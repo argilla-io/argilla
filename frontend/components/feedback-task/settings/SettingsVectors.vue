@@ -1,41 +1,47 @@
 <template>
   <div class="settings__container">
     <div class="settings__edition-form">
-      <h2 class="--heading5 --medium">Edit fields</h2>
-      <div v-for="field in settings.fields" :key="field.id">
+      <h2 class="--heading5 --medium">Edit vectors</h2>
+      <div v-for="vector in settings.vectors" :key="vector.id">
         <form
-          @submit.prevent="onSubmit(field)"
-          class="settings__edition-form__fields"
+          @submit.prevent="onSubmit(vector)"
+          class="settings__edition-form__vectors"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
+            <h4 class="--body1 --medium --capitalized" v-text="vector.name" />
           </div>
 
           <Validation
-            :validations="field.validate().title"
+            :validations="vector.validate().title"
             class="settings__edition-form__group"
           >
-            <label for="field.id">Title</label>
-            <input type="text" id="field.id" v-model="field.title" />
+            <label for="vector.title">Title</label>
+            <input type="text" id="vector.title" v-model="vector.title" />
           </Validation>
 
-          <BaseSwitch v-model="field.settings.use_markdown"
-            >Use Markdown</BaseSwitch
-          >
+          <div class="settings__edition-form__group">
+            <label for="vector.dimensions">Dimension</label>
+            <input
+              type="number"
+              id="vector.dimensions"
+              v-model="vector.dimensions"
+              disabled
+            />
+          </div>
 
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="restore(field)"
-              :disabled="!field.isModified"
+              @on-click="restore(vector)"
+              :disabled="!vector.isModified"
             >
               <span v-text="'Cancel'" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!field.isModified || !field.isFieldValid"
+              :disabled="!vector.isModified || !vector.isValid"
             >
               <span v-text="'Update'" />
             </BaseButton>
@@ -47,10 +53,10 @@
 </template>
 
 <script>
-import { useSettingsFieldsViewModel } from "./useSettingsFieldsViewModel";
+import { useSettingsVectorsViewModel } from "./useSettingsVectorsViewModel";
 
 export default {
-  name: "SettingsFields",
+  name: "SettingsVectors",
   props: {
     settings: {
       type: Object,
@@ -58,12 +64,12 @@ export default {
     },
   },
   methods: {
-    onSubmit(field) {
-      this.update(field);
+    onSubmit(vector) {
+      this.update(vector);
     },
   },
   setup() {
-    return useSettingsFieldsViewModel();
+    return useSettingsVectorsViewModel();
   },
 };
 </script>
@@ -86,7 +92,7 @@ export default {
     max-width: 1000px;
     padding-top: $base-space;
 
-    &__fields {
+    &__vectors {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;

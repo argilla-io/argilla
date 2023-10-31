@@ -1,69 +1,92 @@
 <template>
   <div class="settings__container">
     <div class="settings__edition-form">
-      <h2 class="--heading5 --medium">Edit fields</h2>
-      <div v-for="field in settings.fields" :key="field.id">
+      <h2 class="--heading5 --medium">Edit metadata properties</h2>
+      <div v-for="metadata in settings.metadataProperties" :key="metadata.id">
         <form
-          @submit.prevent="onSubmit(field)"
-          class="settings__edition-form__fields"
+          @submit.prevent="updateMetadata(metadata)"
+          class="settings__edition-form__metadata"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
+            <h4 class="--body1 --medium --capitalized" v-text="metadata.name" />
+            <BaseBadge class="--capitalized" :text="metadata.settings.type" />
           </div>
 
           <Validation
-            :validations="field.validate().title"
+            :validations="metadata.validate().title"
             class="settings__edition-form__group"
           >
-            <label for="field.id">Title</label>
-            <input type="text" id="field.id" v-model="field.title" />
+            <label for="metadata.title">Title</label>
+            <input type="text" id="metadata.title" v-model="metadata.title" />
           </Validation>
 
-          <BaseSwitch v-model="field.settings.use_markdown"
-            >Use Markdown</BaseSwitch
+          <BaseSwitch v-model="metadata.visibleForAnnotators"
+            >Visible for annotators</BaseSwitch
           >
 
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="restore(field)"
-              :disabled="!field.isModified"
+              @on-click="restore(metadata)"
+              :disabled="!metadata.isModified"
             >
               <span v-text="'Cancel'" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!field.isModified || !field.isFieldValid"
+              :disabled="!metadata.isModified || !metadata.isValid"
             >
               <span v-text="'Update'" />
             </BaseButton>
           </div>
         </form>
       </div>
+
+      <h2 class="--heading5 --medium">Extra metadata</h2>
+      <form
+        @submit.prevent="updateDataset(settings.dataset)"
+        class="settings__edition-form__metadata"
+      >
+        <BaseSwitch v-model="settings.dataset.allowExtraMetadata"
+          >Allow extra metadata</BaseSwitch
+        >
+        <div class="settings__edition-form__footer">
+          <BaseButton
+            type="button"
+            class="secondary light small"
+            @on-click="settings.dataset.restore()"
+            :disabled="!settings.dataset.isModified"
+          >
+            <span v-text="'Cancel'" />
+          </BaseButton>
+          <BaseButton
+            type="submit"
+            class="primary small"
+            :disabled="!settings.dataset.isModified"
+          >
+            <span v-text="'Update'" />
+          </BaseButton>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
-import { useSettingsFieldsViewModel } from "./useSettingsFieldsViewModel";
+import { useSettingsMetadataViewModel } from "./useSettingsMetadataViewModel";
 
 export default {
-  name: "SettingsFields",
+  name: "SettingsMetadata",
   props: {
     settings: {
       type: Object,
       required: true,
     },
   },
-  methods: {
-    onSubmit(field) {
-      this.update(field);
-    },
-  },
   setup() {
-    return useSettingsFieldsViewModel();
+    return useSettingsMetadataViewModel();
   },
 };
 </script>
@@ -86,7 +109,7 @@ export default {
     max-width: 1000px;
     padding-top: $base-space;
 
-    &__fields {
+    &__metadata {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
@@ -103,6 +126,9 @@ export default {
       }
       p {
         color: $black-54;
+      }
+      .badge {
+        margin-inline: 0 auto;
       }
     }
 
