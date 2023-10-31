@@ -179,7 +179,7 @@ describe("RecordCriteria", () => {
         [],
         [],
         // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorId":"2","limit":50,"order":"most"}'
+        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
       );
 
       criteria.similaritySearch.order = "least";
@@ -225,7 +225,7 @@ describe("RecordCriteria", () => {
         ["metadata.your_feel"],
         ["inserted_at:asc"],
         // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorId":"2","limit":50,"order":"most"}'
+        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
       );
 
       criteria.page = 1;
