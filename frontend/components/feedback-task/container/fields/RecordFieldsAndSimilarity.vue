@@ -28,7 +28,6 @@
 </template>
 <script>
 import "assets/icons/similarity";
-
 export default {
   props: {
     record: {
