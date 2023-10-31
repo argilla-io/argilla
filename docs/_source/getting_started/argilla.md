@@ -26,7 +26,7 @@
 | [⚙️ Configuration](/getting_started/installation/configurations/configurations)  | User management and **deployment tweaking**                       |
 | [💥 Concepts about LLMs](/conceptual_guides/llm/llm)                            | Generative AI, **ChatGPT and friends**                            |
 | [🦮 Practical Guides](/practical_guides/practical_guides)                       | **Conceptual overview** of our main functionalities               |
-| [🧗‍♀️ Tutorials](/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
+| [🧗‍♀️ Tutorials](/tutorials_and_integrations/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
 | [🏷️ References](/reference/python/index)                                        | Itemized information and **API docs**                             |
 | [🏘️ Community](/community/contributing)                                         | Everything about for **developers and contributing**              |
 | [🗺️ Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1)            | Our **future plans**                                              |
