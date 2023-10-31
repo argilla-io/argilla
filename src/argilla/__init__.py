@@ -96,6 +96,7 @@ if _TYPE_CHECKING:
         TextField,
         TextQuestion,
         ValueSchema,
+        VectorSettings,
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
@@ -129,6 +130,7 @@ _import_structure = {
         "SortOrder",
         "SuggestionSchema",
         "RecordSortField",
+        "VectorSettings",
     ],
     "client.api": [
         "copy",
