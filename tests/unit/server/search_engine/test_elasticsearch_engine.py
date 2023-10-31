@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import TYPE_CHECKING, AsyncGenerator, List, Union
 
-from argilla.server.enums import ResponseStatusFilter
+from argilla.server.enums import ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     TextQuery,
@@ -766,7 +766,7 @@ class TestSuiteElasticSearchEngine:
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             value=selected_record.vectors[0].value,
-            order="least_similar",
+            order=SimilarityOrder.least_similar,
             max_results=1,
         )
 

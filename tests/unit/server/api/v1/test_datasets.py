@@ -20,7 +20,13 @@ from uuid import UUID, uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
-from argilla.server.enums import DatasetStatus, RecordInclude, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla.server.enums import (
+    DatasetStatus,
+    RecordInclude,
+    RecordSortField,
+    ResponseStatusFilter,
+    SimilarityOrder,
+)
 from argilla.server.models import (
     Dataset,
     Field,
@@ -5915,7 +5921,7 @@ class TestSuiteDatasets:
             record=records[0],
             value=None,
             query=None,
-            order="most_similar",
+            order=SimilarityOrder.most_similar,
             max_results=5,
             metadata_filters=[],
             user_response_status_filter=None,
@@ -5959,7 +5965,7 @@ class TestSuiteDatasets:
             record=None,
             value=selected_vector.value,
             query=None,
-            order="most_similar",
+            order=SimilarityOrder.most_similar,
             max_results=10,
             metadata_filters=[],
             user_response_status_filter=None,
@@ -6008,7 +6014,7 @@ class TestSuiteDatasets:
             record=None,
             value=selected_vector.value,
             query=TextQuery(q="Test query"),
-            order="most_similar",
+            order=SimilarityOrder.most_similar,
             max_results=10,
             metadata_filters=[],
             user_response_status_filter=None,

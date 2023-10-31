@@ -78,6 +78,6 @@ class SortOrder(str, Enum):
     desc = "desc"
 
 
-class SimilaritySort(str, Enum):
+class SimilarityOrder(str, Enum):
     most_similar = "most_similar"
     least_similar = "least_similar"
