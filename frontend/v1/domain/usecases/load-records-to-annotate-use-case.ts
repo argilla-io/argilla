@@ -92,6 +92,10 @@ export class LoadRecordsToAnnotateUseCase {
         return true;
       })
       .map((record, index) => {
+        const recordPage = criteria.isFilteringBySimilarity
+          ? index + pagination.from
+          : index + page;
+
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])
           .map((field) => {
@@ -144,7 +148,7 @@ export class LoadRecordsToAnnotateUseCase {
           answer,
           suggestions,
           record.query_score,
-          index + page
+          recordPage
         );
       });
 
