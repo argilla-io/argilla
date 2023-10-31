@@ -461,7 +461,6 @@ class ArgillaMixin:
                         id=id,
                         name=vector_settings.name,
                         title=vector_settings.name,
-                        
                         dimensions=vector_settings.dimensions,
                     ).parsed
                 except AlreadyExistsApiError:
