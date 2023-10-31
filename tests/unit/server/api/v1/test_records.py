@@ -40,6 +40,7 @@ from tests.factories import (
     TermsMetadataPropertyFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
 )
@@ -146,6 +147,8 @@ class TestSuiteRecords:
         vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
         vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
         vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_0 = await VectorFactory.create(record=record, vector_settings=vector_settings_0, value=[1, 1, 1, 1, 1])
+        vector_1 = await VectorFactory.create(record=record, vector_settings=vector_settings_1, value=[2, 2, 2, 2, 2])
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -168,8 +171,7 @@ class TestSuiteRecords:
                     },
                 ],
                 "vectors": {
-                    vector_settings_0.name: [1, 1, 1, 1, 1],
-                    vector_settings_1.name: [2, 2, 2, 2, 2],
+                    vector_settings_0.name: [10, 10, 10, 10, 10],
                     vector_settings_2.name: [3, 3, 3, 3, 3],
                 },
             },
@@ -206,7 +208,7 @@ class TestSuiteRecords:
                 },
             ],
             "vectors": {
-                vector_settings_0.name: [1, 1, 1, 1, 1],
+                vector_settings_0.name: [10, 10, 10, 10, 10],
                 vector_settings_1.name: [2, 2, 2, 2, 2],
                 vector_settings_2.name: [3, 3, 3, 3, 3],
             },

@@ -4815,11 +4815,10 @@ class TestSuiteDatasets:
         assert records[0].suggestions[1].value == "suggestion updated 0 2"
         assert records[0].suggestions[2].value == "suggestion updated 0 3"
         for vector in records[0].vectors:
-            assert records_0_updated_vectors[vector.vector_settings.name] == vector.value
+            if vector.vector_settings.name in records_0_updated_vectors:
+                assert records_0_updated_vectors[vector.vector_settings.name] == vector.value
         for suggestion in suggestions_records_0:
             assert inspect(suggestion).deleted
-        for vector in vector_records_0:
-            assert inspect(vector).deleted
 
         # Record 1
         assert records[1].metadata_ == {
@@ -4833,11 +4832,10 @@ class TestSuiteDatasets:
         assert len(records[1].suggestions) == 1
         assert records[1].suggestions[0].value == "suggestion updated 1 1"
         for vector in records[1].vectors:
-            assert records_1_updated_vectors[vector.vector_settings.name] == vector.value
+            if vector.vector_settings.name in records_1_updated_vectors:
+                assert records_1_updated_vectors[vector.vector_settings.name] == vector.value
         for suggestion in suggestions_records_1:
             assert inspect(suggestion).deleted
-        for vector in vector_records_1:
-            assert inspect(vector).deleted
 
         # Record 2
         assert records[2].metadata_ == {
@@ -4850,8 +4848,6 @@ class TestSuiteDatasets:
         await records[2].awaitable_attrs.vectors
         for suggestion in suggestions_records_2:
             assert inspect(suggestion).persistent
-        for vector in vector_records_2:
-            assert inspect(vector).persistent
 
         # Record 3
         await records[3].awaitable_attrs.suggestions
@@ -4861,7 +4857,8 @@ class TestSuiteDatasets:
         assert records[3].suggestions[1].value == "suggestion updated 3 2"
         assert records[3].suggestions[2].value == "suggestion updated 3 3"
         for vector in records[3].vectors:
-            assert records_3_updated_vectors[vector.vector_settings.name] == vector.value
+            if vector.vector_settings.name in records_3_updated_vectors:
+                assert records_3_updated_vectors[vector.vector_settings.name] == vector.value
 
         # it should be called only with the first three records (metadata was updated for them)
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
