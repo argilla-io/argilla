@@ -55,8 +55,8 @@ from argilla.server.schemas.v1.datasets import (
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
-    VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+    VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
 from argilla.server.search_engine import (
     FloatMetadataFilter,
@@ -600,8 +600,8 @@ class TestSuiteDatasets:
                 {
                     "id": str(vector_settings.id),
                     "name": vector_settings.name,
+                    "title": vector_settings.title,
                     "dimensions": vector_settings.dimensions,
-                    "description": vector_settings.description,
                     "inserted_at": vector_settings.inserted_at.isoformat(),
                     "updated_at": vector_settings.updated_at.isoformat(),
                 }
@@ -610,7 +610,7 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_list_dataset_vector_settings_as_user_from_another_workspace(
+    async def test_list_dataset_vectors_settings_as_user_from_another_workspace(
         self, async_client: "AsyncClient", role: UserRole
     ):
         dataset = await DatasetFactory.create()
@@ -3385,8 +3385,8 @@ class TestSuiteDatasets:
 
         vector_settings_json = {
             "name": "vectors-for-semantic-search",
+            "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             "dimensions": 384,
-            "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
         }
 
         response = await async_client.post(
@@ -3402,8 +3402,8 @@ class TestSuiteDatasets:
         assert response_json == {
             "id": str(vector_settings.id),
             "name": "vectors-for-semantic-search",
+            "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             "dimensions": 384,
-            "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
@@ -3415,17 +3415,21 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "payload",
         [
-            {"name": "", "dimensions": 5},
-            {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "dimensions": 5},
-            {"name": " invalid", "dimensions": 5},
-            {"name": "vectors", "dimensions": 5, "description": ""},
+            {"name": "", "title": "vectors", "dimensions": 5},
+            {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "title": "vectors", "dimensions": 5},
+            {"name": " invalid", "title": "vectors", "dimensions": 5},
+            {"name": "vectors", "title": "", "dimensions": 5},
             {
                 "name": "vectors",
+                "title": "a" * (VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH + 1),
                 "dimensions": 5,
-                "description": "a" * (VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH + 1),
             },
-            {"name": "vectors", "dimensions": 0, "description": "vectors"},
-            {"name": "vectors", "dimensions": -1, "description": "vectors"},
+            {
+                "name": "vectors",
+                "title": "vectors",
+                "dimensions": 0,
+            },
+            {"name": "vectors", "title": "vectors", "dimensions": -1},
         ],
     )
     async def test_create_dataset_vector_settings_with_invalid_settings(
@@ -3447,7 +3451,7 @@ class TestSuiteDatasets:
         response = await async_client.post(
             f"/api/v1/datasets/{vector_settings.dataset_id}/vectors-settings",
             headers=owner_auth_header,
-            json={"name": "vectors", "dimensions": 384},
+            json={"name": "vectors", "title": "vectors", "dimensions": 384},
         )
 
         assert response.status_code == 409
@@ -3458,7 +3462,7 @@ class TestSuiteDatasets:
         response = await async_client.post(
             f"/api/v1/datasets/{uuid4()}/vectors-settings",
             headers=owner_auth_header,
-            json={"name": "vectors", "dimensions": 384},
+            json={"name": "vectors", "title": "vectors", "dimensions": 384},
         )
 
         assert response.status_code == 404
@@ -3472,8 +3476,8 @@ class TestSuiteDatasets:
             headers={API_KEY_HEADER_NAME: annotator.api_key},
             json={
                 "name": "vectors-for-search",
+                "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
                 "dimensions": 384,
-                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             },
         )
 
@@ -3488,8 +3492,8 @@ class TestSuiteDatasets:
             headers={API_KEY_HEADER_NAME: admin.api_key},
             json={
                 "name": "vectors-for-search",
+                "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
                 "dimensions": 384,
-                "description": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             },
         )
 

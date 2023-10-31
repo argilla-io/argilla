@@ -65,8 +65,8 @@ METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
 VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
-VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH = 1
-VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH = 1000
+VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -366,8 +366,8 @@ class QuestionCreate(BaseModel):
 class VectorSettings(BaseModel):
     id: UUID
     name: str
+    title: str
     dimensions: int
-    description: Optional[str] = None
     inserted_at: datetime
     updated_at: datetime
 
@@ -384,19 +384,25 @@ class VectorsSettings(BaseModel):
     items: List[VectorSettings]
 
 
+VectorSettingsTitle = Annotated[
+    constr(
+        min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+    ),
+    PydanticField(..., description="The title of the vector settings"),
+]
+
+
 class VectorSettingsCreate(BaseModel):
     name: str = PydanticField(
         ...,
         regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
         min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
         max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+        description="The title of the vector settings",
     )
+    title: VectorSettingsTitle
     dimensions: PositiveInt
-    description: Optional[str] = PydanticField(
-        None,
-        min_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=VECTOR_SETTINGS_CREATE_DESCRIPTION_MAX_LENGTH,
-    )
 
 
 class ResponseValue(BaseModel):
