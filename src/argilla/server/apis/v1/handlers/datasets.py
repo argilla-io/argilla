@@ -275,7 +275,9 @@ async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Datase
     return record
 
 
-async def _get_vector_settings_by_name_or_raise(db: "AsyncSession", dataset: Dataset, vector_name: str) -> VectorSettings:
+async def _get_vector_settings_by_name_or_raise(
+    db: "AsyncSession", dataset: Dataset, vector_name: str
+) -> VectorSettings:
     vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
         db, name=vector_name, dataset_id=dataset.id
     )

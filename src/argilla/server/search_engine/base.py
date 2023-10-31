@@ -20,8 +20,14 @@ from uuid import UUID
 from pydantic import BaseModel, Field, root_validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import (MetadataPropertyType, RecordSortField, ResponseStatus, ResponseStatusFilter,
-                                  SimilarityOrder, SortOrder, )
+from argilla.server.enums import (
+    MetadataPropertyType,
+    RecordSortField,
+    ResponseStatus,
+    ResponseStatusFilter,
+    SimilarityOrder,
+    SortOrder,
+)
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
