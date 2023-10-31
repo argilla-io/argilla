@@ -753,6 +753,26 @@ class TestSuiteElasticSearchEngine:
         assert responses.total == 1
         assert responses.items[0].record_id == selected_record.id
 
+    async def test_similarity_search_by_vector_value_with_order(
+        self,
+        elasticsearch_engine: ElasticSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await elasticsearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            value=selected_record.vectors[0].value,
+            order="least_similar",
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id != selected_record.id
+
     async def test_similarity_search_by_record(
         self,
         elasticsearch_engine: ElasticSearchEngine,
