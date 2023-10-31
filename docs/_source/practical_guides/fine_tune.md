@@ -130,8 +130,17 @@ argilla_model_card = trainer.generate_model_card("my_model")
 If you don't have huggingface hub installed yet, you can do it with the following command:
 
 ```console
-python -m pip install huggingface_hub
+pip install huggingface_hub
 ```
+
+:::{note}
+
+If your framework chosen is `spacy` or `spacy-transformers` you should also install the following dependency:
+
+```console
+pip install spacy-huggingface-hub
+```
+:::
 
 And then select the environment, depending on whether you are working with a script or from a jupyter notebook:
 
