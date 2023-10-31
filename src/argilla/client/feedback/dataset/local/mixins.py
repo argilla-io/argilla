@@ -42,8 +42,8 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1

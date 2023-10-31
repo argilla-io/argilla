@@ -484,7 +484,7 @@ def list_vector_settings(
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = FeedbackListVectorSettingsModel(**response.json())
         return response_obj
-    
+
     return handle_response_error(response)
 
 
