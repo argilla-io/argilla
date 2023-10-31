@@ -15,8 +15,10 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
+from rich.console import Console
 from tqdm import trange
 
+from argilla.cli.rich import get_argilla_themed_table
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -46,8 +48,6 @@ from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.utils import feedback_dataset_in_argilla
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.workspaces import Workspace
-from rich.console import Console
-from argilla.cli.rich import get_argilla_themed_table
 
 if TYPE_CHECKING:
     import httpx
@@ -215,7 +215,11 @@ class ArgillaMixin:
             return
 
         for i in trange(
-            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=False if show_progress else True
+            0,
+            len(records),
+            PUSHING_BATCH_SIZE,
+            desc="Pushing records to Argilla...",
+            disable=False if show_progress else True,
         ):
             try:
                 datasets_api_v1.add_records(
@@ -231,7 +235,7 @@ class ArgillaMixin:
                 raise Exception(
                     f"Failed while adding the records to the `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
-        
+
     def push_to_argilla(
         self: Union["FeedbackDataset", "ArgillaMixin"],
         name: str,
@@ -317,14 +321,22 @@ class ArgillaMixin:
         ArgillaMixin.__dataset_print_table(remote_feedback_dataset, self.records)
 
         return remote_feedback_dataset
-    
-    
-    def __dataset_print_table(dataset, records):
 
+    def __dataset_print_table(dataset, records):
         console = Console()
         table = get_argilla_themed_table(title="Dataset Uploaded", show_lines=True)
 
-        for column in ("ID", "Name", "Workspace", "Type", "Fields", "Questions", "Number of Records", "URL", "Creation Date"):
+        for column in (
+            "ID",
+            "Name",
+            "Workspace",
+            "Type",
+            "Fields",
+            "Questions",
+            "Number of Records",
+            "URL",
+            "Creation Date",
+        ):
             table.add_column(column, justify="center")
         table.add_row(
             str(dataset.id),
