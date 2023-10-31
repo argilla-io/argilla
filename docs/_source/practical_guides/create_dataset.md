@@ -106,7 +106,7 @@ You can define metadata properties using the Python SDK by providing the followi
 The following arguments apply to specific metadata types:
 - `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
 - `min` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
-- `max` (optional): In an `IntengerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
+- `max` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
 
 ```{include} /_common/tabs/metadata_types.md
 ```
@@ -186,9 +186,37 @@ Fields and questions in the UI follow the order in which these are added to the 
 If you are working as part of an annotation team and you would like to control how much overlap you'd like to have between your annotators, you should consider the different workflows in the [Set up your annotation team guide](/installation/configurations/workspace_management) before configuring and pushing your dataset.
 ```
 
+#### Push to Argilla
+
+To import the dataset to your Argilla instance you can use the `push_to_argilla` method from your `FeedbackDataset` instance. Once pushed, you will be able to see your dataset in the UI.
+
+:::{note}
+From Argilla 1.14.0, calling `push_to_argilla` will not just push the `FeedbackDataset` into Argilla, but will also return the remote `FeedbackDataset` instance, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
+:::
+
+::::{tab-set}
+
+:::{tab-item} Argilla 1.14.0 or higher
+
+```python
+remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+```
+
+:::
+
+:::{tab-item} Lower than Argilla 1.14.0
+
+```python
+dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+```
+
+:::
+
+::::
+
 #### Update Configuration
 
-Configuration updates behavior differs slightly depending on whether you are working with a local or remote `FeedbackDataset` instance. We do not allow for changing the `fields` and `questions` of a remote `FeedbackDataset` instance, but we do allow for changing the `guidelines` and `metadata_properties`. For local `FeedbackDataset` instances, we allow for changing all of these attributes. This is because we want to ensure that the data you are collecting is consistent and that you are not changing the data you are collecting after you have started collecting it.
+Configuration updates behavior differs slightly depending on whether you are working with a local or remote `FeedbackDataset` instance. We do not allow for changing the `fields` and `questions` of a remote `FeedbackDataset` from the Python SDK but do allow for changing their `description` and `title` from the Argilla UI. Additionally, changing the `guidelines` and `metadata_properties` can be changed from the Argilla UI and Python SDK. For local `FeedbackDataset` instances, we allow for changing all of these attributes. Updating configuraiton is limited because we want to avoid inconsistencies between the dataset and defined records and annotations.
 
 ::::{tab-set}
 
@@ -252,34 +280,6 @@ ds.add_metadata_property(metadata)
 # Delete a metadata property
 ds.delete_metadata_properties(metadata_properties="metadata")
 ```
-:::
-
-::::
-
-#### Push to Argilla
-
-To import the dataset to your Argilla instance you can use the `push_to_argilla` method from your `FeedbackDataset` instance. Once pushed, you will be able to see your dataset in the UI.
-
-:::{note}
-From Argilla 1.14.0, calling `push_to_argilla` will not just push the `FeedbackDataset` into Argilla, but will also return the remote `FeedbackDataset` instance, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
-:::
-
-::::{tab-set}
-
-:::{tab-item} Argilla 1.14.0 or higher
-
-```python
-remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-```
-
-:::
-
-:::{tab-item} Lower than Argilla 1.14.0
-
-```python
-dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-```
-
 :::
 
 ::::
@@ -569,7 +569,7 @@ for record in dataset.records:
     record.suggestions = []
     modified_records.append(record)
 
- dataset.update_records(modified_records)
+dataset.update_records(modified_records)
 ```
 
 ###### Update `suggestions`
@@ -607,17 +607,15 @@ dataset.push_to_argilla() # No need to provide `name` and `workspace` as has bee
 
 ::::
 
-
 ###### Update `responses`
 
-In contrary to suggestions, responses cannot be updated directly in Argilla. Instead, you will need to delete the record and add it again with the updated responses.
+In contrary to suggestions, responses cannot be updated using the `FeedbackRecord.update`-method but instead you need to manually update the `responses`-attribute of the `FeedbackRecord` and then push the changes to Argilla by `FeedbackDataset.update_records` as shown in [the example above](#update-records).
 
 ###### Update `metadata`
 
-In contrary to suggestions, metadata cannot be updated directly in Argilla. Instead, you will need to delete the record and add it again with the updated metadata.
+In contrary to suggestions, responses cannot be updated using the `FeedbackRecord.update`-method but instead you need to manually update the `responses`-attribute of the `FeedbackRecord` and then push the changes to Argilla by `FeedbackDataset.update_records` as shown in [the example above](#update-records).
 
 ##### Delete records
-
 
 From `v1.14.0`, it is possible to delete records from a `FeedbackDataset` in Argilla. Remember that from 1.14.0, when pulling a `FeedbackDataset` from Argilla via the `from_argilla` method, the returned instance is a remote `FeedbackDataset`, which implies that all the additions, updates, and deletions are directly pushed to Argilla, without having to call `push_to_argilla` for those to be pushed to Argilla.
 
@@ -646,36 +644,6 @@ dataset.delete_records(list(dataset.records[:5]))
 :::
 
 ::::
-
-#### Push to Argilla
-
-To import the dataset to your Argilla instance you can use the `push_to_argilla` method from your `FeedbackDataset` instance. Once pushed, you will be able to see your dataset in the UI.
-
-:::{note}
-From Argilla 1.14.0, calling `push_to_argilla` will not just push the `FeedbackDataset` into Argilla, but will also return the remote `FeedbackDataset` instance, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
-:::
-
-::::{tab-set}
-
-:::{tab-item} Argilla 1.14.0 or higher
-
-```python
-remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-```
-
-:::
-
-:::{tab-item} Lower than Argilla 1.14.0
-
-```python
-dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-```
-
-:::
-
-::::
-
-Now you're ready to start [the annotation process](/practical_guides/annotate_dataset).
 
 ## Other Datasets
 
