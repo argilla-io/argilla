@@ -20,7 +20,7 @@ These are the section headers that we use:
 
 - Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
 
-## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
+## [1.19.0]()
 
 ### Added
 
@@ -48,7 +48,7 @@ These are the section headers that we use:
 - Update `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to allow to search records with vectors. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 - [breaking] Users working with OpenSearch engines must use version >=2.5 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 
-## [1.18.0]()
+## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
 ### Added
 
