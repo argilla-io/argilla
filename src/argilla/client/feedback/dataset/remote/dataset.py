@@ -17,6 +17,7 @@ import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
+from tabulate import tabulate
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
@@ -418,18 +419,20 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
-        indent = "   "
-        return (
-            "RemoteFeedbackDataset("
-            + textwrap.indent(f"\nid={self.id}", indent)
-            + textwrap.indent(f"\nname={self.name}", indent)
-            + textwrap.indent(f"\nworkspace={self.workspace}", indent)
-            + textwrap.indent(f"\nurl={self.url}", indent)
-            + textwrap.indent(f"\nfields={self.fields}", indent)
-            + textwrap.indent(f"\nquestions={self.questions}", indent)
-            + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
-            + ")"
-        )
+        table = [
+            ["id", self.id],
+            ["name", self.name],
+            ["workspace", self.workspace],
+            ["url", self.url],
+            ["fields", "\n".join([str(field) for field in self.fields])],
+            ["questions", "\n".join([str(question) for question in self.questions])],
+            ["guidelines", self.guidelines],
+        ]
+        table = tabulate(table, tablefmt="simple")
+        title = "RemoteFeedbackDataset"
+        table_with_title = f"{title}\n{table}"
+
+        return table_with_title
 
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""
