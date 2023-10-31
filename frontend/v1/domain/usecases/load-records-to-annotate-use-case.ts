@@ -51,10 +51,12 @@ export class LoadRecordsToAnnotateUseCase {
     let records = this.recordsStorage.get();
     let isNextRecordExist = records.existsRecordOn(page);
 
-    if (!isNextRecordExist) {
-      records = await this.loadRecords("append", criteria);
+    if (!criteria.isFilteringBySimilarity) {
+      if (!isNextRecordExist) {
+        records = await this.loadRecords("append", criteria);
 
-      isNextRecordExist = records.existsRecordOn(page);
+        isNextRecordExist = records.existsRecordOn(page);
+      }
     }
 
     if (isNextRecordExist) {
