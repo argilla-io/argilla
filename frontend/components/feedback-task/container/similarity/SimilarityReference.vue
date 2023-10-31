@@ -92,7 +92,7 @@ export default {
   padding: $base-space 12px;
   justify-content: space-between;
   max-width: 600px;
-  margin-right: auto;
+  width: 100%;
   border-radius: $border-radius;
   color: $black-54;
   background: $black-4;
