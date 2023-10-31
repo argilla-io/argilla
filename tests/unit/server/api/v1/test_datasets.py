@@ -6055,6 +6055,27 @@ class TestSuiteDatasets:
         response_json = response.json()
         assert response_json == {"detail": f"Record with id `{wrong_record_id}` not found in dataset `{dataset.id}`."}
 
+    async def test_search_dataset_records_with_vector_record_id_from_other_dataset(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        record = await RecordFactory.create()
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": str(record.id)}}}
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 0, "limit": 10},
+        )
+
+        assert response.status_code == 422
+        response_json = response.json()
+        assert response_json == {"detail": f"Record with id `{record.id}` not found in dataset `{dataset.id}`."}
+
     async def test_search_dataset_records_with_offset_and_limit(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
