@@ -28,7 +28,6 @@
 </template>
 <script>
 import "assets/icons/similarity";
-
 export default {
   props: {
     record: {
@@ -82,7 +81,7 @@ export default {
 }
 
 .similarity-icon {
-  color: darken($similarity-color, 20%);
+  color: $similarity-color;
   &[data-title] {
     position: relative;
     @extend %has-tooltip--right;
