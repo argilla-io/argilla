@@ -46,7 +46,7 @@ These are the section headers that we use:
 - Update `FeedbackDataset.push_to_argilla` to also push vector settings. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Update `FeedbackDatasetRecord` to support the creation of records with vectors. ([#4043](https://github.com/argilla-io/argilla/pull/4043))
 - Update `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to allow to search records with vectors. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
-- [breaking] Users working with OpenSearch engines must use version >=2.5 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
+- [breaking] Users working with OpenSearch engines must use version >=2.6 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019) and [#4109](https://github.com/argilla-io/argilla/pull/4109)))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
