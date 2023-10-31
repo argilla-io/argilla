@@ -21,7 +21,7 @@ from uuid import UUID
 from pydantic import BaseModel, conint
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter
+from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilaritySort
 from argilla.server.models import (
     Dataset,
     Field,
@@ -274,7 +274,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
-        order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar",
+        order: SimilaritySort = SimilaritySort.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         if bool(value) == bool(record):
@@ -293,7 +293,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")
 
-        if order == "least_similar":
+        if order == SimilaritySort.least_similar:
             for i in range(0, len(vector_value)):
                 vector_value[i] *= -1
 

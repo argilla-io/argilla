@@ -22,7 +22,7 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import RecordInclude
+from argilla.server.enums import RecordInclude, SimilaritySort
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -677,7 +677,7 @@ class VectorQuery(BaseModel):
     name: str
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
-    order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar"
+    order: SimilaritySort = SimilaritySort.most_similar
 
     @root_validator
     def check_required(cls, values: dict) -> dict:

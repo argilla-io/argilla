@@ -20,7 +20,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field, root_validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatus, ResponseStatusFilter, SortOrder
+from argilla.server.enums import (MetadataPropertyType, RecordSortField, ResponseStatus, ResponseStatusFilter,
+                                  SimilaritySort, SortOrder, )
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
@@ -270,7 +271,7 @@ class SearchEngine(metaclass=ABCMeta):
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
-        order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar",
+        order: SimilaritySort = SimilaritySort.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         pass

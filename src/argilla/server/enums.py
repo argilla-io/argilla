@@ -76,3 +76,8 @@ class RecordSortField(str, Enum):
 class SortOrder(str, Enum):
     asc = "asc"
     desc = "desc"
+
+
+class SimilaritySort(str, Enum):
+    most_similar = "most_similar"
+    least_similar = "least_similar"
