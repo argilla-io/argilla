@@ -6034,7 +6034,7 @@ class TestSuiteDatasets:
         response_json = response.json()
         assert response_json == {"detail": f"Vector `wrong_vector` not found in dataset `{dataset.id}`."}
 
-    async def test_search_dataset_records_with_wrong_vector_record_id(
+    async def test_search_dataset_records_with_nonexistent_vector_record_id(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()

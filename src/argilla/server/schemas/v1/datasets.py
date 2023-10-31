@@ -675,10 +675,8 @@ class MetadataQueryParams(BaseModel):
 
 class VectorQuery(BaseModel):
     name: str
-
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
-
     order: Union[Literal["most_similar"], Literal["least_similar"]] = "most_similar"
 
     @root_validator
