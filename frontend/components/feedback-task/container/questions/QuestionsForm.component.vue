@@ -232,13 +232,13 @@ export default {
 .questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: 37em;
-  height: 100%;
-  min-width: 0;
+  flex-basis: max(520px, 33%);
+  max-height: 100%;
   justify-content: space-between;
   border-radius: $border-radius-m;
   border: 1px solid transparent;
   background: palette(white);
+  margin-bottom: auto;
   &__header {
     align-items: baseline;
   }

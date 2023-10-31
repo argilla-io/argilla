@@ -40,7 +40,7 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1.2em;
-  padding-left: 4em;
+  padding-left: $base-space * 2;
   a {
     text-decoration: none;
   }

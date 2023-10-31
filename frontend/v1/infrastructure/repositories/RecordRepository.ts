@@ -1,55 +1,62 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import {
   BackedRecord,
-  BackedRecords,
   BackendAnswerCombinations,
   BackendResponse,
-  BackendRecordStatus,
   BackendSearchRecords,
+  BackendAdvanceSearchQuery,
   ResponseWithTotal,
+  BackedRecords,
+  BackendRecordStatus,
+  BackendSimilaritySearchOrder,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
+import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
+import { Pagination } from "@/v1/domain/entities/Pagination";
+import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
+  ERROR_FETCHING_RECORD_BY_ID: "ERROR_FETCHING_RECORD_BY_ID",
   ERROR_DELETING_RECORD_RESPONSE: "ERROR_DELETING_RECORD_RESPONSE",
   ERROR_UPDATING_RECORD_RESPONSE: "ERROR_UPDATING_RECORD_RESPONSE",
   ERROR_CREATING_RECORD_RESPONSE: "ERROR_CREATING_RECORD_RESPONSE",
+};
+
+const BACKEND_ORDER: {
+  [key in SimilarityOrder]: BackendSimilaritySearchOrder;
+} = {
+  most: "most_similar",
+  least: "least_similar",
 };
 
 export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
   getRecords(
-    datasetId: string,
-    fromRecord: number,
-    howMany: number,
-    status: string,
-    searchText: string,
-    metadata: string[],
-    sortBy: string[]
+    criteria: RecordCriteria,
+    pagination: Pagination
   ): Promise<BackedRecords> {
-    if (searchText?.length)
-      return this.getRecordsByText(
-        datasetId,
-        fromRecord,
-        howMany,
-        status,
-        searchText,
-        metadata,
-        sortBy
-      );
+    if (criteria.isFilteringByText || criteria.isFilteringBySimilarity)
+      return this.getRecordsByAdvanceSearch(criteria, pagination);
 
-    return this.getRecordsDatasetId(
-      datasetId,
-      fromRecord,
-      howMany,
-      status,
-      metadata,
-      sortBy
-    );
+    return this.getRecordsByDatasetId(criteria, pagination);
+  }
+
+  async getRecord(recordId: string): Promise<BackedRecord> {
+    try {
+      const url = `/v1/records/${recordId}`;
+
+      const { data } = await this.axios.get<BackedRecord>(url);
+
+      return data;
+    } catch (err) {
+      throw {
+        response: RECORD_API_ERRORS.ERROR_FETCHING_RECORD_BY_ID,
+      };
+    }
   }
 
   async deleteRecordResponse(record: Record) {
@@ -127,24 +134,16 @@ export class RecordRepository {
     }
   }
 
-  private async getRecordsDatasetId(
-    datasetId: string,
-    fromRecord: number,
-    howMany: number,
-    status: string,
-    metadata: string[],
-    sortBy: string[]
+  private async getRecordsByDatasetId(
+    criteria: RecordCriteria,
+    pagination: Pagination
   ): Promise<BackedRecords> {
+    const { datasetId, status, metadata, sortBy } = criteria;
+    const { from, many } = pagination;
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(
-        fromRecord,
-        howMany,
-        status,
-        metadata,
-        sortBy
-      );
+      const params = this.createParams(from, many, status, metadata, sortBy);
 
       const { data } = await this.axios.get<ResponseWithTotal<BackedRecord[]>>(
         url,
@@ -165,35 +164,45 @@ export class RecordRepository {
     }
   }
 
-  private async getRecordsByText(
-    datasetId: string,
-    fromRecord: number,
-    howMany: number,
-    status: string,
-    searchText: string,
-    metadata: string[],
-    sortBy: string[]
+  private async getRecordsByAdvanceSearch(
+    criteria: RecordCriteria,
+    pagination: Pagination
   ): Promise<BackedRecords> {
+    const {
+      datasetId,
+      status,
+      metadata,
+      sortBy,
+      searchText,
+      similaritySearch,
+      isFilteringByText,
+      isFilteringBySimilarity,
+    } = criteria;
+    const { from, many } = pagination;
+
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
 
-      const body = JSON.parse(
-        JSON.stringify({
-          query: {
-            text: {
-              q: searchText,
-            },
-          },
-        })
-      );
+      const body: BackendAdvanceSearchQuery = {
+        query: {},
+      };
 
-      const params = this.createParams(
-        fromRecord,
-        howMany,
-        status,
-        metadata,
-        sortBy
-      );
+      if (isFilteringBySimilarity) {
+        body.query.vector = {
+          name: similaritySearch.vectorName,
+          record_id: similaritySearch.recordId,
+          max_results: similaritySearch.limit,
+          order: BACKEND_ORDER[similaritySearch.order],
+        };
+      }
+
+      if (isFilteringByText) {
+        body.query.text = {
+          q: searchText,
+        };
+      }
+
+      const params = this.createParams(from, many, status, metadata, sortBy);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -201,7 +210,12 @@ export class RecordRepository {
 
       const { items, total } = data;
 
-      const records = items.map((item) => item.record);
+      const records = items.map((item) => {
+        return {
+          ...item.record,
+          query_score: item.query_score,
+        };
+      });
 
       return {
         records,

@@ -3,7 +3,7 @@ import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
-import { Records } from "../entities/record/Records";
+import { Records, RecordsWithReference } from "../entities/record/Records";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
 import { RecordCriteria } from "../entities/record/RecordCriteria";
 import {
@@ -69,28 +69,27 @@ export class LoadRecordsToAnnotateUseCase {
   }
 
   private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
-    const { datasetId, status, searchText, metadata, sortBy, page } = criteria;
+    const { datasetId, page } = criteria;
     const savedRecords = this.recordsStorage.get();
+    const pagination = savedRecords.getPageToFind(criteria);
 
-    const { fromRecord, howMany } = savedRecords.getPageToFind(page, status);
-
-    const getRecords = this.recordRepository.getRecords(
-      datasetId,
-      fromRecord,
-      howMany,
-      status,
-      searchText,
-      metadata,
-      sortBy
-    );
+    const getRecords = this.recordRepository.getRecords(criteria, pagination);
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
     const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
 
-    const recordsToAnnotate = recordsFromBackend.records.map(
-      (record, index) => {
+    const recordsToAnnotate = recordsFromBackend.records
+      .filter((r) => {
+        // TODO: Delete the filter when the backend remove the reference record.
+        if (criteria.isFilteringBySimilarity) {
+          return r.id !== criteria.similaritySearch.recordId;
+        }
+
+        return true;
+      })
+      .map((record, index) => {
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])
           .map((field) => {
@@ -142,10 +141,58 @@ export class LoadRecordsToAnnotateUseCase {
           fields,
           answer,
           suggestions,
+          record.query_score,
           index + page
         );
+      });
+
+    if (criteria.isFilteringBySimilarity) {
+      let referenceRecord = savedRecords.getById(
+        criteria.similaritySearch.recordId
+      );
+
+      if (!referenceRecord) {
+        const referenceRecordFromBackend =
+          await this.recordRepository.getRecord(
+            criteria.similaritySearch.recordId
+          );
+
+        const fields = fieldsFromBackend
+          .filter((f) => referenceRecordFromBackend.fields[f.name])
+          .map((field) => {
+            return new Field(
+              field.id,
+              field.name,
+              field.title,
+              referenceRecordFromBackend.fields[field.name],
+              datasetId,
+              field.required,
+              field.settings
+            );
+          });
+
+        referenceRecord = new Record(
+          referenceRecordFromBackend.id,
+          datasetId,
+          [],
+          fields,
+          null,
+          [],
+          0,
+          0
+        );
       }
-    );
+
+      const recordsWithReference = new RecordsWithReference(
+        recordsToAnnotate,
+        recordsFromBackend.total,
+        referenceRecord
+      );
+
+      this.recordsStorage.replace(recordsWithReference);
+
+      return recordsWithReference;
+    }
 
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
