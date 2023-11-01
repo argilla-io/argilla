@@ -24,6 +24,10 @@ These are the section headers that we use:
 
 - Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
 
+### Changed
+
+- Changed `FeedbackDataset.*_by_name()` methods to return `None` when no match is found ([#4101](https://github.com/argilla-io/argilla/pull/3976)).
+
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
 ### Added
