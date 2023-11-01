@@ -136,14 +136,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """Returns the fields that define the schema of the records in the dataset."""
         return self._fields
 
-    def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
+    def field_by_name(self, name: str) -> Optional[Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]]:
         """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the field to return.
-
-        Raises:
-            ValueError: if the field with the given name does not exist.
         """
         return self.__get_property_by_name(name, self._fields, "field")
 
@@ -152,14 +149,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """Returns the questions that will be used to annotate the dataset."""
         return self._questions
 
-    def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
+    def question_by_name(self, name: str) -> Optional[Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]]:
         """Returns the question by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the question to return.
-
-        Raises:
-            ValueError: if the question with the given name does not exist.
         """
         return self.__get_property_by_name(name, self._questions, "question")
 
@@ -172,14 +166,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     def metadata_property_by_name(
         self, name: str
-    ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
+    ) -> Optional[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]]:
         """Returns the metadata property by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the metadata property to return.
-
-        Raises:
-            KeyError: if the metadata property with the given name does not exist.
         """
         return self.__get_property_by_name(name, self.metadata_properties, "metadata property")
 
