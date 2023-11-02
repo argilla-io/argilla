@@ -743,7 +743,7 @@ R = TypeVar("R")
 async def _build_record_vectors(
     db: "AsyncSession",
     dataset: Dataset,
-    record_schema: Union["RecordCreate", "RecordUpdateWithId"],
+    record_schema: Union["RecordCreate", "RecordUpdate", "RecordUpdateWithId"],
     build_vector_func: Callable[[List[float], UUID], R],
     cache: Dict[str, VectorSettingsSchema] = {},
     record_position: Optional[int] = None,
