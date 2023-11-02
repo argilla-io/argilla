@@ -67,3 +67,6 @@ class ArgillaOpenAITrainer(ArgillaOpenAITrainerV1, ArgillaTrainerSkeleton):
             task=self._task,
             **card_data_kwargs,
         )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        raise NotImplementedError("This method is not implemented for `ArgillaOpenAITrainer`.")

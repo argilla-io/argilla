@@ -55,7 +55,9 @@ export default {
   methods: {
     newFiltersChanged() {
       if (!this.recordCriteria.hasChanges) return;
-      this.recordCriteria.page = 1;
+      if (!this.recordCriteria.isChangingAutomatically) {
+        this.recordCriteria.page = 1;
+      }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },

@@ -15,7 +15,7 @@
 import os
 import re
 from collections import Counter
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -56,6 +56,24 @@ def try_wrong_format(dataset, task, format_func: Any) -> None:
     ):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=FRAMEWORK)
         trainer.train(OUTPUT_DIR)
+
+
+def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
+    # For example, the sample must be most frequently rated as "1" in question-2 and
+    # label "b" from "question-3" must have not been set by any annotator
+    ratings = [
+        annotation["value"]
+        for annotation in sample["question-2"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if ratings and Counter(ratings).most_common(1)[0][0] == 1 and "b" not in labels:
+        return f"### Text\n{sample['text']}"
+    return None
 
 
 def test_prepare_for_training_sft(
@@ -109,6 +127,23 @@ def test_prepare_for_training_sft(
             assert trainer._trainer._transformers_tokenizer.test_value == 12
 
 
+def formatting_func_rm(sample: Dict[str, Any]):
+    # The FeedbackDataset isn't really set up for RM, so we'll just use an arbitrary example here
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return sample["text"], sample["text"][:5]
+        elif labels[0] == "c":
+            return [(sample["text"], sample["text"][5:10]), (sample["text"], sample["text"][:5])]
+
+
 def test_prepare_for_training_rm(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
@@ -158,6 +193,10 @@ def test_prepare_for_training_rm(
         if tokenizer is not None:
             assert trainer._trainer._transformers_model.test_value == 12
             assert trainer._trainer._transformers_tokenizer.test_value == 12
+
+
+def formatting_func_ppo(sample: Dict[str, Any]):
+    return sample["text"]
 
 
 def test_prepare_for_training_ppo(
@@ -220,6 +259,26 @@ def test_prepare_for_training_ppo(
         if tokenizer is not None:
             assert trainer._trainer._transformers_model.test_value == 12
             assert trainer._trainer._transformers_tokenizer.test_value == 12
+
+
+def formatting_func_dpo(sample: Dict[str, Any]):
+    # The FeedbackDataset isn't really set up for DPO, so we'll just use an arbitrary example here
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Three cases for the tests: None, one tuple and yielding multiple tuples
+        if labels[0] == "a":
+            return None
+        elif labels[0] == "b":
+            return sample["text"][::-1], sample["text"], sample["text"][:5]
+        elif labels[0] == "c":
+            return [
+                (sample["text"], sample["text"][::-1], sample["text"][:5]),
+                (sample["text"][::-1], sample["text"], sample["text"][:5]),
+            ]
 
 
 def test_prepare_for_training_dpo(
@@ -303,3 +362,54 @@ def test_sft_with_peft(
     trainer.train(tmp_path)
     assert "adapter_config.json" in os.listdir(tmp_path)
     assert "adapter_model.bin" in os.listdir(tmp_path)
+
+
+# @pytest.mark.slow
+@pytest.mark.parametrize(
+    "formatting_func, training_task",
+    (
+        (formatting_func_sft, TrainingTask.for_supervised_fine_tuning),
+        (formatting_func_rm, TrainingTask.for_reward_modeling),
+        (formatting_func_ppo, TrainingTask.for_proximal_policy_optimization),
+        (formatting_func_dpo, TrainingTask.for_direct_preference_optimization),
+    ),
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    formatting_func: Callable,
+    training_task: Callable,
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    mocked_trainer_push_to_huggingface,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    task = training_task(formatting_func)
+    model = "sshleifer/tiny-gpt2"
+
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="trl", model=model)
+
+    if training_task == TrainingTask.for_proximal_policy_optimization:
+        from transformers import pipeline
+        from trl import PPOConfig
+
+        reward_model = pipeline("sentiment-analysis", model="lvwerra/distilbert-imdb")
+        trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=2), reward_model=reward_model)
+    else:
+        trainer.update_config(max_steps=1)
+
+    train_with_cleanup(trainer, OUTPUT_DIR)
+
+    trainer.push_to_huggingface("mocked", generate_card=False)
