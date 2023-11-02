@@ -73,7 +73,8 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
                 "index": True,
                 # can similarity property also be part of config @frascuchon ?
                 # relates vector search similarity metric
-                "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
+                # "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
+                "similarity": "cosine"
             }
         }
 
