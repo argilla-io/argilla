@@ -1,23 +1,36 @@
 <template>
-  <div class="filters">
-    <SearchBarBase
-      v-model="recordCriteria.searchText"
-      :placeholder="'Introduce a query'"
-    />
-    <MetadataFilter
-      v-if="!!datasetMetadata.length"
-      :datasetMetadata="datasetMetadata"
-      v-model="recordCriteria.metadata"
-    />
-    <Sort
-      v-if="!!datasetMetadata.length"
-      :datasetMetadata="datasetMetadata"
-      v-model="recordCriteria.sortBy"
-    />
-    <p v-if="shouldShowTotalRecords" class="filters__total-records">
-      {{ totalRecordsInfo }}
-    </p>
-    <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+  <div class="filters__wrapper">
+    <div class="filters">
+      <SearchBarBase
+        v-model="recordCriteria.searchText"
+        :placeholder="'Introduce a query'"
+      />
+      <FilterButton
+        v-if="isAnyAvailableFilter"
+        @click.native="toggleVisibilityOfFilters"
+        :button-name="$t('filters')"
+        :show-chevron-icon="false"
+        :is-button-active="isAnyFilterActive"
+      />
+      <Sort
+        v-if="!!datasetMetadata.length"
+        :datasetMetadata="datasetMetadata"
+        v-model="recordCriteria.sortBy"
+      />
+      <p v-if="shouldShowTotalRecords" class="filters__total-records">
+        {{ totalRecordsInfo }}
+      </p>
+      <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+    </div>
+    <transition name="filterAppear" v-if="visibleFilters" appear>
+      <div class="filters__list">
+        <MetadataFilter
+          v-if="!!datasetMetadata.length"
+          :datasetMetadata="datasetMetadata"
+          v-model="recordCriteria.metadata"
+        />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -35,6 +48,7 @@ export default {
   data: () => {
     return {
       totalRecords: null,
+      visibleFilters: false,
     };
   },
   computed: {
@@ -51,6 +65,12 @@ export default {
         this.recordCriteria.isFilteredByMetadata
       );
     },
+    isAnyAvailableFilter() {
+      return !!this.datasetMetadata.length;
+    },
+    isAnyFilterActive() {
+      return this.recordCriteria.isFilteredByMetadata;
+    },
   },
   methods: {
     newFiltersChanged() {
@@ -60,6 +80,9 @@ export default {
       }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
+    toggleVisibilityOfFilters() {
+      this.visibleFilters = !this.visibleFilters;
     },
   },
   watch: {
@@ -96,10 +119,18 @@ export default {
 .filters {
   display: flex;
   flex-wrap: nowrap;
-  gap: $base-space * 2;
+  gap: $base-space;
   align-items: center;
-  width: 100%;
-  padding: $base-space * 2 0;
+  &__wrapper {
+    width: 100%;
+    padding: $base-space * 2 $base-space * 3;
+  }
+  &__list {
+    display: flex;
+    gap: $base-space;
+    width: 100%;
+    padding-top: $base-space;
+  }
   &__total-records {
     flex-shrink: 0;
     margin: 0;
@@ -112,5 +143,15 @@ export default {
   .search-area {
     width: min(100%, 400px);
   }
+}
+.filterAppear-enter-active,
+.filterAppear-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.filterAppear-enter,
+.filterAppear-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
