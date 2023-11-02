@@ -40,6 +40,9 @@ if TYPE_CHECKING:
 #  it should be tested from the local FeedbackDataset test suite instead. This will allow us
 #  to avoid maintain the TestFeedbackDataset class each time that the base class add a new abstract method.
 class TestFeedbackDataset(FeedbackDatasetBase):
+    def find_similar_records(self, *args, **kwargs):
+        pass
+
     def vector_settings_by_name(self, name: str) -> "VectorSettings":
         pass
 
