@@ -17,6 +17,12 @@
         :datasetMetadata="datasetMetadata"
         v-model="recordCriteria.sortBy"
       />
+      <BaseButton
+        v-if="isAnyFilterActive || isSortedBy"
+        class="small filters__reset-button"
+        @on-click="resetFiltersAndSortBy()"
+        >{{ $t("reset") }}</BaseButton
+      >
       <p v-if="shouldShowTotalRecords" class="filters__total-records">
         {{ totalRecordsInfo }}
       </p>
@@ -71,6 +77,9 @@ export default {
     isAnyFilterActive() {
       return this.recordCriteria.isFilteredByMetadata;
     },
+    isSortedBy() {
+      return this.recordCriteria.isSortedBy;
+    },
   },
   methods: {
     newFiltersChanged() {
@@ -83,6 +92,9 @@ export default {
     },
     toggleVisibilityOfFilters() {
       this.visibleFilters = !this.visibleFilters;
+    },
+    resetFiltersAndSortBy() {
+      this.recordCriteria.resetFiltersAndSortBy();
     },
   },
   watch: {
@@ -139,6 +151,9 @@ export default {
   }
   &__status {
     margin-left: auto;
+  }
+  &__reset-button {
+    @include font-size(13px);
   }
   .search-area {
     width: min(100%, 400px);
