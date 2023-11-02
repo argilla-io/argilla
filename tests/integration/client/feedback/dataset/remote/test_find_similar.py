@@ -26,15 +26,15 @@ class TestSuiteFindSimilar:
 
         feedback_dataset.add_records(
             [
-                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 1]}),
-                FeedbackRecord(external_id="1", fields={"text": "hello"}, vectors={"vector": [2, 2]}),
-                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [4, 4]}),
+                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2]}),
+                FeedbackRecord(external_id="1", fields={"text": "hello"}, vectors={"vector": [3, 4]}),
+                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}),
             ]
         )
 
         remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
 
-        records_with_scores = remote.find_similar_records(vector_name="vector", value=[1, 1], max_results=2)
+        records_with_scores = remote.find_similar_records(vector_name="vector", value=[1, 2], max_results=2)
         assert len(records_with_scores) == 2
 
         record, score = records_with_scores[0]
@@ -53,9 +53,9 @@ class TestSuiteFindSimilar:
 
         feedback_dataset.add_records(
             [
-                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 1]}),
-                FeedbackRecord(external_id="1", fields={"text": "hello"}, vectors={"vector": [2, 2]}),
-                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [4, 4]}),
+                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2]}),
+                FeedbackRecord(external_id="1", fields={"text": "hello"}, vectors={"vector": [3, 4]}),
+                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}),
             ]
         )
 
@@ -82,17 +82,17 @@ class TestSuiteFindSimilar:
 
         feedback_dataset.add_records(
             [
-                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 1]}),
+                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2]}),
                 FeedbackRecord(
                     external_id="1",
                     fields={"text": "hello"},
-                    vectors={"vector": [2, 2]},
+                    vectors={"vector": [3, 4]},
                     responses=[ResponseSchema(status="discarded")],
                 ),
                 FeedbackRecord(
                     external_id="2",
                     fields={"text": "hello"},
-                    vectors={"vector": [4, 4]},
+                    vectors={"vector": [5, 6]},
                     responses=[ResponseSchema(status="submitted", values={"question": {"value": "answer"}})],
                 ),
             ]
@@ -103,9 +103,10 @@ class TestSuiteFindSimilar:
 
         records_with_scores = only_submitted_and_discarded_records.find_similar_records(
             vector_name="vector",
-            value=[1, 1],
+            value=[1, 2],
             max_results=3,
         )
+
         assert len(records_with_scores) == 2
 
         record, score = records_with_scores[0]
