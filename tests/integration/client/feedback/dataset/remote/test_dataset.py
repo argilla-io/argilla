@@ -494,13 +494,13 @@ class TestRemoteFeedbackDataset:
         [
             (
                 {"vector": [1, 1, 1, 1, 1]},
-                f"Argilla server returned an error with http status: 422. "
-                "Error details: {'response': 'Provided vector with name=vector of record at position 0 is not valid",
+                "Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Record at position 0 is not valid because vector with name=vector is not valid",
             ),
             (
                 {"unknown-vector": [1, 1, 1, 1]},
-                f"Argilla server returned an error with http status: 422. "
-                "Error details: {'response': 'Provided vector with name=unknown-vector of record at position 0 is not valid",
+                "Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Record at position 0 is not valid because vector with name=unknown-vector is not valid",
             ),
         ],
     )
