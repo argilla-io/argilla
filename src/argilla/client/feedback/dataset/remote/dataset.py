@@ -47,7 +47,7 @@ from argilla.client.models import Framework
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
-from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchQuery, FeedbackRecordsSearchVectorQuery
+from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQuery
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -246,8 +246,8 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             id=self._dataset.id,
             offset=offset,
             limit=limit,
-            response_status=self.__response_status_query_strings,
-            metadata_filters=self.__metadata_filters_query_strings,
+            response_status=self.response_status_as_query_string,
+            metadata_filters=self.metadata_filters_as_query_strings,
             sort_by=self.__sort_by_query_strings,
         ).parsed
 
@@ -257,7 +257,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     # TODO: define `List[ResponseStatusFilter]` and delegate `query_string` formatting to it
     @property
-    def __response_status_query_strings(self) -> Optional[List[str]]:
+    def response_status_as_query_string(self) -> Optional[List[str]]:
         """Formats the `response_status` if any to the query string format. Otherwise, returns `None`."""
         return (
             [status.value if hasattr(status, "value") else status for status in self._response_status]
@@ -267,7 +267,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     # TODO: define `List[MetadataFilter]` and delegate `query_string` formatting to it
     @property
-    def __metadata_filters_query_strings(self) -> Optional[List[str]]:
+    def metadata_filters_as_query_strings(self) -> Optional[List[str]]:
         """Formats the `metadata_filters` if any to the query string format. Otherwise, returns `None`."""
         return (
             [metadata_filter.query_string for metadata_filter in self._metadata_filters]
@@ -310,6 +310,38 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             names.extend([sort.metadata_name for sort in self.sort_by if sort.is_metadata_field])
         if names:
             helpers.validate_metadata_names(self.dataset, names)
+
+    def find_similar(
+        self,
+        vector_name: str,
+        value: Optional[List[float]],
+        record: Optional[RemoteFeedbackRecord],
+        max_results: int = 50,
+    ):
+        try:
+            response = datasets_api_v1.search_records(
+                client=self._client,
+                id=self.dataset.id,
+                vector_query=FeedbackRecordsSearchVectorQuery(
+                    name=vector_name,
+                    record_id=record and record.id,
+                    value=value,
+                ),
+                metadata_filters=self.metadata_filters_as_query_strings,
+                response_status=self.response_status_as_query_string,
+                limit=max_results,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed searching records for dataset with exception: {e}") from e
+
+        question_id_to_name_map = self.dataset._question_id_to_name
+        return [
+            (
+                RemoteFeedbackRecord.from_api(record_score.record, question_id_to_name=question_id_to_name_map),
+                record_score.query_score,
+            )
+            for record_score in response.parsed.items
+        ]
 
 
 class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
@@ -484,14 +516,14 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._records.add(records=records, show_progress=show_progress)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
-    def search_by(
+    def find_similar_records(
         self,
         vector_name: str,
         value: Optional[List[float]] = None,
         record: Optional[RemoteFeedbackRecord] = None,
         max_results: int = 50,
     ) -> List[Tuple[RemoteFeedbackRecord, float]]:
-        """Search for record in the dataset in Argilla.
+        """Finds similar records to the given record in the dataset based on the given vector.
 
         Args:
             vector_name: a vector name to use for searching by similarity.
@@ -502,26 +534,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         Returns:
             A list of tuples with each tuple including a record and a similarity score.
         """
-        try:
-            response = datasets_api_v1.search_records(
-                client=self._client,
-                id=self.id,
-                query=FeedbackRecordsSearchQuery(
-                    vector=FeedbackRecordsSearchVectorQuery(
-                        name=vector_name,
-                        record_id=record and record.id,
-                        value=value,
-                    ),
-                ),
-                limit=max_results,
-            )
-        except Exception as e:
-            raise RuntimeError(f"Failed searching records for dataset with exception: {e}") from e
-
-        return [
-            (RemoteFeedbackRecord.from_api(record_score.record), record_score.query_score)
-            for record_score in response.parsed
-        ]
+        return self.records.find_similar(vector_name, value, record, max_results)
 
     def update_records(
         self,
