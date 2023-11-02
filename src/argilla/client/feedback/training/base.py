@@ -19,7 +19,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
@@ -80,7 +79,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
             **load_kwargs: arguments for the rg.load() function.
         """
         if filter_by:
-            if not isinstance(dataset, RemoteFeedbackDataset):
+            if isinstance(dataset, FeedbackDataset):
                 raise ValueError("`filter_by` is only supported for `RemoteFeedbackDataset`.")
             dataset = dataset.filter_by(**filter_by).pull()
 
