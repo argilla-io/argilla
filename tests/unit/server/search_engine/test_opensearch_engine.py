@@ -1158,7 +1158,7 @@ class TestSuiteOpenSearchEngine:
         "user_response_status_filter",
         [
             None,
-            UserResponseStatusFilter(statuses=[ResponseStatusFilter.draft, ResponseStatusFilter.missing]),
+            UserResponseStatusFilter(statuses=[ResponseStatusFilter.missing, ResponseStatusFilter.draft]),
         ],
     )
     async def test_similarity_search_by_record_and_user_response_filter(
