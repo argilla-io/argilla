@@ -100,7 +100,7 @@ export default {
         case "discarded":
           return "#B7B7B7";
         case "pending":
-          return "#B6B9FF";
+          return "#BB720A";
         case "submitted":
           return "#3E5CC9";
       }
@@ -141,7 +141,7 @@ $selector-width: 140px;
   &.pending {
     &:hover,
     &:focus-within {
-      background: #eeeeff;
+      background: #fff2e0;
     }
   }
   &__radio {
@@ -173,10 +173,10 @@ $selector-width: 140px;
     }
   }
   &.pending {
-    color: #4c4ea3;
-    border: 1px solid #b6b9ff;
+    color: #bb720a;
+    border: 1px solid #bb720a;
     &:before {
-      background: #b6b9ff;
+      background: #bb720a;
     }
   }
   .svg-icon {

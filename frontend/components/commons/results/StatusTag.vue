@@ -80,10 +80,6 @@ export default {
     background: palette(green);
     border: 1px solid palette(green);
   }
-  &.--edited {
-    background: #bb720a;
-    border: 1px solid #bb720a;
-  }
 
   &.--discarded {
     background: #a7a7a7;
@@ -93,10 +89,10 @@ export default {
     background: $primary-color;
     border: 1px solid $primary-color;
   }
-  &.--pending {
-    background: #eeeeff;
-    border: 1px solid #b6b9ff;
-    color: #4c4ea3;
+  &.--pending,
+  &.--edited {
+    background: #bb720a;
+    border: 1px solid #bb720a;
   }
 
   .svg-icon {
