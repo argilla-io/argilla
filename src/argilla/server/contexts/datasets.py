@@ -13,7 +13,7 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, Union
 from uuid import UUID
 
 import sqlalchemy
@@ -385,7 +385,7 @@ async def get_record_by_id(
 async def get_records_by_ids(
     db: "AsyncSession",
     dataset_id: UUID,
-    records_ids: List[UUID],
+    records_ids: Iterable[UUID],
     include: Optional["RecordIncludeParam"] = None,
     user_id: Optional[UUID] = None,
 ) -> List[Record]:
@@ -805,13 +805,14 @@ async def update_records(
     upsert_vectors = []
     for record_i, record_update in enumerate(records_update.items):
         params = record_update.dict(exclude_unset=True)
+        needs_search_engine_update = False
 
         if "metadata_" in params and (metadata := params["metadata_"]) is not None:
             try:
                 metadata_properties_cache = await _validate_metadata(db, dataset, metadata, metadata_properties_cache)
             except ValueError as err:
                 raise ValueError(f"Provided metadata for record at position {record_i} is not valid: {err}") from err
-            records_search_engine_update.append(record_update.id)
+            needs_search_engine_update = True
 
         if record_update.suggestions is not None:
             params.pop("suggestions")
@@ -838,28 +839,41 @@ async def update_records(
                 record_position=record_i,
             )
             upsert_vectors.extend(record_vectors)
+            needs_search_engine_update = True
 
-        records_update_objects.append(params)
+        if needs_search_engine_update:
+            records_search_engine_update.append(record_update.id)
+
+        # Only update the record if there are params to update
+        if len(params) > 1:
+            records_update_objects.append(params)
 
     async with db.begin_nested():
-        params = [Suggestion.record_id.in_(records_delete_suggestions)]
-        await Suggestion.delete_many(db, params=params, autocommit=False)
-        db.add_all(suggestions)
+        if suggestions:
+            params = [Suggestion.record_id.in_(records_delete_suggestions)]
+            await Suggestion.delete_many(db, params=params, autocommit=False)
+            db.add_all(suggestions)
 
         if upsert_vectors:
             await Vector.upsert_many(
-                db, objects=upsert_vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+                db,
+                objects=upsert_vectors,
+                constraints=[Vector.record_id, Vector.vector_settings_id],
+                autocommit=False,
             )
 
-        await Record.update_many(db, records_update_objects, autocommit=False)
-        records = await get_records_by_ids(
-            db,
-            dataset_id=dataset.id,
-            records_ids=records_search_engine_update,
-            include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
-        )
-        await dataset.awaitable_attrs.vectors_settings
-        await search_engine.index_records(dataset, records)
+        if records_update_objects:
+            await Record.update_many(db, records_update_objects, autocommit=False)
+
+        if records_search_engine_update:
+            records = await get_records_by_ids(
+                db,
+                dataset_id=dataset.id,
+                records_ids=records_search_engine_update,
+                include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
+            )
+            await dataset.awaitable_attrs.vectors_settings
+            await search_engine.index_records(dataset, records)
 
     await db.commit()
 
