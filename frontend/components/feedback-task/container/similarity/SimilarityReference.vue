@@ -21,7 +21,7 @@
         <BaseButton
           class="similarity-reference__preview__button-close"
           @on-click="removeSimilaritySearch"
-          ><svgicon name="close" height="14"
+          ><svgicon name="close" height="10"
         /></BaseButton>
       </span>
     </div>
@@ -139,6 +139,9 @@ export default {
     &__button-close {
       padding: 0;
       color: $similarity-color;
+      &:hover {
+        color: darken($similarity-color, 15%);
+      }
     }
   }
   :deep(.dropdown__header) {
