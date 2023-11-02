@@ -737,17 +737,17 @@ async def _build_record_suggestions(
     return suggestions
 
 
-R = TypeVar("R")
+VectorClass = TypeVar("VectorClass")
 
 
 async def _build_record_vectors(
     db: "AsyncSession",
     dataset: Dataset,
     record_schema: Union["RecordCreate", "RecordUpdate", "RecordUpdateWithId"],
-    build_vector_func: Callable[[List[float], UUID], R],
+    build_vector_func: Callable[[List[float], UUID], VectorClass],
     cache: Dict[str, VectorSettingsSchema] = {},
     record_position: Optional[int] = None,
-) -> List[R]:
+) -> List[VectorClass]:
     """Create vectors for a record."""
     if not record_schema.vectors:
         return []
