@@ -66,3 +66,8 @@ class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleto
         raise NotImplementedError(
             "This method has to be implemented after `FeedbackDataset` allows for token classification."
         )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        raise NotImplementedError(
+            "This method has to be implemented after `FeedbackDataset` allows for token classification."
+        )

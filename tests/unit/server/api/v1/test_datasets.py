@@ -6289,7 +6289,7 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "payload",
         [
-            {"name": "New Name", "guidelines": "New Guidelines"},
+            {"name": "New Name", "guidelines": "New Guidelines", "allow_extra_metadata": False},
             {"name": "New Name"},
             {"guidelines": "New Guidelines"},
             {},
@@ -6314,6 +6314,7 @@ class TestSuiteDatasets:
             guidelines = payload["guidelines"]
         else:
             guidelines = dataset.guidelines
+        allow_extra_metadata = payload.get("allow_extra_metadata") or dataset.allow_extra_metadata
 
         assert response.status_code == 200
         response_body = response.json()
@@ -6321,7 +6322,7 @@ class TestSuiteDatasets:
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
-            "allow_extra_metadata": True,
+            "allow_extra_metadata": allow_extra_metadata,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
@@ -6330,9 +6331,9 @@ class TestSuiteDatasets:
         }
         assert response_body["last_activity_at"] == response_body["updated_at"]
 
-        dataset = await db.get(Dataset, dataset.id)
         assert dataset.name == name
         assert dataset.guidelines == guidelines
+        assert dataset.allow_extra_metadata is allow_extra_metadata
 
     @pytest.mark.parametrize(
         "dataset_json",
@@ -6346,6 +6347,7 @@ class TestSuiteDatasets:
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+            {"allow_extra_metadata": None},
         ],
     )
     @pytest.mark.asyncio

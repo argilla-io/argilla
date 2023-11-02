@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.training.peft import ArgillaPeftTrainer as ArgillaPeftTrainerV1
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.integrations.huggingface.model_card import PeftModelCardData
@@ -43,3 +44,24 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
             update_config_kwargs=self.lora_kwargs,
             **card_data_kwargs,
         )
+
+    @requires_dependencies("huggingface_hub")
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the model to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [huggingface_hub](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+        """
+        if not self._transformers_model:
+            raise ValueError(
+                "The model must be initialized prior to this point. You can either call `train` or `init_model`."
+            )
+        model_url = self._transformers_model.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Model pushed to: {model_url}")
+        tokenizer_url = self._transformers_tokenizer.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Tokenizer pushed to: {tokenizer_url}")
