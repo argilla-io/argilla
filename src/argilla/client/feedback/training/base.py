@@ -19,7 +19,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
@@ -31,6 +30,7 @@ if TYPE_CHECKING:
     import spacy
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
+    from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
-        dataset: FeedbackDataset,
+        dataset: "FeedbackDataset",
         task: TrainingTaskTypes,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
@@ -79,7 +79,9 @@ class ArgillaTrainer(ArgillaTrainerV1):
             **load_kwargs: arguments for the rg.load() function.
         """
         if filter_by:
-            if isinstance(dataset, FeedbackDataset):
+            # Use the id attribute of RemoteFeedbackDataset to determine the type of dataset.
+            # There are errors due to circular imports when trying to import RemoteFeedbackDataset.
+            if not getattr(dataset, "id", None):
                 raise ValueError("`filter_by` is only supported for `RemoteFeedbackDataset`.")
             dataset = dataset.filter_by(**filter_by).pull()
 
