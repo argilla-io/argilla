@@ -1,8 +1,6 @@
 <template>
   <FilterButton
-    button-name="Metadata"
-    icon-name="filter"
-    :show-icon="!!badges.length"
+    :button-name="$t('metadata')"
     :is-button-active="isButtonActive"
   >
     <div class="metadata-button__badges" v-if="badges.length">
@@ -39,7 +37,7 @@
           <BaseButton
             class="secondary full-width small clear metadata-button__tooltip__button"
             @on-click.stop="onClearAll"
-            >Clear all</BaseButton
+            >{{ $t("clear-all") }}</BaseButton
           >
         </FilterTooltip>
       </div>
@@ -114,6 +112,7 @@ export default {
     gap: calc($base-space / 2);
     &__collapsed {
       position: relative;
+      max-height: 22px;
     }
   }
   &__badge :deep(.badge__text) {
