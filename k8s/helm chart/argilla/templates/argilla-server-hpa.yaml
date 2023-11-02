@@ -7,8 +7,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: argilla-server-deployment
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: {{ .Values.replicas.min }}
+  maxReplicas: {{ .Values.replicas.max }}
   metrics:
   - type: Resource
     resource:
