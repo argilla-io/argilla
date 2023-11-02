@@ -32,6 +32,7 @@ from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
@@ -365,3 +366,51 @@ def test_tokenizer_warning_wrong_framework(
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
         ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
+
+
+@pytest.mark.parametrize(
+    "statuses, expected_num_records_before, expected_num_records_after",
+    [
+        ([], 10, 10),
+        ([ResponseStatusFilter.missing], 10, 2),
+        ([ResponseStatusFilter.discarded], 10, 4),
+        ([ResponseStatusFilter.submitted], 10, 4),
+        ([ResponseStatusFilter.discarded, ResponseStatusFilter.submitted], 10, 8),
+        # Use the following test to ensure a ValueError is raised for filters on local FeedbackDataset
+        ([ResponseStatusFilter.submitted], None, None),
+    ],
+)
+def test_trainer_with_filter_by(
+    test_remote_dataset_with_records: "FeedbackDataset",
+    statuses: List[ResponseStatusFilter],
+    expected_num_records_before: int,
+    expected_num_records_after: int,
+) -> None:
+    questions = [
+        question
+        for question in test_remote_dataset_with_records.questions
+        if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=test_remote_dataset_with_records.fields[0], label=label)
+    filter_by = None if len(statuses) == 0 else {"response_status": statuses}
+
+    if expected_num_records_before is None:
+        with pytest.raises(ValueError, match="`filter_by` is only supported for `RemoteFeedbackDataset`."):
+            trainer = ArgillaTrainer(
+                dataset=test_remote_dataset_with_records.pull(),
+                task=task,
+                framework="transformers",
+                model="prajjwal1/bert-tiny",
+                filter_by={"response_status": statuses},
+            )
+    else:
+        assert len(test_remote_dataset_with_records) == expected_num_records_before
+        trainer = ArgillaTrainer(
+            dataset=test_remote_dataset_with_records,
+            task=task,
+            framework="transformers",
+            model="prajjwal1/bert-tiny",
+            filter_by=filter_by,
+        )
+        assert len(trainer._dataset) == expected_num_records_after
