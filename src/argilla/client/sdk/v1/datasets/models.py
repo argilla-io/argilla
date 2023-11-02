@@ -105,11 +105,6 @@ class FeedbackRecordsSearchModel(BaseModel):
     total: int
 
 
-class FeedbackRecordsSearchTextQuery(BaseModel):
-    q: str
-    field: Optional[str] = None
-
-
 class FeedbackRecordsSearchVectorQuery(BaseModel):
     name: str
     record_id: Optional[UUID] = None
@@ -126,10 +121,6 @@ class FeedbackRecordsSearchVectorQuery(BaseModel):
 
         return values
 
-
-class FeedbackRecordsSearchQuery(BaseModel):
-    text: Optional[FeedbackRecordsSearchTextQuery] = None
-    vector: Optional[FeedbackRecordsSearchVectorQuery] = None
 
 
 class FeedbackFieldModel(BaseModel):

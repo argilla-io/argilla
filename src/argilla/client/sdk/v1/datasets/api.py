@@ -29,7 +29,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackQuestionModel,
     FeedbackRecordsModel,
     FeedbackRecordsSearchModel,
-    FeedbackRecordsSearchQuery,
+    FeedbackRecordsSearchVectorQuery,
     FeedbackResponseStatusFilter,
     FeedbackVectorSettingsModel,
 )
@@ -223,7 +223,9 @@ def get_records(
 def search_records(
     client: httpx.Client,
     id: UUID,
-    query: FeedbackRecordsSearchQuery,
+    vector_query: FeedbackRecordsSearchVectorQuery,
+    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    metadata_filters: Optional[List[str]] = None,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
     """Sends a POST request to `/api/me/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
@@ -231,16 +233,31 @@ def search_records(
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the dataset to add the records to.
-        query: a FeedbackRecordsSearchQuery to specify the parameters of the search.
+        vector_query: the vector query to be used to search for records.
+        response_status: the status of the responses to be retrieved.
+            Can either be `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
+        metadata_filters: the metadata filters to be applied to the records. Defaults to None.
         limit: an optional value to limit the number of returned records by the search.
 
     Returns:
         A `Response` object with the response itself, and/or the error codes if applicable.
     """
-    url = f"/api/me/datasets/{id}/records/search"
+    url = f"/api/v1/me/datasets/{id}/records/search"
     params = {"include": ["responses", "suggestions"], "limit": limit}
-    json = {"query": query}
 
+    vector_json = {"name": vector_query.name}
+    if vector_query.value:
+        vector_json["value"] = vector_query.value
+    if vector_query.record_id:
+        vector_json["record_id"] = str(vector_query.record_id)
+
+    json = {"query": {"vector": vector_json}}
+
+    if response_status:
+        params["response_status"] = response_status
+
+    if metadata_filters:
+        params["metadata"] = metadata_filters
     response = client.post(url=url, params=params, json=json)
 
     if response.status_code == 200:
