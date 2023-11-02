@@ -13,7 +13,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-mock
-  - pytest-asyncio
+  - pytest-asyncio!=0.22.0
   - pytest-env
   - factory_boy~=3.2.1
   # docs, pandoc needs conda ...
@@ -47,6 +47,7 @@ dependencies:
       - spacy==3.5.3
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - spacy-transformers>=1.2.5
+      - spacy-huggingface-hub >= 0.0.10
       - transformers[torch]>=4.30.0 # <- required for DPO with TRL
       - evaluate
       - seqeval
