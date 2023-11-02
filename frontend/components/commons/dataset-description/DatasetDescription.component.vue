@@ -43,7 +43,7 @@ export default {
       return this.dataset.guidelines ?? "";
     },
     originalSanitizedDescription() {
-      return this.dataset.originalGuidelines ?? "";
+      return this.dataset.original.guidelines ?? "";
     },
   },
   methods: {

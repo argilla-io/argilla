@@ -80,7 +80,6 @@ jobs:
           echo "Enable HF access token"
       - name: Set Argilla search engine env variable
         if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
-        # TODO(@frascuchon): Enable elasticsearch tests once the ci error is fixed
         run: |
           echo "ARGILLA_SEARCH_ENGINE=elasticsearch" >> "$GITHUB_ENV"
           echo "Configure elasticsearch engine"
@@ -88,14 +87,11 @@ jobs:
         if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
         run: |
           echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
-          echo "Configure elasticsearch engine"
+          echo "Configure opensearch engine"
       - name: Run tests 📈
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
         run: |
-          df -h
-          # ulimit to avoid segmentation fault
-          ulimit -c unlimited
           pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact

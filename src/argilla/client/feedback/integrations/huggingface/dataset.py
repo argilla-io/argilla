@@ -114,7 +114,7 @@ class HuggingFaceDatasetMixin:
 
         for record in dataset.records:
             for field in dataset.fields:
-                hf_dataset[field.name].append(record.fields[field.name])
+                hf_dataset[field.name].append(record.fields.get(field.name, None))
             for question in dataset.questions:
                 if not record.responses:
                     hf_dataset[question.name].append([])
@@ -300,6 +300,13 @@ class HuggingFaceDatasetMixin:
             )
             with open(config_path, "r") as f:
                 config = DatasetConfig.from_yaml(f.read())
+                dataset = cls(
+                    fields=config.fields,
+                    questions=config.questions,
+                    guidelines=config.guidelines,
+                    metadata_properties=config.metadata_properties,
+                    allow_extra_metadata=config.allow_extra_metadata,
+                )
         except EntryNotFoundError:
             # TODO(alvarobartt): here for backwards compatibility, last used in 1.12.0
             warnings.warn(
@@ -318,6 +325,7 @@ class HuggingFaceDatasetMixin:
             )
             with open(config_path, "r") as f:
                 config = DeprecatedDatasetConfig.from_json(f.read())
+                dataset = cls(fields=config.fields, questions=config.questions, guidelines=config.guidelines)
         except Exception as e:
             raise FileNotFoundError(
                 "Neither `argilla.yaml` nor `argilla.cfg` files were found in the"
@@ -340,7 +348,7 @@ class HuggingFaceDatasetMixin:
             responses = {}
             suggestions = []
             user_without_id = False
-            for question in config.questions:
+            for question in dataset.questions:
                 if hfds[index][question.name] is not None and len(hfds[index][question.name]) > 0:
                     if (
                         len(
@@ -414,7 +422,7 @@ class HuggingFaceDatasetMixin:
 
             records.append(
                 FeedbackRecord(
-                    fields={field.name: hfds[index][field.name] for field in config.fields},
+                    fields={field.name: hfds[index][field.name] for field in dataset.fields},
                     metadata=metadata or {},
                     responses=list(responses.values()) or [],
                     suggestions=[suggestion for suggestion in suggestions if suggestion["value"] is not None] or [],
@@ -422,12 +430,7 @@ class HuggingFaceDatasetMixin:
                 )
             )
         del hfds
-        instance = cls(
-            fields=config.fields,
-            questions=config.questions,
-            guidelines=config.guidelines,
-            metadata_properties=config.metadata_properties,
-            allow_extra_metadata=config.allow_extra_metadata,
-        )
-        instance.add_records(records)
-        return instance
+
+        dataset.add_records(records)
+
+        return dataset

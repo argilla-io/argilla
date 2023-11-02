@@ -128,11 +128,16 @@ class Vector(DatabaseModel):
     __tablename__ = "vectors"
 
     value: Mapped[List[Any]] = mapped_column(JSON)
-    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
 
-    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
     record: Mapped["Record"] = relationship(back_populates="vectors")
+    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
+
+    __table_args__ = (
+        UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
+    )
+    __upsertable_columns__ = {"value"}
 
     def __repr__(self) -> str:
         return (
@@ -145,8 +150,8 @@ class VectorSettings(DatabaseModel):
     __tablename__ = "vectors_settings"
 
     name: Mapped[str] = mapped_column(index=True)
+    title: Mapped[str] = mapped_column(Text)
     dimensions: Mapped[int] = mapped_column()
-    description: Mapped[str] = mapped_column(Text, nullable=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(back_populates="vectors_settings")

@@ -1,4 +1,7 @@
-import { createMetadataMock } from "../__mocks__/metadata/mock";
+import {
+  createMetadataMock,
+  createMetadataWithNoValuesMock,
+} from "../__mocks__/metadata/mock";
 import { MetadataSortList } from "./MetadataSort";
 
 describe("MetadataSort ", () => {
@@ -123,6 +126,45 @@ describe("MetadataSort ", () => {
       expect(metadataSort.selected[0].sort).toEqual("desc");
       expect(metadataSort.selected[1].name).toEqual("inserted_at");
       expect(metadataSort.selected[1].sort).toEqual("desc");
+    });
+  });
+
+  describe("Can sort should", () => {
+    test("return true if the metadata sort has value", () => {
+      const metadataSort = new MetadataSortList(createMetadataMock());
+
+      metadataSort.noSelected.forEach((metadataSort) => {
+        expect(metadataSort.canSort).toBeTruthy();
+      });
+    });
+
+    test("return false if the metadata sort has value", () => {
+      const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
+      const metadataSort = new MetadataSortList(
+        metadataForSortingWithoutValues
+      );
+
+      metadataSort.noSelected
+        .filter((n) =>
+          metadataForSortingWithoutValues.some((m) => m.name === n.name)
+        )
+        .forEach((metadata) => {
+          expect(metadata.canSort).toBeFalsy();
+        });
+    });
+
+    test("return always true for metadata hardcoded like inserted at and updated at", () => {
+      const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
+      const metadataSort = new MetadataSortList(
+        metadataForSortingWithoutValues
+      );
+
+      metadataSort.select("inserted_at");
+      metadataSort.select("updated_at");
+
+      metadataSort.selected.forEach((metadataSort) => {
+        expect(metadataSort.canSort).toBeTruthy();
+      });
     });
   });
 });

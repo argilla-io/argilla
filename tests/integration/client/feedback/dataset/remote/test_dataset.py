@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import random
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
@@ -44,6 +44,7 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
@@ -66,7 +67,16 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture()
-def test_dataset():
+def test_dataset_with_metadata_properties():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text"), TextField(name="optional", required=False)],
+        questions=[TextQuestion(name="question")],
+    )
+    return dataset
+
+
+@pytest.fixture()
+def test_dataset_with_metadata_properties():
     dataset = FeedbackDataset(
         fields=[TextField(name="text"), TextField(name="optional", required=False)],
         questions=[TextQuestion(name="question")],
@@ -111,29 +121,31 @@ class TestRemoteFeedbackDataset:
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
         ],
     )
-    async def test_add_records(self, owner: "User", test_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
+    async def test_add_records(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, record: FeedbackRecord
+    ) -> None:
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.add_records([record])
 
         assert len(remote_dataset.records) == 1
 
-    def test_update_records(self, owner: "User", test_dataset: FeedbackDataset):
+    def test_update_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
                 FeedbackRecord(fields={"text": "Another record"}),
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         first_record = remote[0]
         first_record.metadata.update({"terms-metadata": "a"})
@@ -145,18 +157,20 @@ class TestRemoteFeedbackDataset:
         first_record = remote[0]
         assert first_record.metadata["terms-metadata"] == "a"
 
-    async def test_update_records_with_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+    async def test_update_records_with_suggestions(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
+    ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
                 FeedbackRecord(fields={"text": "Another record"}),
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         records = []
         for record in remote:
@@ -172,11 +186,13 @@ class TestRemoteFeedbackDataset:
                 assert suggestion.question_name == "question"
                 assert suggestion.value == f"Hello world! for {record.fields['text']}"
 
-    async def test_update_records_with_empty_list_of_suggestions(self, owner: "User", test_dataset: FeedbackDataset):
+    async def test_update_records_with_empty_list_of_suggestions(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
+    ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(
+        test_dataset_with_metadata_properties.add_records(
             [
                 FeedbackRecord(
                     fields={"text": "Hello world!"}, suggestions=[{"question_name": "question", "value": "test"}]
@@ -187,7 +203,7 @@ class TestRemoteFeedbackDataset:
             ]
         )
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         records = []
         for record in remote:
@@ -203,14 +219,14 @@ class TestRemoteFeedbackDataset:
         "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]
     )
     async def test_update_records_with_metadata_validation_error(
-        self, owner: "User", test_dataset: FeedbackDataset, metadata: Tuple[str, Any]
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, metadata: Tuple[str, Any]
     ):
         rg.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
-        test_dataset.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
+        test_dataset_with_metadata_properties.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
 
         key, value = metadata
 
@@ -296,14 +312,14 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property(
         self,
         owner: "User",
-        test_dataset: FeedbackDataset,
+        test_dataset_with_metadata_properties: FeedbackDataset,
         metadata_property: "AllowedMetadataPropertyTypes",
         RemoteMetadataPropertyCls: Type["AllowedRemoteMetadataPropertyTypes"],
     ) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
-        remote_dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
         remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
 
         assert isinstance(remote_metadata_property, RemoteMetadataPropertyCls)
@@ -345,20 +361,21 @@ class TestRemoteFeedbackDataset:
     async def test_add_metadata_property_sequential(
         self,
         owner: "User",
-        test_dataset: FeedbackDataset,
+        test_dataset_with_metadata_properties: FeedbackDataset,
         metadata_properties: List["AllowedMetadataPropertyTypes"],
         RemoteMetadataPropertiesClasses: List[Type["AllowedRemoteMetadataPropertyTypes"]],
     ) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
-        dataset = test_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
 
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
-        assert len(remote_dataset.metadata_properties) == len(test_dataset.metadata_properties)
+        assert len(remote_dataset.metadata_properties) == len(test_dataset_with_metadata_properties.metadata_properties)
 
         for idx, (metadata_property, remote_metadata_property_cls) in enumerate(
-            zip(metadata_properties, RemoteMetadataPropertiesClasses), start=len(test_dataset.metadata_properties)
+            zip(metadata_properties, RemoteMetadataPropertiesClasses),
+            start=len(test_dataset_with_metadata_properties.metadata_properties),
         ):
             remote_metadata_property = remote_dataset.add_metadata_property(metadata_property)
             assert isinstance(remote_metadata_property, remote_metadata_property_cls)
@@ -416,6 +433,95 @@ class TestRemoteFeedbackDataset:
         remote_dataset.delete_metadata_properties(names)
         assert len(remote_dataset.metadata_properties) == 0
 
+    def test_adding_vector_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+
+        assert len(remote_dataset.vector_settings) == 1
+
+        remote_vector_settings = remote_dataset.vector_settings_by_name("vector")
+        assert vector_settings.name == remote_vector_settings.name
+        assert vector_settings.id == remote_vector_settings.id
+        assert vector_settings.dimensions == remote_vector_settings.dimensions
+
+        other_vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="other-vector", dimensions=100))
+
+        assert len(remote_dataset.vector_settings) == 2
+
+        remote_vector_settings = remote_dataset.vector_settings_by_name("other-vector")
+        assert other_vector_settings.name == remote_vector_settings.name
+        assert other_vector_settings.id == remote_vector_settings.id
+        assert other_vector_settings.dimensions == remote_vector_settings.dimensions
+
+    def test_adding_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+        dataset_vectors_settings = remote_dataset.vector_settings
+        assert len(dataset_vectors_settings) == 1
+
+        with pytest.raises(ValueError, match=f"Vector settings with name 'vector' already exists"):
+            remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
+
+    def test_adding_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=4))
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        records = [
+            FeedbackRecord(
+                external_id=str(i),
+                fields={"text": "Hello world!", "text-2": "Hello world!"},
+                vectors={"vector": [random.uniform(0, 1) for _ in range(4)]},
+            )
+            for i in range(1, 20)
+        ]
+        remote_dataset.add_records(records)
+
+        assert len(remote_dataset.records) == len(records)
+        # TODO: test this once the list of vectors is returned
+        # assert all(record.vectors["vector"] for record in remote_dataset.records)
+
+    @pytest.mark.parametrize(
+        "invalid_vectors, expected_error",
+        [
+            (
+                {"vector": [1, 1, 1, 1, 1]},
+                f"Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Provided vector with name=vector of record at position 0 is not valid",
+            ),
+            (
+                {"unknown-vector": [1, 1, 1, 1]},
+                f"Argilla server returned an error with http status: 422. "
+                "Error details: {'response': 'Provided vector with name=unknown-vector of record at position 0 is not valid",
+            ),
+        ],
+    )
+    def test_adding_records_with_invalid_vectors(
+        self, owner: "User", feedback_dataset: FeedbackDataset, invalid_vectors: dict, expected_error: str
+    ):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        vector_dimension = 4
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=vector_dimension))
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        with pytest.raises(ValidationApiError, match=expected_error):
+            remote_dataset.add_records(
+                FeedbackRecord(
+                    fields={"text": "Hello world!", "text-2": "Hello world!"},
+                    vectors=invalid_vectors,
+                )
+            )
+
     def test_delete_metadata_property_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
@@ -448,7 +554,9 @@ class TestRemoteFeedbackDataset:
         )
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_records(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete_records(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole
+    ) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
@@ -457,7 +565,7 @@ class TestRemoteFeedbackDataset:
 
         api.init(api_key=user.api_key, workspace=ws.name)
 
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote.add_records(
             [
                 FeedbackRecord(fields={"text": "Hello world!"}),
@@ -475,7 +583,9 @@ class TestRemoteFeedbackDataset:
         assert len(remote.records) == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, role: UserRole
+    ) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
@@ -484,7 +594,7 @@ class TestRemoteFeedbackDataset:
         ws.add_user(user.id)
 
         api.init(api_key=user.api_key)
-        remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
 

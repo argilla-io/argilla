@@ -3,20 +3,18 @@
     <div class="header-area">
       <slot name="header">here is the header</slot>
     </div>
-    <div class="empty-content-left"></div>
-    <div class="footer-area">
-      <slot name="footer">here is the footer</slot>
-    </div>
     <div class="sidebar-area">
       <slot name="sidebar-right">here is the sidebar content left</slot>
     </div>
-    <div class="top-area">
+    <div class="top-area container">
       <slot name="top">here is the top content</slot>
     </div>
-    <div class="center-area">
+    <div class="center-area container">
       <slot name="center">here is the center content</slot>
     </div>
-    <div class="empty-content-right"></div>
+    <div class="footer-area">
+      <slot name="footer">here is the footer</slot>
+    </div>
   </div>
 </template>
 
@@ -45,10 +43,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$gap-width: $base-space * 7;
+$gap-width: $base-space * 2;
 .layout {
   display: grid;
-  grid-template-columns: $gap-width 1fr $gap-width $sidebarMenuWidth;
+  grid-template-columns: 1fr $sidebarMenuWidth;
   grid-template-rows: auto auto minmax(0, 1fr) $base-space * 2 auto;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
@@ -56,31 +54,29 @@ $gap-width: $base-space * 7;
   transition: 0.4s ease-in-out;
   &.--panel {
     @include media(">desktop") {
-      grid-template-columns: $gap-width 1fr calc($gap-width / 2) $sidebarWidth;
+      grid-template-columns: 1fr $sidebarWidth;
       transition: 0.4s ease-out;
     }
   }
 }
 
 .header-area {
-  grid-area: 1 / 1 / 2 / 6;
-}
-.empty-content-left {
-  grid-area: 2 / 1 / 4 / 2;
+  grid-area: 1 / 1 / 2 / 5;
 }
 .footer-area {
-  grid-area: 5 / 1 / 5 / 4;
+  grid-area: 5 / 1 / 5 / 2;
 }
 .sidebar-area {
-  grid-area: 2 / 4 / 5 / 5;
-}
-.empty-content-right {
-  grid-area: 2 / 3 / 4 / 4;
+  grid-area: 2 / 2 / 5 / 3;
 }
 .top-area {
-  grid-area: 2 / 2 / 3 / 3;
+  grid-area: 2 / 1 / 3 / 2;
 }
 .center-area {
-  grid-area: 3 / 2 / 4 / 3;
+  grid-area: 3 / 1 / 4 / 2;
+  min-width: 0;
+}
+.container {
+  padding: 0 $base-space * 3;
 }
 </style>

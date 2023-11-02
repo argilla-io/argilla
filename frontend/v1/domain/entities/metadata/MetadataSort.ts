@@ -19,6 +19,8 @@ abstract class Sort {
   abstract get name(): string;
 
   abstract get title(): string;
+
+  abstract get canSort(): boolean;
 }
 
 class MetadataSort extends Sort {
@@ -33,11 +35,19 @@ class MetadataSort extends Sort {
   get title() {
     return this.metadata.title;
   }
+
+  get canSort(): boolean {
+    return this.metadata.hasValues;
+  }
 }
 
 class RecordSort extends Sort {
   constructor(public readonly name: string, public readonly title = name) {
     super();
+  }
+
+  get canSort(): boolean {
+    return true;
   }
 }
 

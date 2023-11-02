@@ -13,14 +13,14 @@
 #  limitations under the License.
 from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
-from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter
+from argilla.server.enums import MetadataPropertyType, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import Record, User, VectorSettings
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
     SortBy,
-    StringQuery,
     TermsMetadataFilter,
+    TextQuery,
     UserResponseStatusFilter,
 )
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
@@ -532,16 +532,16 @@ class TestSuiteOpenSearchEngine:
             ("00000", 1),
             ("card payment", 5),
             ("nothing", 0),
-            (StringQuery(q="card"), 5),
-            (StringQuery(q="account"), 1),
-            (StringQuery(q="payment"), 6),
-            (StringQuery(q="cash"), 3),
-            (StringQuery(q="card payment"), 5),
-            (StringQuery(q="nothing"), 0),
-            (StringQuery(q="rate negative"), 1),  # Terms are found in two different fields
-            (StringQuery(q="negative", field="label"), 4),
-            (StringQuery(q="00000", field="textId"), 1),
-            (StringQuery(q="card payment", field="text"), 5),
+            (TextQuery(q="card"), 5),
+            (TextQuery(q="account"), 1),
+            (TextQuery(q="payment"), 6),
+            (TextQuery(q="cash"), 3),
+            (TextQuery(q="card payment"), 5),
+            (TextQuery(q="nothing"), 0),
+            (TextQuery(q="rate negative"), 1),  # Terms are found in two different fields
+            (TextQuery(q="negative", field="label"), 4),
+            (TextQuery(q="00000", field="textId"), 1),
+            (TextQuery(q="card payment", field="text"), 5),
         ],
     )
     async def test_search_with_query_string(
@@ -549,7 +549,7 @@ class TestSuiteOpenSearchEngine:
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        query: Union[str, StringQuery],
+        query: Union[str, TextQuery],
         expected_items: int,
     ):
         result = await opensearch_engine.search(test_banking_sentiment_dataset, query=query)
@@ -594,7 +594,7 @@ class TestSuiteOpenSearchEngine:
 
         result = await opensearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
         )
         assert len(result.items) == expected_items
@@ -696,13 +696,11 @@ class TestSuiteOpenSearchEngine:
             opensearch, test_banking_sentiment_dataset, all_statuses, len(test_banking_sentiment_dataset.records), user
         )
 
-        no_filter_results = await opensearch_engine.search(
-            test_banking_sentiment_dataset, query=StringQuery(q="payment")
-        )
+        no_filter_results = await opensearch_engine.search(test_banking_sentiment_dataset, query=TextQuery(q="payment"))
 
         results = await opensearch_engine.search(
             test_banking_sentiment_dataset,
-            query=StringQuery(q="payment"),
+            query=TextQuery(q="payment"),
             user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
         )
 
@@ -836,6 +834,43 @@ class TestSuiteOpenSearchEngine:
                     str(metadata_prop.name): record.metadata_[metadata_prop.name]
                     for metadata_prop in metadata_properties
                 },
+            }
+            for record in records
+        ]
+
+    async def test_index_records_with_vectors(self, opensearch_engine: OpenSearchEngine, opensearch: OpenSearch):
+        dataset = await DatasetFactory.create()
+        text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
+        vectors_settings = await VectorSettingsFactory.create_batch(size=5, dataset=dataset, dimensions=5)
+        records = await RecordFactory.create_batch(
+            size=5, fields={field.name: f"This is the value for {field.name}" for field in text_fields}, responses=[]
+        )
+
+        for record in records:
+            for vector_settings in vectors_settings:
+                await VectorFactory.create(
+                    record=record, vector_settings=vector_settings, value=[1.0, 2.0, 3.0, 4.0, 5.0]
+                )
+            await record.awaitable_attrs.vectors
+
+        await _refresh_dataset(dataset)
+
+        await opensearch_engine.create_index(dataset)
+        await opensearch_engine.index_records(dataset, records)
+
+        index_name = index_name_for_dataset(dataset)
+        opensearch.indices.refresh(index=index_name)
+
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+        assert es_docs == [
+            {
+                "id": str(record.id),
+                "fields": record.fields,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+                "responses": {},
+                "metadata": {},
+                "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
             }
             for record in records
         ]
@@ -1055,10 +1090,29 @@ class TestSuiteOpenSearchEngine:
     ):
         settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
         with pytest.raises(
-            expected_exception=ValueError, match="Must provide vector value or record to compute the similarity search"
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
         ):
             await opensearch_engine.similarity_search(
                 dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
+            )
+
+    async def test_similarity_search_with_too_much_inputs(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+        with pytest.raises(
+            expected_exception=ValueError,
+            match="Must provide either vector value or record to compute the similarity search",
+        ):
+            await opensearch_engine.similarity_search(
+                dataset=test_banking_sentiment_dataset_with_vectors,
+                vector_settings=settings,
+                value=[1.0, 2.0],
+                record=Record(),
             )
 
     async def test_similarity_search_by_vector_value(
@@ -1080,6 +1134,26 @@ class TestSuiteOpenSearchEngine:
         assert responses.total == 1
         assert responses.items[0].record_id == selected_record.id
 
+    async def test_similarity_search_by_vector_value_with_order(
+        self,
+        opensearch_engine: OpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset_with_vectors: Dataset,
+    ):
+        selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        responses = await opensearch_engine.similarity_search(
+            dataset=test_banking_sentiment_dataset_with_vectors,
+            vector_settings=vector_settings,
+            value=selected_record.vectors[0].value,
+            order=SimilarityOrder.least_similar,
+            max_results=1,
+        )
+
+        assert responses.total == 1
+        assert responses.items[0].record_id != selected_record.id
+
     async def test_similarity_search_by_record(
         self,
         opensearch_engine: OpenSearchEngine,
@@ -1097,7 +1171,7 @@ class TestSuiteOpenSearchEngine:
         )
 
         assert responses.total == 1
-        assert responses.items[0].record_id == selected_record.id
+        assert responses.items[0].record_id != selected_record.id
 
     async def _configure_record_responses(
         self,

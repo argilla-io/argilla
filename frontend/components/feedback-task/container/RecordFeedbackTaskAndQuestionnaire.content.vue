@@ -2,10 +2,12 @@
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
   <div v-else class="wrapper">
     <template v-if="!!record">
-      <RecordFeedbackTaskComponent
+      <RecordFieldsAndSimilarity
         :key="`${record.id}_fields`"
-        :recordStatus="record.status"
-        :fields="record.fields"
+        :datasetVectors="datasetVectors"
+        :records="records"
+        :recordCriteria="recordCriteria"
+        :record="record"
       />
 
       <QuestionsFormComponent
@@ -52,7 +54,7 @@ export default {
     noRecordsMessage() {
       const { status } = this.recordCriteria.committed;
 
-      if (this.recordCriteria.isFilteringByText)
+      if (this.recordCriteria.isFilteredByText)
         return `You have no ${status} records matching the search input`;
 
       return `You have no ${status} records`;
@@ -152,8 +154,8 @@ export default {
       }, 100);
     },
   },
-  setup() {
-    return useRecordFeedbackTaskViewModel();
+  setup(props) {
+    return useRecordFeedbackTaskViewModel(props);
   },
   mounted() {
     this.$root.$on("on-change-record-page", this.onChangeRecordPage);
@@ -177,6 +179,10 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   height: 100%;
+  overflow: auto;
+  @include media("<tablet") {
+    flex-flow: column;
+  }
   &__text {
     color: $black-54;
   }

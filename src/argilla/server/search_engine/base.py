@@ -14,19 +14,26 @@
 
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
+from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatus, ResponseStatusFilter, SortOrder
+from argilla.server.enums import (
+    MetadataPropertyType,
+    RecordSortField,
+    ResponseStatus,
+    ResponseStatusFilter,
+    SimilarityOrder,
+    SortOrder,
+)
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
     "UserResponse",
-    "StringQuery",
+    "TextQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
     "IntegerMetadataFilter",
@@ -47,7 +54,7 @@ class UserResponse(BaseModel):
     status: ResponseStatus
 
 
-class StringQuery(BaseModel):
+class TextQuery(BaseModel):
     q: str
     field: Optional[str] = None
 
@@ -238,7 +245,7 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
@@ -266,8 +273,11 @@ class SearchEngine(metaclass=ABCMeta):
         vector_settings: VectorSettings,
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
         max_results: int = 100,
+        order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         pass

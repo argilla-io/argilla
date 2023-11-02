@@ -232,6 +232,7 @@ class VectorSettingsFactory(BaseFactory):
         model = VectorSettings
 
     name = factory.Sequence(lambda n: f"vector-{n}")
+    title = "Vector Title"
     dimensions = factory.LazyAttribute(lambda _: random.randrange(16, 1024))
     dataset = factory.SubFactory(DatasetFactory)
 
@@ -240,8 +241,8 @@ class VectorFactory(BaseFactory):
     class Meta:
         model = Vector
 
-    vector_settings = factory.SubFactory(VectorSettingsFactory)
     record = factory.SubFactory(RecordFactory)
+    vector_settings = factory.SubFactory(VectorSettingsFactory)
 
 
 class FieldFactory(BaseFactory):

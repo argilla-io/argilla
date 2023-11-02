@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
-from argilla import Workspace
+from argilla import User, Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -30,6 +30,7 @@ from argilla.client.feedback.schemas.metadata import (
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import TrainingTask
 from argilla.client.models import Framework
 
@@ -622,6 +623,65 @@ def test_prepare_for_training_text_classification(
 
     data = remote.prepare_for_training(framework=framework, task=task)
     assert data is not None
+
+
+def test_push_to_argilla_with_vector_settings(argilla_user: User):
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+        vector_settings=[VectorSettings(name="vector-settings", dimensions=100)],
+    )
+
+    remote = dataset.push_to_argilla(name="test-dataset-vector01")
+    assert len(remote.vector_settings) == 1
+    assert remote.vector_settings[0].name == "vector-settings"
+    assert remote.vector_settings[0].dimensions == 100
+
+
+def test_push_to_argilla_with_wrong_vector_settings(argilla_user: User):
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+        vector_settings=[VectorSettings(name="vector-settings", dimensions=-10)],
+    )
+
+    with pytest.raises(Exception, match="Failed adding vectors to the `FeedbackDataset` in Argilla"):
+        dataset.push_to_argilla(name="test-dataset-vector01")
+
+    with pytest.raises(
+        Exception, match="Could not find a `FeedbackDataset` in Argilla with name='test-dataset-vector01"
+    ):
+        FeedbackDataset.from_argilla("test-dataset-vector01")
+
+
+def test_add_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    new_settings = dataset.add_vector_settings(expected_settings)
+    assert expected_settings == new_settings
+    assert len(dataset.vector_settings) == 1
+    assert dataset.vector_settings_by_name("vector-settings") == expected_settings
+
+
+def test_add_duplicated_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    dataset.add_vector_settings(expected_settings)
+
+    with pytest.raises(ValueError, match="Vector settings with name 'vector-settings' already exists"):
+        dataset.add_vector_settings(expected_settings)
 
 
 @pytest.mark.usefixtures(

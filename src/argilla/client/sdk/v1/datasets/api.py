@@ -23,6 +23,7 @@ from argilla.client.sdk.commons.models import ErrorMessage, HTTPValidationError,
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
+    FeedbackListVectorSettingsModel,
     FeedbackMetadataPropertyModel,
     FeedbackMetricsModel,
     FeedbackQuestionModel,
@@ -30,6 +31,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsSearchModel,
     FeedbackRecordsSearchQuery,
     FeedbackResponseStatusFilter,
+    FeedbackVectorSettingsModel,
 )
 
 
@@ -503,6 +505,46 @@ def add_metadata_property(
         response_obj = Response.from_httpx_response(response)
         response_obj.parsed = FeedbackMetadataPropertyModel(**response.json())
         return response_obj
+    return handle_response_error(response)
+
+
+def list_vector_settings(
+    client: httpx.Client,
+    id: UUID,
+) -> Response[Union[FeedbackListVectorSettingsModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/datasets/{id}/vectors-settings"
+
+    response = client.get(url=url)
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackListVectorSettingsModel(**response.json())
+        return response_obj
+
+    return handle_response_error(response)
+
+
+def add_vector_settings(
+    client: httpx.Client,
+    id: UUID,
+    name: str,
+    title: str,
+    dimensions: int,
+) -> Response[Union[FeedbackVectorSettingsModel, ErrorMessage, HTTPValidationError]]:
+    url = f"/api/v1/datasets/{id}/vectors-settings"
+
+    body = {
+        "name": name,
+        "title": title,
+        "dimensions": dimensions,
+    }
+
+    response = client.post(url=url, json=body)
+    if response.status_code == 201:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackVectorSettingsModel(**response.json())
+        return response_obj
+
+    # TODO: better handle error for v1 API endpoints
     return handle_response_error(response)
 
 

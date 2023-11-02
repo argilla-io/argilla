@@ -47,15 +47,17 @@ export default {
     },
     shouldShowTotalRecords() {
       return (
-        this.recordCriteria.isFilteringByText ||
-        this.recordCriteria.isFilteringByMetadata
+        this.recordCriteria.isFilteredByText ||
+        this.recordCriteria.isFilteredByMetadata
       );
     },
   },
   methods: {
     newFiltersChanged() {
       if (!this.recordCriteria.hasChanges) return;
-      this.recordCriteria.page = 1;
+      if (!this.recordCriteria.isChangingAutomatically) {
+        this.recordCriteria.page = 1;
+      }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },

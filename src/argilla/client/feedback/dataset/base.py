@@ -17,9 +17,11 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, O
 
 from pydantic import BaseModel, ValidationError
 
+from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.utils import generate_pydantic_schema_for_fields, generate_pydantic_schema_for_metadata
 from argilla.utils.dependency import requires_dependencies
 
@@ -69,65 +71,10 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
             TypeError: if `guidelines` is not None and not a string.
             ValueError: if `guidelines` is an empty string.
         """
-        if not isinstance(fields, list):
-            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
 
-        any_required = False
-        unique_names = set()
-        for field in fields:
-            if not isinstance(field, AllowedFieldTypes):
-                raise TypeError(
-                    f"Expected `fields` to be a list of `{AllowedFieldTypes.__name__}`, got {type(field)} instead."
-                )
-            if field.name in unique_names:
-                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
-            unique_names.add(field.name)
-            if not any_required and field.required:
-                any_required = True
-
-        if not any_required:
-            raise ValueError("At least one field in `fields` must be required (`required=True`).")
-
-        self._fields = fields
-
-        if not isinstance(questions, list):
-            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for question in questions:
-            if not isinstance(question, AllowedQuestionTypes.__args__):
-                raise TypeError(
-                    "Expected `questions` to be a list of"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
-                    f" question in the list with type {type(question)} instead."
-                )
-            if question.name in unique_names:
-                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
-            unique_names.add(question.name)
-            if not any_required and question.required:
-                any_required = True
-
-        if not any_required:
-            raise ValueError("At least one question in `questions` must be required (`required=True`).")
-
-        self._questions = questions
-
-        if metadata_properties is not None:
-            unique_names = set()
-            for metadata_property in metadata_properties:
-                if not isinstance(metadata_property, AllowedMetadataPropertyTypes.__args__):
-                    raise TypeError(
-                        f"Expected `metadata_properties` to be a list of"
-                        f" `{'`, `'.join([arg.__name__ for arg in AllowedMetadataPropertyTypes.__args__])}` got a"
-                        f" metadata property in the list with type type {type(metadata_property)} instead."
-                    )
-                if metadata_property.name in unique_names:
-                    raise ValueError(
-                        f"Expected `metadata_properties` to have unique names, got '{metadata_property.name}' twice instead."
-                    )
-                unique_names.add(metadata_property.name)
-        self._metadata_properties = metadata_properties
+        helpers.validate_fields(fields)
+        helpers.validate_questions(questions)
+        helpers.validate_metadata_properties(metadata_properties)
 
         if guidelines is not None:
             if not isinstance(guidelines, str):
@@ -139,6 +86,9 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                     "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
                 )
 
+        self._fields = fields or []
+        self._questions = questions or []
+        self._metadata_properties = metadata_properties or []
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
 
@@ -247,6 +197,18 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
             f"Metadata property with name='{name}' not found, available metadata property names are:"
             f" {', '.join([metadata_property.name for metadata_property in existing_metadata_properties])}"
         )
+
+    @abstractmethod
+    def vector_settings_by_name(self, name: str) -> "VectorSettings":
+        """Returns the vector settings by name if it exists. Otherwise a `ValueError` is raised.
+
+        Args:
+            name: the name of the vector settings to return.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist.
+        """
+        pass
 
     @abstractmethod
     def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
@@ -451,6 +413,21 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     @abstractmethod
     def delete_metadata_properties(self, *args, **kwargs):
         """Deletes a list of `metadata_properties` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def add_vector_settings(self, *args, **kwargs):
+        """Adds a new `vector_settings` to the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def update_vector_settings(self, *args, **kwargs):
+        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_vector_settings(self, *args, **kwargs):
+        """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
     @abstractmethod

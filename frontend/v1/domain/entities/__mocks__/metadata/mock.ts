@@ -9,6 +9,7 @@ const metadataMocked = [
       type: "terms",
       values: ["test", "train", "validation"],
     },
+    visible_for_annotators: true,
   },
   {
     id: "2",
@@ -19,6 +20,7 @@ const metadataMocked = [
       min: 0,
       max: 2,
     },
+    visible_for_annotators: true,
   },
   {
     id: "3",
@@ -29,6 +31,7 @@ const metadataMocked = [
       min: 0.1,
       max: 3.76,
     },
+    visible_for_annotators: true,
   },
   {
     id: "4",
@@ -38,6 +41,7 @@ const metadataMocked = [
       type: "terms",
       values: ["test", "train", "validation"],
     },
+    visible_for_annotators: true,
   },
   {
     id: "5",
@@ -47,6 +51,7 @@ const metadataMocked = [
       type: "terms",
       values: ["test", "train", "validation"],
     },
+    visible_for_annotators: true,
   },
 ];
 
@@ -59,6 +64,7 @@ const metadataWithNoValuesMocked = [
       type: "terms",
       values: [],
     },
+    visible_for_annotators: true,
   },
   {
     id: "2",
@@ -69,6 +75,7 @@ const metadataWithNoValuesMocked = [
       min: null,
       max: null,
     },
+    visible_for_annotators: true,
   },
   {
     id: "3",
@@ -79,6 +86,7 @@ const metadataWithNoValuesMocked = [
       min: null,
       max: null,
     },
+    visible_for_annotators: true,
   },
 ];
 
@@ -88,7 +96,8 @@ export const createMetadataMock = () =>
       metadata.id,
       metadata.name,
       metadata.description,
-      metadata.settings
+      metadata.settings,
+      metadata.visible_for_annotators
     );
   });
 
@@ -98,6 +107,7 @@ export const createMetadataWithNoValuesMock = () =>
       metadata.id,
       metadata.name,
       metadata.description,
-      metadata.settings
+      metadata.settings,
+      metadata.visible_for_annotators
     );
   });

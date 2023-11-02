@@ -32,6 +32,8 @@ from argilla.client.feedback.schemas.questions import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import (
     TrainingTaskTypes,
 )
@@ -42,6 +44,7 @@ from argilla.client.feedback.unification import (
     RatingQuestionStrategy,
 )
 from argilla.client.models import Framework
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchQuery, FeedbackRecordsSearchVectorQuery
@@ -358,7 +361,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._fields = fields
         self._fields_schema = None
         self._questions = questions
-        self._metadata_properties = metadata_properties
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
 
@@ -591,6 +593,13 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
+    @property
+    def vector_settings(self) -> List[RemoteVectorSettings]:
+        """Retrieves the `vector_settings` of the current dataset from Argilla"""
+        response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
+
+        return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
+
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
         self, metadata_property: "AllowedMetadataPropertyTypes"
@@ -631,6 +640,33 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
 
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
+
+    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
+        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
+        for vector_settings in self.vector_settings:
+            if vector_settings.name == name:
+                return vector_settings
+
+        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
+
+    def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
+        try:
+            new_vector_settings = datasets_api_v1.add_vector_settings(
+                client=self._client,
+                id=self.id,
+                title=vector_settings.name,
+                name=vector_settings.name,
+                dimensions=vector_settings.dimensions,
+            ).parsed
+        except AlreadyExistsApiError:
+            raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
+        return RemoteVectorSettings.from_api(new_vector_settings)
+
+    def update_vector_settings(self, *args, **kwargs):
+        pass
+
+    def delete_vector_settings(self, *args, **kwargs):
+        pass
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update_metadata_properties(
