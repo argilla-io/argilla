@@ -694,7 +694,7 @@ async def _build_record_responses(
                 )
             )
         except ValueError as e:
-            raise ValueError(f"response at position {idx} is not valid:") from e
+            raise ValueError(f"response at position {idx} is not valid: {e}") from e
 
     return responses, cache
 
@@ -759,7 +759,7 @@ async def _exists_records_with_ids(db: "AsyncSession", dataset_id: UUID, records
 
 async def _update_record(
     db: "AsyncSession", dataset: Dataset, record_update: "RecordUpdateWithId", caches: Optional[Dict[str, Any]] = None
-) -> Tuple[Dict[str, Any], List[Suggestion], List[VectorSchema], bool, Dict[str, Any]]:
+) -> Tuple[Dict[str, Any], Union[List[Suggestion], None], List[VectorSchema], bool, Dict[str, Any]]:
     if caches is None:
         caches = {
             "metadata_properties": {},
@@ -769,7 +769,7 @@ async def _update_record(
 
     params = record_update.dict(exclude_unset=True)
     needs_search_engine_update = False
-    suggestions = []
+    suggestions = None
     vectors = []
 
     if "metadata_" in params:
@@ -839,7 +839,7 @@ async def update_records(
                 db, dataset, record_update, caches
             )
 
-            if record_suggestions:
+            if record_suggestions is not None:
                 suggestions.extend(record_suggestions)
                 records_delete_suggestions.append(record_update.id)
 
@@ -855,9 +855,11 @@ async def update_records(
             raise ValueError(f"Record at position {record_i} is not valid because {e}") from e
 
     async with db.begin_nested():
-        if suggestions:
+        if records_delete_suggestions:
             params = [Suggestion.record_id.in_(records_delete_suggestions)]
             await Suggestion.delete_many(db, params=params, autocommit=False)
+
+        if suggestions:
             db.add_all(suggestions)
 
         if upsert_vectors:

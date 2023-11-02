@@ -4845,6 +4845,33 @@ class TestSuiteDatasets:
 
         mock_search_engine.index_records.assert_not_called()
 
+    async def test_update_dataset_records_with_empty_list_of_suggestions(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
+        question_1 = await TextQuestionFactory.create(dataset=dataset)
+        question_2 = await TextQuestionFactory.create(dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        suggestions_records_0 = [
+            await SuggestionFactory.create(question=question_0, record=record, value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_1, record=record, value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_2, record=record, value="suggestion 0 3"),
+        ]
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={"items": [{"id": str(record.id), "suggestions": []}]},
+        )
+
+        assert response.status_code == 204
+
+        assert await record.awaitable_attrs.suggestions == []
+        for suggestion in suggestions_records_0:
+            assert inspect(suggestion).deleted
+
     async def test_update_dataset_records_with_vectors(
         self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
     ):
