@@ -47,6 +47,7 @@ from argilla.client.models import Framework
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.vectors_settings import api as vectors_settings_api_v1
 from argilla.client.utils import allowed_for_roles
 
 if TYPE_CHECKING:
@@ -54,9 +55,7 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
         AllowedMetadataPropertyTypes,
@@ -602,7 +601,18 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
 
     def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
-        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
+        """Returns the vector settings with the given name from the current dataset in Argilla.
+
+        Args:
+            name: the name of the vector settings to retrieve.
+
+        Returns:
+            The vector settings with the given name from the current dataset in Argilla.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist in the
+                current dataset in Argilla.
+        """
         for vector_settings in self.vectors_settings:
             if vector_settings.name == name:
                 return vector_settings
@@ -610,6 +620,19 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
 
     def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
+        """Adds a new vector settings to the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vector_settings: the vector settings to add.
+
+        Returns:
+            The newly added vector settings to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            ValueError: if the vector settings with the given name already exists in the
+                dataset in Argilla.
+        """
+
         try:
             new_vector_settings = datasets_api_v1.add_vector_settings(
                 client=self._client,
@@ -622,8 +645,32 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
         return RemoteVectorSettings.from_api(new_vector_settings)
 
-    def update_vector_settings(self, *args, **kwargs):
-        pass
+    def update_vector_settings(self, vector_settings: RemoteVectorSettings) -> RemoteVectorSettings:
+        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vector_settings: the vector settings to update.
+
+        Returns:
+            The updated vector settings in the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            RuntimeError: if the vector settings cannot be updated in the current
+                `FeedbackDataset` in Argilla.
+        """
+        try:
+            updated_vector_settings = vectors_settings_api_v1.update_vector_settings(
+                client=self._client,
+                id=vector_settings.id,
+                title=vector_settings.title,
+            ).parsed
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed while updating the `vector_settings={vector_settings.name}` in the current"
+                f" `FeedbackDataset` in Argilla with exception: {e}"
+            ) from e
+
+        return RemoteVectorSettings.from_api(updated_vector_settings)
 
     def delete_vector_settings(self, *args, **kwargs):
         pass
