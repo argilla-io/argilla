@@ -122,7 +122,6 @@ class FeedbackRecordsSearchVectorQuery(BaseModel):
         return values
 
 
-
 class FeedbackFieldModel(BaseModel):
     id: UUID
     name: str
