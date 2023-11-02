@@ -24,8 +24,8 @@ class RemoteVectorSettings(VectorSettings):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    def to_local(self) -> VectorSettings:
+        return VectorSettings(name=self.name, title=self.title, dimensions=self.dimensions)
 
     @classmethod
     def from_api(cls, api_model: FeedbackVectorSettingsModel) -> "RemoteVectorSettings":

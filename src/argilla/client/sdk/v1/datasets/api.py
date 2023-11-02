@@ -477,6 +477,17 @@ def list_vector_settings(
     client: httpx.Client,
     id: UUID,
 ) -> Response[Union[FeedbackListVectorSettingsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/vectors-settings` endpoint to
+    retrieve the vector settings of a `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the vector settings from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackListVectorSettingsModel`.
+    """
     url = f"/api/v1/datasets/{id}/vectors-settings"
 
     response = client.get(url=url)

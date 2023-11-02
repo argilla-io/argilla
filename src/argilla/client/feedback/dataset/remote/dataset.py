@@ -323,7 +323,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         updated_at: datetime,
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
-        metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
     ) -> None:
@@ -342,8 +341,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             updated_at: contains the datetime when the dataset was last updated in Argilla.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
-            metadata_properties: contains the metadata properties that will be indexed
-                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
@@ -360,7 +357,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._fields_schema = None
         self._questions = questions
         self._guidelines = guidelines
-        self._metadata_properties = metadata_properties
         self._allow_extra_metadata = allow_extra_metadata
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
@@ -530,6 +526,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             guidelines=self.guidelines or None,
             metadata_properties=[metadata_property.to_local() for metadata_property in self.metadata_properties]
             or None,
+            vectors_settings=[vector_settings.to_local() for vector_settings in self.vectors_settings] or None,
             allow_extra_metadata=self._allow_extra_metadata,
         )
         records = [record.to_local() for record in self._records]
@@ -599,81 +596,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
 
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
-
-    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
-        """Returns the vector settings with the given name from the current dataset in Argilla.
-
-        Args:
-            name: the name of the vector settings to retrieve.
-
-        Returns:
-            The vector settings with the given name from the current dataset in Argilla.
-
-        Raises:
-            KeyError: if the vector settings with the given name does not exist in the
-                current dataset in Argilla.
-        """
-        for vector_settings in self.vectors_settings:
-            if vector_settings.name == name:
-                return vector_settings
-
-        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
-
-    def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
-        """Adds a new vector settings to the current `FeedbackDataset` in Argilla.
-
-        Args:
-            vector_settings: the vector settings to add.
-
-        Returns:
-            The newly added vector settings to the current `FeedbackDataset` in Argilla.
-
-        Raises:
-            ValueError: if the vector settings with the given name already exists in the
-                dataset in Argilla.
-        """
-
-        try:
-            new_vector_settings = datasets_api_v1.add_vector_settings(
-                client=self._client,
-                id=self.id,
-                title=vector_settings.name,
-                name=vector_settings.name,
-                dimensions=vector_settings.dimensions,
-            ).parsed
-        except AlreadyExistsApiError:
-            raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
-        return RemoteVectorSettings.from_api(new_vector_settings)
-
-    def update_vector_settings(self, vector_settings: RemoteVectorSettings) -> RemoteVectorSettings:
-        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
-
-        Args:
-            vector_settings: the vector settings to update.
-
-        Returns:
-            The updated vector settings in the current `FeedbackDataset` in Argilla.
-
-        Raises:
-            RuntimeError: if the vector settings cannot be updated in the current
-                `FeedbackDataset` in Argilla.
-        """
-        try:
-            updated_vector_settings = vectors_settings_api_v1.update_vector_settings(
-                client=self._client,
-                id=vector_settings.id,
-                title=vector_settings.title,
-            ).parsed
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed while updating the `vector_settings={vector_settings.name}` in the current"
-                f" `FeedbackDataset` in Argilla with exception: {e}"
-            ) from e
-
-        return RemoteVectorSettings.from_api(updated_vector_settings)
-
-    def delete_vector_settings(self, *args, **kwargs):
-        pass
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update_metadata_properties(
@@ -765,6 +687,86 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 metadata_properties.remove(metadata_property.name)
                 deleted_metadata_properties.append(metadata_property)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
+
+    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
+        """Returns the vector settings with the given name from the current dataset in Argilla.
+
+        Args:
+            name: the name of the vector settings to retrieve.
+
+        Returns:
+            The vector settings with the given name from the current dataset in Argilla.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist in the
+                current dataset in Argilla.
+        """
+        for vector_settings in self.vectors_settings:
+            if vector_settings.name == name:
+                return vector_settings
+
+        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
+        """Adds a new vector settings to the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vector_settings: the vector settings to add.
+
+        Returns:
+            The newly added vector settings to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            ValueError: if the vector settings with the given name already exists in the
+                dataset in Argilla.
+        """
+
+        try:
+            new_vector_settings = datasets_api_v1.add_vector_settings(
+                client=self._client,
+                id=self.id,
+                title=vector_settings.name,
+                name=vector_settings.name,
+                dimensions=vector_settings.dimensions,
+            ).parsed
+        except AlreadyExistsApiError:
+            raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
+        return RemoteVectorSettings.from_api(new_vector_settings)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update_vectors_settings(
+        self, vectors_settings: Union[RemoteVectorSettings, List[RemoteVectorSettings]]
+    ) -> None:
+        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vectors_settings: the vectors settings to update.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the vector settings cannot be updated in the current
+                `FeedbackDataset` in Argilla.
+        """
+        if isinstance(vectors_settings, RemoteVectorSettings):
+            vectors_settings = [vectors_settings]
+
+        for vector_settings in vectors_settings:
+            try:
+                vectors_settings_api_v1.update_vector_settings(
+                    client=self._client,
+                    id=vector_settings.id,
+                    title=vector_settings.title,
+                ).parsed
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed while updating the `vector_settings={vector_settings.name}` in the current"
+                    f" `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
+
+    def delete_vectors_settings(self, *args, **kwargs):
+        pass
 
     def filter_by(
         self,

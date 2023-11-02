@@ -105,6 +105,10 @@ def feedback_dataset() -> FeedbackDataset:
             IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0, max=10),
         ],
+        vectors_settings=[
+            VectorSettings(name="vector-settings-1", dimensions=4),
+            VectorSettings(name="vector-settings-2", dimensions=4),
+        ],
         guidelines="unit test guidelines",
         allow_extra_metadata=False,
     )
@@ -433,7 +437,7 @@ class TestRemoteFeedbackDataset:
         remote_dataset.delete_metadata_properties(names)
         assert len(remote_dataset.metadata_properties) == 0
 
-    def test_adding_vector_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+    def test_add_vector_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
@@ -456,7 +460,7 @@ class TestRemoteFeedbackDataset:
         assert other_vector_settings.id == remote_vector_settings.id
         assert other_vector_settings.dimensions == remote_vector_settings.dimensions
 
-    def test_adding_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
+    def test_add_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
@@ -465,10 +469,50 @@ class TestRemoteFeedbackDataset:
         dataset_vectors_settings = remote_dataset.vectors_settings
         assert len(dataset_vectors_settings) == 1
 
-        with pytest.raises(ValueError, match=f"Vector settings with name 'vector' already exists"):
+        with pytest.raises(ValueError, match="Vector settings with name 'vector' already exists"):
             remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
 
-    def test_adding_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
+    def test_update_vectors_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        vector_settings = remote_dataset.vector_settings_by_name("vector-settings-1")
+        vector_settings.title = "New Vector Settings Title"
+        remote_dataset.update_vectors_settings(vector_settings)
+
+        vector_settings = remote_dataset.vector_settings_by_name("vector-settings-1")
+        assert vector_settings.title == "New Vector Settings Title"
+
+    def test_bulk_update_vectors_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        vectors_settings = list(remote_dataset.vectors_settings)
+        for vector_settings in vectors_settings:
+            vector_settings.title = "New Vector Settings Title"
+
+        remote_dataset.update_vectors_settings(vectors_settings)
+
+        for vector_settings in remote_dataset.vectors_settings:
+            assert vector_settings.title == "New Vector Settings Title"
+
+    def test_update_vectors_settings_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        vectors_settings = list(remote_dataset.vectors_settings)
+        for vector_settings in vectors_settings:
+            vector_settings.title = "New Vector Settings Title"
+            remote_dataset.update_vectors_settings(vector_settings)
+
+        for vector_settings in remote_dataset.vectors_settings:
+            assert vector_settings.title == "New Vector Settings Title"
+
+    def test_add_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
@@ -504,7 +548,7 @@ class TestRemoteFeedbackDataset:
             ),
         ],
     )
-    def test_adding_records_with_invalid_vectors(
+    def test_add_records_with_invalid_vectors(
         self, owner: "User", feedback_dataset: FeedbackDataset, invalid_vectors: dict, expected_error: str
     ):
         api.init(api_key=owner.api_key)
