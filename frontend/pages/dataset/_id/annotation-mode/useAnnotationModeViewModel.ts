@@ -31,7 +31,7 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<RecordStatus>("_search"),
       routes.getQueryParams<string>("_metadata")?.split("+"),
       routes.getQueryParams<string>("_sort")?.split(","),
-      routes.getQueryParams<string>("_similarity")
+      routes.getQueryParams<string>("_similarity", true)
     )
   );
 
@@ -42,7 +42,7 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<RecordStatus>("_search"),
       routes.getQueryParams<string>("_metadata")?.split("+"),
       routes.getQueryParams<string>("_sort")?.split(","),
-      routes.getQueryParams<string>("_similarity")
+      routes.getQueryParams<string>("_similarity", true)
     );
   });
 
@@ -73,6 +73,7 @@ export const useAnnotationModeViewModel = () => {
         value: recordCriteria.value.committed.similaritySearch.isCompleted
           ? JSON.stringify(recordCriteria.value.committed.similaritySearch)
           : undefined,
+        encode: true,
       }
     );
   };

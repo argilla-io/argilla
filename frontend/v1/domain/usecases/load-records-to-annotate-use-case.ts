@@ -82,16 +82,8 @@ export class LoadRecordsToAnnotateUseCase {
     const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
 
-    const recordsToAnnotate = recordsFromBackend.records
-      .filter((r) => {
-        // TODO: Delete the filter when the backend remove the reference record.
-        if (criteria.isFilteringBySimilarity) {
-          return r.id !== criteria.similaritySearch.recordId;
-        }
-
-        return true;
-      })
-      .map((record, index) => {
+    const recordsToAnnotate = recordsFromBackend.records.map(
+      (record, index) => {
         const recordPage = criteria.isFilteringBySimilarity
           ? index + pagination.from
           : index + page;
@@ -150,7 +142,8 @@ export class LoadRecordsToAnnotateUseCase {
           record.query_score,
           recordPage
         );
-      });
+      }
+    );
 
     if (criteria.isFilteringBySimilarity) {
       let referenceRecord = savedRecords.getById(
