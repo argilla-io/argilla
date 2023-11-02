@@ -138,8 +138,9 @@ class DatasetCreate(BaseModel):
 class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: Optional[bool]
 
-    __non_nullable_fields__ = {"name"}
+    __non_nullable_fields__ = {"name", "allow_extra_metadata"}
 
 
 class RecordMetrics(BaseModel):
