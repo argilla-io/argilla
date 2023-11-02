@@ -208,9 +208,9 @@ class TestSuiteRecords:
                 },
             ],
             "vectors": {
-                vector_settings_0.name: [10, 10, 10, 10, 10],
-                vector_settings_1.name: [2, 2, 2, 2, 2],
-                vector_settings_2.name: [3, 3, 3, 3, 3],
+                vector_settings_0.name: [10.0, 10.0, 10.0, 10.0, 10.0],
+                vector_settings_1.name: [2.0, 2.0, 2.0, 2.0, 2.0],
+                vector_settings_2.name: [3.0, 3.0, 3.0, 3.0, 3.0],
             },
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
@@ -310,19 +310,19 @@ class TestSuiteRecords:
                 TermsMetadataPropertyFactory,
                 "a",
                 "z",
-                "'name' metadata property validation failed because 'z' is not an allowed term.",
+                "metadata is not valid: 'name' metadata property validation failed because 'z' is not an allowed term.",
             ),
             (
                 IntegerMetadataPropertyFactory,
                 10,
                 "wrong-integer",
-                "'name' metadata property validation failed because 'wrong-integer' is not an integer.",
+                "metadata is not valid: 'name' metadata property validation failed because 'wrong-integer' is not an integer.",
             ),
             (
                 FloatMetadataPropertyFactory,
                 13.3,
                 "wrong-float",
-                "'name' metadata property validation failed because 'wrong-float' is not a float.",
+                "metadata is not valid: 'name' metadata property validation failed because 'wrong-float' is not a float.",
             ),
         ],
     )
@@ -375,7 +375,8 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"'extra-metadata' metadata property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
+            "detail": "metadata is not valid: 'extra-metadata' metadata property does not exists for dataset "
+            f"'{dataset.id}' and extra metadata is not allowed for this dataset"
         }
 
     async def test_update_record_with_invalid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -395,7 +396,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+            "detail": f"suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
         }
 
     async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -411,7 +412,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
+            "detail": f"vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_record_with_suggestion_for_nonexistent_question(
@@ -434,7 +435,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+            "detail": f"suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
         }
 
     async def test_update_record_with_nonexistent_vector_settings(
@@ -451,7 +452,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
+            "detail": f"vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_record_with_duplicate_suggestions_question_ids(
@@ -473,7 +474,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Found duplicate suggestions question IDs"}
+        assert response.json() == {"detail": "found duplicate suggestions question IDs"}
 
     async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()

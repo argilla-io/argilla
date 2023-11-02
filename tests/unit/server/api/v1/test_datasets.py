@@ -3809,7 +3809,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Missing required value for field: 'output'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because missing required value for field: 'output'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_wrong_value_field(
@@ -3841,7 +3843,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because wrong value found for field 'output'. Expected 'str', found 'int'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_extra_fields(
@@ -3866,7 +3870,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Error: found fields values for non configured fields: ['output']"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because found fields values for non configured fields: ['output']"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
@@ -3916,7 +3922,9 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
         )
         assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because wrong value found for field 'output'. Expected 'str', found 'int'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
@@ -3996,7 +4004,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (
-            "Provided metadata for record at position 0 is not valid: 'metadata-property' metadata property validation failed"
+            "Record at position 0 is not valid because metadata is not valid: 'metadata-property' metadata property validation failed"
             in response.json()["detail"]
         )
 
@@ -4048,7 +4056,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (
-            "Provided metadata for record at position 0 is not valid: 'not-defined-metadata-property' metadata"
+            "Record at position 0 is not valid because metadata is not valid: 'not-defined-metadata-property' metadata"
             f" property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
             == response.json()["detail"]
         )
@@ -4132,7 +4140,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            f"Provided vector with name={vector_settings.name} of record at position 0 is not valid: "
+            f"Record at position 0 is not valid because vector with name={vector_settings.name} is not valid: "
             f"vector must have {vector_settings.dimensions} elements, got 1 elements"
         )
 
@@ -4158,7 +4166,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            "Provided vector with name=missing_vector of record at position 0 is not valid: "
+            "Record at position 0 is not valid because vector with name=missing_vector is not valid: "
             f"vector with name=missing_vector does not exist for dataset_id={str(dataset.id)}"
         )
 
@@ -4187,7 +4195,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            f"Provided vector with name={vector_settings.name} of record at position 0 is not valid: "
+            f"Record at position 0 is not valid because vector with name={vector_settings.name} is not valid: "
             f"vector with name={vector_settings.name} does not exist for dataset_id={dataset.id}"
         )
 
@@ -4847,14 +4855,14 @@ class TestSuiteDatasets:
         records = await RecordFactory.create_batch(10, dataset=dataset)
 
         # Record 0 vectors (all should be updated)
-        await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0]),
-        await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1]),
-        await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2]),
+        await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0])
+        await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1])
+        await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2])
 
         # Record 1 vectors (just the first one should be updated)
-        await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[3, 3, 3, 3, 3]),
-        await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[4, 4, 4, 4, 4]),
-        await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[5, 5, 5, 5, 5]),
+        await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[3, 3, 3, 3, 3])
+        await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[4, 4, 4, 4, 4])
+        await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[5, 5, 5, 5, 5])
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -4939,8 +4947,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": "Provided metadata for record at position 1 is not valid: 'terms' metadata property validation "
-            "failed because 'i was not declared' is not an allowed term."
+            "detail": "Record at position 1 is not valid because metadata is not valid: 'terms' metadata property "
+            "validation failed because 'i was not declared' is not an allowed term."
         }
 
     async def test_update_dataset_records_with_invalid_suggestions(
@@ -4966,8 +4974,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question.id} and record at position 0 is not valid: "
-            "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+            "detail": f"Record at position 0 is not valid because suggestion for question_id={question.id} is not "
+            "valid: 'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
         }
 
     async def test_update_dataset_records_with_invalid_vectors(
@@ -4982,7 +4990,6 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(records[0].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0]}},
                     {"id": str(records[1].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]}},
                 ]
             },
@@ -4990,7 +4997,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name={vector_settings.name} of record at position 1 is not valid: vector must have 5 elements, got 6 elements"
+            "detail": f"Record at position 0 is not valid because vector with name={vector_settings.name} is not "
+            "valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_dataset_records_with_nonexistent_dataset_id(
@@ -5054,7 +5062,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question_id} and record at position 0 is not valid: question_id={question_id} does not exist"
+            "detail": f"Record at position 0 is not valid because suggestion for question_id={question_id} is not "
+            f"valid: question_id={question_id} does not exist"
         }
 
     async def test_update_dataset_records_with_nonexistent_vector_settings_name(
@@ -5071,7 +5080,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name=i-do-not-exist of record at position 0 is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
+            "detail": "Record at position 0 is not valid because vector with name=i-do-not-exist is not valid: vector "
+            f"with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_dataset_records_with_duplicate_records_ids(
@@ -5118,7 +5128,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Found duplicate suggestions question IDs for record at position 0"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because found duplicate suggestions question IDs"
+        }
 
     async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
