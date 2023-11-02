@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
@@ -206,3 +207,44 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
 
     assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    mocked_trainer_push_to_huggingface,
+) -> None:
+    # This framework is not implemented yet. Cross-Encoder models don't implement the functionality
+    # for pushing a model to huggingface, and SentenceTransformer models have the functionality
+    # but is outdated and doesn't work with the current versions of 'huggingface-hub'.
+    # The present test is let here for the future, when we either implement the functionality
+    # in 'argilla', or to 'sentence-transformers'.
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
+
+    model = "all-MiniLM-L6-v2"
+
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMEWORK__, model=model)
+
+    trainer.update_config(max_steps=1)
+
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    with pytest.raises(
+        NotImplementedError, match="This method is not implemented for `ArgillaSentenceTransformersTrainer`."
+    ):
+        trainer.push_to_huggingface("mocked", generate_card=True)
