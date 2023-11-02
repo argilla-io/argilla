@@ -232,9 +232,7 @@ class TestSuiteRecords:
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
             headers=owner_auth_header,
-            json={
-                "metadata": None,
-            },
+            json={"metadata": None},
         )
 
         assert response.status_code == 200

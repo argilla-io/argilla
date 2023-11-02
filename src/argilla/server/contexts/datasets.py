@@ -591,7 +591,7 @@ async def _validate_vector(
 
 async def _create_record(
     db: "AsyncSession", dataset: Dataset, record_create: RecordCreate, caches: Dict[str, Any]
-) -> Tuple[Record, List[Vector]]:
+) -> Record:
     _validate_record_fields(dataset, fields=record_create.fields)
     caches["metadata_properties_cache"] = await _validate_record_metadata(
         db, dataset, record_create.metadata, caches["metadata_properties_cache"]
@@ -618,7 +618,7 @@ async def _create_record(
         suggestions=record_suggestions,
         vectors=record_vectors,
     )
-    return record, record_vectors
+    return record
 
 
 async def create_records(
@@ -628,7 +628,6 @@ async def create_records(
         raise ValueError("Records cannot be created for a non published dataset")
 
     records = []
-    vectors = []
 
     caches = {
         "users_ids_cache": set(),
@@ -639,11 +638,10 @@ async def create_records(
 
     for record_i, record_create in enumerate(records_create.items):
         try:
-            record, record_vectors = await _create_record(db, dataset, record_create, caches)
+            record = await _create_record(db, dataset, record_create, caches)
         except ValueError as e:
             raise ValueError(f"Record at position {record_i} is not valid because {e}") from e
         records.append(record)
-        vectors.extend(record_vectors)
 
     async with db.begin_nested():
         db.add_all(records)
@@ -905,8 +903,9 @@ async def update_record(
     )
 
     # Remove existing suggestions
-    record.suggestions = []
-    params["suggestions"] = suggestions
+    if suggestions is not None:
+        record.suggestions = []
+        params["suggestions"] = suggestions
 
     async with db.begin_nested():
         record = await record.update(db, **params, replace_dict=True, autocommit=False)
