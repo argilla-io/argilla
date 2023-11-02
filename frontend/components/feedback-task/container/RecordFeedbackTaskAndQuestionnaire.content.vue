@@ -4,6 +4,7 @@
     <template v-if="!!record">
       <RecordFieldsAndSimilarity
         :key="`${record.id}_fields`"
+        class="wrapper__fields"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
@@ -12,7 +13,7 @@
 
       <QuestionsFormComponent
         :key="`${record.id}_questions`"
-        class="question-form"
+        class="wrapper__form"
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
         :record="record"
@@ -179,9 +180,18 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   height: 100%;
-  overflow: auto;
+  padding: 0 $base-space * 3 $base-space * 2 $base-space * 3;
   @include media("<tablet") {
     flex-flow: column;
+    overflow: auto;
+  }
+  &__fields,
+  &__form {
+    @include media("<tablet") {
+      overflow: visible;
+      height: auto;
+      max-height: none;
+    }
   }
   &__text {
     color: $black-54;

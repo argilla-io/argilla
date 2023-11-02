@@ -6,10 +6,10 @@
     <div class="sidebar-area">
       <slot name="sidebar-right">here is the sidebar content left</slot>
     </div>
-    <div class="top-area container">
+    <div class="top-area">
       <slot name="top">here is the top content</slot>
     </div>
-    <div class="center-area container">
+    <div class="center-area">
       <slot name="center">here is the center content</slot>
     </div>
     <div class="footer-area">
@@ -47,9 +47,14 @@ $gap-width: $base-space * 2;
 .layout {
   display: grid;
   grid-template-columns: 1fr $sidebarMenuWidth;
-  grid-template-rows: auto auto minmax(0, 1fr) $base-space * 2 auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  grid-template-areas:
+    "header header"
+    "top sidebar"
+    "center sidebar"
+    "footer footer";
   height: 100vh;
   transition: 0.4s ease-in-out;
   &.--panel {
@@ -61,22 +66,20 @@ $gap-width: $base-space * 2;
 }
 
 .header-area {
-  grid-area: 1 / 1 / 2 / 5;
+  grid-area: header;
 }
 .footer-area {
-  grid-area: 5 / 1 / 5 / 2;
+  grid-area: footer;
 }
 .sidebar-area {
-  grid-area: 2 / 2 / 5 / 3;
+  grid-area: sidebar;
 }
 .top-area {
-  grid-area: 2 / 1 / 3 / 2;
-}
-.center-area {
-  grid-area: 3 / 1 / 4 / 2;
+  grid-area: top;
   min-width: 0;
 }
-.container {
-  padding: 0 $base-space * 3;
+.center-area {
+  grid-area: center;
+  min-width: 0;
 }
 </style>
