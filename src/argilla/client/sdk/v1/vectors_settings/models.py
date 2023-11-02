@@ -12,20 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
+from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
-class VectorSettings(BaseModel):
-    """
-
-    Args:
-        name: The name of the vector settings.
-        title: The title of the vector settings.
-        dimensions: The dimensions of the vectors associated with the vector settings.
-    """
-
+class VectorSettingsModel(BaseModel):
+    id: UUID
     name: str
-    title: Optional[str] = None
+    title: str
     dimensions: int
+    dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime

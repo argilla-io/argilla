@@ -71,7 +71,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
-        vector_settings: Optional[List[VectorSettings]] = None,
+        vectors_settings: Optional[List[VectorSettings]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
     ) -> None:
@@ -82,6 +82,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             questions: contains the questions that will be used to annotate the dataset.
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
+            vectors_settings: contains the vectors settings that will be used
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
             allow_extra_metadata: whether to allow extra metadata that has not been defined
                 as a metadata property in the records. Defaults to `True`.
@@ -157,13 +158,13 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
 
         self._records = []
 
-        if vector_settings:
-            self._vector_settings = {vector_setting.name: vector_setting for vector_setting in vector_settings}
+        if vectors_settings:
+            self._vector_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
         else:
             self._vector_settings: Dict[str, VectorSettings] = {}
 
     @property
-    def vector_settings(self) -> List["VectorSettings"]:
+    def vectors_settings(self) -> List["VectorSettings"]:
         """Returns the vector settings of the dataset."""
         return [v for v in self._vector_settings.values()]
 

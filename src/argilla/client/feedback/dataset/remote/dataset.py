@@ -361,6 +361,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._fields_schema = None
         self._questions = questions
         self._guidelines = guidelines
+        self._metadata_properties = metadata_properties
         self._allow_extra_metadata = allow_extra_metadata
 
         self._client = client  # Required to be able to use `allowed_for_roles` decorator
@@ -553,8 +554,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
     @property
-    def vector_settings(self) -> List[RemoteVectorSettings]:
-        """Retrieves the `vector_settings` of the current dataset from Argilla"""
+    def vectors_settings(self) -> List[RemoteVectorSettings]:
+        """Retrieves the `vectors_settings` of the current dataset from Argilla"""
         response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
 
         return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
@@ -602,7 +603,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
         # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
-        for vector_settings in self.vector_settings:
+        for vector_settings in self.vectors_settings:
             if vector_settings.name == name:
                 return vector_settings
 

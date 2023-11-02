@@ -440,7 +440,7 @@ class TestRemoteFeedbackDataset:
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
 
-        assert len(remote_dataset.vector_settings) == 1
+        assert len(remote_dataset.vectors_settings) == 1
 
         remote_vector_settings = remote_dataset.vector_settings_by_name("vector")
         assert vector_settings.name == remote_vector_settings.name
@@ -449,7 +449,7 @@ class TestRemoteFeedbackDataset:
 
         other_vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="other-vector", dimensions=100))
 
-        assert len(remote_dataset.vector_settings) == 2
+        assert len(remote_dataset.vectors_settings) == 2
 
         remote_vector_settings = remote_dataset.vector_settings_by_name("other-vector")
         assert other_vector_settings.name == remote_vector_settings.name
@@ -462,7 +462,7 @@ class TestRemoteFeedbackDataset:
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
-        dataset_vectors_settings = remote_dataset.vector_settings
+        dataset_vectors_settings = remote_dataset.vectors_settings
         assert len(dataset_vectors_settings) == 1
 
         with pytest.raises(ValueError, match=f"Vector settings with name 'vector' already exists"):

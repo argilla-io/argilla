@@ -18,19 +18,7 @@ from typing import TYPE_CHECKING, Generator, List
 import pytest
 from argilla.client.api import delete, init, log
 from argilla.client.datasets import read_datasets
-from argilla.client.models import (
-    Text2TextRecord,
-    TextClassificationRecord,
-    TokenAttributions,
-    TokenClassificationRecord,
-)
-from argilla.client.sdk.datasets.models import TaskType
-from argilla.server.models import User
-from datasets import Dataset
-
-if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
@@ -40,6 +28,19 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from argilla.client.models import (
+    Text2TextRecord,
+    TextClassificationRecord,
+    TokenAttributions,
+    TokenClassificationRecord,
+)
+from argilla.client.sdk.datasets.models import TaskType
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
@@ -52,6 +53,15 @@ from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
+from argilla.server.models import User
+from datasets import Dataset
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 @pytest.fixture
@@ -400,6 +410,35 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
         RankingQuestion(name="question-5", values=["a", "b"], required=True),
     ]
+
+
+@pytest.fixture
+def feedback_dataset_metadata_properties() -> List["AllowedMetadataPropertyTypes"]:
+    return [
+        TermsMetadataProperty(name="metadata-property-1", values=["a", "b", "c"]),
+        IntegerMetadataProperty(name="metadata-property-2", min=0, max=10),
+        FloatMetadataProperty(name="metadata-property-3", min=0, max=10),
+    ]
+
+
+@pytest.fixture
+def feedback_dataset_vectors_settings() -> List["VectorSettings"]:
+    return [VectorSettings(name="vector-settings-1", dimensions=5)]
+
+
+@pytest.fixture
+def feedback_dataset(
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_metadata_properties: List["AllowedMetadataPropertyTypes"],
+    feedback_dataset_vectors_settings: List["VectorSettings"],
+) -> "FeedbackDataset":
+    return FeedbackDataset(
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+        metadata_properties=feedback_dataset_metadata_properties,
+        vectors_settings=feedback_dataset_vectors_settings,
+    )
 
 
 @pytest.fixture

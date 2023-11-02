@@ -11,21 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from typing import Optional
-
-from pydantic import BaseModel
-
-
-class VectorSettings(BaseModel):
-    """
-
-    Args:
-        name: The name of the vector settings.
-        title: The title of the vector settings.
-        dimensions: The dimensions of the vectors associated with the vector settings.
-    """
-
-    name: str
-    title: Optional[str] = None
-    dimensions: int
