@@ -127,7 +127,10 @@ $searchBarSize: $base-space * 4;
   border-radius: $border-radius-l;
   transition: all 0.3s ease;
   border: 1px solid transparent;
-  &:hover,
+  &:hover {
+    background: $black-4;
+    transition: all 0.3s ease;
+  }
   &.active,
   &.expanded {
     background: palette(white);

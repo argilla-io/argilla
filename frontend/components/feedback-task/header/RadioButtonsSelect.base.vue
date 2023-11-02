@@ -100,7 +100,7 @@ export default {
         case "discarded":
           return "#B7B7B7";
         case "pending":
-          return "#BB720A";
+          return "#bb720a";
         case "submitted":
           return "#3E5CC9";
       }
@@ -173,10 +173,10 @@ $selector-width: 140px;
     }
   }
   &.pending {
-    color: #bb720a;
-    border: 1px solid #bb720a;
+    color: palette(brown);
+    border: 1px solid palette(brown);
     &:before {
-      background: #bb720a;
+      background: palette(brown);
     }
   }
   .svg-icon {

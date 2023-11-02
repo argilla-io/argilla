@@ -1,6 +1,12 @@
 <template>
   <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
-    <svgicon v-if="iconName" :name="iconName" width="16" height="16" />
+    <svgicon
+      v-if="iconName"
+      :name="iconName"
+      width="16"
+      height="16"
+      color="#5e5e5e"
+    />
     <BaseButton class="filter-button__button">{{ buttonName }}</BaseButton>
     <slot></slot>
     <svgicon
@@ -16,6 +22,7 @@
 <script>
 import "assets/icons/chevron-down";
 import "assets/icons/sort";
+import "assets/icons/filter";
 export default {
   props: {
     buttonName: {

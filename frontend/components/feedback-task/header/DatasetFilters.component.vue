@@ -9,6 +9,7 @@
         v-if="isAnyAvailableFilter"
         @click.native="toggleVisibilityOfFilters"
         :button-name="$t('filters')"
+        icon-name="filter"
         :show-chevron-icon="false"
         :is-button-active="isAnyFilterActive"
       />

@@ -91,8 +91,8 @@ export default {
   }
   &.--pending,
   &.--edited {
-    background: #bb720a;
-    border: 1px solid #bb720a;
+    background: palette(brown);
+    border: 1px solid palette(brown);
   }
 
   .svg-icon {
