@@ -6322,7 +6322,7 @@ class TestSuiteDatasets:
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
-            "allow_extra_metadata": True,
+            "allow_extra_metadata": allow_extra_metadata,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
