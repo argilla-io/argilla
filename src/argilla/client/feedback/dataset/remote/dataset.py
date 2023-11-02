@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import textwrap
 import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
@@ -419,16 +418,21 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        bold_start, bold_end = "\033[1m", "\033[0m"
         table = [
-            ["id", self.id],
-            ["name", self.name],
-            ["workspace", self.workspace],
-            ["url", self.url],
-            ["fields", "\n".join([str(field) for field in self.fields])],
-            ["questions", "\n".join([str(question) for question in self.questions])],
-            ["guidelines", self.guidelines],
+            [f"{bold_start}id{bold_end}", self.id],
+            [f"{bold_start}name{bold_end}", self.name],
+            [f"{bold_start}workspace{bold_end}", self.workspace],
+            [f"{bold_start}url{bold_end}", self.url],
+            [f"{bold_start}fields{bold_end}", "\n".join([str(field) for field in self.fields])],
+            [f"{bold_start}questions{bold_end}", "\n".join([str(question) for question in self.questions])],
+            [f"{bold_start}guidelines{bold_end}", self.guidelines],
+            [
+                f"{bold_start}metadata_properties{bold_end}",
+                "\n".join([str(metadata_property) for metadata_property in self.metadata_properties]),
+            ],
         ]
-        table = tabulate(table, tablefmt="simple")
+        table = tabulate(table, tablefmt="mixed_grid")
         title = "RemoteFeedbackDataset"
         table_with_title = f"{title}\n{table}"
 
