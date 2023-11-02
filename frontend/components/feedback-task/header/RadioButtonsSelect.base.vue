@@ -21,7 +21,7 @@
       <span slot="dropdown-header">
         <BaseButton class="selected-option" :class="currentOptionId">
           {{ currentOptionName }}
-          <svgicon name="chevron-down" />
+          <svgicon name="chevron-down" width="8" height="8" />
         </BaseButton>
       </span>
       <span slot="dropdown-content">
@@ -110,14 +110,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$selector-width: 160px;
+$selector-width: 140px;
 .options {
   display: flex;
   flex-direction: column;
   gap: calc($base-space / 2);
-  min-width: $selector-width;
-  padding: calc($base-space / 2);
+  padding: $base-space;
   margin: 0;
+  width: $selector-width;
   list-style: none;
 }
 .option {
@@ -152,12 +152,12 @@ $selector-width: 160px;
   }
 }
 .button.selected-option {
-  min-width: $selector-width;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: $base-space + 4px;
+  gap: $base-space;
+  padding: $base-space;
   background: palette(white);
+  @include font-size(14px);
   &.discarded {
     color: #656363;
     border: 1px solid #b7b7b7;

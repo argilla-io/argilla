@@ -1,15 +1,14 @@
 <template>
   <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
-    <BaseButton class="filter-button__button" v-if="!showIcon">{{
-      buttonName
-    }}</BaseButton>
-    <svgicon v-else :name="iconName" width="16" height="16" />
+    <svgicon v-if="iconName" :name="iconName" width="16" height="16" />
+    <BaseButton class="filter-button__button">{{ buttonName }}</BaseButton>
     <slot></slot>
     <svgicon
+      v-if="showChevronIcon"
       class="filter-button__chevron"
       name="chevron-down"
-      width="16"
-      height="16"
+      width="8"
+      height="8"
     />
   </div>
 </template>
@@ -25,11 +24,10 @@ export default {
     },
     iconName: {
       type: String,
-      required: true,
     },
-    showIcon: {
+    showChevronIcon: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isButtonActive: {
       type: Boolean,
@@ -45,11 +43,12 @@ export default {
   gap: $base-space;
   align-items: center;
   width: max-content;
-  height: $base-space * 5;
-  padding: $base-space 12px;
+  min-height: $base-space * 4;
+  padding: $base-space;
   border-radius: $border-radius;
   background: none;
   transition: background-color 0.2s ease;
+  line-height: 1;
   cursor: pointer;
   &:hover,
   &--active {
@@ -64,6 +63,7 @@ export default {
   &__button.button {
     padding: 0;
     border-radius: 0;
+    @include font-size(14px);
   }
   & > * {
     flex-shrink: 0;
