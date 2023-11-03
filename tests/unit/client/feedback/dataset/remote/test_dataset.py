@@ -53,6 +53,11 @@ def test_remote_dataset(mock_httpx_client: httpx.Client) -> RemoteFeedbackDatase
         ),
         fields=[RemoteTextField(id=uuid4(), name="text")],
         questions=[RemoteTextQuestion(id=uuid4(), name="text")],
+        # TODO: Uncomment once vector_settings are supported.
+        # vector_settings=[
+        #     VectorSettings(name="vector-1", dimensions=3),
+        #     VectorSettings(name="vector-2", dimensions=4),
+        # ],
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -67,6 +72,11 @@ def test_remote_record(
         client=mock_httpx_client,
         fields={"text": "test"},
         metadata={"new": "metadata"},
+        # TODO: Uncomment once vector_settings are supported.
+        # vectors={
+        #     "vector-1": [1.0, 2.0, 3.0],
+        #     "vector-2": [1.0, 2.0, 3.0, 4.0],
+        # },
         question_name_to_id=test_remote_dataset._question_name_to_id,
     )
 

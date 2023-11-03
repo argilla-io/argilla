@@ -324,7 +324,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         updated_at: datetime,
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
-        metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
     ) -> None:
@@ -343,8 +342,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             updated_at: contains the datetime when the dataset was last updated in Argilla.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
-            metadata_properties: contains the metadata properties that will be indexed
-                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
@@ -418,6 +415,28 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     @property
     def _question_name_to_id(self) -> Dict[str, "UUID"]:
         return {question.name: question.id for question in self._questions}
+
+    @property
+    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
+        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
+        returns them if any, otherwise, it returns an empty list.
+        """
+        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
+
+    @property
+    def vector_settings(self) -> List[RemoteVectorSettings]:
+        """Retrieves the `vector_settings` of the current dataset from Argilla"""
+        response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
+
+        return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
+
+    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
+        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
+        for vector_settings in self.vector_settings:
+            if vector_settings.name == name:
+                return vector_settings
+
+        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
@@ -545,20 +564,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
         return instance
 
-    @property
-    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
-        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
-        returns them if any, otherwise, it returns an empty list.
-        """
-        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
-
-    @property
-    def vector_settings(self) -> List[RemoteVectorSettings]:
-        """Retrieves the `vector_settings` of the current dataset from Argilla"""
-        response = datasets_api_v1.list_vector_settings(client=self._client, id=self.id)
-
-        return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
-
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
         self, metadata_property: "AllowedMetadataPropertyTypes"
@@ -599,14 +604,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
 
         return ArgillaMixin._parse_to_remote_metadata_property(metadata_property=metadata_property, client=self._client)
-
-    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
-        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
-        for vector_settings in self.vector_settings:
-            if vector_settings.name == name:
-                return vector_settings
-
-        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
 
     def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
         try:

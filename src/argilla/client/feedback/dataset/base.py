@@ -309,6 +309,8 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
             if "metadata" in attributes_to_validate:
                 self._validate_record_metadata(record, metadata_schema)
 
+            # TODO: Add validation of vectors using vector_settings.
+
     @staticmethod
     def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
         """Validates the `FeedbackRecord.fields` against the schema defined by the `fields`."""

@@ -71,15 +71,6 @@ def test_dataset_with_metadata_properties():
     dataset = FeedbackDataset(
         fields=[TextField(name="text"), TextField(name="optional", required=False)],
         questions=[TextQuestion(name="question")],
-    )
-    return dataset
-
-
-@pytest.fixture()
-def test_dataset_with_metadata_properties():
-    dataset = FeedbackDataset(
-        fields=[TextField(name="text"), TextField(name="optional", required=False)],
-        questions=[TextQuestion(name="question")],
         metadata_properties=[
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="integer-metadata"),
@@ -92,7 +83,7 @@ def test_dataset_with_metadata_properties():
 @pytest.fixture
 def feedback_dataset() -> FeedbackDataset:
     return FeedbackDataset(
-        fields=[TextField(name="text"), TextField(name="text-2")],
+        fields=[TextField(name="text"), TextField(name="text-2", required=False)],
         questions=[
             TextQuestion(name="text"),
             LabelQuestion(name="label", labels=["label-1", "label-2", "label-3"], required=False),
@@ -105,8 +96,9 @@ def feedback_dataset() -> FeedbackDataset:
             IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0, max=10),
         ],
+        vector_settings=[VectorSettings(name="vector-1", dimensions=3), VectorSettings(name="vector-2", dimensions=4)],
         guidelines="unit test guidelines",
-        allow_extra_metadata=False,
+        allow_extra_metadata=True,
     )
 
 
@@ -116,18 +108,19 @@ class TestRemoteFeedbackDataset:
         "record",
         [
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={}),
-            FeedbackRecord(fields={"text": "Hello world!", "optional": "Bye world!"}, metadata={}),
+            FeedbackRecord(fields={"text": "Hello world!", "text-2": "Bye world!"}, metadata={}),
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={"terms-metadata": "a"}),
             FeedbackRecord(fields={"text": "Hello world!"}, metadata={"unrelated-metadata": "unrelated-value"}),
+            FeedbackRecord(
+                fields={"text": "Hello world!"}, vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]}
+            ),
         ],
     )
-    async def test_add_records(
-        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, record: FeedbackRecord
-    ) -> None:
+    async def test_add_records(self, owner: "User", feedback_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
 
-        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
+        remote = feedback_dataset.push_to_argilla(name="test_dataset", workspace=ws)
 
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.add_records([record])

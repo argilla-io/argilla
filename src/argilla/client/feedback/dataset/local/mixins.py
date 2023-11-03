@@ -286,11 +286,15 @@ class ArgillaMixin:
         questions = ArgillaMixin.__get_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
-        metadata_properties = ArgillaMixin.__add_metadata_properties(
-            metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
-        )
+        if self.metadata_properties:
+            ArgillaMixin.__add_metadata_properties(
+                metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
+            )
 
-        ArgillaMixin.__add_vectors_settings(vectors_settings=self.vector_settings, client=httpx_client, id=argilla_id)
+        if self.vector_settings:
+            ArgillaMixin.__add_vectors_settings(
+                vectors_settings=self.vector_settings, client=httpx_client, id=argilla_id
+            )
 
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 
@@ -311,7 +315,6 @@ class ArgillaMixin:
             updated_at=new_dataset.updated_at,
             fields=fields,
             questions=questions,
-            metadata_properties=metadata_properties,
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
@@ -385,7 +388,6 @@ class ArgillaMixin:
 
         fields = ArgillaMixin.__get_fields(client=httpx_client, id=existing_dataset.id)
         questions = ArgillaMixin.__get_questions(client=httpx_client, id=existing_dataset.id)
-        metadata_properties = ArgillaMixin.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -396,7 +398,6 @@ class ArgillaMixin:
             updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
-            metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
             allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )

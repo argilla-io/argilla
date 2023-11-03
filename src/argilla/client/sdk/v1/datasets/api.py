@@ -290,12 +290,16 @@ def update_records(
             item["metadata"] = record["metadata"]
         if "suggestions" in record:
             item["suggestions"] = record["suggestions"]
+        if "vectors" in record:
+            item["vectors"] = record["vectors"]
+
         items.append(item)
 
     response = client.patch(url=url, json={"items": items})
 
     if response.status_code == 204:
         return Response.from_httpx_response(response)
+
     return handle_response_error(response)
 
 
