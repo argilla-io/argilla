@@ -96,7 +96,7 @@ def feedback_dataset() -> FeedbackDataset:
             IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0, max=10),
         ],
-        vector_settings=[VectorSettings(name="vector-1", dimensions=3), VectorSettings(name="vector-2", dimensions=4)],
+        vectors_settings=[VectorSettings(name="vector-1", dimensions=3), VectorSettings(name="vector-2", dimensions=4)],
         guidelines="unit test guidelines",
         allow_extra_metadata=True,
     )

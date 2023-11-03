@@ -67,7 +67,7 @@ class TestRecordsSDK:
         feedback_dataset = FeedbackDataset(
             fields=[TextField(name="text")],
             questions=[TextQuestion(name="question")],
-            vector_settings=[
+            vectors_settings=[
                 VectorSettings(name="vector-1", dimensions=3),
                 VectorSettings(name="vector-2", dimensions=4),
             ],

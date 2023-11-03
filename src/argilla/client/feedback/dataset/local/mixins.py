@@ -291,7 +291,7 @@ class ArgillaMixin:
                 metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
             )
 
-        if self.vector_settings:
+        if self.vectors_settings:
             ArgillaMixin.__add_vectors_settings(
                 vectors_settings=self.vectors_settings, client=httpx_client, id=argilla_id
             )
