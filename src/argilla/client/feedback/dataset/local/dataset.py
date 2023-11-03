@@ -298,6 +298,9 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
 
         Returns:
             The vector settings that were deleted.
+
+        Raises:
+            ValueError: if the provided `vectors_settings` is/are not in the dataset.
         """
         if isinstance(vectors_settings, str):
             vectors_settings = [vectors_settings]

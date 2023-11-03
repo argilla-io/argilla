@@ -771,7 +771,14 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """Deletes the given vectors settings from the current `FeedbackDataset` in Argilla.
 
         Args:
-            vectors_settings: the vectors settings to delete.
+            vectors_settings: the name/s of the vectors settings to delete.
+
+        Returns:
+            The vectors settings deleted from the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            ValueError: if the given vectors settings do not exist in the current
+                `FeedbackDataset` in Argilla.
         """
         if isinstance(vectors_settings, str):
             vectors_settings = [vectors_settings]
