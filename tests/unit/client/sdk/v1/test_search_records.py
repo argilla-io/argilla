@@ -21,7 +21,7 @@ from argilla.client.sdk.v1.datasets.api import search_records
 from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQuery
 
 
-class TestSuiteSearchRecords:
+class TestSuiteSearchRecordsSDK:
     def test_search_records_with_record_api_call(self, mock_httpx_client: httpx.Client):
         dataset_id = uuid.uuid4()
         query = FeedbackRecordsSearchVectorQuery(name="test-vector", record_id=uuid.uuid4())
