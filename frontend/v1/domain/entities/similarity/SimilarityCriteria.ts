@@ -16,6 +16,8 @@ export class SimilarityCriteria {
     limit: number,
     order: SimilarityOrder
   ) {
+    if (!recordId && !vectorName && !limit && !order) return;
+
     this.recordId = recordId;
     this.vectorName = vectorName;
     this.limit = limit;

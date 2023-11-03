@@ -1154,20 +1154,33 @@ class TestSuiteOpenSearchEngine:
         assert responses.total == 1
         assert responses.items[0].record_id != selected_record.id
 
-    async def test_similarity_search_by_record(
+    @pytest.mark.parametrize(
+        "user_response_status_filter",
+        [
+            None,
+            UserResponseStatusFilter(statuses=[ResponseStatusFilter.missing, ResponseStatusFilter.draft]),
+        ],
+    )
+    async def test_similarity_search_by_record_and_user_response_filter(
         self,
         opensearch_engine: OpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_with_vectors: Dataset,
+        user_response_status_filter: UserResponseStatusFilter,
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
         vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
+
+        if user_response_status_filter:
+            test_user = await UserFactory.create()
+            user_response_status_filter.user = test_user
 
         responses = await opensearch_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             record=selected_record,
             max_results=1,
+            user_response_status_filter=user_response_status_filter,
         )
 
         assert responses.total == 1
