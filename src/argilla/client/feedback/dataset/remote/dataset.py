@@ -527,9 +527,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
         Args:
             vector_name: a vector name to use for searching by similarity.
-            value: an optional vector value to be used for searching by similarity.
-            record: an optional record to be used for searching by similarity.
-            max_results: the maximum number of results for the search.
+            value: an optional vector value to be used for searching by similarity. Defaults to None.
+            record: an optional record to be used for searching by similarity. Defaults to None.
+            max_results: the maximum number of results for the search. Defaults to 50.
 
         Returns:
             A list of tuples with each tuple including a record and a similarity score.
