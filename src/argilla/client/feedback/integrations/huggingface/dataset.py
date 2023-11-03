@@ -17,6 +17,7 @@ import logging
 import tempfile
 import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
+from tqdm import tqdm
 
 from packaging.version import parse as parse_version
 
@@ -344,7 +345,7 @@ class HuggingFaceDatasetMixin:
             hfds = hfds[list(hfds.keys())[0]]
 
         records = []
-        for index in range(len(hfds)):
+        for index in tqdm(range(len(hfds)), desc="Parsing records: "):
             responses = {}
             suggestions = []
             user_without_id = False
