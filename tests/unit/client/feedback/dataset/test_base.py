@@ -46,10 +46,10 @@ class TestFeedbackDataset(FeedbackDatasetBase):
     def add_vector_settings(self, *args, **kwargs):
         pass
 
-    def update_vector_settings(self, *args, **kwargs):
+    def update_vectors_settings(self, *args, **kwargs):
         pass
 
-    def delete_vector_settings(self, *args, **kwargs):
+    def delete_vectors_settings(self, *args, **kwargs):
         pass
 
     def push_to_huggingface(self, *args, **kwargs):
