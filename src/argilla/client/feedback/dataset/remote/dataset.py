@@ -314,10 +314,10 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
     def find_similar(
         self,
         vector_name: str,
-        value: Optional[List[float]],
-        record: Optional[RemoteFeedbackRecord],
+        value: Optional[List[float]] = None,
+        record: Optional[RemoteFeedbackRecord] = None,
         max_results: int = 50,
-    ):
+    ) -> List[Tuple[RemoteFeedbackRecord, float]]:
         try:
             response = datasets_api_v1.search_records(
                 client=self._client,
