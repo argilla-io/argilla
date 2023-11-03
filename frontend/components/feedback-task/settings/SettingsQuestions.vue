@@ -9,10 +9,7 @@
             class="settings__edition-form__questions"
           >
             <div class="settings__edition-form__name">
-              <h4
-                class="--body1 --medium --capitalized"
-                v-text="question.name"
-              />
+              <h4 class="--body1 --medium" v-text="question.name" />
               <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
             </div>
 

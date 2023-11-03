@@ -14,11 +14,30 @@
 
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, PositiveInt, validator
+
+from argilla.client.feedback.schemas.validators import title_must_have_value
 
 
 class VectorSettings(BaseModel):
-    name: str
-    # TODO: Uncomment when is supported
-    # title: Optional[str] = None
-    dimensions: int
+    """Schema for the `FeedbackDataset` vectors settings. The vectors setttings are used
+    to define the configuration of the vectors associated to the records of a `FeedbackDataset`
+    that will be used to perform the vector search.
+
+    Args:
+        name: The name of the vector settings.
+        title: The title of the vector settings. If not provided, it will be capitalized
+            from the `name` field. And its what will be shown in the UI. Defaults to
+            `None`.
+        dimensions: The dimensions of the vectors associated with the vector settings.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas import VectorSettings
+        >>> VectorSettings(name="my_vector_settings", dimensions=768)
+    """
+
+    name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
+    title: Optional[str] = None
+    dimensions: PositiveInt
+
+    _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)

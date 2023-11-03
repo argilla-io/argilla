@@ -421,12 +421,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update_vector_settings(self, *args, **kwargs):
-        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+    def update_vectors_settings(self, *args, **kwargs):
+        """Updates a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
-    def delete_vector_settings(self, *args, **kwargs):
+    def delete_vectors_settings(self, *args, **kwargs):
         """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
