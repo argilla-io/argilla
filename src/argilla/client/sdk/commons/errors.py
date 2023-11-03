@@ -45,21 +45,6 @@ class ApiCompatibilityError(BaseClientError):
         )
 
 
-class HttpResponseError(BaseClientError):
-    """Used for handle http errors other than defined in Argilla server"""
-
-    def __init__(self, response: httpx.Response):
-        self.status_code = response.status_code
-        self.detail = response.text
-
-    def __str__(self):
-        return (
-            "Received an HTTP error from server\n"
-            + f"Response status: {self.status_code}\n"
-            + f"Response content: {self.detail}\n"
-        )
-
-
 class ArApiResponseError(BaseClientError):
     HTTP_STATUS: int
 
@@ -119,3 +104,19 @@ class ValidationApiError(ArApiResponseError):
 
 class GenericApiError(ArApiResponseError):
     HTTP_STATUS = 500
+
+
+class HttpResponseError(ArApiResponseError):
+    """Used for handle http errors other than defined in Argilla server"""
+
+    def __init__(self, response: httpx.Response):
+        self.status_code = response.status_code
+        self.detail = response.content
+        self.HTTP_STATUS = self.status_code
+
+    def __str__(self):
+        return (
+            "Received an HTTP error from server\n"
+            + f"Response status: {self.status_code}\n"
+            + f"Response content: {self.detail}\n"
+        )

@@ -8,7 +8,7 @@
           class="settings__edition-form__vectors"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="vector.name" />
+            <h4 class="--body1 --medium" v-text="vector.name" />
           </div>
 
           <Validation
