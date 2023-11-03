@@ -52,7 +52,6 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordSearchModel,
     FeedbackRecordsModel,
     FeedbackRecordsSearchModel,
-    FeedbackRecordsSearchQuery,
     FeedbackRecordsSearchVectorQuery,
     FeedbackSuggestionModel,
 )
@@ -390,32 +389,6 @@ async def test_get_records(role: UserRole) -> None:
     assert isinstance(response.parsed, FeedbackRecordsModel)
     assert len(response.parsed.items) > 0
     assert FeedbackItemModel(**response.parsed.items[0].dict())
-
-
-@pytest.mark.skip(reason="unfinished")
-@pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-@pytest.mark.asyncio
-async def test_search_records(role: UserRole) -> None:
-    dataset = await DatasetFactory.create(
-        status=DatasetStatus.ready,
-        fields=[await TextFieldFactory.create(required=True)],
-        questions=[await RatingQuestionFactory.create(required=True)],
-        records=await RecordFactory.create_batch(size=10),
-    )
-    # TODO: Add vectors and vector settings
-    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
-
-    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
-    query = FeedbackRecordsSearchQuery(
-        vector=FeedbackRecordsSearchVectorQuery(name="vector_name", record_id=dataset.records[0].id),
-    )
-
-    response = search_records(client=api.http_client.httpx, id=dataset.id, query=query)
-
-    assert response.status_code == 200
-    assert isinstance(response.parsed, FeedbackRecordsSearchModel)
-    assert len(response.parsed.items) > 0
-    assert FeedbackRecordSearchModel(**response.parsed.items[0].dict())
 
 
 # TODO: check if we can include a callback to the factory to index the metadata in Elastic Search
