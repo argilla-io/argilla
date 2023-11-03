@@ -15,7 +15,7 @@
 from uuid import uuid4
 
 import httpx
-from argilla.client.sdk.v1.vectors_settings.api import update_vector_settings
+from argilla.client.sdk.v1.vectors_settings.api import delete_vector_settings, update_vector_settings
 
 
 class TestSuiteVectorsSettingsSDK:
@@ -40,3 +40,21 @@ class TestSuiteVectorsSettingsSDK:
             url=f"/api/v1/vectors-settings/{vector_settings_id}",
             json={"title": "new-title"},
         )
+
+    def test_delete_vector_settings(self, mock_httpx_client: httpx.Client) -> None:
+        vector_settings_id = uuid4()
+        mock_httpx_client.delete.return_value = httpx.Response(
+            status_code=200,
+            json={
+                "id": str(vector_settings_id),
+                "name": "vector-settings",
+                "title": "title",
+                "dimensions": 128,
+                "dataset_id": str(uuid4()),
+                "inserted_at": "2021-09-13T12:00:00Z",
+                "updated_at": "2021-09-13T12:00:00Z",
+            },
+        )
+        response = delete_vector_settings(client=mock_httpx_client, id=vector_settings_id)
+        assert response.status_code == 200
+        assert mock_httpx_client.patch.called_once_with(url=f"/api/v1/vectors-settings/{vector_settings_id}")

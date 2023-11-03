@@ -53,3 +53,29 @@ def update_vector_settings(
         return response_obj
 
     return handle_response_error(response)
+
+
+def delete_vector_settings(
+    client: "httpx.Client", id: Union[str, "UUID"]
+) -> Response[Union[VectorSettingsModel, "ErrorMessage", "HTTPValidationError"]]:
+    """Sends a `DELETE` request to `/api/v1/vector_settings/{id}` endpoint to delete
+    a vector settings in Argilla.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the vector settings to be deleted in Argilla.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a `VectorSettingsModel`.
+    """
+    url = f"/api/v1/vectors-settings/{id}"
+
+    response = client.delete(url=url)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = VectorSettingsModel.parse_raw(response.content)
+        return response_obj
+
+    return handle_response_error(response)
