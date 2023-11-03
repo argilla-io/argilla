@@ -160,14 +160,14 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._records = []
 
         if vectors_settings:
-            self._vector_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
+            self._vectors_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
         else:
-            self._vector_settings: Dict[str, VectorSettings] = {}
+            self._vectors_settings: Dict[str, VectorSettings] = {}
 
     @property
     def vectors_settings(self) -> List["VectorSettings"]:
         """Returns the vector settings of the dataset."""
-        return [v for v in self._vector_settings.values()]
+        return [v for v in self._vectors_settings.values()]
 
     @property
     def records(self) -> List["FeedbackRecord"]:
@@ -262,17 +262,17 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         return metadata_property
 
     def vector_settings_by_name(self, name: str) -> VectorSettings:
-        vector_settings = self._vector_settings.get(name)
+        vector_settings = self._vectors_settings.get(name)
         if not vector_settings:
             raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
 
         return vector_settings
 
     def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
-        if self._vector_settings.get(vector_settings.name):
+        if self._vectors_settings.get(vector_settings.name):
             raise ValueError(f"Vector settings with name '{vector_settings.name}' already exists in the dataset.")
 
-        self._vector_settings[vector_settings.name] = vector_settings
+        self._vectors_settings[vector_settings.name] = vector_settings
         return vector_settings
 
     def update_vectors_settings(self, vectors_settings: Union[VectorSettings, List[VectorSettings]]) -> None:
@@ -288,8 +288,38 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             stacklevel=1,
         )
 
-    def delete_vectors_settings(self, *args, **kwargs):
-        pass
+    def delete_vectors_settings(
+        self, vectors_settings: Union[str, List[str]]
+    ) -> Union[VectorSettings, List[VectorSettings]]:
+        """Deletes the given vector settings from the dataset.
+
+        Args:
+            vectors_settings: the name/s of the vector settings to delete.
+
+        Returns:
+            The vector settings that were deleted.
+        """
+        if isinstance(vectors_settings, str):
+            vectors_settings = [vectors_settings]
+
+        if not self.vectors_settings:
+            raise ValueError(
+                "The current `FeedbackDataset` does not contain any `vectors_settings` defined, so"
+                " none can be deleted."
+            )
+
+        if not all(vector_setting in self._vectors_settings.keys() for vector_setting in vectors_settings):
+            raise ValueError(
+                f"Invalid `vectors_settings={vectors_settings}` provided. It cannot be"
+                " deleted because it does not exist, make sure you delete just existing `vectors_settings`"
+                " meaning that the name matches any of the existing `vectors_settings` if any. Current"
+                f" `vectors_settings` are: '{', '.join(self._vectors_settings.keys())}'."
+            )
+
+        deleted_vectors_settings = []
+        for vector_setting in vectors_settings:
+            deleted_vectors_settings.append(self._vectors_settings.pop(vector_setting))
+        return deleted_vectors_settings if len(deleted_vectors_settings) > 1 else deleted_vectors_settings[0]
 
     def update_metadata_properties(
         self,
