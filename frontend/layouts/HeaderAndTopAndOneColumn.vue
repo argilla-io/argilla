@@ -6,9 +6,6 @@
     <div class="sidebar-area">
       <slot name="sidebar-right">here is the sidebar content left</slot>
     </div>
-    <div class="top-area">
-      <slot name="top">here is the top content</slot>
-    </div>
     <div class="center-area">
       <slot name="center">here is the center content</slot>
     </div>
@@ -47,12 +44,11 @@ $gap-width: $base-space * 2;
 .layout {
   display: grid;
   grid-template-columns: 1fr $sidebarMenuWidth;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   grid-template-areas:
     "header header"
-    "top sidebar"
     "center sidebar"
     "footer footer";
   height: 100vh;
@@ -73,10 +69,6 @@ $gap-width: $base-space * 2;
 }
 .sidebar-area {
   grid-area: sidebar;
-}
-.top-area {
-  grid-area: top;
-  min-width: 0;
 }
 .center-area {
   grid-area: center;

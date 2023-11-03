@@ -1,26 +1,28 @@
 <template>
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
   <div v-else class="wrapper">
-    <template v-if="!!record">
+    <section class="wrapper__records">
+      <DatasetFiltersComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
+        v-if="!!record"
         :key="`${record.id}_fields`"
-        class="wrapper__fields"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
         :record="record"
       />
+    </section>
 
-      <QuestionsFormComponent
-        :key="`${record.id}_questions`"
-        class="wrapper__form"
-        :class="statusClass"
-        :datasetId="recordCriteria.datasetId"
-        :record="record"
-        @on-submit-responses="goToNext"
-        @on-discard-responses="goToNext"
-      />
-    </template>
+    <QuestionsFormComponent
+      v-if="!!record"
+      :key="`${record.id}_questions`"
+      class="wrapper__form"
+      :class="statusClass"
+      :datasetId="recordCriteria.datasetId"
+      :record="record"
+      @on-submit-responses="goToNext"
+      @on-discard-responses="goToNext"
+    />
 
     <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
       <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
@@ -178,26 +180,35 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: $base-space * 2;
   height: 100%;
-  padding: 0 $base-space * 3 $base-space * 2 $base-space * 3;
-  @include media("<tablet") {
+  gap: $base-space * 2;
+  padding: $base-space * 2;
+  @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
   }
-  &__fields,
+  &__records,
   &__form {
-    @include media("<tablet") {
+    @include media("<desktop") {
       overflow: visible;
       height: auto;
-      max-height: none;
+      max-height: none !important;
     }
+  }
+  &__records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 2;
+    height: 100%;
+    min-width: 0;
   }
   &__text {
     color: $black-54;
   }
   &--empty {
     width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
