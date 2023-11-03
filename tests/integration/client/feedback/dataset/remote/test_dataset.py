@@ -67,16 +67,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture()
-def test_dataset_with_metadata_properties():
-    dataset = FeedbackDataset(
-        fields=[TextField(name="text"), TextField(name="optional", required=False)],
-        questions=[TextQuestion(name="question")],
-    )
-    return dataset
-
-
-@pytest.fixture()
-def test_dataset_with_metadata_properties():
+def test_dataset_with_metadata_properties() -> FeedbackDataset:
     dataset = FeedbackDataset(
         fields=[TextField(name="text"), TextField(name="optional", required=False)],
         questions=[TextQuestion(name="question")],
@@ -104,10 +95,6 @@ def feedback_dataset() -> FeedbackDataset:
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0, max=10),
-        ],
-        vectors_settings=[
-            VectorSettings(name="vector-settings-1", dimensions=4),
-            VectorSettings(name="vector-settings-2", dimensions=4),
         ],
         guidelines="unit test guidelines",
         allow_extra_metadata=False,
@@ -476,8 +463,10 @@ class TestRemoteFeedbackDataset:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector-settings-1", dimensions=4))
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         vector_settings = remote_dataset.vector_settings_by_name("vector-settings-1")
+
         vector_settings.title = "New Vector Settings Title"
         remote_dataset.update_vectors_settings(vector_settings)
 

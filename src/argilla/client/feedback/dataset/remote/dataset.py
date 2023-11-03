@@ -824,7 +824,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             fields=dataset.fields,
             questions=dataset.questions,
             guidelines=dataset.guidelines,
-            metadata_properties=dataset.metadata_properties,
         )
 
         new_dataset._records = dataset.records
