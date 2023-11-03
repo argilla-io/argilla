@@ -17,7 +17,7 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, PositiveInt, conint, conlist, constr, root_validator, validator
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
@@ -138,8 +138,9 @@ class DatasetCreate(BaseModel):
 class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: Optional[bool]
 
-    __non_nullable_fields__ = {"name"}
+    __non_nullable_fields__ = {"name", "allow_extra_metadata"}
 
 
 class RecordMetrics(BaseModel):
@@ -671,7 +672,7 @@ class MetadataParsedQueryParam:
 
 
 class MetadataQueryParams(BaseModel):
-    metadata: List[str] = PydanticField(Query([], regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+    metadata: List[str] = PydanticField(Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
