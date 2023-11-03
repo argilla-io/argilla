@@ -237,7 +237,7 @@ def search_records(
         response_status: the status of the responses to be retrieved.
             Can either be `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
         metadata_filters: the metadata filters to be applied to the records. Defaults to None.
-        limit: an optional value to limit the number of returned records by the search.
+        limit: an optional value to limit the number of returned records by the search. Defaults to 50.
 
     Returns:
         A `Response` object with the response itself, and/or the error codes if applicable.
