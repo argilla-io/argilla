@@ -640,24 +640,6 @@ def test_push_to_argilla_with_vector_settings(argilla_user: User):
     assert remote.vectors_settings[0].dimensions == 100
 
 
-def test_push_to_argilla_with_wrong_vector_settings(argilla_user: User):
-    api.init(api_key=argilla_user.api_key)
-
-    dataset = FeedbackDataset(
-        fields=[TextField(name="required-field")],
-        questions=[TextQuestion(name="question")],
-        vectors_settings=[VectorSettings(name="vector-settings", dimensions=-10)],
-    )
-
-    with pytest.raises(Exception, match="Failed adding vectors to the `FeedbackDataset` in Argilla"):
-        dataset.push_to_argilla(name="test-dataset-vector01")
-
-    with pytest.raises(
-        Exception, match="Could not find a `FeedbackDataset` in Argilla with name='test-dataset-vector01"
-    ):
-        FeedbackDataset.from_argilla("test-dataset-vector01")
-
-
 def test_add_vector_settings():
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field")],

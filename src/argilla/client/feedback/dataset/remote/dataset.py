@@ -742,7 +742,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
 
         Args:
-            vectors_settings: the vectors settings to update.
+            vectors_settings: the remote vectors settings to update. Must exist in Argilla in advance.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
