@@ -739,10 +739,10 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     def update_vectors_settings(
         self, vectors_settings: Union[RemoteVectorSettings, List[RemoteVectorSettings]]
     ) -> None:
-        """Updates the given vectors settings in the current `FeedbackDataset` in Argilla.
+        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
 
         Args:
-            vectors_settings: the vectors settings to update.
+            vectors_settings: the remote vectors settings to update. Must exist in Argilla in advance.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.

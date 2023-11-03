@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, PositiveInt, validator
 
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
@@ -38,6 +38,6 @@ class VectorSettings(BaseModel):
 
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
-    dimensions: int
+    dimensions: PositiveInt
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
