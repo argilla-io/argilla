@@ -8,6 +8,7 @@ import argilla as rg
 from datasets import load_dataset
 
 # load an Argilla Feedback Dataset from the Hugging Face Hub
+# look for other datasets at https://huggingface.co/datasets?other=argilla
 dataset = rg.FeedbackDataset.from_huggingface("argilla/oasst_response_quality", split="train")
 
 # push the dataset to Argilla
