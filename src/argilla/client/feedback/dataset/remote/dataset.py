@@ -200,7 +200,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         if isinstance(records, RemoteFeedbackRecord):
             records = [records]
 
-        self.dataset._validate_records(records, attributes_to_validate=["metadata"])
+        self.dataset._validate_records(records, attributes_to_validate=["metadata", "vectors"])
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress

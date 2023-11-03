@@ -29,6 +29,7 @@ from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackItemModel,
+    FeedbackListVectorSettingsModel,
     FeedbackSuggestionModel,
     FeedbackVectorSettingsModel,
 )
@@ -53,11 +54,6 @@ def test_remote_dataset(mock_httpx_client: httpx.Client) -> RemoteFeedbackDatase
         ),
         fields=[RemoteTextField(id=uuid4(), name="text")],
         questions=[RemoteTextQuestion(id=uuid4(), name="text")],
-        # TODO: Uncomment once vector_settings are supported.
-        # vector_settings=[
-        #     VectorSettings(name="vector-1", dimensions=3),
-        #     VectorSettings(name="vector-2", dimensions=4),
-        # ],
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -72,11 +68,6 @@ def test_remote_record(
         client=mock_httpx_client,
         fields={"text": "test"},
         metadata={"new": "metadata"},
-        # TODO: Uncomment once vector_settings are supported.
-        # vectors={
-        #     "vector-1": [1.0, 2.0, 3.0],
-        #     "vector-2": [1.0, 2.0, 3.0, 4.0],
-        # },
         question_name_to_id=test_remote_dataset._question_name_to_id,
     )
 
@@ -111,6 +102,27 @@ def create_mock_routes(
             ),
             f"/api/v1/me/datasets/{test_remote_dataset.id}/metadata-properties": httpx.Response(
                 status_code=200, json={"items": []}
+            ),
+            f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings": httpx.Response(
+                status_code=200,
+                content=FeedbackListVectorSettingsModel(
+                    items=[
+                        FeedbackVectorSettingsModel(
+                            id=uuid4(),
+                            name="vector-1",
+                            dimensions=3,
+                            inserted_at=datetime.utcnow(),
+                            updated_at=datetime.utcnow(),
+                        ),
+                        FeedbackVectorSettingsModel(
+                            id=uuid4(),
+                            name="vector-2",
+                            dimensions=4,
+                            inserted_at=datetime.utcnow(),
+                            updated_at=datetime.utcnow(),
+                        ),
+                    ]
+                ).json(),
             ),
         },
         "patch": {
@@ -308,12 +320,34 @@ class TestSuiteRemoteDataset:
                 f"/api/v1/me/datasets/{test_remote_dataset.id}/metadata-properties": httpx.Response(
                     status_code=200, json={"items": []}
                 ),
+                f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings": httpx.Response(
+                    status_code=200,
+                    content=FeedbackListVectorSettingsModel(
+                        items=[
+                            FeedbackVectorSettingsModel(
+                                id=uuid4(),
+                                name="vector-1",
+                                dimensions=3,
+                                inserted_at=datetime.utcnow(),
+                                updated_at=datetime.utcnow(),
+                            ),
+                            FeedbackVectorSettingsModel(
+                                id=uuid4(),
+                                name="vector-2",
+                                dimensions=4,
+                                inserted_at=datetime.utcnow(),
+                                updated_at=datetime.utcnow(),
+                            ),
+                        ]
+                    ).json(),
+                ),
             },
         }
+
         configure_mock_routes(mock_httpx_client, mock_routes)
-        test_remote_dataset.add_records(FeedbackRecord(fields={"text": "test"}, vectors={"test": [1, 2, 3]}))
+        test_remote_dataset.add_records(FeedbackRecord(fields={"text": "test"}, vectors={"vector-1": [1.0, 2.0, 3.0]}))
 
         mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
-            json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"test": [1, 2, 3]}}]},
+            json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"vector-1": [1.0, 2.0, 3.0]}}]},
         )

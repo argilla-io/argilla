@@ -119,17 +119,40 @@ def test_update_records_with_warning() -> None:
             ValueError,
             "extra fields not permitted",
         ),
-        # TODO: Uncomment once vector_settings with vector validations are working
-        # (
-        #     FeedbackRecord(
-        #         fields={"required-field": "text"},
-        #         metadata={"extra-metadata": "yes"},
-        #         vectors={"vector-1": [1.0, 2.0, 3.0, 4.0, 5.0]},
-        #     ),
-        #     False,
-        #     ValueError,
-        #     "extra fields not permitted",
-        # ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0, 4.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-1` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0, 5.0]},
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-2` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                    "vector-3": [1.0, 2.0, 3.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-3` not present on dataset vector settings.",
+        ),
     ],
 )
 def test_add_records_validation_error(
