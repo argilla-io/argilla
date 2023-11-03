@@ -100,7 +100,7 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def vector_settings(self) -> Iterable[R]:
+    def vectors_settings(self) -> Iterable[R]:
         """Returns the vector settings of the dataset."""
         pass
 
@@ -309,8 +309,8 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
             metadata_schema = self._build_metadata_schema()
 
         if "vectors" in attributes_to_validate:
-            vector_settings_by_name = {
-                vector_settings.name: vector_settings for vector_settings in self.vector_settings or []
+            vectors_settings_by_name = {
+                vector_settings.name: vector_settings for vector_settings in self.vectors_settings or []
             }
 
         for record in records:
@@ -321,7 +321,7 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                 self._validate_record_metadata(record, metadata_schema)
 
             if "vectors" in attributes_to_validate:
-                self._validate_record_vectors(record, vector_settings_by_name)
+                self._validate_record_vectors(record, vectors_settings_by_name)
 
     @staticmethod
     def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
@@ -345,12 +345,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                 f" with exception: {e}"
             ) from e
 
-    def _validate_record_vectors(self, record: FeedbackRecord, vector_settings_by_name) -> None:
+    def _validate_record_vectors(self, record: FeedbackRecord, vectors_settings_by_name) -> None:
         for vector_name in record.vectors:
-            if not vector_settings_by_name.get(vector_name):
+            if not vectors_settings_by_name.get(vector_name):
                 raise ValueError(f"Vector with name `{vector_name}` not present on dataset vector settings.")
 
-            if vector_settings_by_name[vector_name].dimensions != len(record.vectors[vector_name]):
+            if vectors_settings_by_name[vector_name].dimensions != len(record.vectors[vector_name]):
                 raise ValueError(f"Vector with name `{vector_name}` has an invalid expected dimension.")
 
     def _parse_and_validate_records(
@@ -443,12 +443,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update_vector_settings(self, *args, **kwargs):
-        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+    def update_vectors_settings(self, *args, **kwargs):
+        """Updates a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
-    def delete_vector_settings(self, *args, **kwargs):
+    def delete_vectors_settings(self, *args, **kwargs):
         """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 

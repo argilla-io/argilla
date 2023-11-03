@@ -293,7 +293,7 @@ class ArgillaMixin:
 
         if self.vector_settings:
             ArgillaMixin.__add_vectors_settings(
-                vectors_settings=self.vector_settings, client=httpx_client, id=argilla_id
+                vectors_settings=self.vectors_settings, client=httpx_client, id=argilla_id
             )
 
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
@@ -494,7 +494,7 @@ class TaskTemplateMixin:
         labels: List[str],
         multi_label: bool = False,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -540,7 +540,7 @@ class TaskTemplateMixin:
     def for_question_answering(
         cls: Type["FeedbackDataset"],
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -576,7 +576,7 @@ class TaskTemplateMixin:
     def for_summarization(
         cls: Type["FeedbackDataset"],
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -606,7 +606,7 @@ class TaskTemplateMixin:
     def for_translation(
         cls: Type["FeedbackDataset"],
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -635,7 +635,7 @@ class TaskTemplateMixin:
         cls: Type["FeedbackDataset"],
         rating_scale: int = 7,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -672,7 +672,7 @@ class TaskTemplateMixin:
         cls: Type["FeedbackDataset"],
         labels: Optional[List[str]] = None,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -705,7 +705,7 @@ class TaskTemplateMixin:
         cls: Type["FeedbackDataset"],
         context: bool = False,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -747,7 +747,7 @@ class TaskTemplateMixin:
         number_of_responses: int = 2,
         context: bool = False,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -805,7 +805,7 @@ class TaskTemplateMixin:
         rating_scale: int = 7,
         context: bool = False,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -845,7 +845,7 @@ class TaskTemplateMixin:
         number_of_responses: int = 2,
         context: bool = False,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """
@@ -875,7 +875,7 @@ class TaskTemplateMixin:
         number_of_retrievals: int = 1,
         rating_scale: int = 7,
         use_markdown: bool = False,
-        guidelines: str = None,
+        guidelines: Optional[str] = None,
         metadata_properties: List[AllowedMetadataPropertyTypes] = None,
     ) -> "FeedbackDataset":
         """

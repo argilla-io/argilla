@@ -87,14 +87,17 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         if query_filters:
             bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
         if excluded_id:
-            bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
-
-        if bool_filter_query:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
-            # Will work from Opensearch >= v2.5
-            knn_query["filter"] = {"bool": bool_filter_query}
+            # Will work from Opensearch >= v2.4.0
+            knn_query.update({"filter": {"bool": {"must_not": [{"ids": {"values": [str(excluded_id)]}}]}}})
 
         body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
+
+        if bool_filter_query:
+            # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not
+            # created for requested user (with exists query clauses). This is not happening with Elasticsearch.
+            # The only way make it work is to use them as a post_filter.
+            body["post_filter"] = {"bool": bool_filter_query}
 
         return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
 

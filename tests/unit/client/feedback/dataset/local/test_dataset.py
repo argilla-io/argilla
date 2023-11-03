@@ -58,7 +58,7 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
         ],
-        vector_settings=[
+        vectors_settings=[
             VectorSettings(name="vector-1", dimensions=3),
             VectorSettings(name="vector-2", dimensions=4),
         ],
@@ -166,7 +166,7 @@ def test_add_records_validation_error(
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
         ],
-        vector_settings=[
+        vectors_settings=[
             VectorSettings(name="vector-1", dimensions=3),
             VectorSettings(name="vector-2", dimensions=4),
         ],

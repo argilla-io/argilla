@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 #  to avoid maintain the TestFeedbackDataset class each time that the base class add a new abstract method.
 class TestFeedbackDataset(FeedbackDatasetBase):
     @property
-    def vector_settings(self):
+    def vectors_settings(self):
         return []
 
     def vector_settings_by_name(self, name: str) -> "VectorSettings":
@@ -50,10 +50,10 @@ class TestFeedbackDataset(FeedbackDatasetBase):
     def add_vector_settings(self, *args, **kwargs):
         pass
 
-    def update_vector_settings(self, *args, **kwargs):
+    def update_vectors_settings(self, *args, **kwargs):
         pass
 
-    def delete_vector_settings(self, *args, **kwargs):
+    def delete_vectors_settings(self, *args, **kwargs):
         pass
 
     def push_to_huggingface(self, *args, **kwargs):

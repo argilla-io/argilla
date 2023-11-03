@@ -15,25 +15,14 @@
 from datetime import datetime
 from uuid import UUID
 
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.sdk.v1.datasets.models import FeedbackVectorSettingsModel
+from pydantic import BaseModel
 
 
-class RemoteVectorSettings(VectorSettings):
+class VectorSettingsModel(BaseModel):
     id: UUID
+    name: str
+    title: str
+    dimensions: int
+    dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
-
-    def to_local(self) -> VectorSettings:
-        return VectorSettings(name=self.name, title=self.title, dimensions=self.dimensions)
-
-    @classmethod
-    def from_api(cls, api_model: FeedbackVectorSettingsModel) -> "RemoteVectorSettings":
-        return RemoteVectorSettings(
-            id=api_model.id,
-            name=api_model.name,
-            title=api_model.title,
-            dimensions=api_model.dimensions,
-            inserted_at=api_model.inserted_at,
-            updated_at=api_model.updated_at,
-        )

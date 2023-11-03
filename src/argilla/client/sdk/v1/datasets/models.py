@@ -132,8 +132,7 @@ class FeedbackRecordsMetricsModel(BaseModel):
 class FeedbackVectorSettingsModel(BaseModel):
     id: UUID
     name: str
-    # TODO: Uncomment when is supported
-    # title: Optional[str] = None
+    title: str
     dimensions: int
     inserted_at: datetime
     updated_at: datetime

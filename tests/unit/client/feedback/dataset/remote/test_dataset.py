@@ -110,6 +110,7 @@ def create_mock_routes(
                         FeedbackVectorSettingsModel(
                             id=uuid4(),
                             name="vector-1",
+                            title="Vector 1",
                             dimensions=3,
                             inserted_at=datetime.utcnow(),
                             updated_at=datetime.utcnow(),
@@ -117,6 +118,7 @@ def create_mock_routes(
                         FeedbackVectorSettingsModel(
                             id=uuid4(),
                             name="vector-2",
+                            title="Vector 2",
                             dimensions=4,
                             inserted_at=datetime.utcnow(),
                             updated_at=datetime.utcnow(),
@@ -270,6 +272,7 @@ class TestSuiteRemoteDataset:
         mock_routes = create_mock_routes(test_remote_dataset, test_remote_record)
 
         expected_name = "mock-vector"
+        expected_title = "Mock Vector"
         expected_dimensions = 100
         mock_routes["post"].update(
             {
@@ -278,6 +281,7 @@ class TestSuiteRemoteDataset:
                     content=FeedbackVectorSettingsModel(
                         id=uuid4(),
                         name=expected_name,
+                        title=expected_title,
                         dimensions=expected_dimensions,
                         inserted_at=datetime.utcnow(),
                         updated_at=datetime.utcnow(),
@@ -289,12 +293,12 @@ class TestSuiteRemoteDataset:
         configure_mock_routes(mock_httpx_client, mock_routes)
 
         test_remote_dataset.add_vector_settings(
-            vector_settings=VectorSettings(name=expected_name, dimensions=expected_dimensions)
+            vector_settings=VectorSettings(name=expected_name, title=expected_title, dimensions=expected_dimensions)
         )
 
         mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings",
-            json={"name": expected_name, "title": expected_name, "dimensions": expected_dimensions},
+            json={"name": expected_name, "title": expected_title, "dimensions": expected_dimensions},
         )
 
     def test_add_records_with_vectors(
@@ -327,6 +331,7 @@ class TestSuiteRemoteDataset:
                             FeedbackVectorSettingsModel(
                                 id=uuid4(),
                                 name="vector-1",
+                                title="Vector 1",
                                 dimensions=3,
                                 inserted_at=datetime.utcnow(),
                                 updated_at=datetime.utcnow(),
@@ -334,6 +339,7 @@ class TestSuiteRemoteDataset:
                             FeedbackVectorSettingsModel(
                                 id=uuid4(),
                                 name="vector-2",
+                                title="Vector 2",
                                 dimensions=4,
                                 inserted_at=datetime.utcnow(),
                                 updated_at=datetime.utcnow(),
