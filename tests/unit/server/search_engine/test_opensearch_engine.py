@@ -1072,7 +1072,7 @@ class TestSuiteOpenSearchEngine:
                 "dimension": settings.dimensions,
                 "method": {
                     "engine": "lucene",
-                    "space_type": "l2",
+                    "space_type": "cosinesimil",
                     "name": "hnsw",
                     "parameters": {"ef_construction": 4, "m": 2},
                 },

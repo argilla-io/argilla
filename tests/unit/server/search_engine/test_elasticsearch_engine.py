@@ -696,7 +696,7 @@ class TestSuiteElasticSearchEngine:
                 "type": "dense_vector",
                 "dims": settings.dimensions,
                 "index": True,
-                "similarity": "l2_norm",
+                "similarity": "cosine",
             }
             for settings in vectors_settings
         }
