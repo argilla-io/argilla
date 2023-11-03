@@ -7,6 +7,7 @@
       />
       <FilterButton
         v-if="isAnyAvailableFilter"
+        class="filters__filter-button"
         @click.native="toggleVisibilityOfFilters"
         :button-name="$t('filters')"
         icon-name="filter"
@@ -153,6 +154,18 @@ export default {
   &__reset-button {
     @include font-size(13px);
     flex-shrink: 0;
+  }
+  &__filter-button {
+    &.filter-button--active {
+      background: palette(purple, 400);
+      &,
+      :deep(.button) {
+        color: palette(purple, 200);
+      }
+      &:hover {
+        background: darken(palette(purple, 400), 2%);
+      }
+    }
   }
   .search-area {
     width: min(100%, 400px);
