@@ -86,14 +86,18 @@ export class RecordCriteria {
     this._similaritySearch = new SimilarityCriteria();
 
     if (similaritySearch) {
-      const parsed = JSON.parse(similaritySearch);
+      try {
+        const parsed = JSON.parse(similaritySearch);
 
-      this.similaritySearch.complete(
-        parsed.recordId,
-        parsed.vectorName,
-        parsed.limit,
-        parsed.order
-      );
+        this.similaritySearch.complete(
+          parsed.recordId,
+          parsed.vectorName,
+          parsed.limit,
+          parsed.order
+        );
+      } catch (error) {
+        // User has manually changed the URL, it's ok to ignore this error
+      }
     }
   }
 
