@@ -83,6 +83,7 @@ class FeedbackItemModel(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
+    vectors: Optional[Dict[str, List[float]]] = None
     suggestions: Optional[List[FeedbackSuggestionModel]] = []
     inserted_at: datetime
     updated_at: datetime
