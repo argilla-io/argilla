@@ -268,12 +268,12 @@ describe("MetadataFilter ", () => {
     });
   });
 
-  describe("Has Values", () => {
+  describe("Can Filter", () => {
     test("should return true if the metadata has values", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
       const metadata = metadataFilter.findByCategory("split");
 
-      expect(metadata.hasValues).toBeTruthy();
+      expect(metadata.canFilter).toBeTruthy();
     });
 
     test("should return false if terms metadata has no values", () => {
@@ -282,7 +282,7 @@ describe("MetadataFilter ", () => {
       );
       const metadata = metadataFilter.findByCategory("split");
 
-      expect(metadata.hasValues).toBeFalsy();
+      expect(metadata.canFilter).toBeFalsy();
     });
 
     test("should return false if integer metadata has no values", () => {
@@ -291,7 +291,7 @@ describe("MetadataFilter ", () => {
       );
       const metadata = metadataFilter.findByCategory("loss");
 
-      expect(metadata.hasValues).toBeFalsy();
+      expect(metadata.canFilter).toBeFalsy();
     });
 
     test("should return false if float metadata has no values", () => {
@@ -300,7 +300,7 @@ describe("MetadataFilter ", () => {
       );
       const metadata = metadataFilter.findByCategory("float");
 
-      expect(metadata.hasValues).toBeFalsy();
+      expect(metadata.canFilter).toBeFalsy();
     });
   });
 });

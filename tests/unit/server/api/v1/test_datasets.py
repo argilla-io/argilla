@@ -116,6 +116,7 @@ class TestSuiteDatasets:
                     "allow_extra_metadata": True,
                     "status": "draft",
                     "workspace_id": str(dataset_a.workspace_id),
+                    "last_activity_at": dataset_a.last_activity_at.isoformat(),
                     "inserted_at": dataset_a.inserted_at.isoformat(),
                     "updated_at": dataset_a.updated_at.isoformat(),
                 },
@@ -126,6 +127,7 @@ class TestSuiteDatasets:
                     "allow_extra_metadata": True,
                     "status": "draft",
                     "workspace_id": str(dataset_b.workspace_id),
+                    "last_activity_at": dataset_b.last_activity_at.isoformat(),
                     "inserted_at": dataset_b.inserted_at.isoformat(),
                     "updated_at": dataset_b.updated_at.isoformat(),
                 },
@@ -136,6 +138,7 @@ class TestSuiteDatasets:
                     "allow_extra_metadata": True,
                     "status": "ready",
                     "workspace_id": str(dataset_c.workspace_id),
+                    "last_activity_at": dataset_c.last_activity_at.isoformat(),
                     "inserted_at": dataset_c.inserted_at.isoformat(),
                     "updated_at": dataset_c.updated_at.isoformat(),
                 },
@@ -905,21 +908,23 @@ class TestSuiteDatasets:
         owner_auth_header: dict,
         response_status_filter: Union[str, List[str]],
     ):
-        num_responses_per_status = 10
+        num_records_per_response_status = 10
         response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
 
         dataset = await DatasetFactory.create()
         # missing responses
-        await RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
+        await RecordFactory.create_batch(size=num_records_per_response_status, dataset=dataset)
         # discarded responses
-        await self.create_records_with_response(num_responses_per_status, dataset, owner, ResponseStatus.discarded)
+        await self.create_records_with_response(
+            num_records_per_response_status, dataset, owner, ResponseStatus.discarded
+        )
         # submitted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.submitted, response_values
+            num_records_per_response_status, dataset, owner, ResponseStatus.submitted, response_values
         )
         # drafted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.draft, response_values
+            num_records_per_response_status, dataset, owner, ResponseStatus.draft, response_values
         )
 
         other_dataset = await DatasetFactory.create()
@@ -940,12 +945,13 @@ class TestSuiteDatasets:
         assert response.status_code == 200
         response_json = response.json()
 
-        assert len(response_json["items"]) == (num_responses_per_status * len(response_status_filter))
+        assert response_json["total"] == (num_records_per_response_status * len(response_status_filter))
+        assert len(response_json["items"]) == (num_records_per_response_status * len(response_status_filter))
 
         if "missing" in response_status_filter:
             assert (
                 len([record for record in response_json["items"] if len(record["responses"]) == 0])
-                >= num_responses_per_status
+                >= num_records_per_response_status
             )
         assert all(
             [
@@ -954,6 +960,25 @@ class TestSuiteDatasets:
                 if len(record["responses"]) > 0
             ]
         )
+
+    async def test_list_dataset_records_with_multiple_response_per_record(
+        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        await ResponseFactory.create(record=record)
+        await ResponseFactory.create(record=record)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records?include=responses", headers=owner_auth_header
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+
+        assert response_json["total"] == 1
+        assert len(response_json["items"]) == 1
+        assert len(response_json["items"][0]["responses"]) == 2
 
     @pytest.mark.parametrize(
         "sorts",
@@ -1735,6 +1760,7 @@ class TestSuiteDatasets:
             "allow_extra_metadata": True,
             "status": "draft",
             "workspace_id": str(dataset.workspace_id),
+            "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
@@ -1901,9 +1927,11 @@ class TestSuiteDatasets:
             "allow_extra_metadata": False,
             "status": "draft",
             "workspace_id": str(workspace.id),
+            "last_activity_at": datetime.fromisoformat(response_body["last_activity_at"]).isoformat(),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+        assert response_body["last_activity_at"] == response_body["inserted_at"] == response_body["updated_at"]
 
     async def test_create_dataset_with_invalid_length_guidelines(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -5201,16 +5229,19 @@ class TestSuiteDatasets:
             guidelines = dataset.guidelines
 
         assert response.status_code == 200
-        assert response.json() == {
+        response_body = response.json()
+        assert response_body == {
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
             "allow_extra_metadata": True,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
+            "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
+        assert response_body["last_activity_at"] == response_body["updated_at"]
 
         dataset = await db.get(Dataset, dataset.id)
         assert dataset.name == name

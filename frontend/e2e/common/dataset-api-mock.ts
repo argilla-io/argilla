@@ -65,6 +65,7 @@ export const newDatasetsMocked = [
     workspace_id: "4e70e21a-7533-41e9-8a25-11d6ee3091be",
     inserted_at: fakeDateMonthAgo(4),
     updated_at: fakeDateMonthAgo(4),
+    last_activity_at: fakeDateMonthAgo(4),
   },
   {
     id: "25073901-a24d-4416-b331-71a497b38063",
@@ -75,6 +76,7 @@ export const newDatasetsMocked = [
     workspace_id: "4e70e21a-7533-41e9-8a25-11d6ee3091be",
     inserted_at: fakeDateMonthAgo(4),
     updated_at: fakeDateMonthAgo(4),
+    last_activity_at: fakeDateMonthAgo(4),
   },
   {
     id: "25073901-a24d-4416-b331-71a497b38065",
@@ -85,6 +87,7 @@ export const newDatasetsMocked = [
     workspace_id: "4e70e21a-7533-41e9-8a25-11d6ee3091bd",
     inserted_at: fakeDateMonthAgo(4),
     updated_at: fakeDateMonthAgo(4),
+    last_activity_at: fakeDateMonthAgo(4),
   },
 ];
 

@@ -32,7 +32,7 @@ All the environment variables have changed from using the prefix `RUBRIX_` to us
 .. warning::
   From version `1.13.0`, the support for non-prefixed environment variables has been removed. All environment variables must be prefixed with `ARGILLA_`.
 
-The best to configure a new Argilla Server from Rubrix is just to duplicate all ENV variables for
+The best way to configure a new Argilla Server from Rubrix is just to duplicate all ENV variables for
 both, Rubrix and Argilla instances. This will simplify a version rollback if needed.
 
 ## New Elasticsearch index naming conventions
@@ -57,7 +57,7 @@ ARGILLA_ENABLE_MIGRATION=1 argilla server start
 This will fetch info contained in the Rubrix instance `.rubrix.datasetsw-v0` index and
 will copy the info into the new `ar.datasets` index.
 
-Then, for each old rubrix index, will create an alias with new new name convention format.
+Then, for each old rubrix index, will create an alias with new naming convention format.
 
 This will allow you to work with previous Rubrix datasets from your new Argilla Server without duplicating information and still see the changes from your previous Rubrix Server.
 

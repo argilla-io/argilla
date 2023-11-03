@@ -18,6 +18,16 @@ These are the section headers that we use:
 
 ### Added
 
+- Added functionality to push your models to huggingface hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)).
+
+### Fixed
+
+- Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
+
+## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
+
+### Added
+
 - New `GET /api/v1/datasets/:dataset_id/metadata-properties` endpoint for listing dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
 - New `POST /api/v1/datasets/:dataset_id/metadata-properties` endpoint for creating dataset metadata properties. ([#3813](https://github.com/argilla-io/argilla/pull/3813))
 - New `PATCH /api/v1/metadata-properties/:metadata_property_id` endpoint allowing the update of a specific metadata property. ([#3952](https://github.com/argilla-io/argilla/pull/3952))
@@ -40,6 +50,7 @@ These are the section headers that we use:
 - Added automatic model card generation through `ArgillaTrainer.save` ([#3857](https://github.com/argilla-io/argilla/pull/3857))
 - Added `FeedbackDataset` `TaskTemplateMixin` for pre-defined task templates. ([#3969](https://github.com/argilla-io/argilla/pull/3969))
 - A maximum limit of 50 on the number of options a ranking question can accept. ([#3975](https://github.com/argilla-io/argilla/pull/3975))
+- New `last_activity_at` field to `FeedbackDataset` exposing when the last activity for the associated dataset occurs. ([#3992](https://github.com/argilla-io/argilla/pull/3992))
 
 ### Changed
 
