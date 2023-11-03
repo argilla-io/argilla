@@ -50,5 +50,5 @@ class TestVectorsSettingsSDK:
             client=client.client.httpx, id=vector_settings.id, title="New title for vectors settings"
         )
 
-        assert response.status_code == 200
-        assert response.parsed.title == "New title for vectors settings"
+        updated_vector_settings = remote.vectors_settings[0]
+        assert updated_vector_settings.title  == "New title for vectors settings"
