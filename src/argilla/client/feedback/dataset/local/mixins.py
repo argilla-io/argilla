@@ -385,7 +385,6 @@ class ArgillaMixin:
 
         fields = ArgillaMixin.__get_fields(client=httpx_client, id=existing_dataset.id)
         questions = ArgillaMixin.__get_questions(client=httpx_client, id=existing_dataset.id)
-        metadata_properties = ArgillaMixin.__get_metadata_properties(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -396,7 +395,6 @@ class ArgillaMixin:
             updated_at=existing_dataset.updated_at,
             fields=fields,
             questions=questions,
-            metadata_properties=metadata_properties,
             guidelines=existing_dataset.guidelines or None,
             allow_extra_metadata=existing_dataset.allow_extra_metadata,
         )
