@@ -29,4 +29,11 @@ class RemoteVectorSettings(VectorSettings):
 
     @classmethod
     def from_api(cls, api_model: FeedbackVectorSettingsModel) -> "RemoteVectorSettings":
-        return cls.from_orm(api_model)
+        return RemoteVectorSettings(
+            id=api_model.id,
+            name=api_model.name,
+            title=api_model.title,
+            dimensions=api_model.dimensions,
+            inserted_at=api_model.inserted_at,
+            updated_at=api_model.updated_at,
+        )

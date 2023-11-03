@@ -727,7 +727,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             new_vector_settings = datasets_api_v1.add_vector_settings(
                 client=self._client,
                 id=self.id,
-                title=vector_settings.name,
+                title=vector_settings.title,
                 name=vector_settings.name,
                 dimensions=vector_settings.dimensions,
             ).parsed
