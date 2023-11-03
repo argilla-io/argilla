@@ -680,7 +680,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 f" The existing metadata properties are: {existing_metadata_property_names}."
             )
 
-        deleted_metadata_properties = list()
+        deleted_metadata_properties = []
         for metadata_property in existing_metadata_properties:
             if metadata_property.name in metadata_properties:
                 ArgillaMetadataPropertiesMixin.delete(client=self._client, metadata_property_id=metadata_property.id)
@@ -739,7 +739,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     def update_vectors_settings(
         self, vectors_settings: Union[RemoteVectorSettings, List[RemoteVectorSettings]]
     ) -> None:
-        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
+        """Updates the given vectors settings in the current `FeedbackDataset` in Argilla.
 
         Args:
             vectors_settings: the vectors settings to update.
@@ -765,8 +765,36 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                     f" `FeedbackDataset` in Argilla with exception: {e}"
                 ) from e
 
-    def delete_vectors_settings(self, *args, **kwargs):
-        pass
+    def delete_vectors_settings(
+        self, vectors_settings: Union[str, List[str]]
+    ) -> Union[RemoteVectorSettings, List["RemoteVectorSettings"]]:
+        """Deletes the given vectors settings from the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vectors_settings: the vectors settings to delete.
+        """
+        if isinstance(vectors_settings, str):
+            vectors_settings = [vectors_settings]
+
+        existing_vectors_settings_name = [vector_settings.name for vector_settings in self.vectors_settings]
+
+        unexisting_vectors_settings = []
+        for vector_settings in vectors_settings:
+            if vector_settings not in existing_vectors_settings_name:
+                unexisting_vectors_settings.append(vector_settings.name)
+        if len(unexisting_vectors_settings) > 0:
+            raise ValueError(
+                f"The following vectors settings do not exist in the current `FeedbackDataset` in Argilla: {unexisting_vectors_settings}."
+                f" The existing vectors settings are: {existing_vectors_settings_name}."
+            )
+
+        deleted_vectors_settings = []
+        for vector_settings in self.vectors_settings:
+            if vector_settings.name in vectors_settings:
+                vectors_settings_api_v1.delete_vector_settings(client=self._client, id=vector_settings.id).parsed
+                vectors_settings.remove(vector_settings.name)
+                deleted_vectors_settings.append(vector_settings)
+        return deleted_vectors_settings if len(deleted_vectors_settings) > 1 else deleted_vectors_settings[0]
 
     def filter_by(
         self,
