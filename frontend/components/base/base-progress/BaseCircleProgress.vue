@@ -6,7 +6,11 @@
     <div class="circle-progress__circle">
       <div
         class="circle-progress__progress"
-        :style="{ transform: 'rotate(' + rotation + 'deg)' }"
+        :style="{
+          'background-image': `conic-gradient(${progressColor} ${
+            value * 3.6
+          }deg,#fafafa 0deg)`,
+        }"
       ></div>
       <div class="circle-progress__value">{{ value }}</div>
     </div>
@@ -16,6 +20,10 @@
 <script>
 export default {
   props: {
+    progressColor: {
+      type: String,
+      default: "#ff675f",
+    },
     value: {
       type: Number,
       required: true,
@@ -24,11 +32,6 @@ export default {
     size: {
       type: Number,
       default: 28,
-    },
-  },
-  computed: {
-    rotation() {
-      return (this.value / 100) * 360;
     },
   },
 };
@@ -52,19 +55,24 @@ export default {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid darken($similarity-color, 15%);
-    border-top-color: transparent;
     box-sizing: border-box;
     transform-origin: center center;
   }
   &__value {
     position: absolute;
+    height: calc(100% - 6px);
+    width: calc(100% - 6px);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    @include font-size(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @include font-size(11px);
     font-weight: 500;
     color: $black-54;
+    background: palette(white);
+    border-radius: 50%;
   }
 }
 </style>

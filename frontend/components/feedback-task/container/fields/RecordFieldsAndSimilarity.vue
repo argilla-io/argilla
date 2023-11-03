@@ -9,13 +9,15 @@
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
-          <span
+          <BaseCircleProgress
             v-if="recordCriteria.isFilteredBySimilarity && record.score"
             class="similarity-icon"
-            :data-title="`Similarity Score ${record.score}`"
+            :value="record.score.percentage"
+            :data-title="`Similarity Score`"
+            :size="32"
           >
             <svgicon name="similarity" width="30" height="30" />
-          </span>
+          </BaseCircleProgress>
         </div>
         <SimilarityFilter
           v-if="datasetVectors?.length"
