@@ -18,12 +18,18 @@ from pydantic import BaseModel
 
 
 class VectorSettings(BaseModel):
-    """
+    """Schema for the `FeedbackDataset` vectors settings. The vectors setttings are used
+    to define the configuration of the vectors associated to the records of a `FeedbackDataset`
+    that will be used to perform the vector search.
 
     Args:
         name: The name of the vector settings.
         title: The title of the vector settings.
         dimensions: The dimensions of the vectors associated with the vector settings.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas import VectorSettings
+        >>> VectorSettings(name="my_vector_settings", dimensions=768)
     """
 
     name: str
