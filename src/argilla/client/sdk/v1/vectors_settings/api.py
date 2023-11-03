@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 def update_vector_settings(
-    client: "httpx.Client", id: Union[str, "UUID"], title: Optional[str] = None
+    client: "httpx.Client", id: Union[str, "UUID"], title: str
 ) -> Response[Union[VectorSettingsModel, "ErrorMessage", "HTTPValidationError"]]:
     """Sends a `PATCH` request to `/api/v1/vector_settings/{id}` endpoint to partially
     update a vector settings in Argilla.
@@ -35,7 +35,7 @@ def update_vector_settings(
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the vector settings to be updated in Argilla.
-        title: the new title of the vector settings. Defaults to `None`.
+        title: the new title of the vector settings.
 
     Returns:
         A `Response` object containing a `parsed` attribute with the parsed response if
@@ -43,9 +43,7 @@ def update_vector_settings(
     """
     url = f"/api/v1/vectors-settings/{id}"
 
-    body = {}
-    if title is not None:
-        body["title"] = title
+    body = {"title": title}
 
     response = client.patch(url=url, json=body)
 
