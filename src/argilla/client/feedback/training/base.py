@@ -19,6 +19,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from huggingface_hub import HfApi
+
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
@@ -269,11 +271,11 @@ class ArgillaTrainer(ArgillaTrainerV1):
         if generate_card:
             self.generate_model_card(output_dir)
 
-    def generate_model_card(self, output_dir: str) -> "ArgillaModelCard":
+    def generate_model_card(self, output_dir: Optional[str] = None) -> "ArgillaModelCard":
         """Generate and return a model card based on the model card data.
 
         Args:
-            output_dir: Folder where the model card will be written.
+            output_dir: If given, folder where the model card will be written.
 
         Returns:
             model_card: The model card.
@@ -288,10 +290,45 @@ class ArgillaTrainer(ArgillaTrainerV1):
             template_path=ArgillaModelCard.default_template_path,
         )
 
-        model_card_path = Path(output_dir) / "README.md"
-        model_card.save(model_card_path)
-        self._logger.info(f"Model card generated at: {model_card_path}")
+        if output_dir:
+            model_card_path = Path(output_dir) / "README.md"
+            model_card.save(model_card_path)
+            self._logger.info(f"Model card generated at: {model_card_path}")
+
         return model_card
+
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, **kwargs) -> None:
+        """Push your model to [huggingface's model hub](https://huggingface.co/models).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+            generate_card:
+                Whether to generate (and push) a model card for your model. Defaults to True.
+        """
+        if not kwargs.get("token"):
+            # Try obtaining the token with huggingface_hub utils as a last resort, or let it fail.
+            from huggingface_hub import HfFolder
+
+            if token := HfFolder.get_token():
+                kwargs["token"] = token
+
+            # One last check for the tests. We use a different env var name
+            # that the one gathered with HfFolder.get_token
+            if token := kwargs.get("token", os.environ.get("HF_HUB_ACCESS_TOKEN", None)):
+                kwargs["token"] = token
+
+        url = self._trainer.push_to_huggingface(repo_id, **kwargs)
+
+        if generate_card:
+            model_card = self.generate_model_card()
+            # For spacy based models, overwrite the repo_id with the url variable returned
+            # from its trainer.
+            if getattr(self._trainer, "language", None):
+                repo_id = url
+
+            model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
 
 
 class ArgillaTrainerSkeleton(ABC):
@@ -359,4 +396,10 @@ class ArgillaTrainerSkeleton(ABC):
     def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
         """
         Generates a `FrameworkCardData` instance to generate a model card from.
+        """
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
+        """
+        Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
         """

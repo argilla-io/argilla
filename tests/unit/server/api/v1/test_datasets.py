@@ -3809,7 +3809,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Missing required value for field: 'output'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because missing required value for field: 'output'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_wrong_value_field(
@@ -3841,7 +3843,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because wrong value found for field 'output'. Expected 'str', found 'int'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_extra_fields(
@@ -3866,7 +3870,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Error: found fields values for non configured fields: ['output']"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because found fields values for non configured fields: ['output']"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
@@ -3916,7 +3922,9 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
         )
         assert response.status_code == 422
-        assert response.json() == {"detail": "Wrong value found for field 'output'. Expected 'str', found 'int'"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because wrong value found for field 'output'. Expected 'str', found 'int'"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
@@ -3996,7 +4004,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (
-            "Provided metadata for record at position 0 is not valid: 'metadata-property' metadata property validation failed"
+            "Record at position 0 is not valid because metadata is not valid: 'metadata-property' metadata property validation failed"
             in response.json()["detail"]
         )
 
@@ -4048,7 +4056,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (
-            "Provided metadata for record at position 0 is not valid: 'not-defined-metadata-property' metadata"
+            "Record at position 0 is not valid because metadata is not valid: 'not-defined-metadata-property' metadata"
             f" property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
             == response.json()["detail"]
         )
@@ -4132,7 +4140,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            f"Provided vector with name={vector_settings.name} of record at position 0 is not valid: "
+            f"Record at position 0 is not valid because vector with name={vector_settings.name} is not valid: "
             f"vector must have {vector_settings.dimensions} elements, got 1 elements"
         )
 
@@ -4158,7 +4166,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            "Provided vector with name=missing_vector of record at position 0 is not valid: "
+            "Record at position 0 is not valid because vector with name=missing_vector is not valid: "
             f"vector with name=missing_vector does not exist for dataset_id={str(dataset.id)}"
         )
 
@@ -4187,7 +4195,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json()["detail"] == (
-            f"Provided vector with name={vector_settings.name} of record at position 0 is not valid: "
+            f"Record at position 0 is not valid because vector with name={vector_settings.name} is not valid: "
             f"vector with name={vector_settings.name} does not exist for dataset_id={dataset.id}"
         )
 
@@ -4646,75 +4654,14 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
-        question_0 = await TextQuestionFactory.create(dataset=dataset)
-        question_1 = await TextQuestionFactory.create(dataset=dataset)
-        question_2 = await TextQuestionFactory.create(dataset=dataset)
         await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
         await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
         await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
-        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+            metadata_={"terms-metadata-property": "z", "integer-metadata-property": 1, "float-metadata-property": 1.0},
         )
-
-        # record 0 suggestions and vectors (should be deleted)
-        suggestions_records_0 = [
-            await SuggestionFactory.create(question=question_0, record=records[0], value="suggestion 0 1"),
-            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 2"),
-            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 3"),
-        ]
-
-        vector_records_0 = [
-            await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0]),
-            await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1]),
-            await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2]),
-        ]
-
-        # record 1 suggestions (should be deleted)
-        suggestions_records_1 = [
-            await SuggestionFactory.create(question=question_0, record=records[1], value="suggestion 1 1"),
-            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 2"),
-            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 3"),
-        ]
-
-        vector_records_1 = [
-            await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[0, 0, 0, 0, 0]),
-            await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[1, 1, 1, 1, 1]),
-            await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[2, 2, 2, 2, 2]),
-        ]
-
-        # record 2 suggestions (should be kept)
-        suggestions_records_2 = [
-            await SuggestionFactory.create(question=question_0, record=records[2], value="suggestion 2 1"),
-            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 2"),
-            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 3"),
-        ]
-
-        vector_records_2 = [
-            await VectorFactory.create(vector_settings=vector_settings_0, record=records[2], value=[0, 0, 0, 0, 0]),
-            await VectorFactory.create(vector_settings=vector_settings_1, record=records[2], value=[1, 1, 1, 1, 1]),
-            await VectorFactory.create(vector_settings=vector_settings_2, record=records[2], value=[2, 2, 2, 2, 2]),
-        ]
-
-        records_0_updated_vectors = {
-            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
-            vector_settings_1.name: [1.1, 1.1, 1.1, 1.1, 1.1],
-            vector_settings_2.name: [2.1, 2.1, 2.1, 2.1, 2.1],
-        }
-
-        records_1_updated_vectors = {
-            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
-        }
-
-        records_3_updated_vectors = {
-            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
-            vector_settings_1.name: [0.1, 0.1, 0.1, 0.1, 0.1],
-            vector_settings_2.name: [0.1, 0.1, 0.1, 0.1, 0.1],
-        }
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -4729,18 +4676,6 @@ class TestSuiteDatasets:
                             "float-metadata-property": 0.0,
                             "extra-metadata": "yes",
                         },
-                        "suggestions": [
-                            {
-                                "question_id": str(question_0.id),
-                                "value": "suggestion updated 0 1",
-                            },
-                            {
-                                "question_id": str(question_1.id),
-                                "value": "suggestion updated 0 2",
-                            },
-                            {"question_id": str(question_2.id), "value": "suggestion updated 0 3"},
-                        ],
-                        "vectors": records_0_updated_vectors,
                     },
                     {
                         "id": str(records[1].id),
@@ -4750,13 +4685,6 @@ class TestSuiteDatasets:
                             "float-metadata-property": 1.0,
                             "extra-metadata": "yes",
                         },
-                        "suggestions": [
-                            {
-                                "question_id": str(question_0.id),
-                                "value": "suggestion updated 1 1",
-                            }
-                        ],
-                        "vectors": records_1_updated_vectors,
                     },
                     {
                         "id": str(records[2].id),
@@ -4769,18 +4697,6 @@ class TestSuiteDatasets:
                     },
                     {
                         "id": str(records[3].id),
-                        "suggestions": [
-                            {
-                                "question_id": str(question_0.id),
-                                "value": "suggestion updated 3 1",
-                            },
-                            {
-                                "question_id": str(question_1.id),
-                                "value": "suggestion updated 3 2",
-                            },
-                            {"question_id": str(question_2.id), "value": "suggestion updated 3 3"},
-                        ],
-                        "vectors": records_3_updated_vectors,
                     },
                 ]
             },
@@ -4795,18 +4711,6 @@ class TestSuiteDatasets:
             "float-metadata-property": 0.0,
             "extra-metadata": "yes",
         }
-        await records[0].awaitable_attrs.suggestions
-        await records[0].awaitable_attrs.vectors
-        assert len(records[0].suggestions) == 3
-        assert records[0].suggestions[0].value == "suggestion updated 0 1"
-        assert records[0].suggestions[1].value == "suggestion updated 0 2"
-        assert records[0].suggestions[2].value == "suggestion updated 0 3"
-        for vector in records[0].vectors:
-            assert records_0_updated_vectors[vector.vector_settings.name] == vector.value
-        for suggestion in suggestions_records_0:
-            assert inspect(suggestion).deleted
-        for vector in vector_records_0:
-            assert inspect(vector).deleted
 
         # Record 1
         assert records[1].metadata_ == {
@@ -4815,16 +4719,6 @@ class TestSuiteDatasets:
             "float-metadata-property": 1.0,
             "extra-metadata": "yes",
         }
-        await records[1].awaitable_attrs.suggestions
-        await records[1].awaitable_attrs.vectors
-        assert len(records[1].suggestions) == 1
-        assert records[1].suggestions[0].value == "suggestion updated 1 1"
-        for vector in records[1].vectors:
-            assert records_1_updated_vectors[vector.vector_settings.name] == vector.value
-        for suggestion in suggestions_records_1:
-            assert inspect(suggestion).deleted
-        for vector in vector_records_1:
-            assert inspect(vector).deleted
 
         # Record 2
         assert records[2].metadata_ == {
@@ -4833,24 +4727,221 @@ class TestSuiteDatasets:
             "float-metadata-property": 2.0,
             "extra-metadata": "yes",
         }
-        await records[2].awaitable_attrs.suggestions
-        await records[2].awaitable_attrs.vectors
+
+        # Record 3
+        assert records[3].metadata_ == {
+            "terms-metadata-property": "z",
+            "integer-metadata-property": 1,
+            "float-metadata-property": 1.0,
+        }
+
+        # it should be called only with the first three records (metadata was updated for them)
+        mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
+
+    async def test_update_dataset_records_with_suggestions(
+        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
+        question_1 = await TextQuestionFactory.create(dataset=dataset)
+        question_2 = await TextQuestionFactory.create(dataset=dataset)
+        records = await RecordFactory.create_batch(10, dataset=dataset)
+
+        # Record 0 suggestions (should be deleted)
+        suggestions_records_0 = [
+            await SuggestionFactory.create(question=question_0, record=records[0], value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 3"),
+        ]
+
+        # Record 1 suggestions (should be deleted)
+        suggestions_records_1 = [
+            await SuggestionFactory.create(question=question_0, record=records[1], value="suggestion 1 1"),
+            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 2"),
+            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 3"),
+        ]
+
+        # Record 2 suggestions (should be kept)
+        suggestions_records_2 = [
+            await SuggestionFactory.create(question=question_0, record=records[2], value="suggestion 2 1"),
+            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 2"),
+            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 3"),
+        ]
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "suggestions": [
+                            {
+                                "question_id": str(question_0.id),
+                                "value": "suggestion updated 0 1",
+                            },
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 0 2",
+                            },
+                            {"question_id": str(question_2.id), "value": "suggestion updated 0 3"},
+                        ],
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "suggestions": [
+                            {
+                                "question_id": str(question_0.id),
+                                "value": "suggestion updated 1 1",
+                            }
+                        ],
+                    },
+                    {
+                        "id": str(records[2].id),
+                    },
+                    {
+                        "id": str(records[3].id),
+                        "suggestions": [
+                            {
+                                "question_id": str(question_0.id),
+                                "value": "suggestion updated 3 1",
+                            },
+                            {
+                                "question_id": str(question_1.id),
+                                "value": "suggestion updated 3 2",
+                            },
+                            {"question_id": str(question_2.id), "value": "suggestion updated 3 3"},
+                        ],
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+
+        # Record 0
+        await records[0].awaitable_attrs.suggestions
+        assert records[0].suggestions[0].value == "suggestion updated 0 1"
+        assert records[0].suggestions[1].value == "suggestion updated 0 2"
+        assert records[0].suggestions[2].value == "suggestion updated 0 3"
+        for suggestion in suggestions_records_0:
+            assert inspect(suggestion).deleted
+
+        # Record 1
+        await records[1].awaitable_attrs.suggestions
+        assert records[1].suggestions[0].value == "suggestion updated 1 1"
+        for suggestion in suggestions_records_1:
+            assert inspect(suggestion).deleted
+
+        # Record 2
         for suggestion in suggestions_records_2:
             assert inspect(suggestion).persistent
-        for vector in vector_records_2:
-            assert inspect(vector).persistent
 
         # Record 3
         await records[3].awaitable_attrs.suggestions
-        await records[3].awaitable_attrs.vectors
-        assert len(records[3].suggestions) == 3
         assert records[3].suggestions[0].value == "suggestion updated 3 1"
         assert records[3].suggestions[1].value == "suggestion updated 3 2"
         assert records[3].suggestions[2].value == "suggestion updated 3 3"
-        for vector in records[3].vectors:
-            assert records_3_updated_vectors[vector.vector_settings.name] == vector.value
 
-        # it should be called only with the first three records (metadata was updated for them)
+        mock_search_engine.index_records.assert_not_called()
+
+    async def test_update_dataset_records_with_empty_list_of_suggestions(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
+        question_1 = await TextQuestionFactory.create(dataset=dataset)
+        question_2 = await TextQuestionFactory.create(dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        suggestions_records_0 = [
+            await SuggestionFactory.create(question=question_0, record=record, value="suggestion 0 1"),
+            await SuggestionFactory.create(question=question_1, record=record, value="suggestion 0 2"),
+            await SuggestionFactory.create(question=question_2, record=record, value="suggestion 0 3"),
+        ]
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={"items": [{"id": str(record.id), "suggestions": []}]},
+        )
+
+        assert response.status_code == 204
+
+        assert await record.awaitable_attrs.suggestions == []
+        for suggestion in suggestions_records_0:
+            assert inspect(suggestion).deleted
+
+    async def test_update_dataset_records_with_vectors(
+        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        records = await RecordFactory.create_batch(10, dataset=dataset)
+
+        # Record 0 vectors (all should be updated)
+        await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0])
+        await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1])
+        await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2])
+
+        # Record 1 vectors (just the first one should be updated)
+        await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[3, 3, 3, 3, 3])
+        await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[4, 4, 4, 4, 4])
+        await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[5, 5, 5, 5, 5])
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "vectors": {
+                            vector_settings_0.name: [0.1, 0.1, 0.1, 0.1, 0.1],
+                            vector_settings_1.name: [1.1, 1.1, 1.1, 1.1, 1.1],
+                            vector_settings_2.name: [2.1, 2.1, 2.1, 2.1, 2.1],
+                        },
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "vectors": {
+                            vector_settings_0.name: [3.1, 3.1, 3.1, 3.1, 3.1],
+                        },
+                    },
+                    {
+                        "id": str(records[2].id),
+                        "vectors": {
+                            vector_settings_0.name: [4.1, 4.1, 4.1, 4.1, 4.1],
+                            vector_settings_1.name: [5.1, 5.1, 5.1, 5.1, 5.1],
+                            vector_settings_2.name: [6.1, 6.1, 6.1, 6.1, 6.1],
+                        },
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+
+        # Record 0
+        await records[0].awaitable_attrs.vectors
+        assert records[0].vectors[0].value == [0.1, 0.1, 0.1, 0.1, 0.1]
+        assert records[0].vectors[1].value == [1.1, 1.1, 1.1, 1.1, 1.1]
+        assert records[0].vectors[2].value == [2.1, 2.1, 2.1, 2.1, 2.1]
+
+        # Record 1
+        await records[1].awaitable_attrs.vectors
+        assert records[1].vectors[0].value == [3.1, 3.1, 3.1, 3.1, 3.1]
+        assert records[1].vectors[1].value == [4, 4, 4, 4, 4]
+        assert records[1].vectors[2].value == [5, 5, 5, 5, 5]
+
+        # Record 2
+        await records[2].awaitable_attrs.vectors
+        assert records[2].vectors[0].value == [4.1, 4.1, 4.1, 4.1, 4.1]
+        assert records[2].vectors[1].value == [5.1, 5.1, 5.1, 5.1, 5.1]
+        assert records[2].vectors[2].value == [6.1, 6.1, 6.1, 6.1, 6.1]
+
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
 
     async def test_update_dataset_records_with_invalid_metadata(
@@ -4883,8 +4974,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": "Provided metadata for record at position 1 is not valid: 'terms' metadata property validation "
-            "failed because 'i was not declared' is not an allowed term."
+            "detail": "Record at position 1 is not valid because metadata is not valid: 'terms' metadata property "
+            "validation failed because 'i was not declared' is not an allowed term."
         }
 
     async def test_update_dataset_records_with_invalid_suggestions(
@@ -4910,8 +5001,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question.id} and record at position 0 is not valid: "
-            "'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+            "detail": f"Record at position 0 is not valid because suggestion for question_id={question.id} is not "
+            "valid: 'option-a' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
         }
 
     async def test_update_dataset_records_with_invalid_vectors(
@@ -4926,7 +5017,6 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(records[0].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0]}},
                     {"id": str(records[1].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]}},
                 ]
             },
@@ -4934,7 +5024,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name={vector_settings.name} of record at position 1 is not valid: vector must have 5 elements, got 6 elements"
+            "detail": f"Record at position 0 is not valid because vector with name={vector_settings.name} is not "
+            "valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_dataset_records_with_nonexistent_dataset_id(
@@ -4998,7 +5089,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question_id} and record at position 0 is not valid: question_id={question_id} does not exist"
+            "detail": f"Record at position 0 is not valid because suggestion for question_id={question_id} is not "
+            f"valid: question_id={question_id} does not exist"
         }
 
     async def test_update_dataset_records_with_nonexistent_vector_settings_name(
@@ -5015,7 +5107,8 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided vector with name=i-do-not-exist of record at position 0 is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
+            "detail": "Record at position 0 is not valid because vector with name=i-do-not-exist is not valid: vector "
+            f"with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_dataset_records_with_duplicate_records_ids(
@@ -5062,7 +5155,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Found duplicate suggestions question IDs for record at position 0"}
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because found duplicate suggestions question IDs"
+        }
 
     async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -6289,7 +6384,7 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "payload",
         [
-            {"name": "New Name", "guidelines": "New Guidelines"},
+            {"name": "New Name", "guidelines": "New Guidelines", "allow_extra_metadata": False},
             {"name": "New Name"},
             {"guidelines": "New Guidelines"},
             {},
@@ -6314,6 +6409,7 @@ class TestSuiteDatasets:
             guidelines = payload["guidelines"]
         else:
             guidelines = dataset.guidelines
+        allow_extra_metadata = payload.get("allow_extra_metadata") or dataset.allow_extra_metadata
 
         assert response.status_code == 200
         response_body = response.json()
@@ -6321,7 +6417,7 @@ class TestSuiteDatasets:
             "id": str(dataset.id),
             "name": name,
             "guidelines": guidelines,
-            "allow_extra_metadata": True,
+            "allow_extra_metadata": allow_extra_metadata,
             "status": "ready",
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
@@ -6330,9 +6426,9 @@ class TestSuiteDatasets:
         }
         assert response_body["last_activity_at"] == response_body["updated_at"]
 
-        dataset = await db.get(Dataset, dataset.id)
         assert dataset.name == name
         assert dataset.guidelines == guidelines
+        assert dataset.allow_extra_metadata is allow_extra_metadata
 
     @pytest.mark.parametrize(
         "dataset_json",
@@ -6346,6 +6442,7 @@ class TestSuiteDatasets:
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+            {"allow_extra_metadata": None},
         ],
     )
     @pytest.mark.asyncio
