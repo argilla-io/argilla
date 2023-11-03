@@ -174,6 +174,7 @@ def list_datasets(
 def get_records(
     client: httpx.Client,
     id: UUID,
+    include: Union[None, List[str]] = None,
     offset: int = 0,
     limit: int = 50,
     response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
@@ -186,6 +187,8 @@ def get_records(
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the dataset to retrieve the records from.
+        include: the fields to be included in the response.
+             Can either be `responses` or `suggestions`.
         offset: the offset to be used in the pagination. Defaults to 0.
         limit: the limit to be used in the pagination. Defaults to 50.
         response_status: the status of the responses to be retrieved. Can either be
@@ -198,8 +201,10 @@ def get_records(
         request was successful, which is an instance of `FeedbackRecordsModel`.
     """
     url = f"/api/v1/datasets/{id}/records"
+    params = {"offset": offset, "limit": limit}
 
-    params = {"include": ["responses", "suggestions"], "offset": offset, "limit": limit}
+    if include:
+        params["include"] = include
 
     if response_status:
         params["response_status"] = response_status
@@ -224,6 +229,7 @@ def search_records(
     client: httpx.Client,
     id: UUID,
     vector_query: FeedbackRecordsSearchVectorQuery,
+    include: Union[None, List[str]] = None,
     response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
     metadata_filters: Optional[List[str]] = None,
     limit: int = 50,
@@ -233,17 +239,21 @@ def search_records(
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the dataset to add the records to.
+        include: the fields to be included in the response.
         vector_query: the vector query to be used to search for records.
         response_status: the status of the responses to be retrieved.
             Can either be `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
         metadata_filters: the metadata filters to be applied to the records. Defaults to None.
-        limit: an optional value to limit the number of returned records by the search. Defaults to 50.
+        limit: an optional value to limit the number of returned records by the search.
 
     Returns:
         A `Response` object with the response itself, and/or the error codes if applicable.
     """
     url = f"/api/v1/me/datasets/{id}/records/search"
-    params = {"include": ["responses", "suggestions"], "limit": limit}
+    params = {"limit": limit}
+
+    if include:
+        params["include"] = include
 
     vector_json = {"name": vector_query.name}
     if vector_query.value:
