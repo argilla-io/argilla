@@ -41,7 +41,7 @@ export class GetDatasetSettingsUseCase {
   ): Promise<DatasetSetting> {
     const dataset = await this.datasetRepository.getById(datasetId);
 
-    return new DatasetSetting(dataset, [], [], [], []);
+    return new DatasetSetting(dataset);
   }
 
   private async createDatasetSettingsForAdminOrOwner(
