@@ -18,6 +18,31 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 ```python
 dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
 ```
+
+If your dataset includes vectors, by default these will not get pulled with the rest of the dataset in order to improve performace. If you would like to pull the vectors in your records, you will need to specify it like so:
+
+::::{tab-set}
+
+:::{tab-item} All vectors
+```python
+remote_dataset = dataset.push_to_argilla(
+    name="my-dataset",
+    workspace="my-workspace",
+    with_vectors="all"
+)
+```
+:::
+:::{tab-item} Specific vectors
+```python
+remote_dataset = dataset.push_to_argilla(
+    name="my-dataset",
+    workspace="my-workspace",
+    with_vectors=["my_vectors"]
+)
+```
+:::
+::::
+
 ​
 At this point, you can do any post-processing you may need with this dataset e.g., [unifying responses](collect_responses.ipynb) from multiple annotators. Once you're happy with the result, you can decide on some of the following options to save it.
 ​
@@ -42,7 +67,7 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 :::
 ::::
 ​
-Additionally, you can still clone local `FeedbackDataset` datasets that have neither been pushed nor pulled to/from Argilla, respectively; via calling `push_to_argilla`.
+Additionally, you can still clone local `FeedbackDataset` datasets that have neither been pushed nor pulled to/from Argilla, via calling `push_to_argilla`.
 ​
 ```python
 dataset.push_to_argilla(name="my-dataset-clone", workspace="my-workspace")

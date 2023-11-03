@@ -117,6 +117,30 @@ sorted_records = remote.sort_by(
 You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
 ```
 
+### Semantic search
+You can retrieve records based on their similarity with another record. To do that, make sure you have added `vector_settings` to your [dataset configuration](create_dataset.md#define-vectors) and that your [records include vectors](create_dataset.md#configure-the-records).
+
+In the UI, go to the record you'd like to use for the semantic search and click on `Find similar` at the top right corner of the record card. If there is more than one vector, you will be asked to select which vector to use. You can also select whether you want the most or least similar records and the number of results you would like to see.
+
+In the Python SDK, you can also get a list of records that are semantically close to given a vector.
+
+```python
+ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
+
+# using text embeddings
+value = embedder_model.embeddings("My text is here")
+
+# using another record's vector
+value = ds.records[0].vectors["my_vector"]
+
+similar_records =  ds.find_similar_records(
+	vector_name="my_vector",
+	value=value,
+	max_results=50
+)
+```
+
+
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
