@@ -49,6 +49,7 @@ export default {
   display: flex;
   gap: $base-space;
   align-items: center;
+  flex-shrink: 0;
   width: max-content;
   min-height: $base-space * 4;
   padding: $base-space;

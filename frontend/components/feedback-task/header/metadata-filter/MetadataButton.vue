@@ -37,7 +37,7 @@
           <BaseButton
             class="secondary full-width small clear metadata-button__tooltip__button"
             @on-click.stop="onClearAll"
-            >{{ $t("clear-all") }}</BaseButton
+            >{{ $t("reset-all") }}</BaseButton
           >
         </FilterTooltip>
       </div>

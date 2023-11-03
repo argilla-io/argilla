@@ -20,7 +20,7 @@
       />
       <BaseButton
         v-if="isAnyFilterActive || isSortedBy"
-        class="small filters__reset-button"
+        class="small clear filters__reset-button"
         @on-click="resetFiltersAndSortBy()"
         >{{ $t("reset") }}</BaseButton
       >
@@ -62,9 +62,7 @@ export default {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      if (this.totalRecords === 1) return `${this.totalRecords} record`;
-
-      return `${this.totalRecords} records`;
+      return this.totalRecords;
     },
     shouldShowTotalRecords() {
       return (
@@ -136,7 +134,6 @@ export default {
   align-items: center;
   &__wrapper {
     width: 100%;
-    padding: $base-space * 2 $base-space * 3;
   }
   &__list {
     display: flex;
@@ -155,6 +152,7 @@ export default {
   }
   &__reset-button {
     @include font-size(13px);
+    flex-shrink: 0;
   }
   .search-area {
     width: min(100%, 400px);
