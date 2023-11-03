@@ -19,6 +19,7 @@ from uuid import UUID
 
 from pydantic import Field
 
+from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
@@ -94,8 +95,7 @@ class RemoteResponseSchema(ResponseSchema, RemoteSchema):
         return RemoteResponseSchema(
             user_id=payload.user_id,
             values=payload.values,
-            # TODO: Review type mismatch between API and SDK
-            status=payload.status,
+            status=ResponseStatus(payload.status),
             inserted_at=payload.inserted_at,
             updated_at=payload.updated_at,
         )
@@ -300,7 +300,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
     def from_api(
         cls,
         payload: "FeedbackRecordModel",
-        question_id_to_name: Optional[Dict[UUID, str]] = None,
+        question_id_to_name: Dict[UUID, str],
         client: Optional["httpx.Client"] = None,
     ) -> "RemoteFeedbackRecord":
         return RemoteFeedbackRecord(

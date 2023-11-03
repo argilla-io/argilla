@@ -44,6 +44,9 @@ class TestFeedbackDataset(FeedbackDatasetBase):
     def vectors_settings(self):
         return []
 
+    def find_similar_records(self, *args, **kwargs):
+        pass
+
     def vector_settings_by_name(self, name: str) -> "VectorSettings":
         pass
 
