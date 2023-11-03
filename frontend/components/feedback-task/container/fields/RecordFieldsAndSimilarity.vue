@@ -14,7 +14,7 @@
             class="similarity-icon"
             :value="record.score.percentage"
             :data-title="`Similarity Score`"
-            :size="32"
+            :size="35"
           >
             <svgicon name="similarity" width="30" height="30" />
           </BaseCircleProgress>
