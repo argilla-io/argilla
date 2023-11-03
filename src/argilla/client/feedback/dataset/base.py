@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -441,5 +441,26 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         Args:
             repo_id: the ID of the HuggingFace repo to push the dataset to.
             generate_card: whether to generate a dataset card or not. Defaults to `True`.
+        """
+        pass
+
+    @abstractmethod
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[R, float]]:
+        """Finds similar records to the given `record` or `value` for the given `vector_name`.
+
+        Args:
+            vector_name: a vector name to use for searching by similarity.
+            value: an optional vector value to be used for searching by similarity.
+            record: an optional record to be used for searching by similarity.
+            max_results: the maximum number of results for the search.
+
+        Returns:
+            A list of tuples with each tuple including a record and a similarity score.
         """
         pass

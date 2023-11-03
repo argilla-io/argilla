@@ -15,10 +15,10 @@
 import logging
 import textwrap
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
@@ -542,3 +542,18 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             UserWarning,
         )
         return self
+
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[FeedbackRecord, float]]:
+        warnings.warn(
+            "`find_similar_records` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`. "
+            "After, use `FeedbackDataset.from_argilla(...).find_similar_records()`",
+            UserWarning,
+        )
+        return []
