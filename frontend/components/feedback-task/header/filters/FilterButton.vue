@@ -13,7 +13,7 @@
       v-if="showChevronIcon"
       class="filter-button__chevron"
       name="chevron-down"
-      width="8"
+      width="16"
       height="8"
     />
   </div>
