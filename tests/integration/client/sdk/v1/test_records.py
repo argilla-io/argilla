@@ -15,13 +15,13 @@
 import pytest
 from argilla import (
     FeedbackDataset,
-    User,
     FeedbackRecord,
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
     TextField,
     TextQuestion,
+    User,
     VectorSettings,
     Workspace,
 )
@@ -29,7 +29,8 @@ from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
-from argilla.server.models import User as ServerUser, UserRole
+from argilla.server.models import User as ServerUser
+from argilla.server.models import UserRole
 
 from tests.factories import (
     DatasetFactory,
