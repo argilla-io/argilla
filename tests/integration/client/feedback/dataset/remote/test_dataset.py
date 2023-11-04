@@ -531,13 +531,10 @@ class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "invalid_vectors, expected_error",
         [
-            (
-                {"vector": [1, 1, 1, 1, 1]},
-                "Vector with name `vector` has an invalid expected dimension."
-            ),
+            ({"vector": [1, 1, 1, 1, 1]}, "Vector with name `vector` has an invalid expected dimension."),
             (
                 {"unknown-vector": [1, 1, 1, 1]},
-                "Vector with name `unknown-vector` not present on dataset vector settings."
+                "Vector with name `unknown-vector` not present on dataset vector settings.",
             ),
         ],
     )
