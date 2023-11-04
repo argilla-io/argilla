@@ -132,7 +132,7 @@ class Vector(DatabaseModel):
     vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
 
     record: Mapped["Record"] = relationship(back_populates="vectors")
-    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors", lazy="joined", innerjoin=True)
+    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors", lazy="immediate")
 
     __table_args__ = (
         UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
