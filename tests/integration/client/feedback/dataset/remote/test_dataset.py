@@ -503,6 +503,62 @@ class TestRemoteFeedbackDataset:
         for vector_settings in remote_dataset.vectors_settings:
             assert vector_settings.title == "New Vector Settings Title"
 
+    def test_delete_vectors_settings(self, owner: "User"):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="text")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=4)],
+        )
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+        remote_dataset.delete_vectors_settings("vector")
+        assert len(remote_dataset.vectors_settings) == 0
+
+    def test_bulk_delete_vectors_settings(self, owner: "User"):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="text")],
+            vectors_settings=[
+                VectorSettings(name="vector-1", dimensions=4),
+                VectorSettings(name="vector-2", dimensions=4),
+                VectorSettings(name="vector-3", dimensions=4),
+            ],
+        )
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        remote_dataset.delete_vectors_settings(["vector-1", "vector-2", "vector-3"])
+        assert len(remote_dataset.vectors_settings) == 0
+
+    def test_delete_vector_settings_one_by_one(self, owner: "User"):
+        api.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="text")],
+            vectors_settings=[
+                VectorSettings(name="vector-1", dimensions=4),
+                VectorSettings(name="vector-2", dimensions=4),
+                VectorSettings(name="vector-3", dimensions=4),
+            ],
+        )
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
+
+        for i, vector_settings in enumerate(remote_dataset.vectors_settings, 1):
+            deleted_vector_settings = remote_dataset.delete_vectors_settings(vector_settings.name)
+            assert deleted_vector_settings == vector_settings
+            assert len(remote_dataset.vectors_settings) == len(feedback_dataset.vectors_settings) - i
+
+        assert len(remote_dataset.vectors_settings) == 0
+
     def test_add_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")

@@ -342,6 +342,27 @@ def test_delete_metadata_properties_errors() -> None:
     assert len(dataset.metadata_properties) == 3
 
 
+def test_delete_vectors_settings() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="field", required=True)],
+        questions=[TextQuestion(name="question", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-settings-1", dimensions=10),
+            VectorSettings(name="vector-settings-2", dimensions=10),
+            VectorSettings(name="vector-settings-3", dimensions=10),
+        ],
+    )
+
+    deleted_vectors_settings = dataset.delete_vectors_settings("vector-settings-1")
+    assert isinstance(deleted_vectors_settings, VectorSettings)
+    assert len(dataset.vectors_settings) == 2
+
+    deleted_vectors_settings = dataset.delete_vectors_settings(["vector-settings-2", "vector-settings-3"])
+    assert isinstance(deleted_vectors_settings, list)
+    assert len(deleted_vectors_settings) == 2
+    assert len(dataset.vectors_settings) == 0
+
+
 def test_not_implemented_methods():
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
