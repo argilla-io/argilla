@@ -15,6 +15,7 @@
 import pytest
 from argilla import (
     FeedbackDataset,
+    User,
     FeedbackRecord,
     FloatMetadataProperty,
     IntegerMetadataProperty,
@@ -28,7 +29,7 @@ from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
-from argilla.server.models import User, UserRole
+from argilla.server.models import User as ServerUser, UserRole
 
 from tests.factories import (
     DatasetFactory,
@@ -56,13 +57,10 @@ def test_dataset():
 @pytest.mark.asyncio
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
-        user = await UserFactory.create(role=role)
-
+    def test_update_record_with_vectors(self, owner: ServerUser, role: UserRole) -> None:
         api.init(api_key=owner.api_key)
-
         workspace = Workspace.create(f"workspace")
-        workspace.add_user(user.id)
+        user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
         feedback_dataset = FeedbackDataset(
             fields=[TextField(name="text")],
@@ -100,7 +98,7 @@ class TestRecordsSDK:
         }
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_record(self, owner: User, test_dataset: FeedbackDataset, role: UserRole) -> None:
+    async def test_delete_record(self, owner: ServerUser, test_dataset: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
         api.init(api_key=owner.api_key)
