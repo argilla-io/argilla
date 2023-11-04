@@ -102,6 +102,7 @@ def validate_metadata_names(dataset: "FeedbackDatasetBase", names: typing.List[s
                 f" The existing metadata properties names are: {list(metadata_property_names.keys())}."
             )
 
+
 def validate_vector_names(dataset: "FeedbackDatasetBase", names: typing.List[str]) -> None:
     """Validates that the vector names used in the filters are valid."""
     vectors_names = {vector.name: True for vector in dataset.vectors_settings}

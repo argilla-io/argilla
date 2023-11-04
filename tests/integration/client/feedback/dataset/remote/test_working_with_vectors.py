@@ -121,9 +121,7 @@ class TestSuiteWorkingWithVectors:
                 FeedbackRecord(
                     external_id="1", fields={"text": "hello"}, vectors={"vector": [3, 4], "vector_b": [3, 4]}
                 ),
-                FeedbackRecord(
-                    external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}
-                ),
+                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}),
             ]
         )
 

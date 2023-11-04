@@ -15,7 +15,8 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import Literal, TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Tuple, Union
+
 from tqdm import trange
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
@@ -50,7 +51,7 @@ from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQue
 from argilla.client.sdk.v1.vectors_settings import api as vectors_settings_api_v1
 from argilla.client.utils import allowed_for_roles
 
-INCLUDE_ALL_VECTORS_PARAM:str = "all"
+INCLUDE_ALL_VECTORS_PARAM: str = "all"
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -361,7 +362,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     @property
     def include_as_query_params(self) -> List[str]:
-        include = ["responses", "suggestions"] # default include
+        include = ["responses", "suggestions"]  # default include
 
         if not self._with_vectors:
             return include
