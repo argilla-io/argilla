@@ -292,6 +292,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             responses=[response.to_local() for response in self.responses],
             suggestions=[suggestion.to_local() for suggestion in self.suggestions],
             metadata=self.metadata,
+            vectors=self.vectors,
             external_id=self.external_id,
         )
 
@@ -316,6 +317,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             if payload.suggestions
             else [],
             metadata=payload.metadata if payload.metadata else {},
+            vectors=payload.vectors if payload.vectors else {},
             external_id=payload.external_id if payload.external_id else None,
             question_name_to_id={value: key for key, value in question_id_to_name.items()},
         )

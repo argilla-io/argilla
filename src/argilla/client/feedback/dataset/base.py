@@ -98,6 +98,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """Returns the records of the dataset."""
         pass
 
+    @property
+    @abstractmethod
+    def vectors_settings(self) -> Iterable[R]:
+        """Returns the vector settings of the dataset."""
+        pass
+
     @abstractmethod
     def update_records(self, records: Union[R, List[R]]) -> None:
         """Updates the records of the dataset.
@@ -286,15 +292,15 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         Args:
             records: a list of `FeedbackRecord` objects to validate.
             attributes_to_validate: a list containing the name of the attributes to
-                validate from the record. Valid values are: `fields` and `metadata`.
-                If not provided, both `fields` and `metadata` are validated. Defaults
+                validate from the record. Valid values are: `fields`, `metadata` and `vectors`.
+                If not provided, all `fields`, `metadata` and `vectors` are validated. Defaults
                 to `None`.
 
         Raises:
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
         if attributes_to_validate is None:
-            attributes_to_validate = ["fields", "metadata"]
+            attributes_to_validate = ["fields", "metadata", "vectors"]
 
         if "fields" in attributes_to_validate:
             fields_schema = self._build_fields_schema()
@@ -302,12 +308,20 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         if "metadata" in attributes_to_validate:
             metadata_schema = self._build_metadata_schema()
 
+        if "vectors" in attributes_to_validate:
+            vectors_settings_by_name = {
+                vector_settings.name: vector_settings for vector_settings in self.vectors_settings or []
+            }
+
         for record in records:
             if "fields" in attributes_to_validate:
                 self._validate_record_fields(record, fields_schema)
 
             if "metadata" in attributes_to_validate:
                 self._validate_record_metadata(record, metadata_schema)
+
+            if "vectors" in attributes_to_validate:
+                self._validate_record_vectors(record, vectors_settings_by_name)
 
     @staticmethod
     def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
@@ -330,6 +344,14 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                 f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
                 f" with exception: {e}"
             ) from e
+
+    def _validate_record_vectors(self, record: FeedbackRecord, vectors_settings_by_name) -> None:
+        for vector_name in record.vectors:
+            if not vectors_settings_by_name.get(vector_name):
+                raise ValueError(f"Vector with name `{vector_name}` not present on dataset vector settings.")
+
+            if vectors_settings_by_name[vector_name].dimensions != len(record.vectors[vector_name]):
+                raise ValueError(f"Vector with name `{vector_name}` has an invalid expected dimension.")
 
     def _parse_and_validate_records(
         self,

@@ -43,6 +43,10 @@ if TYPE_CHECKING:
             fields={"required-field": "text", "optional-field": None},
             metadata={"terms-metadata": "a", "more-metadata": 3},
         ),
+        FeedbackRecord(
+            fields={"required-field": "text", "optional-field": None},
+            vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]},
+        ),
     ],
 )
 def test_add_records_validation(record: "FeedbackRecord") -> None:
@@ -53,6 +57,10 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
     )
 
@@ -111,6 +119,40 @@ def test_update_records_with_warning() -> None:
             ValueError,
             "extra fields not permitted",
         ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0, 4.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-1` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0, 5.0]},
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-2` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                    "vector-3": [1.0, 2.0, 3.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-3` not present on dataset vector settings.",
+        ),
     ],
 )
 def test_add_records_validation_error(
@@ -123,6 +165,10 @@ def test_add_records_validation_error(
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
         allow_extra_metadata=allow_extra_metadata,
     )
