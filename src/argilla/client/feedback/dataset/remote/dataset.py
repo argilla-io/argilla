@@ -77,7 +77,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
         sort_by: Optional[List[SortBy]] = None,
-        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
+        with_vectors: Union[INCLUDE_ALL_VECTORS_PARAM, List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
@@ -390,7 +390,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
-        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
+        with_vectors: Union[INCLUDE_ALL_VECTORS_PARAM, List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
