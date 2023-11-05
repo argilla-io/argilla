@@ -474,7 +474,9 @@ async def list_records_by_dataset_id(
     if include and include.with_responses:
         records_query = records_query.options(contains_eager(Record.responses))
 
-    records_query = await _configure_query_relationships(query=records_query, dataset_id=dataset_id, include_params=include)
+    records_query = await _configure_query_relationships(
+        query=records_query, dataset_id=dataset_id, include_params=include
+    )
     records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
     result_records = await db.execute(records_query)
 
