@@ -29,6 +29,7 @@ from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.users.models import UserModel, UserRole
 from argilla.client.sdk.v1.datasets.models import (
     FeedbackItemModel,
+    FeedbackListVectorSettingsModel,
     FeedbackSuggestionModel,
     FeedbackVectorSettingsModel,
 )
@@ -101,6 +102,29 @@ def create_mock_routes(
             ),
             f"/api/v1/me/datasets/{test_remote_dataset.id}/metadata-properties": httpx.Response(
                 status_code=200, json={"items": []}
+            ),
+            f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings": httpx.Response(
+                status_code=200,
+                content=FeedbackListVectorSettingsModel(
+                    items=[
+                        FeedbackVectorSettingsModel(
+                            id=uuid4(),
+                            name="vector-1",
+                            title="Vector 1",
+                            dimensions=3,
+                            inserted_at=datetime.utcnow(),
+                            updated_at=datetime.utcnow(),
+                        ),
+                        FeedbackVectorSettingsModel(
+                            id=uuid4(),
+                            name="vector-2",
+                            title="Vector 2",
+                            dimensions=4,
+                            inserted_at=datetime.utcnow(),
+                            updated_at=datetime.utcnow(),
+                        ),
+                    ]
+                ).json(),
             ),
         },
         "patch": {
@@ -300,12 +324,36 @@ class TestSuiteRemoteDataset:
                 f"/api/v1/me/datasets/{test_remote_dataset.id}/metadata-properties": httpx.Response(
                     status_code=200, json={"items": []}
                 ),
+                f"/api/v1/datasets/{test_remote_dataset.id}/vectors-settings": httpx.Response(
+                    status_code=200,
+                    content=FeedbackListVectorSettingsModel(
+                        items=[
+                            FeedbackVectorSettingsModel(
+                                id=uuid4(),
+                                name="vector-1",
+                                title="Vector 1",
+                                dimensions=3,
+                                inserted_at=datetime.utcnow(),
+                                updated_at=datetime.utcnow(),
+                            ),
+                            FeedbackVectorSettingsModel(
+                                id=uuid4(),
+                                name="vector-2",
+                                title="Vector 2",
+                                dimensions=4,
+                                inserted_at=datetime.utcnow(),
+                                updated_at=datetime.utcnow(),
+                            ),
+                        ]
+                    ).json(),
+                ),
             },
         }
+
         configure_mock_routes(mock_httpx_client, mock_routes)
-        test_remote_dataset.add_records(FeedbackRecord(fields={"text": "test"}, vectors={"test": [1, 2, 3]}))
+        test_remote_dataset.add_records(FeedbackRecord(fields={"text": "test"}, vectors={"vector-1": [1.0, 2.0, 3.0]}))
 
         mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
-            json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"test": [1, 2, 3]}}]},
+            json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"vector-1": [1.0, 2.0, 3.0]}}]},
         )

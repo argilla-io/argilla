@@ -226,6 +226,39 @@ def test_add_records(
     assert len(dataset) == len(dataset.records)
 
 
+def test_add_records_with_vectors() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text", required=True)],
+        questions=[TextQuestion(name="question-1", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
+        ],
+    )
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                },
+            ),
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+        ]
+    )
+
+    assert len(dataset.records) == 2
+    assert dataset.records[0].vectors == {"vector-1": [1.0, 2.0, 3.0]}
+    assert dataset.records[1].vectors == {"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]}
+
+
 @pytest.mark.parametrize(
     "record, exception_cls, exception_msg",
     [

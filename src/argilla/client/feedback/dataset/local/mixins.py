@@ -286,11 +286,15 @@ class ArgillaMixin:
         questions = ArgillaMixin.__get_questions(client=httpx_client, id=argilla_id)
         question_name_to_id = {question.name: question.id for question in questions}
 
-        ArgillaMixin.__add_metadata_properties(
-            metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
-        )
+        if self.metadata_properties:
+            ArgillaMixin.__add_metadata_properties(
+                metadata_properties=self.metadata_properties, client=httpx_client, id=argilla_id
+            )
 
-        ArgillaMixin.__add_vectors_settings(vectors_settings=self.vectors_settings, client=httpx_client, id=argilla_id)
+        if self.vectors_settings:
+            ArgillaMixin.__add_vectors_settings(
+                vectors_settings=self.vectors_settings, client=httpx_client, id=argilla_id
+            )
 
         ArgillaMixin.__publish_dataset(client=httpx_client, id=argilla_id)
 

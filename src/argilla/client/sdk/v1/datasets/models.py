@@ -84,6 +84,7 @@ class FeedbackItemModel(BaseModel):
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
     suggestions: Optional[List[FeedbackSuggestionModel]] = []
+    vectors: Optional[Dict[str, List[float]]] = {}
     inserted_at: datetime
     updated_at: datetime
 
