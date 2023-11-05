@@ -906,6 +906,51 @@ class TestSuiteDatasets:
             "total": 3,
         }
 
+    async def test_list_one_single_record_with_specific_vectors(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record_a = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset)
+
+        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
+        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
+        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
+        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
+        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
+
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records",
+            params={
+                "limit": 1,
+                "include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}",
+            },
+            headers=owner_auth_header,
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "fields": {"text": "This is a text", "sentiment": "neutral"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "vectors": {
+                        "vector-a": [1.0, 2.0, 3.0],
+                        "vector-b": [4.0, 5.0],
+                    },
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                }
+            ],
+            "total": 3,
+        }
+
     async def test_list_dataset_records_with_offset(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
