@@ -230,7 +230,7 @@ def test_add_records_with_vectors() -> None:
     dataset = FeedbackDataset(
         fields=[TextField(name="text", required=True)],
         questions=[TextQuestion(name="question-1", required=True)],
-        vector_settings=[
+        vectors_settings=[
             VectorSettings(name="vector-1", dimensions=3),
             VectorSettings(name="vector-2", dimensions=4),
         ],

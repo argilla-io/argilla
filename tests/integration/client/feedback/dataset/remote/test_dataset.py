@@ -96,7 +96,7 @@ def feedback_dataset() -> FeedbackDataset:
             IntegerMetadataProperty(name="integer-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0, max=10),
         ],
-        vector_settings=[VectorSettings(name="vector-1", dimensions=3), VectorSettings(name="vector-2", dimensions=4)],
+        vectors_settings=[VectorSettings(name="vector-1", dimensions=3), VectorSettings(name="vector-2", dimensions=4)],
         guidelines="unit test guidelines",
         allow_extra_metadata=True,
     )
@@ -250,7 +250,7 @@ class TestRemoteFeedbackDataset:
         assert remote.name == "unit-test-dataset"
         assert remote.workspace.name == workspace.name
         assert remote.guidelines == "unit test guidelines"
-        assert remote.allow_extra_metadata is False
+        assert remote.allow_extra_metadata is feedback_dataset.allow_extra_metadata
 
         for remote_field, field in zip(remote.fields, feedback_dataset.fields):
             assert field.name == remote_field.name
@@ -273,7 +273,7 @@ class TestRemoteFeedbackDataset:
         assert remote.name == "unit-test-dataset"
         assert remote.workspace.name == workspace.name
         assert remote.guidelines == "unit test guidelines"
-        assert remote.allow_extra_metadata is False
+        assert remote.allow_extra_metadata is feedback_dataset.allow_extra_metadata
 
         for remote_field, field in zip(remote.fields, feedback_dataset.fields):
             assert field.name == remote_field.name
@@ -426,9 +426,11 @@ class TestRemoteFeedbackDataset:
         remote_dataset.delete_metadata_properties(names)
         assert len(remote_dataset.metadata_properties) == 0
 
-    def test_add_vector_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
+    def test_add_vector_settings(self, owner: "User"):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         vector_settings = remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
@@ -449,9 +451,11 @@ class TestRemoteFeedbackDataset:
         assert other_vector_settings.id == remote_vector_settings.id
         assert other_vector_settings.dimensions == remote_vector_settings.dimensions
 
-    def test_add_vector_setting_with_the_same_name(self, owner: "User", feedback_dataset: FeedbackDataset):
+    def test_add_vector_setting_with_the_same_name(self, owner: "User"):
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
+
+        feedback_dataset = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
         remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
@@ -583,15 +587,10 @@ class TestRemoteFeedbackDataset:
     @pytest.mark.parametrize(
         "invalid_vectors, expected_error",
         [
-            (
-                {"vector": [1, 1, 1, 1, 1]},
-                "Argilla server returned an error with http status: 422. "
-                "Error details: {'response': 'Record at position 0 is not valid because vector with name=vector is not valid",
-            ),
+            ({"vector": [1, 1, 1, 1, 1]}, "Vector with name `vector` has an invalid expected dimension."),
             (
                 {"unknown-vector": [1, 1, 1, 1]},
-                "Argilla server returned an error with http status: 422. "
-                "Error details: {'response': 'Record at position 0 is not valid because vector with name=unknown-vector is not valid",
+                "Vector with name `unknown-vector` not present on dataset vector settings.",
             ),
         ],
     )
@@ -605,7 +604,7 @@ class TestRemoteFeedbackDataset:
         feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=vector_dimension))
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
 
-        with pytest.raises(ValidationApiError, match=expected_error):
+        with pytest.raises(ValueError, match=expected_error):
             remote_dataset.add_records(
                 FeedbackRecord(
                     fields={"text": "Hello world!", "text-2": "Hello world!"},
