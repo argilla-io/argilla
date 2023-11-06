@@ -56,12 +56,12 @@ These are the section headers that we use:
 - [breaking] Users working with OpenSearch engines must use version >=2.4 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019) and [#4111](https://github.com/argilla-io/argilla/pull/4111))
 - Update `PATCH /api/v1/datasets/:dataset_id` endpoint to allow updating `allow_extra_metadata` attribute. ([#4112](https://github.com/argilla-io/argilla/pull/4112))
 - Using cosine similarity to compute similarity between vectors. ([#4124](https://github.com/argilla-io/argilla/pull/4124))
-- Update `GET /api/v1/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#]())
-- Update `GET /api/v1/me/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#]())
+- Update `GET /api/v1/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
+- Update `GET /api/v1/me/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 
 ### Fixed
 
-- Load user from DB when creating record with responses. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#]())
+- Load user from DB when creating record with responses. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#](https://github.com/argilla-io/argilla/pull/4142))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
