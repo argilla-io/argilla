@@ -27,6 +27,7 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
 
 class TestSuiteArgillaDatasetCard:
     @pytest.mark.parametrize(
-        "repo_id,fields,questions,guidelines,record",
+        "repo_id,fields,questions,guidelines,vectors_settings,record",
         [
             (
                 f"argilla/dataset-card-{uuid4()}",
@@ -49,6 +50,7 @@ class TestSuiteArgillaDatasetCard:
                     RankingQuestion(name="ranking-question", values=["a", "b", "c"]),
                 ],
                 "## Guidelines",
+                [VectorSettings(name="float-vector", dimensions=2)],
                 FeedbackRecord(
                     fields={"text-field": "text"},
                     responses=[
@@ -86,6 +88,7 @@ class TestSuiteArgillaDatasetCard:
                             "value": ["a", "b", "c"],
                         },
                     ],
+                    vectors={"float-vector": [1.0, 2.0]},
                     external_id="external-id-1",
                 ),
             )
@@ -97,6 +100,7 @@ class TestSuiteArgillaDatasetCard:
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         guidelines: str,
+        vectors_settings: List[VectorSettings],
         record: FeedbackRecord,
     ) -> None:
         card = ArgillaDatasetCard.from_template(
@@ -108,6 +112,7 @@ class TestSuiteArgillaDatasetCard:
             argilla_fields=fields,
             argilla_questions=questions,
             argilla_guidelines=guidelines,
+            argilla_vectors_settings=vectors_settings,
             argilla_record=json.loads(record.json()),
             huggingface_record=record.json(),
         )
@@ -117,4 +122,5 @@ class TestSuiteArgillaDatasetCard:
         assert card.content.__contains__(f"# Dataset Card for {repo_id.split('/')[1]}")
         assert all(field.name in card.content for field in fields)
         assert all(question.name in card.content for question in questions)
+        assert all(vector_settings.name in card.content for vector_settings in vectors_settings)
         assert guidelines in card.content
