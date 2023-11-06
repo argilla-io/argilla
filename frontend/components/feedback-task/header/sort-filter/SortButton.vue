@@ -35,3 +35,12 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.filter-button--active {
+  background: none;
+  &:hover {
+    background: $black-4;
+  }
+}
+</style>

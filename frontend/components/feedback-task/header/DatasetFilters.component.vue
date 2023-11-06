@@ -157,13 +157,13 @@ export default {
   }
   &__filter-button {
     &.filter-button--active {
-      background: palette(purple, 400);
+      background: none;
       &,
       :deep(.button) {
         color: palette(purple, 200);
       }
       &:hover {
-        background: darken(palette(purple, 400), 2%);
+        background: palette(purple, 400);
       }
     }
   }
