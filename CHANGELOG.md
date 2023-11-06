@@ -61,7 +61,7 @@ These are the section headers that we use:
 
 ### Fixed
 
-- Load user from DB when creating record with responses. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#4142](https://github.com/argilla-io/argilla/pull/4142))
+- Fixed creating records with responses from multiple users. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
