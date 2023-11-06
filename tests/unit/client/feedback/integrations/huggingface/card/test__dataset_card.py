@@ -33,9 +33,8 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
-
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:

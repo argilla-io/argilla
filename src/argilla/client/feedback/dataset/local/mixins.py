@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Literal, Optional, TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Type, Union
 from uuid import UUID
 
 from argilla.client.api import ArgillaSingleton

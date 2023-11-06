@@ -20,13 +20,13 @@ from pydantic import BaseModel, Extra, ValidationError, create_model
 
 from argilla.client.api import active_client
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
+from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 from argilla.client.feedback.schemas import FeedbackRecord
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 from argilla.client.workspaces import Workspace
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
 
 if typing.TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (

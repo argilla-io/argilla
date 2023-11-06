@@ -13,7 +13,7 @@
 #  limitations under the License.
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Dict, Generic, Iterable, List, Literal, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
 
 from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
