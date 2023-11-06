@@ -123,9 +123,11 @@ Among the dataset fields, we differentiate between the following:
     {% for question in argilla_questions %}
     * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}.{% endfor %}
 
+{% if argilla_vectors_settings %}
 * **✨ NEW** **Vectors**: As of Argilla 1.19.0, the vectors have been included in order to add support for similarity search to explore similar records based on vector search powered by the search engine defined. The vectors are optional and cannot be seen within the UI, those are uploaded and internally used. Also the vectors will always be optional, and only the dimensions previously defined in their settings.
     {% for vector in argilla_vectors_settings %}
     * (optional) **{{ vector.name }}** is of type `float32` and has a dimension of (1, `{{ vector.dimensions }}`).{% endfor %}
+{% endif %}
 
 Additionally, we also have two more fields that are optional and are the following:
 
