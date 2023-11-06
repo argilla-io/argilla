@@ -59,7 +59,6 @@ def test_dataset():
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
-
         api.init(api_key=owner.api_key)
 
         workspace = Workspace.create(f"workspace")
