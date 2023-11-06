@@ -310,6 +310,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         if names:
             helpers.validate_metadata_names(self.dataset, names)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def find_similar(
         self,
         vector_name: str,

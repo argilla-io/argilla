@@ -32,7 +32,7 @@ class TestSuiteSearchRecordsSDK:
         search_records(client=mock_httpx_client, id=dataset_id, vector_query=query, limit=max_results)
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
             params={"include": ["responses", "suggestions"], "limit": max_results},
             json={"query": {"vector": {"name": query.name, "record_id": str(query.record_id)}}},
         )
@@ -47,7 +47,7 @@ class TestSuiteSearchRecordsSDK:
         search_records(client=mock_httpx_client, id=dataset_id, vector_query=query, limit=max_results)
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
             params={"include": ["responses", "suggestions"], "limit": max_results},
             json={"query": {"vector": {"name": query.name, "value": query.value}}},
         )
@@ -69,7 +69,7 @@ class TestSuiteSearchRecordsSDK:
         )
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
             params={
                 "include": ["responses", "suggestions"],
                 "limit": max_results,
