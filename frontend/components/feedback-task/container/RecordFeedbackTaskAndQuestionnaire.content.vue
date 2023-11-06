@@ -11,6 +11,9 @@
         :recordCriteria="recordCriteria"
         :record="record"
       />
+      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+      </div>
     </section>
 
     <QuestionsFormComponent
@@ -23,10 +26,6 @@
       @on-submit-responses="goToNext"
       @on-discard-responses="goToNext"
     />
-
-    <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
-      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-    </div>
   </div>
 </template>
 
