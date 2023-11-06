@@ -1,0 +1,24 @@
+name: Run Argilla frontend tests
+
+on:
+  workflow_call:
+
+jobs:
+  run-frontend-tests:
+    name: Argilla frontend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: cd frontend && npm install
+
+      - name: Run lint
+        run: cd frontend && npm run-script lint
+
+      - name: Run tests
+        run: cd frontend && npm run-script test

@@ -109,10 +109,15 @@ jobs:
             runsOn: extended-runner
     name: Run unit tests with extra engines
     uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
+    needs:
+      - check_repo_files
+      - install_python_dependencies
     if: |
+      !cancelled() &&
       needs.check_repo_files.outputs.pythonChanges == 'true' &&
-      startsWith(github.event.ref, 'refs/tags/v')
+      startsWith(github.event.ref, 'refs/tags/v') &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     with:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
@@ -134,6 +139,12 @@ jobs:
       pytestArgs: tests/integration
     secrets: inherit
 
+  run_frontend_tests:
+    name: Run frontend tests
+    uses: ./.github/workflows/run-frontend-tests.yml
+    needs: check_repo_files
+    # if: needs.check_repo_files.outputs.frontendChanges == 'true'
+
   push_coverage:
     name: Upload code coverage
     runs-on: ubuntu-latest
@@ -154,8 +165,17 @@ jobs:
   build_python_package:
     name: Build Argilla python package
     uses: ./.github/workflows/build-python-package.yml
-    needs: deployable_check
-    if: needs.deployable_check.outputs.isDeployable == 'true'
+    needs:
+      - deployable_check
+      - run_unit_tests
+      - run_unit_test_with_extra_engines
+      - run_integration_tests
+      - run_frontend_tests
+    if: |
+      !cancelled() &&
+      needs.deployable_check.outputs.isDeployable == 'true' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     secrets: inherit
 
   build_server_docker_image_linux_amd64:
