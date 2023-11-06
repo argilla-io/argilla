@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 
@@ -119,49 +119,40 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """Returns whether if adding extra metadata to the records of the dataset is allowed"""
         return self._allow_extra_metadata
 
+    def __get_property_by_name(self, item_name: str, iterable_items, item_type: str):
+        for item in iterable_items:
+            if item.name == item_name:
+                return item
+        warnings.warn(
+            f"{item_type} with name='{item_name}' not found, available {item_type} names are:"
+            f" {', '.join(item.name for item in iterable_items)}"
+        )
+
     @property
     def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
         """Returns the fields that define the schema of the records in the dataset."""
         return self._fields
 
-    def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
+    def field_by_name(self, name: str) -> Optional[Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]]:
         """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the field to return.
-
-        Raises:
-            ValueError: if the field with the given name does not exist.
         """
-        for field in self._fields:
-            if field.name == name:
-                return field
-        raise ValueError(
-            f"Field with name='{name}' not found, available field names are:"
-            f" {', '.join(f.name for f in self._fields)}"
-        )
+        return self.__get_property_by_name(name, self._fields, "field")
 
     @property
     def questions(self) -> Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]]:
         """Returns the questions that will be used to annotate the dataset."""
         return self._questions
 
-    def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
+    def question_by_name(self, name: str) -> Optional[Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]]:
         """Returns the question by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the question to return.
-
-        Raises:
-            ValueError: if the question with the given name does not exist.
         """
-        for question in self._questions:
-            if question.name == name:
-                return question
-        raise ValueError(
-            f"Question with name='{name}' not found, available question names are:"
-            f" {', '.join(q.name for q in self._questions)}"
-        )
+        return self.__get_property_by_name(name, self._questions, "question")
 
     @property
     def metadata_properties(
@@ -172,30 +163,13 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     def metadata_property_by_name(
         self, name: str
-    ) -> Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]:
+    ) -> Optional[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]]:
         """Returns the metadata property by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the metadata property to return.
-
-        Raises:
-            KeyError: if the metadata property with the given name does not exist.
         """
-        existing_metadata_properties = self.metadata_properties
-        if not existing_metadata_properties:
-            raise ValueError(
-                "The current `FeedbackDataset` has no `metadata_properties` defined, please add them first via"
-                " `FeedbackDataset.add_metadata_property`."
-            )
-
-        for metadata_property in existing_metadata_properties:
-            if metadata_property.name == name:
-                return metadata_property
-
-        raise KeyError(
-            f"Metadata property with name='{name}' not found, available metadata property names are:"
-            f" {', '.join([metadata_property.name for metadata_property in existing_metadata_properties])}"
-        )
+        return self.__get_property_by_name(name, self.metadata_properties, "metadata property")
 
     @abstractmethod
     def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
