@@ -99,7 +99,7 @@ trainer = ArgillaTrainer(
 ```
 
 :::{note}
-You can take a look at [filter and query datasets](./filter_dataset.md) page in the docs to learn more about how to filter and sort datasets.
+You can take a look at [filter and query datasets](/practical_guides/fine_tune.md) page in the docs to learn more about how to filter and sort datasets.
 :::
 
 #### Huggingface hub Integration
