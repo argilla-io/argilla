@@ -91,6 +91,11 @@ The **metadata** is a dictionary that can be used to provide additional informat
 {% endfor %}
 {% endif %}
 
+| Metadata Name | Title | Type | Values | Visible for Annotators |
+| ------------- | ----- | ---- | ------ | ---------------------- |
+{% for metadata in argilla_metadata_properties %} | {{ metadata.name }} | {{ metadata.title }} | {{ metadata.type }} | {% if metadata.values %}{{ metadata.values }}{% else %}{{ metadata.min }} - {{ metadata.max }}{% endif %} | {{ metadata.visible_for_annotators }} |
+{% endfor %}
+
 The **guidelines**, are optional as well, and are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
 
 ### Data Instances
