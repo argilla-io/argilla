@@ -22,6 +22,7 @@ from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.model_card import SentenceTransformerCardData
 
 
 class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
@@ -345,3 +346,41 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             # dataset for example should be done taking the extra information from the argilla
             # dataset instead of the defaults
             self._trainer.save(output_dir, model_name=None, create_model_card=False, train_datasets=None)
+
+    def get_model_card_data(self, **card_data_kwargs) -> "SentenceTransformerCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SentenceTransformerCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import SentenceTransformerCardData
+
+        return SentenceTransformerCardData(
+            model_id=self._model,
+            task=self._task,
+            framework_kwargs={"cross_encoder": self._cross_encoder},
+            update_config_kwargs={**self.trainer_kwargs, **self.model_kwargs, **self.data_kwargs},
+            trainer_cls=self._trainer_cls,
+            **card_data_kwargs,
+        )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the model to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [sentence-transformer api docs](https://www.sbert.net/docs/package_reference/SentenceTransformer.html#sentence_transformers.SentenceTransformer.save_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError:
+                For `CrossEncoder` models, that currently aren't implemented underneath.
+        """
+        raise NotImplementedError("This method is not implemented for `ArgillaSentenceTransformersTrainer`.")

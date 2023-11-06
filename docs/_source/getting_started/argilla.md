@@ -26,7 +26,7 @@
 | [⚙️ Configuration](/getting_started/installation/configurations/configurations)  | User management and **deployment tweaking**                       |
 | [💥 Concepts about LLMs](/conceptual_guides/llm/llm)                            | Generative AI, **ChatGPT and friends**                            |
 | [🦮 Practical Guides](/practical_guides/practical_guides)                       | **Conceptual overview** of our main functionalities               |
-| [🧗‍♀️ Tutorials](/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
+| [🧗‍♀️ Tutorials](/tutorials_and_integrations/tutorials/tutorials)                                            | Specific **applied end-to-end examples**                          |
 | [🏷️ References](/reference/python/index)                                        | Itemized information and **API docs**                             |
 | [🏘️ Community](/community/contributing)                                         | Everything about for **developers and contributing**              |
 | [🗺️ Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1)            | Our **future plans**                                              |
@@ -35,11 +35,11 @@
 
 Argilla is built on 5 core components:
 
-- **Python SDK**: A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration and annotation workflows.
+- **Python SDK**: A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration, and annotation workflows.
 - **FastAPI Server**: The core of Argilla is a *Python FastAPI* server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
 - **Relational Database**: A relational database to store the metadata of the records and the annotations. *SQLite* is used as the default built-in option and is deployed separately with the Argilla Server but a separate *PostgreSQL* can be used too.
 - **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support *ElasticSearch* and *AWS OpenSearch* and they can be deployed as separate Docker images.
-- **Vue.js UI**: A web application to visualize and annotate your data, users and teams. It is built with *Vue.js* and is directly deployed alongside the Argilla Server within our Argilla Docker image.
+- **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with *Vue.js* and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
 ## 📏 Principles
 
@@ -47,7 +47,7 @@ Argilla is built on 5 core components:
 
 - **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions and collect more data to improve your model over time. Argilla is designed to close this gap, enabling you to **iterate as much as you need**.
 
-- **User and Developer Experience**: The key to sustainable NLP solutions are to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Argilla optimizes the experience for these core users to **make your teams more productive**.
+- **User and Developer Experience**: The key to sustainable NLP solutions is to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Argilla optimizes the experience for these core users to **make your teams more productive**.
 
 - **Beyond hand-labeling**: Classical hand-labeling workflows are costly and inefficient, but having humans in the loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision in **novel** data annotation workflows\*\*.
 

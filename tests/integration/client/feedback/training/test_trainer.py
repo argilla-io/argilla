@@ -32,6 +32,8 @@ from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.records import SortBy
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
@@ -46,6 +48,8 @@ from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from tests.integration.training.helpers import train_with_cleanup
+
 __OUTPUT_DIR__ = "tmp"
 
 
@@ -55,7 +59,6 @@ __OUTPUT_DIR__ = "tmp"
         Framework("spacy"),
         Framework("spacy-transformers"),
         Framework("transformers"),
-        Framework("spark-nlp"),
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
@@ -113,8 +116,11 @@ def test_prepare_for_training_text_classification_with_defaults(
 
 
 @pytest.mark.parametrize(
-    ("framework", "model_id"),
-    [(Framework("transformers"), "bert-base-cased"), (Framework("peft"), "distilbert-base-cased")],
+    "framework, model_id, target_modules",
+    [
+        (Framework("transformers"), "distilbert-base-cased", None),
+        (Framework("peft"), "distilbert-base-cased", ["q_lin", "k_lin"]),
+    ],
 )
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
@@ -125,6 +131,7 @@ def test_prepare_for_training_text_classification_with_defaults(
 def test_argilla_trainer_text_classification_with_model_tokenizer(
     framework: Union[Framework, str],
     model_id: str,
+    target_modules: Union[List[str], None],
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -145,17 +152,16 @@ def test_argilla_trainer_text_classification_with_model_tokenizer(
 
     model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=3)
     tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", add_prefix_space=True)
-    # Set some values to track and assert later
-    model.test_value = 12
-    tokenizer.test_value = 12
     if not (framework == Framework("peft") and sys.version_info < (3, 9)):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model, tokenizer=tokenizer)
-        trainer.update_config(num_steps=1)
+        trainer.update_config(num_steps=1, target_modules=target_modules)
         trainer.train(__OUTPUT_DIR__)
 
-        # Verify that the passed model and tokenizer are used
-        assert trainer._trainer._transformers_model.test_value == 12
-        assert trainer._trainer._transformers_tokenizer.test_value == 12
+        # Assert that the provided tokenizer is used
+        assert (
+            trainer._trainer._transformers_tokenizer.pretrained_init_configuration
+            == tokenizer.pretrained_init_configuration
+        )
 
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
@@ -362,3 +368,132 @@ def test_tokenizer_warning_wrong_framework(
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
         ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
+
+
+@pytest.mark.parametrize(
+    "framework",
+    [
+        Framework("spacy"),
+        Framework("spacy-transformers"),
+        Framework("transformers"),
+        Framework("setfit"),
+        Framework("peft"),
+        # The FeedbackDataset needs to work with token classification for this framework to work.
+        Framework("span_marker"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    framework: Union[Framework, str],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    mocked_trainer_push_to_huggingface,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    if framework == Framework("span_marker"):
+        with pytest.raises(
+            NotImplementedError,
+            match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
+        ):
+            ArgillaTrainer(dataset=dataset, task=task, framework=framework)
+        return
+
+    else:
+        if framework == Framework("spacy"):
+            model = "en_core_web_sm"
+        elif framework == Framework("setfit"):
+            model = "all-MiniLM-L6-v2"
+        else:
+            model = "prajjwal1/bert-tiny"
+
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model)
+
+    # We need to initialize the model (is faster than calling the whole training process) before calling push_to_huggingface.
+    # The remaining models need to call the train method first.
+    repo_id = "mocked"
+    if framework in (Framework("transformers"), Framework("peft")):
+        trainer.update_config(num_iterations=1)
+        trainer._trainer.init_model(new=True)
+    elif framework in (Framework("setfit"), Framework("spacy"), Framework("spacy-transformers")):
+        if framework in (Framework("spacy"), Framework("spacy-transformers")):
+            trainer.update_config(max_steps=1)
+            repo_id = __OUTPUT_DIR__
+        else:
+            trainer.update_config(num_iterations=1)
+    else:
+        trainer._trainer.init_model()
+
+    # We have to train the model and push it with spacy before removing the
+    # generated folder, as it needs to be packaged.
+    if framework in (Framework("spacy"), Framework("spacy-transformers")):
+        trainer.train(__OUTPUT_DIR__)
+    else:
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
+
+    # This functionality is mocked, no need to check the generated card too.
+    trainer.push_to_huggingface(repo_id, generate_card=False)
+    if Path(__OUTPUT_DIR__).exists():
+        shutil.rmtree(__OUTPUT_DIR__)
+
+
+@pytest.mark.parametrize(
+    "statuses, sort_by, sorted_results",
+    [
+        ([], None, [2, 4, 4, 5, 6, 2, 4, 4, 5, 6]),
+        ([], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 6, 5, 5, 4, 4, 4, 4, 2, 2]),
+        ([ResponseStatusFilter.missing], [SortBy(field="metadata.integer-metadata", order="desc")], [4, 4]),
+        ([ResponseStatusFilter.discarded], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 5, 4, 2]),
+        ([ResponseStatusFilter.submitted], None, [2, 4, 5, 6]),
+        (
+            [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],
+            [SortBy(field="metadata.integer-metadata", order="asc")],
+            [2, 2, 4, 4, 5, 5, 6, 6],
+        ),
+    ],
+)
+def test_trainer_with_filter_by_and_sort_by(
+    test_remote_dataset_with_records: "FeedbackDataset",
+    statuses: List[ResponseStatusFilter],
+    sort_by: SortBy,
+    sorted_results,
+) -> None:
+    questions = [
+        question
+        for question in test_remote_dataset_with_records.questions
+        if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=test_remote_dataset_with_records.fields[0], label=label)
+    filter_by = None if len(statuses) == 0 else {"response_status": statuses}
+
+    assert len(test_remote_dataset_with_records) == 10  # Number of records before filtering/sorting
+    trainer = ArgillaTrainer(
+        dataset=test_remote_dataset_with_records,
+        task=task,
+        framework="transformers",
+        model="prajjwal1/bert-tiny",
+        filter_by=filter_by,
+        sort_by=sort_by,
+    )
+    metadatas = [r.metadata["integer-metadata"] for r in trainer._dataset.pull().records]
+    assert len(trainer._dataset) == len(sorted_results)
+    assert all([r == m for r, m in zip(sorted_results, metadatas)])

@@ -4,11 +4,11 @@
 
 **What? Different datasets?**
 
-First things first, Argilla offers two generations of datasets. The new `FeedbackDataset` and the older datasets called the `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
+First things first, Argilla offers two generations of datasets. The new `FeedbackDataset` and the older datasets called `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
 
 **Why the new `FeedbackDataset`?**
 
-In short, the `FeedbackDataset` is a fully configurable dataset that can be used for any NLP task including LLM-focused tasks. The older datasets are focused on a single NLP task. As a result, the `FeedbackDataset` is more flexible and can be used for a wider range of use cases including all NLP tasks of the older datasets. The older datasets are more feature rich in certain points but no new features are introduced, on the other hand, the `FeedbackDataset` is currently less feature rich in certain points but new features will actively be added over time.
+In short, the `FeedbackDataset` is a fully configurable dataset that can be used for any NLP task including LLM-focused tasks. The older datasets are focused on a single NLP task. As a result, the `FeedbackDataset` is more flexible and can be used for a wider range of use cases including all NLP tasks of the older datasets. The older datasets are more feature-rich in certain points but no new features are introduced, on the other hand, the `FeedbackDataset` is currently less feature-rich in certain points but new features will actively be added over time.
 
 **Will the older datasets be deprecated?**
 
@@ -20,7 +20,7 @@ At the moment, the older datasets are better when doing basic Text Classificatio
 
 **When should I use `FeedbackDataset` better?**
 
-The `FeedbackDataset` is better when you need to do more `complex tasks` that need to represented in `one coherent UI`. This is extremely useful for `LLM` workflows where you need to do `multiple tasks` on the same record. The `FeedbackDataset` also supports `multiple annotators` per record, `customizable tasks` and `synchronization with a database`. However, it does not support `vector search`, `weak supervision` or `active learning` yet.
+The `FeedbackDataset` is better when you need to do more `complex tasks` that need to be represented in `one coherent UI`. This is extremely useful for `LLM` workflows where you need to do `multiple tasks` on the same record. The `FeedbackDataset` also supports `multiple annotators` per record, `customizable tasks` and `synchronization with a database`. However, it does not support `vector search`, `weak supervision` or `active learning` yet.
 
 **When will all the cool features of the older datasets be available in the `FeedbackDataset`?**
 
@@ -34,11 +34,16 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 |-------------------------------	|-----------------	|-------------------|
 | Text classification           	| ✔️               	| ✔️                  |
 | Token classificaiton          	|                 	| ✔️                  |
-| Text2text                     	| ✔️               	| ✔️                   |
-| RLHF               	| ✔️               	|                              	|
-| RAG               	| ✔️               	|                              	|
+| Summarization                  	| ✔️               	| ✔️                   |
+| Translation                  	| ✔️               	| ✔️                   |
+| NLI                  	| ✔️               	| ✔️                   |
 | Sentence Similarity               	| ✔️               	|                              	|
 | Question Answering               	| ✔️               	|                              	|
+| RLHF (SFT)               	| ✔️               	|                              	|
+| RLHF (RM)               	| ✔️               	|                              	|
+| RLHF (PPO)               	| ✔️               	|                              	|
+| RLHF (DPO)               	| ✔️               	|                              	|
+| RAG               	| ✔️               	|                              	|
 | Image support               	| ✔️               	|                              	|
 | And many more               	| ✔️               	|                              	|
 
@@ -65,8 +70,8 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 |-------------------------------	|-----------------	|-------------------|
 | Record status filters 	| ✔️               	| ✔️                   |
 | Text query 	            | ✔️               	| ✔️                   |
-| Metadata filters       	|                	| ✔️                   |
-| Sorting 	            |                	| ✔️                   |
+| Metadata filters       	| ✔️               	| ✔️                   |
+| Sorting 	                | ✔️             	| ✔️                   |
 | Prediction filters 	            |                	| ✔️                   |
 | Annotation filters 	            |                	| ✔️                   |
 | Similarity search 	            |                	| ✔️                   |

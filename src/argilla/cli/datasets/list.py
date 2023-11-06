@@ -31,7 +31,7 @@ def list_datasets(
 
     from argilla.cli.rich import echo_in_panel, get_argilla_themed_table
     from argilla.client.api import list_datasets as list_datasets_api
-    from argilla.client.feedback.dataset.local import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.workspaces import Workspace
 
     console = Console()

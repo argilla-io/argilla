@@ -16,7 +16,8 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 :::
 ​
 ```python
-dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
+remote_dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
+local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
 ```
 ​
 At this point, you can do any post-processing you may need with this dataset e.g., [unifying responses](collect_responses.ipynb) from multiple annotators. Once you're happy with the result, you can decide on some of the following options to save it.
@@ -31,6 +32,7 @@ When using a `FeedbackDataset` pulled from Argilla via `FeedbackDataset.from_arg
 ```python
 # This publishes the dataset with its records to Argilla and returns the dataset in Argilla
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
+local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
 ```
 :::
 
@@ -62,7 +64,7 @@ dataset.push_to_huggingface("argilla/my-dataset")
 dataset.push_to_huggingface("argilla/my-dataset", private=True, token="...")
 ```
 ​
-Note that the `FeedbackDataset.push_to_huggingface()` method uploads not just the dataset records, but also a configuration file named `argilla.yaml`, that contains the dataset configuration i.e. the fields, questions, and guidelines, if any. This way you can load any `FeedbackDataset` that has been pushed to the Hub back in Argilla using the `from_huggingface` method.
+Note that the `FeedbackDataset.push_to_huggingface()` method uploads not just the dataset records, but also a configuration file named `argilla.yaml`, that contains the dataset configuration i.e. the fields, questions, and guidelines, if any. This way you can load any `FeedbackDataset` that has been pushed to the Hub back in Argilla using the `from_huggingface` method. Take a look at [all public Argilla compatible datasets on the Hugging Face hub](https://huggingface.co/datasets?other=argilla).
 ​
 ```python
 # Load a public dataset
@@ -78,7 +80,7 @@ The args and kwargs of `push_to_huggingface` are the args of `push_to_hub` from 
 ​
 ### Save to disk
 ​
-Additionally, due to the integration with 🤗 Datasets, you can also export the records of a `FeedbackDataset` locally in your preferred format by converting the `FeedbackDataset` to a `datasets.Dataset` first using the method `format_as("datasets")`. Then, you may export the `datasets.Dataset` to either CSV, JSON, Parquet, etc. Check all the options in the [�� Datasets documentation](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk).
+Additionally, due to the integration with 🤗 Datasets, you can also export the records of a `FeedbackDataset` locally in your preferred format by converting the `FeedbackDataset` to a `datasets.Dataset` first using the method `format_as("datasets")`. Then, you may export the `datasets.Dataset` to either CSV, JSON, Parquet, etc. Check all the options in the 🤗[Datasets documentation](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk).
 ​
 ```python
 hf_dataset = dataset.format_as("datasets")
@@ -90,7 +92,7 @@ hf_dataset.to_parquet()  # Save as Parquet
 ```
 ​
 ```{note}
-This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to create a `FeedbackDataset` and add the records as explained [here](create_dataset.ipynb).
+This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to create a `FeedbackDataset` and add the records as explained [here](/practical_guides/create_dataset.md).
 ```
 ​
 ## Other datasets
@@ -143,9 +145,9 @@ dataset_ds.push_to_hub("my_dataset")
 ```
 ​
 ### Save to disk
-Your dataset will always be safe and accesible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
+Your dataset will always be safe and accessible from Argilla, but in case you need to share or save it somewhere else, here are a couple of options.
 ​
-Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as csv, json, parquet, etc.
+Alternatively, you can save the dataset locally. To do that, we recommend formatting the dataset as a [Hugging Face Dataset](https://huggingface.co/docs/datasets/v2.12.0/en/package_reference/main_classes#datasets.Dataset.save_to_disk) or [Pandas DataFrame](https://pandas.pydata.org/docs/reference/io.html) first and use the methods native to these libraries to export as CSV, JSON, Parquet, etc.
 ​
 ```python
 # save locally using Hugging Face datasets

@@ -55,27 +55,45 @@ jobs:
           - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
-            runsOn: ubuntu-latest
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.0.1
-            runsOn: ubuntu-latest
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-7.17.11
-            runsOn: ubuntu-latest
+            runsOn: extended-runner
           - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
             searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
             coverageReport: coverage-opensearch-2.4.1
-            runsOn: ubuntu-latest
-          - searchEngineDockerImage: opensearchproject/opensearch:1.3.11
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-1.3.11
             runsOn: ubuntu-latest
     name: Run unit tests
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
+    with:
+      searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
+      searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
+      coverageReport: coverage
+      runsOn: ${{ matrix.runsOn }}
+      pytestArgs: tests/unit
+    secrets: inherit
+
+  run_unit_test_with_extra_engines:
+    strategy:
+      matrix:
+        include:
+          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
+            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+            coverageReport: coverage-elasticsearch-8.0.1
+            runsOn: extended-runner
+          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+            coverageReport: coverage-elasticsearch-7.17.11
+            runsOn: extended-runner
+          - searchEngineDockerImage: opensearchproject/opensearch:1.3.11
+            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
+            coverageReport: coverage-opensearch-1.3.11
+            runsOn: extended-runner
+    name: Run unit tests with extra engines
+    uses: ./.github/workflows/run-python-tests.yml
+    needs: check_repo_files
+    if: |
+      needs.check_repo_files.outputs.pythonChanges == 'true' &&
+      startsWith(github.event.ref, 'refs/tags/v')
     with:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
@@ -91,7 +109,6 @@ jobs:
       - check_repo_files
       - run_unit_tests
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
-    # continue-on-error: true
     with:
       runsOn: extended-runner
       coverageReport: coverage-extra

@@ -29,3 +29,6 @@ class DatabaseModel(DeclarativeBase, AsyncAttrs, CRUDMixin, TimestampMixin):
     __mapper_args__ = {"eager_defaults": True}
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
+    def is_relationship_loaded(self, relationship: str) -> bool:
+        return relationship in self.__dict__

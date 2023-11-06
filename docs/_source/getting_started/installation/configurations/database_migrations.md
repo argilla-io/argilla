@@ -2,7 +2,7 @@
 
 ## Argilla server database migrations
 
-Since Argilla 1.6.0, the information about users and workspaces, and the data of the `FeedbackDataset`s is stored in a SQL database (SQLite or PostgreSQL). That been said,
+Since Argilla 1.6.0, the information about users and workspaces, and the data of the `FeedbackDataset`s is stored in an SQL database (SQLite or PostgreSQL). That being said,
 every release of Argilla may require a database migration to update the database schema to the new version. This section explains how to perform the database migrations.
 
 In order to apply the migrations, a connection to the database needs to be established. In the case that SQLite is used, then the only way to apply the migrations is by
@@ -57,7 +57,7 @@ Path: /Users/gabrielmbmb/Source/Argilla/argilla/src/argilla/server/alembic/versi
     Create Date: 2023-07-24 12:47:11.715011
 ```
 
-### Apply latest migration
+### Apply the latest migration
 
 If the `migrate` command is called without any argument, then the latest migration will be applied.
 
@@ -65,7 +65,7 @@ If the `migrate` command is called without any argument, then the latest migrati
 argilla server database migrate
 ```
 
-### Apply an specific migration
+### Apply a specific migration
 
 The `migrate` command can also be used to apply a specific migration. To do so, the `--revision` option needs to be provided with the name of the revision or the Argilla
 version to which the database will be migrated.
@@ -75,10 +75,10 @@ argilla server database migrate migrate --revision 1.7
 ```
 
 :::{warning}
-Applying a revision that is older than the current revision of the database will revert the database to the state of that revision, which means that data could be lost.
+Applying a revision that is older than the current revision of the database will revert the database to the state of that revision, which means that the data could be lost.
 :::
 
-## Migrating from old schema
+## Migrating from the old schema
 
 For old Argilla versions, labels created from the UI were not included as part of a labeling schema. Instead, the UI used the dataset metadata index in Elastic Search to store
 this information.
@@ -89,7 +89,6 @@ From Argilla version v1.4.0, all labels will be created using the new label sche
 
 If you want to move this info to the corresponding label schema, you can execute the next code snippet:
 
-Here is a code snippet showing how to do it:
 
 ```python
 import argilla as rg
@@ -159,7 +158,7 @@ for dataset in empty_workspace_datasets:
 
 ## Reindex a dataset
 
-Sometimes updates require us to reindex the data.
+Sometimes, updates require us to reindex the data.
 
 ### Argilla Metrics
 
@@ -175,7 +174,7 @@ rg.log(ds, dataset)
 
 ### Elasticsearch
 
-For Elastic indices, re-indexing requires a bit more effort. To be certain of a proper re-indexing, we requires loading the records, and storing them within a completely new index.
+For Elastic indices, re-indexing requires a bit more effort. To be certain of a proper re-indexing, we require loading the records and storing them within a completely new index.
 
 ```python
 import argilla as rg

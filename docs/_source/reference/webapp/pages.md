@@ -16,15 +16,15 @@ The "_Search datasets_" bar on the top allows you to search for a specific datas
 ### Dataset list
 
 In the center of the page you see the list of datasets available for **your user account**.
-The list consists of following columns:
+The list consists of the following columns:
 
 - **Name**: The name of the dataset, can be sorted alphabetically.
 - **Workspace**: A filterable column showing the workspace to which the dataset belongs.
-- **Tags**: User defined tags for the dataset.
+- **Tags**: User-defined tags for the dataset.
 - **Created at**: When was the dataset first logged by the client.
 - **Updated at**: When was the dataset last modified, either via the Argilla web app or the client.
 
-### Side bar
+### Sidebar
 
 You can find a user icon and a refresh button on the top right:
 
@@ -35,7 +35,7 @@ You can find a user icon and a refresh button on the top right:
 ## Dataset
 
 ```{note}
-For a description of the UI and features related to the new Feedback Task datasets, please check [this guide](/guides/llms/practical_guides/annotate_dataset.md).
+For a description of the UI and features related to the new Feedback Task datasets, please check [this guide](/practical_guides/annotate_dataset).
 ```
 
 ![Dataset page](/_static/reference/webapp/pages-dataset_page.png)
@@ -50,7 +50,7 @@ The page is composed of 4 major components:
 
 Argilla's _search bar_ is a powerful tool that allows you to thoroughly explore your dataset, and quickly navigate through the records.
 You can either fuzzy search the contents of your records, or use the more advanced [query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html#query-string-syntax) of Elasticsearch to take full advantage of Argilla's [data models](/reference/python/python_client.rst).
-You can find more information about how to use the search bar in our detailed [search guide]( /guides/query_datasets.md).
+You can find more information about how to use the search bar in our detailed [search guide](/practical_guides/filter_dataset).
 
 ### Filters
 
@@ -77,7 +77,7 @@ Check out our [exploration](../webapp/features.md#explore-records) and [annotati
 
 #### Text classification
 
-In this task the predictions are given as tags below the input text.
+In this task, the predictions are given as tags below the input text.
 They contain the label as well as a percentage score.
 When in [Explore mode](#modes) annotations are shown as tags on the right together with a symbol indicating if the predictions match the annotations or not.
 When in [Annotate mode](#modes) predictions and annotations share the same labels (annotation labels are darker).
@@ -90,8 +90,8 @@ If the record has multiple inputs, these will appear in alphabetical order.
 
 #### Token classification
 
-In this task annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
-At the top of the record list you will find a legend that connects the colors to the respective labels.
+In this task, annotations are given as colored highlights in the input text, while predictions are indicated by underlines.
+At the top of the record list, you will find a legend that connects the colors to the respective labels.
 When in [Annotate mode](#modes) you can remove annotations or add new ones by simply selecting the desired text.
 
 ```{hint}
@@ -119,15 +119,15 @@ This section of the sidebar lets you switch between the different Argilla modes 
 
 #### Metrics
 
-In this section you find several "metrics" that can provide valuable insights to your dataset.
+In this section, you find several "metrics" that can provide valuable insights to your dataset.
 They also provide some support while annotating your records, or defining heuristic rules.
-There are three different kind of _metrics_:
+There are three different kinds of _metrics_:
 
 - **Progress**: see metrics of your annotation process, like its progress and the label distribution (only visible in the _Explore_ and _Annotate_ mode)
 - **Overall rule metrics**: see aggregated metrics about your defined rules (only visible in the _Define rules_ mode)
 - **Stats**: check the keywords of your dataset (text classification, text generation) or the mentions of your annotations and predictions (token classification)
 
-You can find more information about each metric in our dedicated [metrics guide](/guides/measure_datasets_with_metrics).
+You can find more information about each metric in our dedicated [metrics guide](/practical_guides/collect_responses).
 
 #### Refresh
 
@@ -156,7 +156,7 @@ You can edit each field's title and activate the markdown format for each.
 
 #### Questions
 
-You have the ability to edit questions and their descriptions, activate markdown formatting for each question, and preview the results in real-time.
+You have the ability to edit questions and their descriptions, activate markdown formatting for each question, and preview the results in real time.
 
 #### Danger zone
 
@@ -176,7 +176,7 @@ Support for editing this will only be added for the Feedback Task dataset.
 
 ### Labels
 
-Here you can [define your labeling schema](/guides/log_load_and_prepare_data) for this dataset, see the current one and add new labels to it.
+Here you can [define your labeling schema](/practical_guides/create_dataset) for this dataset, see the current one and add new labels to it.
 
 ### Danger zone
 
@@ -200,4 +200,4 @@ These are your user details. The `username` shows the username used as login for
 
 ### API key
 
-Here you can copy your API key that you can use to conect to Argilla from the Python client.
+Here you can copy your API key that you can use to connect to Argilla from the Python client.

@@ -4,6 +4,8 @@ import SvgIcon from "vue-svgicon";
 import nuxtConfig from "./nuxt.config";
 Vue.use(SvgIcon);
 Vue.directive("click-outside", {});
+Vue.config.devtools = false;
+Vue.config.productionTip = false;
 
 // these boolean switches turn off the build for all but the store
 const resetConfig = {

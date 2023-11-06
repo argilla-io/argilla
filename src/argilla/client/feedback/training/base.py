@@ -16,7 +16,8 @@ import os
 import textwrap
 import warnings
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
@@ -30,6 +31,9 @@ if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.schemas.records import SortBy
 
 
 class ArgillaTrainer(ArgillaTrainerV1):
@@ -44,6 +48,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
         train_size: Optional[float] = None,
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
         framework_kwargs: Optional[dict] = {},
     ) -> None:
         """
@@ -67,9 +73,20 @@ class ArgillaTrainer(ArgillaTrainerV1):
             gpu_id: the GPU ID to use when training a SpaCy model. Defaults to -1, which means that the CPU
                 will be used by default. GPU IDs start in 0, which stands for the default GPU in the system,
                 if available.
-            framework_kwargs: arguments for the framework's trainer.
+            filter_by: A dict with key the field to filter by, and values the filters to apply. Currently only
+                defined for `response_status` filters. Can be one of: draft, pending, submitted, and discarded.
+                Defaults to `None` (no filter is applied).
+            sort_by: A list of `SortBy` objects to sort your dataset by.
+                Defaults to `None` (no filter is applied).
+            framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
+                for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
         """
+        if filter_by:
+            dataset = dataset.filter_by(**filter_by)
+        if sort_by:
+            dataset = dataset.sort_by(sort_by)
+
         self._dataset = dataset
         self._train_size = train_size
         self._task = task
@@ -92,6 +109,12 @@ class ArgillaTrainer(ArgillaTrainerV1):
             warnings.warn(
                 f"Passing a tokenizer is not supported for the {framework} framework.", UserWarning, stacklevel=2
             )
+
+        # Save the model_card arguments if given by the user
+        if model_card_kwargs := framework_kwargs.pop("model_card_kwargs", None):
+            self.model_card_kwargs = model_card_kwargs
+        else:
+            self.model_card_kwargs = {}
 
         if framework is Framework.SETFIT:
             if not isinstance(task, TrainingTaskForTextClassification):
@@ -246,6 +269,79 @@ class ArgillaTrainer(ArgillaTrainerV1):
         """
         return self._trainer.predict(text=text, as_argilla_records=False, **kwargs)
 
+    def save(self, output_dir: str, generate_card: bool = True) -> None:
+        """
+        Saves the model to the specified path and optionally generates a `ModelCard` at the same `output_dir`.
+
+        Args:
+            output_dir: The path to the directory where the model will be saved.
+            generate_card: Whether to generate a model card of the `ArgillaTrainer` for the HuggingFace Hub. Defaults
+                to `True`.
+        """
+        super().save(output_dir)
+
+        if generate_card:
+            self.generate_model_card(output_dir)
+
+    def generate_model_card(self, output_dir: Optional[str] = None) -> "ArgillaModelCard":
+        """Generate and return a model card based on the model card data.
+
+        Args:
+            output_dir: If given, folder where the model card will be written.
+
+        Returns:
+            model_card: The model card.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
+
+        if not self.model_card_kwargs.get("output_dir"):
+            self.model_card_kwargs.update({"output_dir": f'"{output_dir}"'})
+
+        model_card = ArgillaModelCard.from_template(
+            card_data=self._trainer.get_model_card_data(**self.model_card_kwargs),
+            template_path=ArgillaModelCard.default_template_path,
+        )
+
+        if output_dir:
+            model_card_path = Path(output_dir) / "README.md"
+            model_card.save(model_card_path)
+            self._logger.info(f"Model card generated at: {model_card_path}")
+
+        return model_card
+
+    def push_to_huggingface(self, repo_id: str, generate_card: Optional[bool] = True, **kwargs) -> None:
+        """Push your model to [huggingface's model hub](https://huggingface.co/models).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+            generate_card:
+                Whether to generate (and push) a model card for your model. Defaults to True.
+        """
+        if not kwargs.get("token"):
+            # Try obtaining the token with huggingface_hub utils as a last resort, or let it fail.
+            from huggingface_hub import HfFolder
+
+            if token := HfFolder.get_token():
+                kwargs["token"] = token
+
+            # One last check for the tests. We use a different env var name
+            # that the one gathered with HfFolder.get_token
+            if token := kwargs.get("token", os.environ.get("HF_HUB_ACCESS_TOKEN", None)):
+                kwargs["token"] = token
+
+        url = self._trainer.push_to_huggingface(repo_id, **kwargs)
+
+        if generate_card:
+            model_card = self.generate_model_card()
+            # For spacy based models, overwrite the repo_id with the url variable returned
+            # from its trainer.
+            if getattr(self._trainer, "language", None):
+                repo_id = url
+
+            model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
+
 
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
@@ -306,4 +402,16 @@ class ArgillaTrainerSkeleton(ABC):
     def save(self, output_dir: str) -> None:
         """
         Saves the model to the specified path.
+        """
+
+    @abstractmethod
+    def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
+        """
+        Generates a `FrameworkCardData` instance to generate a model card from.
+        """
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
+        """
+        Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
         """

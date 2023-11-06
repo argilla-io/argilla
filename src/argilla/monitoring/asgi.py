@@ -61,7 +61,7 @@ def text_classification_mapper(inputs, outputs):
 
 class CachedJsonRequest(Request):
     """
-    We must a cached version of incoming requests since request body cannot be read from middleware directly.
+    We must have a cached version of incoming requests since the request body cannot be read from middleware directly.
     See <https://github.com/encode/starlette/issues/847> for more information
 
     TODO Remove usage of CachedRequest when https://github.com/encode/starlette/pull/848 is released
@@ -82,7 +82,7 @@ class CachedJsonRequest(Request):
 
 
 class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
-    """An standard starlette middleware that enables argilla logs for http prediction requests"""
+    """A standard Starlette middleware that enables argilla logs for http prediction requests"""
 
     def __init__(
         self,

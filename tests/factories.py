@@ -11,14 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import datetime
 import inspect
 
 import factory
-from argilla.server.enums import FieldType
+from argilla.server.enums import FieldType, MetadataPropertyType
 from argilla.server.models import (
     Dataset,
     Field,
+    MetadataProperty,
     Question,
     QuestionType,
     Record,
@@ -213,8 +215,6 @@ class RecordFactory(BaseFactory):
     external_id = factory.Sequence(lambda n: f"external-id-{n}")
     dataset = factory.SubFactory(DatasetFactory)
 
-    inserted_at = factory.Sequence(lambda n: datetime.datetime.utcnow() + datetime.timedelta(seconds=n))
-
 
 class ResponseFactory(BaseFactory):
     class Meta:
@@ -237,17 +237,52 @@ class TextFieldFactory(FieldFactory):
     settings = {"type": FieldType.text.value, "use_markdown": False}
 
 
+class MetadataPropertyFactory(BaseFactory):
+    class Meta:
+        model = MetadataProperty
+
+    # TODO: Remove this method and fix possible failing tests
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        default_settings = getattr(cls, "settings", {})
+        settings = kwargs.get("settings", {})
+        if settings:
+            new_settings = default_settings.copy()
+            new_settings.update(settings)
+            kwargs["settings"] = new_settings
+        return super()._create(model_class, *args, **kwargs)
+
+    name = factory.Sequence(lambda n: f"metadata-property-{n}")
+    title = "Metadata property title"
+    allowed_roles = [UserRole.admin, UserRole.annotator]
+    dataset = factory.SubFactory(DatasetFactory)
+
+
+class TermsMetadataPropertyFactory(MetadataPropertyFactory):
+    settings = {"type": MetadataPropertyType.terms, "values": ["a", "b", "c"]}
+
+
+class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
+    settings = {"type": MetadataPropertyType.integer}
+
+
+class FloatMetadataPropertyFactory(MetadataPropertyFactory):
+    settings = {"type": MetadataPropertyType.float}
+
+
 class QuestionFactory(BaseFactory):
     class Meta:
         model = Question
 
+    # TODO: Remove this method and fix possible failing tests
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         default_settings = cls.settings.copy()
         settings = kwargs.get("settings", {})
         if settings:
-            default_settings.update(settings)
-            kwargs["settings"] = default_settings
+            new_settings = default_settings.copy()
+            new_settings.update(settings)
+            kwargs["settings"] = new_settings
         return super()._create(model_class, *args, **kwargs)
 
     name = factory.Sequence(lambda n: f"question-{n}")

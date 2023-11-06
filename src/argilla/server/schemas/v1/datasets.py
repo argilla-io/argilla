@@ -13,24 +13,27 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
+from fastapi import Query
 from pydantic import BaseModel, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
+from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
-from argilla.server.search_engine import Query
+from argilla.server.search_engine import StringQuery
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.enums import FieldType
-from argilla.server.models import DatasetStatus, QuestionSettings, QuestionType, ResponseStatus
+from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
+from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
 DATASET_NAME_MIN_LENGTH = 1
@@ -52,12 +55,17 @@ QUESTION_CREATE_TITLE_MAX_LENGTH = 500
 QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
 QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
+METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
+METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
+
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
 
 RATING_LOWER_VALUE_ALLOWED = 1
 RATING_UPPER_VALUE_ALLOWED = 10
-
 
 VALUE_TEXT_OPTION_VALUE_MIN_LENGTH = 1
 VALUE_TEXT_OPTION_VALUE_MAX_LENGTH = 200
@@ -71,18 +79,26 @@ LABEL_SELECTION_OPTIONS_MAX_ITEMS = 250
 LABEL_SELECTION_MIN_VISIBLE_OPTIONS = 3
 
 RANKING_OPTIONS_MIN_ITEMS = 2
+RANKING_OPTIONS_MAX_ITEMS = 50
 
+TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
+TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
+
+RECORDS_UPDATE_MIN_ITEMS = 1
+RECORDS_UPDATE_MAX_ITEMS = 1000
 
 
 class Dataset(BaseModel):
     id: UUID
     name: str
     guidelines: Optional[str]
+    allow_extra_metadata: bool
     status: DatasetStatus
     workspace_id: UUID
+    last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
 
@@ -108,6 +124,7 @@ DatasetGuidelines = Annotated[
 class DatasetCreate(BaseModel):
     name: DatasetName
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: bool = True
     workspace_id: UUID
 
 
@@ -158,7 +175,9 @@ class Fields(BaseModel):
 
 FieldName = Annotated[
     constr(
-        regex=FIELD_CREATE_NAME_REGEX, min_length=FIELD_CREATE_NAME_MIN_LENGTH, max_length=FIELD_CREATE_NAME_MAX_LENGTH
+        regex=FIELD_CREATE_NAME_REGEX,
+        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     ),
     PydanticField(..., description="The name of the field"),
 ]
@@ -269,6 +288,7 @@ class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     options: conlist(
         item_type=ValueTextQuestionSettingsOption,
         min_items=RANKING_OPTIONS_MIN_ITEMS,
+        max_items=RANKING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -302,22 +322,36 @@ class Questions(BaseModel):
     items: List[Question]
 
 
-class QuestionCreate(BaseModel):
-    name: constr(
+QuestionName = Annotated[
+    constr(
         regex=QUESTION_CREATE_NAME_REGEX,
         min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
-    )
-    title: constr(
+    ),
+    PydanticField(..., description="The name of the question"),
+]
+
+QuestionTitle = Annotated[
+    constr(
         min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
         max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
-    )
-    description: Optional[
-        constr(
-            min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
-            max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
-        )
-    ]
+    ),
+    PydanticField(..., description="The title of the question"),
+]
+
+QuestionDescription = Annotated[
+    constr(
+        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+    ),
+    PydanticField(..., description="The description of the question"),
+]
+
+
+class QuestionCreate(BaseModel):
+    name: QuestionName
+    title: QuestionTitle
+    description: Optional[QuestionDescription]
     required: Optional[bool]
     settings: QuestionSettingsCreate
 
@@ -346,9 +380,9 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
-        if key == "responses" and "responses" not in self._obj.__dict__:
+        if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
-        if key == "suggestions" and "suggestions" not in self._obj.__dict__:
+        if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
         return super().get(key, default)
 
@@ -372,6 +406,8 @@ class Record(BaseModel):
 
 class Records(BaseModel):
     items: List[Record]
+    # TODO(@frascuchon): Make it required once fetch records without metadata filter computes also the total
+    total: Optional[int] = None
 
 
 class UserSubmittedResponseCreate(BaseModel):
@@ -400,9 +436,11 @@ class RecordCreate(BaseModel):
     suggestions: Optional[List[SuggestionCreate]]
 
     @validator("responses")
-    def check_user_id_is_unique(cls, values):
-        user_ids = []
+    def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
+        if values is None:
+            return values
 
+        user_ids = []
         for value in values:
             if value.user_id in user_ids:
                 raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
@@ -412,11 +450,140 @@ class RecordCreate(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = PydanticField(
+        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
+    )
+
+
+class RecordUpdateWithId(RecordUpdate):
+    id: UUID
+
+
+class RecordsUpdate(BaseModel):
+    items: List[RecordUpdateWithId] = PydanticField(
+        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
+    )
+
+
+NT = TypeVar("NT", int, float)
+
+
+class NumericMetadataProperty(GenericModel, Generic[NT]):
+    min: Optional[NT] = None
+    max: Optional[NT] = None
+
+    @root_validator
+    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        min = values.get("min")
+        max = values.get("max")
+
+        if min is not None and max is not None and min >= max:
+            raise ValueError(f"'min' ({min}) must be lower than 'max' ({max})")
+
+        return values
+
+
+class TermsMetadataPropertyCreate(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+    values: Optional[List[str]] = PydanticField(
+        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+    )
+
+
+class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
+    type: Literal[MetadataPropertyType.integer]
+
+
+class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
+    type: Literal[MetadataPropertyType.float]
+
+
+MetadataPropertyTitle = Annotated[
+    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    PydanticField(..., description="The title of the metadata property"),
+]
+
+MetadataPropertySettingsCreate = Annotated[
+    Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
+    PydanticField(..., discriminator="type"),
+]
+
+
+class MetadataPropertyCreate(BaseModel):
+    name: str = PydanticField(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    )
+    title: MetadataPropertyTitle
+    settings: MetadataPropertySettingsCreate
+    visible_for_annotators: bool = True
+
+
+class TermsMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+    values: Optional[List[str]] = None
+
+
+class IntegerMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.integer]
+    min: Optional[int] = None
+    max: Optional[int] = None
+
+
+class FloatMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.float]
+    min: Optional[float] = None
+    max: Optional[float] = None
+
+
+MetadataPropertySettings = Annotated[
+    Union[TermsMetadataProperty, IntegerMetadataProperty, FloatMetadataProperty],
+    PydanticField(..., discriminator="type"),
+]
+
+
+class MetadataProperty(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    settings: MetadataPropertySettings
+    visible_for_annotators: bool
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class MetadataProperties(BaseModel):
+    items: List[MetadataProperty]
+
+
+class MetadataParsedQueryParam:
+    def __init__(self, string: str):
+        k, *v = string.split(":", maxsplit=1)
+
+        self.name: str = k
+        self.value: str = "".join(v).strip()
+
+
+class MetadataQueryParams(BaseModel):
+    metadata: List[str] = PydanticField(Query([], regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+
+    @property
+    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
+        # TODO: Validate metadata fields names from query params
+        return [MetadataParsedQueryParam(q) for q in self.metadata]
+
+
+class TextQuery(BaseModel):
+    text: StringQuery
 
 
 class SearchRecordsQuery(BaseModel):
-    query: Query
+    query: TextQuery
 
 
 class SearchRecord(BaseModel):

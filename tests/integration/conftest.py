@@ -30,7 +30,6 @@ from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.server import app, argilla_app
 from argilla.server.settings import settings
 from argilla.utils import telemetry
@@ -128,23 +127,14 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 
 
 @pytest.fixture(scope="function")
-def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
-    return mocker.AsyncMock(SearchEngine)
-
-
-@pytest.fixture(scope="function")
-def client(request, mock_search_engine: SearchEngine, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
+def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     async def override_get_async_db():
         session = TestSession()
         yield session
 
-    async def override_get_search_engine():
-        yield mock_search_engine
-
     mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     argilla_app.dependency_overrides[get_async_db] = override_get_async_db
-    argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
 
     raise_server_exceptions = request.param if hasattr(request, "param") else False
     with TestClient(app, raise_server_exceptions=raise_server_exceptions) as client:
@@ -366,3 +356,24 @@ def mocked_openai(mocker):
     mocker.patch("openai.FineTuningJob.create", return_value=response)
     mocker.patch("openai.FineTune.create", return_value=response)
     mocker.patch("openai.File.create", return_value=response)
+
+
+@pytest.fixture
+def mocked_trainer_push_to_huggingface(mocker: "MockerFixture"):
+    # Mock the push_to_huggingface methods for the different trainers,
+    # most of the functionality is already tested by the frameworks itself.
+    # For transformers' model and tokenizer
+    mocker.patch("transformers.PreTrainedModel.push_to_hub", return_value="model_url")
+    mocker.patch("transformers.PreTrainedTokenizer.push_to_hub", return_value="model_url")
+    # For setfit
+    mocker.patch("setfit.trainer.SetFitTrainer.push_to_hub", return_value="model_url")
+    # For peft
+    mocker.patch("peft.PeftModel.push_to_hub", return_value="model_url")
+    mocker.patch("transformers.PreTrainedTokenizerBase.push_to_hub", return_value="model_url")
+    # For spacy and spacy-transformers
+    mocker.patch("spacy_huggingface_hub.push", return_value={"url": "model_url"})
+    # For trl
+    mocker.patch("trl.trainer.sft_trainer.SFTTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.reward_trainer.RewardTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.base.BaseTrainer.push_to_hub", return_value="model_url")
+    mocker.patch("trl.trainer.dpo_trainer.DPOTrainer.push_to_hub", return_value="model_url")

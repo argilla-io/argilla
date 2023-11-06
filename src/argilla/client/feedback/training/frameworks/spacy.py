@@ -13,7 +13,9 @@
 #  limitations under the License.
 
 import logging
-from typing import Optional
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Literal
 
@@ -22,7 +24,13 @@ from argilla.client.models import TextClassificationRecord, TokenClassificationR
 from argilla.training.spacy import ArgillaSpaCyTrainer as ArgillaSpaCyTrainerV1
 from argilla.training.spacy import ArgillaSpaCyTransformersTrainer as ArgillaSpaCyTransformersTrainerV1
 from argilla.training.spacy import _ArgillaSpaCyTrainerBase as _ArgillaSpaCyTrainerBaseV1
-from argilla.utils.dependency import require_dependencies
+from argilla.utils.dependency import require_dependencies, requires_dependencies
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.integrations.huggingface.model_card import (
+        SpacyModelCardData,
+        SpacyTransformersModelCardData,
+    )
 
 
 class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleton):
@@ -133,6 +141,80 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
 
         self.init_training_args()
 
+    @requires_dependencies("spacy-huggingface-hub")
+    def push_to_huggingface(self, output_dir: str, **kwargs) -> str:
+        r"""Uploads the model to [huggingface's model hub](https://huggingface.co/models).
+
+        With spacy we don't need the `repo_id` as in the other frameworks, that
+        variable is generated internally by `spacy_huggingface_hub`, we need the
+        path to the nlp pipeline to package it and push it.
+
+        See Also:
+            The optional arguments are the following:
+            namespace: Name of organization to which the pipeline should be uploaded.
+            commit_msg: Commit message to use for update
+            verbose: Output additional info for debugging, e.g. the full generated hub metadata.
+
+        Args:
+            output_dir: The same path passed to `save` method. The path where the nlp pipeline
+                should be saved to.
+
+        Returns:
+            model_name:
+                The model name will be used in the base trainer to find the repo to push the model card.
+                If the url of a model is: https://huggingface.co/<NAMESPACE>/<MODEL_NAME>,
+                pass <NAMESPACE>/<MODEL_NAME>.
+        """
+        from spacy.cli.package import package
+        from spacy_huggingface_hub import push
+
+        if self._nlp is None:
+            raise ValueError(
+                "No pipeline was initialized, you must call either `init_model` or `train` before calling this method."
+            )
+
+        output_dir = Path(output_dir)
+        with TemporaryDirectory() as tmpdirname:
+            output_dir_pkg = Path(tmpdirname) / "spacy-packaged"
+            output_dir_pkg.mkdir(exist_ok=True, parents=True)
+
+            if not output_dir.is_dir():
+                raise ValueError(
+                    f"output_dir: '{output_dir.resolve()}' doesn't exist, you must pass the path to the folder of the trained model."
+                )
+            self._logger.info("Packaging nlp pipeline")
+            package(
+                input_dir=output_dir.resolve(),
+                output_dir=output_dir_pkg,
+                create_sdist=False,
+                create_wheel=True,
+                name=output_dir.stem,
+            )
+            self._logger.info(f"spacy pipeline packaged at: {output_dir_pkg}")
+
+            # The following line obtains the full path to the .whl file:
+            # The output dir contains a single package name. Inside this package
+            # there will be a `dist` folder containing the packages. As we always
+            # force to generate only the `wheel` package option, there we can only
+            # find the .whl file. In case we generated both the wheel and sdist,
+            # we could find it by getting the file with .whl extension.
+            whl_path = next((next(output_dir_pkg.iterdir()) / "dist").iterdir())
+            # Remove unused parameters from push to avoid errors:
+            expected_kwargs = set(("namespace", "commig_msg", "silent", "verbose"))
+            for kw in tuple(kwargs.keys()):
+                if kw not in expected_kwargs:
+                    kwargs.pop(kw)
+
+            self._logger.info(f"Pushing: {whl_path} to huggingface hub.")
+            result = push(whl_path, **kwargs)
+            url = result["url"]
+
+        self._logger.info(f"Model pushed to: {url}")
+        # Passing the model name generated with spacy-huggingface-hub to use
+        # it in the base ArgillaTrainer, it's easier to grab
+        # the generated repo name than forcing the user to pass an argument.
+        return url.replace("https://huggingface.co/", "")
+
 
 class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
     def __init__(self, freeze_tok2vec: bool = False, **kwargs) -> None:
@@ -150,6 +232,29 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
         self.freeze_tok2vec = freeze_tok2vec
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
 
+    def get_model_card_data(self, **card_data_kwargs) -> "SpacyModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SpacyModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import SpacyModelCardData
+
+        return SpacyModelCardData(
+            model_id=self._model,
+            task=self._task,
+            lang=self.language,
+            gpu_id=self.gpu_id,
+            framework_kwargs={"optimize": self.optimize, "freeze_tok2vec": self.freeze_tok2vec},
+            pipeline=self._pipeline,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.config["training"],
+            **card_data_kwargs,
+        )
+
 
 class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _ArgillaSpaCyTrainerBase):
     def __init__(self, update_transformer: bool = True, **kwargs) -> None:
@@ -162,3 +267,26 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
         """
         self.update_transformer = update_transformer
         _ArgillaSpaCyTrainerBase.__init__(self, **kwargs)
+
+    def get_model_card_data(self, **card_data_kwargs) -> "SpacyTransformersModelCardData":
+        """
+        Generate the card data to be used for the `ArgillaModelCard`.
+
+        Args:
+            card_data_kwargs: Extra arguments provided by the user when creating the `ArgillaTrainer`.
+
+        Returns:
+            SpacyTransformersModelCardData: Container for the data to be written on the `ArgillaModelCard`.
+        """
+        from argilla.client.feedback.integrations.huggingface.model_card import SpacyTransformersModelCardData
+
+        return SpacyTransformersModelCardData(
+            model_id=self._model,
+            task=self._task,
+            lang=self.language,
+            gpu_id=self.gpu_id,
+            framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
+            pipeline=self._pipeline,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.config["training"],
+            **card_data_kwargs,
+        )
