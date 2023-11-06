@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -96,6 +96,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     @abstractmethod
     def records(self) -> Iterable[R]:
         """Returns the records of the dataset."""
+        pass
+
+    @property
+    @abstractmethod
+    def vectors_settings(self) -> Iterable[R]:
+        """Returns the vector settings of the dataset."""
         pass
 
     @abstractmethod
@@ -286,15 +292,15 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         Args:
             records: a list of `FeedbackRecord` objects to validate.
             attributes_to_validate: a list containing the name of the attributes to
-                validate from the record. Valid values are: `fields` and `metadata`.
-                If not provided, both `fields` and `metadata` are validated. Defaults
+                validate from the record. Valid values are: `fields`, `metadata` and `vectors`.
+                If not provided, all `fields`, `metadata` and `vectors` are validated. Defaults
                 to `None`.
 
         Raises:
             ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
         """
         if attributes_to_validate is None:
-            attributes_to_validate = ["fields", "metadata"]
+            attributes_to_validate = ["fields", "metadata", "vectors"]
 
         if "fields" in attributes_to_validate:
             fields_schema = self._build_fields_schema()
@@ -302,12 +308,20 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         if "metadata" in attributes_to_validate:
             metadata_schema = self._build_metadata_schema()
 
+        if "vectors" in attributes_to_validate:
+            vectors_settings_by_name = {
+                vector_settings.name: vector_settings for vector_settings in self.vectors_settings or []
+            }
+
         for record in records:
             if "fields" in attributes_to_validate:
                 self._validate_record_fields(record, fields_schema)
 
             if "metadata" in attributes_to_validate:
                 self._validate_record_metadata(record, metadata_schema)
+
+            if "vectors" in attributes_to_validate:
+                self._validate_record_vectors(record, vectors_settings_by_name)
 
     @staticmethod
     def _validate_record_fields(record: FeedbackRecord, fields_schema: Type[BaseModel]) -> None:
@@ -330,6 +344,14 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
                 f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema,"
                 f" with exception: {e}"
             ) from e
+
+    def _validate_record_vectors(self, record: FeedbackRecord, vectors_settings_by_name) -> None:
+        for vector_name in record.vectors:
+            if not vectors_settings_by_name.get(vector_name):
+                raise ValueError(f"Vector with name `{vector_name}` not present on dataset vector settings.")
+
+            if vectors_settings_by_name[vector_name].dimensions != len(record.vectors[vector_name]):
+                raise ValueError(f"Vector with name `{vector_name}` has an invalid expected dimension.")
 
     def _parse_and_validate_records(
         self,
@@ -421,12 +443,12 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update_vector_settings(self, *args, **kwargs):
-        """Updates the `vector_settings` of the current `FeedbackDataset`."""
+    def update_vectors_settings(self, *args, **kwargs):
+        """Updates a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
     @abstractmethod
-    def delete_vector_settings(self, *args, **kwargs):
+    def delete_vectors_settings(self, *args, **kwargs):
         """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
         pass
 
@@ -441,5 +463,26 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         Args:
             repo_id: the ID of the HuggingFace repo to push the dataset to.
             generate_card: whether to generate a dataset card or not. Defaults to `True`.
+        """
+        pass
+
+    @abstractmethod
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[R, float]]:
+        """Finds similar records to the given `record` or `value` for the given `vector_name`.
+
+        Args:
+            vector_name: a vector name to use for searching by similarity.
+            value: an optional vector value to be used for searching by similarity.
+            record: an optional record to be used for searching by similarity.
+            max_results: the maximum number of results for the search.
+
+        Returns:
+            A list of tuples with each tuple including a record and a similarity score.
         """
         pass

@@ -66,7 +66,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
                 "method": {
                     "name": "hnsw",
                     "engine": "lucene",  # See https://opensearch.org/blog/Expanding-k-NN-with-Lucene-aNN/
-                    "space_type": "l2",
+                    "space_type": "cosinesimil",
                     "parameters": {"m": 2, "ef_construction": 4},
                 },
             }

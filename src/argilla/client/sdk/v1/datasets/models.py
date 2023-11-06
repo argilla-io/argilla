@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, conint
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -84,6 +84,7 @@ class FeedbackItemModel(BaseModel):
     external_id: Optional[str] = None
     responses: Optional[List[FeedbackResponseModel]] = []
     suggestions: Optional[List[FeedbackSuggestionModel]] = []
+    vectors: Optional[Dict[str, List[float]]] = {}
     inserted_at: datetime
     updated_at: datetime
 
@@ -91,6 +92,35 @@ class FeedbackItemModel(BaseModel):
 class FeedbackRecordsModel(BaseModel):
     items: List[FeedbackItemModel]
     total: int
+
+
+# TODO: `query_score` naming can be improved to simply `score`. (frontend should be aligned)
+# TODO: Maybe `query_score` should not be optional.
+class FeedbackRecordSearchModel(BaseModel):
+    record: FeedbackItemModel
+    query_score: Optional[float]
+
+
+class FeedbackRecordsSearchModel(BaseModel):
+    items: List[FeedbackRecordSearchModel]
+    total: int
+
+
+class FeedbackRecordsSearchVectorQuery(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'record_id' or 'value' is provided"""
+        record_id = values.get("record_id")
+        value = values.get("value")
+
+        if bool(record_id) == bool(value):
+            raise ValueError("Either 'record_id' or 'value' must be provided")
+
+        return values
 
 
 class FeedbackFieldModel(BaseModel):
@@ -131,8 +161,7 @@ class FeedbackRecordsMetricsModel(BaseModel):
 class FeedbackVectorSettingsModel(BaseModel):
     id: UUID
     name: str
-    # TODO: Uncomment when is supported
-    # title: Optional[str] = None
+    title: str
     dimensions: int
     inserted_at: datetime
     updated_at: datetime

@@ -25,6 +25,7 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
@@ -42,6 +43,10 @@ if TYPE_CHECKING:
             fields={"required-field": "text", "optional-field": None},
             metadata={"terms-metadata": "a", "more-metadata": 3},
         ),
+        FeedbackRecord(
+            fields={"required-field": "text", "optional-field": None},
+            vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]},
+        ),
     ],
 )
 def test_add_records_validation(record: "FeedbackRecord") -> None:
@@ -52,6 +57,10 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
     )
 
@@ -110,6 +119,40 @@ def test_update_records_with_warning() -> None:
             ValueError,
             "extra fields not permitted",
         ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0, 4.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-1` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0, 5.0]},
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-2` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                    "vector-3": [1.0, 2.0, 3.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-3` not present on dataset vector settings.",
+        ),
     ],
 )
 def test_add_records_validation_error(
@@ -122,6 +165,10 @@ def test_add_records_validation_error(
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
         allow_extra_metadata=allow_extra_metadata,
     )
@@ -293,6 +340,27 @@ def test_delete_metadata_properties_errors() -> None:
     ):
         _ = dataset.delete_metadata_properties(["invalid-metadata"])
     assert len(dataset.metadata_properties) == 3
+
+
+def test_delete_vectors_settings() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="field", required=True)],
+        questions=[TextQuestion(name="question", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-settings-1", dimensions=10),
+            VectorSettings(name="vector-settings-2", dimensions=10),
+            VectorSettings(name="vector-settings-3", dimensions=10),
+        ],
+    )
+
+    deleted_vectors_settings = dataset.delete_vectors_settings("vector-settings-1")
+    assert isinstance(deleted_vectors_settings, VectorSettings)
+    assert len(dataset.vectors_settings) == 2
+
+    deleted_vectors_settings = dataset.delete_vectors_settings(["vector-settings-2", "vector-settings-3"])
+    assert isinstance(deleted_vectors_settings, list)
+    assert len(deleted_vectors_settings) == 2
+    assert len(dataset.vectors_settings) == 0
 
 
 def test_not_implemented_methods():

@@ -37,8 +37,11 @@ These are the section headers that we use:
 - Added support to include vectors for `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint response using `include` query param. ([#4063](https://github.com/argilla-io/argilla/pull/4063))
 - Added `PATCH /api/v1/vectors-settings/:vector_settings_id` endpoint for updating a vector settings. ([#4092](https://github.com/argilla-io/argilla/pull/4092))
 - Added `add_vector_settings` method to local and remote `FeedbackDataset`. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
+- Added `update_vectors_settings` method to local and remote `FeedbackDataset`. ([#4122](https://github.com/argilla-io/argilla/pull/4122))
+- Added `delete_vectors_settings` method to local and remote `FeedbackDataset`. ([#4130](https://github.com/argilla-io/argilla/pull/4130))
 - Added `vector_settings_by_name` method to local and remote `FeedbackDataset`. ([#4055](https://github.com/argilla-io/argilla/pull/4055))
 - Added `ARGILLA_SEARCH_ENGINE` environment variable to configure the search engine to use. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
+- Added `find_similar_records` method to local and remote `FeedbackDataset`. ([#4023](https://github.com/argilla-io/argilla/pull/4023))
 
 ### Changed
 
@@ -52,6 +55,7 @@ These are the section headers that we use:
 - Update `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to allow to search records with vectors. ([#4019](https://github.com/argilla-io/argilla/pull/4019))
 - [breaking] Users working with OpenSearch engines must use version >=2.4 and set `ARGILLA_SEARCH_ENGINE=opensearch`. ([#4019](https://github.com/argilla-io/argilla/pull/4019) and [#4111](https://github.com/argilla-io/argilla/pull/4111))
 - Update `PATCH /api/v1/datasets/:dataset_id` endpoint to allow updating `allow_extra_metadata` attribute. ([#4112](https://github.com/argilla-io/argilla/pull/4112))
+- Using cosine similarity to compute similarity between vectors. ([#4124](https://github.com/argilla-io/argilla/pull/4124))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 

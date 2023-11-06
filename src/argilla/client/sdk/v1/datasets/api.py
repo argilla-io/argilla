@@ -28,6 +28,8 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackMetricsModel,
     FeedbackQuestionModel,
     FeedbackRecordsModel,
+    FeedbackRecordsSearchModel,
+    FeedbackRecordsSearchVectorQuery,
     FeedbackResponseStatusFilter,
     FeedbackVectorSettingsModel,
 )
@@ -217,6 +219,56 @@ def get_records(
     return handle_response_error(response)
 
 
+# TODO: We must change endpoint URL to "/api/v1/me/datasets/{id}/records/search" once the endpoint is available.
+def search_records(
+    client: httpx.Client,
+    id: UUID,
+    vector_query: FeedbackRecordsSearchVectorQuery,
+    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    metadata_filters: Optional[List[str]] = None,
+    limit: int = 50,
+) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/me/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the records to.
+        vector_query: the vector query to be used to search for records.
+        response_status: the status of the responses to be retrieved.
+            Can either be `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
+        metadata_filters: the metadata filters to be applied to the records. Defaults to None.
+        limit: an optional value to limit the number of returned records by the search. Defaults to 50.
+
+    Returns:
+        A `Response` object with the response itself, and/or the error codes if applicable.
+    """
+    url = f"/api/v1/me/datasets/{id}/records/search"
+    params = {"include": ["responses", "suggestions"], "limit": limit}
+
+    vector_json = {"name": vector_query.name}
+    if vector_query.value:
+        vector_json["value"] = vector_query.value
+    if vector_query.record_id:
+        vector_json["record_id"] = str(vector_query.record_id)
+
+    json = {"query": {"vector": vector_json}}
+
+    if response_status:
+        params["response_status"] = response_status
+
+    if metadata_filters:
+        params["metadata"] = metadata_filters
+    response = client.post(url=url, params=params, json=json)
+
+    if response.status_code == 200:
+        response_obj = Response.from_httpx_response(response)
+        response_obj.parsed = FeedbackRecordsSearchModel(**response.json())
+
+        return response_obj
+
+    return handle_response_error(response)
+
+
 def add_records(
     client: httpx.Client, id: UUID, records: List[Dict[str, Any]]
 ) -> Response[Union[ErrorMessage, HTTPValidationError]]:
@@ -290,12 +342,16 @@ def update_records(
             item["metadata"] = record["metadata"]
         if "suggestions" in record:
             item["suggestions"] = record["suggestions"]
+        if "vectors" in record:
+            item["vectors"] = record["vectors"]
+
         items.append(item)
 
     response = client.patch(url=url, json={"items": items})
 
     if response.status_code == 204:
         return Response.from_httpx_response(response)
+
     return handle_response_error(response)
 
 
@@ -473,10 +529,21 @@ def add_metadata_property(
     return handle_response_error(response)
 
 
-def list_vector_settings(
+def list_vectors_settings(
     client: httpx.Client,
     id: UUID,
 ) -> Response[Union[FeedbackListVectorSettingsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a GET request to `/api/v1/datasets/{id}/vectors-settings` endpoint to
+    retrieve the vectors settings of a `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to retrieve the vector settings from.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if the
+        request was successful, which is a `FeedbackListVectorSettingsModel`.
+    """
     url = f"/api/v1/datasets/{id}/vectors-settings"
 
     response = client.get(url=url)
@@ -495,6 +562,17 @@ def add_vector_settings(
     title: str,
     dimensions: int,
 ) -> Response[Union[FeedbackVectorSettingsModel, ErrorMessage, HTTPValidationError]]:
+    """Sends a POST request to `/api/v1/datasets/{id}/vectors-settings` endpoint to
+    add a vector settings to the `FeedbackDataset`.
+
+    Args:
+        client: the authenticated Argilla client to be used to send the request to the API.
+        id: the id of the dataset to add the vector settings to.
+
+    Returns:
+        A `Response` object containing a `parsed` attribute with the parsed response if
+        the request was successful, which is a `FeedbackVectorSettingsModel`.
+    """
     url = f"/api/v1/datasets/{id}/vectors-settings"
 
     body = {
