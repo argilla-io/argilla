@@ -101,3 +101,18 @@ def validate_metadata_names(dataset: "FeedbackDatasetBase", names: typing.List[s
                 f"The metadata property name `{name}` does not exist in the current `FeedbackDataset` in Argilla."
                 f" The existing metadata properties names are: {list(metadata_property_names.keys())}."
             )
+
+
+def validate_vector_names(dataset: "FeedbackDatasetBase", names: typing.List[str]) -> None:
+    """Validates that the vector names used in the filters are valid."""
+    vectors_names = {vector.name: True for vector in dataset.vectors_settings}
+
+    if not vectors_names:
+        return
+
+    for name in set(names):
+        if not vectors_names.get(name):
+            raise ValueError(
+                f"The vector name `{name}` does not exist in the current `FeedbackDataset` in Argilla."
+                f" The existing vector names are: {list(vectors_names.keys())}."
+            )

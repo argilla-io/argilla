@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Type, Union
 from uuid import UUID
 
 from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.dataset.remote.dataset import INCLUDE_ALL_VECTORS_PARAM, RemoteFeedbackDataset
 from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes, QuestionTypes
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import (
@@ -349,6 +349,7 @@ class ArgillaMixin:
         *,
         workspace: Optional[str] = None,
         id: Optional[Union[UUID, str]] = None,
+        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
@@ -360,6 +361,8 @@ class ArgillaMixin:
             workspace: the workspace of the `FeedbackDataset` to retrieve from Argilla.
                 If not provided, the active workspace will be used.
             id: the ID of the `FeedbackDataset` to retrieve from Argilla. Defaults to `None`.
+            with_vectors: the vector settings to retrieve from Argilla. Use `all` to download all vectors.
+                Defaults to `None`.
 
         Returns:
             The `RemoteFeedbackDataset` retrieved from Argilla.
@@ -382,7 +385,7 @@ class ArgillaMixin:
                 else (
                     f"Could not find a `FeedbackDataset` in Argilla with name='{name}' and workspace='{workspace}'."
                     if name and workspace
-                    else (f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'.")
+                    else f"Could not find a `FeedbackDataset` in Argilla with ID='{id}'."
                 )
             )
 
@@ -400,6 +403,7 @@ class ArgillaMixin:
             questions=questions,
             guidelines=existing_dataset.guidelines or None,
             allow_extra_metadata=existing_dataset.allow_extra_metadata,
+            with_vectors=with_vectors,
         )
 
     @classmethod

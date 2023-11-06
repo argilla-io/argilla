@@ -15,7 +15,7 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Tuple, Union
 
 from tqdm import trange
 
@@ -51,6 +51,8 @@ from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQue
 from argilla.client.sdk.v1.vectors_settings import api as vectors_settings_api_v1
 from argilla.client.utils import allowed_for_roles
 
+INCLUDE_ALL_VECTORS_PARAM: str = "all"
+
 if TYPE_CHECKING:
     from uuid import UUID
 
@@ -75,6 +77,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
         sort_by: Optional[List[SortBy]] = None,
+        with_vectors: Union[INCLUDE_ALL_VECTORS_PARAM, List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
@@ -102,7 +105,10 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         self._response_status = response_status or []
         self._metadata_filters = metadata_filters or []
 
+        self._with_vectors = with_vectors
+
         self._validate_metadata_names()
+        self._validate_vector_names()
 
     @property
     def dataset(self) -> "RemoteFeedbackDataset":
@@ -243,6 +249,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return datasets_api_v1.get_records(
             client=self._client,
             id=self._dataset.id,
+            include=self.include_as_query_params,
             offset=offset,
             limit=limit,
             response_status=self.response_status_as_query_string,
@@ -299,6 +306,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             sort_by=sort_by,
             metadata_filters=metadata_filters,
             response_status=response_status,
+            with_vectors=new_ds.records._with_vectors,
         )
 
     def _validate_metadata_names(self):
@@ -309,6 +317,15 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             names.extend([sort.metadata_name for sort in self.sort_by if sort.is_metadata_field])
         if names:
             helpers.validate_metadata_names(self.dataset, names)
+
+    def _validate_vector_names(self):
+        if not self._with_vectors or self._with_vectors == INCLUDE_ALL_VECTORS_PARAM:
+            return
+
+        if isinstance(self._with_vectors, str):
+            self._with_vectors = [self._with_vectors]
+
+        helpers.validate_vector_names(self.dataset, self._with_vectors)
 
     def find_similar(
         self,
@@ -321,6 +338,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             response = datasets_api_v1.search_records(
                 client=self._client,
                 id=self.dataset.id,
+                include=self.include_as_query_params,
                 vector_query=FeedbackRecordsSearchVectorQuery(
                     name=vector_name,
                     record_id=record and record.id,
@@ -342,6 +360,20 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             for record_score in response.parsed.items
         ]
 
+    @property
+    def include_as_query_params(self) -> List[str]:
+        include = ["responses", "suggestions"]  # default include
+
+        if not self._with_vectors:
+            return include
+
+        if self._with_vectors == INCLUDE_ALL_VECTORS_PARAM:
+            include.append("vectors")
+        else:
+            include.append(f"vectors:{','.join(self._with_vectors)}")
+
+        return include
+
 
 class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     # TODO: Call super method once the base init contains only commons init attributes
@@ -358,6 +390,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
+        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
@@ -399,7 +432,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._created_at = created_at
         self._updated_at = updated_at
 
-        self._records = RemoteFeedbackRecords(dataset=self)
+        self._records = RemoteFeedbackRecords(dataset=self, with_vectors=with_vectors)
 
     @property
     def records(self) -> RemoteFeedbackRecords:

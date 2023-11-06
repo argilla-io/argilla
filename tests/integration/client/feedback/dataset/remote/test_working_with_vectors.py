@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Any
 
 import argilla as rg
 import pytest
@@ -30,7 +31,7 @@ def feedback_dataset() -> FeedbackDataset:
     return FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="question")])
 
 
-class TestSuiteFindSimilar:
+class TestSuiteWorkingWithVectors:
     def tests_find_similar_records_using_value(self, owner: User, feedback_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test")
@@ -86,6 +87,109 @@ class TestSuiteFindSimilar:
         record, score = records_with_scores[1]
         assert record.external_id == "2"
         assert score < 1.0
+
+    @pytest.mark.parametrize(
+        "vector_names",
+        [
+            "vector",
+            ["vector"],
+            ["vector3"],
+            ["vector", "vector2"],
+            ["vector", "vector2", "vector3"],
+        ],
+    )
+    def test_load_dataset_including_selective_vectors(
+        self, owner: User, feedback_dataset: FeedbackDataset, vector_names: Any
+    ):
+        rg.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test")
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=2))
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector2", dimensions=2))
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector3", dimensions=2))
+
+        feedback_dataset.add_records(
+            [
+                FeedbackRecord(
+                    external_id="0",
+                    fields={"text": "hello"},
+                    vectors={vector_settings.name: [1, 2] for vector_settings in feedback_dataset.vectors_settings},
+                ),
+                FeedbackRecord(
+                    external_id="1",
+                    fields={"text": "hello"},
+                    vectors={vector_settings.name: [3, 4] for vector_settings in feedback_dataset.vectors_settings},
+                ),
+                FeedbackRecord(
+                    external_id="2",
+                    fields={"text": "hello"},
+                    vectors={vector_settings.name: [5, 6] for vector_settings in feedback_dataset.vectors_settings},
+                ),
+            ]
+        )
+
+        remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
+        remote = FeedbackDataset.from_argilla(id=remote.id, with_vectors=vector_names)
+
+        records = list(remote)
+
+        if not isinstance(vector_names, list):
+            vector_names = [vector_names]
+
+        expected_vector_names = set(vector_names)
+
+        assert set(records[0].vectors.keys()) == expected_vector_names
+        assert set(records[1].vectors.keys()) == expected_vector_names
+        assert set(records[2].vectors.keys()) == expected_vector_names
+
+    def test_load_dataset_including_wrong_vectors(self, owner: User, feedback_dataset: FeedbackDataset):
+        rg.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test")
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=2))
+        feedback_dataset.add_records(
+            [
+                FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2]}),
+                FeedbackRecord(external_id="1", fields={"text": "hello"}, vectors={"vector": [3, 4]}),
+                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}),
+            ]
+        )
+
+        remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
+        with pytest.raises(
+            ValueError,
+            match="The vector name `wrong-vector-name` does not exist in the current `FeedbackDataset` in Argilla. "
+            "The existing vector names are: \['vector'\].",
+        ):
+            FeedbackDataset.from_argilla(id=remote.id, with_vectors="wrong-vector-name")
+
+    def test_find_similar_including_vectors(self, owner: User, feedback_dataset: FeedbackDataset):
+        rg.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test")
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=2))
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector_b", dimensions=2))
+        feedback_dataset.add_records(
+            [
+                FeedbackRecord(
+                    external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2], "vector_b": [1, 2]}
+                ),
+                FeedbackRecord(
+                    external_id="1", fields={"text": "hello"}, vectors={"vector": [3, 4], "vector_b": [3, 4]}
+                ),
+                FeedbackRecord(external_id="2", fields={"text": "hello"}, vectors={"vector": [5, 6]}),
+            ]
+        )
+
+        remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
+        remote = FeedbackDataset.from_argilla(id=remote.id, with_vectors="all")
+
+        records_with_score = remote.find_similar_records(vector_name="vector", value=[1, 2], max_results=3)
+
+        records = [record for record, _ in records_with_score]
+        assert records[0].vectors.keys() == {"vector", "vector_b"}
+        assert records[1].vectors.keys() == {"vector", "vector_b"}
+        assert records[2].vectors.keys() == {"vector"}
 
     def test_find_similar_combining_filters(self, owner: User, feedback_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)

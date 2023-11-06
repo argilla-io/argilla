@@ -58,6 +58,48 @@ def test_dataset():
 @pytest.mark.asyncio
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
+    def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
+        api.init(api_key=owner.api_key)
+
+        workspace = Workspace.create(f"workspace")
+        user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
+
+        feedback_dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="question")],
+            vectors_settings=[
+                VectorSettings(name="vector-1", dimensions=3),
+                VectorSettings(name="vector-2", dimensions=4),
+            ],
+        )
+
+        api.init(api_key=user.api_key, workspace=workspace.name)
+
+        remote_dataset = feedback_dataset.push_to_argilla(name="dataset", workspace=workspace)
+        remote_dataset.add_records([FeedbackRecord(fields={"text": "text"})])
+
+        record = remote_dataset.records[0]
+
+        response = update_record(
+            client=api.active_api().client.httpx,
+            id=record.id,
+            data={
+                "vectors": {
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                }
+            },
+        )
+
+        assert response.status_code == 200
+        assert isinstance(response.parsed, FeedbackItemModel)
+        assert response.parsed.id == record.id
+        assert response.parsed.vectors == {
+            "vector-1": [1.0, 2.0, 3.0],
+            "vector-2": [1.0, 2.0, 3.0, 4.0],
+        }
+
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: ServerUser, role: UserRole) -> None:
         api.init(api_key=owner.api_key)
         workspace = Workspace.create(f"workspace")

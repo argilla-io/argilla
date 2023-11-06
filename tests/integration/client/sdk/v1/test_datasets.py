@@ -374,6 +374,7 @@ async def test_update_records(test_dataset: FeedbackDataset, role: UserRole) -> 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_get_records(role: UserRole) -> None:
+    # TODO: Remote this test. It does not make sense as integration test
     dataset = await DatasetFactory.create(
         status=DatasetStatus.ready,
         fields=[await TextFieldFactory.create(required=True)],
