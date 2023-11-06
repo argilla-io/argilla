@@ -32,6 +32,8 @@ from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.records import SortBy
 from argilla.client.feedback.training import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
     TrainingTask,
@@ -451,3 +453,47 @@ def test_push_to_huggingface(
     trainer.push_to_huggingface(repo_id, generate_card=False)
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
+
+
+@pytest.mark.parametrize(
+    "statuses, sort_by, sorted_results",
+    [
+        ([], None, [2, 4, 4, 5, 6, 2, 4, 4, 5, 6]),
+        ([], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 6, 5, 5, 4, 4, 4, 4, 2, 2]),
+        ([ResponseStatusFilter.missing], [SortBy(field="metadata.integer-metadata", order="desc")], [4, 4]),
+        ([ResponseStatusFilter.discarded], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 5, 4, 2]),
+        ([ResponseStatusFilter.submitted], None, [2, 4, 5, 6]),
+        (
+            [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],
+            [SortBy(field="metadata.integer-metadata", order="asc")],
+            [2, 2, 4, 4, 5, 5, 6, 6],
+        ),
+    ],
+)
+def test_trainer_with_filter_by_and_sort_by(
+    test_remote_dataset_with_records: "FeedbackDataset",
+    statuses: List[ResponseStatusFilter],
+    sort_by: SortBy,
+    sorted_results,
+) -> None:
+    questions = [
+        question
+        for question in test_remote_dataset_with_records.questions
+        if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=test_remote_dataset_with_records.fields[0], label=label)
+    filter_by = None if len(statuses) == 0 else {"response_status": statuses}
+
+    assert len(test_remote_dataset_with_records) == 10  # Number of records before filtering/sorting
+    trainer = ArgillaTrainer(
+        dataset=test_remote_dataset_with_records,
+        task=task,
+        framework="transformers",
+        model="prajjwal1/bert-tiny",
+        filter_by=filter_by,
+        sort_by=sort_by,
+    )
+    metadatas = [r.metadata["integer-metadata"] for r in trainer._dataset.pull().records]
+    assert len(trainer._dataset) == len(sorted_results)
+    assert all([r == m for r, m in zip(sorted_results, metadatas)])

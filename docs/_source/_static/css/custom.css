@@ -151,6 +151,25 @@ h2 {
   background: linear-gradient(-45deg, #c13030, #e25a55);
 }
 
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  color: white !important;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  z-index: 100; /* Make sure it's above your content */
+  background: linear-gradient(-45deg, #e73a3a, #fa655f);
+  text-align: center;
+}
+.floating-button:hover {
+  color: white !important;
+  transition: all 0.3s ease-in-out;
+  background: linear-gradient(-45deg, #c13030, #e25a55);
+}
+
 
 
 .content .note .wy-alert-title,
