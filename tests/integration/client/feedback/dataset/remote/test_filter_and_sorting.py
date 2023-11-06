@@ -156,7 +156,7 @@ class TestFilteredRemoteFeedbackDataset:
         assert filtered_dataset is not None
         assert len(filtered_dataset.records) == 0
 
-        filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.submitted).pull(limit=1)
+        filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.submitted).pull(max_records=1)
 
         assert filtered_dataset is not None
         assert len(filtered_dataset.records) == 1

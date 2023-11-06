@@ -17,7 +17,7 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 ​
 ```python
 remote_dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
-local_dataset = remote_dataset.pull(limit=100) # get first 100 records
+local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
 ```
 ​
 At this point, you can do any post-processing you may need with this dataset e.g., [unifying responses](collect_responses.ipynb) from multiple annotators. Once you're happy with the result, you can decide on some of the following options to save it.
@@ -32,7 +32,7 @@ When using a `FeedbackDataset` pulled from Argilla via `FeedbackDataset.from_arg
 ```python
 # This publishes the dataset with its records to Argilla and returns the dataset in Argilla
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-local_dataset = remote_dataset.pull(limit=100) # get first 100 records
+local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
 ```
 :::
 

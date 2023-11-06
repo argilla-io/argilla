@@ -601,7 +601,7 @@ class TestRemoteFeedbackDataset:
         assert local_copy is not None
         assert local_copy.records == []
 
-    async def test_pull_with_limited_results(
+    async def test_pull_with_max_records(
         self,
         argilla_user: ServerUser,
         feedback_dataset_guidelines: str,
@@ -624,7 +624,7 @@ class TestRemoteFeedbackDataset:
         await db.refresh(argilla_user, attribute_names=["datasets"])
 
         same_dataset = FeedbackDataset.from_argilla("test-dataset")
-        local_copy = same_dataset.pull(limit=1)
+        local_copy = same_dataset.pull(max_records=1)
 
         assert local_copy is not None
         assert len(local_copy.records) == 1

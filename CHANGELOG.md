@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `limit` argument to `pull()` method for `RemoteFeedbackDataset`.([#4074](https://github.com/argilla-io/argilla/pull/4074))
+- Added `max_records` argument to `pull()` method for `RemoteFeedbackDataset`.([#4074](https://github.com/argilla-io/argilla/pull/4074))
 -
 ### Fixed
 
