@@ -53,6 +53,7 @@ class ArgillaSingleton:
         workspace: Optional[str] = None,
         timeout: int = 60,
         extra_headers: Optional[Dict[str, str]] = None,
+        httpx_extra_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Argilla:
         cls._INSTANCE = None
 
@@ -62,6 +63,7 @@ class ArgillaSingleton:
             timeout=timeout,
             workspace=workspace,
             extra_headers=extra_headers,
+            httpx_extra_kwargs=httpx_extra_kwargs,
         )
 
         return cls._INSTANCE
@@ -73,6 +75,7 @@ def init(
     workspace: Optional[str] = None,
     timeout: int = 60,
     extra_headers: Optional[Dict[str, str]] = None,
+    httpx_extra_kwargs: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Init the Python client.
 
@@ -91,6 +94,8 @@ def init(
         timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
         extra_headers: Extra HTTP headers sent to the server. You can use this to customize
             the headers of argilla client requests, like additional security restrictions. Default: `None`.
+        httpx_extra_kwargs: Extra kwargs passed to the `httpx.Client` constructor. For more information about the
+            available arguments, see https://www.python-httpx.org/api/#client. Defaults to `None`.
 
     Examples:
         >>> import argilla as rg
@@ -106,6 +111,7 @@ def init(
         workspace=workspace,
         timeout=timeout,
         extra_headers=extra_headers,
+        httpx_extra_kwargs=httpx_extra_kwargs,
     )
 
 

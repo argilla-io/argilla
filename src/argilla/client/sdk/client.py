@@ -19,7 +19,7 @@ import inspect
 import json
 import uuid
 from json import JSONEncoder
-from typing import Dict, Optional, TypeVar
+from typing import Any, Dict, Optional, TypeVar
 from urllib.parse import urlparse
 
 import httpx
@@ -36,6 +36,7 @@ class _ClientCommonDefaults:
     cookies: Dict[str, str] = dataclasses.field(default_factory=dict)
     headers: Dict[str, str] = dataclasses.field(default_factory=dict)
     timeout: float = 5.0
+    httpx_extra_kwargs: Optional[Dict[str, Any]] = None
 
     def get_headers(self) -> Dict[str, str]:
         """Get headers to be used in all endpoints"""
@@ -94,11 +95,13 @@ class _EnhancedJSONEncoder(JSONEncoder):
 class Client(_ClientCommonDefaults, _Client):
     def __post_init__(self):
         super().__post_init__()
+        self.httpx_extra_kwargs = self.httpx_extra_kwargs or {}
         self.__httpx__ = httpx.Client(
             base_url=self.base_url,
             headers=self.get_headers(),
             cookies=self.get_cookies(),
             timeout=self.get_timeout(),
+            **self.httpx_extra_kwargs,
         )
         # TODO: Remove this NOW!!!!
         self.__http_async__ = httpx.AsyncClient(
