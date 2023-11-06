@@ -62,7 +62,7 @@ There are no leaderboards associated with this dataset.
 
 ### Data in Argilla
 
-The dataset is created in Argilla with: **fields**, **questions**, **suggestions**, **metadata**, and **guidelines**.
+The dataset is created in Argilla with: **fields**, **questions**, **suggestions**, **metadata**, **vectors**, and **guidelines**.
 
 The **fields** are the dataset records themselves, for the moment just text fields are supported. These are the ones that will be used to provide responses to the questions.
 
@@ -80,7 +80,16 @@ The **questions** are the questions that will be asked to the annotators. They c
 
 The **suggestions** are human or machine generated recommendations for each question to assist the annotator during the annotation process, so those are always linked to the existing questions, and named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above, but the column name is appended with "-suggestion" and the metadata is appended with "-suggestion-metadata".
 
-**✨ NEW** The **metadata** is a dictionary that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
+The **metadata** is a dictionary that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
+
+{% if argilla_vectors_settings %}
+**✨ NEW** The **vectors** are different columns that contain a vector in floating point, which is constraint to the pre-defined dimensions in the **vectors_settings** when configuring the vectors within the dataset itself, also the dimensions will always be 1-dimensional. The **vectors** are optional and identified by the pre-defined vector name in the dataset configuration file in `argilla.yaml`.
+
+| Vector Name | Title | Dimensions |
+|-------------|-------|------------|
+{% for vector in argilla_vectors_settings %}| {{ vector.name }} | {{ vector.title }} | [1, {{ vector.dimensions }}] |
+{% endfor %}
+{% endif %}
 
 The **guidelines**, are optional as well, and are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
 
@@ -114,9 +123,15 @@ Among the dataset fields, we differentiate between the following:
     {% for question in argilla_questions %}
     * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}.{% endfor %}
 
+{% if argilla_vectors_settings %}
+* **✨ NEW** **Vectors**: As of Argilla 1.19.0, the vectors have been included in order to add support for similarity search to explore similar records based on vector search powered by the search engine defined. The vectors are optional and cannot be seen within the UI, those are uploaded and internally used. Also the vectors will always be optional, and only the dimensions previously defined in their settings.
+    {% for vector in argilla_vectors_settings %}
+    * (optional) **{{ vector.name }}** is of type `float32` and has a dimension of (1, `{{ vector.dimensions }}`).{% endfor %}
+{% endif %}
+
 Additionally, we also have two more fields that are optional and are the following:
 
-* **✨ NEW** **metadata:** This is an optional field that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
+* **metadata:** This is an optional field that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
 * **external_id:** This is an optional field that can be used to provide an external ID for the dataset record. This can be useful if you want to link the dataset record to an external resource, such as a database or a file.
 
 ### Data Splits

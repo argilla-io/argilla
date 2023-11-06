@@ -349,7 +349,7 @@ class ArgillaMixin:
         *,
         workspace: Optional[str] = None,
         id: Optional[Union[UUID, str]] = None,
-        with_vectors: Union[None, INCLUDE_ALL_VECTORS_PARAM, List[str]] = None,
+        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
     ) -> RemoteFeedbackDataset:
         """Retrieves an existing `FeedbackDataset` from Argilla (must have been pushed in advance).
 
