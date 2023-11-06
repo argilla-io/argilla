@@ -58,13 +58,12 @@ def test_dataset():
 @pytest.mark.asyncio
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
-        user = await UserFactory.create(role=role)
+    def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
 
         api.init(api_key=owner.api_key)
 
         workspace = Workspace.create(f"workspace")
-        workspace.add_user(user.id)
+        user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
         feedback_dataset = FeedbackDataset(
             fields=[TextField(name="text")],
