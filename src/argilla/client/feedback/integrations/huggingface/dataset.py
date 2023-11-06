@@ -250,7 +250,9 @@ class HuggingFaceDatasetMixin:
 
     @classmethod
     @requires_dependencies(["huggingface_hub", "datasets"])
-    def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, show_progress: bool = True, *args: Any, **kwargs: Any) -> "FeedbackDataset":
+    def from_huggingface(
+        cls: Type["FeedbackDataset"], repo_id: str, show_progress: bool = True, *args: Any, **kwargs: Any
+    ) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the Hugging Face Hub.
 
         Args:
@@ -343,11 +345,9 @@ class HuggingFaceDatasetMixin:
                     f" are: {', '.join(hfds.keys())}."
                 )
             hfds = hfds[list(hfds.keys())[0]]
-        
+
         records = []
-        for index in trange(
-            0, len(hfds), desc="Parsing records", disable=not show_progress
-        ):
+        for index in trange(0, len(hfds), desc="Parsing records", disable=not show_progress):
             responses = {}
             suggestions = []
             user_without_id = False
