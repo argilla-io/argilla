@@ -472,7 +472,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         )
         return self
 
-    def pull(self) -> "FeedbackDataset":
+    def pull(self, *args, **kwargs) -> "FeedbackDataset":
         warnings.warn(
             "`pull` method is not supported for local datasets and won't take any effect."
             "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`. "

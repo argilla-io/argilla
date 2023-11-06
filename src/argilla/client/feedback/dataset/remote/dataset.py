@@ -512,8 +512,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         self._records.delete(records=[records] if not isinstance(records, list) else records)
 
-    def pull(self) -> "FeedbackDataset":
+    def pull(self, max_records: Optional[int] = None) -> "FeedbackDataset":
         """Pulls the dataset from Argilla and returns a local instance of it.
+
+        Args:
+            max_records: the maximum number of records to pull from Argilla. Defaults to `None`.
 
         Returns:
             A local instance of the dataset which is a `FeedbackDataset` object.
@@ -529,9 +532,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             or None,
             allow_extra_metadata=self._allow_extra_metadata,
         )
-        records = [record.to_local() for record in self._records]
 
-        if len(records) > 0:
+        len_records = len(self._records)
+        if len_records > 0:
+            max_records = max_records or len_records
+            records = [record.to_local() for record in self._records[:max_records]]
             instance.add_records(records=records)
         else:
             warnings.warn(
