@@ -43,6 +43,9 @@ class TestSuiteHuggingFaceDatasetMixin:
                 rg.IntegerMetadataProperty(name="integer-metadata-property", min=0, max=100),
                 rg.FloatMetadataProperty(name="float-metadata-property", min=0.0, max=100.0),
             ],
+            vectors_settings=[
+                rg.VectorSettings(name="float-vector", dimensions=2),
+            ],
             guidelines="These are the guidelines",
         )
 
@@ -60,6 +63,7 @@ class TestSuiteHuggingFaceDatasetMixin:
                         "integer-metadata-property": 1,
                         "float-metadata-property": 1.0,
                     },
+                    vectors={"float-vector": [1.0, 2.0]},
                     external_id="external-id-1",
                 )
             ]
@@ -80,5 +84,6 @@ class TestSuiteHuggingFaceDatasetMixin:
         assert dataset.fields == self.dataset.fields
         assert dataset.questions == self.dataset.questions
         assert dataset.metadata_properties == self.dataset.metadata_properties
+        assert dataset.vectors_settings == self.dataset.vectors_settings
         assert dataset.guidelines == self.dataset.guidelines
         assert dataset.records == self.dataset.records
