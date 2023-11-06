@@ -421,7 +421,7 @@ async def _configure_query_relationships(
         query = query.options(joinedload(Record.suggestions))
 
     if include_params.with_all_vectors:
-        query = query.options(joinedload(Record.vectors))
+        query = query.options(joinedload(Record.vectors).joinedload(Vector.vector_settings))
 
     elif include_params.with_some_vector:
         vector_settings_ids_subquery = select(VectorSettings.id).filter(
@@ -429,7 +429,7 @@ async def _configure_query_relationships(
         )
         query = query.outerjoin(
             Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(vector_settings_ids_subquery))
-        ).options(contains_eager(Record.vectors))
+        ).options(contains_eager(Record.vectors).joinedload(Vector.vector_settings))
 
     return query
 
@@ -477,7 +477,7 @@ async def list_records_by_dataset_id(
     records_query = await _configure_query_relationships(
         query=records_query, dataset_id=dataset_id, include_params=include
     )
-    records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
+    records_query = records_query.order_by(Record.inserted_at.asc())
     result_records = await db.execute(records_query)
 
     count_query = (
