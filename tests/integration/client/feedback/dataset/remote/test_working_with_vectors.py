@@ -94,8 +94,8 @@ class TestSuiteWorkingWithVectors:
             "vector",
             ["vector"],
             ["vector3"],
-            ["vector", "vector2", "vector3"],
             ["vector", "vector2"],
+            ["vector", "vector2", "vector3"],
         ],
     )
     def test_load_dataset_including_selective_vectors(
