@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.schemas.records import SortBy
 
 
 class ArgillaTrainer(ArgillaTrainerV1):
@@ -48,6 +49,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         seed: Optional[int] = None,
         gpu_id: Optional[int] = -1,
         filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
         framework_kwargs: Optional[dict] = {},
     ) -> None:
         """
@@ -74,16 +76,15 @@ class ArgillaTrainer(ArgillaTrainerV1):
             filter_by: A dict with key the field to filter by, and values the filters to apply. Currently only
                 defined for `response_status` filters. Can be one of: draft, pending, submitted, and discarded.
                 Defaults to `None` (no filter is applied).
+            sort_by: TODO.
             framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
                 for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
         """
         if filter_by:
-            # Use the id attribute of RemoteFeedbackDataset to determine the type of dataset.
-            # There are errors due to circular imports when trying to import RemoteFeedbackDataset.
-            if not getattr(dataset, "id", None):
-                raise ValueError("`filter_by` is only supported for `RemoteFeedbackDataset`.")
-            dataset = dataset.filter_by(**filter_by).pull()
+            dataset = dataset.filter_by(**filter_by)
+        if sort_by:
+            dataset = dataset.sort_by(sort_by)
 
         self._dataset = dataset
         self._train_size = train_size
