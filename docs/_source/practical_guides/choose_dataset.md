@@ -30,50 +30,48 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 
 ### NLP Tasks
 
-| Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
-|-------------------------------	|-----------------	|-------------------|
-| Text classification           	| ✔️               	| ✔️                  |
-| Token classificaiton          	|                 	| ✔️                  |
-| Summarization                  	| ✔️               	| ✔️                   |
-| Translation                  	| ✔️               	| ✔️                   |
-| NLI                  	| ✔️               	| ✔️                   |
-| Sentence Similarity               	| ✔️               	|                              	|
-| Question Answering               	| ✔️               	|                              	|
-| RLHF (SFT)               	| ✔️               	|                              	|
-| RLHF (RM)               	| ✔️               	|                              	|
-| RLHF (PPO)               	| ✔️               	|                              	|
-| RLHF (DPO)               	| ✔️               	|                              	|
-| RAG               	| ✔️               	|                              	|
-| Image support               	| ✔️               	|                              	|
-| And many more               	| ✔️               	|                              	|
+| Task / Dataset       | FeedbackDataset | Older datasets |
+| -------------------- | --------------- | -------------- |
+| Text classification  | ✔️              | ✔️             |
+| Token classification |                 | ✔️             |
+| Summarization        | ✔️              | ✔️             |
+| Translation          | ✔️              | ✔️             |
+| NLI                  | ✔️              | ✔️             |
+| Sentence Similarity  | ✔️              |                |
+| Question Answering   | ✔️              |                |
+| RLHF (SFT)           | ✔️              |                |
+| RLHF (RM)            | ✔️              |                |
+| RLHF (PPO)           | ✔️              |                |
+| RLHF (DPO)           | ✔️              |                |
+| RAG                  | ✔️              |                |
+| Image support        | ✔️              |                |
+| And many more        | ✔️              |                |
 
 ### Annotation workflows
 
-| Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
-|-------------------------------	|-----------------	|-------------------|
-| bulk annotation           	|                	| ✔️                  |
-| vector search          	|                 	| ✔️                  |
-| active learning                     	|                	| ✔️                   |
-| weak supervision               	|                	| ✔️                             	|
+| Task / Dataset   | FeedbackDataset | Older datasets |
+| ---------------- | --------------- | -------------- |
+| bulk annotation  |                 | ✔️             |
+| vector search    |                 | ✔️             |
+| active learning  |                 | ✔️             |
+| weak supervision |                 | ✔️             |
 
 ### User and team management
 
-| Features                      	| FeedbackDataset 	| Older datasets 	|
-|-------------------------------	|-----------------	|-------------------|
-| Multiple annotators per record 	| ✔️               	|                    |
-| Multiple-tasks in one UI      	| ✔️               	|                    |
-| Synchronization with database 	| ✔️               	|                    |
+| Features                       | FeedbackDataset | Older datasets |
+| ------------------------------ | --------------- | -------------- |
+| Multiple annotators per record | ✔️              |                |
+| Multiple-tasks in one UI       | ✔️              |                |
+| Synchronization with database  | ✔️              |                |
 
 ### UI Sorting and filtering and querying
 
-| Features                      	| FeedbackDataset 	| Older datasets 	|
-|-------------------------------	|-----------------	|-------------------|
-| Record status filters 	| ✔️               	| ✔️                   |
-| Text query 	            | ✔️               	| ✔️                   |
-| Metadata filters       	| ✔️               	| ✔️                   |
-| Sorting 	                | ✔️             	| ✔️                   |
-| Prediction filters 	            |                	| ✔️                   |
-| Annotation filters 	            |                	| ✔️                   |
-| Similarity search 	            |                	| ✔️                   |
-
-
+| Features              | FeedbackDataset | Older datasets |
+| --------------------- | --------------- | -------------- |
+| Record status filters | ✔️              | ✔️             |
+| Text query            | ✔️              | ✔️             |
+| Metadata filters      | ✔️              | ✔️             |
+| Sorting               | ✔️              | ✔️             |
+| Prediction filters    |                 | ✔️             |
+| Annotation filters    |                 | ✔️             |
+| Similarity search     |                 | ✔️             |
