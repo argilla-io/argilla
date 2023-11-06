@@ -767,7 +767,7 @@ async def delete_dataset_records(
     response_model=SearchRecordsResult,
     response_model_exclude_unset=True,
 )
-async def search_dataset_records(
+async def search_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
@@ -783,6 +783,7 @@ async def search_dataset_records(
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
+
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     search_responses = await _get_search_responses(
