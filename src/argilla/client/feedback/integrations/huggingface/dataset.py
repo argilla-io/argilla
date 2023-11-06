@@ -17,9 +17,9 @@ import logging
 import tempfile
 import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
-from tqdm import tqdm
 
 from packaging.version import parse as parse_version
+from tqdm import tqdm
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import QuestionTypes
