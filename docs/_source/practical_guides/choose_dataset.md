@@ -33,7 +33,7 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
 |-------------------------------	|-----------------	|-------------------|
 | Text classification           	| ✔️               	| ✔️                  |
-| Token classificaiton          	|                 	| ✔️                  |
+| Token classification          	|                 	| ✔️                  |
 | Summarization                  	| ✔️               	| ✔️                   |
 | Translation                  	| ✔️               	| ✔️                   |
 | NLI                  	| ✔️               	| ✔️                   |
