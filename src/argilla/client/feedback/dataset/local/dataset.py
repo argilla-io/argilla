@@ -18,6 +18,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
+from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
@@ -135,7 +136,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             ...             name="metadata-property-1",
             ...             values=["a", "b", "c"]
             ...         ),
-            ...         rg.IntMetadataProperty(
+            ...         rg.IntegerMetadataProperty(
             ...             name="metadata-property-2",
             ...             gt=0,
             ...             lt=10,
@@ -149,20 +150,54 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             ...     guidelines="These are the annotation guidelines.",
             ... )
         """
-        super().__init__(
-            fields=fields,
-            questions=questions,
-            metadata_properties=metadata_properties,
-            guidelines=guidelines,
-            allow_extra_metadata=allow_extra_metadata,
-        )
 
-        self._records = []
+        helpers.validate_fields(fields)
+        helpers.validate_questions(questions)
+        helpers.validate_metadata_properties(metadata_properties)
+
+        if guidelines is not None:
+            if not isinstance(guidelines, str):
+                raise TypeError(
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                )
+            if len(guidelines) < 1:
+                raise ValueError(
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                )
+
+        self._fields = fields or []
+        self._questions = questions or []
+        self._metadata_properties = metadata_properties or []
+        self._guidelines = guidelines
+        self._allow_extra_metadata = allow_extra_metadata
 
         if vectors_settings:
             self._vectors_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
         else:
             self._vectors_settings: Dict[str, VectorSettings] = {}
+        self._records = []
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedQuestionTypes"]]:
+        return self._questions
+
+    @property
+    def metadata_properties(
+        self,
+    ) -> Union[List["AllowedMetadataPropertyTypes"]]:
+        return self._metadata_properties
 
     @property
     def vectors_settings(self) -> List["VectorSettings"]:
@@ -234,8 +269,8 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
                 list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
         """
-        records = self._parse_records(records)
-        self._validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self, records)
 
         if len(self._records) > 0:
             self._records += records

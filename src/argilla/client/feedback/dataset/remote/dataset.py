@@ -61,7 +61,9 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -175,7 +177,9 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             PermissionError: if the user does not have either `owner` or `admin` role.
             Exception: If the pushing of the records to Argilla fails.
         """
-        records = self.dataset._parse_and_validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self.dataset, records)
+
         question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
         for i in trange(
@@ -206,7 +210,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         if isinstance(records, RemoteFeedbackRecord):
             records = [records]
 
-        self.dataset._validate_records(records, attributes_to_validate=["metadata", "vectors"])
+        helpers.validate_dataset_records(self.dataset, records, attributes_to_validate=["metadata", "vectors"])
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress
@@ -420,7 +424,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
 
         self._fields = fields
-        self._fields_schema = None
         self._questions = questions
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
@@ -433,6 +436,22 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._updated_at = updated_at
 
         self._records = RemoteFeedbackRecords(dataset=self, with_vectors=with_vectors)
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedRemoteFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedRemoteQuestionTypes"]]:
+        return self._questions
 
     @property
     def records(self) -> RemoteFeedbackRecords:
