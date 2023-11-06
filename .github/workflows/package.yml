@@ -119,7 +119,6 @@ jobs:
     uses: ./.github/workflows/run-python-tests.yml
     needs:
       - check_repo_files
-      - run_unit_tests
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
       runsOn: extended-runner
