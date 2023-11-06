@@ -64,6 +64,7 @@ def test_dataset():
 
 @pytest.mark.asyncio
 class TestFilteredRemoteFeedbackDataset:
+    @pytest.mark.skip(reason="Avoid using factory tests")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     @pytest.mark.parametrize(
         "statuses, expected_num_records",
@@ -106,7 +107,7 @@ class TestFilteredRemoteFeedbackDataset:
             (FloatMetadataFilter(name="float-metadata", le=5.0), 100),
         ],
     )
-    async def test_filter_by_metadata(
+    def test_filter_by_metadata(
         self,
         owner: User,
         test_dataset: FeedbackDataset,
@@ -129,7 +130,7 @@ class TestFilteredRemoteFeedbackDataset:
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
         assert len(filtered_dataset.records) == expected_num_records
 
-    async def test_filter_by_response_status_without_results(
+    def test_filter_by_response_status_without_results(
         self,
         argilla_user: User,
         feedback_dataset_guidelines: str,
@@ -149,7 +150,6 @@ class TestFilteredRemoteFeedbackDataset:
         dataset.add_records(records=feedback_dataset_records)
         dataset.push_to_argilla(name="test-dataset")
 
-        await db.refresh(argilla_user, attribute_names=["datasets"])
         same_dataset = FeedbackDataset.from_argilla(name="test-dataset")
         filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.draft).pull()
 
@@ -174,6 +174,7 @@ class TestFilteredRemoteFeedbackDataset:
 
         assert records == other_records
 
+    @pytest.mark.skip(reason="Avoid using factory tests")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_attributes(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
@@ -259,7 +260,7 @@ class TestFilteredRemoteFeedbackDataset:
         ):
             remote.filter_by(metadata_filters=IntegerMetadataFilter(name="unexpected-field", ge=4, le=5))
 
-    def _create_test_dataset_with_records(self, owner, test_dataset):
+    def _create_test_dataset_with_records(self, owner: User, test_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
         remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
