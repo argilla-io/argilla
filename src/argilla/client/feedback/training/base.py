@@ -76,7 +76,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
             filter_by: A dict with key the field to filter by, and values the filters to apply. Currently only
                 defined for `response_status` filters. Can be one of: draft, pending, submitted, and discarded.
                 Defaults to `None` (no filter is applied).
-            sort_by: TODO.
+            sort_by: A list of `SortBy` objects to sort your dataset by.
+                Defaults to `None` (no filter is applied).
             framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
                 for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
