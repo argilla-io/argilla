@@ -484,7 +484,7 @@ async def list_dataset_records(
 ):
     dataset = await _get_dataset(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
+    await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
 
     if metadata.metadata_parsed or sort_by_query_param:
         records, total = await _filter_records_using_search_engine(
