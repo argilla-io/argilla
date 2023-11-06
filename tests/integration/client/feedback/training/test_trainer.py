@@ -50,12 +50,6 @@ from tests.integration.training.helpers import train_with_cleanup
 
 __OUTPUT_DIR__ = "tmp"
 
-# To mimick the tests from huggingface_hub: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/testing_constants.py
-HF_HUB_CONSTANTS = {
-    "HF_HUB_ENDPOINT_STAGING": "https://hub-ci.huggingface.co",
-    "HF_HUB_TOKEN": "hf_94wBhPGp6KrrTH3KDchhKpRxZwd6dmHWLL",
-}
-
 
 @pytest.mark.parametrize(
     "framework",
@@ -377,11 +371,11 @@ def test_tokenizer_warning_wrong_framework(
 @pytest.mark.parametrize(
     "framework",
     [
-        # Framework("spacy"),
-        # Framework("spacy-transformers"),
-        # Framework("transformers"),
-        # Framework("setfit"),
-        # Framework("peft"),
+        Framework("spacy"),
+        Framework("spacy-transformers"),
+        Framework("transformers"),
+        Framework("setfit"),
+        Framework("peft"),
         # The FeedbackDataset needs to work with token classification for this framework to work.
         Framework("span_marker"),
     ],
