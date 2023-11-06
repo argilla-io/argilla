@@ -137,6 +137,7 @@ $filters-inline-min-width: 540px;
     width: 100%;
     container-type: inline-size;
     container-name: filters;
+    z-index: 1;
   }
   &__list {
     display: flex;
