@@ -20,5 +20,10 @@ from argilla.client.feedback.utils.html import (
     media_to_html,
     video_to_html,
 )
+from argilla.client.feedback.utils.internal import (
+    feedback_dataset_in_argilla,
+    generate_pydantic_schema_for_fields,
+    generate_pydantic_schema_for_metadata,
+)
 
 __all__ = ["audio_to_html", "video_to_html", "image_to_html", "create_token_highlights"]
