@@ -106,4 +106,3 @@ export default {
   }
 }
 </style>
-../base-render-markdown/RenderMarkdown.base.component.vue

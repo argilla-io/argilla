@@ -3,14 +3,14 @@
     <div class="range__inputs">
       <input
         type="number"
-        v-model.number.lazy="sliderValues[0]"
+        v-model.number.lazy="values[0]"
         :min="min"
         :max="max"
       />
       <span class="range__separator" />
       <input
         type="number"
-        v-model.number.lazy="sliderValues[1]"
+        v-model.number.lazy="values[1]"
         :min="min"
         :max="max"
       />
@@ -21,7 +21,7 @@
           class="range__slider"
           ref="from"
           type="range"
-          v-model.number="sliderValues[0]"
+          v-model.number="values[0]"
           :min="min"
           :max="max"
           :step="step"
@@ -30,7 +30,7 @@
           class="range__slider"
           ref="to"
           type="range"
-          v-model.number="sliderValues[1]"
+          v-model.number="values[1]"
           :min="min"
           :max="max"
           :step="step"
@@ -60,33 +60,59 @@ export default {
       default: () => this.max / 100,
     },
   },
+  model: {
+    prop: "sliderValues",
+    event: "onSliderValuesChanged",
+  },
+  data() {
+    return {
+      values: this.sliderValues,
+    };
+  },
   watch: {
+    sliderValues() {
+      this.values = this.sliderValues;
+    },
+    values() {
+      this.$emit("onSliderValuesChanged", this.values);
+    },
     sliderFrom(newValue) {
       if (newValue > this.sliderTo) {
-        this.sliderValues = [this.sliderFrom, this.sliderFrom];
+        this.values = [this.sliderFrom, this.sliderFrom];
       }
       if (newValue < this.min) {
-        this.sliderValues = [this.min, newValue];
+        this.values = [this.min, newValue];
       }
+
       this.styleRange();
+
+      if (newValue === this.max) {
+        this.$refs.from.style.zIndex = 4;
+        this.$refs.to.style.zIndex = 3;
+      }
     },
     sliderTo(newValue) {
       if (newValue < this.sliderFrom) {
-        this.sliderValues = [this.sliderTo, this.sliderTo];
+        this.values = [this.sliderTo, this.sliderTo];
       }
       if (newValue > this.max) {
-        this.sliderValues = [this.sliderFrom, this.max];
+        this.values = [this.sliderFrom, this.max];
       }
-      this.$refs.to.style.zIndex = newValue <= 0 ? 2 : 0;
+
       this.styleRange();
+
+      if (newValue === this.min) {
+        this.$refs.from.style.zIndex = 3;
+        this.$refs.to.style.zIndex = 4;
+      }
     },
   },
   computed: {
     sliderFrom() {
-      return this.sliderValues[0];
+      return this.values[0];
     },
     sliderTo() {
-      return this.sliderValues[1];
+      return this.values[1];
     },
   },
   methods: {
@@ -102,6 +128,9 @@ export default {
       #3e5cc9 ${(toPosition / rangeDistance) * 100}%,
       #ccc ${(toPosition / rangeDistance) * 100}%,
       #ccc 100%)`;
+
+      this.$refs.from.style.zIndex = 2;
+      this.$refs.to.style.zIndex = 3;
     },
   },
   created() {
