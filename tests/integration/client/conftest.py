@@ -516,6 +516,130 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
 
 
 @pytest.fixture
+def feedback_dataset_records_with_metadata() -> List[FeedbackRecord]:
+    records = []
+    external_id = 0
+    for status in ["submitted", "discarded"]:
+        records.extend(
+            [
+                FeedbackRecord(
+                    fields={"text": "This is a positive example", "label": "positive"},
+                    responses=[
+                        {
+                            "values": {
+                                "question-1": {"value": "positive example"},
+                                "question-2": {"value": 1},
+                                "question-3": {"value": "a"},
+                                "question-4": {"value": ["a", "b"]},
+                                "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                            },
+                            "status": status,
+                        },
+                    ],
+                    metadata={"terms-metadata": "a", "integer-metadata": 2, "float-metadata": 2.0},
+                    external_id=str(external_id + 1),
+                ),
+                FeedbackRecord(
+                    fields={"text": "This is a negative example", "label": "negative"},
+                    metadata={"terms-metadata": "a", "integer-metadata": 4, "float-metadata": 4.0},
+                    external_id=str(external_id + 2),
+                ),
+                FeedbackRecord(
+                    fields={"text": "This is a negative example", "label": "negative"},
+                    responses=[
+                        {
+                            "values": {
+                                "question-1": {"value": "negative example"},
+                                "question-2": {"value": 1},
+                                "question-3": {"value": "b"},
+                                "question-4": {"value": ["b", "c"]},
+                                "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                            },
+                            "status": status,
+                        }
+                    ],
+                    metadata={"terms-metadata": "b", "integer-metadata": 4, "float-metadata": 4.0},
+                    suggestions=[
+                        {
+                            "question_name": "question-1",
+                            "value": "This is a suggestion to question 1",
+                            "type": "human",
+                            "score": 0.0,
+                            "agent": "agent-1",
+                        },
+                        {
+                            "question_name": "question-2",
+                            "value": 1,
+                            "type": "human",
+                            "score": 0.0,
+                            "agent": "agent-1",
+                        },
+                        {
+                            "question_name": "question-3",
+                            "value": "a",
+                            "type": "human",
+                            "score": 0.0,
+                            "agent": "agent-1",
+                        },
+                        {
+                            "question_name": "question-4",
+                            "value": ["a", "b"],
+                            "type": "human",
+                            "score": 0.0,
+                            "agent": "agent-1",
+                        },
+                        {
+                            "question_name": "question-5",
+                            "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                            "type": "human",
+                            "score": 0.0,
+                            "agent": "agent-1",
+                        },
+                    ],
+                    external_id=str(external_id + 3),
+                ),
+                FeedbackRecord(
+                    fields={"text": "This is a negative example", "label": "negative"},
+                    responses=[
+                        {
+                            "values": {
+                                "question-1": {"value": "negative example"},
+                                "question-2": {"value": 1},
+                                "question-3": {"value": "c"},
+                                "question-4": {"value": ["a", "c"]},
+                                "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                            },
+                            "status": status,
+                        }
+                    ],
+                    metadata={"terms-metadata": "b", "integer-metadata": 5, "float-metadata": 4.0},
+                    external_id=str(external_id + 4),
+                ),
+                FeedbackRecord(
+                    fields={"text": "This is a negative example", "label": "negative"},
+                    responses=[
+                        {
+                            "values": {
+                                "question-1": {"value": "negative example"},
+                                "question-2": {"value": 1},
+                                "question-3": {"value": "a"},
+                                "question-4": {"value": ["a"]},
+                                "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                            },
+                            "status": status,
+                        }
+                    ],
+                    metadata={"terms-metadata": "c", "integer-metadata": 6, "float-metadata": 6.0},
+                    external_id=str(external_id + 5),
+                ),
+            ]
+        )
+        external_id += 5
+
+    return records
+
+
+@pytest.fixture
 def feedback_dataset_huggingface() -> Dataset:
     return Dataset.from_dict(
         {
