@@ -123,9 +123,6 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         for item in iterable_items:
             if item.name == item_name:
                 return item
-            if hasattr(item, "title"):
-                if item.title == item_name:
-                    return item
         warnings.warn(
             f"{item_type} with name='{item_name}' not found, available {item_type} names are:"
             f" {', '.join(item.name for item in iterable_items)}"
