@@ -390,7 +390,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         questions: List["AllowedRemoteQuestionTypes"],
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
-        with_vectors: Union[INCLUDE_ALL_VECTORS_PARAM, List[str], None] = None,
+        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 

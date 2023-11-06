@@ -188,7 +188,7 @@ def get_records(
         client: the authenticated Argilla client to be used to send the request to the API.
         id: the id of the dataset to retrieve the records from.
         include: the fields to be included in the response.
-             Can either be `responses` or `suggestions`.
+             Can either be `responses`, `suggestions`, `vectors:all` or `vectors:vector_name_1,vector_name_2,...`
         offset: the offset to be used in the pagination. Defaults to 0.
         limit: the limit to be used in the pagination. Defaults to 50.
         response_status: the status of the responses to be retrieved. Can either be
