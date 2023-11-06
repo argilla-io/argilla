@@ -43,12 +43,12 @@ jobs:
     env:
       COVERAGE_REPORT: ${{ inputs.coverageReport }}
     steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
+      # Cannot reuse `install-python-dependencies.yml` workflow as workflows cannot be called as steps, just as jobs
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - uses: actions/cache@v3
         id: cache
