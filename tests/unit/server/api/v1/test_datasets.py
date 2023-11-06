@@ -5233,7 +5233,6 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
-
     async def create_dataset_with_user_responses(
         self, user: User, workspace: "Workspace"
     ) -> Tuple[Dataset, List[Question], List[Record], List[Response], List[Suggestion]]:

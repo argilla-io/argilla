@@ -1,6 +1,19 @@
-import pytest
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
 import argilla as rg
+import pytest
 from argilla import User, ValueSchema, Workspace
 from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.sdk.users.models import UserRole
@@ -8,7 +21,6 @@ from argilla.feedback import FeedbackDataset, FeedbackRecord, ResponseSchema, Te
 
 
 class TestSuiteListDatasetRecords:
-
     @pytest.mark.parametrize("offset", [0, 20, 30, 50, 60, 80, 90])
     @pytest.mark.parametrize("limit", [20, 40, 50, 60, 80, 90, 150])
     def test_list_dataset_records_with_multiple_responses_and_variable_offset(
