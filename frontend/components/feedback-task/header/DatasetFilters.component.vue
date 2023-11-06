@@ -128,13 +128,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$filters-inline-min-width: 540px;
 .filters {
   display: flex;
-  flex-wrap: nowrap;
   gap: $base-space;
   align-items: center;
   &__wrapper {
     width: 100%;
+    container-type: inline-size;
+    container-name: filters;
   }
   &__list {
     display: flex;
@@ -171,6 +173,7 @@ export default {
     width: min(100%, 400px);
   }
 }
+
 .filterAppear-enter-active,
 .filterAppear-leave-active {
   transition: all 0.3s ease-out;
@@ -180,5 +183,11 @@ export default {
 .filterAppear-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+@container filters (max-width: #{$filters-inline-min-width}) {
+  .filters {
+    flex-wrap: wrap;
+  }
 }
 </style>
