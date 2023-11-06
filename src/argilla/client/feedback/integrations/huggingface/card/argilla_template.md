@@ -82,6 +82,11 @@ The **suggestions** are human or machine generated recommendations for each ques
 
 **✨ NEW** The **metadata** is a dictionary that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
 
+| Metadata Name | Title | Type | Values | Visible for Annotators |
+| ------------- | ----- | ---- | ------ | ---------------------- |
+{% for metadata in argilla_metadata_properties %} | {{ metadata.name }} | {{ metadata.title }} | {{ metadata.type }} | {% if metadata.values %}{{ metadata.values }}{% else %}{{ metadata.min }} - {{ metadata.max }}{% endif %} | {{ metadata.visible_for_annotators }} |
+{% endfor %}
+
 The **guidelines**, are optional as well, and are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
 
 ### Data Instances
