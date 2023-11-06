@@ -205,6 +205,7 @@ class HuggingFaceDatasetMixin:
                     guidelines=self.guidelines,
                     metadata_properties=self.metadata_properties or None,
                     allow_extra_metadata=self.allow_extra_metadata,
+                    vectors_settings=self.vectors_settings or None,
                 ).to_yaml()
             )
             f.flush()
@@ -306,6 +307,7 @@ class HuggingFaceDatasetMixin:
                     guidelines=config.guidelines,
                     metadata_properties=config.metadata_properties,
                     allow_extra_metadata=config.allow_extra_metadata,
+                    vectors_settings=config.vectors_settings,
                 )
         except EntryNotFoundError:
             # TODO(alvarobartt): here for backwards compatibility, last used in 1.12.0

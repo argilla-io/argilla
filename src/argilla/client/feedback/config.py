@@ -33,6 +33,7 @@ except ImportError:
     )
 
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 
 class DatasetConfig(BaseModel):
@@ -43,6 +44,7 @@ class DatasetConfig(BaseModel):
         List[Annotated[AllowedMetadataPropertyTypes, Field(..., discriminator="type")]]
     ] = None
     allow_extra_metadata: bool = True
+    vectors_settings: Optional[List[VectorSettings]] = None
 
     def to_yaml(self) -> str:
         return dump(self.dict())
