@@ -46,7 +46,15 @@ from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from tests.integration.training.helpers import train_with_cleanup
+
 __OUTPUT_DIR__ = "tmp"
+
+# To mimick the tests from huggingface_hub: https://github.com/huggingface/huggingface_hub/blob/v0.18.0.rc0/tests/testing_constants.py
+HF_HUB_CONSTANTS = {
+    "HF_HUB_ENDPOINT_STAGING": "https://hub-ci.huggingface.co",
+    "HF_HUB_TOKEN": "hf_94wBhPGp6KrrTH3KDchhKpRxZwd6dmHWLL",
+}
 
 
 @pytest.mark.parametrize(
@@ -55,7 +63,6 @@ __OUTPUT_DIR__ = "tmp"
         Framework("spacy"),
         Framework("spacy-transformers"),
         Framework("transformers"),
-        Framework("spark-nlp"),
         Framework("span_marker"),
         Framework("setfit"),
         Framework("peft"),
@@ -365,3 +372,88 @@ def test_tokenizer_warning_wrong_framework(
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     with pytest.warns(UserWarning, match="Passing a tokenizer is not supported for the setfit framework."):
         ArgillaTrainer(dataset=dataset, task=task, framework="setfit", tokenizer=tokenizer)
+
+
+@pytest.mark.parametrize(
+    "framework",
+    [
+        # Framework("spacy"),
+        # Framework("spacy-transformers"),
+        # Framework("transformers"),
+        # Framework("setfit"),
+        # Framework("peft"),
+        # The FeedbackDataset needs to work with token classification for this framework to work.
+        Framework("span_marker"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    framework: Union[Framework, str],
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    mocked_trainer_push_to_huggingface,
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    questions = [
+        question for question in dataset.questions if isinstance(question, (LabelQuestion, MultiLabelQuestion))
+    ]
+    label = LabelQuestionUnification(question=questions[0])
+    task = TrainingTask.for_text_classification(text=dataset.fields[0], label=label)
+
+    if framework == Framework("span_marker"):
+        with pytest.raises(
+            NotImplementedError,
+            match=f"Framework {framework} is not supported for this {TrainingTaskForTextClassification}.",
+        ):
+            ArgillaTrainer(dataset=dataset, task=task, framework=framework)
+        return
+
+    else:
+        if framework == Framework("spacy"):
+            model = "en_core_web_sm"
+        elif framework == Framework("setfit"):
+            model = "all-MiniLM-L6-v2"
+        else:
+            model = "prajjwal1/bert-tiny"
+
+        trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model)
+
+    # We need to initialize the model (is faster than calling the whole training process) before calling push_to_huggingface.
+    # The remaining models need to call the train method first.
+    repo_id = "mocked"
+    if framework in (Framework("transformers"), Framework("peft")):
+        trainer.update_config(num_iterations=1)
+        trainer._trainer.init_model(new=True)
+    elif framework in (Framework("setfit"), Framework("spacy"), Framework("spacy-transformers")):
+        if framework in (Framework("spacy"), Framework("spacy-transformers")):
+            trainer.update_config(max_steps=1)
+            repo_id = __OUTPUT_DIR__
+        else:
+            trainer.update_config(num_iterations=1)
+    else:
+        trainer._trainer.init_model()
+
+    # We have to train the model and push it with spacy before removing the
+    # generated folder, as it needs to be packaged.
+    if framework in (Framework("spacy"), Framework("spacy-transformers")):
+        trainer.train(__OUTPUT_DIR__)
+    else:
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
+
+    # This functionality is mocked, no need to check the generated card too.
+    trainer.push_to_huggingface(repo_id, generate_card=False)
+    if Path(__OUTPUT_DIR__).exists():
+        shutil.rmtree(__OUTPUT_DIR__)

@@ -367,3 +367,20 @@ class ArgillaSentenceTransformersTrainer(ArgillaTrainerSkeleton):
             trainer_cls=self._trainer_cls,
             **card_data_kwargs,
         )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the model to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [sentence-transformer api docs](https://www.sbert.net/docs/package_reference/SentenceTransformer.html#sentence_transformers.SentenceTransformer.save_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError:
+                For `CrossEncoder` models, that currently aren't implemented underneath.
+        """
+        raise NotImplementedError("This method is not implemented for `ArgillaSentenceTransformersTrainer`.")
