@@ -1,5 +1,4 @@
 import { Field } from "../entities/field/Field";
-import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";

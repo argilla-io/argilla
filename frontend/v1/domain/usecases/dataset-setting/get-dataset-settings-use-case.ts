@@ -1,7 +1,6 @@
 import { DatasetSetting } from "../../entities/DatasetSetting";
 import { Field } from "../../entities/field/Field";
 import { Metadata } from "../../entities/metadata/Metadata";
-import { Question } from "../../entities/question/Question";
 import { Vector } from "../../entities/vector/Vector";
 import { IDatasetRepository } from "../../services/IDatasetRepository";
 import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
