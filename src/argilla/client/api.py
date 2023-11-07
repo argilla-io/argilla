@@ -107,6 +107,7 @@ def init(
         timeout=timeout,
         extra_headers=extra_headers,
     )
+    whoami()
 
 
 def log(
@@ -477,6 +478,32 @@ def active_client() -> Argilla:
     If Active client is None, initialize a default one.
     """
     return ArgillaSingleton.get()
+
+
+def whoami() -> None:
+    # Check the current user on the Argilla Server
+
+    from rich import print as rprint
+    from rich.markdown import Markdown
+
+    user = active_client()._user
+    first_name = user.first_name if user.first_name != "" else "None"
+
+    rprint(
+        Markdown(
+            f"- **Username**: {user.username}\n"
+            f"- **Role**: {user.role}\n"
+            f"- **First name**: {first_name}\n"
+            f"- **Last name**: {user.last_name}\n"
+            f"- **Workspaces**: {user.workspaces}\n"
+            f"- **Updated at**: {user.updated_at}"
+        )
+    )
+
+    ds_list = []
+    for each_dataset in list_datasets():
+        ds_list.append(each_dataset.name)
+    rprint(Markdown(f"- **Datasets**: {ds_list}"))
 
 
 active_api = active_client  # backward compatibility

@@ -50,6 +50,7 @@ if _TYPE_CHECKING:
         log,
         log_async,
         set_workspace,
+        whoami,
     )
     from argilla.client.datasets import (
         DatasetForText2Text,
@@ -145,6 +146,7 @@ _import_structure = {
         "active_client",
         "list_datasets",
         "list_workspaces",
+        "whoami",
     ],
     "client.models": [
         "Text2TextRecord",
