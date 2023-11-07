@@ -255,6 +255,7 @@ class HuggingFaceDatasetMixin:
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines or None,
                 argilla_vectors_settings=self.vectors_settings or None,
+                argilla_metadata_properties=self.metadata_properties,
                 argilla_record=json.loads(sample_argilla_record.json()),
                 huggingface_record=sample_huggingface_record,
             )

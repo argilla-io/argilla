@@ -61,7 +61,9 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -175,7 +177,9 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             PermissionError: if the user does not have either `owner` or `admin` role.
             Exception: If the pushing of the records to Argilla fails.
         """
-        records = self.dataset._parse_and_validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self.dataset, records)
+
         question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
         for i in trange(
@@ -206,7 +210,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         if isinstance(records, RemoteFeedbackRecord):
             records = [records]
 
-        self.dataset._validate_records(records, attributes_to_validate=["metadata", "vectors"])
+        helpers.validate_dataset_records(self.dataset, records, attributes_to_validate=["metadata", "vectors"])
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress
@@ -420,7 +424,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
 
         self._fields = fields
-        self._fields_schema = None
         self._questions = questions
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
@@ -433,6 +436,22 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._updated_at = updated_at
 
         self._records = RemoteFeedbackRecords(dataset=self, with_vectors=with_vectors)
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedRemoteFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedRemoteQuestionTypes"]]:
+        return self._questions
 
     @property
     def records(self) -> RemoteFeedbackRecords:
@@ -620,8 +639,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         self._records.delete(records=[records] if not isinstance(records, list) else records)
 
-    def pull(self) -> "FeedbackDataset":
+    def pull(self, max_records: Optional[int] = None) -> "FeedbackDataset":
         """Pulls the dataset from Argilla and returns a local instance of it.
+
+        Args:
+            max_records: the maximum number of records to pull from Argilla. Defaults to `None`.
 
         Returns:
             A local instance of the dataset which is a `FeedbackDataset` object.
@@ -638,9 +660,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             vectors_settings=[vector_settings.to_local() for vector_settings in self.vectors_settings] or None,
             allow_extra_metadata=self._allow_extra_metadata,
         )
-        records = [record.to_local() for record in self._records]
 
-        if len(records) > 0:
+        len_records = len(self._records)
+        if len_records > 0:
+            max_records = max_records or len_records
+            records = [record.to_local() for record in self._records[:max_records]]
             instance.add_records(records=records)
         else:
             warnings.warn(
