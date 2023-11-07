@@ -1,7 +1,7 @@
 import { RecordCriteria } from "./RecordCriteria";
 
 describe("RecordCriteria", () => {
-  describe("isFilteringByText", () => {
+  describe("isFilteredByText", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
@@ -9,10 +9,11 @@ describe("RecordCriteria", () => {
         "pending",
         "searchText",
         [],
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByText).toBe(true);
+      expect(criteria.isFilteredByText).toBe(true);
     });
 
     test("should return false if searchText is empty", () => {
@@ -22,10 +23,11 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         [],
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByText).toBe(false);
+      expect(criteria.isFilteredByText).toBe(false);
     });
 
     test("should return false if searchText is undefined", () => {
@@ -35,14 +37,15 @@ describe("RecordCriteria", () => {
         "pending",
         undefined,
         [],
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByText).toBe(false);
+      expect(criteria.isFilteredByText).toBe(false);
     });
   });
 
-  describe("isFilteringByMetadata should", () => {
+  describe("isFilteredByMetadata should", () => {
     test("return true if metadata is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
@@ -50,10 +53,11 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         ["metadata"],
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(true);
+      expect(criteria.isFilteredByMetadata).toBe(true);
     });
 
     test("return false if metadata is empty", () => {
@@ -63,10 +67,11 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         [],
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(false);
+      expect(criteria.isFilteredByMetadata).toBe(false);
     });
 
     test("return false if metadata is undefined", () => {
@@ -76,10 +81,11 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         undefined,
-        []
+        [],
+        null
       );
 
-      expect(criteria.isFilteringByMetadata).toBe(false);
+      expect(criteria.isFilteredByMetadata).toBe(false);
     });
   });
 
@@ -91,7 +97,8 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         [],
-        []
+        [],
+        null
       );
 
       criteria.page = 2;
@@ -106,7 +113,8 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         [],
-        []
+        [],
+        null
       );
 
       criteria.status = "submitted";
@@ -121,7 +129,8 @@ describe("RecordCriteria", () => {
         "pending",
         "Can AI help us?",
         [],
-        []
+        [],
+        null
       );
 
       criteria.searchText = "Can ML help to improve your business processes?";
@@ -136,7 +145,8 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         ["metadata"],
-        []
+        [],
+        null
       );
 
       criteria.metadata = ["metadata1", "metadata2"];
@@ -151,7 +161,8 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         [],
-        ["sortBy"]
+        ["sortBy"],
+        null
       );
 
       criteria.sortBy = ["sortBy1", "sortBy2"];
@@ -159,14 +170,32 @@ describe("RecordCriteria", () => {
       expect(criteria.hasChanges).toBe(true);
     });
 
-    test("return false if page, status, searchText, metadata or sortBy  are same after commit", () => {
+    test("return true if similaritySearch is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
         "pending",
         "",
         [],
-        []
+        [],
+        // eslint-disable-next-line quotes
+        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+      );
+
+      criteria.similaritySearch.order = "least";
+
+      expect(criteria.hasChanges).toBe(true);
+    });
+
+    test("return false if page, status, searchText, metadata, sortBy or similaritySearch are same after commit", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        [],
+        [],
+        null
       );
 
       criteria.page = 2;
@@ -174,6 +203,12 @@ describe("RecordCriteria", () => {
       criteria.searchText = "Love ML";
       criteria.metadata = ["metadata1", "metadata2"];
       criteria.sortBy = ["sortBy1", "sortBy2"];
+
+      criteria.similaritySearch.order = "least";
+      criteria.similaritySearch.recordId = "1";
+      criteria.similaritySearch.vectorName = "2";
+      criteria.similaritySearch.limit = 50;
+
       criteria.commit();
 
       expect(criteria.hasChanges).toBe(false);
@@ -188,7 +223,9 @@ describe("RecordCriteria", () => {
         "pending",
         "Do you love ML?",
         ["metadata.your_feel"],
-        ["inserted_at:asc"]
+        ["inserted_at:asc"],
+        // eslint-disable-next-line quotes
+        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
       );
 
       criteria.page = 1;
@@ -196,6 +233,7 @@ describe("RecordCriteria", () => {
       criteria.searchText = "Do you love AI?";
       criteria.metadata = ["metadata.my_feel"];
       criteria.sortBy = ["inserted_at:desc"];
+      criteria.similaritySearch.order = "least";
 
       criteria.reset();
 
@@ -204,6 +242,9 @@ describe("RecordCriteria", () => {
       expect(criteria.searchText).toEqual(criteria.committed.searchText);
       expect(criteria.metadata).toEqual(criteria.committed.metadata);
       expect(criteria.sortBy).toEqual(criteria.committed.sortBy);
+      expect(criteria.similaritySearch).toEqual(
+        criteria.committed.similaritySearch
+      );
     });
   });
 });

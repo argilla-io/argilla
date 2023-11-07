@@ -86,6 +86,7 @@ class TestSuiteRemoteFeedbackRecord:
         assert all(isinstance(record, FeedbackRecord) for record in deleted_records)
         assert len(remote_dataset.records) == 0
 
+    @pytest.mark.skip(reason="Enable when factories are removed from the test")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update(self, role: UserRole, db: "AsyncSession") -> None:
         dataset = await DatasetFactory.create()
@@ -113,6 +114,7 @@ class TestSuiteRemoteFeedbackRecord:
             for suggestion in remote_record.suggestions
         )
 
+    @pytest.mark.skip(reason="Enable when factories are removed from the test")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_suggestions(self, role: UserRole, db: "AsyncSession") -> None:
         dataset = await DatasetFactory.create()
@@ -138,6 +140,7 @@ class TestSuiteRemoteFeedbackRecord:
 
 @pytest.mark.asyncio
 class TestSuiteRemoteSuggestionSchema:
+    @pytest.mark.skip(reason="Enable when factories are removed from the test")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete(self, role: UserRole, db: "AsyncSession") -> None:
         dataset = await DatasetFactory.create()
