@@ -4,6 +4,7 @@
       :preview="fieldsPreview"
       :visibleReferenceRecord="visibleReferenceRecord"
       :recordCriteria="recordCriteria"
+      :availableVectors="availableVectors"
       @show-reference-record="showReferenceRecord"
       @hide-reference-record="hideReferenceRecord"
     />
@@ -24,6 +25,10 @@ export default {
     },
     recordCriteria: {
       type: Object,
+      required: true,
+    },
+    availableVectors: {
+      type: Array,
       required: true,
     },
   },

@@ -28,5 +28,11 @@
     }
   },
   "filterBy": "Filter by...",
-  "findSimilar": "Find similar"
+  "findSimilar": "Find similar",
+  "with": "with",
+  "similarUsing": "similar using",
+  "cancel": "Cancel",
+  "find": "Find",
+  "similarTo": "Similar to",
+  "similarityScore": "Similarity Score"
 }
