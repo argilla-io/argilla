@@ -1,8 +1,8 @@
 <template>
   <SimilarityConfigDropdown
-    v-if="selected && availableVectors.length > 1"
+    v-if="selected && vectors.length > 1"
     v-model="selected"
-    :options="availableVectors"
+    :options="vectors"
     :useExtraText="$t('with')"
     :useTextCapitalized="false"
     useTextProp="title"
@@ -15,7 +15,7 @@ export default {
     value: {
       type: String,
     },
-    availableVectors: {
+    vectors: {
       type: Array,
       required: true,
     },

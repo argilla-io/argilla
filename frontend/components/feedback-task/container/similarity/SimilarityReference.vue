@@ -27,7 +27,7 @@
 
       <SimilarityFilterVector
         class="similarity-reference__dropdown"
-        :availableVectors="availableVectors"
+        :vectors="availableVectors"
         v-model="recordCriteria.similaritySearch.vectorName"
       />
     </div>

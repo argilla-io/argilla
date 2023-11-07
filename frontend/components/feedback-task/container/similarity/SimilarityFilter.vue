@@ -23,7 +23,7 @@
           />
           {{ $t("similarUsing") }}:
         </span>
-        <SimilarityFilterVectors
+        <SimilarityFilterVectorRadioButtons
           v-model="recordCriteria.similaritySearch.vectorName"
           :vectors="availableVectors"
         />
