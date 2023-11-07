@@ -22,6 +22,10 @@ These are the section headers that we use:
 
 We have chosen to disable raining a `ValueError` during the `FeedbackDataset.*_by_name()`: `FeedbackDataset.question_by_name()`, `FeedbackDataset.field_by_name()` and `FeedbackDataset.metadata_property_by_name`. Instead, these methods will now return `None` when no match is found. This change is backwards compatible with previous versions of Argilla, but might break your code if you are relying on the `ValueError` to be raised.
 
+#### `FeedbackDataset`
+
+We added a `show_progress` argument to `from_huggingface()` method to make the progress bar for parsing records process optional.
+
 #### `RemoteFeedbackDataset`
 
 We have added additional support for the `pull()`-method of `RemoteFeedbackDataset`. It is now possible to pull a `RemoteFeedbackDataset` with a specific `max_records`-argument. In combination with the earlier introduced `filter_by` and `sorty_by` this allows for more fine-grained control over the records that are pulled from Argilla.
