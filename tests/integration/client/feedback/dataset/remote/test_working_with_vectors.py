@@ -233,3 +233,18 @@ class TestSuiteWorkingWithVectors:
         record, score = records_with_scores[1]
         assert record.external_id == "2"
         assert score < 1.0
+
+    def test_find_similar_with_wrong_inputs(self, owner: User, feedback_dataset: FeedbackDataset):
+        rg.init(api_key=owner.api_key)
+        workspace = Workspace.create(name="test")
+
+        record = FeedbackRecord(external_id="0", fields={"text": "hello"}, vectors={"vector": [1, 2]})
+
+        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=2))
+        remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
+
+        with pytest.raises(ValueError, match="Either 'record' or 'value' must be provided"):
+            remote.find_similar_records(vector_name="vector")
+
+        with pytest.raises(ValueError, match="Either 'record' or 'value' must be provided"):
+            remote.find_similar_records(vector_name="vector", value=[1, 2], record=record)
