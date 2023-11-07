@@ -7,6 +7,7 @@
 </template>
 <script>
 import { useSuggestionFilterViewModel } from "./useSuggestionFilterViewModel";
+
 export default {
   props: {
     datasetQuestions: {

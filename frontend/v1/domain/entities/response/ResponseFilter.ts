@@ -1,6 +1,6 @@
-import { Question } from "./Question";
+import { Question } from "../question/Question";
 
-class QuestionFilter {
+class ResponseFilter {
   constructor(private readonly question: Question) {}
 
   get name() {
@@ -12,13 +12,13 @@ class QuestionFilter {
   }
 }
 
-export class QuestionFilterList {
-  public readonly questions: QuestionFilter[];
+export class ResponseFilterList {
+  public readonly questions: ResponseFilter[];
 
   constructor(questions: Question[]) {
     this.questions = questions
       .filter(this.visibleTypeOfQuestions)
-      .map((question) => new QuestionFilter(question));
+      .map((question) => new ResponseFilter(question));
   }
 
   private visibleTypeOfQuestions(question: Question): boolean {
