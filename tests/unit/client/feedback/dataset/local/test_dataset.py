@@ -540,7 +540,6 @@ def test__unique_metadata_property(metadata_property: "AllowedMetadataPropertyTy
     dataset._unique_metadata_property(metadata_property)
 
 
-
 def test_properties_by_name() -> None:
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],

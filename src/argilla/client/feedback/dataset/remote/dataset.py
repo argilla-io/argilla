@@ -339,7 +339,6 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         record: Optional[RemoteFeedbackRecord] = None,
         max_results: int = 50,
     ) -> List[Tuple[RemoteFeedbackRecord, float]]:
-
         if bool(record) == bool(value):
             raise ValueError("Either 'record' or 'value' must be provided")
 
