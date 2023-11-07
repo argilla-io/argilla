@@ -16,6 +16,16 @@ export class QuestionFilterList {
   public readonly questions: QuestionFilter[];
 
   constructor(questions: Question[]) {
-    this.questions = questions.map((question) => new QuestionFilter(question));
+    this.questions = questions
+      .filter(this.visibleTypeOfQuestions)
+      .map((question) => new QuestionFilter(question));
+  }
+
+  private visibleTypeOfQuestions(question: Question): boolean {
+    return (
+      question.isMultiLabelType ||
+      question.isSingleLabelType ||
+      question.isRatingType
+    );
   }
 }
