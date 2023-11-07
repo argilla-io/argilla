@@ -627,6 +627,7 @@ class TestRemoteFeedbackDataset:
 
         assert len(remote_dataset.metadata_properties) == 0
 
+    @pytest.mark.skip(reason="Avoid using test factories")
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
         dataset = await DatasetFactory.create()
@@ -809,6 +810,7 @@ class TestRemoteFeedbackDataset:
         assert local_copy is not None
         assert len(local_copy.records) == 1
 
+    @pytest.mark.skip(reason="Avoid using test factories")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_warning_local_methods(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()

@@ -77,6 +77,7 @@ if TYPE_CHECKING:
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LE = 1000
+LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
@@ -441,29 +442,18 @@ async def list_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
-    if metadata.metadata_parsed or sort_by_query_param:
-        records, total = await _filter_records_using_search_engine(
-            db,
-            search_engine,
-            dataset=dataset,
-            parsed_metadata=metadata.metadata_parsed,
-            limit=limit,
-            offset=offset,
-            user=current_user,
-            response_statuses=response_statuses,
-            include=include,
-            sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
-        )
-    else:
-        records, total = await datasets.list_records_by_dataset_id(
-            db,
-            dataset_id,
-            current_user.id,
-            include=include,
-            response_statuses=response_statuses,
-            offset=offset,
-            limit=limit,
-        )
+    records, total = await _filter_records_using_search_engine(
+        db,
+        search_engine,
+        dataset=dataset,
+        parsed_metadata=metadata.metadata_parsed,
+        limit=limit,
+        offset=offset,
+        user=current_user,
+        response_statuses=response_statuses,
+        include=include,
+        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
+    )
 
     return Records(items=records, total=total)
 
@@ -486,22 +476,17 @@ async def list_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
 
-    if metadata.metadata_parsed or sort_by_query_param:
-        records, total = await _filter_records_using_search_engine(
-            db,
-            search_engine,
-            dataset=dataset,
-            parsed_metadata=metadata.metadata_parsed,
-            limit=limit,
-            offset=offset,
-            response_statuses=response_statuses,
-            include=include,
-            sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
-        )
-    else:
-        records, total = await datasets.list_records_by_dataset_id(
-            db, dataset_id, include=include, response_statuses=response_statuses, offset=offset, limit=limit
-        )
+    records, total = await _filter_records_using_search_engine(
+        db,
+        search_engine,
+        dataset=dataset,
+        parsed_metadata=metadata.metadata_parsed,
+        limit=limit,
+        offset=offset,
+        response_statuses=response_statuses,
+        include=include,
+        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
+    )
 
     return Records(items=records, total=total)
 

@@ -21,18 +21,18 @@
           <SimilarityFilterOrder
             v-model="recordCriteria.similaritySearch.order"
           />
-          similar using:
+          {{ $t("similarUsing") }}:
         </span>
-        <SimilarityFilterVectors
+        <SimilarityFilterVectorRadioButtons
           v-model="recordCriteria.similaritySearch.vectorName"
           :vectors="availableVectors"
         />
         <div class="similarity-filter__buttons">
           <base-button class="primary outline small" @click="cancel">
-            Cancel
+            {{ $t("cancel") }}
           </base-button>
           <base-button class="primary small" @click="findSimilar">
-            Find
+            {{ $t("find") }}
           </base-button>
         </div>
       </div>
@@ -66,6 +66,8 @@ export default {
   },
   methods: {
     onSetDefaultVector() {
+      if (this.recordCriteria.similaritySearch.vectorName) return;
+
       this.recordCriteria.similaritySearch.vectorName =
         this.availableVectors[0].name;
     },
