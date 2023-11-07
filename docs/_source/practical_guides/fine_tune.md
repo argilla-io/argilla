@@ -84,7 +84,7 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 
 #### Filter and Sort datasets for training
 
-Say you want to filter a part or your dataset, keep only the submitted records, or maybe sort by date to train on the latest additions to your dataset only. You can do it easily from the `ArgillaTrainer` by using the `filter_by` and `sort_by` methods:
+Say you want to filter a part of your dataset, keep only the submitted records, or maybe sort by date to train on the latest additions to your dataset only. You can do it easily from the `ArgillaTrainer` by using the `filter_by`, `sort_by`, and `max_records` arguments:
 
 ```python
 from argilla import SortBy
@@ -95,6 +95,7 @@ trainer = ArgillaTrainer(
     framework="setfit",
     filter_by={"response_status": ["submitted"]},
     sort_by=[SortBy(field="metadata.my-metadata", order="asc")],
+    max_records=1000
 )
 ```
 

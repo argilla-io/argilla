@@ -24,6 +24,7 @@ These are the section headers that we use:
 - Added functionality to push your models to the Hugging Face hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)). Contributed by @Racso-3141.
 - Added `filter_by` argument to `ArgillaTrainer` to filter by `response_status` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 - Added `sort_by` argument to `ArgillaTrainer` to sort by `metadata` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
+- Added `max_records` argument to `ArgillaTrainer` to limit record used for training ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 
 ### Fixed
 
