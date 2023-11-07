@@ -280,7 +280,6 @@ rg.log(
 :::
 ::::
 
-
 ## Use semantic search
 
 This section introduces how to use the semantic search feature from Argilla UI and Argilla Python client.
@@ -288,7 +287,7 @@ This section introduces how to use the semantic search feature from Argilla UI a
 ### Argilla UI
 ::::{tab-set}
 :::{tab-item} FeedbackDataset
-
+The use of the semantich search in Feedback Datasets is explained in detail [here](../filter_dataset.md#semantic-search).
 :::
 :::{tab-item} Older datasets
 Within the Argilla UI, it is possible to select a record that has an attached vector to start semantic searching by clicking the "Find similar" button. After labeling, the "Remove similar record filter" button can be pressed to close the specific search and continue with your labeling session.
@@ -334,10 +333,9 @@ Now that we have our reference vector, we can do a semantic search in the Python
 
 ::::{tab-set}
 :::{tab-item} FeedbackDataset
-[TODO]
+The use of the semantich search in Feedback Datasets is explained in detail [here](../filter_dataset.md#semantic-search).
 :::
 :::{tab-item} Older datasets
-
 The `rg.load` method includes a `vector` parameter which can be used to retrieve similar records to a given vector, and a `limit` parameter to indicate the number of records to be retrieved. This parameter accepts a tuple with the key of the target vector (this should match with one of the keys of the `vectors` dictionary) and the query vector itself.
 
 In addition, the `vector` param can be combined with the `query` param to combine vector search with traditional search.
