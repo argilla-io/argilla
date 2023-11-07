@@ -487,7 +487,11 @@ def whoami() -> None:
     from rich.markdown import Markdown
 
     user = active_client()._user
-    first_name = user.first_name if user.first_name != "" else "None"
+
+    first_name = user.first_name if user.first_name != "" else None
+    ws_ds_dictionary = {}
+    for work_space in user.workspaces:
+        ws_ds_dictionary[work_space] = [ds.name for ds in list_datasets() if ds.workspace == work_space]
 
     rprint(
         Markdown(
@@ -495,15 +499,12 @@ def whoami() -> None:
             f"- **Role**: {user.role}\n"
             f"- **First name**: {first_name}\n"
             f"- **Last name**: {user.last_name}\n"
+            f"- **API Key**: ***\n"
             f"- **Workspaces**: {user.workspaces}\n"
+            f"- **Datasets**: {list((ws, ws_ds_dictionary[ws]) for ws in ws_ds_dictionary.keys())}\n"
             f"- **Updated at**: {user.updated_at}"
         )
     )
-
-    ds_list = []
-    for each_dataset in list_datasets():
-        ds_list.append(each_dataset.name)
-    rprint(Markdown(f"- **Datasets**: {ds_list}"))
 
 
 active_api = active_client  # backward compatibility

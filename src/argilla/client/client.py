@@ -171,6 +171,19 @@ class Argilla:
 
         self._check_argilla_versions()
 
+    def __repr__(self):
+        user = self._user
+        first_name = user.first_name if user.first_name != "" else None
+        ws_ds_dictionary = {}
+        for work_space in user.workspaces:
+            ws_ds_dictionary[work_space] = [
+                ds.name
+                for ds in datasets_api.list_datasets(client=self.http_client).parsed
+                if ds.workspace == work_space
+            ]
+
+        return f"ArgillaClient(\n\tusername='{user.username}',\n\trole='{user.role}', \n\tfirst_name='{first_name}', \n\tlast_name='{user.last_name}', \n\tapi_key='***', \n\tworkspaces={user.workspaces}, \n\tdatasets={ws_ds_dictionary}, \n\tupdated_at='{user.updated_at}'\n)"
+
     def _check_argilla_versions(self):
         from argilla import __version__ as rg_version
 
