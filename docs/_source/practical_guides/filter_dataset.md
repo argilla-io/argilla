@@ -100,7 +100,7 @@ filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 ### Sort
 You may also order your records according to one or several attributes. In the UI, you can easily do this using the `Sort` menu. In the Python SDK, you can do this sorting with the `sort_by` method.
 
-You can sort
+These are the arguments of the `sort_by` function:
 - `field`: This refers to the information that will be used for the sorting. This can be time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
 - `order`: Whether the order should be ascending (`asc`) or descending (`des`).
 
@@ -122,24 +122,33 @@ You can retrieve records based on their similarity with another record. To do th
 
 In the UI, go to the record you'd like to use for the semantic search and click on `Find similar` at the top right corner of the record card. If there is more than one vector, you will be asked to select which vector to use. You can also select whether you want the most or least similar records and the number of results you would like to see.
 
-In the Python SDK, you can also get a list of records that are semantically close to given a vector.
+In the Python SDK, you can also get a list of records that are semantically close to a given embedding with the `find_similar_records` method. These are the arguments of this function:
+
+- `vector_name`: The `name` of the vector to use in the search.
+- `value`: A vector to use for the similarity search in the form of a `List[float]`. It is necessary to include a `value` **or** a `record`.
+- `record`: A `FeedbackRecord` to use as part of the search. It is necessary to include a `value` **or** a `record`.
+- `max_results` (optional): The maximum number of results for this search.
 
 ```python
 ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
 
 # using text embeddings
-value = embedder_model.embeddings("My text is here")
-
-# using another record's vector
-value = ds.records[0].vectors["my_vector"]
-
 similar_records =  ds.find_similar_records(
-	vector_name="my_vector",
-	value=value,
-	max_results=50
+    vector_name="my_vector",
+    value=embedder_model.embeddings("My text is here")
+)
+
+# using another record
+similar_records =  ds.find_similar_records(
+    vector_name="my_vector",
+    record=ds.records[0],
+    max_results=5
 )
 ```
 
+```{tip}
+You can also combine filters and semantic search: `dataset.filter_by(...).find_similar_records(...)`
+```
 
 ## Other datasets
 

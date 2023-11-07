@@ -19,13 +19,13 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
 ```
 
-If your dataset includes vectors, by default these will not get pulled with the rest of the dataset in order to improve performace. If you would like to pull the vectors in your records, you will need to specify it like so:
+If your dataset includes vectors, by default these will **not** get pulled with the rest of the dataset in order to improve performace. If you would like to pull the vectors in your records, you will need to specify it like so:
 
 ::::{tab-set}
 
 :::{tab-item} All vectors
 ```python
-remote_dataset = dataset.push_to_argilla(
+remote_dataset = rg.FeedbackDataset.from_argilla(
     name="my-dataset",
     workspace="my-workspace",
     with_vectors="all"
@@ -34,7 +34,7 @@ remote_dataset = dataset.push_to_argilla(
 :::
 :::{tab-item} Specific vectors
 ```python
-remote_dataset = dataset.push_to_argilla(
+remote_dataset = rg.FeedbackDataset.from_argilla(
     name="my-dataset",
     workspace="my-workspace",
     with_vectors=["my_vectors"]
