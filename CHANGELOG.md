@@ -16,19 +16,38 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Highlights
+
+#### 🚨 Breaking changes
+
+We have chosen to disable raining a `ValueError` during the `FeedbackDataset.*_by_name()`: `FeedbackDataset.question_by_name()`, `FeedbackDataset.field_by_name()` and `FeedbackDataset.metadata_property_by_name`. Instead, these methods will now return `None` when no match is found. This change is backwards compatible with previous versions of Argilla, but might break your code if you are relying on the `ValueError` to be raised.
+
+#### `RemoteFeedbackDataset`
+
+We have added additional support for the `pull()`-method of `RemoteFeedbackDataset`. It is now possible to pull a `RemoteFeedbackDataset` with a specific `max_records`-argument. In combination with the earlier introduced `filter_by` and `sorty_by` this allows for more fine-grained control over the records that are pulled from Argilla.
+
+#### `ArgillaTrainer`
+
+The `ArgillaTrainer` class has been updated to support additional features. Hugging Face models can now be shared to the Hugging Face Hub directly from the `ArgillaTrainer.push_to_huggingface`-method. Additionally, we have included `sormodels to the Hugging Face hubts to the `ArgillaTrainer`-initialization-method of to allow for more fine-grained control over the records that are used for training.
+
+#### 🎨 UI
+
+We have fixed a small UI bug where larger svg-images where pushed out of the visisible screen, leading to a bad user experience.
+
 ### Added
 
 - Added `max_records` argument to `pull()` method for `RemoteFeedbackDataset`.([#4074](https://github.com/argilla-io/argilla/pull/4074))
-- Added functionality to push your models to huggingface hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)).
+- Added functionality to push your models to the Hugging Face hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)).
 - Added `filter_by` argument to `ArgillaTrainer` to filter by `response_status` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
+- Added `sort_by` argument to `ArgillaTrainer` to sort by `metadata` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 
 ### Fixed
 
-- Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
+- Fixed svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
 
 ### Changed
 
-- Changed `FeedbackDataset.*_by_name()` methods to return `None` when no match is found ([#4101](https://github.com/argilla-io/argilla/pull/3976)).
+- [breaking] Changed `FeedbackDataset.*_by_name()` methods to return `None` when no match is found ([#4101](https://github.com/argilla-io/argilla/pull/3976)).
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
