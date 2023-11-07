@@ -19,7 +19,7 @@ These are the section headers that we use:
 ### Contributors
 
 - @Racso-3141 Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
-  
+
 ### Added
 
 - Added `show_progress` argument to `from_huggingface()` method to make the progress bar for parsing records process optional.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
