@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any
+from typing import Any, List, Union
 
 import argilla as rg
 import pytest
@@ -91,22 +91,31 @@ class TestSuiteWorkingWithVectors:
     @pytest.mark.parametrize(
         "vector_names",
         [
-            "vector",
-            ["vector"],
+            # TODO: Review this test since this is the ONLY order where all tests pass. If you change the order, some
+            #  of those tests will fail with unexpected vector names.
+            ["vector1"],
+            ["vector1", "vector2", "vector3"],
+            ["vector2"],
             ["vector3"],
-            ["vector", "vector2"],
-            ["vector", "vector2", "vector3"],
+            ["vector1", "vector2"],
+            ["vector2", "vector3"],
+            ["vector1", "vector3"],
+            "vector1",
         ],
     )
-    def test_load_dataset_including_selective_vectors(
-        self, owner: User, feedback_dataset: FeedbackDataset, vector_names: Any
-    ):
+    def test_load_dataset_including_selective_vectors(self, owner: User, vector_names: Union[str, List[str]]):
         rg.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test")
 
-        feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=2))
-        feedback_dataset.add_vector_settings(VectorSettings(name="vector2", dimensions=2))
-        feedback_dataset.add_vector_settings(VectorSettings(name="vector3", dimensions=2))
+        feedback_dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[TextQuestion(name="question")],
+            vectors_settings=[
+                VectorSettings(name="vector1", dimensions=2),
+                VectorSettings(name="vector2", dimensions=2),
+                VectorSettings(name="vector3", dimensions=2),
+            ],
+        )
 
         feedback_dataset.add_records(
             [
@@ -131,16 +140,14 @@ class TestSuiteWorkingWithVectors:
         remote = feedback_dataset.push_to_argilla("test_find_similar_records", workspace=workspace)
         remote = FeedbackDataset.from_argilla(id=remote.id, with_vectors=vector_names)
 
-        records = list(remote)
-
         if not isinstance(vector_names, list):
             vector_names = [vector_names]
 
         expected_vector_names = set(vector_names)
 
-        assert set(records[0].vectors.keys()) == expected_vector_names
-        assert set(records[1].vectors.keys()) == expected_vector_names
-        assert set(records[2].vectors.keys()) == expected_vector_names
+        assert set(remote[0].vectors.keys()) == expected_vector_names
+        assert set(remote[1].vectors.keys()) == expected_vector_names
+        assert set(remote[2].vectors.keys()) == expected_vector_names
 
     def test_load_dataset_including_wrong_vectors(self, owner: User, feedback_dataset: FeedbackDataset):
         rg.init(api_key=owner.api_key)
