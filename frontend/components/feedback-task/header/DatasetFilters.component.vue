@@ -5,12 +5,12 @@
       :placeholder="'Introduce a query'"
     />
     <MetadataFilter
-      v-if="!!datasetMetadata.length"
+      v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
       :datasetMetadata="datasetMetadata"
       v-model="recordCriteria.metadata"
     />
     <Sort
-      v-if="!!datasetMetadata.length"
+      v-if="!datasetMetadataIsLoading"
       :datasetMetadata="datasetMetadata"
       v-model="recordCriteria.sortBy"
     />
