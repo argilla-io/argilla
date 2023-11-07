@@ -782,7 +782,6 @@ class TestRemoteFeedbackDataset:
         assert local_copy is not None
         assert local_copy.records == []
 
-    @pytest.mark.skip(reason="Avoid using test factories")
     async def test_pull_with_max_records(
         self,
         argilla_user: ServerUser,
@@ -811,6 +810,7 @@ class TestRemoteFeedbackDataset:
         assert local_copy is not None
         assert len(local_copy.records) == 1
 
+    @pytest.mark.skip(reason="Avoid using test factories")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_warning_local_methods(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
