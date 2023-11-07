@@ -37,6 +37,11 @@
           :datasetMetadata="datasetMetadata"
           v-model="recordCriteria.metadata"
         />
+        <ResponsesFilter
+          v-if="!!datasetQuestions.length"
+          :datasetQuestions="datasetQuestions"
+          v-model="recordCriteria.metadata"
+        />
         <SuggestionFilter :datasetQuestions="datasetQuestions" />
       </div>
     </transition>
