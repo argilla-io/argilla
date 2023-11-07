@@ -3,7 +3,6 @@
   <div v-else class="wrapper">
     <template v-if="!!record">
       <RecordFieldsAndSimilarity
-        :key="`${record.id}_fields`"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
