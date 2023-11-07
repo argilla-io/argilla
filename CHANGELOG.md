@@ -20,29 +20,19 @@ These are the section headers that we use:
 
 - @Racso-3141 Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
 
+
+## [1.19.0]()
+
 ### Added
 
 - Added `show_progress` argument to `from_huggingface()` method to make the progress bar for parsing records process optional.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
 - Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
 - Added to sort by `inserted_at` or `updated_at` for datasets with no metadata. ([4147](https://github.com/argilla-io/argilla/pull/4147))
 - Added `max_records` argument to `pull()` method for `RemoteFeedbackDataset`.([#4074](https://github.com/argilla-io/argilla/pull/4074))
-- Added functionality to push your models to huggingface hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)).
+- Added functionality to push your models to the Hugging Face hub with `ArgillaTrainer.push_to_huggingface` ([#3976](https://github.com/argilla-io/argilla/pull/3976)). Contributed by @Racso-3141.
 - Added `POST /api/v1/datasets/:dataset_id/records/search` endpoint to search for records without user context, including responses by all users. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - Added `filter_by` argument to `ArgillaTrainer` to filter by `response_status` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
-
-### Changed
-
-- [breaking] `limit` query parameter for `GET /api/v1/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
-- [breaking] `limit` query parameter for `GET /api/v1/me/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
-
-### Fixed
-
-- Fix svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
-
-## [1.19.0]()
-
-### Added
-
+- Added `sort_by` argument to `ArgillaTrainer` to sort by `metadata` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 - Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
 - Added `GET /api/v1/datasets/:dataset_id/vectors-settings` endpoint for listing the vectors settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
 - Added `DELETE /api/v1/vectors-settings/:vector_settings_id` endpoint for deleting a vector settings. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
@@ -60,7 +50,7 @@ These are the section headers that we use:
 
 ### Changed
 
-- Changed `FeedbackDataset.*_by_name()` methods to return `None` when no match is found ([#4101](https://github.com/argilla-io/argilla/pull/3976)).
+- [breaking] Changed `FeedbackDataset.*_by_name()` methods to return `None` when no match is found ([#4101](https://github.com/argilla-io/argilla/pull/3976)).
 - Update `POST /api/v1/datasets/:dataset_id/records` endpoint to allow to create records with `vectors` ([#4022](https://github.com/argilla-io/argilla/pull/4022))
 - Update `PATCH /api/v1/datasets/:dataset_id/records` endpoint to allow to update records with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
 - Update `PATCH /api/v1/records/:record_id` endpoint to allow to update record with `vectors`. ([#4062](https://github.com/argilla-io/argilla/pull/4062))
@@ -74,10 +64,14 @@ These are the section headers that we use:
 - Using cosine similarity to compute similarity between vectors. ([#4124](https://github.com/argilla-io/argilla/pull/4124))
 - Update `GET /api/v1/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 - Update `GET /api/v1/me/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
+- [breaking] `limit` query parameter for `GET /api/v1/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
+- [breaking] `limit` query parameter for `GET /api/v1/me/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 
 ### Fixed
 
+- Fixed svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
 - Fixed creating records with responses from multiple users. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#4142](https://github.com/argilla-io/argilla/pull/4142))
+
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 

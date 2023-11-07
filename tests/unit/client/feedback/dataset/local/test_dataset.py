@@ -538,3 +538,18 @@ def test__unique_metadata_property(metadata_property: "AllowedMetadataPropertyTy
         ],
     )
     dataset._unique_metadata_property(metadata_property)
+
+
+
+def test_properties_by_name() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+    )
+    assert dataset.field_by_name("mock") is None
+    assert dataset.question_by_name("mock") is None
+    assert dataset.metadata_property_by_name("mock") is None
+    assert isinstance(dataset.field_by_name("required-field"), TextField)
+    assert isinstance(dataset.question_by_name("question"), TextQuestion)
+    assert isinstance(dataset.metadata_property_by_name("terms-metadata"), TermsMetadataProperty)
