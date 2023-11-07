@@ -23,6 +23,7 @@ from typing_extensions import Annotated
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
 from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, authorize, is_authorized
@@ -77,6 +78,7 @@ if TYPE_CHECKING:
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
 
 router = APIRouter(tags=["datasets"])
@@ -451,7 +453,7 @@ async def list_current_user_dataset_records(
         user=current_user,
         response_statuses=response_statuses,
         include=include,
-        sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
+        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
 
     return Records(items=records, total=total)
@@ -484,7 +486,7 @@ async def list_dataset_records(
         offset=offset,
         response_statuses=response_statuses,
         include=include,
-        sort_by_query_param=sort_by_query_param or {RecordSortField.inserted_at.value: "asc"},
+        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
 
     return Records(items=records, total=total)
