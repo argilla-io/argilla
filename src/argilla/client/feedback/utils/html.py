@@ -98,12 +98,12 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
 
 
 # Functions to convert media files to HTML (for user friendliness)
-def video_to_html(path: str, file_type: Optional[str] = None) -> str:
+def video_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
     """
     Convert a video file to an HTML tag with embedded base64 data.
 
     Args:
-        path: The path to the video file.
+        media_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the video file. If not provided, it will be inferred from the file extension.
 
     Returns:
@@ -113,15 +113,15 @@ def video_to_html(path: str, file_type: Optional[str] = None) -> str:
         >>> from argilla.client.feedback.utils import video_to_html
         >>> html = video_to_html("my_video.mp4")
     """
-    return media_to_html("video", path, file_type)
+    return media_to_html("video", media_source, file_type)
 
 
-def audio_to_html(path: str, file_type: Optional[str] = None) -> str:
+def audio_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
     """
     Convert an audio file to an HTML tag with embedded base64 data.
 
     Args:
-        path: The path to the audio file.
+        media_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the audio file. If not provided, it will be inferred from the file extension.
 
     Returns:
@@ -131,15 +131,15 @@ def audio_to_html(path: str, file_type: Optional[str] = None) -> str:
         >>> from argilla.client.feedback.utils import audio_to_html
         >>> html = audio_to_html("my_audio.mp3")
     """
-    return media_to_html("audio", path, file_type)
+    return media_to_html("audio", media_source, file_type)
 
 
-def image_to_html(path: str, file_type: Optional[str] = None) -> str:
+def image_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
     """
     Convert an image file to an HTML tag with embedded base64 data.
 
     Args:
-        path: The path to the image file.
+        media_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the image file. If not provided, it will be inferred from the file extension.
 
     Returns:
@@ -149,7 +149,7 @@ def image_to_html(path: str, file_type: Optional[str] = None) -> str:
         >>> from argilla.client.feedback.utils import image_to_html
         >>> html = image_to_html("my_image.png")
     """
-    return media_to_html("image", path, file_type)
+    return media_to_html("image", media_source, file_type)
 
 
 def create_token_highlights(
