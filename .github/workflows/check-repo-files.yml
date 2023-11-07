@@ -30,6 +30,8 @@ jobs:
               - 'tests/**'
               - 'pyproject.toml'
               - 'setup.py'
+            frontendChanges:
+              - 'frontend/**'
             buildChanges:
               - 'src/**'
               - 'frontend/**'

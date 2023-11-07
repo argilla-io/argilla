@@ -34,19 +34,10 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     uses: ./.github/workflows/check-repo-files.yml
 
-  deployable_check:
-    name: Check if must build & deploy from environment
-    runs-on: ubuntu-latest
+  install_python_dependencies:
+    name: Install and cache Python dependencies
+    uses: ./.github/workflows/install-python-dependencies.yml
     needs: check_repo_files
-    env:
-      IS_DEPLOYABLE: ${{ secrets.AR_DOCKER_USERNAME != '' && needs.check_repo_files.outputs.buildChanges == 'true' }}
-    outputs:
-      isDeployable: ${{ steps.set_output.outputs.is_deployable }}
-    steps:
-      - name: set output
-        id: set_output
-        run: |
-          echo "is_deployable=$IS_DEPLOYABLE" >> $GITHUB_OUTPUT
 
   run_unit_tests:
     strategy:
@@ -55,14 +46,16 @@ jobs:
           - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
-            runsOn: extended-runner
+            runsOn: ubuntu-latest
           - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
             searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
             coverageReport: coverage-opensearch-2.4.1
             runsOn: ubuntu-latest
     name: Run unit tests
     uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
+    needs:
+      - check_repo_files
+      - install_python_dependencies
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
@@ -90,10 +83,15 @@ jobs:
             runsOn: extended-runner
     name: Run unit tests with extra engines
     uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
+    needs:
+      - check_repo_files
+      - install_python_dependencies
     if: |
+      !cancelled() &&
       needs.check_repo_files.outputs.pythonChanges == 'true' &&
-      startsWith(github.event.ref, 'refs/tags/v')
+      startsWith(github.event.ref, 'refs/tags/v') &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     with:
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
@@ -107,13 +105,19 @@ jobs:
     uses: ./.github/workflows/run-python-tests.yml
     needs:
       - check_repo_files
-      - run_unit_tests
+      - install_python_dependencies
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
       runsOn: extended-runner
       coverageReport: coverage-extra
       pytestArgs: tests/integration
     secrets: inherit
+
+  run_frontend_tests:
+    name: Run frontend tests
+    uses: ./.github/workflows/run-frontend-tests.yml
+    needs: check_repo_files
+    if: needs.check_repo_files.outputs.frontendChanges == 'true'
 
   push_coverage:
     name: Upload code coverage
@@ -122,25 +126,37 @@ jobs:
       - run_unit_tests
       - run_integration_tests
     steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v3
+
       - name: Copy all reports
         run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
+
       - name: Display current files structure
         run: ls -R
+
       - name: Upload Coverage reports to Codecov 📦
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
 
   build_python_package:
     name: Build Argilla python package
     uses: ./.github/workflows/build-python-package.yml
-    needs: deployable_check
-    if: needs.deployable_check.outputs.isDeployable == 'true'
+    needs:
+      - check_repo_files
+      - run_unit_tests
+      - run_unit_test_with_extra_engines
+      - run_integration_tests
+      - run_frontend_tests
+    if: |
+      !cancelled() &&
+      needs.check_repo_files.outputs.buildChanges == 'true' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     secrets: inherit
 
-  build_server_docker_image:
-    name: Build Argilla server docker image
+  build_server_docker_image_linux_amd64:
+    name: Build Argilla server docker image linux/amd64
     uses: ./.github/workflows/build-push-docker.yml
     needs:
       - build_python_package
@@ -155,37 +171,77 @@ jobs:
       image-name: argilla/argilla-server
       dockerfile: docker/Dockerfile
       readme: README.md
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64
     secrets: inherit
 
-  build_quickstart_docker_image:
-    name: Build Argilla quickstart docker image
+  build_quickstart_docker_image_linux_amd64:
+    name: Build Argilla quickstart docker image linux/amd64
     uses: ./.github/workflows/build-push-docker.yml
-    needs: build_server_docker_image
+    needs: build_server_docker_image_linux_amd64
     if: |
       !cancelled() &&
-      needs.build_server_docker_image.result == 'success'
+      needs.build_server_docker_image_linux_amd64.result == 'success'
     with:
       download-python-package: false
       image-name: argilla/argilla-quickstart
       dockerfile: docker/quickstart.Dockerfile
       readme: docker/quickstart.README.md
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64
       build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+        ARGILLA_VERSION=${{ needs.build_server_docker_image_linux_amd64.outputs.version }}
     secrets: inherit
 
+  # Build of arm64 Docker images only when release, as we need QEMU virtualization and it's very slow
+  build_server_docker_image_linux_arm64:
+    name: Build Argilla server docker image linux/arm64
+    uses: ./.github/workflows/build-push-docker.yml
+    needs:
+      - build_python_package
+      - run_unit_tests
+    if: |
+      !cancelled() &&
+      github.event_name == 'release' &&
+      needs.build_python_package.result == 'success' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    with:
+      download-python-package: true
+      image-name: argilla/argilla-server
+      dockerfile: docker/Dockerfile
+      readme: README.md
+      platforms: linux/arm64
+    secrets: inherit
+
+  build_quickstart_docker_image_linux_arm64:
+    name: Build Argilla quickstart docker image linux/arm64
+    uses: ./.github/workflows/build-push-docker.yml
+    needs: build_server_docker_image_linux_arm64
+    if: |
+      !cancelled() &&
+      github.event_name == 'release' &&
+      needs.build_server_docker_image_linux_arm64.result == 'success'
+    with:
+      download-python-package: false
+      image-name: argilla/argilla-quickstart
+      dockerfile: docker/quickstart.Dockerfile
+      readme: docker/quickstart.README.md
+      platforms: linux/arm64
+      build-args: |
+        ARGILLA_VERSION=${{ needs.build_server_docker_image_linux_arm64.outputs.version }}
+    secrets: inherit
+
+  # Deploy preview environment per PR
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
-    needs: build_quickstart_docker_image
+    needs: build_quickstart_docker_image_linux_amd64
     if: |
       !cancelled() &&
-      needs.build_quickstart_docker_image.result == 'success' &&
+      needs.build_quickstart_docker_image_linux_amd64.result == 'success' &&
       github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-quickstart
-      image-version: ${{ needs.build_quickstart_docker_image.outputs.version }}
+      image-version: ${{ needs.build_quickstart_docker_image_linux_amd64.outputs.version }}
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
@@ -197,26 +253,30 @@ jobs:
     if: ${{ github.event_name == 'release' }}
     needs:
       - run_integration_tests
-      - build_quickstart_docker_image
+      - build_quickstart_docker_image_linux_arm64
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.AR_TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+
       - name: Test Installing 🍿
         run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
+
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:
