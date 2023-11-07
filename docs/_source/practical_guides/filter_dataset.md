@@ -5,6 +5,8 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
+[TODO: Add image with the new filters]
+
 ### Filter
 
 From Argilla 1.15.0, the `filter_by` method has been included for the `FeedbackDataset`s pushed to Argilla, which allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. So on, to be able to use the `filter_by` method, you will need to make sure that you are using a `FeedbackDataset` in Argilla.
@@ -121,6 +123,10 @@ You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
 You can retrieve records based on their similarity with another record. To do that, make sure you have added `vector_settings` to your [dataset configuration](create_dataset.md#define-vectors) and that your [records include vectors](create_dataset.md#configure-the-records).
 
 In the UI, go to the record you'd like to use for the semantic search and click on `Find similar` at the top right corner of the record card. If there is more than one vector, you will be asked to select which vector to use. You can also select whether you want the most or least similar records and the number of results you would like to see.
+
+At any time, you can expand or collapse the record that was used for the search as a reference. If you want to undo the search, just click on the cross next to the reference record.
+
+[TODO: Image needed here!]
 
 In the Python SDK, you can also get a list of records that are semantically close to a given embedding with the `find_similar_records` method. These are the arguments of this function:
 
