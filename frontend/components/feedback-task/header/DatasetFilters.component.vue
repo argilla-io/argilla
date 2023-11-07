@@ -30,15 +30,17 @@
       </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
-    <transition name="filterAppear" v-if="visibleFilters" appear>
-      <div class="filters__list">
-        <MetadataFilter
-          v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
-          :datasetMetadata="datasetMetadata"
-          v-model="recordCriteria.metadata"
-        />
-      </div>
-    </transition>
+    <template v-if="visibleFilters">
+      <transition name="filterAppear" appear>
+        <div class="filters__list">
+          <MetadataFilter
+            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            :datasetMetadata="datasetMetadata"
+            v-model="recordCriteria.metadata"
+          />
+        </div>
+      </transition>
+    </template>
   </div>
 </template>
 
@@ -159,6 +161,7 @@ $filters-inline-min-width: 540px;
     flex-shrink: 0;
   }
   &__filter-button {
+    user-select: none;
     &.filter-button--active {
       background: none;
       &,
