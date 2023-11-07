@@ -15,10 +15,9 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
-from rich.console import Console
+import rich
 from tqdm import trange
 
-from argilla.cli.rich import get_argilla_themed_table
 from argilla.client.api import ArgillaSingleton
 from argilla.client.feedback.constants import PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -219,7 +218,8 @@ class ArgillaMixin:
             len(records),
             PUSHING_BATCH_SIZE,
             desc="Pushing records to Argilla...",
-            disable=False if show_progress else True,
+            disable=not show_progress,
+            colour="blue",
         ):
             try:
                 datasets_api_v1.add_records(
@@ -317,39 +317,9 @@ class ArgillaMixin:
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
-
-        ArgillaMixin.__dataset_print_table(remote_feedback_dataset, self.records)
-
+        rich.print(f"[bold green]✓ Dataset succesfully pushed to Argilla[/bold green]")
+        print(remote_feedback_dataset)
         return remote_feedback_dataset
-
-    def __dataset_print_table(dataset, records):
-        console = Console()
-        table = get_argilla_themed_table(title="Dataset Uploaded", show_lines=True)
-
-        for column in (
-            "ID",
-            "Name",
-            "Workspace",
-            "Type",
-            "Fields",
-            "Questions",
-            "Number of Records",
-            "URL",
-            "Creation Date",
-        ):
-            table.add_column(column, justify="center")
-        table.add_row(
-            str(dataset.id),
-            dataset.name,
-            dataset.workspace.name,
-            "Feedback",
-            ", ".join([fields.name for fields in dataset.fields]),
-            ", ".join([questions.name for questions in dataset.questions]),
-            str(len(records)),
-            dataset.url,
-            dataset.created_at.isoformat(sep=" "),
-        )
-        console.print(table)
 
     @staticmethod
     def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
