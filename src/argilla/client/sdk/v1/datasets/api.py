@@ -233,7 +233,7 @@ def search_records(
     metadata_filters: Optional[List[str]] = None,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST request to `/api/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
+    """Sends a POST request to `/api/v1/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.

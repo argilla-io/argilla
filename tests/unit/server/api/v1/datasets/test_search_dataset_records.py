@@ -26,7 +26,7 @@ from tests.factories import AdminFactory, AnnotatorFactory, DatasetFactory, Owne
 
 @pytest.mark.asyncio
 class TestSearchDatasetRecords:
-    def url(self, dataset_id: UUID):
+    def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/search"
 
     async def test_as_owner(self, async_client: AsyncClient):
