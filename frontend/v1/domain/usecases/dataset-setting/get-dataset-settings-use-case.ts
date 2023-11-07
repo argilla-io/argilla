@@ -56,7 +56,7 @@ export class GetDatasetSettingsUseCase {
 
     const [
       dataset,
-      backendQuestions,
+      questions,
       backendFields,
       backendVectors,
       backendMetadataProperties,
@@ -67,18 +67,6 @@ export class GetDatasetSettingsUseCase {
       getVectors,
       getMetadataProperties,
     ]);
-
-    const questions = backendQuestions.map((question) => {
-      return new Question(
-        question.id,
-        question.name,
-        question.description,
-        datasetId,
-        question.title,
-        question.required,
-        question.settings
-      );
-    });
 
     const fields = backendFields.map((field) => {
       return new Field(
