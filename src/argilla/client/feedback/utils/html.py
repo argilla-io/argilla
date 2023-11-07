@@ -195,10 +195,6 @@ def create_token_highlights(
         (w - min_weight) / (max_weight - min_weight) if max_weight != min_weight else 0 for w in weights
     ]
 
-    # Get the color map if set to None or not indicated
-    if c_map is None:
-        c_map = "viridis"
-
     # Generate the HTML string with highlighted tokens
     html_str = ["<p>"]
     for token, weight in zip(tokens, normalized_weights):

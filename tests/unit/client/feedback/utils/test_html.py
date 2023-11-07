@@ -104,7 +104,7 @@ def test_wrappers(func, path, expected, tmp_path):
         (["token1", "token2"], [0, 0], None, None, "<p>token1 token2 </p>"),
         ([], [], None, ValueError, None),
         (["token1"], [0.5], None, None, "token1"),
-        (["token1", "token2"], [0.5, 0.5], None, None, "token1"),
+        (["token1", "token2"], [0.5, 0.5], None, TypeError, "token1"),
         (["token1", "token2"], [1, 2], None, None, '<span style="background-color:'),
         (["token1", "token2"], [0.5, 0.8], "viridis", None, '<span style="background-color:'),
     ],
