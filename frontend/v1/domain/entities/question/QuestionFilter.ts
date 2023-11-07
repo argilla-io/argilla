@@ -6,6 +6,10 @@ class QuestionFilter {
   get name() {
     return this.question.name;
   }
+
+  get title() {
+    return this.question.title;
+  }
 }
 
 export class QuestionFilterList {

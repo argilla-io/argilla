@@ -10,6 +10,11 @@
       :placeholder="$t('filterBy')"
       :selected-options="filter.selectedOptions"
     />
+    <OptionsSelector
+      v-if="filter.operator"
+      v-model="filter.operator"
+      :options="['and', 'or']"
+    />
     <div class="labels-selector__items">
       <BaseCheckbox
         class="labels-selector__item"
