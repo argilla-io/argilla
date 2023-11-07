@@ -357,10 +357,10 @@ The next step is to create records following Argilla's `FeedbackRecord` format. 
 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](#define-record-fields)).
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
-- `metadata` (optional): A dictionary with the metadata of the record. This can include any information about the record that is not part of the fields. If you want the metadata to correspond with the metadata properties configured for your dataset, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record, but will not be usable for filtering and sorting. If there is no metadata, this will be `None`.
-- `vectors` (optional): A dictionary with the vector associated to the record. Make sure that the key of the dictionary corresponds with the vector settings `name` and that the dimensions match.
-- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Just one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range. If suggestions are added, they will appear in the UI as pre-filled responses.
-- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include `user_id`s in case you're planning to add more than one response for the same question, as only one `user_id` can be None, later to be replaced by the current active `user_id`, while the rest will be discarded otherwise.
+- `metadata` (optional): A dictionary with the metadata of the record. Read more about [including metadata](#format-metadata).
+- `vectors` (optional): A dictionary with the vector associated to the record. Read more about [including vectors](#format-vectors).
+- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Read more about [including suggestions](#format-suggestions).
+- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Read more about [including responses](#format-responses).
 
 ```python
 # Create a single Feedback Record
@@ -372,6 +372,30 @@ record = rg.FeedbackRecord(
     metadata={"source": "encyclopedia"},
     vectors={"my_vector": [...], "my_other_vector": [...]},
     external_id=None
+)
+```
+
+#### Format `metadata`
+Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. If you want the metadata to correspond with the metadata properties configured for your dataset so that these can be used for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting.
+
+```python
+record = rg.FeedbackRecord(
+    fields={...},
+    metadata={"source": "encyclopedia", "text_length":150}
+)
+```
+
+#### Format `vectors`
+You can associate vectors, like text embeddings, to your records. This will enable the [semantic search](filter_dataset.md#semantic-search) in the UI and the Python SDK. These are saved as a dictionary, where the keys corresponds to the `name`s of the vector settings that were configured for your dataset and the value is a list of floats. Make sure that the length of the list corresponds to the dimensions set in the vector settings.
+
+```{hint}
+Vectors should have the following format `List[float]`. If you are using numpy arrays, simply convert them using the method `.tolist()`.
+```
+
+```python
+record = rg.FeedbackRecord(
+    fields={...},
+    vectors={"my_vector": [...], "my_other_vector": [...]}
 )
 ```
 
@@ -471,7 +495,7 @@ record = rg.FeedbackRecord(
 
 #### Format `responses`
 
-If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Note that just one response with an empty `user_id` can be specified, as the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
+If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include the `user_id` in case you're planning to add more than one response for the same question. You can only specify one response with an empty `user_id`: the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
 ::::{tab-set}
 
@@ -599,7 +623,9 @@ As soon as you add records to a remote dataset, these should be available in the
 
 #### Update records
 
-It is possible to add, update and delete attributes of existing records such as suggestions and metadata by simply modifying the records and saving the changes with the `update_records` method. This is an example of how you would do this:
+It is possible to add, update and delete attributes of existing records such as suggestions and metadata by simply modifying the records and saving the changes with the `update_records` method. To learn more about the format that these should have check the section ["Configure the records"](#configure-the-records) above.
+
+This is an example of how you would do this:
 
 ```python
 # Load the dataset
@@ -607,7 +633,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 modified_records = []
 # Loop through the records and make modifications
 for record in dataset.records:
-    # e.g. adding /modifying a metadata field
+    # e.g. adding/modifying a metadata field
     record.metadata["my_metadata"] = "new_metadata"
     # e.g. removing all suggestions
     record.suggestions = []
