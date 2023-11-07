@@ -51,6 +51,7 @@ export default {
   background: none;
   transition: background-color 0.2s ease;
   line-height: 1;
+  color: $black-54;
   cursor: pointer;
   &:hover,
   &--active {
