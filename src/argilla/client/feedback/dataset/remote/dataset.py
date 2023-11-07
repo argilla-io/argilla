@@ -432,7 +432,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 "\n".join([str(metadata_property) for metadata_property in self.metadata_properties]),
             ],
         ]
-        table = tabulate(table, tablefmt="mixed_grid")
+        table = tabulate(table, tablefmt="simple")
         title = "RemoteFeedbackDataset"
         table_with_title = f"{title}\n{table}"
 
