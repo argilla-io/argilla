@@ -33,6 +33,7 @@ These are the section headers that we use:
 - Added `POST /api/v1/datasets/:dataset_id/records/search` endpoint to search for records without user context, including responses by all users. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - Added `filter_by` argument to `ArgillaTrainer` to filter by `response_status` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 - Added `sort_by` argument to `ArgillaTrainer` to sort by `metadata` ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
+- Added `max_records` argument to `ArgillaTrainer` to limit record used for training ([#4120](https://github.com/argilla-io/argilla/pull/4120)).
 - Added `POST /api/v1/datasets/:dataset_id/vectors-settings` endpoint for creating vector settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
 - Added `GET /api/v1/datasets/:dataset_id/vectors-settings` endpoint for listing the vectors settings for a dataset. ([#3776](https://github.com/argilla-io/argilla/pull/3776))
 - Added `DELETE /api/v1/vectors-settings/:vector_settings_id` endpoint for deleting a vector settings. ([#3776](https://github.com/argilla-io/argilla/pull/3776))

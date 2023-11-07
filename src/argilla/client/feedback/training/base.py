@@ -30,7 +30,8 @@ if TYPE_CHECKING:
     import spacy
     from transformers import PreTrainedModel, PreTrainedTokenizer
 
-    from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import SortBy
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
 class ArgillaTrainer(ArgillaTrainerV1):
     def __init__(
         self,
-        dataset: "FeedbackDataset",
+        dataset: ["FeedbackDataset", "RemoteFeedbackDataset"],
         task: TrainingTaskTypes,
         framework: Framework,
         lang: Optional["spacy.Language"] = None,
@@ -50,6 +51,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
         gpu_id: Optional[int] = -1,
         filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
         sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
         framework_kwargs: Optional[dict] = {},
     ) -> None:
         """
@@ -78,6 +80,7 @@ class ArgillaTrainer(ArgillaTrainerV1):
                 Defaults to `None` (no filter is applied).
             sort_by: A list of `SortBy` objects to sort your dataset by.
                 Defaults to `None` (no filter is applied).
+            max_records: the maximum number of records to use for training. Defaults to None.
             framework_kwargs: arguments for the framework's trainer. A special key (model_card_kwargs) is reserved
                 for the arguments that can be passed to the model card.
             **load_kwargs: arguments for the rg.load() function.
@@ -86,6 +89,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
             dataset = dataset.filter_by(**filter_by)
         if sort_by:
             dataset = dataset.sort_by(sort_by)
+        if max_records:
+            dataset = dataset.pull(max_records=max_records)
 
         self._dataset = dataset
         self._train_size = train_size

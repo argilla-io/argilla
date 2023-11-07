@@ -456,25 +456,32 @@ def test_push_to_huggingface(
 
 
 @pytest.mark.parametrize(
-    "statuses, sort_by, sorted_results",
+    "statuses, sort_by, sorted_results, max_records",
     [
-        ([], None, [2, 4, 4, 5, 6, 2, 4, 4, 5, 6]),
-        ([], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 6, 5, 5, 4, 4, 4, 4, 2, 2]),
-        ([ResponseStatusFilter.missing], [SortBy(field="metadata.integer-metadata", order="desc")], [4, 4]),
-        ([ResponseStatusFilter.discarded], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 5, 4, 2]),
-        ([ResponseStatusFilter.submitted], None, [2, 4, 5, 6]),
+        ([], None, [2, 4, 4, 5, 6, 2, 4, 4, 5, 6], None),
+        ([], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 6, 5, 5, 4, 4, 4, 4, 2, 2], 4),
+        ([ResponseStatusFilter.missing], [SortBy(field="metadata.integer-metadata", order="desc")], [4, 4], 1000),
+        (
+            [ResponseStatusFilter.discarded],
+            [SortBy(field="metadata.integer-metadata", order="desc")],
+            [6, 5, 4, 2],
+            None,
+        ),
+        ([ResponseStatusFilter.submitted], None, [2, 4, 5, 6], None),
         (
             [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],
             [SortBy(field="metadata.integer-metadata", order="asc")],
             [2, 2, 4, 4, 5, 5, 6, 6],
+            None,
         ),
     ],
 )
-def test_trainer_with_filter_by_and_sort_by(
+def test_trainer_with_filter_by_and_sort_by_and_max_records(
     test_remote_dataset_with_records: "FeedbackDataset",
     statuses: List[ResponseStatusFilter],
     sort_by: SortBy,
-    sorted_results,
+    sorted_results: List[int],
+    max_records: int,
 ) -> None:
     questions = [
         question
@@ -493,7 +500,10 @@ def test_trainer_with_filter_by_and_sort_by(
         model="prajjwal1/bert-tiny",
         filter_by=filter_by,
         sort_by=sort_by,
+        max_records=max_records,
     )
+    if max_records is None:
+        max_records = 99999
     metadatas = [r.metadata["integer-metadata"] for r in trainer._dataset.pull().records]
-    assert len(trainer._dataset) == len(sorted_results)
+    assert len(trainer._dataset) == min(len(sorted_results), max_records)
     assert all([r == m for r, m in zip(sorted_results, metadatas)])
