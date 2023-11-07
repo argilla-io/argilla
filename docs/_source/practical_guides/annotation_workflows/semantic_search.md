@@ -10,24 +10,6 @@ In this guide, you'll find how to:
 - Encode text into vectors for Argilla records.
 - Use semantic search.
 
-Or you can get started right away with the following code:
-
-```python
-import argilla as rg
-
-# Feedback Records
-record = rg.FeedbackRecord(
-    fields={"text": "I am a vector record"},
-    vectors={"my_vector_name": [0, 42, 1984]}
-)
-
-# Older record types
-record = rg.TextClassificationRecord(
-    text="I am a vector record",
-    vectors={"my_vector_name": [0, 42, 1984]}
-)
-```
-
 The next section gives a general overview of how semantic search works in Argilla.
 
 ## How it works
