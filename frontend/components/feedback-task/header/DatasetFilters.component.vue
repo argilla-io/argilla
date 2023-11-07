@@ -79,7 +79,7 @@ export default {
       );
     },
     isAnyAvailableFilter() {
-      return !!this.datasetMetadata.length;
+      return !!this.datasetMetadata.length || !!this.datasetQuestions.length;
     },
     isAnyFilterActive() {
       return this.recordCriteria.isFilteredByMetadata;
