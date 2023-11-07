@@ -312,6 +312,12 @@ async def delete_question(db: "AsyncSession", question: Question) -> Question:
     return await question.delete(db)
 
 
+async def count_vectors_settings_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
+    result = await db.execute(select(func.count(VectorSettings.id)).filter_by(dataset_id=dataset_id))
+
+    return result.scalar()
+
+
 async def get_vector_settings_by_id(db: "AsyncSession", vector_settings_id: UUID) -> Union[VectorSettings, None]:
     result = await db.execute(
         select(VectorSettings).filter_by(id=vector_settings_id).options(selectinload(VectorSettings.dataset))
