@@ -32,8 +32,8 @@ class TestSuiteSearchRecordsSDK:
         search_records(client=mock_httpx_client, id=dataset_id, vector_query=query, limit=max_results)
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
-            params={"include": ["responses", "suggestions"], "limit": max_results},
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
+            params={"limit": max_results},
             json={"query": {"vector": {"name": query.name, "record_id": str(query.record_id)}}},
         )
 
@@ -47,8 +47,8 @@ class TestSuiteSearchRecordsSDK:
         search_records(client=mock_httpx_client, id=dataset_id, vector_query=query, limit=max_results)
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
-            params={"include": ["responses", "suggestions"], "limit": max_results},
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
+            params={"limit": max_results},
             json={"query": {"vector": {"name": query.name, "value": query.value}}},
         )
 
@@ -69,9 +69,8 @@ class TestSuiteSearchRecordsSDK:
         )
 
         mock_httpx_client.post.assert_called_once_with(
-            url=f"/api/v1/me/datasets/{dataset_id}/records/search",
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
             params={
-                "include": ["responses", "suggestions"],
                 "limit": max_results,
                 "metadata": expected_metadata_filters,
             },
@@ -99,3 +98,24 @@ class TestSuiteSearchRecordsSDK:
             search_records(client=mock_httpx_client, id=dataset_id, vector_query=query, limit=max_results)
 
         assert exc_info.value.HTTP_STATUS == status_code
+
+    def test_search_records_with_include(self, mock_httpx_client: httpx.Client):
+        dataset_id = uuid.uuid4()
+        query = FeedbackRecordsSearchVectorQuery(name="test-vector", value=[1, 2])
+        max_results = 5
+
+        mock_httpx_client.post.return_value = httpx.Response(status_code=200, json={"total": 0, "items": []})
+
+        search_records(
+            client=mock_httpx_client,
+            id=dataset_id,
+            vector_query=query,
+            limit=max_results,
+            include=["metadata", "responses", "vectors:v1"],
+        )
+
+        mock_httpx_client.post.assert_called_once_with(
+            url=f"/api/v1/datasets/{dataset_id}/records/search",
+            params={"include": ["metadata", "responses", "vectors:v1"], "limit": max_results},
+            json={"query": {"vector": {"name": query.name, "value": query.value}}},
+        )

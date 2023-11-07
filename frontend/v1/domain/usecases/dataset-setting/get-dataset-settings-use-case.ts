@@ -56,7 +56,7 @@ export class GetDatasetSettingsUseCase {
 
     const [
       dataset,
-      questions,
+      backendQuestions,
       backendFields,
       backendVectors,
       backendMetadataProperties,

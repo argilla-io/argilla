@@ -30,8 +30,13 @@
   "filters": "Filters",
   "filterBy": "Filter by...",
   "findSimilar": "Find similar",
+  "similarTo": "Similar to",
+  "similarityScore": "Similarity Score",
+  "similarUsing": "similar using",
   "metadata": "Metadata",
-  "responses": "Responses",
   "reset-all": "Reset all",
-  "reset": "Reset"
+  "reset": "Reset",
+  "with": "with",
+  "find": "Find",
+  "cancel": "Cancel"
 }

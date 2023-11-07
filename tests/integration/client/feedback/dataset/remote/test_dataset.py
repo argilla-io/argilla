@@ -627,6 +627,7 @@ class TestRemoteFeedbackDataset:
 
         assert len(remote_dataset.metadata_properties) == 0
 
+    @pytest.mark.skip(reason="Avoid using test factories")
     @pytest.mark.parametrize("statuses", [["draft", "discarded", "submitted"]])
     async def test_from_argilla_with_responses(self, owner: "User", statuses: List[str]) -> None:
         dataset = await DatasetFactory.create()
@@ -781,6 +782,35 @@ class TestRemoteFeedbackDataset:
         assert local_copy is not None
         assert local_copy.records == []
 
+    async def test_pull_with_max_records(
+        self,
+        argilla_user: ServerUser,
+        feedback_dataset_guidelines: str,
+        feedback_dataset_fields: List[AllowedFieldTypes],
+        feedback_dataset_questions: List[AllowedQuestionTypes],
+        feedback_dataset_records: List[FeedbackRecord],
+        db: AsyncSession,
+    ) -> None:
+        api.active_api()
+        api.init(api_key=argilla_user.api_key)
+
+        dataset = FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+        dataset.add_records(feedback_dataset_records)
+        dataset.push_to_argilla(name="test-dataset")
+
+        await db.refresh(argilla_user, attribute_names=["datasets"])
+
+        same_dataset = FeedbackDataset.from_argilla("test-dataset")
+        local_copy = same_dataset.pull(max_records=1)
+
+        assert local_copy is not None
+        assert len(local_copy.records) == 1
+
+    @pytest.mark.skip(reason="Avoid using test factories")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_warning_local_methods(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()

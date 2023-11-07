@@ -1,6 +1,9 @@
 <template>
-  <FilterButton :button-name="name" :is-button-active="isButtonActive">
-    <div class="filter-button-width-badges__badges" v-if="badges.length">
+  <FilterButton
+    :button-name="$t('metadata')"
+    :is-button-active="isButtonActive"
+  >
+    <div class="metadata-button__badges" v-if="badges.length">
       <FilterBadge
         class="filter-button-width-badges__badge"
         :active-badge="activeBadge === badge && isActive"

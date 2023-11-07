@@ -15,7 +15,7 @@
         :is-button-active="isAnyFilterActive"
       />
       <Sort
-        v-if="!!datasetMetadata.length"
+        v-if="!datasetMetadataIsLoading"
         :datasetMetadata="datasetMetadata"
         v-model="recordCriteria.sortBy"
       />
@@ -30,21 +30,17 @@
       </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
-    <transition name="filterAppear" v-if="visibleFilters" appear>
-      <div class="filters__list">
-        <MetadataFilter
-          v-if="!!datasetMetadata.length"
-          :datasetMetadata="datasetMetadata"
-          v-model="recordCriteria.metadata"
-        />
-        <ResponsesFilter
-          v-if="!!datasetQuestions.length"
-          :datasetQuestions="datasetQuestions"
-          v-model="recordCriteria.metadata"
-        />
-        <SuggestionFilter :datasetQuestions="datasetQuestions" />
-      </div>
-    </transition>
+    <template v-if="visibleFilters">
+      <transition name="filterAppear" appear>
+        <div class="filters__list">
+          <MetadataFilter
+            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            :datasetMetadata="datasetMetadata"
+            v-model="recordCriteria.metadata"
+          />
+        </div>
+      </transition>
+    </template>
   </div>
 </template>
 
@@ -78,7 +74,7 @@ export default {
       );
     },
     isAnyAvailableFilter() {
-      return !!this.datasetMetadata.length || !!this.datasetQuestions.length;
+      return !!this.datasetMetadata.length;
     },
     isAnyFilterActive() {
       return this.recordCriteria.isFilteredByMetadata;
@@ -166,6 +162,7 @@ $filters-inline-min-width: 540px;
     flex-shrink: 0;
   }
   &__filter-button {
+    user-select: none;
     &.filter-button--active {
       background: none;
       &,
