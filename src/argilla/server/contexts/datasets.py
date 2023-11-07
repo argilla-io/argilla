@@ -596,13 +596,13 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await load_users_from_record_responses(records)
+        await _load_users_from_record_responses(records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
 
 
-async def load_users_from_record_responses(records: Iterable[Record]):
+async def _load_users_from_record_responses(records: Iterable[Record]) -> None:
     for record in records:
         for response in record.responses:
             await response.awaitable_attrs.user

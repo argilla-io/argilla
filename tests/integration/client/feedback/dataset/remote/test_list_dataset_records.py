@@ -20,7 +20,7 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.feedback import FeedbackDataset, FeedbackRecord, ResponseSchema, TextField, TextQuestion
 
 
-class TestSuiteListDatasetRecords:
+class TestListDatasetRecords:
     @pytest.mark.parametrize("offset", [0, 20, 30, 50, 60, 80, 90])
     @pytest.mark.parametrize("limit", [20, 40, 50, 60, 80, 90, 150])
     def test_list_dataset_records_with_multiple_responses_and_variable_offset(
