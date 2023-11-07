@@ -3,7 +3,7 @@
     <SearchLabelComponent
       v-model="searchText"
       :placeholder="$t('filterBy')"
-      searchRef="metadataSearch"
+      :searchRef="name"
       class="category__search"
     />
     <ul class="category__list">
@@ -28,6 +28,10 @@ export default {
   props: {
     categories: {
       type: Array,
+      required: true,
+    },
+    name: {
+      type: String,
       required: true,
     },
   },

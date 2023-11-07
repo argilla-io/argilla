@@ -1,11 +1,8 @@
 <template>
-  <FilterButton
-    :button-name="$t('metadata')"
-    :is-button-active="isButtonActive"
-  >
-    <div class="metadata-button__badges" v-if="badges.length">
+  <FilterButton :button-name="name" :is-button-active="isButtonActive">
+    <div class="filter-button-width-badges__badges" v-if="badges.length">
       <FilterBadge
-        class="metadata-button__badge"
+        class="filter-button-width-badges__badge"
         :active-badge="activeBadge === badge && isActive"
         v-for="badge in visibleBadges"
         :key="badge.name"
@@ -14,7 +11,7 @@
         @on-clear="onClickOnClear(badge, $event)"
       ></FilterBadge>
       <div
-        class="metadata-button__badges__collapsed"
+        class="filter-button-width-badges__badges__collapsed"
         v-if="badges.length > maxVisibleBadges"
         v-click-outside="{
           events: ['mousedown'],
@@ -25,7 +22,10 @@
           :text="`+ ${this.badges.length - this.maxVisibleBadges}`"
           @on-click="toggleTooltip"
         />
-        <FilterTooltip v-if="visibleTooltip" class="metadata-button__tooltip">
+        <FilterTooltip
+          v-if="visibleTooltip"
+          class="filter-button-width-badges__tooltip"
+        >
           <FilterBadge
             class="badge"
             v-for="badge in collapsedBadges"
@@ -35,7 +35,7 @@
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
           <BaseButton
-            class="secondary full-width small clear metadata-button__tooltip__button"
+            class="secondary full-width small clear filter-button-width-badges__tooltip__button"
             @on-click.stop="onClearAll"
             >{{ $t("reset-all") }}</BaseButton
           >
@@ -49,6 +49,10 @@
 import "assets/icons/filter";
 export default {
   props: {
+    name: {
+      type: String,
+      required: true,
+    },
     badges: {
       type: Array,
       default: () => [],
@@ -106,7 +110,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.metadata-button {
+.filter-button-width-badges {
   &__badges {
     display: flex;
     gap: calc($base-space / 2);

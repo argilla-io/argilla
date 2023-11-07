@@ -5,10 +5,10 @@
     @keyup.up="preselectPreviousOption"
     @keyup.down="preselectNextOption"
   >
-    <MetadataLabelsSelectorSearch
+    <LabelsSelectorSearch
       v-model="searchText"
       :placeholder="$t('filterBy')"
-      :selected-options="metadata.selectedOptions"
+      :selected-options="filter.selectedOptions"
     />
     <div class="labels-selector__items">
       <BaseCheckbox
@@ -32,7 +32,7 @@
 <script>
 export default {
   props: {
-    metadata: {
+    filter: {
       type: Object,
       required: true,
     },
@@ -47,7 +47,7 @@ export default {
     searchText() {
       this.preSelectionIndex = 0;
     },
-    metadataOptions: {
+    filterOptions: {
       handler: function () {
         if (this.searchText.length) {
           this.searchText = "";
@@ -58,13 +58,13 @@ export default {
   },
   computed: {
     labelsFilteredBySearchText() {
-      return this.metadata.filterByText(this.searchText);
+      return this.filter.filterByText(this.searchText);
     },
     optionsLength() {
-      return this.metadata.options.length;
+      return this.filter.options.length;
     },
-    metadataOptions() {
-      return this.metadata.options;
+    filterOptions() {
+      return this.filter.options;
     },
   },
   methods: {
