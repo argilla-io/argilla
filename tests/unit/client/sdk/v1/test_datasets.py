@@ -102,10 +102,7 @@ def test_search_records(mock_httpx_client: httpx.Client) -> None:
 
     mock_httpx_client.post.assert_called_once_with(
         url=f"/api/v1/datasets/{dataset_id}/records/search",
-        params={
-            "include": ["responses", "suggestions"],
-            "limit": 50,
-        },
+        params={"limit": 50},
         json={"query": {"vector": {"name": "vector_name", "value": [1.0, 2.0, 3.0]}}},
     )
 
@@ -191,10 +188,7 @@ def test_search_records_with_record_id(mock_httpx_client: httpx.Client):
 
     mock_httpx_client.post.assert_called_once_with(
         url=f"/api/v1/datasets/{dataset_id}/records/search",
-        params={
-            "include": ["responses", "suggestions"],
-            "limit": 50,
-        },
+        params={"limit": 50},
         json={"query": {"vector": {"name": "vector_name", "record_id": str(expected_record_id)}}},
     )
 
