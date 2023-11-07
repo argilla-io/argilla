@@ -23,7 +23,7 @@ from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.search_engine import SearchEngine, get_search_engine
+from argilla.server.search_engine import OpenSearchEngine, SearchEngine, get_search_engine
 from argilla.server.server import argilla_app
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.settings import settings
@@ -39,14 +39,6 @@ from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 @pytest.fixture(scope="session")
 def elasticsearch_config():
     return {"hosts": settings.elasticsearch}
-
-
-@pytest_asyncio.fixture()
-async def elastic_search_engine(elasticsearch_config: dict) -> AsyncGenerator[SearchEngine, None]:
-    engine = SearchEngine(config=elasticsearch_config, es_number_of_replicas=0, es_number_of_shards=1)
-    yield engine
-
-    await engine.client.close()
 
 
 @pytest.fixture(scope="session", autouse=True)

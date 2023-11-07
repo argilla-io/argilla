@@ -16,16 +16,17 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import Query
-from pydantic import BaseModel, conlist, constr, root_validator, validator
+from fastapi import HTTPException, Query
+from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
+from argilla.server.enums import RecordInclude, SimilarityOrder
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
-from argilla.server.search_engine import StringQuery
+from argilla.server.search_engine import TextQuery
 
 try:
     from typing import Annotated
@@ -60,6 +61,12 @@ METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
 METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
+
+VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
+VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
 
 RATING_OPTIONS_MIN_ITEMS = 2
 RATING_OPTIONS_MAX_ITEMS = 10
@@ -131,8 +138,9 @@ class DatasetCreate(BaseModel):
 class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
+    allow_extra_metadata: Optional[bool]
 
-    __non_nullable_fields__ = {"name"}
+    __non_nullable_fields__ = {"name", "allow_extra_metadata"}
 
 
 class RecordMetrics(BaseModel):
@@ -356,6 +364,48 @@ class QuestionCreate(BaseModel):
     settings: QuestionSettingsCreate
 
 
+class VectorSettings(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    dimensions: int
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+    def check_vector(self, value: List[float]) -> None:
+        num_elements = len(value)
+        if num_elements != self.dimensions:
+            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+
+
+class VectorsSettings(BaseModel):
+    items: List[VectorSettings]
+
+
+VectorSettingsTitle = Annotated[
+    constr(
+        min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+    ),
+    PydanticField(..., description="The title of the vector settings"),
+]
+
+
+class VectorSettingsCreate(BaseModel):
+    name: str = PydanticField(
+        ...,
+        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+        description="The title of the vector settings",
+    )
+    title: VectorSettingsTitle
+    dimensions: PositiveInt
+
+
 class ResponseValue(BaseModel):
     value: Any
 
@@ -380,10 +430,19 @@ class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
+
         if key == "responses" and not self._obj.is_relationship_loaded("responses"):
             return default
+
         if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
             return default
+
+        if key == "vectors":
+            if self._obj.is_relationship_loaded("vectors"):
+                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
+            else:
+                return default
+
         return super().get(key, default)
 
 
@@ -396,6 +455,7 @@ class Record(BaseModel):
     # response: Optional[Response]
     responses: Optional[List[Response]]
     suggestions: Optional[List[Suggestion]]
+    vectors: Optional[Dict[str, List[float]]]
     inserted_at: datetime
     updated_at: datetime
 
@@ -434,6 +494,7 @@ class RecordCreate(BaseModel):
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
+    vectors: Optional[Dict[str, List[float]]]
 
     @validator("responses")
     def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
@@ -443,16 +504,14 @@ class RecordCreate(BaseModel):
         user_ids = []
         for value in values:
             if value.user_id in user_ids:
-                raise ValueError(f"Responses contains several responses for the same user_id: {str(value.user_id)!r}")
+                raise ValueError(f"'responses' contains several responses for the same user_id={str(value.user_id)!r}")
             user_ids.append(value.user_id)
 
         return values
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = PydanticField(
-        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
-    )
+    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordUpdateWithId(RecordUpdate):
@@ -460,9 +519,52 @@ class RecordUpdateWithId(RecordUpdate):
 
 
 class RecordsUpdate(BaseModel):
+    # TODO: review this definition and align to create model
     items: List[RecordUpdateWithId] = PydanticField(
         ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
     )
+
+
+class RecordIncludeParam(BaseModel):
+    relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
+    vectors: Optional[List[str]] = PydanticField(None, alias="vectors")
+
+    @root_validator
+    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        relationships = values.get("relationships")
+        if not relationships:
+            return values
+
+        vectors = values.get("vectors")
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
+            # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
+            # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
+            raise HTTPException(
+                status_code=422,
+                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
+            )
+
+        return values
+
+    @property
+    def with_responses(self) -> bool:
+        return self._has_relationships and RecordInclude.responses in self.relationships
+
+    @property
+    def with_suggestions(self) -> bool:
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
+
+    @property
+    def with_all_vectors(self) -> bool:
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
+
+    @property
+    def with_some_vector(self) -> bool:
+        return self.vectors is not None and len(self.vectors) > 0
+
+    @property
+    def _has_relationships(self):
+        return self.relationships is not None
 
 
 NT = TypeVar("NT", int, float)
@@ -570,7 +672,7 @@ class MetadataParsedQueryParam:
 
 
 class MetadataQueryParams(BaseModel):
-    metadata: List[str] = PydanticField(Query([], regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+    metadata: List[str] = PydanticField(Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
@@ -578,12 +680,42 @@ class MetadataQueryParams(BaseModel):
         return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
-class TextQuery(BaseModel):
-    text: StringQuery
+class VectorQuery(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+    order: SimilarityOrder = SimilarityOrder.most_similar
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'record_id' or 'value' is provided"""
+        record_id = values.get("record_id")
+        value = values.get("value")
+
+        if bool(record_id) == bool(value):
+            raise ValueError("Either 'record_id' or 'value' must be provided")
+
+        return values
+
+
+class Query(BaseModel):
+    text: Optional[TextQuery] = None
+    vector: Optional[VectorQuery] = None
+
+    @root_validator
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'text' or 'vector' is provided"""
+        text = values.get("text")
+        vector = values.get("vector")
+
+        if text is None and vector is None:
+            raise ValueError("Either 'text' or 'vector' must be provided")
+
+        return values
 
 
 class SearchRecordsQuery(BaseModel):
-    query: TextQuery
+    query: Query
 
 
 class SearchRecord(BaseModel):

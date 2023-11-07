@@ -15,10 +15,11 @@
 import logging
 import textwrap
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
+from argilla.client.feedback.dataset import helpers
+from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
@@ -30,7 +31,7 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -70,6 +71,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         fields: List["AllowedFieldTypes"],
         questions: List["AllowedQuestionTypes"],
         metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
+        vectors_settings: Optional[List[VectorSettings]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
     ) -> None:
@@ -80,6 +82,9 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             questions: contains the questions that will be used to annotate the dataset.
             metadata_properties: contains the metadata properties that will be indexed
                 and could be used to filter the dataset. Defaults to `None`.
+            vectors_settings: contains the vectors settings that will define the configuration
+                of the vectors associated to the records in the dataset and that would
+                allow to perform vector search. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
             allow_extra_metadata: whether to allow extra metadata that has not been defined
                 as a metadata property in the records. Defaults to `True`.
@@ -131,7 +136,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             ...             name="metadata-property-1",
             ...             values=["a", "b", "c"]
             ...         ),
-            ...         rg.IntMetadataProperty(
+            ...         rg.IntegerMetadataProperty(
             ...             name="metadata-property-2",
             ...             gt=0,
             ...             lt=10,
@@ -145,15 +150,59 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             ...     guidelines="These are the annotation guidelines.",
             ... )
         """
-        super().__init__(
-            fields=fields,
-            questions=questions,
-            metadata_properties=metadata_properties,
-            guidelines=guidelines,
-            allow_extra_metadata=allow_extra_metadata,
-        )
 
+        helpers.validate_fields(fields)
+        helpers.validate_questions(questions)
+        helpers.validate_metadata_properties(metadata_properties)
+
+        if guidelines is not None:
+            if not isinstance(guidelines, str):
+                raise TypeError(
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                )
+            if len(guidelines) < 1:
+                raise ValueError(
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                )
+
+        self._fields = fields or []
+        self._questions = questions or []
+        self._metadata_properties = metadata_properties or []
+        self._guidelines = guidelines
+        self._allow_extra_metadata = allow_extra_metadata
+
+        if vectors_settings:
+            self._vectors_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
+        else:
+            self._vectors_settings: Dict[str, VectorSettings] = {}
         self._records = []
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedQuestionTypes"]]:
+        return self._questions
+
+    @property
+    def metadata_properties(
+        self,
+    ) -> Union[List["AllowedMetadataPropertyTypes"]]:
+        return self._metadata_properties
+
+    @property
+    def vectors_settings(self) -> List["VectorSettings"]:
+        """Returns the vector settings of the dataset."""
+        return [v for v in self._vectors_settings.values()]
 
     @property
     def records(self) -> List["FeedbackRecord"]:
@@ -220,8 +269,8 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
                 list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
         """
-        records = self._parse_records(records)
-        self._validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self, records)
 
         if len(self._records) > 0:
             self._records += records
@@ -246,6 +295,69 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._unique_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
         return metadata_property
+
+    def vector_settings_by_name(self, name: str) -> VectorSettings:
+        vector_settings = self._vectors_settings.get(name)
+        if not vector_settings:
+            raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
+
+        return vector_settings
+
+    def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
+        if self._vectors_settings.get(vector_settings.name):
+            raise ValueError(f"Vector settings with name '{vector_settings.name}' already exists in the dataset.")
+
+        self._vectors_settings[vector_settings.name] = vector_settings
+        return vector_settings
+
+    def update_vectors_settings(self, vectors_settings: Union[VectorSettings, List[VectorSettings]]) -> None:
+        """Does nothing because the `vector_settings` are updated automatically for
+        `FeedbackDataset` datasets when assigning their updateable attributes to a new value.
+        """
+        warnings.warn(
+            "`update_vectors_settings` method is not supported for `FeedbackDataset` datasets"
+            " unless its pushed to Argilla i.e. `RemoteFeedbackDataset`. This is because the"
+            " `vector_settings` updates are already applied via assignment if any. So,"
+            " this method is not required locally.",
+            UserWarning,
+            stacklevel=1,
+        )
+
+    def delete_vectors_settings(
+        self, vectors_settings: Union[str, List[str]]
+    ) -> Union[VectorSettings, List[VectorSettings]]:
+        """Deletes the given vector settings from the dataset.
+
+        Args:
+            vectors_settings: the name/s of the vector settings to delete.
+
+        Returns:
+            The vector settings that were deleted.
+
+        Raises:
+            ValueError: if the provided `vectors_settings` is/are not in the dataset.
+        """
+        if isinstance(vectors_settings, str):
+            vectors_settings = [vectors_settings]
+
+        if not self.vectors_settings:
+            raise ValueError(
+                "The current `FeedbackDataset` does not contain any `vectors_settings` defined, so"
+                " none can be deleted."
+            )
+
+        if not all(vector_setting in self._vectors_settings.keys() for vector_setting in vectors_settings):
+            raise ValueError(
+                f"Invalid `vectors_settings={vectors_settings}` provided. It cannot be"
+                " deleted because it does not exist, make sure you delete just existing `vectors_settings`"
+                " meaning that the name matches any of the existing `vectors_settings` if any. Current"
+                f" `vectors_settings` are: '{', '.join(self._vectors_settings.keys())}'."
+            )
+
+        deleted_vectors_settings = []
+        for vector_setting in vectors_settings:
+            deleted_vectors_settings.append(self._vectors_settings.pop(vector_setting))
+        return deleted_vectors_settings if len(deleted_vectors_settings) > 1 else deleted_vectors_settings[0]
 
     def update_metadata_properties(
         self,
@@ -498,3 +610,18 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             UserWarning,
         )
         return self
+
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[FeedbackRecord, float]]:
+        warnings.warn(
+            "`find_similar_records` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`. "
+            "After, use `FeedbackDataset.from_argilla(...).find_similar_records()`",
+            UserWarning,
+        )
+        return []

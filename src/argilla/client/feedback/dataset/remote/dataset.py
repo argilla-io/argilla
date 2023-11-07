@@ -15,7 +15,7 @@
 import textwrap
 import warnings
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Tuple, Union
 
 from tqdm import trange
 
@@ -32,6 +32,8 @@ from argilla.client.feedback.schemas.questions import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import (
     TrainingTaskTypes,
 )
@@ -42,21 +44,26 @@ from argilla.client.feedback.unification import (
     RatingQuestionStrategy,
 )
 from argilla.client.models import Framework
+from argilla.client.sdk.commons.errors import AlreadyExistsApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.datasets import api as datasets_api_v1
+from argilla.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQuery
+from argilla.client.sdk.v1.vectors_settings import api as vectors_settings_api_v1
 from argilla.client.utils import allowed_for_roles
+
+INCLUDE_ALL_VECTORS_PARAM: str = "all"
 
 if TYPE_CHECKING:
     from uuid import UUID
 
     import httpx
 
-    from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.dataset.local import FeedbackDataset
-    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -72,6 +79,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         response_status: Optional[Union[ResponseStatusFilter, List[ResponseStatusFilter]]] = None,
         metadata_filters: Optional[Union["MetadataFilters", List["MetadataFilters"]]] = None,
         sort_by: Optional[List[SortBy]] = None,
+        with_vectors: Union[INCLUDE_ALL_VECTORS_PARAM, List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackRecords` instance to access a `FeedbackDataset`
         records in Argilla. This class is used to get records from Argilla, iterate over
@@ -99,7 +107,10 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         self._response_status = response_status or []
         self._metadata_filters = metadata_filters or []
 
+        self._with_vectors = with_vectors
+
         self._validate_metadata_names()
+        self._validate_vector_names()
 
     @property
     def dataset(self) -> "RemoteFeedbackDataset":
@@ -139,7 +150,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
             if self._has_filters():
-                return self._fetch_records(offset=0, limit=0).total
+                return self._fetch_records(offset=0, limit=1).total
             else:
                 response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset.id).parsed
                 return response.records.count
@@ -166,7 +177,9 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             PermissionError: if the user does not have either `owner` or `admin` role.
             Exception: If the pushing of the records to Argilla fails.
         """
-        records = self.dataset._parse_and_validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self.dataset, records)
+
         question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
         for i in trange(
@@ -197,7 +210,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         if isinstance(records, RemoteFeedbackRecord):
             records = [records]
 
-        self.dataset._validate_records(records, attributes_to_validate=["metadata"])
+        helpers.validate_dataset_records(self.dataset, records, attributes_to_validate=["metadata", "vectors"])
 
         for i in trange(
             0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress
@@ -240,10 +253,11 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return datasets_api_v1.get_records(
             client=self._client,
             id=self._dataset.id,
+            include=self.include_as_query_params,
             offset=offset,
             limit=limit,
-            response_status=self.__response_status_query_strings,
-            metadata_filters=self.__metadata_filters_query_strings,
+            response_status=self.response_status_as_query_string,
+            metadata_filters=self.metadata_filters_as_query_strings,
             sort_by=self.__sort_by_query_strings,
         ).parsed
 
@@ -253,7 +267,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     # TODO: define `List[ResponseStatusFilter]` and delegate `query_string` formatting to it
     @property
-    def __response_status_query_strings(self) -> Optional[List[str]]:
+    def response_status_as_query_string(self) -> Optional[List[str]]:
         """Formats the `response_status` if any to the query string format. Otherwise, returns `None`."""
         return (
             [status.value if hasattr(status, "value") else status for status in self._response_status]
@@ -263,7 +277,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
     # TODO: define `List[MetadataFilter]` and delegate `query_string` formatting to it
     @property
-    def __metadata_filters_query_strings(self) -> Optional[List[str]]:
+    def metadata_filters_as_query_strings(self) -> Optional[List[str]]:
         """Formats the `metadata_filters` if any to the query string format. Otherwise, returns `None`."""
         return (
             [metadata_filter.query_string for metadata_filter in self._metadata_filters]
@@ -296,6 +310,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             sort_by=sort_by,
             metadata_filters=metadata_filters,
             response_status=response_status,
+            with_vectors=new_ds.records._with_vectors,
         )
 
     def _validate_metadata_names(self):
@@ -306,6 +321,66 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
             names.extend([sort.metadata_name for sort in self.sort_by if sort.is_metadata_field])
         if names:
             helpers.validate_metadata_names(self.dataset, names)
+
+    def _validate_vector_names(self):
+        if not self._with_vectors or self._with_vectors == INCLUDE_ALL_VECTORS_PARAM:
+            return
+
+        if isinstance(self._with_vectors, str):
+            self._with_vectors = [self._with_vectors]
+
+        helpers.validate_vector_names(self.dataset, self._with_vectors)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def find_similar(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[RemoteFeedbackRecord] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[RemoteFeedbackRecord, float]]:
+        if bool(record) == bool(value):
+            raise ValueError("Either 'record' or 'value' must be provided")
+
+        try:
+            response = datasets_api_v1.search_records(
+                client=self._client,
+                id=self.dataset.id,
+                include=self.include_as_query_params,
+                vector_query=FeedbackRecordsSearchVectorQuery(
+                    name=vector_name,
+                    record_id=record and record.id,
+                    value=value,
+                ),
+                metadata_filters=self.metadata_filters_as_query_strings,
+                response_status=self.response_status_as_query_string,
+                limit=max_results,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed searching records for dataset with exception: {e}") from e
+
+        question_id_to_name_map = self.dataset._question_id_to_name
+        return [
+            (
+                RemoteFeedbackRecord.from_api(record_score.record, question_id_to_name=question_id_to_name_map),
+                record_score.query_score,
+            )
+            for record_score in response.parsed.items
+        ]
+
+    @property
+    def include_as_query_params(self) -> List[str]:
+        include = ["responses", "suggestions"]  # default include
+
+        if not self._with_vectors:
+            return include
+
+        if self._with_vectors == INCLUDE_ALL_VECTORS_PARAM:
+            include.append("vectors")
+        else:
+            include.append(f"vectors:{','.join(self._with_vectors)}")
+
+        return include
 
 
 class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
@@ -321,9 +396,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         updated_at: datetime,
         fields: List["AllowedRemoteFieldTypes"],
         questions: List["AllowedRemoteQuestionTypes"],
-        metadata_properties: Optional[List["AllowedRemoteMetadataPropertyTypes"]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
+        with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
     ) -> None:
         """Initializes a `RemoteFeedbackDataset` instance in Argilla.
 
@@ -340,8 +415,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             updated_at: contains the datetime when the dataset was last updated in Argilla.
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
-            metadata_properties: contains the metadata properties that will be indexed
-                and could be used to filter the dataset. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
 
         Raises:
@@ -355,7 +428,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
 
         self._fields = fields
-        self._fields_schema = None
         self._questions = questions
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
@@ -367,7 +439,23 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         self._created_at = created_at
         self._updated_at = updated_at
 
-        self._records = RemoteFeedbackRecords(dataset=self)
+        self._records = RemoteFeedbackRecords(dataset=self, with_vectors=with_vectors)
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedRemoteFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedRemoteQuestionTypes"]]:
+        return self._questions
 
     @property
     def records(self) -> RemoteFeedbackRecords:
@@ -415,6 +503,28 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
     @property
     def _question_name_to_id(self) -> Dict[str, "UUID"]:
         return {question.name: question.id for question in self._questions}
+
+    @property
+    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
+        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
+        returns them if any, otherwise, it returns an empty list.
+        """
+        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
+
+    @property
+    def vectors_settings(self) -> List[RemoteVectorSettings]:
+        """Retrieves the `vectors_settings` of the current dataset from Argilla"""
+        response = datasets_api_v1.list_vectors_settings(client=self._client, id=self.id)
+
+        return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
+
+    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
+        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
+        for vector_settings in self.vector_settings:
+            if vector_settings.name == name:
+                return vector_settings
+
+        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
@@ -479,6 +589,27 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         self._records.add(records=records, show_progress=show_progress)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[RemoteFeedbackRecord] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[RemoteFeedbackRecord, float]]:
+        """Finds similar records to the given record in the dataset based on the given vector.
+
+        Args:
+            vector_name: a vector name to use for searching by similarity.
+            value: an optional vector value to be used for searching by similarity. Defaults to None.
+            record: an optional record to be used for searching by similarity. Defaults to None.
+            max_results: the maximum number of results for the search. Defaults to 50.
+
+        Returns:
+            A list of tuples with each tuple including a record and a similarity score.
+        """
+        return self.records.find_similar(vector_name, value, record, max_results)
+
     def update_records(
         self,
         records: Union[RemoteFeedbackRecord, List[RemoteFeedbackRecord]],
@@ -530,6 +661,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             guidelines=self.guidelines or None,
             metadata_properties=[metadata_property.to_local() for metadata_property in self.metadata_properties]
             or None,
+            vectors_settings=[vector_settings.to_local() for vector_settings in self.vectors_settings] or None,
             allow_extra_metadata=self._allow_extra_metadata,
         )
 
@@ -546,13 +678,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             )
 
         return instance
-
-    @property
-    def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
-        """Retrieves the `metadata_properties` of the current dataset from Argilla, and
-        returns them if any, otherwise, it returns an empty list.
-        """
-        return ArgillaMetadataPropertiesMixin.list(client=self._client, dataset_id=self.id)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_metadata_property(
@@ -678,13 +803,128 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
                 f" The existing metadata properties are: {existing_metadata_property_names}."
             )
 
-        deleted_metadata_properties = list()
+        deleted_metadata_properties = []
         for metadata_property in existing_metadata_properties:
             if metadata_property.name in metadata_properties:
                 ArgillaMetadataPropertiesMixin.delete(client=self._client, metadata_property_id=metadata_property.id)
                 metadata_properties.remove(metadata_property.name)
                 deleted_metadata_properties.append(metadata_property)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
+
+    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
+        """Returns the vector settings with the given name from the current dataset in Argilla.
+
+        Args:
+            name: the name of the vector settings to retrieve.
+
+        Returns:
+            The vector settings with the given name from the current dataset in Argilla.
+
+        Raises:
+            KeyError: if the vector settings with the given name does not exist in the
+                current dataset in Argilla.
+        """
+        for vector_settings in self.vectors_settings:
+            if vector_settings.name == name:
+                return vector_settings
+
+        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:
+        """Adds a new vector settings to the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vector_settings: the vector settings to add.
+
+        Returns:
+            The newly added vector settings to the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            ValueError: if the vector settings with the given name already exists in the
+                dataset in Argilla.
+        """
+
+        try:
+            new_vector_settings = datasets_api_v1.add_vector_settings(
+                client=self._client,
+                id=self.id,
+                title=vector_settings.title,
+                name=vector_settings.name,
+                dimensions=vector_settings.dimensions,
+            ).parsed
+        except AlreadyExistsApiError:
+            raise ValueError(f"Vector settings with name {vector_settings.name!r} already exists.")
+        return RemoteVectorSettings.from_api(new_vector_settings)
+
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
+    def update_vectors_settings(
+        self, vectors_settings: Union[RemoteVectorSettings, List[RemoteVectorSettings]]
+    ) -> None:
+        """Updates the given vector settings in the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vectors_settings: the remote vectors settings to update. Must exist in Argilla in advance.
+
+        Raises:
+            PermissionError: if the user does not have either `owner` or `admin` role.
+            RuntimeError: if the vector settings cannot be updated in the current
+                `FeedbackDataset` in Argilla.
+        """
+        if isinstance(vectors_settings, RemoteVectorSettings):
+            vectors_settings = [vectors_settings]
+
+        for vector_settings in vectors_settings:
+            try:
+                vectors_settings_api_v1.update_vector_settings(
+                    client=self._client,
+                    id=vector_settings.id,
+                    title=vector_settings.title,
+                ).parsed
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed while updating the `vector_settings={vector_settings.name}` in the current"
+                    f" `FeedbackDataset` in Argilla with exception: {e}"
+                ) from e
+
+    def delete_vectors_settings(
+        self, vectors_settings: Union[str, List[str]]
+    ) -> Union[RemoteVectorSettings, List["RemoteVectorSettings"]]:
+        """Deletes the given vectors settings from the current `FeedbackDataset` in Argilla.
+
+        Args:
+            vectors_settings: the name/s of the vectors settings to delete.
+
+        Returns:
+            The vectors settings deleted from the current `FeedbackDataset` in Argilla.
+
+        Raises:
+            ValueError: if the given vectors settings do not exist in the current
+                `FeedbackDataset` in Argilla.
+        """
+        if isinstance(vectors_settings, str):
+            vectors_settings = [vectors_settings]
+
+        existing_vectors_settings_name = [vector_settings.name for vector_settings in self.vectors_settings]
+
+        unexisting_vectors_settings = []
+        for vector_settings in vectors_settings:
+            if vector_settings not in existing_vectors_settings_name:
+                unexisting_vectors_settings.append(vector_settings.name)
+        if len(unexisting_vectors_settings) > 0:
+            raise ValueError(
+                f"The following vectors settings do not exist in the current `FeedbackDataset` in Argilla: {unexisting_vectors_settings}."
+                f" The existing vectors settings are: {existing_vectors_settings_name}."
+            )
+
+        deleted_vectors_settings = []
+        for vector_settings in self.vectors_settings:
+            if vector_settings.name in vectors_settings:
+                vectors_settings_api_v1.delete_vector_settings(client=self._client, id=vector_settings.id).parsed
+                vectors_settings.remove(vector_settings.name)
+                deleted_vectors_settings.append(vector_settings)
+        return deleted_vectors_settings if len(deleted_vectors_settings) > 1 else deleted_vectors_settings[0]
 
     def filter_by(
         self,
@@ -742,7 +982,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             fields=dataset.fields,
             questions=dataset.questions,
             guidelines=dataset.guidelines,
-            metadata_properties=dataset.metadata_properties,
         )
 
         new_dataset._records = dataset.records

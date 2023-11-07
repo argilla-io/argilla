@@ -16,13 +16,13 @@
   -->
 
 <template>
-  <div v-if="options.length">
-    <RadioButtonsSelectBase
-      :options="options"
-      :selected-option="selectedOption"
-      @change="onChangeOption"
-    />
-  </div>
+  <RadioButtonsSelectBase
+    v-if="options.length"
+    class="filter-status"
+    :options="options"
+    :selected-option="selectedOption"
+    @change="onChangeOption"
+  />
 </template>
 
 <script>
@@ -61,3 +61,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.filter-status {
+  flex-shrink: 0;
+}
+</style>

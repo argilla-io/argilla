@@ -1,5 +1,9 @@
+interface OriginalDAtaset {
+  guidelines: string;
+  allowExtraMetadata: boolean;
+}
 export class Dataset {
-  public originalGuidelines: string;
+  public original: OriginalDAtaset;
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -11,9 +15,10 @@ export class Dataset {
     public readonly tags: unknown,
     public readonly createdAt: string,
     public updatedAt: string,
-    public readonly lastActivityAt: string
+    public readonly lastActivityAt: string,
+    public allowExtraMetadata: boolean
   ) {
-    this.originalGuidelines = guidelines;
+    this.initializeOriginal();
   }
 
   public get workspace() {
@@ -21,15 +26,27 @@ export class Dataset {
   }
 
   public get isModified(): boolean {
-    return this.guidelines !== this.originalGuidelines;
+    return (
+      this.guidelines !== this.original.guidelines ||
+      this.allowExtraMetadata !== this.original.allowExtraMetadata
+    );
   }
 
   restore() {
-    this.guidelines = this.originalGuidelines;
+    this.guidelines = this.original.guidelines;
+    this.allowExtraMetadata = this.original.allowExtraMetadata;
   }
 
   update(when: string) {
-    this.originalGuidelines = this.guidelines;
+    this.initializeOriginal();
+
     this.updatedAt = when;
+  }
+
+  private initializeOriginal() {
+    this.original = {
+      guidelines: this.guidelines,
+      allowExtraMetadata: this.allowExtraMetadata,
+    };
   }
 }
