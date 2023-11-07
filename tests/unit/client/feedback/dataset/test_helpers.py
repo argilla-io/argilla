@@ -15,6 +15,7 @@
 from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 import pytest
+from argilla.client.feedback.dataset.helpers import generate_pydantic_schema_for_metadata
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
@@ -25,7 +26,6 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.client.feedback.utils import generate_pydantic_schema_for_metadata
 from pydantic import ValidationError
 
 if TYPE_CHECKING:

@@ -154,7 +154,12 @@ class TestFilteredRemoteFeedbackDataset:
         filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.draft).pull()
 
         assert filtered_dataset is not None
-        assert filtered_dataset.records == []
+        assert len(filtered_dataset.records) == 0
+
+        filtered_dataset = same_dataset.filter_by(response_status=ResponseStatusFilter.submitted).pull(max_records=1)
+
+        assert filtered_dataset is not None
+        assert len(filtered_dataset.records) == 1
 
     def test_filter_by_overrides_previous_values(self, owner: "User", test_dataset: FeedbackDataset):
         remote = self._create_test_dataset_with_records(owner, test_dataset)

@@ -82,6 +82,26 @@ A `TrainingTask` is used to define how the data should be processed and formatte
 | for_direct_preference_optimization | `prompt-chosen-rejected`     | `Union[Tuple[str, str, str], Iterator[Tuple[str, str, str]]]`          | ✗      |
 | for_chat_completion                | `chat-turn-role-content`     | `Union[Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]`| ✗      |
 
+#### Filter and Sort datasets for training
+
+Say you want to filter a part or your dataset, keep only the submitted records, or maybe sort by date to train on the latest additions to your dataset only. You can do it easily from the `ArgillaTrainer` by using the `filter_by` and `sort_by` methods:
+
+```python
+from argilla import SortBy
+
+trainer = ArgillaTrainer(
+    dataset=dataset,
+    task=task,
+    framework="setfit",
+    filter_by={"response_status": ["submitted"]},
+    sort_by=[SortBy(field="metadata.my-metadata", order="asc")],
+)
+```
+
+:::{note}
+You can take a look at [filter and query datasets](/practical_guides/fine_tune.md) page in the docs to learn more about how to filter and sort datasets.
+:::
+
 #### Huggingface hub Integration
 
 This section presents some integrations with the huggingface 🤗[model hub](https://huggingface.co/docs/hub/models-the-hub), the easiest way to share your argilla models, as well as possibility to generate an automated model card.

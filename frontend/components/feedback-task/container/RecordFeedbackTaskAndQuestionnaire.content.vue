@@ -5,7 +5,6 @@
       <DatasetFiltersComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
         v-if="!!record"
-        :key="`${record.id}_fields`"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"

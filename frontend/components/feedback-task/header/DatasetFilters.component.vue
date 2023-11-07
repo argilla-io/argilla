@@ -15,7 +15,7 @@
         :is-button-active="isAnyFilterActive"
       />
       <Sort
-        v-if="!!datasetMetadata.length"
+        v-if="!datasetMetadataIsLoading"
         :datasetMetadata="datasetMetadata"
         v-model="recordCriteria.sortBy"
       />
@@ -33,7 +33,7 @@
     <transition name="filterAppear" v-if="visibleFilters" appear>
       <div class="filters__list">
         <MetadataFilter
-          v-if="!!datasetMetadata.length"
+          v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
           :datasetMetadata="datasetMetadata"
           v-model="recordCriteria.metadata"
         />
