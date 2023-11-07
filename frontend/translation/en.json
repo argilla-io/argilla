@@ -27,6 +27,16 @@
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
   },
+  "filters": "Filters",
   "filterBy": "Filter by...",
-  "findSimilar": "Find similar"
+  "findSimilar": "Find similar",
+  "similarTo": "Similar to",
+  "similarityScore": "Similarity Score",
+  "similarUsing": "similar using",
+  "metadata": "Metadata",
+  "reset-all": "Reset all",
+  "reset": "Reset",
+  "with": "with",
+  "find": "Find",
+  "cancel": "Cancel"
 }

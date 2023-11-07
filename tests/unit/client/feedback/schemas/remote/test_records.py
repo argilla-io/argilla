@@ -245,6 +245,10 @@ def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None
                         "agent": "agent-1",
                     },
                 ],
+                "vectors": {
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
                 "external_id": "entry-1",
             },
             {
@@ -266,6 +270,10 @@ def test_remote_response_schema_from_api(payload: FeedbackResponseModel) -> None
                         "agent": "agent-1",
                     },
                 ],
+                "vectors": {
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
                 "external_id": "entry-1",
             },
         ),
@@ -318,6 +326,10 @@ def test_remote_feedback_record(schema_kwargs: Dict[str, Any], server_payload: D
                     agent="agent-1",
                 )
             ],
+            vectors={
+                "vector-1": [1.0, 2.0, 3.0],
+                "vector-2": [1.0, 2.0, 3.0, 4.0],
+            },
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
         ),

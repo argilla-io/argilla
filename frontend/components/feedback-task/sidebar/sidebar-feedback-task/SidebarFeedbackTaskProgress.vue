@@ -31,6 +31,7 @@
       :multiple="true"
       :progress="(totalSubmitted * 100) / progressTotal"
       :progress-secondary="(totalDiscarded * 100) / progressTotal"
+      progress-bg="#bb720a"
       :color="itemColor(1)"
       :color-secondary="itemColor(2)"
     >

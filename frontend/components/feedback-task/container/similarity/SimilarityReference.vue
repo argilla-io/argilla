@@ -9,7 +9,7 @@
         class="similarity-reference__dropdown"
         v-model="recordCriteria.similaritySearch.order"
       />
-      <p>Similar to</p>
+      <p>{{ $t("similarTo") }}</p>
       <span class="similarity-reference__preview">
         <span
           v-for="text in preview"
@@ -21,10 +21,17 @@
         <BaseButton
           class="similarity-reference__preview__button-close"
           @on-click="removeSimilaritySearch"
-          ><svgicon name="close" height="14"
+          ><svgicon name="close" height="10"
         /></BaseButton>
       </span>
+
+      <SimilarityFilterVector
+        class="similarity-reference__dropdown"
+        :vectors="availableVectors"
+        v-model="recordCriteria.similaritySearch.vectorName"
+      />
     </div>
+
     <div class="similarity-reference__right">
       <BaseButton
         class="similarity-reference__button-icon"
@@ -60,12 +67,19 @@ export default {
       type: Object,
       required: true,
     },
+    availableVectors: {
+      type: Array,
+      required: true,
+    },
   },
   watch: {
     "recordCriteria.similaritySearch.order"() {
       this.filterChanged();
     },
     "recordCriteria.similaritySearch.limit"() {
+      this.filterChanged();
+    },
+    "recordCriteria.similaritySearch.vectorName"() {
       this.filterChanged();
     },
   },
@@ -139,6 +153,9 @@ export default {
     &__button-close {
       padding: 0;
       color: $similarity-color;
+      &:hover {
+        color: darken($similarity-color, 15%);
+      }
     }
   }
   :deep(.dropdown__header) {

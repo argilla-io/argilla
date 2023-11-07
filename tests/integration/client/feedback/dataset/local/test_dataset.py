@@ -226,6 +226,39 @@ def test_add_records(
     assert len(dataset) == len(dataset.records)
 
 
+def test_add_records_with_vectors() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text", required=True)],
+        questions=[TextQuestion(name="question-1", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
+        ],
+    )
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                },
+            ),
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+        ]
+    )
+
+    assert len(dataset.records) == 2
+    assert dataset.records[0].vectors == {"vector-1": [1.0, 2.0, 3.0]}
+    assert dataset.records[1].vectors == {"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]}
+
+
 @pytest.mark.parametrize(
     "record, exception_cls, exception_msg",
     [
@@ -631,31 +664,13 @@ def test_push_to_argilla_with_vector_settings(argilla_user: User):
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field")],
         questions=[TextQuestion(name="question")],
-        vector_settings=[VectorSettings(name="vector-settings", dimensions=100)],
+        vectors_settings=[VectorSettings(name="vector-settings", dimensions=100)],
     )
 
     remote = dataset.push_to_argilla(name="test-dataset-vector01")
-    assert len(remote.vector_settings) == 1
-    assert remote.vector_settings[0].name == "vector-settings"
-    assert remote.vector_settings[0].dimensions == 100
-
-
-def test_push_to_argilla_with_wrong_vector_settings(argilla_user: User):
-    api.init(api_key=argilla_user.api_key)
-
-    dataset = FeedbackDataset(
-        fields=[TextField(name="required-field")],
-        questions=[TextQuestion(name="question")],
-        vector_settings=[VectorSettings(name="vector-settings", dimensions=-10)],
-    )
-
-    with pytest.raises(Exception, match="Failed adding vectors to the `FeedbackDataset` in Argilla"):
-        dataset.push_to_argilla(name="test-dataset-vector01")
-
-    with pytest.raises(
-        Exception, match="Could not find a `FeedbackDataset` in Argilla with name='test-dataset-vector01"
-    ):
-        FeedbackDataset.from_argilla("test-dataset-vector01")
+    assert len(remote.vectors_settings) == 1
+    assert remote.vectors_settings[0].name == "vector-settings"
+    assert remote.vectors_settings[0].dimensions == 100
 
 
 def test_add_vector_settings():
@@ -667,7 +682,7 @@ def test_add_vector_settings():
     expected_settings = VectorSettings(name="vector-settings", dimensions=100)
     new_settings = dataset.add_vector_settings(expected_settings)
     assert expected_settings == new_settings
-    assert len(dataset.vector_settings) == 1
+    assert len(dataset.vectors_settings) == 1
     assert dataset.vector_settings_by_name("vector-settings") == expected_settings
 
 

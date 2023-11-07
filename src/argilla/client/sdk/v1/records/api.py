@@ -49,6 +49,8 @@ def update_record(
         body["metadata"] = data["metadata"]
     if "suggestions" in data:
         body["suggestions"] = data["suggestions"]
+    if "vectors" in data:
+        body["vectors"] = data["vectors"]
 
     response = client.patch(url=url, json=body)
 

@@ -8,7 +8,7 @@
           class="settings__edition-form__fields"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
+            <h4 class="--body1 --medium" v-text="field.name" />
           </div>
 
           <Validation

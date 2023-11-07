@@ -15,8 +15,8 @@
       <svgicon
         class="badge__close-button__icon"
         name="close"
-        width="14"
-        height="14"
+        width="10"
+        height="10"
     /></BaseButton>
   </component>
 </template>
@@ -102,7 +102,7 @@ $badgeBorderActiveColor: palette(purple, 200);
     flex-shrink: 0;
     border-radius: 0;
     &__icon {
-      min-width: 14px;
+      min-width: 10px;
       color: $badgeColor;
       &:hover {
         color: darken($badgeColor, 90%);

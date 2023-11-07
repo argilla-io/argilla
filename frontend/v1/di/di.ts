@@ -13,6 +13,7 @@ import {
   VectorRepository,
 } from "@/v1/infrastructure/repositories";
 
+import { useRole } from "@/v1/infrastructure/services";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
@@ -89,6 +90,7 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetDatasetSettingsUseCase)
       .withDependencies(
+        useRole,
         DatasetRepository,
         QuestionRepository,
         FieldRepository,

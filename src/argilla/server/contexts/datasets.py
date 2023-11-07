@@ -399,7 +399,7 @@ async def get_records_by_ids(
                 Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
             ).options(contains_eager(Record.responses))
 
-    query = await _configure_query_relationships(query, include_params=include)
+    query = await _configure_query_relationships(query=query, dataset_id=dataset_id, include_params=include)
 
     result = await db.execute(query)
     records = result.unique().scalars().all()
@@ -412,7 +412,7 @@ async def get_records_by_ids(
 
 
 async def _configure_query_relationships(
-    query: "Select", include_params: Optional["RecordIncludeParam"] = None
+    query: "Select", dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
 ) -> "Select":
     if not include_params:
         return query
@@ -421,67 +421,17 @@ async def _configure_query_relationships(
         query = query.options(joinedload(Record.suggestions))
 
     if include_params.with_all_vectors:
-        query = query.options(joinedload(Record.vectors))
+        query = query.options(joinedload(Record.vectors).joinedload(Vector.vector_settings))
 
     elif include_params.with_some_vector:
-        vector_settings_ids_subquery = select(VectorSettings.id).filter(VectorSettings.name.in_(include_params.vectors))
+        vector_settings_ids_subquery = select(VectorSettings.id).filter(
+            and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(include_params.vectors))
+        )
         query = query.outerjoin(
             Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(vector_settings_ids_subquery))
-        ).options(contains_eager(Record.vectors))
+        ).options(contains_eager(Record.vectors).joinedload(Vector.vector_settings))
 
     return query
-
-
-async def list_records_by_dataset_id(
-    db: "AsyncSession",
-    dataset_id: UUID,
-    user_id: Optional[UUID] = None,
-    include: Optional["RecordIncludeParam"] = None,
-    response_statuses: List[ResponseStatusFilter] = [],
-    offset: int = 0,
-    limit: int = LIST_RECORDS_LIMIT,
-) -> Tuple[List[Record], int]:
-    response_statuses_ = [
-        ResponseStatus(response_status)
-        for response_status in response_statuses
-        if response_status != ResponseStatusFilter.missing
-    ]
-
-    response_status_filter_expressions = []
-
-    if response_statuses_:
-        response_status_filter_expressions.append(Response.status.in_(response_statuses_))
-
-    if ResponseStatusFilter.missing in response_statuses:
-        response_status_filter_expressions.append(Response.status.is_(None))
-
-    records_query = (
-        select(Record)
-        .filter(Record.dataset_id == dataset_id)
-        .outerjoin(
-            Response,
-            Response.record_id == Record.id
-            if user_id is None
-            else and_(Response.record_id == Record.id, Response.user_id == user_id),
-        )
-    )
-
-    if response_status_filter_expressions:
-        records_query = records_query.filter(or_(*response_status_filter_expressions))
-
-    if include and include.with_responses:
-        records_query = records_query.options(contains_eager(Record.responses))
-
-    records_query = await _configure_query_relationships(query=records_query, include_params=include)
-    records_query = records_query.order_by(Record.inserted_at.asc()).offset(offset).limit(limit)
-    result_records = await db.execute(records_query)
-
-    count_query = (
-        records_query.with_only_columns(func.count(Record.id.distinct())).order_by(None).offset(None).limit(None)
-    )
-    result_count = await db.execute(count_query)
-
-    return result_records.unique().scalars().all(), result_count.scalar_one()
 
 
 async def count_records_by_dataset_id(db: "AsyncSession", dataset_id: UUID) -> int:
@@ -646,9 +596,16 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
+        await _load_users_from_record_responses(records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
+
+
+async def _load_users_from_record_responses(records: Iterable[Record]) -> None:
+    for record in records:
+        for response in record.responses:
+            await response.awaitable_attrs.user
 
 
 async def _validate_record_metadata(

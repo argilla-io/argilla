@@ -8,7 +8,7 @@
           class="settings__edition-form__metadata"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="metadata.name" />
+            <h4 class="--body1 --medium" v-text="metadata.name" />
             <BaseBadge class="--capitalized" :text="metadata.settings.type" />
           </div>
 

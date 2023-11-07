@@ -4,22 +4,27 @@
       v-if="recordCriteria.isFilteredBySimilarity && !!records.reference"
       :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
+      :availableVectors="datasetVectors"
     />
-    <RecordFields :fields="record.fields">
+    <RecordFields :fields="record.fields" :key="`${record.id}_fields`">
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
-          <span
-            v-if="recordCriteria.isFilteredBySimilarity && record.score"
+          <BaseCircleProgress
+            v-if="
+              recordCriteria.isFilteredBySimilarity && record.score.percentage
+            "
             class="similarity-icon"
-            :data-title="`Similarity Score ${record.score}`"
+            :value="record.score.percentage"
+            :data-title="$t('similarityScore')"
+            :size="35"
           >
             <svgicon name="similarity" width="30" height="30" />
-          </span>
+          </BaseCircleProgress>
         </div>
         <SimilarityFilter
           v-if="datasetVectors?.length"
-          :available-vectors="datasetVectors"
+          :availableVectors="datasetVectors"
           :recordCriteria="recordCriteria"
           :recordId="record.id"
         /></div
@@ -57,6 +62,7 @@ export default {
   gap: $base-space;
   min-width: 0;
   height: 100%;
+  min-height: 0;
 
   &__header {
     $this: &;

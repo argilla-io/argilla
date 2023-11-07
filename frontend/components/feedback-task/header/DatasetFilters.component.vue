@@ -1,23 +1,46 @@
 <template>
-  <div class="filters">
-    <SearchBarBase
-      v-model="recordCriteria.searchText"
-      :placeholder="'Introduce a query'"
-    />
-    <MetadataFilter
-      v-if="!!datasetMetadata.length"
-      :datasetMetadata="datasetMetadata"
-      v-model="recordCriteria.metadata"
-    />
-    <Sort
-      v-if="!!datasetMetadata.length"
-      :datasetMetadata="datasetMetadata"
-      v-model="recordCriteria.sortBy"
-    />
-    <p v-if="shouldShowTotalRecords" class="filters__total-records">
-      {{ totalRecordsInfo }}
-    </p>
-    <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+  <div class="filters__wrapper">
+    <div class="filters">
+      <SearchBarBase
+        v-model="recordCriteria.searchText"
+        :placeholder="'Introduce a query'"
+      />
+      <FilterButton
+        v-if="isAnyAvailableFilter"
+        class="filters__filter-button"
+        @click.native="toggleVisibilityOfFilters"
+        :button-name="$t('filters')"
+        icon-name="filter"
+        :show-chevron-icon="false"
+        :is-button-active="isAnyFilterActive"
+      />
+      <Sort
+        v-if="!datasetMetadataIsLoading"
+        :datasetMetadata="datasetMetadata"
+        v-model="recordCriteria.sortBy"
+      />
+      <BaseButton
+        v-if="isAnyFilterActive || isSortedBy"
+        class="small clear filters__reset-button"
+        @on-click="resetFiltersAndSortBy()"
+        >{{ $t("reset") }}</BaseButton
+      >
+      <p v-if="shouldShowTotalRecords" class="filters__total-records">
+        {{ totalRecordsInfo }}
+      </p>
+      <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+    </div>
+    <template v-if="visibleFilters">
+      <transition name="filterAppear" appear>
+        <div class="filters__list">
+          <MetadataFilter
+            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            :datasetMetadata="datasetMetadata"
+            v-model="recordCriteria.metadata"
+          />
+        </div>
+      </transition>
+    </template>
   </div>
 </template>
 
@@ -35,21 +58,29 @@ export default {
   data: () => {
     return {
       totalRecords: null,
+      visibleFilters: false,
     };
   },
   computed: {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      if (this.totalRecords === 1) return `${this.totalRecords} record`;
-
-      return `${this.totalRecords} records`;
+      return this.totalRecords;
     },
     shouldShowTotalRecords() {
       return (
         this.recordCriteria.isFilteredByText ||
         this.recordCriteria.isFilteredByMetadata
       );
+    },
+    isAnyAvailableFilter() {
+      return !!this.datasetMetadata.length;
+    },
+    isAnyFilterActive() {
+      return this.recordCriteria.isFilteredByMetadata;
+    },
+    isSortedBy() {
+      return this.recordCriteria.isSortedBy;
     },
   },
   methods: {
@@ -60,6 +91,12 @@ export default {
       }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
+    toggleVisibilityOfFilters() {
+      this.visibleFilters = !this.visibleFilters;
+    },
+    resetFiltersAndSortBy() {
+      this.recordCriteria.resetFiltersAndSortBy();
     },
   },
   watch: {
@@ -93,13 +130,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$filters-inline-min-width: 540px;
 .filters {
   display: flex;
-  flex-wrap: nowrap;
-  gap: $base-space * 2;
+  gap: $base-space;
   align-items: center;
-  width: 100%;
-  padding: $base-space * 2 0;
+  &__wrapper {
+    width: 100%;
+    container-type: inline-size;
+    container-name: filters;
+    z-index: 1;
+  }
+  &__list {
+    display: flex;
+    gap: $base-space;
+    width: 100%;
+    padding-top: $base-space;
+  }
   &__total-records {
     flex-shrink: 0;
     margin: 0;
@@ -109,8 +156,42 @@ export default {
   &__status {
     margin-left: auto;
   }
+  &__reset-button {
+    @include font-size(13px);
+    flex-shrink: 0;
+  }
+  &__filter-button {
+    user-select: none;
+    &.filter-button--active {
+      background: none;
+      &,
+      :deep(.button) {
+        color: palette(purple, 200);
+      }
+      &:hover {
+        background: palette(purple, 400);
+      }
+    }
+  }
   .search-area {
     width: min(100%, 400px);
+  }
+}
+
+.filterAppear-enter-active,
+.filterAppear-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.filterAppear-enter,
+.filterAppear-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@container filters (max-width: #{$filters-inline-min-width}) {
+  .filters {
+    flex-wrap: wrap;
   }
 }
 </style>
