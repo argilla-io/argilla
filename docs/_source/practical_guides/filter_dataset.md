@@ -127,7 +127,7 @@ In the Python SDK, you can also get a list of records that are semantically clos
 - `vector_name`: The `name` of the vector to use in the search.
 - `value`: A vector to use for the similarity search in the form of a `List[float]`. It is necessary to include a `value` **or** a `record`.
 - `record`: A `FeedbackRecord` to use as part of the search. It is necessary to include a `value` **or** a `record`.
-- `max_results` (optional): The maximum number of results for this search.
+- `max_results` (optional): The maximum number of results for this search. The default is `50`.
 
 ```python
 ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
