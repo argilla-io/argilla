@@ -8,13 +8,14 @@
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <MetadataButton
+        <FilterButtonWithBadges
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory"
           @click-on-badge="openCategoryFilter"
           @click-on-clear="removeCategoryFilters"
           @click-on-clear-all="clearAllCategories"
+          :name="$t('metadata')"
         />
       </span>
       <span
@@ -22,10 +23,11 @@
         slot="dropdown-content"
         class="metadata-filter__container"
       >
-        <MetadataCategoriesSelector
+        <CategoriesSelector
           v-if="!visibleCategory"
           class="metadata-filter__categories"
           :categories="metadataFilters.categories"
+          name="metadataCategories"
           @select-category="selectMetadataCategory"
         />
         <template v-else>
@@ -37,12 +39,12 @@
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="metadata-filter__content">
-            <MetadataLabelsSelector
+            <LabelsSelector
               v-if="visibleCategory.isTerms"
-              :metadata="visibleCategory"
+              :filter="visibleCategory"
             />
             <div v-else>
-              <MetadataRangeSelector :metadata="visibleCategory" />
+              <RangeSelector :filter="visibleCategory" />
             </div>
           </div>
         </template>
