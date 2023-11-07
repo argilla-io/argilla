@@ -55,6 +55,10 @@ export class RecordCriteria {
     return this.committed.similaritySearch.isCompleted;
   }
 
+  get isSortedBy() {
+    return this.committed.sortBy.length > 0;
+  }
+
   get hasChanges(): boolean {
     if (this.committed.page !== this.page) return true;
     if (this.committed.status !== this.status) return true;
@@ -129,6 +133,11 @@ export class RecordCriteria {
     this.metadata = this.committed.metadata;
     this.sortBy = this.committed.sortBy;
     this._similaritySearch = this.committed.similaritySearch;
+  }
+
+  resetFiltersAndSortBy() {
+    this.metadata = [];
+    this.sortBy = [];
   }
 
   nextPage() {

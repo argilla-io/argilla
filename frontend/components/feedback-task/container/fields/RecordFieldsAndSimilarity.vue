@@ -62,6 +62,7 @@ export default {
   gap: $base-space;
   min-width: 0;
   height: 100%;
+  min-height: 0;
 
   &__header {
     $this: &;
