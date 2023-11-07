@@ -3906,7 +3906,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_search_dataset_records(
+    async def test_search_current_user_dataset_records(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4016,7 +4016,7 @@ class TestSuiteDatasets:
             ),
         ],
     )
-    async def test_search_dataset_records_with_metadata_filter(
+    async def test_search_current_user_dataset_records_with_metadata_filter(
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
@@ -4084,7 +4084,7 @@ class TestSuiteDatasets:
             ({"name": "float_prop", "settings": {"type": "float"}}, "wrong-value"),
         ],
     )
-    async def test_search_dataset_records_with_wrong_metadata_filter_values(
+    async def test_search_current_user_dataset_records_with_wrong_metadata_filter_values(
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
@@ -4144,7 +4144,7 @@ class TestSuiteDatasets:
             [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
         ],
     )
-    async def test_search_dataset_records_with_sort_by(
+    async def test_search_current_user_dataset_records_with_sort_by(
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
@@ -4194,7 +4194,7 @@ class TestSuiteDatasets:
             sort_by=expected_sorts_by,
         )
 
-    async def test_search_dataset_records_with_sort_by_with_wrong_sort_order_value(
+    async def test_search_current_user_dataset_records_with_sort_by_with_wrong_sort_order_value(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4213,7 +4213,7 @@ class TestSuiteDatasets:
             "detail": "Provided sort order in 'sort_by' query param 'wrong' for field 'inserted_at' is not valid."
         }
 
-    async def test_search_dataset_records_with_sort_by_with_non_existent_metadata_property(
+    async def test_search_current_user_dataset_records_with_sort_by_with_non_existent_metadata_property(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4232,7 +4232,7 @@ class TestSuiteDatasets:
             "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
         }
 
-    async def test_search_dataset_records_with_sort_by_with_invalid_field(
+    async def test_search_current_user_dataset_records_with_sort_by_with_invalid_field(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4262,7 +4262,7 @@ class TestSuiteDatasets:
             ["responses", "suggestions"],
         ],
     )
-    async def test_search_dataset_records_with_include(
+    async def test_search_current_user_dataset_records_with_include(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: "User", includes: List[str]
     ):
         workspace = await WorkspaceFactory.create()
@@ -4390,7 +4390,7 @@ class TestSuiteDatasets:
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
         )
 
-    async def test_search_dataset_records_with_include_vectors(
+    async def test_search_current_user_dataset_records_with_include_vectors(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4477,7 +4477,7 @@ class TestSuiteDatasets:
             "total": 3,
         }
 
-    async def test_search_dataset_records_with_include_specific_vectors(
+    async def test_search_current_user_dataset_records_with_include_specific_vectors(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4568,7 +4568,7 @@ class TestSuiteDatasets:
             "total": 3,
         }
 
-    async def test_search_dataset_records_with_response_status_filter(
+    async def test_search_current_user_dataset_records_with_response_status_filter(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4594,7 +4594,7 @@ class TestSuiteDatasets:
         )
         assert response.status_code == 200
 
-    async def test_search_dataset_records_with_record_vector(
+    async def test_search_current_user_dataset_records_with_record_vector(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4635,7 +4635,7 @@ class TestSuiteDatasets:
             user_response_status_filter=None,
         )
 
-    async def test_search_dataset_records_with_vector_value(
+    async def test_search_current_user_dataset_records_with_vector_value(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4679,7 +4679,7 @@ class TestSuiteDatasets:
             user_response_status_filter=None,
         )
 
-    async def test_search_dataset_records_with_vector_value_and_query(
+    async def test_search_current_user_dataset_records_with_vector_value_and_query(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4728,7 +4728,7 @@ class TestSuiteDatasets:
             user_response_status_filter=None,
         )
 
-    async def test_search_dataset_records_with_wrong_vector(
+    async def test_search_current_user_dataset_records_with_wrong_vector(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4748,7 +4748,7 @@ class TestSuiteDatasets:
         response_json = response.json()
         assert response_json == {"detail": f"Vector `wrong_vector` not found in dataset `{dataset.id}`."}
 
-    async def test_search_dataset_records_with_nonexistent_vector_record_id(
+    async def test_search_current_user_dataset_records_with_nonexistent_vector_record_id(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4769,7 +4769,7 @@ class TestSuiteDatasets:
         response_json = response.json()
         assert response_json == {"detail": f"Record with id `{wrong_record_id}` not found in dataset `{dataset.id}`."}
 
-    async def test_search_dataset_records_with_vector_record_id_from_other_dataset(
+    async def test_search_current_user_dataset_records_with_vector_record_id_from_other_dataset(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4790,7 +4790,7 @@ class TestSuiteDatasets:
         response_json = response.json()
         assert response_json == {"detail": f"Record with id `{record.id}` not found in dataset `{dataset.id}`."}
 
-    async def test_search_dataset_records_with_offset_and_limit(
+    async def test_search_current_user_dataset_records_with_offset_and_limit(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4829,7 +4829,7 @@ class TestSuiteDatasets:
         assert response_json["total"] == 2
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
-    async def test_search_dataset_records_as_restricted_user_from_different_workspace(
+    async def test_search_current_user_dataset_records_as_restricted_user_from_different_workspace(
         self, async_client: "AsyncClient", role: UserRole
     ):
         workspace_a = await WorkspaceFactory.create()
@@ -4846,7 +4846,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_search_dataset_records_with_non_existent_field(
+    async def test_search_current_user_dataset_records_with_non_existent_field(
         self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
@@ -4859,7 +4859,9 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
-    async def test_search_dataset_with_non_existent_dataset(self, async_client: "AsyncClient", owner_auth_header):
+    async def test_search_current_user_dataset_records_with_non_existent_dataset(
+        self, async_client: "AsyncClient", owner_auth_header
+    ):
         query_json = {"query": {"text": {"q": "unit test", "field": "input"}}}
         response = await async_client.post(
             f"/api/v1/me/datasets/{uuid4()}/records/search", headers=owner_auth_header, json=query_json

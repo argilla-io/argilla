@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from argilla.server.search_engine.base import SearchResponses
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
-LIST_DATASET_RECORDS_LIMIT_LTE = 1000
+LIST_DATASET_RECORDS_LIMIT_LE = 1000
 LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
 
@@ -435,7 +435,7 @@ async def list_current_user_dataset_records(
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id)
@@ -469,12 +469,12 @@ async def list_dataset_records(
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_dataset_records_with_all_responses(dataset))
+    await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
 
     records, total = await _filter_records_using_search_engine(
         db,
@@ -752,7 +752,7 @@ async def delete_dataset_records(
     response_model=SearchRecordsResult,
     response_model_exclude_unset=True,
 )
-async def search_dataset_records(
+async def search_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
@@ -764,10 +764,11 @@ async def search_dataset_records(
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, lte=LIST_DATASET_RECORDS_LIMIT_LTE),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
+
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     search_responses = await _get_search_responses(
@@ -788,12 +789,73 @@ async def search_dataset_records(
         response.record_id: {"query_score": response.score, "search_record": None}
         for response in search_responses.items
     }
+
     records = await datasets.get_records_by_ids(
         db=db,
         dataset_id=dataset_id,
         records_ids=list(record_id_score_map.keys()),
         include=include,
         user_id=current_user.id,
+    )
+
+    for record in records:
+        record_id_score_map[record.id]["search_record"] = SearchRecord(
+            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+        )
+
+    return SearchRecordsResult(
+        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+    )
+
+
+@router.post(
+    "/datasets/{dataset_id}/records/search",
+    status_code=status.HTTP_200_OK,
+    response_model=SearchRecordsResult,
+    response_model_exclude_unset=True,
+)
+async def search_dataset_records(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+    dataset_id: UUID,
+    body: SearchRecordsQuery,
+    metadata: MetadataQueryParams = Depends(),
+    sort_by_query_param: SortByQueryParamParsed,
+    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
+    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id, with_fields=True)
+
+    await authorize(current_user, DatasetPolicyV1.search_records_with_all_responses(dataset))
+
+    search_responses = await _get_search_responses(
+        db=db,
+        search_engine=search_engine,
+        dataset=dataset,
+        text_query=body.query.text,
+        vector_query=body.query.vector,
+        parsed_metadata=metadata.metadata_parsed,
+        limit=limit,
+        offset=offset,
+        response_statuses=response_statuses,
+        sort_by_query_param=sort_by_query_param,
+    )
+
+    record_id_score_map = {
+        response.record_id: {"query_score": response.score, "search_record": None}
+        for response in search_responses.items
+    }
+
+    records = await datasets.get_records_by_ids(
+        db=db,
+        dataset_id=dataset_id,
+        records_ids=list(record_id_score_map.keys()),
+        include=include,
     )
 
     for record in records:

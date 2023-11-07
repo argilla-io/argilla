@@ -150,7 +150,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         """Returns the number of records in the current `FeedbackDataset` in Argilla."""
         try:
             if self._has_filters():
-                return self._fetch_records(offset=0, limit=0).total
+                return self._fetch_records(offset=0, limit=1).total
             else:
                 response = datasets_api_v1.get_metrics(client=self._client, id=self._dataset.id).parsed
                 return response.records.count
@@ -331,6 +331,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
         helpers.validate_vector_names(self.dataset, self._with_vectors)
 
+    @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def find_similar(
         self,
         vector_name: str,

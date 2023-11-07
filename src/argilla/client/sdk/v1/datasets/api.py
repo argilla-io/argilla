@@ -224,7 +224,6 @@ def get_records(
     return handle_response_error(response)
 
 
-# TODO: We must change endpoint URL to "/api/v1/me/datasets/{id}/records/search" once the endpoint is available.
 def search_records(
     client: httpx.Client,
     id: UUID,
@@ -234,7 +233,7 @@ def search_records(
     metadata_filters: Optional[List[str]] = None,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
-    """Sends a POST request to `/api/me/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
+    """Sends a POST request to `/api/v1/datasets/{id}/records/search` endpoint to search for records inside an specific dataset.
 
     Args:
         client: the authenticated Argilla client to be used to send the request to the API.
@@ -249,11 +248,15 @@ def search_records(
     Returns:
         A `Response` object with the response itself, and/or the error codes if applicable.
     """
-    url = f"/api/v1/me/datasets/{id}/records/search"
-    params = {"limit": limit}
+    url = f"/api/v1/datasets/{id}/records/search"
 
+    params = {"limit": limit}
     if include:
         params["include"] = include
+    if response_status:
+        params["response_status"] = response_status
+    if metadata_filters:
+        params["metadata"] = metadata_filters
 
     vector_json = {"name": vector_query.name}
     if vector_query.value:
@@ -263,11 +266,6 @@ def search_records(
 
     json = {"query": {"vector": vector_json}}
 
-    if response_status:
-        params["response_status"] = response_status
-
-    if metadata_filters:
-        params["metadata"] = metadata_filters
     response = client.post(url=url, params=params, json=json)
 
     if response.status_code == 200:
