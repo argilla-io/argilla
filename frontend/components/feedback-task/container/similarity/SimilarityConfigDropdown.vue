@@ -1,26 +1,29 @@
 <template>
   <BaseDropdown
     class="similarity-config"
+    :class="useTextCapitalized ? '--capitalized' : ''"
     :visible="dropdownIsVisible"
     @visibility="onVisibility"
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ value }}<svgicon name="chevron-down" height="8" />
+      {{ useExtraText }}
+      {{ value }}
+      <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
       <ul class="similarity-config__options">
         <li
           :class="
-            value === option
+            value === getKeyProp(option)
               ? 'similarity-config__option--selected'
               : 'similarity-config__option'
           "
           v-for="option in options"
-          :key="option"
-          @click="selectOption(option)"
+          :key="getKeyProp(option)"
+          @click="selectOption(getKeyProp(option))"
         >
-          {{ option }}
+          {{ getDisplayProp(option) }}
         </li>
       </ul>
     </template>
@@ -38,6 +41,19 @@ export default {
       type: Array,
       required: true,
     },
+    useTextCapitalized: {
+      type: Boolean,
+      default: true,
+    },
+    useExtraText: {
+      type: String,
+    },
+    useTextProp: {
+      type: String,
+    },
+    useKeyProp: {
+      type: String,
+    },
   },
   model: {
     prop: "value",
@@ -49,6 +65,18 @@ export default {
     };
   },
   methods: {
+    getDisplayProp(option) {
+      if (this.useTextProp) {
+        return option[this.useTextProp];
+      }
+      return option;
+    },
+    getKeyProp(option) {
+      if (this.useKeyProp) {
+        return option[this.useKeyProp];
+      }
+      return option;
+    },
     onVisibility(value) {
       this.dropdownIsVisible = value;
     },
@@ -63,7 +91,6 @@ export default {
 <style lang="scss" scoped>
 .similarity-config {
   user-select: none;
-  text-transform: capitalize;
   font-weight: 500;
 
   &__options {
