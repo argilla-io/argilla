@@ -14,27 +14,29 @@
 
 
 import base64
+import warnings
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
+import magic
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
 
-# Define supported types for each media
+# Define html supported types for each media
 SUPPORTED_MEDIA_TYPES = {
-    "video": ["mp4", "webm"],  # .ogg does not work in Safari
-    "audio": ["mp3", "wav"],  # .ogg does not work in Safari
-    "image": ["png", "jpg", "gif"],  # basic one, but more can be added
+    "video": ["mp4", "webm", "ogg"],
+    "audio": ["mp3", "wav", "ogg"],
+    "image": ["png", "jpg", "jpeg", "ico", "svg", "gif", "apng", "avif", "webp"],
 }
 
 
-def media_to_html(media_type: str, path: str, file_type: Optional[str] = None) -> str:
+def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
     """
     Convert a media file to an HTML tag with embedded base64 data.
 
     Args:
         media_type: The type of media to convert. Can be one of 'video', 'audio', or 'image'.
-        path: The path to the media file.
+        media_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the media file. If not provided, it will be inferred from the file extension.
 
     Returns:
@@ -45,15 +47,27 @@ def media_to_html(media_type: str, path: str, file_type: Optional[str] = None) -
         ValueError: If the provided file type is not supported.
     """
 
-    file_path = Path(path)
+    if isinstance(media_source, bytes):
+        # Get the file type if not provided
+        if not file_type:
+            type_detector = magic.Magic(mime=True)
+            mime_type = type_detector.from_buffer(media_source)
+            file_type = mime_type.removeprefix("video/").removeprefix("audio/").removeprefix("image/")
 
-    # Validate file existence and non-emptiness
-    if not file_path.exists() or file_path.stat().st_size == 0:
-        raise FileNotFoundError(f"File {file_path} does not exist or is empty.")
+        file_data = media_source
 
-    # Get the file type if not provided
-    if not file_type:
-        file_type = file_path.suffix[1:].lower()
+    else:
+        file_path = Path(media_source)
+
+        # Validate file existence and non-emptiness
+        if not file_path.exists() or file_path.stat().st_size == 0:
+            raise FileNotFoundError(f"File {file_path} does not exist or is empty.")
+
+        # Get the file type if not provided
+        if not file_type:
+            file_type = file_path.suffix[1:].lower()
+
+        file_data = file_path.read_bytes()
 
     # Check if the file type is supported
     if file_type not in SUPPORTED_MEDIA_TYPES[media_type]:
@@ -61,8 +75,10 @@ def media_to_html(media_type: str, path: str, file_type: Optional[str] = None) -
             f"Unsupported {media_type} type: {file_type}. Supported types are {SUPPORTED_MEDIA_TYPES[media_type]}"
         )
 
+    if file_type == "ogg":
+        warnings.warn("'ogg' files might not be supported in Safari.", category=UserWarning)
+
     # Encode the media data as base64
-    file_data = file_path.read_bytes()
     media_base64 = base64.b64encode(file_data).decode("utf-8")
 
     # Create the Data URL
@@ -137,7 +153,7 @@ def image_to_html(path: str, file_type: Optional[str] = None) -> str:
 
 
 def create_token_highlights(
-    tokens: List[str], weights: List[float], c_map: Optional[Union[str, Callable]] = None
+    tokens: List[str], weights: List[float], c_map: Optional[Union[str, Callable]] = "viridis"
 ) -> str:
     """
     Generates an HTML string with tokens highlighted based on the corresponding weights using a color map.
