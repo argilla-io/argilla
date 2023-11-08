@@ -6,10 +6,15 @@
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
     />
+    <p v-if="shouldShowTotalRecords" class="total-records">
+      {{ totalRecordsInfo }}
+    </p>
     <RecordFields :fields="record.fields" :key="`${record.id}_fields`">
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
+        </div>
+        <div class="fields__header--right">
           <BaseHalfCircleProgress
             v-if="
               recordCriteria.isFilteredBySimilarity && record.score.percentage
@@ -20,13 +25,13 @@
           >
             <svgicon name="similarity" width="30" height="30" />
           </BaseHalfCircleProgress>
-        </div>
-        <SimilarityFilter
-          v-if="datasetVectors?.length"
-          :availableVectors="datasetVectors"
-          :recordCriteria="recordCriteria"
-          :recordId="record.id"
-        /></div
+          <SimilarityFilter
+            v-if="datasetVectors?.length"
+            :availableVectors="datasetVectors"
+            :recordCriteria="recordCriteria"
+            :recordId="record.id"
+          />
+        </div></div
     ></RecordFields>
   </div>
 </template>
@@ -50,6 +55,34 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data: () => {
+    return {
+      totalRecords: null,
+    };
+  },
+  computed: {
+    totalRecordsInfo() {
+      if (!this.totalRecords || this.totalRecords === 0) return null;
+
+      return this.totalRecords === 1
+        ? `${this.totalRecords} record`
+        : `${this.totalRecords} records`;
+    },
+    shouldShowTotalRecords() {
+      return (
+        this.recordCriteria.isFilteredByText ||
+        this.recordCriteria.isFilteredByMetadata
+      );
+    },
+  },
+  mounted() {
+    this.$root.$on("on-changed-total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
+    });
+  },
+  destroyed() {
+    this.$root.$off("on-changed-total-records");
   },
 };
 </script>
@@ -78,11 +111,25 @@ export default {
       align-items: center;
       gap: $base-space;
     }
+    &--right {
+      display: flex;
+      align-items: center;
+      gap: $base-space;
+    }
   }
   &__status {
     display: inline-flex;
     margin-right: auto;
   }
+}
+
+.total-records {
+  display: inline-flex;
+  justify-content: end;
+  flex-shrink: 0;
+  margin: 0;
+  @include font-size(13px);
+  color: $black-37;
 }
 
 .similarity__progress {

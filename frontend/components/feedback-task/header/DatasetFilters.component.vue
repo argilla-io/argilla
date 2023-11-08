@@ -25,9 +25,6 @@
         @on-click="resetFiltersAndSortBy()"
         >{{ $t("reset") }}</BaseButton
       >
-      <p v-if="shouldShowTotalRecords" class="filters__total-records">
-        {{ totalRecordsInfo }}
-      </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
     <template v-if="visibleFilters">
@@ -57,22 +54,10 @@ export default {
   },
   data: () => {
     return {
-      totalRecords: null,
       visibleFilters: false,
     };
   },
   computed: {
-    totalRecordsInfo() {
-      if (!this.totalRecords || this.totalRecords === 0) return null;
-
-      return this.totalRecords;
-    },
-    shouldShowTotalRecords() {
-      return (
-        this.recordCriteria.isFilteredByText ||
-        this.recordCriteria.isFilteredByMetadata
-      );
-    },
     isAnyAvailableFilter() {
       return !!this.datasetMetadata.length;
     },
@@ -117,41 +102,24 @@ export default {
     return useDatasetsFiltersViewModel();
   },
   mounted() {
-    this.$root.$on("on-changed-total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
-
     this.loadMetadata(this.recordCriteria.datasetId);
-  },
-  destroyed() {
-    this.$root.$off("on-changed-total-records");
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$filters-inline-min-width: 540px;
 .filters {
   display: flex;
   gap: $base-space;
   align-items: center;
   &__wrapper {
     width: 100%;
-    container-type: inline-size;
-    container-name: filters;
-    z-index: 1;
   }
   &__list {
     display: flex;
     gap: $base-space;
     width: 100%;
     padding-top: $base-space;
-  }
-  &__total-records {
-    flex-shrink: 0;
-    margin: 0;
-    @include font-size(13px);
-    color: $black-37;
   }
   &__status {
     margin-left: auto;
@@ -187,11 +155,5 @@ $filters-inline-min-width: 540px;
 .filterAppear-leave-to {
   opacity: 0;
   transform: translateY(-4px);
-}
-
-@container filters (max-width: #{$filters-inline-min-width}) {
-  .filters {
-    flex-wrap: wrap;
-  }
 }
 </style>
