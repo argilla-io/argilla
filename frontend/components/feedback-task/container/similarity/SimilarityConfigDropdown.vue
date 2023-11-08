@@ -8,7 +8,7 @@
   >
     <template slot="dropdown-header">
       {{ useExtraText }}
-      {{ value }}
+      {{ selectedValue }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
@@ -63,6 +63,15 @@ export default {
     return {
       dropdownIsVisible: false,
     };
+  },
+  computed: {
+    selectedValue() {
+      const selectedOption = this.options.find(
+        (option) => this.value === this.getKeyProp(option)
+      );
+
+      return this.getDisplayProp(selectedOption);
+    },
   },
   methods: {
     getDisplayProp(option) {
