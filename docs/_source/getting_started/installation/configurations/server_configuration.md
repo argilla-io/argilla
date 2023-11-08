@@ -6,7 +6,7 @@ By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at
 
 From the Argilla version `1.19.0`, you must setup the search engine manually work with Feedback datasets. You should set the
 environment variable `ARGILLA_SEARCH_ENGINE=opensearch` or `ARGILLA_SEARCH_ENGINE=elasticsearch` depending on the backend you're using
-The default value for this variable is set to `elasticsearch`. The minimal version for Elasticsearch is `8.5.0`, and for Opensearch is `2.4.0`. 
+The default value for this variable is set to `elasticsearch`. The minimal version for Elasticsearch is `8.5.0`, and for Opensearch is `2.4.0`.
 Please, review your backend and upgrade it if necessary.
 
 
