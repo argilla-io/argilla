@@ -1,6 +1,13 @@
 <template>
-  <div class="record-reference__wrapper">
+  <div
+    :class="
+      visibleReferenceRecord
+        ? 'record-reference__wrapper--expanded'
+        : 'record-reference__wrapper'
+    "
+  >
     <SimilarityReference
+      class="record-reference__filter"
       :preview="fieldsPreview"
       :visibleReferenceRecord="visibleReferenceRecord"
       :recordCriteria="recordCriteria"
@@ -68,6 +75,15 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
+    &--expanded {
+      @extend .record-reference__wrapper;
+      .record-reference {
+        &__filter,
+        &__filter:hover {
+          background: none;
+        }
+      }
+    }
   }
 }
 </style>

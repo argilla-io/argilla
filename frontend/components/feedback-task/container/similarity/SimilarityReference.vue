@@ -110,7 +110,7 @@ export default {
   border-radius: $border-radius;
   color: $black-54;
   background: $black-4;
-  @include font-size(13px);
+  @include font-size(12px);
   transition: background 0.3s ease-in-out;
   &:hover {
     background: $black-6;
@@ -165,6 +165,7 @@ export default {
   :deep(.dropdown__content) {
     left: -$base-space;
     right: auto;
+    top: calc(100% + 4px);
   }
   p {
     margin: 0;
