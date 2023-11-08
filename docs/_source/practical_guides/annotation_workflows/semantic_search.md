@@ -38,16 +38,6 @@ In order to use this feature you should use Elasticsearch at least version `8.5.
 If you had Argilla running with Elasticsearch 7.1.0 you need to migrate to at least version 8.5.x. Please check the section "[Migrating from Elasticsearch 7.1.0 to 8.5](#Migrate-from-7.1.0-to-8.5)".
 ```
 
-### Opensearch backend
-
-If you don't have another instance of Elasticsearch or Opensearch running, or don't want to keep previous Argilla datasets, you can launch a clean instance of Opensearch by downloading the [docker-compose.opensearch.yaml file](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker/docker-compose.opensearch.yaml) and running:
-
-```bash
-docker-compose -f docker-compose.opensearch.yaml up
-```
-
-Once the service is up you can launch the Argilla Server with `python -m argilla`.
-
 ### Elasticsearch backend
 
 If you don't have another instance of Elasticsearch or Opensearch running, or don't want to keep previous Argilla datasets, you can launch a clean instance of Elasticsearch by downloading the [docker-compose.elasticsearch.yaml](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker/docker-compose.elasticsearch.yaml) and running:
@@ -55,8 +45,6 @@ If you don't have another instance of Elasticsearch or Opensearch running, or do
 ```bash
 docker-compose -f docker-compose.elasticsearch.yaml up
 ```
-
-Once the service is up you can launch the Argilla Server with `python -m argilla`.
 
 #### Migrate from 7.1.0 to 8.5
 
@@ -72,6 +60,18 @@ In order to migrate from Elasticsearch 7.1.0 and keep your datasets you can foll
 3. Start the Elasticsearch service again.
 4. Once is up and running, stop it again and set the Elasticsearch image to 8.5.x
 5. Finally, start again the Elasticsearch service. Data should be migrated properly.
+
+Once the service is up you can launch the Argilla Server with `python -m argilla server start`.
+
+### Opensearch backend
+
+If you don't have another instance of Elasticsearch or Opensearch running, or don't want to keep previous Argilla datasets, you can launch a clean instance of Opensearch by downloading the [docker-compose.opensearch.yaml file](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker/docker-compose.opensearch.yaml) and running:
+
+```bash
+docker-compose -f docker-compose.opensearch.yaml up
+```
+
+Once the service is up you can launch the Argilla Server with `ARGILLA_SEARCH_ENGINE=opensearch python -m argilla server start`.
 
 ## Add vectors to your data
 

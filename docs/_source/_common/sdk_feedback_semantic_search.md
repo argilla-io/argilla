@@ -32,8 +32,8 @@ for record, score in similar_records:
 You can also combine filters and semantic search like this:
 
 ```python
-( dataset
-   .filter_by(metadata=[rg.TermsMetadataFilter(values=["Positive"])])
-   .find_similar_records(vector_name="vector", value=model.encode("Another text").tolist())
+similar_records = (dataset
+    .filter_by(metadata=[rg.TermsMetadataFilter(values=["Positive"])])
+    .find_similar_records(vector_name="vector", value=model.encode("Another text").tolist())
 )
 ```
