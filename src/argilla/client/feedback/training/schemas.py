@@ -1561,14 +1561,16 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             for example in formatted_data:
                 record = {}
                 for k, v in new_keys.items():
-                    value = example[k]
                     if v == "label":
+                        value = example[v]
                         # At this point the label must be either an int or a float, determine which one is it.
                         if isinstance(value, str):
                             if value.lstrip("-").isdigit():
                                 value = int(value)
                             else:
                                 value = float(value)
+                    else:
+                        value = example[k]
 
                     record[v] = value
                 outputs.append(record)
