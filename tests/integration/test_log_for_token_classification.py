@@ -22,7 +22,6 @@ from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
 
 
-
 def test_log_with_empty_text(api: Argilla):
     dataset = "test_log_with_empty_text"
     text = " "

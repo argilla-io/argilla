@@ -819,7 +819,6 @@ def test_load_as_pandas(api: Argilla):
     assert isinstance(records, DatasetForTextClassification)
     assert isinstance(records[0], TextClassificationRecord)
 
-
     for record in records:
         for vector in record.vectors:
             assert server_vectors_cfg[vector]["value"] == record.vectors[vector]

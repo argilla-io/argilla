@@ -14,9 +14,8 @@
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 import argilla as rg
+import pytest
 from argilla.client.api import delete, init, load, log
 from argilla.client.client import Argilla
 from argilla.client.datasets import read_datasets

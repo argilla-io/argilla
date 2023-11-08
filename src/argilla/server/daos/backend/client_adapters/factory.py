@@ -17,10 +17,9 @@ from typing import Tuple
 from opensearchpy import OpenSearch
 from packaging.version import parse
 
-from argilla.server.settings import settings as server_settings
-
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.backend.client_adapters import ElasticsearchClient, IClientAdapter, OpenSearchClient
+from argilla.server.settings import settings as server_settings
 
 _LOGGER = logging.getLogger("argilla")
 

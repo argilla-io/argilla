@@ -27,6 +27,7 @@ from argilla.server.apis.v0.models.token_classification import (
 )
 from argilla.server.commons.models import TaskType
 
+
 @pytest.mark.asyncio
 async def test_load_as_different_task(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})
