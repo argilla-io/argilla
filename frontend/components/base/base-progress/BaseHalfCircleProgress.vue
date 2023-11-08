@@ -5,7 +5,7 @@
         class="half-circle-progress__fill"
         :style="{ transform: `rotate(${rotation}deg)` }"
       ></div>
-      <div class="half-circle-progress__text">{{ value }}</div>
+      <div class="half-circle-progress__text">{{ value }}<span>%</span></div>
     </div>
   </div>
 </template>
@@ -28,7 +28,7 @@ export default {
 </script>
 <style scoped lang="scss">
 $progress-color: palette(orange-red-crayola);
-$size: 34px;
+$size: 36px;
 $progress-size: 2px;
 .half-circle-progress {
   position: relative;
@@ -52,9 +52,14 @@ $progress-size: 2px;
     border-right-color: $progress-color;
   }
   &__text {
-    @include font-size(10px);
+    @include font-size(9px);
     color: $black-54;
     line-height: 1;
+    font-weight: 600;
+    span {
+      @include font-size(7px);
+      font-weight: 400;
+    }
   }
 }
 </style>

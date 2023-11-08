@@ -103,6 +103,7 @@ export default {
 
 .similarity__progress {
   color: $similarity-color;
+  margin-bottom: $base-space;
   &[data-title] {
     position: relative;
     @extend %has-tooltip--left;
