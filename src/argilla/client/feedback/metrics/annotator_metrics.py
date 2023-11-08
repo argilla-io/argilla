@@ -49,6 +49,36 @@ Responses = List[Union[float, int, str]]
 Suggestions = Responses
 
 
+# TODO(plaguss): Move this function to the new utils module when it's available
+def get_responses_per_user(
+    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"], question_name: str
+) -> Tuple[Dict[int, Responses], Suggestions]:
+    hf_dataset = dataset.format_as("datasets")
+    question_type = type(dataset.question_by_name(question_name))
+    # Create a dict of responses per user:
+    responses_per_user = defaultdict(list)
+
+    for responses_ in hf_dataset[question_name]:
+        for response in responses_:
+            user_id = response["user_id"]
+            if user_id is None:
+                raise NotImplementedError(
+                    "In order to use this functionality the records need to be assigned to a user."
+                )
+            if question_type == RankingQuestion:
+                value = response["value"]["value"]
+            else:
+                value = response["value"]
+
+            responses_per_user[user_id].append(value)
+
+    suggestions = hf_dataset[f"{question_name}-suggestion"]
+    if question_type == RankingQuestion:
+        suggestions = [suggestion["value"] for suggestion in suggestions]
+
+    return responses_per_user, suggestions
+
+
 class AnnotatorMetric:
     def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
         self._dataset = dataset
@@ -57,37 +87,6 @@ class AnnotatorMetric:
         if self._question_type in (MultiLabelQuestion, RankingQuestion):
             raise NotImplementedError(f"No metrics are defined currently for {self._question_type.__name__}")
         self._allowed_metrics = METRICS_PER_QUESTION[self._question_type]
-
-    def _prepare_responses_and_suggestions(self) -> Tuple[Dict[int, Responses], Suggestions]:
-        hf_dataset = self._dataset.format_as("datasets")
-        # TODO(plaguss): We should expose this functionality more easily for a FeedbackDataset.
-        # Create a dict of responses per user:
-        responses_per_user = defaultdict(list)
-        if self._question_type != RankingQuestion:
-            for responses_ in hf_dataset[self._question_name]:
-                for response in responses_:
-                    user_id = response["user_id"]
-                    if user_id is None:
-                        raise NotImplementedError(
-                            "In order to use this functionality the records need to be assigned to a user."
-                        )
-                    responses_per_user[user_id].append(response["value"])
-        else:
-            for responses_ in hf_dataset[self._question_name]:
-                for response in responses_:
-                    user_id = response["user_id"]
-                    if user_id is None:
-                        raise NotImplementedError(
-                            "In order to use this functionality the records need to be assigned to a user."
-                        )
-                    responses_per_user[user_id].append(response["value"]["value"])
-
-        suggestions = hf_dataset[f"{self._question_name}-suggestion"]
-        if self._question_type == RankingQuestion:
-            suggestions = [suggestion["value"] for suggestion in suggestions]
-        # TODO(plaguss): Check there are suggestions for every response.
-
-        return responses_per_user, suggestions
 
     def compute(self, metric_names: Union[str, List[str]], **kwargs) -> float:
         if isinstance(metric_names, str):
@@ -101,7 +100,8 @@ class AnnotatorMetric:
                 )
             metric_classes.append((metric_name, self._allowed_metrics[metric_name]))
 
-        responses_per_user, suggestions = self._prepare_responses_and_suggestions()
+        # responses_per_user, suggestions = self._prepare_responses_and_suggestions()
+        responses_per_user, suggestions = get_responses_per_user(self._dataset, self._question_name)
         # TODO(plaguss): check all the metrics are available for the question type
         metrics = defaultdict(list)
         for user_id, responses in responses_per_user.items():

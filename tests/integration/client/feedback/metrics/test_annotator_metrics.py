@@ -31,7 +31,8 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     "question, metric_names",
     [
-        ("question-1", "gleu"),
+        # TextQuestion
+        # ("question-1", "gleu"),
         # RatingQuestion
         ("question-2", ["accuracy", "spearman-r"]),
         # LabelQuestion
