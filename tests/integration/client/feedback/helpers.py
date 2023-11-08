@@ -288,7 +288,7 @@ def formatting_func_sentence_transformers(sample: dict):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 2},
             ]
 
 task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)

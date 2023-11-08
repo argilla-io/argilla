@@ -545,7 +545,7 @@ label_strategy = RatingQuestionUnification(
 
 task = TrainingTask.for_sentence_similarity(
     texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
-    label=dataset.question_by_name("label"),
+    label=dataset.question_by_name("other-question"),
     label_strategy=label_strategy
 )
 ```
