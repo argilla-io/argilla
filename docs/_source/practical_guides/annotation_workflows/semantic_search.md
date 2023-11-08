@@ -226,7 +226,7 @@ local_ds = rg.FeedbackDataset(
             labels=dataset.info.features['label'].names, #these are the labels in the original dataset
         )
     ],
-    vector_settings=[
+    vectors_settings=[
         rg.VectorSettings(name=key, dimensions=len(value))
         for key,value in dataset[0]["vectors"].items()
     ]

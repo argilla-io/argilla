@@ -124,7 +124,7 @@ To use the similarity search in the UI and the Python SDK, you will need to conf
 - `title` (optional): A name for the vector to display in the UI for better readability.
 
 ```python
-vector_settings = [
+vectors_settings = [
     rg.VectorSettings(
         name="my_vector",
         dimensions=768
@@ -154,7 +154,7 @@ Once the scope of the project is defined, which implies knowing the `fields`, `q
 - `questions`: The list of questions to show in the form. The order in which the questions will appear in the UI matches the order of this list.
 - `metadata`(optional): The list of metadata properties included in this dataset.
 - `allow_extra_metadata` (optional): A boolean to specify whether this dataset will allow metadata fields in the records other than those specified under `metadata`. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
-- `vector_settings` (optional): A list of vector settings (up to 5) to use for similarity search.
+- `vectors_settings` (optional): A list of vector settings (up to 5) to use for similarity search.
 - `guidelines` (optional): A set of guidelines for the annotators. These will appear in the dataset settings in the UI.
 
 If you haven't done so already, check the sections above to learn about each of them.
@@ -193,7 +193,7 @@ dataset = rg.FeedbackDataset(
         )
     ],
     allow_extra_metadata = False,
-    vector_settings=[
+    vectors_settings=[
         rg.VectorSettings(
             name="my_vectors",
             dimensions=768,
@@ -332,10 +332,10 @@ ds.add_vector_settings(rg.VectorSettings(name="my_new_vectors", dimensions=786))
 # Change vector settings title
 vector_cfg = ds.vector_settings_by_name("my_vector")
 vector_cfg.title = "Old vectors"
-ds.update_vector_settings(vector_cfg)
+ds.update_vectors_settings(vector_cfg)
 
 # Delete vector settings
-ds.delete_vector_settings("my_vectors")
+ds.delete_vectors_settings("my_vectors")
 ```
 :::
 
