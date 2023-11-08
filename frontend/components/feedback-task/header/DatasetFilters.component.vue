@@ -25,6 +25,9 @@
         @on-click="resetFiltersAndSortBy()"
         >{{ $t("reset") }}</BaseButton
       >
+      <p v-if="shouldShowTotalRecords" class="filters__total-records">
+        {{ totalRecordsInfo }}
+      </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
     <template v-if="visibleFilters">
@@ -54,10 +57,22 @@ export default {
   },
   data: () => {
     return {
+      totalRecords: null,
       visibleFilters: false,
     };
   },
   computed: {
+    totalRecordsInfo() {
+      if (!this.totalRecords || this.totalRecords === 0) return null;
+
+      return this.totalRecords;
+    },
+    shouldShowTotalRecords() {
+      return (
+        this.recordCriteria.isFilteredByText ||
+        this.recordCriteria.isFilteredByMetadata
+      );
+    },
     isAnyAvailableFilter() {
       return !!this.datasetMetadata.length;
     },
@@ -102,7 +117,14 @@ export default {
     return useDatasetsFiltersViewModel();
   },
   mounted() {
+    this.$root.$on("on-changed-total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
+    });
+
     this.loadMetadata(this.recordCriteria.datasetId);
+  },
+  destroyed() {
+    this.$root.$off("on-changed-total-records");
   },
 };
 </script>
@@ -120,6 +142,12 @@ export default {
     gap: $base-space;
     width: 100%;
     padding-top: $base-space;
+  }
+  &__total-records {
+    flex-shrink: 0;
+    margin: 0;
+    @include font-size(13px);
+    color: $black-37;
   }
   &__status {
     margin-left: auto;

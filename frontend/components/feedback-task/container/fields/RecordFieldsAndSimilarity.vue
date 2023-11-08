@@ -6,10 +6,10 @@
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
     />
-    <p v-if="shouldShowTotalRecords" class="total-records">
-      {{ totalRecordsInfo }}
-    </p>
-    <RecordFields :fields="record.fields" :key="`${record.id}_fields`">
+    <RecordFields
+      :fields="record.fields"
+      :key="`${record.id}_fields`"
+    >
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
@@ -61,29 +61,6 @@ export default {
       totalRecords: null,
     };
   },
-  computed: {
-    totalRecordsInfo() {
-      if (!this.totalRecords || this.totalRecords === 0) return null;
-
-      return this.totalRecords === 1
-        ? `${this.totalRecords} record`
-        : `${this.totalRecords} records`;
-    },
-    shouldShowTotalRecords() {
-      return (
-        this.recordCriteria.isFilteredByText ||
-        this.recordCriteria.isFilteredByMetadata
-      );
-    },
-  },
-  mounted() {
-    this.$root.$on("on-changed-total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
-  },
-  destroyed() {
-    this.$root.$off("on-changed-total-records");
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -121,15 +98,6 @@ export default {
     display: inline-flex;
     margin-right: auto;
   }
-}
-
-.total-records {
-  display: inline-flex;
-  justify-content: end;
-  flex-shrink: 0;
-  margin: 0;
-  @include font-size(13px);
-  color: $black-37;
 }
 
 .similarity__progress {
