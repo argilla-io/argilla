@@ -65,7 +65,9 @@ export default {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      return this.totalRecords;
+      return this.totalRecords === 1
+        ? `${this.totalRecords} record`
+        : `${this.totalRecords} records`;
     },
     shouldShowTotalRecords() {
       return (
