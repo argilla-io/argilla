@@ -16,7 +16,6 @@ import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
-import rich
 from tqdm import trange
 
 from argilla.client.api import ArgillaSingleton
@@ -70,6 +69,9 @@ if TYPE_CHECKING:
         FeedbackMetadataPropertyModel,
         FeedbackQuestionModel,
     )
+
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
 
 class ArgillaMixin:
@@ -318,9 +320,9 @@ class ArgillaMixin:
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
-        logging.basicConfig(level=logging.INFO)
-        logging.info("\033[1;32m✓ Dataset succesfully pushed to Argilla\033[1;0m")
-        logging.info(remote_feedback_dataset)
+
+        _LOGGER.info("✓ Dataset succesfully pushed to Argilla")
+        _LOGGER.info(remote_feedback_dataset)
         return remote_feedback_dataset
 
     @staticmethod
