@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Tuple, Union
 import numpy as np
 from pydantic import BaseModel
 
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -28,6 +29,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -51,15 +53,39 @@ Suggestions = Responses
 
 # TODO(plaguss): Move this function to the new utils module when it's available
 def get_responses_per_user(
-    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"], question_name: str
+    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
+    question_name: str,
+    response_status: str = ResponseStatusFilter.submitted.value,
 ) -> Tuple[Dict[int, Responses], Suggestions]:
+    """Extract the responses per user and the suggestions from a FeedbackDataset.
+
+    Helper function for the metrics module where we want to compare the responses
+    in relation to the suggestions offered.
+
+    Args:
+        dataset: FeedbackDataset or RemoteFeedbackDataset.
+        question_name: The name of the question to filter from the dataset.
+        response_status: The responses status for the responses. Defaults to "submitted".
+
+    Raises:
+        NotImplementedError:
+            When no user_id is given. We need that information to compute the metrics.
+
+    Returns:
+        Tuple containing the responses per user as a dict, with keys the user id and values the responses,
+        and the suggestions.
+    """
+    if isinstance(dataset, RemoteFeedbackDataset):
+        dataset = dataset.filter_by(response_status=response_status)
+
     hf_dataset = dataset.format_as("datasets")
     question_type = type(dataset.question_by_name(question_name))
-    # Create a dict of responses per user:
     responses_per_user = defaultdict(list)
 
     for responses_ in hf_dataset[question_name]:
         for response in responses_:
+            if response["status"] != response_status:
+                continue
             user_id = response["user_id"]
             if user_id is None:
                 raise NotImplementedError(
@@ -100,7 +126,6 @@ class AnnotatorMetric:
                 )
             metric_classes.append((metric_name, self._allowed_metrics[metric_name]))
 
-        # responses_per_user, suggestions = self._prepare_responses_and_suggestions()
         responses_per_user, suggestions = get_responses_per_user(self._dataset, self._question_name)
         # TODO(plaguss): check all the metrics are available for the question type
         metrics = defaultdict(list)
