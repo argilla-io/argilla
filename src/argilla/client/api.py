@@ -30,6 +30,9 @@ from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces
 
 Api = Argilla  # Backward compatibility
 
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
+
 
 class ArgillaSingleton:
     """The active argilla singleton instance"""
@@ -484,9 +487,7 @@ def active_client() -> Argilla:
 def whoami() -> None:
     """Check the current user on the Argilla Server"""
 
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.info(active_client())
+    _LOGGER.info(active_client())
 
 
 active_api = active_client  # backward compatibility
