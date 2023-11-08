@@ -124,6 +124,15 @@ git fetch origin
 git checkout [branch-name]
 ```
 
+### Use CHANGELOG.md
+
+If you are working on a new feature, it is a good practice to make note of it for others to keep up with the changes. For that, we utilize the `CHANGELOG.md` file in the root directory. This file is used to list changes made in each version of the project. A sample addition would be:
+
+```md
+- Added DESCRIPTION_OF_FEATURE [#NUMBER_OF_PR](LINK_TO_PR)
+```
+
+You can have a look at the `CHANGELOG.md` file to see more cases and examples.
 
 ### Make changes and push them
 
@@ -169,6 +178,8 @@ First, click on `compare across forks` and select the right repositories and bra
 ![compare-across-forks](../_static/images/community/contributing/compare-across-forks.PNG)
 
 Then, fill in the pull request template. In the title, add the feat, bug or docs prefix depending on the type of modification. A general template will be shown, please click on `Preview` and choose the corresponding pull request template. In addition, on the right side, you can select a reviewer (for instance, if you discussed the issue with a member of the Argilla team) and assign the pull request to yourself.
+
+It is highly advisable to add labels to PR as well. You can do this again by the labels section right to the screen. For instance, if you are addressing a bug, add the `bug` label or if the PR is related to the documentation, add the `documentation` label. This way, PRs can be easily filtered.
 
 ![pr](../_static/images/community/contributing/pull-request.PNG)
 
