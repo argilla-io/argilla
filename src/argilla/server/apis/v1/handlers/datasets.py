@@ -661,7 +661,7 @@ async def create_dataset_vector_settings(
     count_vectors_settings_by_dataset_id = await datasets.count_vectors_settings_by_dataset_id(db, dataset_id)
     if count_vectors_settings_by_dataset_id >= CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"The maximum number of vector settings has been reached for dataset with id `{dataset_id}`",
         )
 

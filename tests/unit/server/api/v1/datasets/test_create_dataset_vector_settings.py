@@ -43,7 +43,7 @@ class TestCreateDatasetVectorSettings:
             },
         )
 
-        assert response.status_code == 403
+        assert response.status_code == 422
         assert response.json() == {
             "detail": f"The maximum number of vector settings has been reached for dataset with id `{dataset.id}`"
         }
