@@ -20,6 +20,10 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
+    LabelQuestion,
+    LabelQuestionUnification,
+    RatingQuestion,
+    RatingQuestionUnification,
     TrainingTask,
 )
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
@@ -31,6 +35,7 @@ from tests.integration.client.feedback.helpers import (
     formatting_func_sentence_transformers_case_3_a,
     formatting_func_sentence_transformers_case_3_b,
     formatting_func_sentence_transformers_case_4,
+    formatting_func_sentence_transformers_rating_question,
 )
 from tests.integration.training.helpers import train_with_cleanup
 
@@ -60,6 +65,7 @@ def formatting_func_errored(sample):
         formatting_func_sentence_transformers_case_2,
         formatting_func_sentence_transformers_case_3_b,
         formatting_func_sentence_transformers_case_4,
+        formatting_func_sentence_transformers_rating_question,
     ],
 )
 @pytest.mark.usefixtures(
@@ -84,7 +90,14 @@ def test_prepare_for_training_sentence_transformers(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+    if formatting_func.__name__ == "formatting_func_sentence_transformers_rating_question":
+        label_strategy = RatingQuestionUnification(
+            question=RatingQuestion(name="label", values=[1, 2]), strategy="majority"
+        )
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func, label_strategy=label_strategy)
+    else:
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+
     train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
 
     assert isinstance(train_dataset, list)
