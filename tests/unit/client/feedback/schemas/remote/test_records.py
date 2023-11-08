@@ -345,7 +345,6 @@ def test_remote_feedback_record_schema_from_api(payload: FeedbackItemModel) -> N
             "client": ...,
             "responses": {"__all__": {"id", "client"}},
             "suggestions": ...,
-            "vectors": ...,
             "inserted_at": ...,
             "updated_at": ...,
         }
