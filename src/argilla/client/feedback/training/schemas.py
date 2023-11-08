@@ -499,7 +499,7 @@ class TrainingTask:
                 List[Dict[str, str]],
             ],
         ] = None,
-        label_strategy: Optional[LabelQuestionUnification] = None,
+        label_strategy: Optional[Union[LabelQuestionUnification, RatingQuestionUnification]] = None,
     ) -> "TrainingTaskForSentenceSimilarity":
         """
 
@@ -557,12 +557,12 @@ class TrainingTask:
             )
 
         if formatting_func is not None:
-            return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func)
+            return TrainingTaskForSentenceSimilarity(formatting_func=formatting_func, label=label_strategy)
         else:
             if not label:
-                return TrainingTaskForSentenceSimilarity(texts=texts)
+                return TrainingTaskForSentenceSimilarity(texts=texts, label=label_strategy)
 
-            if isinstance(label, LabelQuestionUnification):
+            if isinstance(label, (LabelQuestionUnification, RatingQuestionUnification)):
                 if label_strategy is not None:
                     raise ValueError("label_strategy is already defined via Unification class.")
             else:
@@ -573,8 +573,8 @@ class TrainingTask:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
                 if isinstance(label, LabelQuestion):
                     label = LabelQuestionUnification(**unification_kwargs)
-                elif isinstance(label, RankingQuestion):
-                    label = RankingQuestionUnification(**unification_kwargs)
+                elif isinstance(label, RatingQuestion):
+                    label = RatingQuestionUnification(**unification_kwargs)
                 else:
                     raise ValueError(f"Label type {type(label)} is not supported.")
             return TrainingTaskForSentenceSimilarity(texts=texts, label=label)
@@ -1485,7 +1485,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
         ],
     ] = None
     texts: Optional[List[TextField]] = None
-    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]] = None
+    label: Optional[Union[LabelQuestionUnification, RatingQuestionUnification]] = None
 
     @property
     def supported_frameworks(self):
@@ -1537,9 +1537,15 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
                     else:
                         _all_labels.add(sample["label"])
 
-                self.label = LabelQuestionUnification(
-                    question=LabelQuestion(name="custom_func", labels=list(_all_labels))
-                )
+                if self.label is None:
+                    labels = list(_all_labels)
+                    if isinstance(labels[0], int):
+                        label = RatingQuestionUnification(
+                            question=RatingQuestion(name="custom_func", values=labels), strategy="majority"
+                        )
+                    else:
+                        label = LabelQuestionUnification(question=LabelQuestion(name="custom_func", labels=labels))
+                    self.label = label
 
             return outputs
 
@@ -1558,13 +1564,12 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
                     value = example[k]
                     if v == "label":
                         # At this point the label must be either an int or a float, determine which one is it.
-                        if value.lstrip("-").isdigit():
-                            value = int(value)
-                        else:
-                            value = float(value)
-                        if isinstance(self.label, RankingQuestionUnification):
-                            max_value = max([float(x) for x in self.label.question.__all_labels__])
-                            value = (value / 100) * float(max_value)
+                        if isinstance(value, str):
+                            if value.lstrip("-").isdigit():
+                                value = int(value)
+                            else:
+                                value = float(value)
+
                     record[v] = value
                 outputs.append(record)
 
