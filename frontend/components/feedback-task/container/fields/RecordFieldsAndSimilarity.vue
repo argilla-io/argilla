@@ -7,8 +7,9 @@
       :availableVectors="datasetVectors"
     />
     <RecordFields
-      :fields="record.fields"
+      v-if="!!record"
       :key="`${record.id}_fields`"
+      :fields="record.fields"
     >
       <div class="fields__header">
         <div class="fields__header--left">
