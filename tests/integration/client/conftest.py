@@ -522,6 +522,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
     # Generates 4 records from 3 annotators.
 
     import random
+    import uuid
 
     q1_options = ["positive", "negative"]
     q2_options = [1, 2]
@@ -534,7 +535,9 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
     ]
 
     records = []
+
     for record_id in range(1, 5):
+        responses = []
         for annotator_id in range(1, 4):
             # Make the random seed depend on the record_id and annotator_id for reproducibility.
             random.seed(123 + record_id + annotator_id)
@@ -583,62 +586,67 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                     suggestion_q4 = q4_options[idx4 - 1]
                     suggestion_q5 = q5_options[idx5 - 1]
 
-            records.append(
-                FeedbackRecord(
-                    fields={"text": f"This is a {response_q1} example", "label": f"{response_q1}"},
-                    responses=[
-                        {
-                            "values": {
-                                "question-1": {"value": f"{response_q1} example"},
-                                "question-2": {"value": response_q2},
-                                "question-3": {"value": response_q3},
-                                "question-4": {"value": response_q4},
-                                "question-5": {"value": response_q5},
-                            },
-                            "status": "submitted",
-                        },
-                    ],
-                    suggestions=[
-                        {
-                            "question_name": "question-1",
-                            "value": suggestion_q1,
-                            "type": "human",
-                            "score": 0.0,
-                            "agent": f"agent-{annotator_id}",
-                        },
-                        {
-                            "question_name": "question-2",
-                            "value": suggestion_q2,
-                            "type": "human",
-                            "score": 0.0,
-                            "agent": f"agent-{annotator_id}",
-                        },
-                        {
-                            "question_name": "question-3",
-                            "value": suggestion_q3,
-                            "type": "human",
-                            "score": 0.0,
-                            "agent": f"agent-{annotator_id}",
-                        },
-                        {
-                            "question_name": "question-4",
-                            "value": suggestion_q4,
-                            "type": "human",
-                            "score": 0.0,
-                            "agent": f"agent-{annotator_id}",
-                        },
-                        {
-                            "question_name": "question-5",
-                            "value": suggestion_q5,
-                            "type": "human",
-                            "score": 0.0,
-                            "agent": f"agent-{annotator_id}",
-                        },
-                    ],
-                    metadata={"unit": "test"},
-                    external_id=str(annotator_id + record_id),
-                )
+            responses.append(
+                {
+                    "values": {
+                        "question-1": {"value": f"{response_q1} example"},
+                        "question-2": {"value": response_q2},
+                        "question-3": {"value": response_q3},
+                        "question-4": {"value": response_q4},
+                        "question-5": {"value": response_q5},
+                    },
+                    "status": "submitted",
+                    "user_id": uuid.UUID(int=annotator_id),
+                },
             )
+
+        records.append(
+            FeedbackRecord(
+                fields={"text": f"This is a {response_q1} example", "label": f"{response_q1}"},
+                responses=responses,
+                suggestions=[
+                    {
+                        "question_name": "question-1",
+                        "value": suggestion_q1,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-2",
+                        "value": suggestion_q2,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-3",
+                        "value": suggestion_q3,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-4",
+                        "value": suggestion_q4,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-5",
+                        "value": suggestion_q5,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                ],
+                metadata={"unit": "test"},
+                external_id=str(annotator_id + record_id),
+            )
+        )
+
+    return records
 
 
 def feedback_dataset_records_with_metadata() -> List[FeedbackRecord]:

@@ -12,10 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+import uuid
+from typing import TYPE_CHECKING, List, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.metrics import AnnotatorMetric, AnnotatorMetricResult
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
@@ -26,20 +28,34 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
-from sklearn.metrics import accuracy_score
-
-
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        ("question-1", "gleu"),
+        # RatingQuestion
+        ("question-2", ["accuracy", "spearman-r"]),
+        # LabelQuestion
+        ("question-3", "accuracy"),
+        ("question-3", ["precision", "f1-score"]),
+        # No current implementation for MultiLabelQuestion
+        ("question-4", "accuracy"),
+        # RankingQuestion
+        ("question-5", "accuracy"),
+    ],
+)
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
     "feedback_dataset_questions",
     "feedback_dataset_records_with_paired_suggestions",
 )
-def test_metrics_dataset(
+def test_annotator_metric(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
 ):
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -48,21 +64,21 @@ def test_metrics_dataset(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    df = dataset.format_as("datasets").to_pandas()
-    print("DATAFRAME", dataset.format_as("datasets"))
-    print("******** DF *")
-    print(df[["text", "label", "question-1", "question-1-suggestion"]])
-    print("*********")
-    # print(df.columns)
-    print("*********")
-    # print(df["question-1"])
-    print(df["question-2"])
-    print(df["question-2-suggestion"])
-    # print(df["question-3"])
-    # print(df["question-4"])
-    # print(df["question-5"])
-    dfq2 = df["question-2"].apply(lambda x: x[0]["value"])
-    print(dfq2)
-    acc = accuracy_score(dfq2, df["question-2-suggestion"])
-    print(acc)
-    assert 1 == 2
+    if question in ("question-4", "question-5"):
+        with pytest.raises(NotImplementedError):
+            AnnotatorMetric(dataset, question)
+    else:
+        metric = AnnotatorMetric(dataset, question)
+        metrics_report = metric.compute(metric_names)
+        assert len(metrics_report) == 3  # Number of annotators
+        assert isinstance(metrics_report, dict)
+        user_id = str(uuid.UUID(int=1))
+        metric_results = metrics_report[user_id]
+        assert isinstance(metric_results, list)
+        metric_result = metric_results[0]
+        assert isinstance(metric_result, AnnotatorMetricResult)
+        if isinstance(metric_names, str):
+            metric_names = [metric_names]
+
+        assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
+        # TODO: Check some values for the metrics
