@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 from uuid import UUID
 
@@ -317,7 +318,9 @@ class ArgillaMixin:
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
-        rich.print(f"[bold green]✓ Dataset succesfully pushed to Argilla[/bold green]")
+
+        logging.basicConfig(level=logging.INFO)
+        logging.info("\033[1;32m✓ Dataset succesfully pushed to Argilla\033[1;0m")
         print(remote_feedback_dataset)
         return remote_feedback_dataset
 
