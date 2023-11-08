@@ -105,7 +105,7 @@ export default {
   color: $similarity-color;
   &[data-title] {
     position: relative;
-    @extend %has-tooltip--right;
+    @extend %has-tooltip--left;
   }
 }
 </style>
