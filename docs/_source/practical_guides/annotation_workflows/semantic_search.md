@@ -13,14 +13,14 @@ In this guide, you'll find how to:
 The next section gives a general overview of how semantic search works in Argilla.
 
 ## How it works
+
 Semantic search in Argilla works as follows:
 
-1. One or several vectors can be included in the `vectors` field of Argilla Records. The `vectors` field accepts a dictionary where `keys` represent the names and `values` contain the actual vectors. This is the case because certain use cases might require using several vectors. Note that for a `FeedbackDataset` you will also need to [configure `VectorSettings`](/practical-guides/create_dataset.md) in your dataset.
+1. One or several vectors can be included in the `vectors` field of Argilla Records. The `vectors` field accepts a dictionary where `keys` represent the names and `values` contain the actual vectors. This is the case because certain use cases might require using several vectors. Note that for a `FeedbackDataset` you will also need to [configure `VectorSettings`](/practical_guides/create_dataset.md#define-vectors) in your dataset.
 2. The vectors are stored at indexing time, once the records are logged with `add_records` or `update_records` in a `FeedbackDataset`, or with `rg.log` in older datasets.
 3. If you have stored vectors in your dataset, you can use the semantic search feature in Argilla UI and the Python SDK.
 
 In future versions, embedding services might be developed to facilitate steps 1 and 2 and associate vectors to records automatically.
-
 
 ```{note}
 
@@ -29,7 +29,6 @@ It's completely up to the user which encoding or embedding mechanism to use for 
 Currently, Argilla uses vector search only for searching similar records (nearest neighbors) of a given vector. This can be leveraged from Argilla UI as well as the Python Client. In the future, vector search could be leveraged as well for free text queries using Argilla UI.
 
 ```
-
 
 ## Setup vector search support
 
@@ -40,22 +39,27 @@ If you had Argilla running with Elasticsearch 7.1.0 you need to migrate to at le
 ```
 
 ### Opensearch backend
+
 If you don't have another instance of Elasticsearch or Opensearch running, or don't want to keep previous Argilla datasets, you can launch a clean instance of Opensearch by downloading the [docker-compose.opensearch.yaml file](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker/docker-compose.opensearch.yaml) and running:
 
 ```bash
 docker-compose -f docker-compose.opensearch.yaml up
 ```
+
 Once the service is up you can launch the Argilla Server with `python -m argilla`.
 
 ### Elasticsearch backend
+
 If you don't have another instance of Elasticsearch or Opensearch running, or don't want to keep previous Argilla datasets, you can launch a clean instance of Elasticsearch by downloading the [docker-compose.elasticsearch.yaml](https://raw.githubusercontent.com/argilla-io/argilla/develop/docker/docker-compose.elasticsearch.yaml) and running:
 
 ```bash
 docker-compose -f docker-compose.elasticsearch.yaml up
 ```
+
 Once the service is up you can launch the Argilla Server with `python -m argilla`.
 
 #### Migrate from 7.1.0 to 8.5
+
 ```{warning}
 
 If you had Argilla running with Elasticsearch 7.1.0 you need to migrate to at least version 8.5.x. Before following the process described below, please read the official [Elasticsearch Migration Guide](https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.5.html) carefully.
@@ -70,16 +74,15 @@ In order to migrate from Elasticsearch 7.1.0 and keep your datasets you can foll
 5. Finally, start again the Elasticsearch service. Data should be migrated properly.
 
 ## Add vectors to your data
+
 The first and most important thing to do before leveraging semantic search is to turn text into a numerical representation: a vector. In practical terms, you can think of a vector as an array or list of numbers. You can associate this list of numbers with an Argilla Record by using the aforementioned `vectors` field. But the question is: **how do you create these vectors?**
 
 Over the years, many approaches have been used to turn text into numerical representations. The goal is to "encode" meaning, context,  topics, etc.. This can be used to find "semantically" similar text. Some of these approaches are *LSA* (Latent Semantic Analysis), *tf-idf*, *LDA* (Latent Dirichlet Allocation), or *doc2Vec*. More recent methods fall in the category of "neural" methods, which leverage the power of large neural networks to *embed* text into dense vectors (a large array of real numbers). These methods have demonstrated a great ability to capture semantic features. These methods are powering a new wave of technologies that fall under categories like neural search, semantic search, or vector search. Most of these methods involve using a large language model to encode the full context of a textual snippet, such as a sentence, a paragraph, and more lately larger documents.
-
 
 ```{note}
 
 In the context of Argilla, we intentionally use the term `vector` in favor of `embedding` to emphasize that users can leverage methods other than neural, which might be cheaper to compute or be more useful for their use cases.
 ```
-
 
 In the next sections, we show how to encode text using different models and services and how to add them to Argilla records.
 
@@ -88,8 +91,8 @@ In the next sections, we show how to encode text using different models and serv
 If you run into issues when logging records with large vectors using `rg.log`, we recommend you to use a smaller `chunk_size` as shown in the following examples.
 ```
 
-
 ### Sentence Transformers
+
 SentenceTransformers is a Python framework for state-of-the-art sentence, text and image embeddings. There are dozens of [pre-trained models available](https://huggingface.co/models?pipeline_tag=sentence-similarity&sort=downloads) on the Hugging Face Hub.
 
 The code below will load a dataset from the Hub, encode the `text` field, and create the `vectors` field which will contain only one key (`mini-lm-sentence-transformers`).
@@ -164,10 +167,9 @@ dataset = dataset.map(
 )
 ```
 
-### co:here `Co.Embed`
+### Cohere `Co.Embed`
 
-[Co:here Co.Embed](https://docs.cohere.ai/reference/embed) is an API endpoint by Cohere that takes a piece of text and turns it into a vector embedding.
-
+[Cohere Co.Embed](https://docs.cohere.ai/reference/embed) is an API endpoint by Cohere that takes a piece of text and turns it into a vector embedding.
 
 ```{warning}
 
@@ -179,7 +181,6 @@ The code below will load a dataset from the Hub, encode the `text` field, and cr
 To run the code below you need to install `cohere` and `datasets` with pip: `pip install cohere datasets`.
 
 You also need to set up your Cohere API key as shown below.
-
 
 ```python
 import cohere
@@ -203,6 +204,7 @@ dataset = dataset.map(
 ```
 
 ## Configure your dataset
+
 Our dataset now contains a `vectors` field with the embedding vector generated by our preferred model. This dataset can be transformed into an Argilla Dataset in the following ways:
 
 ::::{tab-set}
@@ -233,6 +235,7 @@ remote_ds = local_ds.push_to_argilla("banking77", workspace="admin")
 ```
 
 Now we can create records and add them to the dataset:
+
 ```python
 records = [
     rg.FeedbackRecord(
@@ -243,6 +246,7 @@ records = [
 ]
 remote_ds.add_records(records)
 ```
+
 :::
 :::{tab-item} Older datasets
 
@@ -259,6 +263,7 @@ rg.log(
     chunk_size=50,
 )
 ```
+
 :::
 ::::
 
@@ -267,9 +272,13 @@ rg.log(
 This section introduces how to use the semantic search feature from Argilla UI and Argilla Python client.
 
 ### Argilla UI
+
 ::::{tab-set}
 :::{tab-item} FeedbackDataset
-The use of the semantich search in Feedback Datasets is explained in detail [here](../filter_dataset.md#semantic-search).
+
+```{include} /_common/ui_feedback_semantic_search.md
+```
+
 :::
 :::{tab-item} Older datasets
 Within the Argilla UI, it is possible to select a record that has an attached vector to start semantic searching by clicking the "Find similar" button. After labeling, the "Remove similar record filter" button can be pressed to close the specific search and continue with your labeling session.
@@ -311,7 +320,7 @@ vector = openai.Embedding.create(
 
 :::
 
-:::{tab-item} co.here co.Embed
+:::{tab-item} Cohere co.Embed
 
 ```python
 vector = co.embed(["I lost my credit card. What should I do?"], model="small").embeddings[0]
@@ -325,11 +334,15 @@ Now that we have our reference vector, we can do a semantic search in the Python
 
 ::::{tab-set}
 
-:::{tab-item} FeedbackDataset
-The use of the semantich search in Feedback Datasets is explained in detail [here](/practical_guides/filter_dataset.md#semantic-search).
+:::{tab-item} Feedback Datasets
+
+```{include} /_common/sdk_feedback_semantic_search.md
+```
+
 :::
 
 :::{tab-item} Older datasets
+
 The `rg.load` method includes a `vector` parameter which can be used to retrieve similar records to a given vector, and a `limit` parameter to indicate the number of records to be retrieved. This parameter accepts a tuple with the key of the target vector (this should match with one of the keys of the `vectors` dictionary) and the query vector itself.
 
 In addition, the `vector` param can be combined with the `query` param to combine vector search with traditional search.
@@ -342,6 +355,7 @@ ds = rg.load(
     query="annotated_as:card_arrival"
 )
 ```
+
 :::
 
 ::::

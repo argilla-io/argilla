@@ -119,51 +119,11 @@ You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
 ```
 
 ### Semantic search
-You can retrieve records based on their similarity with another record. To do that, make sure you have added `vector_settings` to your [dataset configuration](create_dataset.md#define-vectors) and that your [records include vectors](create_dataset.md#configure-the-records).
 
-In the UI, go to the record you'd like to use for the semantic search and click on `Find similar` at the top right corner of the record card. If there is more than one vector, you will be asked to select which vector to use. You can also select whether you want the most or least similar records and the number of results you would like to see.
-
-At any time, you can expand or collapse the record that was used for the search as a reference. If you want to undo the search, just click on the cross next to the reference record.
-
-[TODO: Image needed here!]
-
-In the Python SDK, you can also get a list of records that are semantically close to a given embedding with the `find_similar_records` method. These are the arguments of this function:
-
-- `vector_name`: The `name` of the vector to use in the search.
-- `value`: A vector to use for the similarity search in the form of a `List[float]`. It is necessary to include a `value` **or** a `record`.
-- `record`: A `FeedbackRecord` to use as part of the search. It is necessary to include a `value` **or** a `record`.
-- `max_results` (optional): The maximum number of results for this search. The default is `50`.
-
-This returns a list of Tuples with the records and their similarity score (between 0 and 1).
-
-```python
-ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
-
-# using text embeddings
-similar_records =  ds.find_similar_records(
-    vector_name="my_vector",
-    value=embedder_model.embeddings("My text is here")
-    # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
-)
-
-# using another record
-similar_records =  ds.find_similar_records(
-    vector_name="my_vector",
-    record=ds.records[0],
-    max_results=5
-)
-
-# work with the resulting tuples
-for record, score in similar_records:
-    ...
+```{include} /_common/ui_feedback_semantic_search.md
 ```
 
-You can also combine filters and semantic search like this: `dataset.filter_by(...).find_similar_records(...)`
-```python
-( dataset
-   .filter_by(metadata=[rg.TermsMetadataFilter(values=["Positive"])])
-   .find_similar_records(vector_name="vector", value=model.encode("Another text").tolist())
-)
+```{include} /_common/sdk_feedback_semantic_search.md
 ```
 
 ## Other datasets
@@ -175,7 +135,6 @@ The search in Argilla is driven by Elasticsearch's powerful [query string syntax
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
 The same query can be used in the search bar of the Argilla web app, or with the Python client as optional arguments.
-
 
 ```python
 import argilla as rg
@@ -497,4 +456,3 @@ This is a table with available fields that you can use in your query string:
 | metrics.predicted.mentions.chars_length  | Mention length in chars (prediction)  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.value             | Text of the token (prediction)        |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.tag               | IOB tag (prediction)                  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
-
