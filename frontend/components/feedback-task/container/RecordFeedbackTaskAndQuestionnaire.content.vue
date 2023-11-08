@@ -4,7 +4,6 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
-        v-if="!!record"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"

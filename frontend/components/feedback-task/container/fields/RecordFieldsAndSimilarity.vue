@@ -6,7 +6,11 @@
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
     />
-    <RecordFields :fields="record.fields" :key="`${record.id}_fields`">
+    <RecordFields
+      v-if="!!record"
+      :key="`${record.id}_fields`"
+      :fields="record.fields"
+    >
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
