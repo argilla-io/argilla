@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import logging
+import textwrap
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
@@ -163,21 +164,14 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
-        bold_start, bold_end = "\033[1m", "\033[0m"
-        table = [
-            [f"{bold_start}fields{bold_end}", "\n".join([str(field) for field in self.fields])],
-            [f"{bold_start}questions{bold_end}", "\n".join([str(question) for question in self.questions])],
-            [f"{bold_start}guidelines{bold_end}", self.guidelines],
-            [
-                f"{bold_start}metadata_properties{bold_end}",
-                "\n".join([str(metadata_property) for metadata_property in self.metadata_properties]),
-            ],
-        ]
-        table = tabulate(table, tablefmt="simple")
-        title = "FeedbackDataset"
-        table_with_title = f"{title}\n{table}"
-
-        return table_with_title
+        return (
+            "FeedbackDataset("
+            + textwrap.indent(
+                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines}\nmetadata_properties={self.metadata_properties})",
+                "    ",
+            )
+            + "\n)"
+        )
 
     def __len__(self) -> int:
         """Returns the number of records in the dataset."""

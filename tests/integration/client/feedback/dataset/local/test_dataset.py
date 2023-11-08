@@ -90,6 +90,12 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
         assert record.suggestions[0].question_id == remote_dataset.question_by_name("text").id
 
 
+def test_local_feedback_dataset_repr() -> None:
+    ds = FeedbackDataset.for_question_answering()
+    expected_repr = f"FeedbackDataset(\n    fields={ds.fields}\n    questions={ds.questions}\n    guidelines={ds.guidelines}\n    metadata_properties={ds.metadata_properties})\n)"
+    assert repr(ds) == expected_repr
+
+
 def test_add_records(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],

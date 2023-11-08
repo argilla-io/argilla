@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
@@ -132,6 +133,41 @@ class TestRemoteFeedbackDataset:
         remote_dataset.add_records([record])
 
         assert len(remote_dataset.records) == 1
+
+    def test_remote_feedback_dataset_repr(
+        self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
+    ) -> None:
+        rg.init(api_key=owner.api_key)
+        ws = rg.Workspace.create(name="test-workspace")
+        remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
+
+        str_remote = remote.__repr__()
+        field_str = ""
+        question_str = ""
+        metadata_str = ""
+        for field in remote.fields:
+            field_str += str(field) if field == remote.fields[-1] else str(field) + "\n                     "
+        for question in remote.questions:
+            question_str += (
+                str(question) if question == remote.questions[-1] else str(question) + "\n                     "
+            )
+        for metadata in remote.metadata_properties:
+            metadata_str += (
+                str(metadata)
+                if metadata == remote.metadata_properties[-1]
+                else str(metadata) + "\n                     "
+            )
+        guidelines = remote.guidelines if remote.guidelines != None else ""
+        starting_dashes = str_remote[: re.search("-\\n", str_remote).span()[0] + 1]
+        ending_dashes = str_remote[re.search("[^t]\\n---", str_remote).span()[0] + 2 :]
+
+        expected_repr = (
+            starting_dashes
+            + f"\n\x1b[1mid\x1b[0m                   {remote.id}\n\x1b[1mname\x1b[0m                 {remote.name}\n\x1b[1mworkspace\x1b[0m            {remote.workspace}\n\x1b[1murl\x1b[0m                  {remote.url}\n\x1b[1mfields\x1b[0m               {field_str}\n\x1b[1mquestions\x1b[0m            {question_str}\n\x1b[1mguidelines\x1b[0m{guidelines}\n\x1b[1mmetadata_properties\x1b[0m  {metadata_str}\n"
+            + ending_dashes
+        )
+
+        assert repr(remote) == expected_repr
 
     def test_update_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset):
         rg.init(api_key=owner.api_key)
