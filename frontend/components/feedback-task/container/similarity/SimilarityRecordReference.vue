@@ -78,8 +78,8 @@ export default {
     &--expanded {
       @extend .record-reference__wrapper;
       .record-reference {
-        &__filter {
-          border: 1px solid $similarity-color;
+        &__filter,
+        &__filter:hover {
           background: none;
         }
       }
