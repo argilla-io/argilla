@@ -46,6 +46,9 @@ class DatasetConfig(BaseModel):
     allow_extra_metadata: bool = True
     vectors_settings: Optional[List[VectorSettings]] = None
 
+    class Config:
+        use_enum_values = True
+
     def to_yaml(self) -> str:
         return dump(self.dict())
 
