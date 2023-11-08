@@ -63,9 +63,6 @@ class AnnotatorMetric:
         # TODO(plaguss): We should expose this functionality more easily for a FeedbackDataset.
         # Create a dict of responses per user:
         responses_per_user = defaultdict(list)
-        import operator
-
-        operator.itemgetter
         if self._question_type != RankingQuestion:
             for responses_ in hf_dataset[self._question_name]:
                 for response in responses_:
@@ -98,9 +95,10 @@ class AnnotatorMetric:
 
         metric_classes = []
         for metric_name in metric_names:
-            if metric_name not in self._allowed_metrics.keys():
-                # TODO: Improve the error message
-                raise ValueError(f"Metric {metric} not allowed for question {self._question_name}")
+            if metric_name not in self._allowed_metrics:
+                raise ValueError(
+                    f"Metric {metric} not allowed for question {self._question_name}, choose one from: {list(self._allowed_metrics.keys())}."
+                )
             metric_classes.append((metric_name, self._allowed_metrics[metric_name]))
 
         responses_per_user, suggestions = self._prepare_responses_and_suggestions()
