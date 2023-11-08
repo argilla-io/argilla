@@ -21,7 +21,6 @@ export default {
   },
   computed: {
     rotation() {
-      // return -180 + (this.value / 100) * 180;
       return 45 + this.value * 1.8;
     },
   },
@@ -29,8 +28,8 @@ export default {
 </script>
 <style scoped lang="scss">
 $progress-color: palette(orange-red-crayola);
-$size: 50px;
-$progress-size: 3px;
+$size: 34px;
+$progress-size: 2px;
 .half-circle-progress {
   position: relative;
   display: flex;
@@ -53,7 +52,7 @@ $progress-size: 3px;
     border-right-color: $progress-color;
   }
   &__text {
-    @include font-size(13px);
+    @include font-size(10px);
     color: $black-54;
     line-height: 1;
   }
