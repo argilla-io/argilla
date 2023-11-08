@@ -114,7 +114,7 @@ from sentence_transformers import SentenceTransformer
 from datasets import load_dataset
 
 # Define fast version of sentence transformers
-encoder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+encoder = SentenceTransformer("BAAI/bge-small-en", device="cpu")
 
 # Load dataset
 dataset = load_dataset("PolyAI/banking77", split="test")
@@ -292,7 +292,7 @@ Within the Argilla UI, it is possible to select a record that has an attached ve
 To find records similar to a given vector, first we need to produce that vector of reference. Let's see how we can do that with the different frameworks that we used before:
 
 ```{warning}
-In order to get good results, make sure you are using the same encoder model for generating the vector used for the query. For example, if your dataset has been encoded with the `all-MiniLM-L6-v2` model from sentence transformers, make sure to use the same model for encoding the text to be used for querying. Another option is to use an existing record in your dataset, which already contains a vector.
+In order to get good results, make sure you are using the same encoder model for generating the vector used for the query. For example, if your dataset has been encoded with the `bge-small-en` model from sentence transformers, make sure to use the same model for encoding the text to be used for querying. Another option is to use an existing record in your dataset, which already contains a vector.
 ```
 
 ::::{tab-set}
@@ -302,7 +302,7 @@ In order to get good results, make sure you are using the same encoder model for
 ```python
 from sentence_transformers import SentenceTransformer
 
-encoder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+encoder = SentenceTransformer("BAAI/bge-small-en", device="cpu")
 
 vector = encoder.encode("I lost my credit card. What should I do?").tolist()
 ```
