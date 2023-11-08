@@ -10,17 +10,16 @@
       <div class="fields__header">
         <div class="fields__header--left">
           <StatusTag class="fields__status" :recordStatus="record.status" />
-          <BaseCircleProgress
+          <BaseHalfCircleProgress
             v-if="
               recordCriteria.isFilteredBySimilarity && record.score.percentage
             "
-            class="similarity-icon"
+            class="similarity__progress"
             :value="record.score.percentage"
             :data-title="$t('similarityScore')"
-            :size="35"
           >
             <svgicon name="similarity" width="30" height="30" />
-          </BaseCircleProgress>
+          </BaseHalfCircleProgress>
         </div>
         <SimilarityFilter
           v-if="datasetVectors?.length"
@@ -86,7 +85,7 @@ export default {
   }
 }
 
-.similarity-icon {
+.similarity__progress {
   color: $similarity-color;
   &[data-title] {
     position: relative;
