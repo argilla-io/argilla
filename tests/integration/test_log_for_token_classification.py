@@ -21,7 +21,6 @@ from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
 
-from tests import SUPPORTED_VECTOR_SEARCH
 
 
 def test_log_with_empty_text(api: Argilla):
@@ -184,7 +183,6 @@ def test_search_keywords(api: Argilla):
     assert {"listened", "listen"} == top_keywords, top_keywords
 
 
-@pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
 def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
@@ -217,10 +215,6 @@ def test_log_data_with_vectors_and_update_ok(api: Argilla):
     assert ds[0].id == 3
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
     dataset = "test_log_data_and_partial_update_ok"
     text = "This is a text"

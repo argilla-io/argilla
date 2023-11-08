@@ -76,7 +76,6 @@ from argilla.server.commons.models import TaskStatus
 from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
-from tests import SUPPORTED_VECTOR_SEARCH
 from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
 
 
@@ -375,7 +374,7 @@ def test_load_limits(argilla_user: User):
     api = Argilla(api_key=argilla_user.api_key)
     api.delete(dataset)
 
-    create_some_data_for_text_classification(api.http_client, dataset, n=50, with_vectors=SUPPORTED_VECTOR_SEARCH)
+    create_some_data_for_text_classification(api.http_client, dataset, n=50)
 
     limit_data_to = 10
     ds = api.load(name=dataset, limit=limit_data_to)
@@ -763,7 +762,7 @@ def test_load_with_ids_list(api: Argilla):
     api.delete(name=dataset)
 
     expected_data = 100
-    create_some_data_for_text_classification(api.client, dataset, n=expected_data, with_vectors=SUPPORTED_VECTOR_SEARCH)
+    create_some_data_for_text_classification(api.client, dataset, n=expected_data)
     ds = api.load(name=dataset, ids=[3, 5])
     assert len(ds) == 2
 
@@ -778,7 +777,6 @@ def test_load_with_query(api: Argilla):
         api.client,
         dataset,
         n=expected_data,
-        with_vectors=SUPPORTED_VECTOR_SEARCH,
     )
     ds = api.load(name=dataset, query="id:1")
     ds = ds.to_pandas()
@@ -815,17 +813,16 @@ def test_load_as_pandas(api: Argilla):
         api.client,
         dataset,
         n=expected_data,
-        with_vectors=SUPPORTED_VECTOR_SEARCH,
     )
 
     records = api.load(name=dataset)
     assert isinstance(records, DatasetForTextClassification)
     assert isinstance(records[0], TextClassificationRecord)
 
-    if SUPPORTED_VECTOR_SEARCH:
-        for record in records:
-            for vector in record.vectors:
-                assert server_vectors_cfg[vector]["value"] == record.vectors[vector]
+
+    for record in records:
+        for vector in record.vectors:
+            assert server_vectors_cfg[vector]["value"] == record.vectors[vector]
 
 
 @pytest.mark.parametrize(
@@ -874,8 +871,7 @@ def test_load_text2text(api: Argilla):
             status="Default",
             event_timestamp=datetime.datetime(2000, 1, 1),
         )
-        if SUPPORTED_VECTOR_SEARCH:
-            record.vectors = vectors
+        record.vectors = vectors
         records.append(record)
 
     dataset = "test_load_text2text"
@@ -884,9 +880,8 @@ def test_load_text2text(api: Argilla):
 
     df = api.load(name=dataset)
     assert len(df) == 2
-    if SUPPORTED_VECTOR_SEARCH:
-        for record in df:
-            assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
+    for record in df:
+        assert record.vectors["bert_uncased"] == vectors["bert_uncased"]
 
 
 def test_client_workspace(api: Argilla, argilla_user: User):
