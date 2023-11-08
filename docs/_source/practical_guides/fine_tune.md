@@ -533,6 +533,23 @@ task = TrainingTask.for_sentence_similarity(
 )
 ```
 
+For datasets that where annotated with numerical values we could also pass the label strategy we want to use (let's assume we have another question in the dataset named "other-question" that contains values that come from rated answers):
+
+```python
+from argilla.feedback import RatingQuestionUnification
+
+label_strategy = RatingQuestionUnification(
+    question=dataset.question_by_name("other-question"),
+    strategy="majority"
+)
+
+task = TrainingTask.for_sentence_similarity(
+    texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
+    label=dataset.question_by_name("label"),
+    label_strategy=label_strategy
+)
+```
+
 :::
 
 :::{tab-item} formatting_func
