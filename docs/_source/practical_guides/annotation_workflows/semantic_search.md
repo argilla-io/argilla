@@ -32,7 +32,7 @@ Currently, Argilla uses vector search only for searching similar records (neares
 
 ## Setup vector search support
 
-In order to use this feature you should use Elasticsearch at least version `8.5.x`or Opensearch `2.2.0`. We provide pre-configured docker-compose files in the root of Argilla's [Github repository](https://github.com/argilla-io/argilla).
+In order to use this feature you should use Elasticsearch at least version `8.5.x`or Opensearch `2.4.0`. We provide pre-configured docker-compose files in the root of Argilla's [Github repository](https://github.com/argilla-io/argilla).
 
 ```{warning}
 If you had Argilla running with Elasticsearch 7.1.0 you need to migrate to at least version 8.5.x. Please check the section "[Migrating from Elasticsearch 7.1.0 to 8.5](#Migrate-from-7.1.0-to-8.5)".
