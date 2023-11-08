@@ -319,8 +319,12 @@ async def _filter_records_using_search_engine(
     )
 
     record_ids = [response.record_id for response in search_responses.items]
+    user_id = user.id if user else None
+
     return (
-        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, records_ids=record_ids, include=include),
+        await datasets.get_records_by_ids(
+            db=db, dataset_id=dataset.id, user_id=user_id, records_ids=record_ids, include=include
+        ),
         search_responses.total,
     )
 
