@@ -124,7 +124,7 @@ To use the similarity search in the UI and the Python SDK, you will need to conf
 - `title` (optional): A name for the vector to display in the UI for better readability.
 
 ```python
-vector_settings = [
+vectors_settings = [
     rg.VectorSettings(
         name="my_vector",
         dimensions=768
@@ -153,8 +153,8 @@ Once the scope of the project is defined, which implies knowing the `fields`, `q
 - `fields`: The list of fields to show in the record card. The order in which the fields will appear in the UI matches the order of this list.
 - `questions`: The list of questions to show in the form. The order in which the questions will appear in the UI matches the order of this list.
 - `metadata`(optional): The list of metadata properties included in this dataset.
-- `extra_metadata_properties` (optional): A boolean to specify whether this dataset will allow metadata fields in the records other than those specified under `metadata`. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
-- `vector_settings` (optional): A list of vector settings (up to 5) to use for similarity search.
+- `allow_extra_metadata` (optional): A boolean to specify whether this dataset will allow metadata fields in the records other than those specified under `metadata`. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
+- `vectors_settings` (optional): A list of vector settings (up to 5) to use for similarity search.
 - `guidelines` (optional): A set of guidelines for the annotators. These will appear in the dataset settings in the UI.
 
 If you haven't done so already, check the sections above to learn about each of them.
@@ -193,10 +193,10 @@ dataset = rg.FeedbackDataset(
         )
     ],
     allow_extra_metadata = False,
-    vectors=[
+    vectors_settings=[
         rg.VectorSettings(
             name="my_vectors",
-            dimensions=678,
+            dimensions=768,
             tite="My Vectors" #optional
         )
     ],
@@ -332,10 +332,10 @@ ds.add_vector_settings(rg.VectorSettings(name="my_new_vectors", dimensions=786))
 # Change vector settings title
 vector_cfg = ds.vector_settings_by_name("my_vector")
 vector_cfg.title = "Old vectors"
-ds.update_vector_settings(vector_cfg)
+ds.update_vectors_settings(vector_cfg)
 
 # Delete vector settings
-ds.delete_vector_settings("my_vectors")
+ds.delete_vectors_settings("my_vectors")
 ```
 :::
 
@@ -511,8 +511,6 @@ record = rg.FeedbackRecord(
 
 ::::
 
-
-
 #### Format `responses`
 
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include the `user_id` in case you're planning to add more than one response for the same question. You can only specify one response with an empty `user_id`: the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
@@ -685,6 +683,7 @@ dataset = rg.FeedbackDataset.from_argilla(name="my_dataset", workspace="my_works
 # Delete a specific record
 dataset.records[0].delete()
 ```
+
 :::
 
 :::{tab-item} Multiple records
@@ -698,6 +697,7 @@ records_to_delete = list(dataset.records[:5])
 # Delete the list of records from the dataset
 dataset.delete_records(records_to_delete)
 ```
+
 :::
 
 ::::
@@ -723,6 +723,7 @@ If you forget to define a labeling schema, Argilla will aggregate the labels it 
 ::::{tab-set}
 
 :::{tab-item} Text Classification
+
 ```python
 import argilla as rg
 
@@ -730,9 +731,11 @@ settings = rg.TextClassificationSettings(label_schema=["A", "B", "C"])
 
 rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
+
 :::
 
 :::{tab-item} Token Classification
+
 ```python
 import argilla as rg
 
@@ -740,6 +743,7 @@ settings = rg.TokenClassificationSettings(label_schema=["A", "B", "C"])
 
 rg.configure_dataset_settings(name="my_dataset", settings=settings)
 ```
+
 :::
 
 :::{tab-item} Text2Text
@@ -755,21 +759,21 @@ Because we do not require a labeling schema for `Text2Text`, we can create a dat
 The main component of the Argilla data model is called a record. A dataset in Argilla is a collection of these records.
 Records can be of different types depending on the currently supported tasks:
 
- 1. `TextClassificationRecord`
- 2. `TokenClassificationRecord`
- 3. `Text2TextRecord`
+1. `TextClassificationRecord`
+2. `TokenClassificationRecord`
+3. `Text2TextRecord`
 
 The most critical attributes of a record that are common to all types are:
 
- - `text`: The input text of the record (Required);
- - `annotation`: Annotate your record in a task-specific manner (Optional);
- - `prediction`: Add task-specific model predictions to the record (Optional);
- - `metadata`: Add some arbitrary metadata to the record (Optional);
+- `text`: The input text of the record (Required);
+- `annotation`: Annotate your record in a task-specific manner (Optional);
+- `prediction`: Add task-specific model predictions to the record (Optional);
+- `metadata`: Add some arbitrary metadata to the record (Optional);
 
 Some other cool attributes for a record are:
 
- - `vectors`: Input vectors to enable [semantic search](/practical_guides/annotate_dataset.md#semantic-search).
- - `explanation`: Token attributions for [highlighting text](/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
+- `vectors`: Input vectors to enable [semantic search](/practical_guides/annotate_dataset.md#semantic-search).
+- `explanation`: Token attributions for [highlighting text](/tutorials/notebooks/monitoring-textclassification-shaptransformersinterpret-explainability).
 
 In Argilla, records are created programmatically using the [client library](/reference/python/python_client.rst) within a Python script, a [Jupyter notebook](https://jupyter.org/), or another IDE.
 
@@ -1022,18 +1026,22 @@ You can delete records by passing their `id` into the `rg.delete_records()` func
 ::::{tab-set}
 
 :::{tab-item} Delete by id
+
 ```python
 ## Delete by id
 import argilla as rg
 rg.delete_records(name="example-dataset", ids=[1,3,5])
 ```
+
 :::
 :::{tab-item} Delete by query
+
 ```python
 ## Discard records by query
 import argilla as rg
 rg.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
 ```
+
 :::
 ::::
 

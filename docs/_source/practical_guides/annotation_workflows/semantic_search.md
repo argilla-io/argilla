@@ -287,7 +287,9 @@ In order to get good results, make sure you are using the same encoder model for
 ```
 
 ::::{tab-set}
+
 :::{tab-item} Sentence Transformers
+
 ```python
 from sentence_transformers import SentenceTransformer
 
@@ -295,28 +297,38 @@ encoder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
 
 vector = encoder.encode("I lost my credit card. What should I do?").tolist()
 ```
+
 :::
+
 :::{tab-item} OpenAI Embeddings
+
 ```python
 vector = openai.Embedding.create(
     input = ["I lost my credit card. What should I do?"],
     model="text-similarity-ada-001"
 )["data"][0]["embedding"]
 ```
+
 :::
-:::{tab-item}co:here `co.Embed`
+
+:::{tab-item} co.here co.Embed
+
 ```python
 vector = co.embed(["I lost my credit card. What should I do?"], model="small").embeddings[0]
 ```
+
 :::
+
 ::::
 
 Now that we have our reference vector, we can do a semantic search in the Python SDK:
 
 ::::{tab-set}
+
 :::{tab-item} FeedbackDataset
-The use of the semantich search in Feedback Datasets is explained in detail [here](../filter_dataset.md#semantic-search).
+The use of the semantich search in Feedback Datasets is explained in detail [here](/practical_guides/filter_dataset.md#semantic-search).
 :::
+
 :::{tab-item} Older datasets
 The `rg.load` method includes a `vector` parameter which can be used to retrieve similar records to a given vector, and a `limit` parameter to indicate the number of records to be retrieved. This parameter accepts a tuple with the key of the target vector (this should match with one of the keys of the `vectors` dictionary) and the query vector itself.
 
@@ -331,4 +343,5 @@ ds = rg.load(
 )
 ```
 :::
+
 ::::

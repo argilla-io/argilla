@@ -34,7 +34,6 @@ These are the arguments that you will need to define for your filter:
 - `le`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values lower than or equal to the provided value. At least one of `ge` or `le` should be provided.
 - `values`: In a `TermsMetadataFilter`, returns records with at least one of the values provided.
 
-
 ```python
 import argilla as rg
 
@@ -135,6 +134,8 @@ In the Python SDK, you can also get a list of records that are semantically clos
 - `record`: A `FeedbackRecord` to use as part of the search. It is necessary to include a `value` **or** a `record`.
 - `max_results` (optional): The maximum number of results for this search. The default is `50`.
 
+This returns a list of Tuples with the records and their similarity score (between 0 and 1).
+
 ```python
 ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
 
@@ -142,6 +143,7 @@ ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
 similar_records =  ds.find_similar_records(
     vector_name="my_vector",
     value=embedder_model.embeddings("My text is here")
+    # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
 )
 
 # using another record
@@ -150,10 +152,18 @@ similar_records =  ds.find_similar_records(
     record=ds.records[0],
     max_results=5
 )
+
+# work with the resulting tuples
+for record, score in similar_records:
+    ...
 ```
 
-```{tip}
-You can also combine filters and semantic search: `dataset.filter_by(...).find_similar_records(...)`
+You can also combine filters and semantic search like this: `dataset.filter_by(...).find_similar_records(...)`
+```python
+( dataset
+   .filter_by(metadata=[rg.TermsMetadataFilter(values=["Positive"])])
+   .find_similar_records(vector_name="vector", value=model.encode("Another text").tolist())
+)
 ```
 
 ## Other datasets
