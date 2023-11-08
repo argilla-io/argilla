@@ -72,7 +72,8 @@ These are the section headers that we use:
 
 - Fixed svg images out of screen with too large images ([#4047](https://github.com/argilla-io/argilla/pull/4047))
 - Fixed creating records with responses from multiple users. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#4142](https://github.com/argilla-io/argilla/pull/4142))
-
+- Fixed deleting or updating responses as an owner for annotators. (Commit [403a66d](https://github.com/argilla-io/argilla/commit/403a66d16d816fa8a62e3f76314ccc90e0073297))
+- Fixed passing user_id when getting records by id. (Commit [98c7927](https://github.com/argilla-io/argilla/commit/98c792757a21da05bac89b7f625e7e5792ad59f9))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
