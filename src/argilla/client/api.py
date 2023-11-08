@@ -14,6 +14,7 @@
 #  limitations under the License.
 
 import asyncio
+import logging
 import warnings
 from asyncio import Future
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -481,30 +482,11 @@ def active_client() -> Argilla:
 
 
 def whoami() -> None:
-    # Check the current user on the Argilla Server
+    """Check the current user on the Argilla Server"""
 
-    from rich import print as rprint
-    from rich.markdown import Markdown
-
-    user = active_client()._user
-
-    first_name = user.first_name if user.first_name != "" else None
-    ws_ds_dictionary = {}
-    for work_space in user.workspaces:
-        ws_ds_dictionary[work_space] = [ds.name for ds in list_datasets() if ds.workspace == work_space]
-
-    rprint(
-        Markdown(
-            f"- **Username**: {user.username}\n"
-            f"- **Role**: {user.role}\n"
-            f"- **First name**: {first_name}\n"
-            f"- **Last name**: {user.last_name}\n"
-            f"- **API Key**: ***\n"
-            f"- **Workspaces**: {user.workspaces}\n"
-            f"- **Datasets**: {list((ws, ws_ds_dictionary[ws]) for ws in ws_ds_dictionary.keys())}\n"
-            f"- **Updated at**: {user.updated_at}"
-        )
-    )
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.info(active_client())
 
 
 active_api = active_client  # backward compatibility

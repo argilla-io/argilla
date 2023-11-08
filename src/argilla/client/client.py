@@ -182,7 +182,7 @@ class Argilla:
                 if ds.workspace == work_space
             ]
 
-        return f"ArgillaClient(\n\tusername='{user.username}',\n\trole='{user.role}', \n\tfirst_name='{first_name}', \n\tlast_name='{user.last_name}', \n\tapi_key='***', \n\tworkspaces={user.workspaces}, \n\tdatasets={ws_ds_dictionary}, \n\tupdated_at='{user.updated_at}'\n)"
+        return f"ArgillaClient(\n\tusername='{user.username}',\n\trole='{user.role}', \n\tfirst_name='{first_name}', \n\tlast_name='{user.last_name}', \n\tpassword='***', \n\tapi_key='***', \n\tworkspaces={user.workspaces}, \n\tdatasets={ws_ds_dictionary}, \n\tupdated_at='{user.updated_at}'\n)"
 
     def _check_argilla_versions(self):
         from argilla import __version__ as rg_version
