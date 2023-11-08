@@ -166,10 +166,10 @@ $filters-inline-min-width: 540px;
       background: none;
       &,
       :deep(.button) {
-        color: palette(purple, 200);
+        color: $primary-color;
       }
       &:hover {
-        background: palette(purple, 400);
+        background: lighten($primary-color, 44%);
       }
     }
   }

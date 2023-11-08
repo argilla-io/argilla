@@ -197,7 +197,7 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: $base-space;
     height: 100%;
     min-width: 0;
   }
