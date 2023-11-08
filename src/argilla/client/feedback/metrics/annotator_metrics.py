@@ -112,7 +112,7 @@ class AnnotatorMetric:
                 result = metric.compute(**kwargs)
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
-        return metrics
+        return dict(metrics)
 
 
 class AnnotatorMetricResult(BaseModel):
