@@ -318,10 +318,9 @@ class ArgillaMixin:
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
         )
-
         logging.basicConfig(level=logging.INFO)
         logging.info("\033[1;32m✓ Dataset succesfully pushed to Argilla\033[1;0m")
-        print(remote_feedback_dataset)
+        logging.info(remote_feedback_dataset)
         return remote_feedback_dataset
 
     @staticmethod
