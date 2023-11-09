@@ -16,7 +16,7 @@
           <StatusTag class="fields__status" :recordStatus="record.status" />
         </div>
         <div class="fields__header--right">
-          <BaseHalfCircleProgress
+          <SimilarityScorePercentage
             v-if="
               recordCriteria.isFilteredBySimilarity && record.score.percentage
             "
@@ -24,8 +24,7 @@
             :value="record.score.percentage"
             :data-title="$t('similarityScore')"
           >
-            <svgicon name="similarity" width="30" height="30" />
-          </BaseHalfCircleProgress>
+          </SimilarityScorePercentage>
           <SimilarityFilter
             v-if="datasetVectors?.length"
             :availableVectors="datasetVectors"
