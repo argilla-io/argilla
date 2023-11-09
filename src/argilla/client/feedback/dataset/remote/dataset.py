@@ -538,6 +538,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             + textwrap.indent(f"\nfields={self.fields}", indent)
             + textwrap.indent(f"\nquestions={self.questions}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
+            + textwrap.indent(f"\nguidelines={self.metadata_properties}", indent)
             + ")"
         )
 
