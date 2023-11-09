@@ -1,4 +1,5 @@
 import { Field } from "../entities/field/Field";
+import { Question } from "../entities/question/Question";
 import { Record } from "../entities/record/Record";
 import { Suggestion } from "../entities/question/Suggestion";
 import { IRecordStorage } from "../services/IRecordStorage";
@@ -78,7 +79,7 @@ export class LoadRecordsToAnnotateUseCase {
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
-    const [recordsFromBackend, questions, fieldsFromBackend] =
+    const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
 
     const recordsToAnnotate = recordsFromBackend.records.map(
@@ -100,6 +101,18 @@ export class LoadRecordsToAnnotateUseCase {
               field.settings
             );
           });
+
+        const questions = questionsFromBackend.map((question) => {
+          return new Question(
+            question.id,
+            question.name,
+            question.description,
+            datasetId,
+            question.title,
+            question.required,
+            question.settings
+          );
+        });
 
         const userAnswer = record.responses[0];
         const answer = userAnswer

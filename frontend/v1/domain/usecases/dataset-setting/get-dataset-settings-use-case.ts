@@ -1,6 +1,7 @@
 import { DatasetSetting } from "../../entities/DatasetSetting";
 import { Field } from "../../entities/field/Field";
 import { Metadata } from "../../entities/metadata/Metadata";
+import { Question } from "../../entities/question/Question";
 import { Vector } from "../../entities/vector/Vector";
 import { IDatasetRepository } from "../../services/IDatasetRepository";
 import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
@@ -55,7 +56,7 @@ export class GetDatasetSettingsUseCase {
 
     const [
       dataset,
-      questions,
+      backendQuestions,
       backendFields,
       backendVectors,
       backendMetadataProperties,
@@ -66,6 +67,18 @@ export class GetDatasetSettingsUseCase {
       getVectors,
       getMetadataProperties,
     ]);
+
+    const questions = backendQuestions.map((question) => {
+      return new Question(
+        question.id,
+        question.name,
+        question.description,
+        datasetId,
+        question.title,
+        question.required,
+        question.settings
+      );
+    });
 
     const fields = backendFields.map((field) => {
       return new Field(

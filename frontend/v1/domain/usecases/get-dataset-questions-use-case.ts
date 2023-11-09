@@ -4,7 +4,21 @@ import { QuestionRepository } from "~/v1/infrastructure/repositories";
 export class GetDatasetQuestionsUseCase {
   constructor(private readonly questionRepository: QuestionRepository) {}
 
-  execute(datasetId: string): Promise<Question[]> {
-    return this.questionRepository.getQuestions(datasetId);
+  async execute(datasetId: string): Promise<Question[]> {
+    const backendQuestions = await this.questionRepository.getQuestions(
+      datasetId
+    );
+
+    return backendQuestions.map((question) => {
+      return new Question(
+        question.id,
+        question.name,
+        question.description,
+        datasetId,
+        question.title,
+        question.required,
+        question.settings
+      );
+    });
   }
 }

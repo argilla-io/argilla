@@ -10,23 +10,13 @@ export const enum QUESTION_API_ERRORS {
 export class QuestionRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  async getQuestions(datasetId: string): Promise<Question[]> {
+  async getQuestions(datasetId: string): Promise<BackendQuestion[]> {
     try {
       const { data } = await this.axios.get<Response<BackendQuestion[]>>(
         `/v1/datasets/${datasetId}/questions`
       );
 
-      return data.items.map((question) => {
-        return new Question(
-          question.id,
-          question.name,
-          question.description,
-          datasetId,
-          question.title,
-          question.required,
-          question.settings
-        );
-      });
+      return data.items;
     } catch (err) {
       throw {
         response: QUESTION_API_ERRORS.GET_QUESTIONS,
