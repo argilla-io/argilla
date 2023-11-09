@@ -1,48 +1,32 @@
 <template>
-  <div
-    class="responses-filter"
-    v-if="!!questionFilters && questionFilters.questions"
-  >
-    <BaseDropdown
-      :visible="visibleDropdown"
-      @visibility="onResponsesToggleVisibility"
-    >
+  <div class="responses-filter" v-if="!!datasetQuestions">
+    <BaseDropdown :visible="visibleDropdown" @visibility="onToggleVisibility">
       <span slot="dropdown-header">
         <FilterButtonWithBadges
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
-          :active-badge="visibleCategory"
-          @click-on-badge="openCategoryFilter"
-          @click-on-clear="removeCategoryFilters"
-          @click-on-clear-all="clearAllCategories"
+          :active-badge="selectedResponse"
+          @click-on-badge="openResponseFilter"
+          @click-on-clear="clearResponseFilter"
+          @click-on-clear-all="clearAllResponseFilter"
           :name="$t('responses')"
         />
       </span>
-      <span
-        v-if="!!questionFilters"
-        slot="dropdown-content"
-        class="responses-filter__container"
-      >
+      <span slot="dropdown-content" class="responses-filter__container">
         <CategoriesSelector
-          v-if="!visibleCategory"
+          v-if="!selectedResponse"
           class="responses-filter__categories"
           :categories="questionFilters.questions"
           name="metadataCategories"
-          @select-category="selectCategory"
+          @select-category="selectResponse"
         />
         <template v-else>
-          <div class="responses-filter__header" @click="selectCategory(null)">
-            <span v-text="visibleCategory.title" />
+          <div class="responses-filter__header" @click="selectResponse(null)">
+            <span v-text="selectedResponse.title" />
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="responses-filter__content">
-            <LabelsSelector
-              v-if="visibleCategory.isTerms"
-              :filter="visibleCategory"
-            />
-            <div v-else>
-              <RangeSelector :filter="visibleCategory" />
-            </div>
+            <LabelsSelector :filter="selectedResponse" />
           </div>
         </template>
       </span>
@@ -60,103 +44,34 @@ export default {
       type: Array,
       required: true,
     },
-    questionFiltered: {
-      type: Array,
-      required: true,
-    },
-  },
-  model: {
-    prop: "questionFiltered",
-    event: "onquestionFilteredChanged",
   },
   data() {
     return {
       visibleDropdown: false,
-      visibleCategory: null,
-      selectedOptions: [],
-      appliedCategoriesFilters: [],
+      selectedResponse: null,
     };
   },
   methods: {
-    onResponsesToggleVisibility(value) {
+    onToggleVisibility(value) {
       this.visibleDropdown = value;
-      this.visibleCategory = null;
+      this.selectedResponse = null;
     },
-    selectCategory(category) {
-      this.visibleCategory = category;
+    selectResponse(response) {
+      this.selectedResponse = response;
     },
-    applyFilter() {
-      this.visibleDropdown = false;
-
-      this.filter();
-    },
-    filter() {
-      if (!this.questionFilters.hasChangesSinceLatestCommit) return;
-
-      const newFilter = this.questionFilters.commit();
-
-      this.$emit("onquestionFilteredChanged", newFilter);
-
-      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
-    },
-    openCategoryFilter(category) {
+    openResponseFilter(response) {
       this.visibleDropdown = this.visibleDropdown
-        ? category !== this.visibleCategory
+        ? response !== this.selectedResponse
         : true;
 
-      this.selectCategory(category);
+      this.selectResponse(response);
     },
-    removeCategoryFilters(category) {
-      category.clear();
-
-      this.applyFilter();
+    clearResponseFilter() {
+      this.$emit("remove-suggestion-filter");
     },
-    clearAllCategories(categories) {
-      categories.forEach((category) => {
-        category.clear();
-      });
-
-      this.applyFilter();
+    clearAllResponseFilter() {
+      this.$emit("clear-all-suggestion-filter");
     },
-    updateAppliedCategoriesFromMetadataFilter() {
-      if (!this.questionFilters) return;
-
-      // this.questionFilters.initializeWith(this.questionFiltered);
-
-      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
-    },
-  },
-  watch: {
-    visibleDropdown() {
-      if (!this.visibleDropdown) {
-        this.debounce.stop();
-
-        this.filter();
-      }
-    },
-    "questionFilters.categories": {
-      deep: true,
-      async handler() {
-        this.debounce.stop();
-
-        await this.debounce.wait();
-
-        this.filter();
-      },
-    },
-    questionFiltered() {
-      if (
-        !this.questionFilters.hasChangesSinceLatestCommitWith(
-          this.questionFiltered
-        )
-      )
-        return;
-
-      this.updateAppliedCategoriesFromMetadataFilter();
-    },
-  },
-  created() {
-    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useResponseFilterViewModel(props);

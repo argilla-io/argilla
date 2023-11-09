@@ -1,18 +1,9 @@
+import { OptionForFilter, RangeValue } from "../common/Filter";
 import { Metadata } from "./Metadata";
-
-export interface OptionForFilter {
-  selected: boolean;
-  label: string;
-}
-interface RangeValue {
-  ge?: number;
-  le?: number;
-}
 
 class MetadataFilter {
   public value: RangeValue;
   public options: OptionForFilter[] = [];
-
   constructor(private metadata: Metadata) {
     if (this.isTerms) {
       this.options =

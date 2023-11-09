@@ -1,49 +1,24 @@
-import { OptionForFilter } from "../metadata/MetadataFilter";
+import { FilterWithOption, FilterWithScore } from "../common/Filter";
 import { Question } from "../question/Question";
 
-interface IConfiguration {
-  name: string;
-}
-
-class ConfigurationValues implements IConfiguration {
-  public options: OptionForFilter[] = [];
-
+class ConfigurationValues extends FilterWithOption {
   constructor(
     public readonly question: Question,
     public operator: "and" | "or" = "and"
   ) {
-    this.options =
-      this.question.settings.options?.map((value) => {
-        return { selected: false, label: value.value.toString() };
-      }) ?? [];
-  }
-
-  get name(): string {
-    return "values";
-  }
-
-  public filterByText(text: string) {
-    return this.options.filter((option) =>
-      option.label.toLowerCase().includes(text.toLowerCase())
+    super(
+      "values",
+      "Values",
+      question.settings.options.map(({ value }) => {
+        return { selected: false, label: value.toString() };
+      })
     );
-  }
-
-  public get selectedOptions(): OptionForFilter[] {
-    return this.options.filter((option) => option.selected);
   }
 }
 
-class ConfigurationScore implements IConfiguration {
-  public readonly value: any;
+class ConfigurationScore extends FilterWithScore {
   constructor(public readonly min: number, public readonly max: number) {
-    this.value = {
-      ge: min,
-      le: max,
-    };
-  }
-
-  get name(): string {
-    return "score";
+    super("score", "Score", min, max);
   }
 
   get isInteger(): boolean {
@@ -58,28 +33,15 @@ class ConfigurationScore implements IConfiguration {
   }
 }
 
-class ConfigurationAgent implements IConfiguration {
-  public options: OptionForFilter[] = [];
-
-  constructor(public readonly agents: string[]) {
-    this.options =
-      this.agents.map((value) => {
+class ConfigurationAgent extends FilterWithOption {
+  constructor(agents: string[]) {
+    super(
+      "agent",
+      "Agent",
+      agents.map((value) => {
         return { selected: false, label: value };
-      }) ?? [];
-  }
-
-  get name(): string {
-    return "agent";
-  }
-
-  public filterByText(text: string) {
-    return this.options.filter((option) =>
-      option.label.toLowerCase().includes(text.toLowerCase())
+      })
     );
-  }
-
-  public get selectedOptions(): OptionForFilter[] {
-    return this.options.filter((option) => option.selected);
   }
 }
 

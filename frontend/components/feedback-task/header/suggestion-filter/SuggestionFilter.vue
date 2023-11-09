@@ -7,7 +7,7 @@
           :badges="appliedCategoriesFilters"
           :active-badge="selectedSuggestion"
           @click-on-badge="openSuggestionFilter"
-          @click-on-clear="removeSuggestionFilter"
+          @click-on-clear="clearSuggestionFilter"
           @click-on-clear-all="clearAllSuggestionFilter"
           :name="$t('suggestions')"
         />
@@ -97,12 +97,12 @@ export default {
     },
     openSuggestionFilter(suggestion) {
       this.visibleDropdown = this.visibleDropdown
-        ? category !== this.selectedSuggestion
+        ? suggestion !== this.selectedSuggestion
         : true;
 
       this.selectCategory(suggestion);
     },
-    removeSuggestionFilter() {
+    clearSuggestionFilter() {
       this.$emit("remove-suggestion-filter");
     },
     clearAllSuggestionFilter() {
