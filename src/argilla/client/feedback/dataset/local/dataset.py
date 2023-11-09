@@ -214,7 +214,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         return (
             "FeedbackDataset("
             + textwrap.indent(
-                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines})\nguidelines={self.metadata_properties})",
+                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines})\nmetadata_properties={self.metadata_properties})",
                 "    ",
             )
             + "\n)"
