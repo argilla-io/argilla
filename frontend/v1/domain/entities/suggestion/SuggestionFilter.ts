@@ -50,7 +50,7 @@ class SuggestionFilter extends Filter {
 
     this.configurations.push(new ConfigurationScore(10, 90));
     this.configurations.push(new ConfigurationValues(question));
-    this.configurations.push(new ConfigurationAgent(["Test", "Test2"]));
+    this.configurations.push(new ConfigurationAgent(["model", "human"]));
   }
 
   get name() {
