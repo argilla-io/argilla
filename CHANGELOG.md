@@ -68,6 +68,7 @@ These are the section headers that we use:
 - [breaking] `limit` query parameter for `GET /api/v1/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - [breaking] `limit` query parameter for `GET /api/v1/me/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - Now client class `DatasetConfig` is setting `use_enum_values` config value to `True`. Closes [#4089](https://github.com/argilla-io/argilla/issues/4089) ([#4172](https://github.com/argilla-io/argilla/pull/4172))
+- [breaking] Remove support for Elasticsearch < 8.5 and OpenSearch < 2.4. ()
 
 ### Fixed
 

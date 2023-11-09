@@ -22,8 +22,6 @@ from argilla.server.daos.backend.search.model import BaseQuery, SortConfig
 
 @dataclasses.dataclass
 class IClientAdapter(metaclass=ABCMeta):
-    vector_search_supported: bool
-
     @abstractmethod
     def get_cluster_info(self) -> Dict[str, Any]:
         """Returns basic about es cluster"""
