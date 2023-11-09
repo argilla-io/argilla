@@ -15,7 +15,7 @@
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
-<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
+<a  href="https://huggingface.co/new-space?template=Argilla">
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
 </a>
 </p>

@@ -3,7 +3,7 @@
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
 ```{warning}
-HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
+HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the [HuggingFace Spaces settings](https://huggingface.co/docs/hub/spaces-storage#persistent-storage). Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 ```
 
 In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
@@ -16,11 +16,11 @@ In this section, you'll learn to deploy an Argilla Space and use it for data ann
 
 You can deploy Argilla on Spaces with just a few clicks:
 
-<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
+<a  href="https://huggingface.co/new-space?template=Argilla">
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to set up the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
+You need to define the **Owner** (your personal account or an organization), a **Space name**, the Space SDK (Docker with the template Argilla) and the **Visibility**. To interact with the Argilla app with Python, you need to set up the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
 
 <div class="flex justify-center">
 <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-new-space.png"/>
