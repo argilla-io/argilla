@@ -126,7 +126,7 @@ def formatting_func_sentence_transformers(sample: dict):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 2},
             ]
 
 
@@ -180,7 +180,7 @@ def formatting_func_sentence_transformers_case_3_a(sample):
         elif labels[0] == "b":
             return {"sentence": sample["text"], "label": 1}
         elif labels[0] == "c":
-            return [{"sentence": sample["text"], "label": 1}, {"sentence": sample["text"], "label": 0}]
+            return [{"sentence": sample["text"], "label": 1}, {"sentence": sample["text"], "label": 2}]
 
 
 def formatting_func_sentence_transformers_case_3_b(sample):
@@ -202,7 +202,7 @@ def formatting_func_sentence_transformers_case_3_b(sample):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 2},
             ]
 
 
@@ -219,6 +219,17 @@ def formatting_func_sentence_transformers_case_4(sample):
             return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}
         elif labels[0] == "c":
             return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}] * 2
+
+
+def formatting_func_sentence_transformers_rating_question(sample: dict):
+    # Formatting function to test the RatingQuestion
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-2"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": labels[0]}
 
 
 def model_card_pattern(framework: Framework, training_task: Any) -> str:
@@ -277,7 +288,7 @@ def formatting_func_sentence_transformers(sample: dict):
         elif labels[0] == "c":
             return [
                 {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
+                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 2},
             ]
 
 task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
