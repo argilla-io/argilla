@@ -38,24 +38,24 @@ class MetadataFilter {
     return this.metadata.hasValues;
   }
 
-  public filterByText(text: string) {
+  filterByText(text: string) {
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(text.toLowerCase())
     );
   }
 
-  public get isAnswered(): boolean {
+  get isAnswered(): boolean {
     return this.isTerms
       ? this.selectedOptions.length > 0
       : this.value.ge !== this.settings.min ||
           this.value.le !== this.settings.max;
   }
 
-  public get selectedOptions(): OptionForFilter[] {
+  get selectedOptions(): OptionForFilter[] {
     return this.options.filter((option) => option.selected);
   }
 
-  public completeMetadata(value: string) {
+  completeMetadata(value: string) {
     if (this.isTerms) {
       value.split(",").forEach((label) => {
         const option = this.options.find((option) => option.label === label);
