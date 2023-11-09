@@ -1,38 +1,70 @@
 <template>
-  <div>
-    <h2>Suggestions</h2>
-    <div v-if="!secondSection.length">
-      <div v-for="question in questionFilters.questions">
-        <p @click="changeToSecondSection(question)">{{ question.name }}</p>
-      </div>
-    </div>
-    <div v-else>
-      <div v-if="!thirdSection">
-        <div v-for="config in secondSection">
-          <p @click="changeToThirdSection(config)">{{ config.id }}</p>
-        </div>
-      </div>
-      <div v-else>
-        <div v-if="thirdSection.id === 'values'">
-          {{ thirdSection.question.settings.type }}
-          <div v-for="answer in thirdSection.question.answer.values">
-            <p>{{ answer }}</p>
+  <div class="suggestion-filter" v-if="!!datasetQuestions">
+    <BaseDropdown :visible="visibleDropdown" @visibility="onToggleVisibility">
+      <span slot="dropdown-header">
+        <FilterButtonWithBadges
+          :is-active="visibleDropdown"
+          :badges="appliedCategoriesFilters"
+          :active-badge="selectedSuggestion"
+          @click-on-badge="openSuggestionFilter"
+          @click-on-clear="removeSuggestionFilter"
+          @click-on-clear-all="clearAllSuggestionFilter"
+          :name="$t('suggestions')"
+        />
+      </span>
+      <span slot="dropdown-content" class="suggestion-filter__container">
+        <CategoriesSelector
+          v-if="!selectedSuggestion"
+          name="suggestions"
+          class="suggestion-filter__categories"
+          :categories="questionFilters.questions"
+          @select-category="selectSuggestion"
+        />
+        <template v-else>
+          <div
+            v-if="!selectedConfiguration"
+            class="suggestion-filter__header"
+            @click="selectSuggestion(null)"
+          >
+            <span v-text="selectedSuggestion.title" />
+            <svgicon name="chevron-left" width="12" height="12" />
           </div>
-          <div v-for="conditional in thirdSection.conditionals">
-            <b>{{ conditional }}</b>
+          <div>
+            <CategoriesSelector
+              v-if="!selectedConfiguration"
+              name="suggestionsConfiguration"
+              class="suggestion-filter__categories"
+              :categories="selectedSuggestion.configurations"
+              @select-category="selectConfiguration"
+            />
+            <template v-else>
+              <div
+                class="suggestion-filter__header"
+                @click="selectConfiguration(null)"
+              >
+                <span
+                  >{{ $t(selectedConfiguration.name) }} - ({{
+                    selectedSuggestion.title
+                  }})</span
+                >
+                <svgicon name="chevron-left" width="12" height="12" />
+              </div>
+              <div class="suggestion-filter__content">
+                <div v-if="selectedConfiguration.name === 'values'">
+                  <LabelsSelector :filter="selectedConfiguration" />
+                </div>
+                <div v-if="selectedConfiguration.name === 'score'">
+                  <RangeSelector :filter="selectedConfiguration" />
+                </div>
+                <div v-if="selectedConfiguration.name === 'agent'">
+                  <LabelsSelector :filter="selectedConfiguration" />
+                </div>
+              </div>
+            </template>
           </div>
-        </div>
-        <div v-if="thirdSection.id === 'score'">
-          <p>{{ thirdSection.min }}</p>
-          <p>{{ thirdSection.max }}</p>
-        </div>
-        <div v-if="thirdSection.id === 'agent'">
-          <div v-for="agent in thirdSection.agents">
-            <p>{{ agent }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+        </template>
+      </span>
+    </BaseDropdown>
   </div>
 </template>
 <script>
@@ -47,16 +79,34 @@ export default {
   },
   data() {
     return {
-      secondSection: [],
-      thirdSection: null,
+      visibleDropdown: false,
+      selectedSuggestion: null,
+      selectedConfiguration: null,
     };
   },
   methods: {
-    changeToSecondSection(question) {
-      this.secondSection = question.configurations;
+    onToggleVisibility(value) {
+      this.visibleDropdown = value;
+      this.selectedSuggestion = null;
     },
-    changeToThirdSection(config) {
-      this.thirdSection = config;
+    selectSuggestion(suggestion) {
+      this.selectedSuggestion = suggestion;
+    },
+    selectConfiguration(configuration) {
+      this.selectedConfiguration = configuration;
+    },
+    openSuggestionFilter(suggestion) {
+      this.visibleDropdown = this.visibleDropdown
+        ? category !== this.selectedSuggestion
+        : true;
+
+      this.selectCategory(suggestion);
+    },
+    removeSuggestionFilter() {
+      this.$emit("remove-suggestion-filter");
+    },
+    clearAllSuggestionFilter() {
+      this.$emit("clear-all-suggestion-filter");
     },
   },
   setup(props) {
@@ -64,3 +114,42 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+$suggestion-filter-width: 300px;
+.suggestion-filter {
+  &__container {
+    display: block;
+    width: $suggestion-filter-width;
+  }
+  &__header {
+    display: flex;
+    gap: $base-space;
+    align-items: center;
+    justify-content: space-between;
+    padding: $base-space $base-space * 2;
+    cursor: pointer;
+    &:hover {
+      background: $black-4;
+    }
+  }
+  &__content {
+    padding: $base-space;
+  }
+  &__categories {
+    padding: $base-space;
+    background: palette(white);
+    border-radius: $border-radius;
+  }
+  &__button.button {
+    padding: 10px;
+  }
+  :deep(.dropdown__header:hover) {
+    background: none;
+  }
+  :deep(.dropdown__content) {
+    right: auto;
+    left: 0;
+  }
+}
+</style>

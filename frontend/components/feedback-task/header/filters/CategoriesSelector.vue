@@ -14,8 +14,12 @@
         <BaseButton
           @on-click="selectCategory(category)"
           class="category__item"
-          :disabled="!category.canFilter"
-          ><span>{{ category.title }}</span>
+          :disabled="
+            category.hasOwnProperty('canFilter') && !category.canFilter
+          "
+        >
+          <span v-if="!!category.title">{{ category.title }}</span>
+          <span v-else>{{ $t(category.name) }}</span>
           <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>
@@ -42,9 +46,10 @@ export default {
   },
   computed: {
     categoriesFilteredBySearchText() {
-      return this.categories.filter((cat) =>
-        cat.title.toLowerCase().includes(this.searchText.toLowerCase())
-      );
+      return this.categories.filter((cat) => {
+        const filterProp = cat.title ?? this.$t(cat.name);
+        return filterProp.toLowerCase().includes(this.searchText.toLowerCase());
+      });
     },
   },
   methods: {

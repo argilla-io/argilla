@@ -1,6 +1,6 @@
 import { Metadata } from "./Metadata";
 
-interface OptionForFilter {
+export interface OptionForFilter {
   selected: boolean;
   label: string;
 }

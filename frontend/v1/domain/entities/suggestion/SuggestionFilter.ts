@@ -1,33 +1,85 @@
+import { OptionForFilter } from "../metadata/MetadataFilter";
 import { Question } from "../question/Question";
 
 interface IConfiguration {
-  id: string;
+  name: string;
 }
 
 class ConfigurationValues implements IConfiguration {
-  constructor(public readonly question: Question) {}
-  get id(): string {
+  public options: OptionForFilter[] = [];
+
+  constructor(
+    public readonly question: Question,
+    public operator: "and" | "or" = "and"
+  ) {
+    this.options =
+      this.question.settings.options?.map((value) => {
+        return { selected: false, label: value.value.toString() };
+      }) ?? [];
+  }
+
+  get name(): string {
     return "values";
   }
 
-  get conditionals(): string[] {
-    return ["and", "or"];
+  public filterByText(text: string) {
+    return this.options.filter((option) =>
+      option.label.toLowerCase().includes(text.toLowerCase())
+    );
+  }
+
+  public get selectedOptions(): OptionForFilter[] {
+    return this.options.filter((option) => option.selected);
   }
 }
 
 class ConfigurationScore implements IConfiguration {
-  constructor(public readonly min: number, public readonly max: number) {}
+  public readonly value: any;
+  constructor(public readonly min: number, public readonly max: number) {
+    this.value = {
+      ge: min,
+      le: max,
+    };
+  }
 
-  get id(): string {
+  get name(): string {
     return "score";
+  }
+
+  get isInteger(): boolean {
+    return true;
+  }
+
+  get settings() {
+    return {
+      min: this.min,
+      max: this.max,
+    };
   }
 }
 
 class ConfigurationAgent implements IConfiguration {
-  constructor(public readonly agents: string[]) {}
+  public options: OptionForFilter[] = [];
 
-  get id(): string {
+  constructor(public readonly agents: string[]) {
+    this.options =
+      this.agents.map((value) => {
+        return { selected: false, label: value };
+      }) ?? [];
+  }
+
+  get name(): string {
     return "agent";
+  }
+
+  public filterByText(text: string) {
+    return this.options.filter((option) =>
+      option.label.toLowerCase().includes(text.toLowerCase())
+    );
+  }
+
+  public get selectedOptions(): OptionForFilter[] {
+    return this.options.filter((option) => option.selected);
   }
 }
 
