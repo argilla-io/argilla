@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 
+from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric, AgreementMetricResult
 from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, AnnotatorMetricResult
 
-__all__ = ["AnnotatorMetric", "AnnotatorMetricResult"]
+__all__ = ["AnnotatorMetric", "AnnotatorMetricResult", "AgreementMetric", "AgreementMetricResult"]
