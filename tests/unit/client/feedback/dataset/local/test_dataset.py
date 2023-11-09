@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 from typing import TYPE_CHECKING, List, Type
 
 import numpy.array_api
@@ -405,7 +406,7 @@ def test_init(
     assert dataset.guidelines == feedback_dataset_guidelines
     assert dataset.fields == feedback_dataset_fields
     assert dataset.questions == feedback_dataset_questions
-    assert dataset.allow_extra_metadata == False
+    assert dataset.allow_extra_metadata is False
 
 
 def test_init_wrong_guidelines(
@@ -552,3 +553,16 @@ def test_properties_by_name() -> None:
     assert isinstance(dataset.field_by_name("required-field"), TextField)
     assert isinstance(dataset.question_by_name("question"), TextQuestion)
     assert isinstance(dataset.metadata_property_by_name("terms-metadata"), TermsMetadataProperty)
+
+
+def test_repr() -> None:
+    indent = "   "
+    ds = FeedbackDataset.for_text_classification(labels=["pos", "neg"], guidelines=None)
+    assert repr(ds) == (
+        "FeedbackDataset("
+        + textwrap.indent(f"\nfields={ds.fields}", indent)
+        + textwrap.indent(f"\nquestions={ds.questions}", indent)
+        + textwrap.indent(f"\nmetadata_properties={ds.metadata_properties}", indent)
+        + textwrap.indent(f"\nguidelines={ds.guidelines}", indent)
+        + "\n)"
+    )

@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added and update to the `__repr__` for the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4171](https://github.com/argilla-io/argilla/pull/4171))
+
 ### Fixed
 
 - Fixed error in `ArgillaTrainer`, with numerical labels use `RatingQuestion` instead of `RankingQuestion` ([#4171](https://github.com/argilla-io/argilla/pull/4171))

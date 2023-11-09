@@ -61,9 +61,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
-        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -537,8 +535,9 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             + textwrap.indent(f"\nurl={self.url}", indent)
             + textwrap.indent(f"\nfields={self.fields}", indent)
             + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
-            + ")"
+            + "\n)"
         )
 
     def __len__(self) -> int:

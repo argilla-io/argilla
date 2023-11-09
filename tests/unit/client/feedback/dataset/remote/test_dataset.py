@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 from datetime import datetime
 from typing import Dict
-from unittest import mock
 from uuid import uuid4
 
 import httpx
@@ -356,4 +356,19 @@ class TestSuiteRemoteDataset:
         mock_httpx_client.post.assert_called_once_with(
             url=f"/api/v1/datasets/{test_remote_dataset.id}/records",
             json={"items": [{"fields": {"text": "test"}, "suggestions": [], "vectors": {"vector-1": [1.0, 2.0, 3.0]}}]},
+        )
+
+    def test_repr(self, test_remote_dataset: RemoteFeedbackDataset) -> None:
+        indent = "   "
+        assert repr(test_remote_dataset) == (
+            "RemoteFeedbackDataset("
+            + textwrap.indent(f"\nid={test_remote_dataset.id}", indent)
+            + textwrap.indent(f"\nname={test_remote_dataset.name}", indent)
+            + textwrap.indent(f"\nworkspace={test_remote_dataset.workspace}", indent)
+            + textwrap.indent(f"\nurl={test_remote_dataset.url}", indent)
+            + textwrap.indent(f"\nfields={test_remote_dataset.fields}", indent)
+            + textwrap.indent(f"\nquestions={test_remote_dataset.questions}", indent)
+            + textwrap.indext(f"\nmetadata_properties={test_remote_dataset.metadata_properties}", indent)
+            + textwrap.indent(f"\nguidelines={test_remote_dataset.guidelines}", indent)
+            + "\n)"
         )

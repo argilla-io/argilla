@@ -211,11 +211,13 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        indent = "   "
         return (
             "FeedbackDataset("
-            + textwrap.indent(
-                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines})", "    "
-            )
+            + textwrap.indent(f"\nfields={self.fields}", indent)
+            + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
+            + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
             + "\n)"
         )
 
