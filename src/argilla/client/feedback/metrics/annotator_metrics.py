@@ -118,16 +118,13 @@ class AnnotatorMetric:
         if isinstance(metric_names, str):
             metric_names = [metric_names]
 
-        metric_classes = []
-        for metric_name in metric_names:
-            if metric_name not in self._allowed_metrics:
-                raise ValueError(
-                    f"Metric {metric} not allowed for question {self._question_name}, choose one from: {list(self._allowed_metrics.keys())}."
-                )
-            metric_classes.append((metric_name, self._allowed_metrics[metric_name]))
+        if any([metric not in self._allowed_metrics for metric in metric_names]):
+            raise ValueError(f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}")
+
+        metric_classes = [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
 
         responses_per_user, suggestions = get_responses_per_user(self._dataset, self._question_name)
-        # TODO(plaguss): check all the metrics are available for the question type
+
         metrics = defaultdict(list)
         for user_id, responses in responses_per_user.items():
             for metric_name, metric_cls in metric_classes:
