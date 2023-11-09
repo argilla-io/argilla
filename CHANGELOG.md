@@ -16,10 +16,6 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Contributors
-
-- @Racso-3141 Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
-
 ### Fixed
 
 - Fixed error in `ArgillaTrainer`, with numerical labels use `RatingQuestion` instead of `RankingQuestion` ([#4171](https://github.com/argilla-io/argilla/pull/4171))
