@@ -8,12 +8,25 @@ export interface RangeValue {
   le?: number;
 }
 
-export abstract class FilterWithOption {
+export abstract class Filter {
+  abstract get name(): string;
+
+  get canFilter() {
+    return true;
+  }
+}
+
+export abstract class FilterWithOption extends Filter {
   constructor(
     public readonly name: string,
-    public readonly title: string,
     public readonly options: OptionForFilter[] = []
-  ) {}
+  ) {
+    super();
+  }
+
+  get title(): string {
+    return null;
+  }
 
   filterByText(text: string) {
     return this.options.filter((option) =>
@@ -41,14 +54,15 @@ export abstract class FilterWithOption {
   }
 }
 
-export abstract class FilterWithScore {
+export abstract class FilterWithScore extends Filter {
   public value: RangeValue;
   constructor(
     public readonly name: string,
-    public readonly title: string,
     public readonly min: number,
     public readonly max: number
   ) {
+    super();
+
     this.value = {
       ge: min,
       le: max,

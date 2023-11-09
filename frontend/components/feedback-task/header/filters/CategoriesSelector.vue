@@ -14,9 +14,7 @@
         <BaseButton
           @on-click="selectCategory(category)"
           class="category__item"
-          :disabled="
-            category.hasOwnProperty('canFilter') && !category.canFilter
-          "
+          :disabled="!category.canFilter"
         >
           <span v-if="!!category.title">{{ category.title }}</span>
           <span v-else>{{ $t(category.name) }}</span>

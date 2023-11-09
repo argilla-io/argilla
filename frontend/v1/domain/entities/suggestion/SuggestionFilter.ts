@@ -1,4 +1,4 @@
-import { FilterWithOption, FilterWithScore } from "../common/Filter";
+import { Filter, FilterWithOption, FilterWithScore } from "../common/Filter";
 import { Question } from "../question/Question";
 
 class ConfigurationValues extends FilterWithOption {
@@ -8,7 +8,6 @@ class ConfigurationValues extends FilterWithOption {
   ) {
     super(
       "values",
-      "Values",
       question.settings.options.map(({ value }) => {
         return { selected: false, label: value.toString() };
       })
@@ -18,7 +17,7 @@ class ConfigurationValues extends FilterWithOption {
 
 class ConfigurationScore extends FilterWithScore {
   constructor(public readonly min: number, public readonly max: number) {
-    super("score", "Score", min, max);
+    super("score", min, max);
   }
 
   get isInteger(): boolean {
@@ -37,7 +36,6 @@ class ConfigurationAgent extends FilterWithOption {
   constructor(agents: string[]) {
     super(
       "agent",
-      "Agent",
       agents.map((value) => {
         return { selected: false, label: value };
       })
@@ -45,9 +43,11 @@ class ConfigurationAgent extends FilterWithOption {
   }
 }
 
-class SuggestionFilter {
+class SuggestionFilter extends Filter {
   public readonly configurations = [];
   constructor(private readonly question: Question) {
+    super();
+
     this.configurations.push(new ConfigurationScore(10, 90));
     this.configurations.push(new ConfigurationValues(question));
     this.configurations.push(new ConfigurationAgent(["Test", "Test2"]));
