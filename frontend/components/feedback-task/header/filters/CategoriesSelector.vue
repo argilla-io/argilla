@@ -16,8 +16,8 @@
           class="category__item"
           :disabled="!category.canFilter"
         >
-          <span v-if="!!category.title">{{ category.title }}</span>
-          <span v-else>{{ $t(category.name) }}</span>
+          <span v-if="!!category.title" v-text="category.title" />
+          <span v-else v-text="category.name" />
           <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>

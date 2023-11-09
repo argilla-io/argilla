@@ -40,8 +40,5 @@
   "reset": "Reset",
   "with": "with",
   "find": "Find",
-  "cancel": "Cancel",
-  "score": "Score",
-  "values": "Values",
-  "agent": "Agent"
+  "cancel": "Cancel"
 }

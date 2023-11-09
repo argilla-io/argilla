@@ -2,17 +2,13 @@ import { FilterWithOption } from "../common/Filter";
 import { Question } from "../question/Question";
 
 class ResponseFilter extends FilterWithOption {
-  constructor(private readonly question: Question) {
+  constructor(question: Question) {
     super(
       question.name,
       question.settings.options.map(({ value }) => {
         return { selected: false, label: value.toString() };
       })
     );
-  }
-
-  get title() {
-    return this.question.title;
   }
 }
 

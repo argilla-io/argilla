@@ -26,7 +26,7 @@
             class="suggestion-filter__header"
             @click="selectSuggestion(null)"
           >
-            <span v-text="selectedSuggestion.title" />
+            <span v-text="selectedSuggestion.name" />
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div>
@@ -44,7 +44,7 @@
               >
                 <span
                   >{{ $t(selectedConfiguration.name) }} - ({{
-                    selectedSuggestion.title
+                    selectedSuggestion.name
                   }})</span
                 >
                 <svgicon name="chevron-left" width="12" height="12" />
@@ -83,6 +83,12 @@ export default {
       selectedSuggestion: null,
       selectedConfiguration: null,
     };
+  },
+  watch: {
+    visibleDropdown() {
+      this.selectSuggestion(null);
+      this.selectConfiguration(null);
+    },
   },
   methods: {
     onToggleVisibility(value) {

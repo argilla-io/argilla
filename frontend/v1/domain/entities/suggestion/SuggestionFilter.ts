@@ -53,12 +53,8 @@ class SuggestionFilter extends Filter {
     this.configurations.push(new ConfigurationAgent(["model", "human"]));
   }
 
-  get name() {
+  get name(): string {
     return this.question.name;
-  }
-
-  get title() {
-    return this.question.title;
   }
 }
 

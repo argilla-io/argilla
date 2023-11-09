@@ -22,7 +22,7 @@
         />
         <template v-else>
           <div class="responses-filter__header" @click="selectResponse(null)">
-            <span v-text="selectedResponse.title" />
+            <span v-text="selectedResponse.name" />
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="responses-filter__content">

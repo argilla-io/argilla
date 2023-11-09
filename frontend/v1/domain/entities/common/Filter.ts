@@ -24,10 +24,6 @@ export abstract class FilterWithOption extends Filter {
     super();
   }
 
-  get title(): string {
-    return null;
-  }
-
   filterByText(text: string) {
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(text.toLowerCase())
