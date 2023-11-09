@@ -16,12 +16,12 @@
 
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
 
 import numpy as np
 from pydantic import BaseModel
 
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.metrics.utils import get_responses_per_user
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -29,7 +29,6 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -46,63 +45,13 @@ from sklearn.metrics import (
     recall_score,
 )
 
-# Type aliases
-Responses = List[Union[float, int, str]]
-Suggestions = Responses
 
+class AnnotatorMetricResult(BaseModel):
+    metric_name: str
+    result: Union[float, Dict[str, float], pd.DataFrame]
 
-# TODO(plaguss): Move this function to the new utils module when it's available
-def get_responses_per_user(
-    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
-    question_name: str,
-    response_status: str = ResponseStatusFilter.submitted.value,
-) -> Tuple[Dict[int, Responses], Suggestions]:
-    """Extract the responses per user and the suggestions from a FeedbackDataset.
-
-    Helper function for the metrics module where we want to compare the responses
-    in relation to the suggestions offered.
-
-    Args:
-        dataset: FeedbackDataset or RemoteFeedbackDataset.
-        question_name: The name of the question to filter from the dataset.
-        response_status: The responses status for the responses. Defaults to "submitted".
-
-    Raises:
-        NotImplementedError:
-            When no user_id is given. We need that information to compute the metrics.
-
-    Returns:
-        Tuple containing the responses per user as a dict, with keys the user id and values the responses,
-        and the suggestions.
-    """
-    if isinstance(dataset, RemoteFeedbackDataset):
-        dataset = dataset.filter_by(response_status=response_status)
-
-    hf_dataset = dataset.format_as("datasets")
-    question_type = type(dataset.question_by_name(question_name))
-    responses_per_user = defaultdict(list)
-
-    for responses_ in hf_dataset[question_name]:
-        for response in responses_:
-            if response["status"] != response_status:
-                continue
-            user_id = response["user_id"]
-            if user_id is None:
-                raise NotImplementedError(
-                    "In order to use this functionality the records need to be assigned to a user."
-                )
-            if question_type == RankingQuestion:
-                value = response["value"]["value"]
-            else:
-                value = response["value"]
-
-            responses_per_user[user_id].append(value)
-
-    suggestions = hf_dataset[f"{question_name}-suggestion"]
-    if question_type == RankingQuestion:
-        suggestions = [suggestion["value"] for suggestion in suggestions]
-
-    return responses_per_user, suggestions
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class AnnotatorMetric:
@@ -114,12 +63,14 @@ class AnnotatorMetric:
             raise NotImplementedError(f"No metrics are defined currently for {self._question_type.__name__}")
         self._allowed_metrics = METRICS_PER_QUESTION[self._question_type]
 
-    def compute(self, metric_names: Union[str, List[str]], **kwargs) -> float:
+    def compute(self, metric_names: Union[str, List[str]], **kwargs) -> Dict[str, List[AnnotatorMetricResult]]:
         if isinstance(metric_names, str):
             metric_names = [metric_names]
 
         if any([metric not in self._allowed_metrics for metric in metric_names]):
-            raise ValueError(f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}")
+            raise ValueError(
+                f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}"
+            )
 
         metric_classes = [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
 
@@ -133,14 +84,6 @@ class AnnotatorMetric:
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
         return dict(metrics)
-
-
-class AnnotatorMetricResult(BaseModel):
-    metric_name: str
-    result: Union[float, Dict[str, float], pd.DataFrame]
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class AnnotatorMetricBase(ABC):
