@@ -67,7 +67,7 @@ These are the section headers that we use:
 - Update `GET /api/v1/me/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 - [breaking] `limit` query parameter for `GET /api/v1/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - [breaking] `limit` query parameter for `GET /api/v1/me/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
-- [breaking] Remove support for Elasticsearch < 8.5 and OpenSearch < 2.4. ()
+- [breaking] Remove support for Elasticsearch < 8.5 and OpenSearch < 2.4. ([#4173](https://github.com/argilla-io/argilla/pull/4173))
 
 ### Fixed
 
