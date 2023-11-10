@@ -235,5 +235,5 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Record {record_without_vector.id} does not have a vector for vector settings {vector_settings.name}"
+            "detail": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`"
         }

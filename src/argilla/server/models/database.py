@@ -211,7 +211,6 @@ class Record(DatabaseModel):
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
                 return vector.value
-        return None
 
 
 class Question(DatabaseModel):
