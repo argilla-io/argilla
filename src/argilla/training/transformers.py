@@ -294,6 +294,31 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             inputs["end_positions"] = end_positions
             return inputs
 
+        def question_answering_preprocess_function_validation(examples):
+            questions = [q.strip() for q in examples["question"]]
+            inputs = self._transformers_tokenizer(
+                questions,
+                examples["context"],
+                truncation="only_second",
+                return_overflowing_tokens=True,
+                return_offsets_mapping=True,
+                padding="max_length",
+            )
+
+            sample_map = inputs.pop("overflow_to_sample_mapping")
+            example_ids = []
+
+            for i in range(len(inputs["input_ids"])):
+                sample_idx = sample_map[i]
+                example_ids.append(examples["id"][sample_idx])
+
+                sequence_ids = inputs.sequence_ids(i)
+                offset = inputs["offset_mapping"][i]
+                inputs["offset_mapping"][i] = [o if sequence_ids[k] == 1 else None for k, o in enumerate(offset)]
+
+            inputs["example_id"] = example_ids
+            return inputs
+
         # set correct tokenization
         if self._record_class == TextClassificationRecord:
             preprocess_function = text_classification_preprocess_function
@@ -323,9 +348,18 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._tokenized_train_dataset = self._tokenized_train_dataset.rename_column("label", "labels")
 
         if self._eval_dataset is not None:
-            self._tokenized_eval_dataset = self._eval_dataset.map(
-                preprocess_function, batched=True, remove_columns=remove_columns
-            )
+            if self._model_class == AutoModelForQuestionAnswering:
+                # We need to preprocess the validation dataset separately, because we need to return the example_id
+                self._tokenized_eval_dataset = self._eval_dataset.map(
+                    question_answering_preprocess_function_validation,
+                    batched=True,
+                    remove_columns=remove_columns,
+                )
+            else:
+                self._tokenized_eval_dataset = self._eval_dataset.map(
+                    preprocess_function, batched=True, remove_columns=remove_columns
+                )
+
             if replace_labels:
                 self._tokenized_eval_dataset = self._tokenized_eval_dataset.rename_column("label", "labels")
         else:
@@ -391,19 +425,64 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             func = compute_metrics
         elif AutoModelForQuestionAnswering:
-            f1 = evaluate.load("f1")
+            squad = evaluate.load("squad")
+
+            import collections
+
+            # Copy from https://huggingface.co/learn/nlp-course/chapter7/7?fw=pt#fine-tuning-the-model-with-the-trainer-api
+            n_best = 20
 
             def compute_metrics_question_answering(pred):
-                labels = pred.label_ids
-                preds = pred.predictions.argmax(-1)
+                start_logits, end_logits = pred.predictions
+                features = self._tokenized_eval_dataset
+                examples = self._eval_dataset
 
-                # Calculate Exact Match (EM)
-                em = sum([int(p == l) for p, l in zip(preds, labels)]) / len(labels)
+                example_to_features = collections.defaultdict(list)
+                for idx, feature in enumerate(features):
+                    example_to_features[feature["example_id"]].append(idx)
 
-                # Calculate F1-score
-                f1_score = f1(labels, preds, average="macro")
+                predicted_answers = []
+                for example in examples:
+                    example_id = example["id"]
+                    context = example["context"]
+                    answers = []
 
-                return {"exact_match": em, "f1": f1_score}
+                    # Loop through all features associated with that example
+                    for feature_index in example_to_features[example_id]:
+                        start_logit = start_logits[feature_index]
+                        end_logit = end_logits[feature_index]
+                        offsets = features[feature_index]["offset_mapping"]
+
+                        start_indexes = np.argsort(start_logit)[-1 : -n_best - 1 : -1].tolist()
+                        end_indexes = np.argsort(end_logit)[-1 : -n_best - 1 : -1].tolist()
+                        for start_index in start_indexes:
+                            for end_index in end_indexes:
+                                # Skip answers that are not fully in the context
+                                if offsets[start_index] is None or offsets[end_index] is None:
+                                    continue
+                                # Skip answers with a length that is either < 0 or > max_answer_length
+                                if (
+                                    end_index < start_index
+                                    or end_index - start_index + 1 > self._transformers_tokenizer.model_max_length
+                                ):
+                                    continue
+
+                                answer = {
+                                    "text": context[offsets[start_index][0] : offsets[end_index][1]],
+                                    "logit_score": start_logit[start_index] + end_logit[end_index],
+                                }
+                                answers.append(answer)
+
+                    # Select the answer with the best score
+                    if len(answers) > 0:
+                        best_answer = max(answers, key=lambda x: x["logit_score"])
+                        predicted_answers.append({"id": example_id, "prediction_text": best_answer["text"]})
+                    else:
+                        predicted_answers.append({"id": example_id, "prediction_text": ""})
+
+                theoretical_answers = [{"id": ex["id"], "answers": ex["answers"]} for ex in examples]
+
+                return squad.compute(predictions=predicted_answers, references=theoretical_answers)
 
             func = compute_metrics_question_answering
         else:
