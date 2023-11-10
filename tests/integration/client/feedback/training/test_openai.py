@@ -16,7 +16,7 @@ import re
 
 import argilla as rg
 import pytest
-from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
+from argilla.client.feedback.training.schemas.base import TrainingTaskForChatCompletionFormat
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 from tests.integration.client.feedback.helpers import formatting_func_chat_completion

@@ -15,7 +15,7 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from argilla.client.api import get_workspace, load
 from argilla.client.datasets import DatasetForText2Text, DatasetForTextClassification, DatasetForTokenClassification
@@ -300,6 +300,36 @@ _________________________________________________________________
         """
         self._trainer.save(output_dir)
 
+    def get_model_kwargs(self):
+        """
+        Returns the model kwargs.
+        """
+        return self._trainer.get_model_kwargs()
+
+    def get_trainer_kwargs(self):
+        """
+        Returns the training kwargs.
+        """
+        return self._trainer.get_trainer_kwargs()
+
+    def get_trainer_model(self):
+        """
+        Returns the trainer model.
+        """
+        return self._trainer.get_model()
+
+    def get_trainer_tokenizer(self):
+        """
+        Returns the trainer tokenizer.
+        """
+        return self._trainer.get_tokenizer()
+
+    def get_trainer(self):
+        """
+        Returns the trainer trainer.
+        """
+        return self._trainer.get_trainer()
+
 
 class ArgillaTrainerSkeleton(ABC):
     def __init__(
@@ -331,6 +361,11 @@ class ArgillaTrainerSkeleton(ABC):
             self._id2label = None
         self._model = model
         self._seed = seed
+        self.model_kwargs = {}
+        self.trainer_kwargs = {}
+        self.trainer_model = None
+        self.trainer_tokenizer = None
+        self._trainer = None
 
     @abstractmethod
     def init_training_args(self):
@@ -367,3 +402,45 @@ class ArgillaTrainerSkeleton(ABC):
         """
         Saves the model to the specified path.
         """
+
+    @abstractmethod
+    def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
+        """
+        Generates a `FrameworkCardData` instance to generate a model card from.
+        """
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
+        """
+        Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
+        """
+
+    def get_model_kwargs(self):
+        """
+        Returns the model kwargs.
+        """
+        return self.model_kwargs
+
+    def get_trainer_kwargs(self):
+        """
+        Returns the training kwargs.
+        """
+        return self.trainer_kwargs
+
+    def get_model(self):
+        """
+        Returns the model.
+        """
+        return self._model
+
+    def get_tokenizer(self):
+        """
+        Returns the tokenizer.
+        """
+        return self.trainer_tokenizer
+
+    def get_trainer(self):
+        """
+        Returns the trainer.
+        """
+        return self._trainer

@@ -35,7 +35,7 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.records import SortBy
 from argilla.client.feedback.training import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTask,
     TrainingTaskForQuestionAnsweringFormat,
     TrainingTaskForTextClassification,
@@ -159,8 +159,7 @@ def test_argilla_trainer_text_classification_with_model_tokenizer(
 
         # Assert that the provided tokenizer is used
         assert (
-            trainer._trainer._transformers_tokenizer.pretrained_init_configuration
-            == tokenizer.pretrained_init_configuration
+            trainer._trainer.trainer_tokenizer.pretrained_init_configuration == tokenizer.pretrained_init_configuration
         )
 
     if Path(__OUTPUT_DIR__).exists():
