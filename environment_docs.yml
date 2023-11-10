@@ -1,0 +1,26 @@
+name: argilla
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python~=3.9.7
+  - pip>=2.22.0
+  - openjdk=11
+  # pyparsing 3.0.5 seems to be buggy
+  - pyparsing!=3.0.5
+  # docs, pandoc needs conda ...
+  - pandoc==2.12
+  # we need this to ensure syntax highlighting in the notebook code cells for the docs
+  - ipython<8.0.0
+  - sphinx==4.5.0
+  - pip:
+      # docs
+      - sphinx-design==0.2.0
+      - furo==2022.6.4.1
+      - myst-parser==0.16.1
+      - nbsphinx==0.8.9
+      - sphinxext.opengraph==0.6.3
+      - sphinx-copybutton==0.5.0
+      - sphinx-notfound-page==0.8.3
+      - rich!=13.1.0
