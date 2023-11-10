@@ -44,7 +44,9 @@ class TestSuiteHuggingFaceDatasetMixin:
                 rg.FloatMetadataProperty(name="float-metadata-property", min=0.0, max=100.0),
             ],
             vectors_settings=[
-                rg.VectorSettings(name="float-vector", dimensions=2),
+                # Named `text-field` to ensure that even if name is duplicated with a field/question, the
+                # vector is properly serialized under the `vectors` column in the `datasets.Dataset`
+                rg.VectorSettings(name="text-field", dimensions=2),
             ],
             guidelines="These are the guidelines",
         )
@@ -63,7 +65,7 @@ class TestSuiteHuggingFaceDatasetMixin:
                         "integer-metadata-property": 1,
                         "float-metadata-property": 1.0,
                     },
-                    vectors={"float-vector": [1.0, 2.0]},
+                    vectors={"text-field": [1.0, 2.0]},
                     external_id="external-id-1",
                 )
             ]
