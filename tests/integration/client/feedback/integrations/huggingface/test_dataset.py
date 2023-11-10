@@ -63,7 +63,7 @@ class TestSuiteHuggingFaceDatasetMixin:
                         "integer-metadata-property": 1,
                         "float-metadata-property": 1.0,
                     },
-                    vectors={"text-field": [1.0, 2.0]},
+                    vectors={"float-vector": [1.0, 2.0]},
                     external_id="external-id-1",
                 )
             ]
@@ -91,7 +91,7 @@ class TestSuiteHuggingFaceDatasetMixin:
 
 # Separate edge cases for integration tests
 @pytest.mark.skipif(os.getenv("HF_HUB_ACCESS_TOKEN") is None, reason="`HF_HUB_ACCESS_TOKEN` is not set")
-def test_push_to_huggingface_duplicated_vectors_name() -> None:
+def test_push_to_huggingface_with_vectors_with_field_names() -> None:
     """Ensure that even if a field in the `FeedbackDataset` is named as a vector within the same dataset,
     the dataset can still be pushed and pulled to/from HuggingFace Hub, respectively.
     """
@@ -105,7 +105,7 @@ def test_push_to_huggingface_duplicated_vectors_name() -> None:
         vectors_settings=[
             # Named `text-field` to ensure that even if name is duplicated with a field/question, the
             # vector is properly serialized under the `vectors` column in the `datasets.Dataset`
-            rg.VectorSettings(name="float-vector", dimensions=2),
+            rg.VectorSettings(name="text-field", dimensions=2),
         ],
     )
 
