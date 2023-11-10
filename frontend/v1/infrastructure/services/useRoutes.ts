@@ -8,6 +8,7 @@ type KindOfParam =
   | "_metadata"
   | "_sort"
   | "_response"
+  | "_suggestion"
   | "_similarity";
 
 export const ROUTES = {

@@ -76,19 +76,22 @@ export default {
       type: Array,
       required: true,
     },
+    suggestionFiltered: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "suggestionFiltered",
+    event: "onSuggestionFilteredChanged",
   },
   data() {
     return {
       visibleDropdown: false,
       selectedSuggestion: null,
       selectedConfiguration: null,
+      appliedCategoriesFilters: [],
     };
-  },
-  watch: {
-    visibleDropdown() {
-      this.selectSuggestion(null);
-      this.selectConfiguration(null);
-    },
   },
   methods: {
     onToggleVisibility(value) {
@@ -101,12 +104,26 @@ export default {
     selectConfiguration(configuration) {
       this.selectedConfiguration = configuration;
     },
+    applyFilter() {
+      this.visibleDropdown = false;
+
+      this.filter();
+    },
+    filter() {
+      if (!this.questionFilters.hasChangesSinceLatestCommit) return;
+
+      const newFilter = this.questionFilters.commit();
+
+      this.$emit("onSuggestionFilteredChanged", newFilter);
+
+      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+    },
     openSuggestionFilter(suggestion) {
       this.visibleDropdown = this.visibleDropdown
         ? suggestion !== this.selectedSuggestion
         : true;
 
-      this.selectCategory(suggestion);
+      this.selectSuggestion(suggestion);
     },
     clearSuggestionFilter() {
       this.$emit("remove-suggestion-filter");
@@ -114,6 +131,45 @@ export default {
     clearAllSuggestionFilter() {
       this.$emit("clear-all-suggestion-filter");
     },
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.questionFilters) return;
+
+      this.questionFilters.initializeWith(this.suggestionFiltered);
+
+      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+    },
+  },
+  watch: {
+    visibleDropdown() {
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.filter();
+      }
+    },
+    "questionFilters.questions": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.filter();
+      },
+    },
+    suggestionFiltered() {
+      if (
+        !this.questionFilters.hasChangesSinceLatestCommitWith(
+          this.suggestionFiltered
+        )
+      )
+        return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
+  },
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useSuggestionFilterViewModel(props);

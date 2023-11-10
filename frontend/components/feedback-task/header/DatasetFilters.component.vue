@@ -42,7 +42,10 @@
             :datasetQuestions="datasetQuestions"
             v-model="recordCriteria.response"
           />
-          <SuggestionFilter :datasetQuestions="datasetQuestions" />
+          <SuggestionFilter
+            :datasetQuestions="datasetQuestions"
+            v-model="recordCriteria.suggestion"
+          />
         </div>
       </transition>
     </template>
@@ -118,6 +121,9 @@ export default {
       this.newFiltersChanged();
     },
     "recordCriteria.response"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.suggestion"() {
       this.newFiltersChanged();
     },
   },

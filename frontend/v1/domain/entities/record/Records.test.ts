@@ -100,7 +100,16 @@ describe("Records", () => {
 
   describe("getPageToFind", () => {
     test("the current page should be from 1 to 10 when no have records", () => {
-      const criteria = new RecordCriteria("1", 1, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        1,
+        "pending",
+        "",
+        [],
+        [],
+        [],
+        null
+      );
       const records = new Records([]);
 
       const pageToFind = records.getPageToFind(criteria);
@@ -109,7 +118,16 @@ describe("Records", () => {
     });
 
     test("the page should be from 10 and many 10 when the user submit one record in current queue and going to forward", () => {
-      const criteria = new RecordCriteria("1", 10, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        10,
+        "pending",
+        "",
+        [],
+        [],
+        [],
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
         new Record("2", "1", [], [], null, [], 1, 2),
@@ -137,7 +155,16 @@ describe("Records", () => {
     });
 
     test("the page should be from 9 and many 10 when the user submit two record in current queue and going to forward", () => {
-      const criteria = new RecordCriteria("1", 10, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        10,
+        "pending",
+        "",
+        [],
+        [],
+        [],
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
         new Record("2", "1", [], [], null, [], 1, 2),
@@ -171,7 +198,16 @@ describe("Records", () => {
     });
 
     test("the page should be from 2 and many 1 when the user start with page 3 and go to backward", () => {
-      const criteria = new RecordCriteria("1", 3, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        3,
+        "pending",
+        "",
+        [],
+        [],
+        [],
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 3),
         new Record("2", "1", [], [], null, [], 1, 4),
@@ -191,6 +227,7 @@ describe("Records", () => {
         "",
         [],
         [],
+        [],
         // eslint-disable-next-line quotes
         '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
       );
@@ -207,6 +244,7 @@ describe("Records", () => {
         3,
         "pending",
         "",
+        [],
         [],
         [],
         // eslint-disable-next-line quotes

@@ -8,6 +8,7 @@ interface CommittedRecordCriteria {
   metadata: string[];
   sortBy: string[];
   response: string[];
+  suggestion: string[];
   similaritySearch: SimilarityCriteria;
 }
 
@@ -26,6 +27,7 @@ export class RecordCriteria {
     public metadata: string[],
     public sortBy: string[],
     public response: string[],
+    public suggestion: string[],
     similaritySearch: string
   ) {
     this.complete(
@@ -35,6 +37,7 @@ export class RecordCriteria {
       metadata,
       sortBy,
       response,
+      suggestion,
       similaritySearch
     );
 
@@ -77,6 +80,8 @@ export class RecordCriteria {
     if (!this.areEquals(this.metadata, this.committed.metadata)) return true;
     if (!this.areEquals(this.sortBy, this.committed.sortBy)) return true;
     if (!this.areEquals(this.response, this.committed.response)) return true;
+    if (!this.areEquals(this.suggestion, this.committed.suggestion))
+      return true;
     if (!this.similaritySearch.isEqual(this.committed.similaritySearch))
       return true;
 
@@ -90,6 +95,7 @@ export class RecordCriteria {
     metadata: string[],
     sortBy: string[],
     response: string[],
+    suggestion: string[],
     similaritySearch: string
   ) {
     this.isChangingAutomatically = true;
@@ -100,6 +106,7 @@ export class RecordCriteria {
     this.metadata = metadata ?? [];
     this.sortBy = sortBy ?? [];
     this.response = response ?? [];
+    this.suggestion = suggestion ?? [];
     this._similaritySearch = new SimilarityCriteria();
 
     if (similaritySearch) {
@@ -134,6 +141,7 @@ export class RecordCriteria {
       metadata: this.metadata,
       sortBy: this.sortBy,
       response: this.response,
+      suggestion: this.suggestion,
       similaritySearch: similaritySearchCommitted,
     };
 
@@ -147,6 +155,7 @@ export class RecordCriteria {
     this.metadata = this.committed.metadata;
     this.sortBy = this.committed.sortBy;
     this.response = this.committed.response;
+    this.suggestion = this.committed.suggestion;
     this._similaritySearch = this.committed.similaritySearch;
   }
 
@@ -154,6 +163,7 @@ export class RecordCriteria {
     this.metadata = [];
     this.sortBy = [];
     this.response = [];
+    this.suggestion = [];
   }
 
   nextPage() {
