@@ -103,5 +103,14 @@ async def track_login(request: "Request", username: str):
     )
 
 
+def tutorial_running(tutorial_id: int) -> None:
+    """Can be called when a tutorial is executed so that the tutorial_id is used to identify the tutorial and send an event.
+
+    Args:
+        tutorial_id: ID number of the tutorial.
+    """
+    _CLIENT.track_data(action="TutorialRunning", data={"tutorial_id": tutorial_id})
+
+
 def get_telemetry_client() -> TelemetryClient:
     return _CLIENT
