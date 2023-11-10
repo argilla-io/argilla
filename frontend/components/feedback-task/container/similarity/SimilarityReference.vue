@@ -1,5 +1,8 @@
 <template>
-  <div class="similarity-reference">
+  <div
+    class="similarity-reference"
+    v-if="recordCriteria.isFilteringBySimilarity"
+  >
     <div class="similarity-reference__left">
       <SimilarityFilterLimit
         class="similarity-reference__dropdown"
@@ -73,21 +76,16 @@ export default {
     },
   },
   watch: {
-    "recordCriteria.similaritySearch.order"() {
-      this.filterChanged();
-    },
-    "recordCriteria.similaritySearch.limit"() {
-      this.filterChanged();
-    },
-    "recordCriteria.similaritySearch.vectorName"() {
-      this.filterChanged();
+    "recordCriteria.similaritySearch": {
+      deep: true,
+      handler() {
+        this.filterChanged();
+      },
     },
   },
   methods: {
     removeSimilaritySearch() {
       this.recordCriteria.similaritySearch.reset();
-
-      this.filterChanged();
     },
     filterChanged() {
       if (!this.recordCriteria.hasChanges) return;

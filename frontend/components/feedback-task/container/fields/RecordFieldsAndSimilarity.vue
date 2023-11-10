@@ -1,7 +1,8 @@
 <template>
   <div class="fields">
     <SimilarityRecordReference
-      v-if="recordCriteria.isFilteredBySimilarity && !!records.reference"
+      v-show="recordCriteria.isFilteringBySimilarity"
+      v-if="!!records.reference"
       :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
@@ -17,9 +18,8 @@
         </div>
         <div class="fields__header--right">
           <SimilarityScorePercentage
-            v-if="
-              recordCriteria.isFilteredBySimilarity && record.score.percentage
-            "
+            v-show="recordCriteria.isFilteringBySimilarity"
+            v-if="record.score.percentage"
             class="similarity__progress"
             :value="record.score.percentage"
             :data-title="$t('similarityScore')"
@@ -41,7 +41,6 @@ export default {
   props: {
     record: {
       type: Object,
-      required: true,
     },
     recordCriteria: {
       type: Object,

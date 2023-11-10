@@ -7,6 +7,7 @@
     "
   >
     <SimilarityReference
+      v-show="recordCriteria.isFilteringBySimilarity"
       class="record-reference__filter"
       :preview="fieldsPreview"
       :visibleReferenceRecord="visibleReferenceRecord"
@@ -16,6 +17,7 @@
       @hide-reference-record="hideReferenceRecord"
     />
     <RecordFields
+      v-show="recordCriteria.isFilteringBySimilarity"
       v-if="visibleReferenceRecord"
       class="record-reference"
       :fields="fields"
