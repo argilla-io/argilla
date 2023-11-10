@@ -539,7 +539,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             + textwrap.indent(f"\nquestions={self.questions}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
             + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
-            + ")"
+            + "\n)"
         )
 
     def __len__(self) -> int:
