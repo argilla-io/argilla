@@ -115,8 +115,10 @@ class HuggingFaceDatasetMixin:
 
         vectors_settings = dataset.vectors_settings
         if vectors_settings:
+            hf_features["vectors"] = {}
             for vector_settings in vectors_settings:
-                hf_features[vector_settings.name] = Sequence(Value(dtype="float32"), id="vectors")
+                hf_features["vectors"].update({vector_settings.name: Sequence(Value(dtype="float32"), id="vectors")})
+            hf_dataset["vectors"] = []
 
         for record in dataset.records:
             for field in dataset.fields:
@@ -160,10 +162,10 @@ class HuggingFaceDatasetMixin:
             hf_dataset["external_id"].append(record.external_id or None)
 
             if vectors_settings:
+                vectors = {}
                 for vector_settings in vectors_settings:
-                    if vector_settings.name not in hf_dataset:
-                        hf_dataset[vector_settings.name] = []
-                    hf_dataset[vector_settings.name].append(record.vectors.get(vector_settings.name, None))
+                    vectors.update({vector_settings.name: record.vectors.get(vector_settings.name, None)})
+                hf_dataset["vectors"].append(vectors)
 
         return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
@@ -439,9 +441,13 @@ class HuggingFaceDatasetMixin:
                 metadata = json.loads(hfds[index]["metadata"])
 
             vectors = {}
-            for vector_settings in dataset.vectors_settings:
-                if vector_settings.name in hfds[index] and hfds[index][vector_settings.name] is not None:
-                    vectors.update({vector_settings.name: hfds[index][vector_settings.name]})
+            if "vectors" in hfds[index] and hfds[index]["vectors"]:
+                for vector_settings in dataset.vectors_settings:
+                    if (
+                        vector_settings.name in hfds[index]["vectors"]
+                        and hfds[index]["vectors"][vector_settings.name] is not None
+                    ):
+                        vectors.update({vector_settings.name: hfds[index]["vectors"][vector_settings.name]})
 
             records.append(
                 FeedbackRecord(
