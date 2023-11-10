@@ -1302,6 +1302,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
             "question": [],
             "context": [],
             "answer": [],
+            "id": [],
         }
         for entry in data:
             if any([entry.get("question") is None, entry.get("context") is None, entry.get("answer") is None]):
@@ -1316,6 +1317,8 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
             datasets_dict["context"].append(entry["context"])
             datasets_dict["answer"].append({"answer_start": [answer_start], "text": [entry["answer"]]})
 
+        datasets_dict["id"] = list(range(len(data)))
+
         feature_dict = {
             "question": datasets.Value("string"),
             "context": datasets.Value("string"),
@@ -1327,6 +1330,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
                 length=-1,
                 id=None,
             ),
+            "id": datasets.Value(dtype="int32"),
         }
 
         ds = datasets.Dataset.from_dict(datasets_dict, features=datasets.Features(feature_dict))
