@@ -67,7 +67,6 @@ These are the section headers that we use:
 - Update `GET /api/v1/me/datasets/:dataset_id/records` endpoint to fetch record using the search engine. ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 - [breaking] `limit` query parameter for `GET /api/v1/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
 - [breaking] `limit` query parameter for `GET /api/v1/me/datasets/:dataset_id/records` endpoint is now only accepting values greater or equal than `1` and less or equal than `1000`. ([#4143](https://github.com/argilla-io/argilla/pull/4143))
-- Now client class `DatasetConfig` is setting `use_enum_values` config value to `True`. Closes [#4089](https://github.com/argilla-io/argilla/issues/4089) ([#4172](https://github.com/argilla-io/argilla/pull/4172))
 - [breaking] Remove support for Elasticsearch < 8.5 and OpenSearch < 2.4. ()
 
 ### Fixed
@@ -76,6 +75,7 @@ These are the section headers that we use:
 - Fixed creating records with responses from multiple users. Closes [#3746](https://github.com/argilla-io/argilla/issues/3746) and [#3808](https://github.com/argilla-io/argilla/issues/3808) ([#4142](https://github.com/argilla-io/argilla/pull/4142))
 - Fixed deleting or updating responses as an owner for annotators. (Commit [403a66d](https://github.com/argilla-io/argilla/commit/403a66d16d816fa8a62e3f76314ccc90e0073297))
 - Fixed passing user_id when getting records by id. (Commit [98c7927](https://github.com/argilla-io/argilla/commit/98c792757a21da05bac89b7f625e7e5792ad59f9))
+- Fixed non-basic tags serialized when pushing a dataset to the Hugging Face Hub. Closes [#4089](https://github.com/argilla-io/argilla/issues/4089) ([#4200](https://github.com/argilla-io/argilla/pull/4200))
 
 ## [1.18.0](https://github.com/argilla-io/argilla/compare/v1.17.0...v1.18.0)
 
