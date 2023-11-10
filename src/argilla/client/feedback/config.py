@@ -22,12 +22,12 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from pydantic import BaseModel, Field
-
 import json
 
+from pydantic import BaseModel, Field
+
 try:
-    from yaml import SafeLoader, safe_dump, load
+    from yaml import SafeLoader, load, safe_dump
 
 except ImportError:
     raise ImportError(
