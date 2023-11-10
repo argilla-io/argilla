@@ -285,7 +285,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         if not vector_value:
             record_id = record.id
-            vector_value = record.vector_by_vector_settings(vector_settings)
+            vector_value = record.vector_value_by_vector_settings(vector_settings)
 
         if not vector_value:
             raise ValueError("Cannot find a vector value to apply with provided info")

@@ -207,7 +207,7 @@ class Record(DatabaseModel):
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
-    def vector_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[Vector, None]:
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
                 return vector.value

@@ -229,7 +229,7 @@ async def _get_search_responses(
             record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
             await record.awaitable_attrs.vectors
 
-            if record.vector_by_vector_settings(vector_settings) is None:
+            if record.vector_value_by_vector_settings(vector_settings) is None:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=f"Record {record.id} does not have a vector for vector settings {vector_settings.name}",
