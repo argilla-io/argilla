@@ -14,6 +14,7 @@
 
 import logging
 import os
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -22,8 +23,6 @@ from argilla.client.datasets import DatasetForText2Text, DatasetForTextClassific
 from argilla.client.models import Framework, Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings, load_dataset_settings
 from argilla.utils.telemetry import get_telemetry_client
-
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if TYPE_CHECKING:
     import spacy
@@ -82,6 +81,11 @@ class ArgillaTrainer(object):
 
         if train_size:
             self._split_applied = True
+
+        _pytorch_fallback_env = "PYTORCH_ENABLE_MPS_FALLBACK"
+        if _pytorch_fallback_env not in os.environ:
+            os.environ[_pytorch_fallback_env] = "1"
+            warnings.warn(f"{_pytorch_fallback_env} not set. Setting it to 1.", UserWarning, stacklevel=2)
 
         self.rg_dataset_snapshot = load(name=self._name, limit=1, workspace=workspace)
         if not len(self.rg_dataset_snapshot) > 0:

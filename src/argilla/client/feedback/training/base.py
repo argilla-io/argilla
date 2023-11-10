@@ -24,8 +24,6 @@ from argilla.client.models import Framework, TextClassificationRecord
 from argilla.training.base import ArgillaTrainer as ArgillaTrainerV1
 from argilla.training.base import ArgillaTrainerSkeleton as ArgillaTrainerSkeletonV1
 
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-
 if TYPE_CHECKING:
     import spacy
     from transformers import PreTrainedModel, PreTrainedTokenizer
