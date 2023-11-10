@@ -443,10 +443,7 @@ class HuggingFaceDatasetMixin:
             vectors = {}
             if "vectors" in hfds[index] and hfds[index]["vectors"]:
                 for vector_settings in dataset.vectors_settings:
-                    if (
-                        vector_settings.name in hfds[index]["vectors"]
-                        and hfds[index]["vectors"][vector_settings.name] is not None
-                    ):
+                    if hfds[index]["vectors"].get(vector_settings.name, None) is not None:
                         vectors.update({vector_settings.name: hfds[index]["vectors"][vector_settings.name]})
 
             records.append(
