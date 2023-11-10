@@ -14,7 +14,7 @@
 
 import secrets
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from pydantic import parse_obj_as
@@ -206,6 +206,12 @@ class Record(DatabaseModel):
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
+
+    def vector_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[Vector, None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
+        return None
 
 
 class Question(DatabaseModel):
