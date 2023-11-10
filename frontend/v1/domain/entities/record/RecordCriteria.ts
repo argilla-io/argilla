@@ -132,7 +132,13 @@ export class RecordCriteria {
     this.searchText = this.committed.searchText;
     this.metadata = this.committed.metadata;
     this.sortBy = this.committed.sortBy;
-    this._similaritySearch = this.committed.similaritySearch;
+
+    this.similaritySearch.complete(
+      this.committed.similaritySearch.recordId,
+      this.committed.similaritySearch.vectorName,
+      this.committed.similaritySearch.limit,
+      this.committed.similaritySearch.order
+    );
   }
 
   resetFiltersAndSortBy() {
