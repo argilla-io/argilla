@@ -64,6 +64,7 @@ def test_dataset():
 
 @pytest.mark.asyncio
 class TestFilteredRemoteFeedbackDataset:
+    @pytest.mark.skip(reason="Avoid using factory tests")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     @pytest.mark.parametrize(
         "statuses, expected_num_records",
@@ -106,7 +107,7 @@ class TestFilteredRemoteFeedbackDataset:
             (FloatMetadataFilter(name="float-metadata", le=5.0), 100),
         ],
     )
-    async def test_filter_by_metadata(
+    def test_filter_by_metadata(
         self,
         owner: User,
         test_dataset: FeedbackDataset,
@@ -179,6 +180,7 @@ class TestFilteredRemoteFeedbackDataset:
 
         assert records == other_records
 
+    @pytest.mark.skip(reason="Avoid using factory tests")
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_attributes(self, role: UserRole) -> None:
         dataset = await DatasetFactory.create()
@@ -264,7 +266,7 @@ class TestFilteredRemoteFeedbackDataset:
         ):
             remote.filter_by(metadata_filters=IntegerMetadataFilter(name="unexpected-field", ge=4, le=5))
 
-    def _create_test_dataset_with_records(self, owner, test_dataset):
+    def _create_test_dataset_with_records(self, owner: User, test_dataset: FeedbackDataset):
         api.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
         remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)

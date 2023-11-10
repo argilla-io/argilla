@@ -14,13 +14,13 @@
 
 import dataclasses
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
-from argilla.server.search_engine import (
-    SearchEngine,
-)
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine
+from argilla.server.models import VectorSettings
+from argilla.server.search_engine import SearchEngine
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
 from argilla.server.settings import settings
 
 
@@ -65,11 +65,50 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             "number_of_replicas": self.number_of_replicas,
         }
 
+    def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
+        return {
+            field_name_for_vector_settings(vector_settings): {
+                "type": "dense_vector",
+                "dims": vector_settings.dimensions,
+                "index": True,
+                # can similarity property also be part of config @frascuchon ?
+                # relates vector search similarity metric
+                # "similarity": "l2_norm",  ## default value regarding the knn best practices es documentation
+                "similarity": "cosine",
+            }
+        }
+
+    async def _request_similarity_search(
+        self,
+        index: str,
+        vector_settings: VectorSettings,
+        value: List[float],
+        k: int,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
+    ) -> dict:
+        knn_query = {
+            "field": field_name_for_vector_settings(vector_settings),
+            "query_vector": value,
+            "k": k,
+            "num_candidates": _compute_num_candidates_from_k(k=k),
+        }
+
+        bool_filter_query = {}
+        if query_filters:
+            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
+        if excluded_id:
+            bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
+
+        if bool_filter_query:
+            knn_query["filter"] = {"bool": bool_filter_query}
+        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True, size=k)
+
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(index=index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         await self.client.update(index=index_name, id=id, **body)
@@ -106,4 +145,4 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             raise RuntimeError(errors)
 
     async def _refresh_index_request(self, index_name: str):
-        await self.client.indices.refresh(index_name)
+        await self.client.indices.refresh(index=index_name)

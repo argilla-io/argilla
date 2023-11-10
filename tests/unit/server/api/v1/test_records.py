@@ -40,6 +40,8 @@ from tests.factories import (
     TermsMetadataPropertyFactory,
     TextQuestionFactory,
     UserFactory,
+    VectorFactory,
+    VectorSettingsFactory,
     WorkspaceFactory,
 )
 
@@ -78,13 +80,60 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
+    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+    async def test_get_record(self, async_client: "AsyncClient", role: UserRole):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": None,
+            "suggestions": [],
+            "vectors": None,
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+
+    async def test_get_record_without_authentication(self, async_client: "AsyncClient"):
+        record = await RecordFactory.create()
+
+        response = await async_client.get(f"/api/v1/records/{record.id}")
+
+        assert response.status_code == 401
+
+    @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
+    async def test_get_record_as_restricted_user_from_different_workspace(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+        user = await UserFactory.create(role=role)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+
+        assert response.status_code == 403
+
+    async def test_get_record_with_nonexistent_record_id(self, async_client: "AsyncClient", owner_auth_header: dict):
+        await RecordFactory.create()
+
+        response = await async_client.get(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+
+        assert response.status_code == 404
+
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+        question_0 = await TextQuestionFactory.create(dataset=dataset)
         question_1 = await TextQuestionFactory.create(dataset=dataset)
         question_2 = await TextQuestionFactory.create(dataset=dataset)
-        question_3 = await TextQuestionFactory.create(dataset=dataset)
         await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
         await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
         await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
@@ -92,9 +141,14 @@ class TestSuiteRecords:
             dataset=dataset,
             metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
         )
-        await SuggestionFactory.create(question=question_1, record=record, value="suggestion 1")
-        await SuggestionFactory.create(question=question_2, record=record, value="suggestion 2")
-        await SuggestionFactory.create(question=question_3, record=record, value="suggestion 3")
+        await SuggestionFactory.create(question=question_0, record=record, value="suggestion 1")
+        await SuggestionFactory.create(question=question_1, record=record, value="suggestion 2")
+        await SuggestionFactory.create(question=question_2, record=record, value="suggestion 3")
+        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        await VectorFactory.create(record=record, vector_settings=vector_settings_0, value=[1, 1, 1, 1, 1])
+        await VectorFactory.create(record=record, vector_settings=vector_settings_1, value=[2, 2, 2, 2, 2])
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -108,14 +162,18 @@ class TestSuiteRecords:
                 },
                 "suggestions": [
                     {
-                        "question_id": str(question_1.id),
+                        "question_id": str(question_0.id),
                         "value": "suggestion updated 1",
                     },
                     {
-                        "question_id": str(question_2.id),
+                        "question_id": str(question_1.id),
                         "value": "suggestion updated 2",
                     },
                 ],
+                "vectors": {
+                    vector_settings_0.name: [10, 10, 10, 10, 10],
+                    vector_settings_2.name: [3, 3, 3, 3, 3],
+                },
             },
         )
 
@@ -133,7 +191,7 @@ class TestSuiteRecords:
             "responses": None,
             "suggestions": [
                 {
-                    "question_id": str(question_1.id),
+                    "question_id": str(question_0.id),
                     "type": None,
                     "score": None,
                     "value": "suggestion updated 1",
@@ -141,7 +199,7 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[0].id),
                 },
                 {
-                    "question_id": str(question_2.id),
+                    "question_id": str(question_1.id),
                     "type": None,
                     "score": None,
                     "value": "suggestion updated 2",
@@ -149,6 +207,11 @@ class TestSuiteRecords:
                     "id": str(record.suggestions[1].id),
                 },
             ],
+            "vectors": {
+                vector_settings_0.name: [10.0, 10.0, 10.0, 10.0, 10.0],
+                vector_settings_1.name: [2.0, 2.0, 2.0, 2.0, 2.0],
+                vector_settings_2.name: [3.0, 3.0, 3.0, 3.0, 3.0],
+            },
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -169,9 +232,7 @@ class TestSuiteRecords:
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
             headers=owner_auth_header,
-            json={
-                "metadata": None,
-            },
+            json={"metadata": None},
         )
 
         assert response.status_code == 200
@@ -182,6 +243,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -207,6 +269,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -232,6 +295,7 @@ class TestSuiteRecords:
             "external_id": record.external_id,
             "responses": None,
             "suggestions": [],
+            "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
@@ -244,19 +308,19 @@ class TestSuiteRecords:
                 TermsMetadataPropertyFactory,
                 "a",
                 "z",
-                "'name' metadata property validation failed because 'z' is not an allowed term.",
+                "metadata is not valid: 'name' metadata property validation failed because 'z' is not an allowed term.",
             ),
             (
                 IntegerMetadataPropertyFactory,
                 10,
                 "wrong-integer",
-                "'name' metadata property validation failed because 'wrong-integer' is not an integer.",
+                "metadata is not valid: 'name' metadata property validation failed because 'wrong-integer' is not an integer.",
             ),
             (
                 FloatMetadataPropertyFactory,
                 13.3,
                 "wrong-float",
-                "'name' metadata property validation failed because 'wrong-float' is not a float.",
+                "metadata is not valid: 'name' metadata property validation failed because 'wrong-float' is not a float.",
             ),
         ],
     )
@@ -309,10 +373,11 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"'extra-metadata' metadata property does not exists for dataset '{dataset.id}' and extra metadata is not allowed for this dataset"
+            "detail": "metadata is not valid: 'extra-metadata' metadata property does not exists for dataset "
+            f"'{dataset.id}' and extra metadata is not allowed for this dataset"
         }
 
-    async def test_update_record_with_not_valid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_record_with_invalid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         question = await LabelSelectionQuestionFactory.create(dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
@@ -329,7 +394,23 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+            "detail": f"suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid option.\nValid options are: ['option1', 'option2', 'option3']"
+        }
+
+    async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"vectors": {vector_settings.name: [1, 2, 3, 4, 5, 6]}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
         }
 
     async def test_update_record_with_suggestion_for_nonexistent_question(
@@ -352,7 +433,24 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+            "detail": f"suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+        }
+
+    async def test_update_record_with_nonexistent_vector_settings(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"vectors": {"i-do-not-exist": [1, 2, 3, 4, 5, 6]}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_record_with_duplicate_suggestions_question_ids(
@@ -374,7 +472,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Found duplicate suggestions question IDs"}
+        assert response.json() == {"detail": "found duplicate suggestions question IDs"}
 
     async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()
@@ -459,7 +557,7 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
         assert response.status_code == 422
-        assert response.json() == {"detail": "Missing required question: 'input_ok'"}
+        assert response.json() == {"detail": "missing question with name=input_ok"}
 
     @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
     async def test_create_record_response_with_missing_required_questions(
@@ -619,9 +717,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Error: found responses for non configured questions: ['unknown_question']"
-        }
+        assert response.json() == {"detail": "found responses for non configured questions: ['unknown_question']"}
 
     @pytest.mark.parametrize(
         "create_questions_func, responses, expected_error_msg",
@@ -905,7 +1001,7 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Error: found responses for non configured questions: ['wrong_question']"}
+        assert response.json() == {"detail": "found responses for non configured questions: ['wrong_question']"}
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])

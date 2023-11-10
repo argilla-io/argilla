@@ -14,11 +14,13 @@
 
 import dataclasses
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
 
+from argilla.server.models import VectorSettings
 from argilla.server.search_engine.base import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
 from argilla.server.settings import settings
 
 
@@ -50,10 +52,54 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _configure_index_settings(self):
         return {
+            "index.knn": False,
             "max_result_window": self.max_result_window,
             "number_of_shards": self.number_of_shards,
             "number_of_replicas": self.number_of_replicas,
         }
+
+    def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
+        return {
+            field_name_for_vector_settings(vector_settings): {
+                "type": "knn_vector",
+                "dimension": vector_settings.dimensions,
+                "method": {
+                    "name": "hnsw",
+                    "engine": "lucene",  # See https://opensearch.org/blog/Expanding-k-NN-with-Lucene-aNN/
+                    "space_type": "cosinesimil",
+                    "parameters": {"m": 2, "ef_construction": 4},
+                },
+            }
+        }
+
+    async def _request_similarity_search(
+        self,
+        index: str,
+        vector_settings: VectorSettings,
+        value: List[float],
+        k: int,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
+    ) -> dict:
+        knn_query = {"vector": value, "k": k}
+
+        bool_filter_query = {}
+        if query_filters:
+            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
+        if excluded_id:
+            # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
+            # Will work from Opensearch >= v2.4.0
+            knn_query.update({"filter": {"bool": {"must_not": [{"ids": {"values": [str(excluded_id)]}}]}}})
+
+        body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
+
+        if bool_filter_query:
+            # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not
+            # created for requested user (with exists query clauses). This is not happening with Elasticsearch.
+            # The only way make it work is to use them as a post_filter.
+            body["post_filter"] = {"bool": bool_filter_query}
+
+        return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
         await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))

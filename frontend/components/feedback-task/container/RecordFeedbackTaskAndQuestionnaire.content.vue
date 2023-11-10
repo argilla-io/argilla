@@ -1,27 +1,30 @@
 <template>
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
   <div v-else class="wrapper">
-    <template v-if="!!record">
-      <RecordFeedbackTaskComponent
-        :key="`${record.id}_fields`"
-        :recordStatus="record.status"
-        :fields="record.fields"
-      />
-
-      <QuestionsFormComponent
-        :key="`${record.id}_questions`"
-        class="question-form"
-        :class="statusClass"
-        :datasetId="recordCriteria.datasetId"
+    <section class="wrapper__records">
+      <DatasetFiltersComponent :recordCriteria="recordCriteria" />
+      <RecordFieldsAndSimilarity
+        v-if="!!record"
+        :datasetVectors="datasetVectors"
+        :records="records"
+        :recordCriteria="recordCriteria"
         :record="record"
-        @on-submit-responses="goToNext"
-        @on-discard-responses="goToNext"
       />
-    </template>
+      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+      </div>
+    </section>
 
-    <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
-      <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-    </div>
+    <QuestionsFormComponent
+      v-if="!!record"
+      :key="`${record.id}_questions`"
+      class="wrapper__form"
+      :class="statusClass"
+      :datasetId="recordCriteria.datasetId"
+      :record="record"
+      @on-submit-responses="goToNext"
+      @on-discard-responses="goToNext"
+    />
   </div>
 </template>
 
@@ -52,7 +55,7 @@ export default {
     noRecordsMessage() {
       const { status } = this.recordCriteria.committed;
 
-      if (this.recordCriteria.isFilteringByText)
+      if (this.recordCriteria.isFilteredByText)
         return `You have no ${status} records matching the search input`;
 
       return `You have no ${status} records`;
@@ -152,8 +155,8 @@ export default {
       }, 100);
     },
   },
-  setup() {
-    return useRecordFeedbackTaskViewModel();
+  setup(props) {
+    return useRecordFeedbackTaskViewModel(props);
   },
   mounted() {
     this.$root.$on("on-change-record-page", this.onChangeRecordPage);
@@ -175,13 +178,35 @@ export default {
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: $base-space * 2;
   height: 100%;
+  gap: $base-space * 2;
+  padding: $base-space * 2;
+  @include media("<desktop") {
+    flex-flow: column;
+    overflow: auto;
+  }
+  &__records,
+  &__form {
+    @include media("<desktop") {
+      overflow: visible;
+      height: auto;
+      max-height: none !important;
+    }
+  }
+  &__records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 2;
+    height: 100%;
+    min-width: 0;
+  }
   &__text {
     color: $black-54;
   }
   &--empty {
     width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -14,18 +14,26 @@
 
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
+from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator
 from pydantic.generics import GenericModel
 
-from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
-from argilla.server.models import Dataset, MetadataProperty, Record, Response, User
+from argilla.server.enums import (
+    MetadataPropertyType,
+    RecordSortField,
+    ResponseStatus,
+    ResponseStatusFilter,
+    SimilarityOrder,
+    SortOrder,
+)
+from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
-    "StringQuery",
+    "UserResponse",
+    "TextQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
     "IntegerMetadataFilter",
@@ -41,7 +49,12 @@ __all__ = [
 ]
 
 
-class StringQuery(BaseModel):
+class UserResponse(BaseModel):
+    values: Optional[Dict[str, Any]]
+    status: ResponseStatus
+
+
+class TextQuery(BaseModel):
     q: str
     field: Optional[str] = None
 
@@ -232,7 +245,7 @@ class SearchEngine(metaclass=ABCMeta):
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         # TODO(@frascuchon): The search records method should receive a generic list of filters
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
@@ -244,4 +257,27 @@ class SearchEngine(metaclass=ABCMeta):
 
     @abstractmethod
     async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
+        pass
+
+    async def configure_index_vectors(self, vector_settings: VectorSettings):
+        pass
+
+    @abstractmethod
+    async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
+        pass
+
+    @abstractmethod
+    async def similarity_search(
+        self,
+        dataset: Dataset,
+        vector_settings: VectorSettings,
+        value: Optional[List[float]] = None,
+        record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
+        max_results: int = 100,
+        order: SimilarityOrder = SimilarityOrder.most_similar,
+        threshold: Optional[float] = None,
+    ) -> SearchResponses:
         pass

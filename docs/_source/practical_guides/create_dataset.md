@@ -174,6 +174,25 @@ dataset = rg.FeedbackDataset(
 )
 ```
 
+After having defined the dataset, it is possible to get their dedicated properties via the `field_by_name`, `question_by_name` and `metadata_property_by_name` methods:
+
+```python
+ds.field_by_name("question")
+# rg.TextField(name="question")
+ds.question_by_name("answer_quality")
+# rg.RatingQuestion(
+#     name="answer_quality",
+#     description="How would you rate the quality of the answer?",
+#     values=[1, 2, 3, 4, 5],
+# )
+ds.metadata_property_by_name("groups")
+# rg.TermsMetadataProperty(
+#     name="groups",
+#     title="Annotation groups",
+#     values=["group-a", "group-b", "group-c"]
+# )
+```
+
 ```{note}
 After configuring your dataset, you can still edit the main information such as field titles, questions, descriptions, and markdown format from the UI. More info in [dataset settings](/reference/webapp/pages).
 ```
@@ -185,6 +204,7 @@ Fields and questions in the UI follow the order in which these are added to the 
 ```{hint}
 If you are working as part of an annotation team and you would like to control how much overlap you'd like to have between your annotators, you should consider the different workflows in the [Set up your annotation team guide](/installation/configurations/workspace_management) before configuring and pushing your dataset.
 ```
+
 
 #### Push to Argilla
 

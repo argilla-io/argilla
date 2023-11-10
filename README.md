@@ -249,16 +249,7 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 
 ## 🏘️ Community
 
-<iframe
-  src="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB"
-  width="100%"
-  height="600px"
-  frameborder="0"
-  style="border: 1px solid #bfcbda88; border-radius: 4px;"
-  allowfullscreen=""
-  aria-hidden="false"
-  tabindex="0"
-></iframe>
+🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
 🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
 
