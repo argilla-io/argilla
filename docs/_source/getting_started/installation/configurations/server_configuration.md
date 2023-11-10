@@ -4,7 +4,7 @@ This section explains advanced operations and settings for running the Argilla S
 
 By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at `http://localhost:9200`. You can customize this by setting the `ARGILLA_ELASTICSEARCH` environment variable. Have a look at the list of available [environment variables](#environment-variables) to further configure the Argilla server.
 
-From the Argilla version `1.19.0`, you must setup the search engine manually work with Feedback datasets. You should set the
+From the Argilla version `1.19.0`, you must set up the search engine manually to work with Feedback datasets. You should set the
 environment variable `ARGILLA_SEARCH_ENGINE=opensearch` or `ARGILLA_SEARCH_ENGINE=elasticsearch` depending on the backend you're using
 The default value for this variable is set to `elasticsearch`. The minimal version for Elasticsearch is `8.5.0`, and for Opensearch is `2.4.0`.
 Please, review your backend and upgrade it if necessary.
