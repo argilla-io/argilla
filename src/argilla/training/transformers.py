@@ -366,6 +366,8 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._tokenized_eval_dataset = None
 
     def compute_metrics(self):
+        import collections
+
         import evaluate
         import numpy as np
         from transformers import AutoModelForQuestionAnswering
@@ -426,8 +428,6 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             func = compute_metrics
         elif AutoModelForQuestionAnswering:
             squad = evaluate.load("squad")
-
-            import collections
 
             # Copy from https://huggingface.co/learn/nlp-course/chapter7/7?fw=pt#fine-tuning-the-model-with-the-trainer-api
             n_best = 20
