@@ -38,6 +38,10 @@ export abstract class FilterWithOption extends Filter {
     return this.selectedOptions.length > 0;
   }
 
+  get valueParams() {
+    return this.selectedOptions.map((option) => option.label).join(",");
+  }
+
   completeMetadata(value: string) {
     value.split(",").forEach((label) => {
       const option = this.options.find((option) => option.label === label);
@@ -67,6 +71,10 @@ export abstract class FilterWithScore extends Filter {
 
   get isAnswered(): boolean {
     return this.value.ge !== this.min || this.value.le !== this.max;
+  }
+
+  get valueParams() {
+    return JSON.stringify(this.value);
   }
 
   completeMetadata(value: string) {

@@ -6,7 +6,7 @@
         :active-badge="activeBadge === badge && isActive"
         v-for="badge in visibleBadges"
         :key="badge.name"
-        :text="badge.title"
+        :text="badge.title ?? badge.name"
         @on-click="onClickOnBadge(badge, $event)"
         @on-clear="onClickOnClear(badge, $event)"
       ></FilterBadge>

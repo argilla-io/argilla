@@ -15,9 +15,9 @@
       <span slot="dropdown-content" class="responses-filter__container">
         <CategoriesSelector
           v-if="!selectedResponse"
+          name="responsesCategories"
           class="responses-filter__categories"
-          :categories="questionFilters.questions"
-          name="metadataCategories"
+          :categories="questionFilters.responses"
           @select-category="selectResponse"
         />
         <template v-else>
@@ -44,11 +44,20 @@ export default {
       type: Array,
       required: true,
     },
+    responseFiltered: {
+      type: Array,
+      required: true,
+    },
+  },
+  model: {
+    prop: "responseFiltered",
+    event: "onResponseFilteredChanged",
   },
   data() {
     return {
       visibleDropdown: false,
       selectedResponse: null,
+      appliedCategoriesFilters: [],
     };
   },
   methods: {
@@ -59,6 +68,20 @@ export default {
     selectResponse(response) {
       this.selectedResponse = response;
     },
+    applyFilter() {
+      this.visibleDropdown = false;
+
+      this.filter();
+    },
+    filter() {
+      if (!this.questionFilters.hasChangesSinceLatestCommit) return;
+
+      const newFilter = this.questionFilters.commit();
+
+      this.$emit("onResponseFilteredChanged", newFilter);
+
+      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+    },
     openResponseFilter(response) {
       this.visibleDropdown = this.visibleDropdown
         ? response !== this.selectedResponse
@@ -66,12 +89,53 @@ export default {
 
       this.selectResponse(response);
     },
-    clearResponseFilter() {
-      this.$emit("remove-suggestion-filter");
+    clearResponseFilter(response) {
+      response.clear();
+
+      this.applyFilter();
     },
-    clearAllResponseFilter() {
+    clearAllResponseFilter(responses) {
       this.$emit("clear-all-suggestion-filter");
     },
+    updateAppliedCategoriesFromMetadataFilter() {
+      if (!this.questionFilters) return;
+
+      this.questionFilters.initializeWith(this.responseFiltered);
+
+      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+    },
+  },
+  watch: {
+    visibleDropdown() {
+      if (!this.visibleDropdown) {
+        this.debounce.stop();
+
+        this.filter();
+      }
+    },
+    "questionFilters.responses": {
+      deep: true,
+      async handler() {
+        this.debounce.stop();
+
+        await this.debounce.wait();
+
+        this.filter();
+      },
+    },
+    responseFiltered() {
+      if (
+        !this.questionFilters.hasChangesSinceLatestCommitWith(
+          this.responseFiltered
+        )
+      )
+        return;
+
+      this.updateAppliedCategoriesFromMetadataFilter();
+    },
+  },
+  created() {
+    this.updateAppliedCategoriesFromMetadataFilter();
   },
   setup(props) {
     return useResponseFilterViewModel(props);

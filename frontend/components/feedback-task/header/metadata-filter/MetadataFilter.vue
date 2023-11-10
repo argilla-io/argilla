@@ -13,7 +13,7 @@
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory"
           @click-on-badge="openCategoryFilter"
-          @click-on-clear="removeCategoryFilters"
+          @click-on-clear="clearCategoryFilter"
           @click-on-clear-all="clearAllCategories"
           :name="$t('metadata')"
         />
@@ -25,9 +25,9 @@
       >
         <CategoriesSelector
           v-if="!visibleCategory"
+          name="metadataCategories"
           class="metadata-filter__categories"
           :categories="metadataFilters.categories"
-          name="metadataCategories"
           @select-category="selectMetadataCategory"
         />
         <template v-else>
@@ -76,7 +76,6 @@ export default {
     return {
       visibleDropdown: false,
       visibleCategory: null,
-      selectedOptions: [],
       appliedCategoriesFilters: [],
     };
   },
@@ -109,7 +108,7 @@ export default {
 
       this.selectMetadataCategory(category);
     },
-    removeCategoryFilters(category) {
+    clearCategoryFilter(category) {
       category.clear();
 
       this.applyFilter();

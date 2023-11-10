@@ -7,6 +7,7 @@ interface CommittedRecordCriteria {
   searchText: string;
   metadata: string[];
   sortBy: string[];
+  response: string[];
   similaritySearch: SimilarityCriteria;
 }
 
@@ -24,9 +25,18 @@ export class RecordCriteria {
     public searchText: string,
     public metadata: string[],
     public sortBy: string[],
+    public response: string[],
     similaritySearch: string
   ) {
-    this.complete(page, status, searchText, metadata, sortBy, similaritySearch);
+    this.complete(
+      page,
+      status,
+      searchText,
+      metadata,
+      sortBy,
+      response,
+      similaritySearch
+    );
 
     this.commit();
   }
@@ -66,6 +76,7 @@ export class RecordCriteria {
     if (this.committed.searchText !== this.searchText) return true;
     if (!this.areEquals(this.metadata, this.committed.metadata)) return true;
     if (!this.areEquals(this.sortBy, this.committed.sortBy)) return true;
+    if (!this.areEquals(this.response, this.committed.response)) return true;
     if (!this.similaritySearch.isEqual(this.committed.similaritySearch))
       return true;
 
@@ -78,6 +89,7 @@ export class RecordCriteria {
     searchText: string,
     metadata: string[],
     sortBy: string[],
+    response: string[],
     similaritySearch: string
   ) {
     this.isChangingAutomatically = true;
@@ -87,6 +99,7 @@ export class RecordCriteria {
     this.searchText = searchText ?? "";
     this.metadata = metadata ?? [];
     this.sortBy = sortBy ?? [];
+    this.response = response ?? [];
     this._similaritySearch = new SimilarityCriteria();
 
     if (similaritySearch) {
@@ -120,6 +133,7 @@ export class RecordCriteria {
       searchText: this.searchText,
       metadata: this.metadata,
       sortBy: this.sortBy,
+      response: this.response,
       similaritySearch: similaritySearchCommitted,
     };
 
@@ -132,12 +146,14 @@ export class RecordCriteria {
     this.searchText = this.committed.searchText;
     this.metadata = this.committed.metadata;
     this.sortBy = this.committed.sortBy;
+    this.response = this.committed.response;
     this._similaritySearch = this.committed.similaritySearch;
   }
 
-  resetFiltersAndSortBy() {
+  resetFilters() {
     this.metadata = [];
     this.sortBy = [];
+    this.response = [];
   }
 
   nextPage() {

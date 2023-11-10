@@ -43,7 +43,7 @@
                 @click="selectConfiguration(null)"
               >
                 <span
-                  >{{ $t(selectedConfiguration.name) }} - ({{
+                  >{{ selectedConfiguration.name }} - ({{
                     selectedSuggestion.name
                   }})</span
                 >

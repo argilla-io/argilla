@@ -22,7 +22,7 @@
       <BaseButton
         v-if="isAnyFilterActive || isSortedBy"
         class="small clear filters__reset-button"
-        @on-click="resetFiltersAndSortBy()"
+        @on-click="resetFilters()"
         >{{ $t("reset") }}</BaseButton
       >
       <p v-if="shouldShowTotalRecords" class="filters__total-records">
@@ -40,7 +40,7 @@
           />
           <ResponsesFilter
             :datasetQuestions="datasetQuestions"
-            v-model="recordCriteria.metadata"
+            v-model="recordCriteria.response"
           />
           <SuggestionFilter :datasetQuestions="datasetQuestions" />
         </div>
@@ -100,8 +100,8 @@ export default {
     toggleVisibilityOfFilters() {
       this.visibleFilters = !this.visibleFilters;
     },
-    resetFiltersAndSortBy() {
-      this.recordCriteria.resetFiltersAndSortBy();
+    resetFilters() {
+      this.recordCriteria.resetFilters();
     },
   },
   watch: {
@@ -115,6 +115,9 @@ export default {
       this.newFiltersChanged();
     },
     "recordCriteria.sortBy"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.response"() {
       this.newFiltersChanged();
     },
   },

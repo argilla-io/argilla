@@ -115,6 +115,7 @@ export class MetadataFilterList {
     return this.filteredMetadata;
   }
 
+  // TODO: change encapsulation
   findByCategory(category: string) {
     return this.metadata.find((cat) => cat.name === category);
   }
