@@ -13,7 +13,8 @@ export class FieldRepository {
   async getFields(datasetId: string): Promise<BackendField[]> {
     try {
       const { data } = await this.axios.get<Response<BackendField[]>>(
-        `/v1/datasets/${datasetId}/fields`
+        `/v1/datasets/${datasetId}/fields`,
+        { headers: { "cache-control": "max-age=120" } }
       );
 
       return data.items;
