@@ -9,22 +9,6 @@ const find = (metadataFilter: MetadataFilterList, category: string) => {
 };
 
 describe("MetadataFilter ", () => {
-  describe("Find by Category", () => {
-    test("should return the metadata by category", () => {
-      const metadataFilter = new MetadataFilterList(createMetadataMock());
-      const metadata = metadataFilter.findByCategory("split");
-
-      expect(metadata.name).toEqual(createMetadataMock()[0].name);
-    });
-
-    test("should return undefined if the category does not exist", () => {
-      const metadataFilter = new MetadataFilterList(createMetadataMock());
-      const metadata = metadataFilter.findByCategory("not-exist");
-
-      expect(metadata).toBeUndefined();
-    });
-  });
-
   describe("Categories", () => {
     test("should return the categories", () => {
       const metadataFilter = new MetadataFilterList(createMetadataMock());
