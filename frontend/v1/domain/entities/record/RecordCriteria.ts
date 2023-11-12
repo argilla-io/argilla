@@ -1,6 +1,7 @@
 import { SimilarityCriteria } from "../similarity/SimilarityCriteria";
 import { SortCriteria } from "../metadata/SortCriteria";
 import { MetadataCriteria } from "../metadata/MetadataCriteria";
+import { ResponseCriteria } from "../response/ResponseCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
 interface CommittedRecordCriteria {
@@ -9,7 +10,7 @@ interface CommittedRecordCriteria {
   searchText: string;
   metadata: MetadataCriteria;
   sortBy: SortCriteria;
-  response: string[];
+  response: ResponseCriteria;
   suggestion: string[];
   similaritySearch: SimilarityCriteria;
 }
@@ -20,6 +21,7 @@ export class RecordCriteria {
 
   public metadata: MetadataCriteria;
   public sortBy: SortCriteria;
+  public response: ResponseCriteria;
   public similaritySearch: SimilarityCriteria;
 
   constructor(
@@ -29,12 +31,13 @@ export class RecordCriteria {
     public searchText: string,
     metadata: string,
     sortBy: string,
-    public response: string[],
+    response: string,
     public suggestion: string[],
     similaritySearch: string
   ) {
     this.metadata = new MetadataCriteria();
     this.sortBy = new SortCriteria();
+    this.response = new ResponseCriteria();
     this.similaritySearch = new SimilarityCriteria();
 
     this.complete(
@@ -80,10 +83,11 @@ export class RecordCriteria {
     if (this.committed.status !== this.status) return true;
 
     if (this.committed.searchText !== this.searchText) return true;
-    if (!this.areEquals(this.response, this.committed.response)) return true;
+
     if (!this.areEquals(this.suggestion, this.committed.suggestion))
       return true;
 
+    if (!this.response.isEqual(this.committed.response)) return true;
     if (!this.metadata.isEqual(this.committed.metadata)) return true;
     if (!this.sortBy.isEqual(this.committed.sortBy)) return true;
     if (!this.similaritySearch.isEqual(this.committed.similaritySearch))
@@ -98,7 +102,7 @@ export class RecordCriteria {
     searchText: string,
     metadata: string,
     sortBy: string,
-    response: string[],
+    response: string,
     suggestion: string[],
     similaritySearch: string
   ) {
@@ -107,11 +111,12 @@ export class RecordCriteria {
     this.page = Number(page ?? 1);
     this.status = status ?? "pending";
     this.searchText = searchText ?? "";
-    this.response = response ?? [];
+
     this.suggestion = suggestion ?? [];
 
     this.metadata.complete(metadata);
     this.sortBy.complete(sortBy);
+    this.response.complete(response);
     this.similaritySearch.complete(similaritySearch);
   }
 
@@ -120,6 +125,7 @@ export class RecordCriteria {
     const similaritySearchCommitted = new SimilarityCriteria();
     const metadataCommitted = new MetadataCriteria();
     const sortByCommitted = new SortCriteria();
+    const responseCommitted = new ResponseCriteria();
 
     similaritySearchCommitted.withValue(
       this.similaritySearch.recordId,
@@ -129,15 +135,17 @@ export class RecordCriteria {
     );
     metadataCommitted.withValue(this.metadata.value);
     sortByCommitted.witValue(this.sortBy.value);
+    responseCommitted.withValue(this.response.value);
 
     this.committed = {
       page: this.page,
       status: this.status,
       searchText: this.searchText,
-      response: this.response,
       suggestion: this.suggestion,
+
       metadata: metadataCommitted,
       sortBy: sortByCommitted,
+      response: responseCommitted,
       similaritySearch: similaritySearchCommitted,
     };
 
@@ -163,10 +171,10 @@ export class RecordCriteria {
   }
 
   reset() {
-    this.response = [];
     this.suggestion = [];
     this.metadata.reset();
     this.sortBy.reset();
+    this.response.reset();
   }
 
   nextPage() {

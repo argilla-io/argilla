@@ -140,6 +140,8 @@ export class MetadataSortList {
   }
 
   complete(sort: SortSearch[]) {
+    if (!this.hasDifferencesWith(sort)) return;
+
     this.clear();
 
     if (!sort.length) return;

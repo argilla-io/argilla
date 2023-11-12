@@ -1,6 +1,11 @@
 import { FilterWithOption } from "../common/Filter";
 import { Question } from "../question/Question";
 
+export interface ResponseSearch {
+  name: string;
+  value: string[];
+}
+
 class ResponseFilter extends FilterWithOption {
   constructor(question: Question) {
     super(
@@ -15,7 +20,7 @@ class ResponseFilter extends FilterWithOption {
 export class ResponseFilterList {
   public readonly responses: ResponseFilter[];
   private readonly filteredResponses: ResponseFilter[] = [];
-  private latestCommit: string[] = [];
+  private latestCommit: ResponseSearch[] = [];
 
   constructor(questions: Question[]) {
     this.responses = questions
@@ -37,39 +42,36 @@ export class ResponseFilterList {
     if (this.filtered.some((f) => !this.filteredResponses.includes(f)))
       return true;
 
-    return this.hasChangesSinceLatestCommitWith(this.convertToRouteParam());
+    return this.hasChangesSinceLatestCommitWith(this.createCommit());
   }
 
-  hasChangesSinceLatestCommitWith(compare: string[]) {
-    return this.latestCommit.join("") !== compare.join("");
+  hasChangesSinceLatestCommitWith(compare: ResponseSearch[]) {
+    return JSON.stringify(this.latestCommit) !== JSON.stringify(compare);
   }
 
-  commit(): string[] {
+  commit(): ResponseSearch[] {
     this.synchronizeFilteredMetadata();
 
-    this.latestCommit = this.convertToRouteParam();
+    this.latestCommit = this.createCommit();
 
     return this.latestCommit;
   }
 
-  initializeWith(params: string[]) {
+  complete(params: ResponseSearch[]) {
+    if (!this.hasChangesSinceLatestCommitWith(params)) return;
+
     this.responses.forEach((m) => m.clear());
 
     if (!params.length) return;
 
-    const responsesFilter = params.map((metadata) => {
-      const [name, value] = metadata.split(/:(.*)/s);
-      return { name, value };
-    });
+    params.forEach(({ name, value }) => {
+      const response = this.findByCategory(name);
+      if (response) {
+        response.completeMetadata(value);
 
-    responsesFilter.forEach(({ name, value }) => {
-      const metadata = this.findByCategory(name);
-      if (metadata) {
-        metadata.completeMetadata(value);
+        if (this.filteredResponses.includes(response)) return;
 
-        if (this.filteredResponses.includes(metadata)) return;
-
-        this.filteredResponses.push(metadata);
+        this.filteredResponses.push(response);
       }
     });
 
@@ -98,17 +100,11 @@ export class ResponseFilterList {
     });
   }
 
-  private convertToRouteParam(): string[] {
-    return this.toQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
-  }
-
-  private toQueryParams() {
-    return this.filteredResponses.map((m) => {
+  private createCommit(): ResponseSearch[] {
+    return this.filteredResponses.map((metadata) => {
       return {
-        name: m.name,
-        value: m.valueParams,
+        name: metadata.name,
+        value: metadata.valueParams,
       };
     });
   }

@@ -38,12 +38,12 @@ export abstract class FilterWithOption extends Filter {
     return this.selectedOptions.length > 0;
   }
 
-  get valueParams() {
-    return this.selectedOptions.map((option) => option.label).join(",");
+  get valueParams(): string | string[] {
+    return this.selectedOptions.map((option) => option.label);
   }
 
-  completeMetadata(value: string) {
-    value.split(",").forEach((label) => {
+  completeMetadata(value: string[]) {
+    value.forEach((label) => {
       const option = this.options.find((option) => option.label === label);
       if (option) option.selected = true;
     });

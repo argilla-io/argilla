@@ -40,7 +40,7 @@
           />
           <ResponsesFilter
             :datasetQuestions="datasetQuestions"
-            v-model="recordCriteria.response"
+            v-model="recordCriteria.response.value"
           />
           <SuggestionFilter
             :datasetQuestions="datasetQuestions"
@@ -120,7 +120,7 @@ export default {
     "recordCriteria.sortBy.value"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.response"() {
+    "recordCriteria.response.value"() {
       this.newFiltersChanged();
     },
     "recordCriteria.suggestion"() {

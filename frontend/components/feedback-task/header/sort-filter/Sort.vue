@@ -108,8 +108,6 @@ export default {
       },
     },
     sortFilters() {
-      if (!this.metadataSort.hasDifferencesWith(this.sortFilters)) return;
-
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },

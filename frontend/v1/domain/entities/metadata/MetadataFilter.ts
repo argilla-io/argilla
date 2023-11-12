@@ -64,6 +64,7 @@ class MetadataFilter {
     if (!value) return;
 
     if (this.isTerms) {
+      // TODO: The base method resolve this
       const labels = value as string[];
       labels.forEach((label) => {
         const option = this.options.find((option) => option.label === label);
@@ -102,6 +103,10 @@ export class MetadataFilterList {
     return this.metadata;
   }
 
+  get filteredCategories() {
+    return this.filteredMetadata;
+  }
+
   get filtered() {
     return this.metadata.filter((m) => m.isAnswered);
   }
@@ -113,10 +118,6 @@ export class MetadataFilterList {
       return true;
 
     return this.hasChangesSinceLatestCommitWith(this.createCommit());
-  }
-
-  get filteredCategories() {
-    return this.filteredMetadata;
   }
 
   hasChangesSinceLatestCommitWith(compare: MetadataSearch[]) {

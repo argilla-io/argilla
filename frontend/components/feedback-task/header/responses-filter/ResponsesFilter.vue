@@ -100,7 +100,7 @@ export default {
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.questionFilters) return;
 
-      this.questionFilters.initializeWith(this.responseFiltered);
+      this.questionFilters.complete(this.responseFiltered);
 
       this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
     },
@@ -124,13 +124,6 @@ export default {
       },
     },
     responseFiltered() {
-      if (
-        !this.questionFilters.hasChangesSinceLatestCommitWith(
-          this.responseFiltered
-        )
-      )
-        return;
-
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },
