@@ -105,7 +105,8 @@ describe("Records", () => {
         1,
         "pending",
         "",
-        [],
+        "",
+        "",
         [],
         [],
         null
@@ -123,7 +124,8 @@ describe("Records", () => {
         10,
         "pending",
         "",
-        [],
+        "",
+        "",
         [],
         [],
         null
@@ -160,7 +162,8 @@ describe("Records", () => {
         10,
         "pending",
         "",
-        [],
+        "",
+        "",
         [],
         [],
         null
@@ -203,7 +206,8 @@ describe("Records", () => {
         3,
         "pending",
         "",
-        [],
+        "",
+        "",
         [],
         [],
         null
@@ -225,11 +229,11 @@ describe("Records", () => {
         3,
         "pending",
         "",
+        "",
+        "",
         [],
         [],
-        [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "record:1,vector:2,limit:50,order:most"
       );
       const records = new Records([]);
 
@@ -244,11 +248,11 @@ describe("Records", () => {
         3,
         "pending",
         "",
+        "",
+        "",
         [],
         [],
-        [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "record:1,vector:2,limit:50,order:most"
       );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 3),

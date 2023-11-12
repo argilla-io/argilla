@@ -62,9 +62,8 @@ export const useRoutes = () => {
     const funcToUse = Object.keys(actualQuery).length ? "push" : "replace";
     let newQuery = {};
 
-    params.forEach(({ key, value, encode }) => {
+    params.forEach(({ key, value }) => {
       if (!value) return;
-      if (encode) value = btoa(value);
 
       newQuery = {
         ...newQuery,
@@ -80,19 +79,8 @@ export const useRoutes = () => {
     });
   };
 
-  const getQueryParams = <T>(key: KindOfParam, decode = false): T => {
-    const param = route.value.query[key] as string;
-
-    if (!!param && decode) {
-      try {
-        return atob(param) as T;
-      } catch {
-        // Encrypted param changed manually
-        return undefined;
-      }
-    }
-
-    return param as T;
+  const getQueryParams = <T>(key: KindOfParam): T => {
+    return route.value.query[key] as T;
   };
 
   return {

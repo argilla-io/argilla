@@ -86,7 +86,7 @@ export default {
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.metadataSort) return;
 
-      this.metadataSort.initializeWith(this.sortFilters);
+      this.metadataSort.complete(this.sortFilters);
     },
   },
   watch: {

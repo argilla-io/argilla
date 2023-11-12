@@ -14,8 +14,10 @@ import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
+import { SortCriteria } from "~/v1/domain/entities/metadata/SortCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
+import { MetadataCriteria } from "~/v1/domain/entities/metadata/MetadataCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -253,8 +255,8 @@ export class RecordRepository {
     fromRecord: number,
     howMany: number,
     status: string,
-    metadata: string[],
-    sortBy: string[]
+    metadata: MetadataCriteria,
+    sortBy: SortCriteria
   ) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
@@ -268,11 +270,11 @@ export class RecordRepository {
 
     if (backendStatus === "missing") params.append("response_status", "draft");
 
-    metadata.forEach((query) => {
-      params.append("metadata", query);
+    metadata.backendParams.forEach((metadata) => {
+      params.append("metadata", metadata);
     });
 
-    sortBy.forEach((sort) => {
+    sortBy.backendParams.forEach((sort) => {
       params.append("sort_by", sort);
     });
 

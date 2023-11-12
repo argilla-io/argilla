@@ -1,6 +1,11 @@
 import { OptionForFilter, RangeValue } from "../common/Filter";
 import { Metadata } from "./Metadata";
 
+export interface MetadataSearch {
+  name: string;
+  value: string[] | RangeValue;
+}
+
 class MetadataFilter {
   public value: RangeValue;
   public options: OptionForFilter[] = [];
@@ -55,21 +60,20 @@ class MetadataFilter {
     return this.options.filter((option) => option.selected);
   }
 
-  completeMetadata(value: string) {
+  completeMetadata(value: string[] | RangeValue) {
+    if (!value) return;
+
     if (this.isTerms) {
-      value.split(",").forEach((label) => {
+      const labels = value as string[];
+      labels.forEach((label) => {
         const option = this.options.find((option) => option.label === label);
         if (option) option.selected = true;
       });
     } else {
-      try {
-        const { ge, le } = JSON.parse(value);
-        this.value.ge = ge;
-        this.value.le = le;
-      } catch (error) {
-        this.value.ge = this.settings.min;
-        this.value.le = this.settings.max;
-      }
+      const { ge, le } = value as RangeValue;
+
+      this.value.ge = ge;
+      this.value.le = le;
     }
   }
 
@@ -84,7 +88,7 @@ class MetadataFilter {
 export class MetadataFilterList {
   private readonly metadata: MetadataFilter[];
   private readonly filteredMetadata: MetadataFilter[] = [];
-  private latestCommit: string[] = [];
+  private latestCommit: MetadataSearch[] = [];
 
   constructor(metadata: Metadata[]) {
     this.metadata = metadata.map((m) => new MetadataFilter(m));
@@ -108,42 +112,35 @@ export class MetadataFilterList {
     if (this.filtered.some((f) => !this.filteredMetadata.includes(f)))
       return true;
 
-    return this.hasChangesSinceLatestCommitWith(this.convertToRouteParam());
+    return this.hasChangesSinceLatestCommitWith(this.createCommit());
   }
 
   get filteredCategories() {
     return this.filteredMetadata;
   }
 
-  // TODO: change encapsulation
-  findByCategory(category: string) {
-    return this.metadata.find((cat) => cat.name === category);
+  hasChangesSinceLatestCommitWith(compare: MetadataSearch[]) {
+    return JSON.stringify(this.latestCommit) !== JSON.stringify(compare);
   }
 
-  hasChangesSinceLatestCommitWith(compare: string[]) {
-    return this.latestCommit.join("") !== compare.join("");
-  }
-
-  commit(): string[] {
+  commit(): MetadataSearch[] {
     this.synchronizeFilteredMetadata();
 
-    this.latestCommit = this.convertToRouteParam();
+    this.latestCommit = this.createCommit();
 
     return this.latestCommit;
   }
 
-  initializeWith(params: string[]) {
+  complete(params: MetadataSearch[]) {
+    if (!this.hasChangesSinceLatestCommitWith(params)) return;
+
     this.metadata.forEach((m) => m.clear());
 
     if (!params.length) return;
 
-    const metadataFilter = params.map((metadata) => {
-      const [name, value] = metadata.split(/:(.*)/s);
-      return { name, value };
-    });
-
-    metadataFilter.forEach(({ name, value }) => {
+    params.forEach(({ name, value }) => {
       const metadata = this.findByCategory(name);
+
       if (metadata) {
         metadata.completeMetadata(value);
 
@@ -154,6 +151,24 @@ export class MetadataFilterList {
     });
 
     this.commit();
+  }
+
+  private createCommit(): MetadataSearch[] {
+    return this.filteredMetadata.map((metadata) => {
+      return {
+        name: metadata.name,
+        value: metadata.isTerms
+          ? metadata.selectedOptions.map((s) => s.label)
+          : {
+              ge: metadata.value.ge,
+              le: metadata.value.le,
+            },
+      };
+    });
+  }
+
+  private findByCategory(category: string) {
+    return this.metadata.find((cat) => cat.name === category);
   }
 
   private synchronizeFilteredMetadata() {
@@ -171,23 +186,6 @@ export class MetadataFilterList {
       const indexOf = this.filteredMetadata.indexOf(f);
 
       this.filteredMetadata.splice(indexOf, 1);
-    });
-  }
-
-  private convertToRouteParam(): string[] {
-    return this.toQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
-  }
-
-  private toQueryParams() {
-    return this.filteredMetadata.map((m) => {
-      return {
-        name: m.name,
-        value: m.isTerms
-          ? m.selectedOptions.map((s) => s.label).join(",")
-          : JSON.stringify(m.value),
-      };
     });
   }
 }

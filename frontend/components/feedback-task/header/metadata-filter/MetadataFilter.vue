@@ -123,7 +123,7 @@ export default {
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.metadataFilters) return;
 
-      this.metadataFilters.initializeWith(this.metadataFiltered);
+      this.metadataFilters.complete(this.metadataFiltered);
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
@@ -147,13 +147,7 @@ export default {
       },
     },
     metadataFiltered() {
-      if (
-        !this.metadataFilters.hasChangesSinceLatestCommitWith(
-          this.metadataFiltered
-        )
-      )
-        return;
-
+      debugger;
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },

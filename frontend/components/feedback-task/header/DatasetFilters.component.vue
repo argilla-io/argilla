@@ -17,7 +17,7 @@
       <Sort
         v-if="!datasetMetadataIsLoading"
         :datasetMetadata="datasetMetadata"
-        v-model="recordCriteria.sortBy"
+        v-model="recordCriteria.sortBy.value"
       />
       <BaseButton
         v-if="isAnyFilterActive || isSortedBy"
@@ -36,7 +36,7 @@
           <MetadataFilter
             v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
             :datasetMetadata="datasetMetadata"
-            v-model="recordCriteria.metadata"
+            v-model="recordCriteria.metadata.value"
           />
           <ResponsesFilter
             :datasetQuestions="datasetQuestions"
@@ -104,7 +104,7 @@ export default {
       this.visibleFilters = !this.visibleFilters;
     },
     resetFilters() {
-      this.recordCriteria.resetFilters();
+      this.recordCriteria.reset();
     },
   },
   watch: {
@@ -114,10 +114,10 @@ export default {
     "recordCriteria.status"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.metadata"() {
+    "recordCriteria.metadata.value"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.sortBy"() {
+    "recordCriteria.sortBy.value"() {
       this.newFiltersChanged();
     },
     "recordCriteria.response"() {

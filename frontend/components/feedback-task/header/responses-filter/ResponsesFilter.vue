@@ -94,7 +94,7 @@ export default {
 
       this.applyFilter();
     },
-    clearAllResponseFilter(responses) {
+    clearAllResponseFilter(_response) {
       this.$emit("clear-all-suggestion-filter");
     },
     updateAppliedCategoriesFromMetadataFilter() {

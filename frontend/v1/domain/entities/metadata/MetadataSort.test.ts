@@ -83,8 +83,8 @@ describe("MetadataSort ", () => {
     });
   });
 
-  describe("Convert to Router Params", () => {
-    test("should be able to convert to router params", () => {
+  describe("commit should", () => {
+    test("be able to convert to router params", () => {
       const metadataSort = new MetadataSortList(createMetadataMock());
       metadataSort.select("loss");
       metadataSort.select("split");
@@ -92,40 +92,30 @@ describe("MetadataSort ", () => {
 
       const param = metadataSort.commit();
 
-      expect(param).toEqual(["metadata.loss:desc", "metadata.split:asc"]);
-    });
+      expect(param[0].key).toEqual("metadata.");
+      expect(param[0].name).toEqual("loss");
+      expect(param[0].sort).toEqual("desc");
 
-    test("should be able to convert to router params for record sort", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
-      metadataSort.select("loss");
-      metadataSort.select("inserted_at");
-      metadataSort.toggleSort("loss");
-
-      const param = metadataSort.commit();
-
-      expect(param).toEqual(["metadata.loss:desc", "inserted_at:asc"]);
+      expect(param[1].key).toEqual("metadata.");
+      expect(param[1].name).toEqual("split");
+      expect(param[1].sort).toEqual("asc");
     });
   });
 
   describe("Complete by Route Params", () => {
     test("should be able to complete by route params", () => {
       const metadataSort = new MetadataSortList(createMetadataMock());
-      metadataSort.initializeWith(["metadata.loss:desc", "metadata.split:asc"]);
+      metadataSort.complete([
+        { key: "metadata", name: "loss", sort: "desc" },
+        { key: "", name: "inserted_at", sort: "asc" },
+      ]);
 
+      expect(metadataSort.selected[0].key).toEqual("metadata.");
       expect(metadataSort.selected[0].name).toEqual("loss");
       expect(metadataSort.selected[0].sort).toEqual("desc");
-      expect(metadataSort.selected[1].name).toEqual("split");
-      expect(metadataSort.selected[1].sort).toEqual("asc");
-    });
-
-    test("should be able to complete record sort", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
-      metadataSort.initializeWith(["metadata.loss:desc", "inserted_at:desc"]);
-
-      expect(metadataSort.selected[0].name).toEqual("loss");
-      expect(metadataSort.selected[0].sort).toEqual("desc");
+      expect(metadataSort.selected[1].key).toEqual("");
       expect(metadataSort.selected[1].name).toEqual("inserted_at");
-      expect(metadataSort.selected[1].sort).toEqual("desc");
+      expect(metadataSort.selected[1].sort).toEqual("asc");
     });
   });
 

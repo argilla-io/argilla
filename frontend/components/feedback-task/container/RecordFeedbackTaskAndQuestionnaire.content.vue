@@ -110,7 +110,7 @@ export default {
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
     },
     onChangeRecordFilter(criteria) {
@@ -119,7 +119,7 @@ export default {
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
     },
     onSearchFinished() {

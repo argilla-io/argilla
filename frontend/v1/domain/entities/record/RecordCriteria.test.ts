@@ -8,6 +8,8 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "searchText",
+        "",
+        "",
         [],
         [],
         null
@@ -21,6 +23,8 @@ describe("RecordCriteria", () => {
         "datasetId",
         1,
         "pending",
+        "",
+        "",
         "",
         [],
         [],
@@ -36,6 +40,8 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         undefined,
+        "",
+        "",
         [],
         [],
         null
@@ -52,7 +58,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        ["metadata"],
+        // eslint-disable-next-line quotes
+        'your_feel:["happy","sad"]',
+        "",
+        [],
         [],
         null
       );
@@ -65,6 +74,8 @@ describe("RecordCriteria", () => {
         "datasetId",
         1,
         "pending",
+        "",
+        "",
         "",
         [],
         [],
@@ -81,6 +92,8 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         undefined,
+        "",
+        [],
         [],
         null
       );
@@ -95,6 +108,8 @@ describe("RecordCriteria", () => {
         "datasetId",
         1,
         "pending",
+        "",
+        "",
         "",
         [],
         [],
@@ -112,6 +127,8 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
+        "",
+        "",
         [],
         [],
         null
@@ -128,6 +145,8 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "Can AI help us?",
+        "",
+        "",
         [],
         [],
         null
@@ -144,12 +163,15 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        ["metadata"],
+        "",
+        "",
+        [],
         [],
         null
       );
 
-      criteria.metadata = ["metadata1", "metadata2"];
+      // eslint-disable-next-line quotes
+      criteria.metadata.complete('your_feel:["happy","sad"]');
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -160,12 +182,14 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
+        "",
+        "",
         [],
-        ["sortBy"],
+        [],
         null
       );
 
-      criteria.sortBy = ["sortBy1", "sortBy2"];
+      criteria.sortBy.complete("inserted_at:asc");
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -176,10 +200,11 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
+        "",
+        "",
         [],
         [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "record:1,vector:2,limit:50,order:most"
       );
 
       criteria.similaritySearch.order = "least";
@@ -193,6 +218,8 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
+        "",
+        "",
         [],
         [],
         null
@@ -201,8 +228,11 @@ describe("RecordCriteria", () => {
       criteria.page = 2;
       criteria.status = "submitted";
       criteria.searchText = "Love ML";
-      criteria.metadata = ["metadata1", "metadata2"];
-      criteria.sortBy = ["sortBy1", "sortBy2"];
+      criteria.metadata.value = [
+        { name: "metadata1", value: ["value1"] },
+        { name: "metadata2", value: ["value2"] },
+      ];
+      criteria.sortBy.value = [{ key: "", name: "inserted_at", sort: "asc" }];
 
       criteria.similaritySearch.order = "least";
       criteria.similaritySearch.recordId = "1";
@@ -215,27 +245,28 @@ describe("RecordCriteria", () => {
     });
   });
 
-  describe("Reset should", () => {
+  describe("rollback should", () => {
     test("restore committed changes", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
         "pending",
         "Do you love ML?",
-        ["metadata.your_feel"],
-        ["inserted_at:asc"],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "your_feel:[happy,sad]",
+        "inserted_at:desc",
+        [],
+        [],
+        "record:1,vector:2,limit:50,order:most"
       );
 
       criteria.page = 1;
       criteria.status = "discarded";
       criteria.searchText = "Do you love AI?";
-      criteria.metadata = ["metadata.my_feel"];
-      criteria.sortBy = ["inserted_at:desc"];
+      criteria.metadata.complete("your_feel:[sad]");
+      criteria.sortBy.complete("inserted_at:asc");
       criteria.similaritySearch.order = "least";
 
-      criteria.reset();
+      criteria.rollback();
 
       expect(criteria.page).toEqual(criteria.committed.page);
       expect(criteria.status).toEqual(criteria.committed.status);

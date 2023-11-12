@@ -1,16 +1,33 @@
+import { Criteria } from "../common/Criteria";
+
 export type SimilarityOrder = "most" | "least";
 
-export class SimilarityCriteria {
+export interface SimilaritySearch {
+  recordId: string;
+  vectorName: string;
+  limit: number;
+  order: SimilarityOrder;
+}
+
+export class SimilarityCriteria extends Criteria {
   public recordId: string;
   public vectorName: string;
   public limit: number;
   public order: SimilarityOrder;
 
-  constructor() {
-    this.reset();
+  complete(urlParams: string) {
+    if (!urlParams) return;
+
+    const params = urlParams.split(",");
+    const [recordId, vectorName, limit, order] = params;
+
+    this.recordId = recordId.split(":")[1];
+    this.vectorName = vectorName.split(":")[1];
+    this.limit = parseInt(limit.split(":")[1]);
+    this.order = order.split(":")[1] as SimilarityOrder;
   }
 
-  complete(
+  withValue(
     recordId: string,
     vectorName: string,
     limit: number,
@@ -33,19 +50,16 @@ export class SimilarityCriteria {
     );
   }
 
+  get urlParams(): string {
+    if (!this.isCompleted) return "";
+
+    return `record:${this.recordId},vector:${this.vectorName},limit:${this.limit},order:${this.order}`;
+  }
+
   reset() {
     this.recordId = undefined;
     this.vectorName = undefined;
     this.limit = 50;
     this.order = "most";
-  }
-
-  isEqual(other: SimilarityCriteria): boolean {
-    return (
-      this.recordId === other.recordId &&
-      this.vectorName === other.vectorName &&
-      this.limit === other.limit &&
-      this.order === other.order
-    );
   }
 }

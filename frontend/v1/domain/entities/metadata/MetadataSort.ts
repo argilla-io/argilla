@@ -1,11 +1,15 @@
 import { Metadata } from "./Metadata";
 
-const SORT_KEY_SEPARATOR = ".";
-const ORDER_BY_SEPARATOR = ":";
 const SORT_ASC = "asc";
 const SORT_DESC = "desc";
 
 type SortOptions = "asc" | "desc";
+
+export interface SortSearch {
+  key: string;
+  name: string;
+  sort: SortOptions;
+}
 
 abstract class Sort {
   public sort: SortOptions = SORT_ASC;
@@ -25,7 +29,7 @@ abstract class Sort {
 
 class MetadataSort extends Sort {
   constructor(private metadata: Metadata) {
-    super(`metadata${SORT_KEY_SEPARATOR}`);
+    super("metadata.");
   }
 
   get name() {
@@ -54,6 +58,8 @@ class RecordSort extends Sort {
 export class MetadataSortList {
   private metadataSorts: Sort[];
   private selectedCategories: Sort[] = [];
+  private latestCommit: SortSearch[] = [];
+
   constructor(metadata: Metadata[] = []) {
     this.metadataSorts = metadata.map((metadata) => new MetadataSort(metadata));
     this.metadataSorts.push(new RecordSort("inserted_at"));
@@ -110,40 +116,39 @@ export class MetadataSortList {
   }
 
   get hasChanges() {
-    return this.latestCommit.join("") !== this.createSortCriteria().join("");
+    return this.hasDifferencesWith(this.createSortCriteria());
   }
 
-  hasDifferencesWith(compare: string[]) {
-    return this.latestCommit.join("") !== compare.join("");
+  hasDifferencesWith(compare: SortSearch[]) {
+    return JSON.stringify(this.latestCommit) !== JSON.stringify(compare);
   }
 
-  private latestCommit: string[] = [];
-  commit(): string[] {
+  commit(): SortSearch[] {
     this.latestCommit = this.createSortCriteria();
 
     return this.latestCommit;
   }
 
-  private createSortCriteria(): string[] {
-    return this.selected.map(
-      (c) => `${c.key}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`
-    );
+  private createSortCriteria(): SortSearch[] {
+    return this.selectedCategories.map((metadataSort) => {
+      return {
+        key: metadataSort.key,
+        name: metadataSort.name,
+        sort: metadataSort.sort,
+      };
+    });
   }
 
-  initializeWith(sort: string[]) {
+  complete(sort: SortSearch[]) {
     this.clear();
 
     if (!sort.length) return;
 
-    sort.forEach((sortParam) => {
-      const categories = sortParam.split(SORT_KEY_SEPARATOR);
-      const [name, sort] =
-        categories[categories.length - 1].split(ORDER_BY_SEPARATOR);
-
+    sort.forEach(({ name, sort }) => {
       const found = this.findByCategory(name);
 
       if (found) {
-        found.sort = sort as SortOptions;
+        found.sort = sort;
 
         this.selectedCategories.push(found);
       }
