@@ -15,6 +15,7 @@
 import logging
 import os
 import re
+import textwrap
 import warnings
 from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
@@ -181,8 +182,19 @@ class Argilla:
                 for ds in datasets_api.list_datasets(client=self.http_client).parsed
                 if ds.workspace == work_space
             ]
-
-        return f"ArgillaClient(\n\tusername='{user.username}',\n\trole='{user.role}', \n\tfirst_name='{first_name}', \n\tlast_name='{user.last_name}', \n\tpassword='***', \n\tapi_key='***', \n\tworkspaces={user.workspaces}, \n\tdatasets={ws_ds_dictionary}, \n\tupdated_at='{user.updated_at}'\n)"
+        indent = "   "
+        return (
+            "ArgillaClient("
+            + textwrap.indent(f"\nusername='{user.username}'", indent)
+            + textwrap.indent(f"\nrole='{user.role}'", indent)
+            + textwrap.indent(f"\nfirst_name='{first_name}'", indent)
+            + textwrap.indent(f"\nlast_name='{user.last_name}'", indent)
+            + textwrap.indent(f"\npassword='***'", indent)
+            + textwrap.indent(f"\napi_key='***'", indent)
+            + textwrap.indent(f"\nworkspaces={user.workspaces}", indent)
+            + textwrap.indent(f"\ndatasets={ws_ds_dictionary}", indent)
+            + textwrap.indent(f"\nupdated_at='{user.updated_at}'", indent)
+        )
 
     def _check_argilla_versions(self):
         from argilla import __version__ as rg_version
