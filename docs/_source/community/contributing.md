@@ -137,7 +137,7 @@ If you are working on a new feature, it is a good practice to make note of it fo
 A sample addition would be:
 
 ```md
-- Fixed the key errors for the `init` method ([#NUMBER_OF_PR](LINK_TO_PR))
+- Fixed the key errors for the `init` method ([#NUMBER_OF_PR](LINK_TO_PR)). Contributed by @github_handle.
 ```
 
 You can have a look at the [CHANGELOG.md](https://raw.githubusercontent.com/argilla-io/argilla/develop/CHANGELOG.md) file to see more cases and examples.
