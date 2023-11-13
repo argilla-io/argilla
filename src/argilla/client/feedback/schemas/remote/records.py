@@ -19,10 +19,10 @@ from uuid import UUID
 
 from pydantic import Field
 
+from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     import httpx
 
     from argilla.client.sdk.v1.datasets.models import FeedbackResponseModel, FeedbackSuggestionModel
-    from argilla.client.sdk.v1.records.models import FeedbackItemModel
+    from argilla.client.sdk.v1.records.models import FeedbackRecordModel
 
 
 class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
@@ -70,7 +70,7 @@ class RemoteSuggestionSchema(SuggestionSchema, RemoteSchema):
             id=payload.id,
             client=client,
             question_id=payload.question_id,
-            question_name=question_id_to_name[payload.question_id],
+            question_name=question_id_to_name[UUID(payload.question_id)],
             type=payload.type,
             score=payload.score,
             value=payload.value,
@@ -95,10 +95,13 @@ class RemoteResponseSchema(ResponseSchema, RemoteSchema):
         return RemoteResponseSchema(
             user_id=payload.user_id,
             values=payload.values,
-            status=payload.status,
+            status=ResponseStatus(payload.status),
             inserted_at=payload.inserted_at,
             updated_at=payload.updated_at,
         )
+
+
+AllowedSuggestionSchema = Union[RemoteSuggestionSchema, SuggestionSchema]
 
 
 class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
@@ -117,42 +120,25 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             question. Defaults to an empty list.
     """
 
+    # TODO: remote record should receive a dataset instead of this
     question_name_to_id: Optional[Dict[str, UUID]] = Field(..., exclude=True, repr=False)
 
     responses: List[RemoteResponseSchema] = Field(default_factory=list)
-    suggestions: Union[Tuple[RemoteSuggestionSchema], List[RemoteSuggestionSchema]] = Field(
-        default_factory=tuple, allow_mutation=False
-    )
+    suggestions: Union[Tuple[AllowedSuggestionSchema], List[AllowedSuggestionSchema]] = Field(default_factory=tuple)
 
     class Config:
+        allow_mutation = True
         validate_assignment = True
 
-    def __update_suggestions(
+    def __normalize_suggestions_to_update(
         self,
         suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
+            Dict[str, Any], List[Dict[str, Any]], AllowedSuggestionSchema, List[AllowedSuggestionSchema]
         ],
-    ) -> None:
-        """Updates the suggestions for the record in Argilla. Note that the suggestions
-        must exist in Argilla to be updated.
-
-        Note that this method will update the record in Argilla directly.
-
-        Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
-        """
+    ) -> List[AllowedSuggestionSchema]:
         if isinstance(suggestions, (dict, SuggestionSchema)):
             suggestions = [suggestions]
 
-        existing_suggestions = {suggestion.question_name: suggestion for suggestion in self.suggestions}
         new_suggestions = {}
 
         for suggestion in suggestions:
@@ -172,79 +158,63 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
                     UserWarning,
                     stacklevel=1,
                 )
-                new_suggestions.pop(suggestion.question_name, None)
-                new_suggestions[suggestion.question_name] = suggestion
-            elif suggestion.question_name in existing_suggestions:
-                comparable_fields = {"question_name", "type", "score", "value", "agent"}
-                comparable_suggestion = suggestion.dict(include={"question_name", "type", "score", "value", "agent"})
-                if any(
-                    [
-                        comparable_suggestion == suggestion.dict(include=comparable_fields)
-                        for suggestion in existing_suggestions.values()
-                    ]
-                ):
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided and the provided suggestion is the same, so it will"
-                        " be ignored.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                else:
-                    warnings.warn(
-                        f"A suggestion for question `{suggestion.question_name}` has already"
-                        " been provided but the provided suggestion is different, so it will"
-                        " overwrite the existing one.",
-                        UserWarning,
-                        stacklevel=1,
-                    )
-                    existing_suggestions.pop(suggestion.question_name, None)
-                    new_suggestions[suggestion.question_name] = suggestion
-            else:
-                new_suggestions[suggestion.question_name] = suggestion
 
-        for suggestion in new_suggestions.values():
-            if isinstance(suggestion, RemoteSuggestionSchema):
-                suggestion = suggestion.to_local()
-            pushed_suggestion = datasets_api_v1.set_suggestion(
-                client=self.client,
-                record_id=self.id,
-                **suggestion.to_server_payload(question_name_to_id=self.question_name_to_id),
-            )
-            existing_suggestions[suggestion.question_name] = RemoteSuggestionSchema.from_api(
-                payload=pushed_suggestion.parsed,
-                question_id_to_name={value: key for key, value in self.question_name_to_id.items()},
-                client=self.client,
-            )
+            new_suggestions[suggestion.question_name] = suggestion
 
-        self.__dict__["suggestions"] = tuple(existing_suggestions.values())
+        return list(new_suggestions.values())
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
         self,
-        suggestions: Union[
-            RemoteSuggestionSchema,
-            List[RemoteSuggestionSchema],
-            SuggestionSchema,
-            List[SuggestionSchema],
-            Dict[str, Any],
-            List[Dict[str, Any]],
-        ],
+        suggestions: Optional[
+            Union[
+                SuggestionSchema,
+                Dict[str, Any],
+                List[SuggestionSchema],
+                List[Dict[str, Any]],
+            ]
+        ] = None,
     ) -> None:
-        """Update a `RemoteFeedbackRecord`. Currently just `suggestions` are supported.
+        """Update a `RemoteFeedbackRecord` in Argilla.
 
         Note that this method will update the record in Argilla directly.
 
         Args:
-            suggestions: can be a single `RemoteSuggestionSchema` or `SuggestionSchema`,
-                a list of `RemoteSuggestionSchema` or `SuggestionSchema`, a single
-                dictionary, or a list of dictionaries. If a dictionary is provided,
-                it will be converted to a `RemoteSuggestionSchema` internally.
+            suggestions: **DEPRECATED** the new list of suggestions to set for the
+                record. It can be a single `SuggestionSchema`, a list of `SuggestionSchema`,
+                a single dictionary or a list of dictionary. If a dictionary is provided,
+                it will be converted to a `SuggestionSchema` internally. Defaults to
+                `None`.
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
         """
-        self.__update_suggestions(suggestions=suggestions)
+        if suggestions is not None:
+            warnings.warn(
+                "The `suggestions` argument is deprecated and will be removed in "
+                "future releases. In order to update the suggestions of a record "
+                "assign the `suggestions` attribute directly.",
+                DeprecationWarning,
+                stacklevel=1,
+            )
+
+            new_suggestions = self.__normalize_suggestions_to_update(suggestions)
+            self.suggestions = tuple(new_suggestions)
+
+        self.__updated_record_data()
+
+    def __updated_record_data(self) -> None:
+        response = records_api_v1.update_record(self.client, self.id, self.to_server_payload(self.question_name_to_id))
+
+        updated_record = self.from_api(
+            payload=response.parsed,
+            question_id_to_name={value: key for key, value in self.question_name_to_id.items()}
+            if self.question_name_to_id
+            else None,
+            client=self.client,
+        )
+
+        self.__dict__.update(updated_record.__dict__)
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete_suggestions(self, suggestions: Union[RemoteSuggestionSchema, List[RemoteSuggestionSchema]]) -> None:
@@ -257,7 +227,18 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
         Raises:
             PermissionError: if the user does not have either `owner` or `admin` role.
+
+        **DEPRECATED**
         """
+
+        warnings.warn(
+            "The `delete_suggestions` method is deprecated and will be removed in "
+            "future releases. In order to update/delete the suggestions of a record "
+            "assign the `suggestions` attribute directly (`record.suggestions = []`).",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+
         if isinstance(suggestions, RemoteSuggestionSchema):
             suggestions = [suggestions]
 
@@ -282,7 +263,8 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             self.__dict__["suggestions"] = tuple(existing_suggestions.values())
         except Exception as e:
             raise RuntimeError(
-                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from record with ID `{self.id}` from Argilla."
+                f"Failed to delete suggestions with IDs `{[suggestion.id for suggestion in delete_suggestions]}` from "
+                f"record with ID `{self.id}` from Argilla."
             ) from e
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
@@ -310,14 +292,15 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             responses=[response.to_local() for response in self.responses],
             suggestions=[suggestion.to_local() for suggestion in self.suggestions],
             metadata=self.metadata,
+            vectors=self.vectors,
             external_id=self.external_id,
         )
 
     @classmethod
     def from_api(
         cls,
-        payload: "FeedbackItemModel",
-        question_id_to_name: Optional[Dict[UUID, str]] = None,
+        payload: "FeedbackRecordModel",
+        question_id_to_name: Dict[UUID, str],
         client: Optional["httpx.Client"] = None,
     ) -> "RemoteFeedbackRecord":
         return RemoteFeedbackRecord(
@@ -334,6 +317,7 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             if payload.suggestions
             else [],
             metadata=payload.metadata if payload.metadata else {},
+            vectors=payload.vectors if payload.vectors else {},
             external_id=payload.external_id if payload.external_id else None,
             question_name_to_id={value: key for key, value in question_id_to_name.items()},
         )

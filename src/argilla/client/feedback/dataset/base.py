@@ -11,18 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
 
-from pydantic import ValidationError
-
+from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-)
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-from argilla.client.feedback.utils import generate_pydantic_schema
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
+from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -30,214 +27,139 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.schemas.types import (
         AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
     )
 
+R = TypeVar("R", bound=FeedbackRecord)
 
-class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, metaclass=ABCMeta):
+
+class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     """Base class with shared functionality for `FeedbackDataset` and `RemoteFeedbackDataset`."""
-
-    def __init__(
-        self,
-        *,
-        fields: Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]],
-        questions: Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]],
-        guidelines: Optional[str] = None,
-    ) -> None:
-        """Initializes a `FeedbackDatasetBase` instance locally.
-
-        Args:
-            fields: contains the fields that will define the schema of the records in the dataset.
-            questions: contains the questions that will be used to annotate the dataset.
-            guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
-
-        Raises:
-            TypeError: if `fields` is not a list of `FieldSchema`.
-            ValueError: if `fields` does not contain at least one required field.
-            TypeError: if `questions` is not a list of `TextQuestion`, `RatingQuestion`,
-                `LabelQuestion`, and/or `MultiLabelQuestion`.
-            ValueError: if `questions` does not contain at least one required question.
-            TypeError: if `guidelines` is not None and not a string.
-            ValueError: if `guidelines` is an empty string.
-        """
-        if not isinstance(fields, list):
-            raise TypeError(f"Expected `fields` to be a list, got {type(fields)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for field in fields:
-            if not isinstance(field, AllowedFieldTypes):
-                raise TypeError(
-                    f"Expected `fields` to be a list of `{AllowedFieldTypes.__name__}`, got {type(field)} instead."
-                )
-            if field.name in unique_names:
-                raise ValueError(f"Expected `fields` to have unique names, got {field.name} twice instead.")
-            unique_names.add(field.name)
-            if not any_required and field.required:
-                any_required = True
-
-        if not any_required:
-            raise ValueError("At least one field in `fields` must be required (`required=True`).")
-
-        self._fields = fields
-        self._fields_schema = generate_pydantic_schema(self.fields)
-
-        if not isinstance(questions, list):
-            raise TypeError(f"Expected `questions` to be a list, got {type(questions)} instead.")
-
-        any_required = False
-        unique_names = set()
-        for question in questions:
-            if not isinstance(question, AllowedQuestionTypes.__args__):
-                raise TypeError(
-                    "Expected `questions` to be a list of"
-                    f" `{'`, `'.join([arg.__name__ for arg in AllowedQuestionTypes.__args__])}` got a"
-                    f" question in the list with type {type(question)} instead."
-                )
-            if question.name in unique_names:
-                raise ValueError(f"Expected `questions` to have unique names, got {question.name} twice instead.")
-            unique_names.add(question.name)
-            if not any_required and question.required:
-                any_required = True
-
-        if not any_required:
-            raise ValueError("At least one question in `questions` must be required (`required=True`).")
-
-        self._questions = questions
-
-        if guidelines is not None:
-            if not isinstance(guidelines, str):
-                raise TypeError(
-                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
-                )
-            if len(guidelines) < 1:
-                raise ValueError(
-                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
-                )
-
-        self._guidelines = guidelines
 
     @property
     @abstractmethod
-    def records(self) -> Any:
+    def records(self) -> Iterable[R]:
         """Returns the records of the dataset."""
         pass
 
     @property
-    def guidelines(self) -> str:
-        """Returns the guidelines for annotating the dataset."""
-        return self._guidelines
+    @abstractmethod
+    def vectors_settings(self) -> List[VectorSettings]:
+        """Returns the vector settings of the dataset."""
+        pass
+
+    @abstractmethod
+    def update_records(self, records: Union[R, List[R]]) -> None:
+        """Updates the records of the dataset.
+
+        Args:
+            records: the records to update the dataset with.
+
+        Raises:
+            ValueError: if the provided `records` are invalid.
+        """
+        pass
 
     @property
-    def fields(self) -> Union[List[AllowedFieldTypes], List["AllowedRemoteFieldTypes"]]:
-        """Returns the fields that define the schema of the records in the dataset."""
-        return self._fields
+    @abstractmethod
+    def guidelines(self) -> Optional[str]:
+        """Returns the guidelines for annotating the dataset."""
+        pass
 
-    def field_by_name(self, name: str) -> Union[AllowedFieldTypes, "AllowedRemoteFieldTypes"]:
-        """Returns the field by name if it exists. Othewise a `ValueError` is raised.
+    @property
+    @abstractmethod
+    def allow_extra_metadata(self) -> bool:
+        """Returns whether if adding extra metadata to the records of the dataset is allowed"""
+        pass
+
+    def __get_property_by_name(self, item_name: str, iterable_items, item_type: str):
+        for item in iterable_items:
+            if item.name == item_name:
+                return item
+        warnings.warn(
+            f"{item_type} with name='{item_name}' not found, available {item_type} names are:"
+            f" {', '.join(item.name for item in iterable_items)}"
+        )
+
+    @property
+    @abstractmethod
+    def fields(self) -> Union[List[AllowedFieldTypes]]:
+        """Returns the fields that define the schema of the records in the dataset."""
+        pass
+
+    def field_by_name(self, name: str) -> Optional[Union[AllowedFieldTypes]]:
+        """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
             name: the name of the field to return.
-
-        Raises:
-            ValueError: if the field with the given name does not exist.
         """
-        for field in self._fields:
-            if field.name == name:
-                return field
-        raise ValueError(
-            f"Field with name='{name}' not found, available field names are:"
-            f" {', '.join(f.name for f in self._fields)}"
-        )
+        return self.__get_property_by_name(name, self.fields, "field")
 
     @property
-    def questions(self) -> Union[List[AllowedQuestionTypes], List["AllowedRemoteQuestionTypes"]]:
+    @abstractmethod
+    def questions(self) -> Union[List[AllowedQuestionTypes]]:
         """Returns the questions that will be used to annotate the dataset."""
-        return self._questions
+        pass
 
-    def question_by_name(self, name: str) -> Union[AllowedQuestionTypes, "AllowedRemoteQuestionTypes"]:
-        """Returns the question by name if it exists. Othewise a `ValueError` is raised.
+    def question_by_name(self, name: str) -> Optional[Union[AllowedQuestionTypes]]:
+        """Returns the question by name if it exists.
 
         Args:
             name: the name of the question to return.
-
-        Raises:
-            ValueError: if the question with the given name does not exist.
         """
-        for question in self._questions:
-            if question.name == name:
-                return question
-        raise ValueError(
-            f"Question with name='{name}' not found, available question names are:"
-            f" {', '.join(q.name for q in self._questions)}"
-        )
+        return self.__get_property_by_name(name, self.questions, "question")
 
+    @property
     @abstractmethod
-    def add_records(self, *args, **kwargs) -> None:
-        """Adds the given records to the `FeedbackDataset`."""
+    def metadata_properties(self) -> Union[List["AllowedMetadataPropertyTypes"]]:
+        """Returns the metadata properties that will be indexed and could be used to filter the dataset."""
         pass
 
-    def _parse_records(
-        self, records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
-    ) -> List[FeedbackRecord]:
-        """Parses the records into a list of `FeedbackRecord` objects.
+    def metadata_property_by_name(self, name: str) -> Optional[Union["AllowedMetadataPropertyTypes"]]:
+        """Returns the metadata property by name if it exists.
 
         Args:
-            records: either a single `FeedbackRecord` or `dict` or a list of `FeedbackRecord` or `dict`.
+            name: the name of the metadata property to return.
+        """
+        return self.__get_property_by_name(name, self.metadata_properties, "metadata property")
 
-        Returns:
-            A list of `FeedbackRecord` objects.
+    @abstractmethod
+    def vector_settings_by_name(self, name: str) -> Optional["VectorSettings"]:
+        """Returns the vector settings by name if it exists.
+
+        Args:
+            name: the name of the vector settings to return.
 
         Raises:
-            ValueError: if `records` is not a `FeedbackRecord` or `dict` or a list of `FeedbackRecord` or `dict`.
+            KeyError: if the vector settings with the given name does not exist.
         """
-        if isinstance(records, (dict, FeedbackRecord)):
-            records = [records]
+        return self.__get_property_by_name(name, self.vectors_settings, "vector settings")
 
-        if len(records) == 0:
-            raise ValueError("Expected `records` to be a non-empty list of `dict` or `FeedbackRecord`.")
+    @abstractmethod
+    def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
+        """Sorts the records in the dataset by the given field."""
+        pass
 
-        new_records = []
-        for record in records:
-            if isinstance(record, dict):
-                new_records.append(FeedbackRecord(**record))
-            elif isinstance(record, FeedbackRecord):
-                new_records.append(record)
-            else:
+    def _unique_metadata_property(self, metadata_property: "AllowedMetadataPropertyTypes") -> None:
+        """Checks whether the provided `metadata_property` already exists in the dataset.
+
+        Args:
+            metadata_property: the metadata property to validate.
+
+        Raises:
+            ValueError: if the `metadata_property` already exists in the dataset.
+        """
+        existing_metadata_properties = self.metadata_properties
+        if existing_metadata_properties:
+            existing_metadata_property_names = [
+                metadata_property.name for metadata_property in existing_metadata_properties
+            ]
+            if metadata_property.name in existing_metadata_property_names:
                 raise ValueError(
-                    "Expected `records` to be a list of `dict` or `FeedbackRecord`,"
-                    f" got type `{type(record)}` instead."
+                    f"Invalid `metadata_property={metadata_property.name}` provided as it already exists. Current"
+                    f" `metadata_properties` are: {', '.join(existing_metadata_property_names)}"
                 )
-        return new_records
-
-    def _validate_records(self, records: List[FeedbackRecord]) -> None:
-        """Validates the records against the schema defined by the `fields`.
-
-        Args:
-            records: a list of `FeedbackRecord` objects to validate.
-
-        Raises:
-            ValueError: if the `fields` schema does not match the `FeedbackRecord.fields` schema.
-        """
-        if self._fields_schema is None:
-            self._fields_schema = generate_pydantic_schema(self.fields)
-
-        for record in records:
-            try:
-                self._fields_schema.parse_obj(record.fields)
-            except ValidationError as e:
-                raise ValueError(
-                    f"`FeedbackRecord.fields` does not match the expected schema, with exception: {e}"
-                ) from e
-
-    def _parse_and_validate_records(
-        self,
-        records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
-    ) -> List[FeedbackRecord]:
-        """Convenient method for calling `_parse_records` and `_validate_records` in sequence."""
-        records = self._parse_records(records)
-        self._validate_records(records)
-        return records
 
     @requires_dependencies("datasets")
     def format_as(self, format: Literal["datasets"]) -> "Dataset":
@@ -260,8 +182,13 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, metaclass=ABCMeta):
             >>> huggingface_dataset = dataset.format_as("datasets")
         """
         if format == "datasets":
-            return self._huggingface_format(self)
+            return HuggingFaceDatasetMixin._huggingface_format(self)
         raise ValueError(f"Unsupported format '{format}'.")
+
+    @abstractmethod
+    def add_records(self, *args, **kwargs) -> None:
+        """Adds the given records to the `FeedbackDataset`."""
+        pass
 
     @abstractmethod
     def pull(self):
@@ -291,4 +218,69 @@ class FeedbackDatasetBase(ABC, HuggingFaceDatasetMixin, metaclass=ABCMeta):
     @abstractmethod
     def unify_responses(self, *args, **kwargs):
         """Unifies the responses for a given question."""
+        pass
+
+    @abstractmethod
+    def add_metadata_property(self, *args, **kwargs):
+        """Adds a new `metadata_property` to the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def update_metadata_properties(self, *args, **kwargs):
+        """Updates the `metadata_properties` of the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_metadata_properties(self, *args, **kwargs):
+        """Deletes a list of `metadata_properties` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def add_vector_settings(self, *args, **kwargs):
+        """Adds a new `vector_settings` to the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def update_vectors_settings(self, *args, **kwargs):
+        """Updates a list of `vector_settings` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def delete_vectors_settings(self, *args, **kwargs):
+        """Deletes a list of `vector_settings` from the current `FeedbackDataset`."""
+        pass
+
+    @abstractmethod
+    def push_to_huggingface(self, repo_id, generate_card, *args, **kwargs):
+        """Pushes the current `FeedbackDataset` to HuggingFace Hub.
+
+        Note:
+            The records from the `RemoteFeedbackDataset` are being pulled before pushing,
+            to ensure that there's no missmatch while uploading those as those are lazily fetched.
+
+        Args:
+            repo_id: the ID of the HuggingFace repo to push the dataset to.
+            generate_card: whether to generate a dataset card or not. Defaults to `True`.
+        """
+        pass
+
+    @abstractmethod
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[R, float]]:
+        """Finds similar records to the given `record` or `value` for the given `vector_name`.
+
+        Args:
+            vector_name: a vector name to use for searching by similarity.
+            value: an optional vector value to be used for searching by similarity.
+            record: an optional record to be used for searching by similarity.
+            max_results: the maximum number of results for the search.
+
+        Returns:
+            A list of tuples with each tuple including a record and a similarity score.
+        """
         pass

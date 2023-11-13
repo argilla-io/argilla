@@ -82,6 +82,7 @@ $secondary-color: palette(grey, 200);
 $secondary-lighten-color: lighten(palette(grey, 200), 5%);
 $secondary-darken-color: darken(palette(grey, 200), 5%);
 $highlight: $brand-primary-color;
+$similarity-color: palette(orange-red-crayola);
 $bg: palette(grey, 800);
 
 // Black opacity
@@ -91,6 +92,7 @@ $black-54: rgba(0, 0, 0, 0.6);
 $black-37: rgba(0, 0, 0, 0.37);
 $black-20: rgba(0, 0, 0, 0.2);
 $black-10: rgba(0, 0, 0, 0.1);
+$black-6: rgba(0, 0, 0, 0.06);
 $black-4: rgba(0, 0, 0, 0.04);
 
 // States

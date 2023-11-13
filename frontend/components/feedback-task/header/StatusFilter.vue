@@ -16,22 +16,18 @@
   -->
 
 <template>
-  <div v-if="options.length">
-    <RadioButtonsSelectBase
-      :options="options"
-      :selected-option="selectedOption"
-      @change="onChangeOption"
-    />
-  </div>
+  <RadioButtonsSelectBase
+    v-if="options.length"
+    class="filter-status"
+    :options="options"
+    :selected-option="selectedOption"
+    @change="onChangeOption"
+  />
 </template>
 
 <script>
 export default {
   props: {
-    options: {
-      type: Array,
-      required: true,
-    },
     selectedOption: {
       type: String,
     },
@@ -40,6 +36,24 @@ export default {
     prop: "selectedOption",
     event: "change",
   },
+  data() {
+    return {
+      options: [
+        {
+          id: "pending",
+          name: "Pending",
+        },
+        {
+          id: "submitted",
+          name: "Submitted",
+        },
+        {
+          id: "discarded",
+          name: "Discarded",
+        },
+      ],
+    };
+  },
   methods: {
     onChangeOption(option) {
       this.$emit("change", option);
@@ -47,3 +61,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.filter-status {
+  flex-shrink: 0;
+}
+</style>

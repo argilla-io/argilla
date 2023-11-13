@@ -7,7 +7,7 @@ Similarly, Argilla Feedback can be used to write or select prompts for the last 
 
 The following figure shows **the stages for training and fine-tuning LLMs**. From top to bottom, it shows, the data needed at each stage (note the color for the data collected with human feedback), the stage (namely, pre-training, supervised fine-tuning, reward modeling, and reinforcement learning), and finally the model created at each stage. Argilla Feedback makes the process of collecting human feedback seamless at each step after the pre-training stage.
 
-<img src="/_static/images/llms/rlhf.svg" alt="LLM fine-tuning stages" style="display:block;margin-left:auto;margin-right:auto;">
+<img src="../../_static/images/llms/rlhf.svg" alt="LLM fine-tuning stages" style="display:block;margin-left:auto;margin-right:auto;">
 
 :::{note}
 This guide uses terminology from the [InstructGPT paper](https://openai.com/research/instruction-following) and the amazing [introduction to RLHF](https://huyenchip.com/2023/05/02/rlhf.html) by Chip Huyen. The above figure is an adaptation of Chip Huyen's figure.
@@ -17,7 +17,7 @@ To understand how Argilla Feedback works, let’s deep-dive into the **Collectin
 
 ## Collecting demonstration data
 
-When training large language models, the collection of demonstration data plays a significant role. This data, consisting of **prompts and demonstrations**, is used in supervised fine-tuning where models learn to generate responses to prompts based on human-provided examples. Other common names for this stage are **instruction-tuning** and **behaviour cloning**. Although this is commonly identified as a labor-intensive stage, recent research, like the [LIMA work](https://arxiv.org/abs/2305.11206), curating a small set of 1,000 high-quality and diverse examples can effectively teach a model to follow instructions. Argilla Feedback is designed to simplify and distribute this process across many labelers within your organization.
+When training large language models, the collection of demonstration data plays a significant role. This data, consisting of **prompts and demonstrations**, is used in supervised fine-tuning where models learn to generate responses to prompts based on human-provided examples. Other common names for this stage are **instruction-tuning** and **behavior cloning**. Although this is commonly identified as a labor-intensive stage, recent research, like the [LIMA work](https://arxiv.org/abs/2305.11206), curating a small set of 1,000 high-quality and diverse examples can effectively teach a model to follow instructions. Argilla Feedback is designed to simplify and distribute this process across many labelers within your organization.
 
 Consider this example. Your company has access to a database of prompts, perhaps from an existing database like ShareGPT or from your internal resources, and you aim to fine-tune a model to respond accurately to these prompts. Using Argilla Feedback, you can efficiently **distribute the prompts to human labelers who then write responses as if they were the model**. This set of model responses becomes a key component of the supervised fine-tuning process.
 
@@ -63,7 +63,7 @@ The reward model is designed to assign a score to a pair consisting of a prompt 
 Consider this example. Your company has access to an instruction-following model, after going through the supervised fine-tuning stage or reusing an open-source instruction-following model. After an **internal evaluation process**, the model shows undesired behaviors like generating made-up facts (sometimes referred to as “hallucinations”), harmful content, or just unhelpful responses. This is where a second stage of alignment with human preferences becomes relevant.
 
 :::{tip}
-You can **use Argilla Feedback for the internal evaluation process by registering the interactions with the model** and asking labelers to rate the quality of the responses. If you’d like help setting up such an effort, reach out to us and will gladly help with the setup.
+You can **use Argilla Feedback for the internal evaluation process by registering the interactions with the model** and asking labelers to rate the quality of the responses. If you’d like help setting up such an effort, reach out to us, and will gladly help with the setup.
 :::
 
 With Argilla, you can seamlessly create a feedback collection procedure. This involves asking labelers to rank multiple model responses for a specific prompt. The comparison data gathered in this process can be utilized to train a reward model. This reward model has two key uses:

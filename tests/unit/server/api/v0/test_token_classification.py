@@ -266,10 +266,6 @@ async def test_create_records_for_token_classification(
         assert metrics_validator(record)
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 @pytest.mark.parametrize(
     ("include_metrics", "metrics_validator"),
     [

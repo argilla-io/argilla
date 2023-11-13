@@ -51,6 +51,7 @@ class UserRole(str, Enum):
 class RecordInclude(str, Enum):
     responses = "responses"
     suggestions = "suggestions"
+    vectors = "vectors"
 
 
 class QuestionType(str, Enum):
@@ -59,3 +60,24 @@ class QuestionType(str, Enum):
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
+
+
+class MetadataPropertyType(str, Enum):
+    terms = "terms"  # Textual types with a fixed value list
+    integer = "integer"  # Integer values
+    float = "float"  # Decimal values
+
+
+class RecordSortField(str, Enum):
+    inserted_at = "inserted_at"
+    updated_at = "updated_at"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
+class SimilarityOrder(str, Enum):
+    most_similar = "most_similar"
+    least_similar = "least_similar"

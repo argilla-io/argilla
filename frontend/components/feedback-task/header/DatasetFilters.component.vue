@@ -1,90 +1,132 @@
 <template>
-  <div class="filters">
-    <span class="filters__component">
+  <div class="filters__wrapper">
+    <div class="filters">
       <SearchBarBase
-        v-model="searchInput"
+        v-model="recordCriteria.searchText"
         :placeholder="'Introduce a query'"
-        :additionalInfo="additionalInfoForSearchComponent"
       />
-    </span>
-    <span class="filters__component">
-      <StatusFilter :options="statusOptions" v-model="selectedStatus" />
-    </span>
+      <FilterButton
+        v-if="isAnyAvailableFilter"
+        class="filters__filter-button"
+        @click.native="toggleVisibilityOfFilters"
+        :button-name="$t('filters')"
+        icon-name="filter"
+        :show-chevron-icon="false"
+        :is-button-active="isAnyFilterActive"
+      />
+      <Sort
+        v-if="!datasetMetadataIsLoading"
+        :datasetMetadata="datasetMetadata"
+        v-model="recordCriteria.sortBy"
+      />
+      <BaseButton
+        v-if="isAnyFilterActive || isSortedBy"
+        class="small clear filters__reset-button"
+        @on-click="resetFiltersAndSortBy()"
+        >{{ $t("reset") }}</BaseButton
+      >
+      <p v-if="shouldShowTotalRecords" class="filters__total-records">
+        {{ totalRecordsInfo }}
+      </p>
+      <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+    </div>
+    <template v-if="visibleFilters">
+      <transition name="filterAppear" appear>
+        <div class="filters__list">
+          <MetadataFilter
+            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            :datasetMetadata="datasetMetadata"
+            v-model="recordCriteria.metadata"
+          />
+        </div>
+      </transition>
+    </template>
   </div>
 </template>
 
 <script>
+import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
+
 export default {
   name: "DatasetFiltersComponent",
   props: {
-    datasetId: {
-      type: String,
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },
   data: () => {
     return {
-      selectedStatus: null,
-      searchInput: null,
       totalRecords: null,
+      visibleFilters: false,
     };
   },
-  beforeMount() {
-    this.selectedStatus = this.selectedStatus ?? this.statusFromRoute;
-    this.searchInput = this.searchInput ?? this.searchFromRoute;
-
-    this.$root.$on("reset-status-filter", () => {
-      this.selectedStatus = this.statusFromRoute;
-    });
-    this.$root.$on("reset-search-filter", () => {
-      this.searchInput = this.searchFromRoute;
-    });
-    this.$root.$on("total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
-  },
   computed: {
-    additionalInfoForSearchComponent() {
+    totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      if (this.totalRecords === 1) return `${this.totalRecords} record`;
-      return `${this.totalRecords} records`;
+      return this.totalRecords === 1
+        ? `${this.totalRecords} record`
+        : `${this.totalRecords} records`;
     },
-    statusFromRoute() {
-      return this.$route.query?._status;
+    shouldShowTotalRecords() {
+      return (
+        this.recordCriteria.isFilteredByText ||
+        this.recordCriteria.isFilteredByMetadata
+      );
     },
-    searchFromRoute() {
-      return this.$route.query?._search;
+    isAnyAvailableFilter() {
+      return !!this.datasetMetadata.length;
+    },
+    isAnyFilterActive() {
+      return this.recordCriteria.isFilteredByMetadata;
+    },
+    isSortedBy() {
+      return this.recordCriteria.isSortedBy;
+    },
+  },
+  methods: {
+    newFiltersChanged() {
+      if (!this.recordCriteria.hasChanges) return;
+      if (!this.recordCriteria.isChangingAutomatically) {
+        this.recordCriteria.page = 1;
+      }
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
+    toggleVisibilityOfFilters() {
+      this.visibleFilters = !this.visibleFilters;
+    },
+    resetFiltersAndSortBy() {
+      this.recordCriteria.resetFiltersAndSortBy();
     },
   },
   watch: {
-    selectedStatus(newValue) {
-      this.$root.$emit("status-filter-changed", newValue);
+    "recordCriteria.searchText"() {
+      this.newFiltersChanged();
     },
-    searchInput(searchInput) {
-      this.$root.$emit("search-filter-changed", searchInput);
+    "recordCriteria.status"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.metadata"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.sortBy"() {
+      this.newFiltersChanged();
     },
   },
-  created() {
-    this.statusOptions = [
-      {
-        id: "pending",
-        name: "Pending",
-      },
-      {
-        id: "submitted",
-        name: "Submitted",
-      },
-      {
-        id: "discarded",
-        name: "Discarded",
-      },
-    ];
+  setup() {
+    return useDatasetsFiltersViewModel();
   },
-  beforeDestroy() {
-    this.$root.$off("reset-status-filter");
-    this.$root.$off("reset-search-filter");
-    this.$root.$off("total-records");
+  mounted() {
+    this.$root.$on("on-changed-total-records", (totalRecords) => {
+      this.totalRecords = totalRecords;
+    });
+
+    this.loadMetadata(this.recordCriteria.datasetId);
+  },
+  destroyed() {
+    this.$root.$off("on-changed-total-records");
   },
 };
 </script>
@@ -92,12 +134,56 @@ export default {
 <style lang="scss" scoped>
 .filters {
   display: flex;
-  flex-wrap: wrap;
-  gap: $base-space * 2;
+  gap: $base-space;
   align-items: center;
-  padding: $base-space * 2 0;
+  &__wrapper {
+    width: 100%;
+  }
+  &__list {
+    display: flex;
+    gap: $base-space;
+    width: 100%;
+    padding-top: $base-space;
+  }
+  &__total-records {
+    flex-shrink: 0;
+    margin: 0;
+    @include font-size(13px);
+    color: $black-37;
+  }
+  &__status {
+    margin-left: auto;
+  }
+  &__reset-button {
+    @include font-size(13px);
+    flex-shrink: 0;
+  }
+  &__filter-button {
+    user-select: none;
+    &.filter-button--active {
+      background: none;
+      &,
+      :deep(.button) {
+        color: $primary-color;
+      }
+      &:hover {
+        background: lighten($primary-color, 44%);
+      }
+    }
+  }
+  .search-area {
+    width: min(100%, 400px);
+  }
 }
-.search-area {
-  width: clamp(300px, 30vw, 800px);
+
+.filterAppear-enter-active,
+.filterAppear-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.filterAppear-enter,
+.filterAppear-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

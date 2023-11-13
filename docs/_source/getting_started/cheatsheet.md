@@ -11,19 +11,19 @@
 
 ## Connect to Argilla
 
-To get started with your data from our Python library, we first need to connect to our FastAPI server. This is done via `httpx` using an API key and a URL. Or take a more extensive look [here](/guides/log_load_and_prepare_data).
+To get started with your data from our Python library, we first need to connect to our FastAPI server. This is done via `httpx` using an API key and a URL. Or take a more extensive look [here](/getting_started/quickstart_installation).
 
 ```{include} /_common/tabs/argilla_connect.md
 ```
 
 ## Configure datasets
 
-Before getting started with any textual data project, we advise setting up annotation guidelines and a labeling schema. Need some more context? Take look [here](/guides/log_load_and_prepare_data).
+Before getting started with any textual data project, we advise setting up annotation guidelines and a labeling schema. Need some more context? Take a look [here](/getting_started/quickstart_workflow).
 
 ```{include} /_common/tabs/dataset_settings.md
 ```
 
-Note that feedback datasets support different types of questions. For more info on each of them, check out [this section](../guides/llms/practical_guides/create_dataset.md#define-questions).
+Note that feedback datasets support different types of questions. For more info on each of them, check out [this section](/getting_started/quickstart_workflow_feedback).
 
 ```{include} /_common/tabs/question_settings.md
 ```
@@ -35,7 +35,7 @@ Note that feedback datasets support different types of questions. For more info 
 
 ## Query datasets
 
-To search your data from the UI or the Python library, you need to be able to write Lucene Query Language (LQL), which is native to Elastic Search and Open Search. To know more about querying and searching, take a look [here](/guides/query_datasets.md).
+To search your data from the UI or the Python library, you need to be able to write Lucene Query Language (LQL), which is native to Elastic Search and Open Search. To know more about querying and searching, take a look [here](/practical_guides/filter_dataset).
 
 ::::{tab-set}
 
@@ -88,7 +88,7 @@ Inclusive ranges are specified with square brackets and exclusive ranges are wit
 :::{tab-item} operators
 
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
-Following examples showcase the power of these operators:
+The following examples showcase the power of these operators:
 
 - `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
@@ -135,7 +135,7 @@ Wildcard searches can be run on individual search terms, using `?` to replace a 
 
 ## Semantic search
 
-Semantic search or vector search is an amazingly powerful tool to sift through text based on sensical intuition instead of keywords. We use the native Elastic Search vector support to empower our users to navigate their records. Want to know more about this? Take a look [here](/guides/label_records_with_semanticsearch.md).
+Semantic search or vector search is an amazingly powerful tool to sift through text based on sensical intuition instead of keywords. We use the native Elastic Search vector support to empower our users to navigate their records. Want to know more about this? Take a look [here](/tutorials/techniques/semantic_search).
 
 ::::{tab-set}
 
@@ -156,7 +156,7 @@ rg.log(name="dataset", records=record)
 ```python
 import argilla as rg
 
-# We resturn the 50 most similar records
+# We return the 50 most similar records
 records = rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 ```
 :::
@@ -167,7 +167,7 @@ records = rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 
 ## Weak supervision
 
-Weak supervision for NLP is like teaching a model with "approximate" answers instead of perfect ones. It uses clever tricks and shortcuts to avoid the need for labor-intensive labeling. It's like giving the model training wheels to learn on its own. While it's not as accurate as traditional supervision, it allows training on a much larger scale. Want to know more, look [here](/guides/programmatic_labeling_with_rules.md).
+Weak supervision for NLP is like teaching a model with "approximate" answers instead of perfect ones. It uses clever tricks and shortcuts to avoid the need for labor-intensive labeling. It's like giving the model training wheels to learn on its own. While it's not as accurate as traditional supervision, it allows training on a much larger scale. Want to know more, look [here](/tutorials/techniques/weak_supervision).
 
 ::::{tab-set}
 
@@ -222,7 +222,7 @@ rg.log(records_for_training, name="majority_voter_results")
 
 ## Train Models
 
-We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. We support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Train/fine-tune a model from a `FeedbackDataset` as explained [here](/guides/llms/practical_guides/practical_guides/fine_tune.html), or either a `TextClassificationDataset` or a `TokenClassificationDataset`[here](/guides/train_a_model.md).
+We love our open-source training libraries as much as you do, so we provide integrations with all of them to limit the time you spend on data preparation and have more fun with actual training. We support `spacy`, `transformers`, `setfit`, `openai`, `autotrain`, and way more. Want to get to know all support? Train/fine-tune a model from a `FeedbackDataset` as explained [here](/practical_guides/fine_tune.md#feedback-dataset), or either a `TextClassificationDataset` or a `TokenClassificationDataset`[here](/practical_guides/fine_tune.md#other-datasets).
 
 ```python
 from argilla.training import ArgillaTrainer

@@ -29,9 +29,9 @@
    practical_guides/choose_dataset
    practical_guides/create_dataset
    practical_guides/assign_records
-   practical_guides/update_dataset
    practical_guides/filter_dataset
    practical_guides/annotate_dataset
+   practical_guides/annotation_workflows/annotation_workflows
    practical_guides/collect_responses
    practical_guides/export_dataset
    practical_guides/fine_tune
@@ -64,7 +64,6 @@
 
    Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
    Github <https://github.com/argilla-io/argilla>
-   Discussion forum <https://github.com/argilla-io/argilla/discussions>
    community/developer_docs
    community/contributing
    community/migration-rubrix.md

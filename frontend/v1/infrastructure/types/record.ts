@@ -26,8 +26,31 @@ export interface BackedRecord {
   responses: BackendResponse[];
   fields: { [key: string]: string };
   updated_at: string;
+  query_score: number;
 }
+
 export interface BackedRecords {
   records: BackedRecord[];
   total: number;
+}
+
+export interface BackendSearchRecords {
+  record: BackedRecord;
+  query_score: number;
+}
+
+export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
+
+export interface BackendAdvanceSearchQuery {
+  query: {
+    vector?: {
+      name: string;
+      record_id: string;
+      max_results: number;
+      order: BackendSimilaritySearchOrder;
+    };
+    text?: {
+      q: string;
+    };
+  };
 }

@@ -23,7 +23,7 @@ authors = [{ name = "argilla", email = "contact@argilla.io" }]
 maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
-    "httpx >= 0.15,< 0.24",
+    "httpx >= 0.15,<= 0.25",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
@@ -42,7 +42,7 @@ dependencies = [
     # for logging, tracebacks, printing, progressbars
     "rich != 13.1.0",
     # for CLI
-    "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
+    "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
 ]
 dynamic = ["version"]
 
@@ -100,13 +100,14 @@ integrations = [
     "snorkel >= 0.9.7",
     "spacy == 3.5.3",
     "spacy-transformers >= 1.2.5",
+    "spacy-huggingface-hub >= 0.0.10",
     "transformers[torch] >= 4.30.0",
     "evaluate",
     "seqeval",
     "sentence-transformers",
     "setfit>=0.7.0",
     "span_marker",
-    "openai>=0.27.10",
+    "openai>=0.27.10,<1.0.0",
     "peft",
     "trl>=0.5.0",
 ]
@@ -136,6 +137,9 @@ version = { attr = "argilla.__version__" }
 [tool.setuptools.package-data]
 "argilla.client.feedback.integrations.huggingface.card" = [
     "argilla_template.md",
+]
+"argilla.client.feedback.integrations.huggingface.model_card" = [
+    "argilla_model_template.md",
 ]
 
 [tool.pytest.ini_options]

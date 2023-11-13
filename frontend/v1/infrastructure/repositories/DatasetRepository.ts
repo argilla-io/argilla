@@ -19,6 +19,7 @@ interface BackendDatasetFeedbackTaskResponse {
   name: string;
   status: string;
   updated_at: string;
+  last_activity_at: string;
   workspace_id: string;
 }
 
@@ -42,7 +43,9 @@ export class DatasetRepository implements IDatasetRepository {
       workspace,
       {},
       dataset.inserted_at,
-      dataset.updated_at
+      dataset.updated_at,
+      dataset.last_activity_at,
+      dataset.allow_extra_metadata
     );
   }
 
@@ -60,7 +63,9 @@ export class DatasetRepository implements IDatasetRepository {
         dataset.workspace,
         dataset.tags,
         dataset.created_at,
-        dataset.last_updated
+        dataset.last_updated,
+        dataset.last_updated,
+        false
       );
     });
 
@@ -76,7 +81,9 @@ export class DatasetRepository implements IDatasetRepository {
           datasetFromBackend.workspace_name,
           {},
           datasetFromBackend.inserted_at,
-          datasetFromBackend.updated_at
+          datasetFromBackend.updated_at,
+          datasetFromBackend.last_activity_at,
+          datasetFromBackend.allow_extra_metadata
         );
       }
     );
@@ -91,6 +98,7 @@ export class DatasetRepository implements IDatasetRepository {
           `/v1/datasets/${dataset.id}`,
           {
             guidelines: dataset.guidelines,
+            allow_extra_metadata: dataset.allowExtraMetadata,
           }
         );
 

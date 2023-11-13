@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .model_card import (
+from argilla.client.feedback.integrations.huggingface.model_card.model_card import (
     ArgillaModelCard,
     FrameworkCardData,
     OpenAIModelCardData,

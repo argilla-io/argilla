@@ -14,6 +14,7 @@
 
 import sys
 import time
+from typing import Union
 
 import argilla as rg
 import pandas as pd
@@ -25,6 +26,21 @@ from datasets import load_dataset
 class LoadDatasets:
     def __init__(self, api_key: str):
         rg.init(api_key=api_key)
+
+    @staticmethod
+    def load_news_text_summarization():
+        print("Loading News-text-summarization dataset")
+
+        # Load dataset from hub
+        dataset = load_dataset("argilla/news-summary", split="train")
+        dataset_rg = rg.read_datasets(dataset, task="Text2Text")
+
+        # Log the dataset
+        rg.log(
+            dataset_rg,
+            name="news-text-summarization",
+            tags={"description": "A text summarization dataset with news pieces and their predicted summaries."},
+        )
 
     @staticmethod
     def load_sst_sentiment_explainability():
@@ -50,21 +66,6 @@ class LoadDatasets:
                 "description": "The sst2 sentiment dataset with predictions from a pretrained pipeline and "
                 "explanations from Transformers Interpret."
             },
-        )
-
-    @staticmethod
-    def load_news_text_summarization():
-        print("Loading News-text-summarization dataset")
-
-        # Load dataset from hub
-        dataset = load_dataset("argilla/news-summary", split="train")
-        dataset_rg = rg.read_datasets(dataset, task="Text2Text")
-
-        # Log the dataset
-        rg.log(
-            dataset_rg,
-            name="news-text-summarization",
-            tags={"description": "A text summarization dataset with news pieces and their predicted summaries."},
         )
 
     @staticmethod
@@ -169,16 +170,14 @@ if __name__ == "__main__":
     if LOAD_DATASETS.lower() == "none":
         print("No datasets will be loaded")
     else:
+        load_datasets = LOAD_DATASETS.lower().strip()
         while True:
             try:
-                response = requests.get("http://0.0.0.0:6900/")
+                response = requests.get("http://0.0.0.0:6900")
                 if response.status_code == 200:
                     ld = LoadDatasets(API_KEY)
-
                     ld.load_feedback_dataset_from_huggingface(
-                        repo_id="argilla/databricks-dolly-15k-curated-en",
-                        split="train",
-                        samples=100,
+                        repo_id="argilla/databricks-dolly-15k-curated-en", split="train", samples=100
                     )
 
                     if LOAD_DATASETS.lower() != "single":
@@ -191,14 +190,13 @@ if __name__ == "__main__":
                         ld.load_gutenberg_spacy_ner_monitoring()
                         # `FeedbackDataset`
                         ld.load_feedback_dataset_from_huggingface(
-                            repo_id="argilla/oasst_response_quality",
-                            split="train",
-                            samples=100,
+                            repo_id="argilla/oasst_response_quality", split="train", samples=100
                         )
                         ld.load_feedback_dataset_from_huggingface(
-                            repo_id="argilla/oasst_response_comparison",
-                            split="train",
-                            samples=100,
+                            repo_id="argilla/oasst_response_comparison", split="train", samples=100
+                        )
+                        ld.load_feedback_dataset_from_huggingface(
+                            repo_id="argilla/text-descriptives-metadata", split="train", samples=100
                         )
             except requests.exceptions.ConnectionError:
                 pass

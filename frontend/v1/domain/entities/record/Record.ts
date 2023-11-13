@@ -2,6 +2,7 @@ import { isEqual, cloneDeep } from "lodash";
 import { Field } from "../field/Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
+import { Score } from "../similarity/Score";
 import { RecordAnswer } from "./RecordAnswer";
 
 const DEFAULT_STATUS = "pending";
@@ -9,7 +10,8 @@ const DEFAULT_STATUS = "pending";
 export class Record {
   // eslint-disable-next-line no-use-before-define
   private original: Record;
-
+  public updatedAt?: string;
+  public readonly score: Score;
   constructor(
     public readonly id: string,
     public readonly datasetId: string,
@@ -17,10 +19,12 @@ export class Record {
     public readonly fields: Field[],
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
-    public updatedAt: string,
+    score: number,
     public readonly page: number
   ) {
     this.completeQuestion();
+    this.updatedAt = answer?.updatedAt;
+    this.score = new Score(score);
   }
 
   get status() {

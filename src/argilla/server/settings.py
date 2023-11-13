@@ -91,6 +91,8 @@ class Settings(BaseSettings):
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
 
+    search_engine: str = "elasticsearch"
+
     vectors_fields_limit: int = Field(
         default=5,
         description="Max number of supported vectors per record",

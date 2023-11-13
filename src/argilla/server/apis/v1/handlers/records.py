@@ -24,7 +24,7 @@ from argilla.server.database import get_async_db
 from argilla.server.models import User
 from argilla.server.policies import RecordPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import Record as RecordSchema
-from argilla.server.schemas.v1.records import Response, ResponseCreate
+from argilla.server.schemas.v1.records import RecordUpdate, Response, ResponseCreate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
@@ -39,15 +39,52 @@ router = APIRouter(tags=["records"])
 
 
 async def _get_record(
-    db: AsyncSession, record_id: UUID, with_dataset: bool = False, with_suggestions: bool = False
+    db: AsyncSession,
+    record_id: UUID,
+    with_dataset: bool = False,
+    with_suggestions: bool = False,
+    with_vectors: bool = False,
 ) -> "Record":
-    record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions)
+    record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions, with_vectors)
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Record with id `{record_id}` not found",
         )
     return record
+
+
+@router.get("/records/{record_id}", response_model=RecordSchema)
+async def get_record(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+
+    await authorize(current_user, RecordPolicyV1.get(record))
+
+    return record
+
+
+@router.patch("/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema)
+async def update_record(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    record_id: UUID,
+    record_update: RecordUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True, with_vectors=True)
+
+    await authorize(current_user, RecordPolicyV1.update(record))
+
+    try:
+        return await datasets.update_record(db, search_engine, record, record_update)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)

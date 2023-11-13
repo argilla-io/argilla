@@ -7,11 +7,7 @@ const useStoreForRecords = useStoreFor<Records, IRecordStorage>(Records);
 export const useRecords = () => {
   const state = useStoreForRecords();
 
-  const clearRecords = () => {
-    state.save(new Records());
-  };
-
-  const add = (newRecords: Records) => {
+  const append = (newRecords: Records) => {
     const oldRecords = state.get();
 
     const allRecords = [...oldRecords.records];
@@ -31,9 +27,13 @@ export const useRecords = () => {
     state.save(new Records(allRecords, newRecords.total));
   };
 
+  const replace = (newRecords: Records) => {
+    state.save(newRecords);
+  };
+
   return {
     ...state,
-    add,
-    clearRecords,
+    append,
+    replace,
   };
 };

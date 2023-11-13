@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
+import warnings
 from typing import Optional
 
 from argilla.client import api
@@ -72,5 +73,5 @@ def configure_dataset(name: str, settings: Settings, workspace: Optional[str] = 
         settings: The dataset settings
         workspace: The workspace name where the dataset will belongs to
     """
-    _LOGGER.warning("This method is deprecated. Use configure_dataset_settings instead.")
+    warnings.warn("This method is deprecated. Use configure_dataset_settings instead.", DeprecationWarning)
     return configure_dataset_settings(name, settings, workspace)

@@ -1,28 +1,26 @@
 <template>
-  <transition name="fade" v-if="fieldText" appear mode="out-in">
-    <div class="text_field_component" :key="fieldText">
-      <div class="title-area --body2">
-        <span class="text_field_component__title-content" v-text="title" />
-        <BaseActionTooltip
-          class="text_field_component__tooltip"
-          tooltip="Copied"
-          tooltip-position="left"
+  <div class="text_field_component" :key="fieldText">
+    <div class="title-area --body2">
+      <span class="text_field_component__title-content" v-text="title" />
+      <BaseActionTooltip
+        class="text_field_component__tooltip"
+        tooltip="Copied"
+        tooltip-position="left"
+      >
+        <BaseButton
+          title="Copy to clipboard"
+          class="text_field_component__copy-button"
+          @click.prevent="$copyToClipboard(fieldText)"
         >
-          <BaseButton
-            title="Copy to clipboard"
-            class="text_field_component__copy-button"
-            @click.prevent="$copyToClipboard(fieldText)"
-          >
-            <svgicon color="#acacac" name="copy" width="18" height="18" />
-          </BaseButton>
-        </BaseActionTooltip>
-      </div>
-      <div class="content-area --body1">
-        <div v-if="!useMarkdown" v-html="text" />
-        <RenderMarkdownBaseComponent v-else :markdown="text" />
-      </div>
+          <svgicon color="#acacac" name="copy" width="18" height="18" />
+        </BaseButton>
+      </BaseActionTooltip>
     </div>
-  </transition>
+    <div class="content-area --body1">
+      <div v-if="!useMarkdown" v-html="text" />
+      <RenderMarkdownBaseComponent v-else :markdown="text" />
+    </div>
+  </div>
 </template>
 
 <script>
@@ -55,12 +53,18 @@ export default {
 
 <style lang="scss" scoped>
 .text_field_component {
+  $this: &;
   display: flex;
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
   background: palette(grey, 800);
   border-radius: $border-radius-m;
+  &:hover {
+    #{$this}__copy-button {
+      opacity: 1;
+    }
+  }
   .title-area {
     display: flex;
     align-items: center;
@@ -84,6 +88,7 @@ export default {
     flex-shrink: 0;
     padding: 0;
     z-index: 2;
+    opacity: 0;
   }
 }
 .fade-enter-active,

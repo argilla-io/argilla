@@ -31,8 +31,6 @@ from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.models import User
 from argilla.server.schemas.v0.datasets import Dataset
 
-from tests import SUPPORTED_VECTOR_SEARCH
-
 if TYPE_CHECKING:
     from httpx import AsyncClient
 
@@ -229,7 +227,6 @@ async def test_create_records_for_text_classification(async_client: "AsyncClient
     test_telemetry.assert_called()
 
 
-@pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
 @pytest.mark.asyncio
 async def test_create_records_for_text_classification_vector_search(
     async_client: "AsyncClient", argilla_user: User, test_telemetry

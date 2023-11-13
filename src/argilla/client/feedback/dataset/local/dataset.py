@@ -11,14 +11,18 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import logging
 import textwrap
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset.base import FeedbackDatasetBase
-from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
+from argilla.client.feedback.dataset import helpers
+from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
+from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
+from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
+from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -26,7 +30,8 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.types import AllowedQuestionTypes
+from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas import (
     TrainingTaskForChatCompletion,
     TrainingTaskForDPO,
@@ -49,27 +54,40 @@ from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.records import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
+class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase[FeedbackRecord], TaskTemplateMixin):
     def __init__(
         self,
         *,
         fields: List["AllowedFieldTypes"],
-        questions: List[AllowedQuestionTypes],
+        questions: List["AllowedQuestionTypes"],
+        metadata_properties: Optional[List["AllowedMetadataPropertyTypes"]] = None,
+        vectors_settings: Optional[List[VectorSettings]] = None,
         guidelines: Optional[str] = None,
+        allow_extra_metadata: bool = True,
     ) -> None:
         """Initializes a `FeedbackDataset` instance locally.
 
         Args:
             fields: contains the fields that will define the schema of the records in the dataset.
             questions: contains the questions that will be used to annotate the dataset.
+            metadata_properties: contains the metadata properties that will be indexed
+                and could be used to filter the dataset. Defaults to `None`.
+            vectors_settings: contains the vectors settings that will define the configuration
+                of the vectors associated to the records in the dataset and that would
+                allow to perform vector search. Defaults to `None`.
             guidelines: contains the guidelines for annotating the dataset. Defaults to `None`.
+            allow_extra_metadata: whether to allow extra metadata that has not been defined
+                as a metadata property in the records. Defaults to `True`.
 
         Raises:
             TypeError: if `fields` is not a list of `FieldSchema`.
@@ -113,12 +131,78 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
             ...             labels=["category-1", "category-2", "category-3"],
             ...         ),
             ...     ],
+            ...     metadata_properties=[
+            ...         rg.TermsMetadataProperty(
+            ...             name="metadata-property-1",
+            ...             values=["a", "b", "c"]
+            ...         ),
+            ...         rg.IntegerMetadataProperty(
+            ...             name="metadata-property-2",
+            ...             gt=0,
+            ...             lt=10,
+            ...         ),
+            ...         rg.FloatMetadataProperty(
+            ...             name="metadata-property-2",
+            ...             gt=-10.0,
+            ...             lt=10.0,
+            ...         ),
+            ...     ],
             ...     guidelines="These are the annotation guidelines.",
             ... )
         """
-        super().__init__(fields=fields, questions=questions, guidelines=guidelines)
 
+        helpers.validate_fields(fields)
+        helpers.validate_questions(questions)
+        helpers.validate_metadata_properties(metadata_properties)
+
+        if guidelines is not None:
+            if not isinstance(guidelines, str):
+                raise TypeError(
+                    f"Expected `guidelines` to be either None (default) or a string, got {type(guidelines)} instead."
+                )
+            if len(guidelines) < 1:
+                raise ValueError(
+                    "Expected `guidelines` to be either None (default) or a non-empty string, minimum length is 1."
+                )
+
+        self._fields = fields or []
+        self._questions = questions or []
+        self._metadata_properties = metadata_properties or []
+        self._guidelines = guidelines
+        self._allow_extra_metadata = allow_extra_metadata
+
+        if vectors_settings:
+            self._vectors_settings = {vector_setting.name: vector_setting for vector_setting in vectors_settings}
+        else:
+            self._vectors_settings: Dict[str, VectorSettings] = {}
         self._records = []
+
+    @property
+    def guidelines(self) -> Optional[str]:
+        return self._guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self._allow_extra_metadata
+
+    @property
+    def fields(self) -> Union[List["AllowedFieldTypes"]]:
+        return self._fields
+
+    @property
+    def questions(self) -> Union[List["AllowedQuestionTypes"]]:
+        return self._questions
+
+    @property
+    def metadata_properties(
+        self,
+    ) -> Union[List["AllowedMetadataPropertyTypes"]]:
+        return self._metadata_properties
+
+    @property
+    def vectors_settings(self) -> List["VectorSettings"]:
+        """Returns the vector settings of the dataset."""
+        return [v for v in self._vectors_settings.values()]
 
     @property
     def records(self) -> List["FeedbackRecord"]:
@@ -127,12 +211,14 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
 
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
+        indent = "   "
         return (
             "FeedbackDataset("
-            + textwrap.indent(
-                f"\nfields={self.fields}\nquestions={self.questions}\nguidelines={self.guidelines})", "    "
-            )
-            + "\n)"
+            + textwrap.indent(f"\nfields={self.fields}", indent)
+            + textwrap.indent(f"\nquestions={self.questions}", indent)
+            + textwrap.indent(f"\nguidelines={self.guidelines})", indent)
+            + textwrap.indent(f"\nmetadata_properties={self.metadata_properties})", indent),
+            +"\n)",
         )
 
     def __len__(self) -> int:
@@ -185,40 +271,153 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
                 list of dictionaries as a record or dictionary as a record.
             ValueError: if the given records do not match the expected schema.
         """
-        records = self._parse_records(records)
-        self._validate_records(records)
+        records = helpers.normalize_records(records)
+        helpers.validate_dataset_records(self, records)
 
         if len(self._records) > 0:
             self._records += records
         else:
             self._records = records
 
-    def pull(self) -> "FeedbackDataset":
-        warnings.warn(
-            "`pull` method is not supported for local datasets and won't take any effect."
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`."
-            "After, use `FeedbackDataset.from_argilla(...).pull()`.",
-            UserWarning,
-        )
-        return self
+    def add_metadata_property(
+        self, metadata_property: "AllowedMetadataPropertyTypes"
+    ) -> "AllowedMetadataPropertyTypes":
+        """Adds the given metadata property to the dataset.
 
-    def filter_by(self, *args, **kwargs) -> "FeedbackDataset":
-        warnings.warn(
-            "`filter_by` method is not supported for local datasets and won't take any effect. "
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`."
-            "After, use `FeedbackDataset.from_argilla(...).filter_by()`.",
-            UserWarning,
-        )
-        return self
+        Args:
+            metadata_property: the metadata property to add.
 
-    def delete(self):
+        Returns:
+            The metadata property that was added.
+
+        Raises:
+            TypeError: if `metadata_property` is not a `MetadataPropertySchema`.
+            ValueError: if `metadata_property` is already in the dataset.
+        """
+        self._unique_metadata_property(metadata_property)
+        self._metadata_properties.append(metadata_property)
+        return metadata_property
+
+    def vector_settings_by_name(self, name: str) -> VectorSettings:
+        vector_settings = self._vectors_settings.get(name)
+        if not vector_settings:
+            raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
+
+        return vector_settings
+
+    def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
+        if self._vectors_settings.get(vector_settings.name):
+            raise ValueError(f"Vector settings with name '{vector_settings.name}' already exists in the dataset.")
+
+        self._vectors_settings[vector_settings.name] = vector_settings
+        return vector_settings
+
+    def update_vectors_settings(self, vectors_settings: Union[VectorSettings, List[VectorSettings]]) -> None:
+        """Does nothing because the `vector_settings` are updated automatically for
+        `FeedbackDataset` datasets when assigning their updateable attributes to a new value.
+        """
         warnings.warn(
-            "`delete` method is not supported for local datasets and won't take any effect. "
-            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`."
-            "After, use `FeedbackDataset.from_argilla(...).delete()`",
+            "`update_vectors_settings` method is not supported for `FeedbackDataset` datasets"
+            " unless its pushed to Argilla i.e. `RemoteFeedbackDataset`. This is because the"
+            " `vector_settings` updates are already applied via assignment if any. So,"
+            " this method is not required locally.",
             UserWarning,
+            stacklevel=1,
         )
-        return self
+
+    def delete_vectors_settings(
+        self, vectors_settings: Union[str, List[str]]
+    ) -> Union[VectorSettings, List[VectorSettings]]:
+        """Deletes the given vector settings from the dataset.
+
+        Args:
+            vectors_settings: the name/s of the vector settings to delete.
+
+        Returns:
+            The vector settings that were deleted.
+
+        Raises:
+            ValueError: if the provided `vectors_settings` is/are not in the dataset.
+        """
+        if isinstance(vectors_settings, str):
+            vectors_settings = [vectors_settings]
+
+        if not self.vectors_settings:
+            raise ValueError(
+                "The current `FeedbackDataset` does not contain any `vectors_settings` defined, so"
+                " none can be deleted."
+            )
+
+        if not all(vector_setting in self._vectors_settings.keys() for vector_setting in vectors_settings):
+            raise ValueError(
+                f"Invalid `vectors_settings={vectors_settings}` provided. It cannot be"
+                " deleted because it does not exist, make sure you delete just existing `vectors_settings`"
+                " meaning that the name matches any of the existing `vectors_settings` if any. Current"
+                f" `vectors_settings` are: '{', '.join(self._vectors_settings.keys())}'."
+            )
+
+        deleted_vectors_settings = []
+        for vector_setting in vectors_settings:
+            deleted_vectors_settings.append(self._vectors_settings.pop(vector_setting))
+        return deleted_vectors_settings if len(deleted_vectors_settings) > 1 else deleted_vectors_settings[0]
+
+    def update_metadata_properties(
+        self,
+        metadata_properties: Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]],
+    ) -> None:
+        """Does nothing because the `metadata_properties` are updated automatically for
+        `FeedbackDataset` datasets when assigning their updateable attributes to a new value.
+        """
+        warnings.warn(
+            "`update_metadata_properties` method is not supported for `FeedbackDataset` datasets"
+            " unless its pushed to Argilla i.e. `RemoteFeedbackDataset`. This is because the"
+            " `metadata_properties` updates are already applied via assignment if any. So,"
+            " this method is not required locally.",
+            UserWarning,
+            stacklevel=1,
+        )
+
+    def delete_metadata_properties(
+        self, metadata_properties: Union[str, List[str]]
+    ) -> Union["AllowedMetadataPropertyTypes", List["AllowedMetadataPropertyTypes"]]:
+        """Deletes the given metadata properties from the dataset.
+
+        Args:
+            metadata_properties: the name/s of the metadata property/ies to delete.
+
+        Returns:
+            The metadata properties that were deleted.
+
+        Raises:
+            TypeError: if `metadata_properties` is not a string or a list of strings.
+            ValueError: if the provided `metadata_properties` is/are not in the dataset.
+        """
+        if not isinstance(metadata_properties, list):
+            metadata_properties = [metadata_properties]
+
+        if not self.metadata_properties:
+            raise ValueError(
+                "The current `FeedbackDataset` does not contain any `metadata_properties` defined, so"
+                " none can be deleted."
+            )
+        metadata_properties_mapping = {
+            metadata_property.name: metadata_property for metadata_property in self.metadata_properties
+        }
+        if not all(
+            metadata_property in metadata_properties_mapping.keys() for metadata_property in metadata_properties
+        ):
+            raise ValueError(
+                f"Invalid `metadata_properties={metadata_properties}` provided. It cannot be"
+                " deleted because it does not exist, make sure you delete just existing `metadata_properties`"
+                " meaning that the name matches any of the existing `metadata_properties` if any. Current"
+                f" `metadata_properties` are: '{', '.join(metadata_properties_mapping.keys())}'."
+            )
+
+        deleted_metadata_properties = []
+        for metadata_property in metadata_properties:
+            deleted_metadata_properties.append(metadata_properties_mapping.pop(metadata_property))
+        self._metadata_properties = list(metadata_properties_mapping.values())
+        return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
     def unify_responses(
         self: "FeedbackDatasetBase",
@@ -308,7 +507,7 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
                 " dataset via the `FeedbackDataset.add_records()` method first."
             )
 
-        local_dataset = self.pull()
+        local_dataset = self
         if isinstance(task, (TrainingTaskForTextClassification, TrainingTaskForSentenceSimilarity)):
             if task.formatting_func is None:
                 # in sentence-transformer models we can train without labels
@@ -368,3 +567,63 @@ class FeedbackDataset(ArgillaMixin, FeedbackDatasetBase):
             raise NotImplementedError(
                 f"Framework {framework} is not supported. Choose from: {[e.value for e in Framework]}"
             )
+
+    def update_records(self, records: Union["FeedbackRecord", List["FeedbackRecord"]]) -> None:
+        warnings.warn(
+            "`update_records` method only works for `FeedbackDataset` pushed to Argilla. "
+            "If your are working with local data, you can just iterate over the records and update them."
+        )
+
+    def sort_by(
+        self, field: Union[str, RecordSortField], order: Union[str, SortOrder] = SortOrder.asc
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`sort_by` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`. "
+            "After, use `FeedbackDataset.from_argilla(...).sort_by()`.",
+            UserWarning,
+            stacklevel=1,
+        )
+        return self
+
+    def pull(self, *args, **kwargs) -> "FeedbackDataset":
+        warnings.warn(
+            "`pull` method is not supported for local datasets and won't take any effect."
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`. "
+            "After, use `FeedbackDataset.from_argilla(...).pull()`.",
+            UserWarning,
+        )
+        return self
+
+    def filter_by(self, *args, **kwargs) -> "FeedbackDataset":
+        warnings.warn(
+            "`filter_by` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla()`. "
+            "After, use `FeedbackDataset.from_argilla(...).filter_by()`.",
+            UserWarning,
+        )
+        return self
+
+    def delete(self):
+        warnings.warn(
+            "`delete` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`. "
+            "After, use `FeedbackDataset.from_argilla(...).delete()`",
+            UserWarning,
+        )
+        return self
+
+    def find_similar_records(
+        self,
+        vector_name: str,
+        value: Optional[List[float]] = None,
+        record: Optional[R] = None,
+        max_results: int = 50,
+    ) -> List[Tuple[FeedbackRecord, float]]:
+        warnings.warn(
+            "`find_similar_records` method is not supported for local datasets and won't take any effect. "
+            "First, you need to push the dataset to Argilla with `FeedbackDataset.push_to_argilla`. "
+            "After, use `FeedbackDataset.from_argilla(...).find_similar_records()`",
+            UserWarning,
+        )
+        return []

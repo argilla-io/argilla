@@ -5,11 +5,65 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
+### Filter
+
 From Argilla 1.15.0, the `filter_by` method has been included for the `FeedbackDataset`s pushed to Argilla, which allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. So on, to be able to use the `filter_by` method, you will need to make sure that you are using a `FeedbackDataset` in Argilla.
 
-### Filter by `response_status`
+:::{warning}
+The `filter_by` method returns a new instance which is a `FeedbackDataset` with the filtered records and synced with Argilla, which means that you will just have access to the records that are compliant with the applied filter. So calling `filter_by` will return a `FeedbackDataset` with a subset of the records, but the records won't be modified unless updates or deletions are specifically applied at record-level. So on, the following methods are not allowed: `delete`, `delete_records`, `add_records`, `records.add`, and `records.delete`; while you'll still be able to perform record-level operations such as `update` or `delete`.
+:::
 
-The `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. The `response_status` of an annotation can be one of the following: "draft", "missing", "discarded", or "submitted".
+#### By `fields` content
+
+In the UI, you can filter records based on their content using the searchbar in the top left corner on top of the record card. For example, you may read or annotate all records mentioning John Wick by simply typing "John Wick" in the searchbar.
+
+#### By metadata property
+
+In the UI, you will find a metadata filter that lets you easily set a combination of filters based on the metadata properties defined for your dataset.
+
+```{note}
+Note that if a metadata property was set to `visible_for_annotators=False` this metadata property will only appear in the metadata filter for users with the `admin` or `owner` role.
+```
+
+In the Python SDK, you can also filter the records using one or a combination of metadata filters for the metadata properties defined in your dataset. Depending on the type of metadata you want to filter by, you will need to choose one of the following: `IntegerMetadataFilter`, `FloatMetadataFilter` or `TermsMetadataFilter`.
+
+These are the arguments that you will need to define for your filter:
+
+- `name`: The name of the metadata property you want to filter by.
+- `ge`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values greater than or equal to the provided value. At least one of `ge` or `le` should be provided.
+- `le`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values lower than or equal to the provided value. At least one of `ge` or `le` should be provided.
+- `values`: In a `TermsMetadataFilter`, returns records with at least one of the values provided.
+
+```python
+import argilla as rg
+
+rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
+
+dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
+
+filtered_records = dataset.filter_by(
+    metadata_filters=[
+        rg.IntegerMetadataFilter(
+            name="tokens-length",
+            ge=900, # at least one of ge or le should be provided
+            le=1000
+        ),
+        rg.TermsMetadataFilter(
+            name="task",
+            values=["summarization", "information-extraction"]
+        )
+    ]
+)
+```
+
+#### By status
+
+In the Python SDK, the `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. The `response_status` of an annotation can be one of the following:
+
+- `missing`: The records with this status have no responses. In the UI, they will appear under the `Pending` queue.
+- `draft`: The records with this status have responses but have not been submitted or discarded. In the UI, they will appear under the `Pending` queue.
+- `discarded`: The records with this status may or may not have responses but have been discarded by the annotator. In the UI, they will appear under the `Discarded` queue.
+- `submitted`: The records with this status have responses already submitted by the annotator. In the UI, they will appear under the `Submitted` queue.
 
 :::{note}
 From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from Argilla, but the instance will be remote, which implies that the additions, updates, and deletions of records will be pushed to Argilla as soon as they are made. This is a change from previous versions of Argilla, where you had to call `push_to_argilla` again to push the changes to Argilla.
@@ -30,6 +84,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
+
 :::
 
 :::{tab-item} list of statuses
@@ -43,13 +98,39 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 ```
+
 :::
 ::::
 
-:::{warning}
-The `filter_by` method returns a new instance which is a `FeedbackDataset` with the filtered records and synced with Argilla, which means that you will just have access to the records that are compliant with the applied filter. So calling `filter_by` will return a `FeedbackDataset` with a subset of the records, but the records won't be modified unless updates or deletions are specifically applied at record-level. So on, the following methods are not allowed: `delete`, `delete_records`, `add_records`, `records.add`, and `records.delete`; while you'll still be able to perform record-level operations such as `update` or `delete`.
-:::
+### Sort
 
+You may also order your records according to one or several attributes. In the UI, you can easily do this using the `Sort` menu. In the Python SDK, you can do this sorting with the `sort_by` method.
+
+These are the arguments of the `sort_by` function:
+
+- `field`: This refers to the information that will be used for the sorting. This can be time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
+- `order`: Whether the order should be ascending (`asc`) or descending (`des`).
+
+```python
+sorted_records = remote.sort_by(
+    [
+        SortBy(field="metadata.my-metadata", order="asc"),
+        SortBy(field="updated_at", order="des"),
+    ]
+)
+```
+
+```{tip}
+You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
+```
+
+### Semantic search
+
+```{include} /_common/ui_feedback_semantic_search.md
+```
+
+```{include} /_common/sdk_feedback_semantic_search.md
+```
 
 ## Other datasets
 
@@ -60,7 +141,6 @@ The search in Argilla is driven by Elasticsearch's powerful [query string syntax
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
 The same query can be used in the search bar of the Argilla web app, or with the Python client as optional arguments.
-
 
 ```python
 import argilla as rg
@@ -121,7 +201,7 @@ Inclusive ranges are specified with square brackets and exclusive ranges are wit
 :::{tab-item} operators
 
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
-Following examples showcase the power of these operators:
+The following examples showcase the power of these operators:
 
 - `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
@@ -179,7 +259,7 @@ For a complete list of available fields and their content, have a look at the fi
 The default behavior when not specifying any fields in the query string changed in version `>=0.16.0`.
 Before this version, Argilla searched in a mixture of the the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
 If you want to search for special characters now, you have to specify the `text.exact` field.
-For example, this is the query if you want to search for words with an exclamation mark in the end: `text.exact:*\!`
+For example, this is the query if you want to search for words with an exclamation mark at the end: `text.exact:*\!`
 
 If you do not retrieve any results after a version update, you should use the `words` and `words.extended` fields in your search query for old datasets instead of the `text` and `text.exact` ones.
 ```
@@ -221,23 +301,23 @@ Again, as with the `text` field, you can also use the white space analyzer to pe
 
 ### Words and phrases
 
-Apart from single words you can also search for *phrases* by surrounding multiples words with double quotes.
+Apart from single words you can also search for *phrases* by surrounding multiple words with double quotes.
 This searches for all the words in the phrase, in the same order.
 
-If we take the two examples from above, then following query will only return the second example:
+If we take the two examples from above, then the following query will only return the second example:
 
 - `text:"lazy dog hated"`
 
 ### Metadata fields
 
 You also have the metadata of your records available when performing a search.
-Imagine you provided the split to which the record belongs to as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
+Imagine you provided the split to which the record belongs as metadata, that is `metadata={"split": "train"}` or `metadata={"split": "test"}`.
 Then you could only search your training data by specifying the corresponding field in your query:
 
 - `metadata.split:train`
 
 Metadata are indexed as keywords.
-This means you cannot search for single words in them, and capitalization and punctuations are taken into account.
+This means you cannot search for single words in them, and capitalization and punctuation are taken into account.
 You can, however, use wild cards.
 
 ```{warning}
@@ -247,7 +327,7 @@ The metadata field has by default a maximum length of 128 characters and a field
 
 #### Non-searchable metadata fields
 
-If your intention is to only store metadata with records and not use it for searches, you can achieve this by defining
+If you intend to only store metadata with records and not use it for searches, you can achieve this by defining
 the metadata field with a leading underscore. For instance, if you use `metadata._my_hidden_field`, the field will be
 accessible at the record level, but it won't be used in searches.
 
@@ -260,24 +340,24 @@ Note that the URL cannot exceed the metadata length limit.
 
 ### Vector fields
 
-It is also possible to query the presense of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
+It is also possible to query the presence of vector field. Imagine you only want to include records with `vectors={"vector_1": vector_1}`. You can then define a query `vectors.vector_1: *`.
 
 ### Filters as query string
 
-Just like the metadata, you can also use the filter fields in you query.
+Just like the metadata, you can also use the filter fields in your query.
 A few examples to emulate the filters in the query string are:
 
 - `status:Validated`
 - `annotated_as:HAM`
 - `predicted_by:Model A`
 
-The field values are treated as keywords, that is you cannot search for single words in them, and capitalization and punctuations are taken into account.
+The field values are treated as keywords, that is you cannot search for single words in them, and capitalization and punctuation are taken into account.
 You can, however, use wild cards.
 
 ### Combine terms and fields
 
 You can combine an arbitrary amount of terms and fields in your search using the familiar boolean operators `AND`, `OR` and `NOT`.
-Following examples showcase the power of these operators:
+The following examples showcase the power of these operators:
 
 - `text:(quick AND fox)`: Returns records that contain the word *quick* and *fox*. The `AND` operator is the default operator, so `text:(quick fox)` is equivalent.
 - `text:(quick OR brown)`: Returns records that contain either the word *quick* or *brown*.
@@ -288,7 +368,7 @@ Following examples showcase the power of these operators:
 ### Query string features
 
 The query string syntax has many powerful features that you can use to create complex searches.
-Following is just a hand selected subset of the many features you can look up on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html).
+The following is just a hand-selected subset of the many features you can look up on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/query-dsl-query-string-query.html).
 
 #### Wildcards
 
@@ -304,7 +384,7 @@ Regular expression patterns can be embedded in the query string by wrapping them
 
 - `text:/joh?n(ath[oa]n)/`: Matches *jonathon*, *jonathan*, *johnathon*, and *johnathan*.
 
-The supported regular expression syntax is explained on the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
+The supported regular expression syntax is explained in the official [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/regexp-syntax.html).
 
 #### Fuzziness
 
@@ -323,8 +403,8 @@ Inclusive ranges are specified with square brackets and exclusive ranges with cu
 
 ##### Datetime Ranges
 
-Datetime ranges are a special kind of range queries that can be defined for the `event_timestamp` and `last_updated` fields.
-The formatting is similar to normal range queries, but they require an iso-formatted datetime, which can be ontained via `datetime.now().isoformat()`, resulting in `1984-01-01T01:01:01.000000`. Note that the `*` can be used inter-changebly for the end of time or beginning of time.
+Datetime ranges are a special kind of range query that can be defined for the `event_timestamp` and `last_updated` fields.
+The formatting is similar to normal range queries, but they require an iso-formatted datetime, which can be obtained via `datetime.now().isoformat()`, resulting in `1984-01-01T01:01:01.000000`. Note that the `*` can be used interchangeably for the end of time or beginning of time.
 
 - `event_timestamp:[1984-01-01T01:01:01.000000 TO *]`
 - `last_updated:{* TO 1984-01-01T01:01:01.000000}`
@@ -382,4 +462,3 @@ This is a table with available fields that you can use in your query string:
 | metrics.predicted.mentions.chars_length  | Mention length in chars (prediction)  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.value             | Text of the token (prediction)        |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.tag               | IOB tag (prediction)                  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
-
