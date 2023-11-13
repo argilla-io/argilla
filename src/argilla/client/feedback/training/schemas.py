@@ -133,7 +133,6 @@ class TrainingData(ABC):
                         explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
-
         if explode_columns:
             df = df.explode(list(explode_columns))
         # In cases of MultiLabel datasets the label column contains a list,
@@ -1594,7 +1593,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
 
     @requires_dependencies("sentence-transformers")
     def _prepare_for_training_with_sentence_transformers(
-        self, data: List[dict], train_size: float, seed: int
+        self, data: Union[List[dict], List[List[dict]]], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
         from sentence_transformers import InputExample
 
@@ -1615,7 +1614,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             def dataset_fields(sample):
                 return {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
 
-        elif sample_keys == sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
+        elif sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
 
             def dataset_fields(sample):
                 return {

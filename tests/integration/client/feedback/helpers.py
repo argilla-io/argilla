@@ -130,6 +130,20 @@ def formatting_func_sentence_transformers(sample: dict):
             ]
 
 
+def formatting_func_sentence_transformers_all_lists(sample: dict):
+    labels = [
+        annotation["value"]
+        for annotation in sample["question-3"]
+        if annotation["status"] == "submitted" and annotation["value"] is not None
+    ]
+    if labels:
+        # Force to pass always a list of values
+        return [
+            {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
+            {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 2},
+        ]
+
+
 # Additional formatting functions used for different sentence transformer cases:
 
 
