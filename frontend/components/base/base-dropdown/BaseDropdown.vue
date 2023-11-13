@@ -16,7 +16,14 @@
   -->
 
 <template>
-  <div v-click-outside="onClickOutside" ref="dropdown" class="dropdown">
+  <div
+    ref="dropdown"
+    class="dropdown"
+    v-click-outside="{
+      events: ['mousedown'],
+      handler: onClickOutside,
+    }"
+  >
     <div class="dropdown__header" @click="onClick">
       <slot name="dropdown-header" />
     </div>
