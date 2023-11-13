@@ -62,9 +62,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 .option-selector {
+  padding: calc($base-space / 2);
   user-select: none;
   text-transform: capitalize;
+  @include font-size(13px);
   font-weight: 500;
+  :deep(.dropdown__content) {
+    top: 100%;
+  }
 
   &__options {
     list-style: none;
