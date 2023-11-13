@@ -126,11 +126,17 @@ export default {
 
       this.selectSuggestion(suggestion);
     },
-    clearSuggestionFilter() {
-      this.$emit("remove-suggestion-filter");
+    clearSuggestionFilter(suggestion) {
+      suggestion.clear();
+
+      this.applyFilter();
     },
-    clearAllSuggestionFilter() {
-      this.$emit("clear-all-suggestion-filter");
+    clearAllSuggestionFilter(suggestions) {
+      suggestions.forEach((suggestion) => {
+        suggestion.clear();
+      });
+
+      this.applyFilter();
     },
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.questionFilters) return;
