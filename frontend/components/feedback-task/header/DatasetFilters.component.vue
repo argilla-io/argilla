@@ -156,15 +156,15 @@ $filters-inline-min-width: 540px;
   align-items: center;
   &__wrapper {
     width: 100%;
-    container-type: inline-size;
-    container-name: filters;
     z-index: 1;
   }
   &__list {
+    position: relative;
     display: flex;
     gap: $base-space;
     width: 100%;
     padding-top: $base-space;
+    overflow: auto;
   }
   &__total-records {
     flex-shrink: 0;
@@ -206,11 +206,5 @@ $filters-inline-min-width: 540px;
 .filterAppear-leave-to {
   opacity: 0;
   transform: translateY(-4px);
-}
-
-@container filters (max-width: #{$filters-inline-min-width}) {
-  .filters {
-    flex-wrap: wrap;
-  }
 }
 </style>

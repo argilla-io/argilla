@@ -4,6 +4,7 @@
     v-if="!!metadataFilters && metadataFilters.hasFilters"
   >
     <BaseDropdown
+      boundary="viewport"
       :visible="visibleDropdown"
       @visibility="onMetadataToggleVisibility"
     >

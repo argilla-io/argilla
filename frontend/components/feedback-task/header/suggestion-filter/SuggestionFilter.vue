@@ -1,6 +1,10 @@
 <template>
   <div class="suggestion-filter" v-if="!!datasetQuestions">
-    <BaseDropdown :visible="visibleDropdown" @visibility="onToggleVisibility">
+    <BaseDropdown
+      boundary="viewport"
+      :visible="visibleDropdown"
+      @visibility="onToggleVisibility"
+    >
       <span slot="dropdown-header">
         <FilterButtonWithBadges
           :is-active="visibleDropdown"
