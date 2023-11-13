@@ -74,7 +74,7 @@ docker-compose -f docker-compose.opensearch.yaml up
 Once the service is up you can launch the Argilla Server with `ARGILLA_SEARCH_ENGINE=opensearch python -m argilla server start`.
 
 :::{warning}
-For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla. 
+For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla.
 See https://github.com/opensearch-project/k-NN/issues/1286
 
 This may result in unexpected results when combining filtering with vector search with this engine.

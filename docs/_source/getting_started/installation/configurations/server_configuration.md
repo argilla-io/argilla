@@ -10,7 +10,7 @@ The default value for this variable is set to `elasticsearch`. The minimal versi
 Please, review your backend and upgrade it if necessary.
 
 :::{warning}
-For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla. 
+For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla.
 See https://github.com/opensearch-project/k-NN/issues/1286
 
 This may result in unexpected results when combining filtering with vector search with this engine.
