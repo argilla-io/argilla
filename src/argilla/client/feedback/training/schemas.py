@@ -1596,13 +1596,22 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     def _prepare_for_training_with_sentence_transformers(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
+        from types import GeneratorType
+
         from sentence_transformers import InputExample
 
         if not len(data) > 0:
             raise ValueError("The dataset must contain at least one sample to be able to train.")
 
         # Use the first sample to decide what type of dataset to generate:
-        sample_keys = set(data[0].keys())
+        if isinstance(data[0], list):
+            # In case we are returning lists, extract the first element of that list to check the fields.
+            sample_keys = set(data[0][0].keys())
+        elif isinstance(data[0], dict):
+            sample_keys = set(data[0].keys())
+        else:
+            raise ValueError(f"The type is not supported: {type(data[0])}.")
+
         if sample_keys == {"label", "sentence-1", "sentence-2"}:
 
             def dataset_fields(sample):
