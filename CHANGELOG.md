@@ -25,6 +25,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
 - Added `show_progress` argument to `from_huggingface()` method to make the progress bar for parsing records process optional.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
 - Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
 - Added to sort by `inserted_at` or `updated_at` for datasets with no metadata. ([4147](https://github.com/argilla-io/argilla/pull/4147))
