@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 from typing import TYPE_CHECKING
 
 import pytest
@@ -125,7 +126,7 @@ async def create_dataset(async_client: "AsyncClient", workspace_name: str, task:
     }[task]
 
     response = await async_client.post(
-        f"/api/datasets/{dataset_name}/{task}:bulk",
+        f"/api/datasets/{dataset_name}/{task.value}:bulk",
         json=request_builder().dict(by_alias=True, exclude_none=True),
         params=params,
     )
@@ -164,7 +165,7 @@ async def test_update_record_ok(async_client: "AsyncClient", owner: User, task, 
     assert updated_record.metadata["new_value"] == text
 
     response = await async_client.post(
-        f"/api/datasets/{dataset}/{task}:search",
+        f"/api/datasets/{dataset}/{task.value}:search",
         json={"query": {"ids": [expected_id]}},
         headers={API_KEY_HEADER_NAME: user.api_key},
         params={"workspace": workspace.name},
