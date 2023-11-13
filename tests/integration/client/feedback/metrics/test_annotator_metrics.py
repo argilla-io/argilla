@@ -28,12 +28,16 @@ if TYPE_CHECKING:
     "question, metric_names",
     [
         # TextQuestion
-        # ("question-1", "gleu"),
+        ("question-1", "gleu"),
+        ("question-1", ["gleu"]),
         # RatingQuestion
-        ("question-2", ["accuracy", "spearman-r"]),
+        ("question-2", "accuracy"),
+        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
         # LabelQuestion
         ("question-3", "accuracy"),
-        ("question-3", ["precision", "f1-score"]),
+        # ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "pearson-r"]),
+        # ("question-3", "confusion-matrix"),
         # No current implementation for MultiLabelQuestion
         ("question-4", "accuracy"),
         # RankingQuestion

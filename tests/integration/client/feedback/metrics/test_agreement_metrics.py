@@ -82,6 +82,7 @@ def test_prepare_dataset_for_annotation_task(
         ("question-1", None),
         # RatingQuestion
         ("question-2", "alpha"),
+        ("question-2", ["alpha"]),
         # LabelQuestion
         ("question-3", "alpha"),
         # MultiLabelQuestion
