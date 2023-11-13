@@ -312,9 +312,9 @@ def test_question_answering_without_formatting_func(
         context=dataset.field_by_name("text"),
         answer=dataset.question_by_name("question-1"),
     )
-    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers", train_size=0.8)
     trainer.update_config(num_iterations=1)
-    trainer.train(__OUTPUT_DIR__)
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
 
 @pytest.mark.parametrize(

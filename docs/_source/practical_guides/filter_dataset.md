@@ -14,6 +14,7 @@ The `filter_by` method returns a new instance which is a `FeedbackDataset` with 
 :::
 
 #### By `fields` content
+
 In the UI, you can filter records based on their content using the searchbar in the top left corner on top of the record card. For example, you may read or annotate all records mentioning John Wick by simply typing "John Wick" in the searchbar.
 
 #### By metadata property
@@ -27,11 +28,11 @@ Note that if a metadata property was set to `visible_for_annotators=False` this 
 In the Python SDK, you can also filter the records using one or a combination of metadata filters for the metadata properties defined in your dataset. Depending on the type of metadata you want to filter by, you will need to choose one of the following: `IntegerMetadataFilter`, `FloatMetadataFilter` or `TermsMetadataFilter`.
 
 These are the arguments that you will need to define for your filter:
+
 - `name`: The name of the metadata property you want to filter by.
 - `ge`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values greater than or equal to the provided value. At least one of `ge` or `le` should be provided.
 - `le`: In an `IntegerMetadataFilter` or `FloatMetadataFilter`, match values lower than or equal to the provided value. At least one of `ge` or `le` should be provided.
 - `values`: In a `TermsMetadataFilter`, returns records with at least one of the values provided.
-
 
 ```python
 import argilla as rg
@@ -56,7 +57,9 @@ filtered_records = dataset.filter_by(
 ```
 
 #### By status
+
 In the Python SDK, the `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. The `response_status` of an annotation can be one of the following:
+
 - `missing`: The records with this status have no responses. In the UI, they will appear under the `Pending` queue.
 - `draft`: The records with this status have responses but have not been submitted or discarded. In the UI, they will appear under the `Pending` queue.
 - `discarded`: The records with this status may or may not have responses but have been discarded by the annotator. In the UI, they will appear under the `Discarded` queue.
@@ -81,6 +84,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
+
 :::
 
 :::{tab-item} list of statuses
@@ -94,13 +98,16 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 dataset = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 ```
+
 :::
 ::::
 
 ### Sort
+
 You may also order your records according to one or several attributes. In the UI, you can easily do this using the `Sort` menu. In the Python SDK, you can do this sorting with the `sort_by` method.
 
-You can sort
+These are the arguments of the `sort_by` function:
+
 - `field`: This refers to the information that will be used for the sorting. This can be time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
 - `order`: Whether the order should be ascending (`asc`) or descending (`des`).
 
@@ -117,6 +124,14 @@ sorted_records = remote.sort_by(
 You can also combine filters and sorting: `dataset.filter_by(...).sort_by(...)`
 ```
 
+### Semantic search
+
+```{include} /_common/ui_feedback_semantic_search.md
+```
+
+```{include} /_common/sdk_feedback_semantic_search.md
+```
+
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
@@ -126,7 +141,6 @@ The search in Argilla is driven by Elasticsearch's powerful [query string syntax
 It allows you to perform simple fuzzy searches of words and phrases, or complex queries taking full advantage of Argilla's data model.
 
 The same query can be used in the search bar of the Argilla web app, or with the Python client as optional arguments.
-
 
 ```python
 import argilla as rg
@@ -448,4 +462,3 @@ This is a table with available fields that you can use in your query string:
 | metrics.predicted.mentions.chars_length  | Mention length in chars (prediction)  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.value             | Text of the token (prediction)        |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
 | metrics.predicted.tags.tag               | IOB tag (prediction)                  |                                             | <p style="text-align: center;">&#10004;</p> |                                             |
-

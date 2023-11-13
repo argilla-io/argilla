@@ -608,10 +608,17 @@ async def create_records(
     await db.commit()
 
 
+async def _load_users_from_responses(responses: Union[Response, Iterable[Response]]) -> None:
+    if isinstance(responses, Response):
+        responses = [responses]
+
+    for response in responses:
+        await response.awaitable_attrs.user
+
+
 async def _load_users_from_record_responses(records: Iterable[Record]) -> None:
     for record in records:
-        for response in record.responses:
-            await response.awaitable_attrs.user
+        await _load_users_from_responses(record.responses)
 
 
 async def _validate_record_metadata(
@@ -964,6 +971,7 @@ async def update_response(
             replace_dict=True,
             autocommit=False,
         )
+        await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
@@ -975,6 +983,7 @@ async def update_response(
 async def delete_response(db: "AsyncSession", search_engine: SearchEngine, response: Response) -> Response:
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
+        await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
 
