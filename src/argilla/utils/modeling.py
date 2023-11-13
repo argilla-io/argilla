@@ -18,8 +18,8 @@ import re
 from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from tqdm import tqdm
 import textdescriptives as td
+from tqdm import tqdm
 
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -96,9 +96,9 @@ class TextDescriptivesExtractor:
         field_metrics = field_metrics.dropna(axis=1, how="any")
         # If basic metrics is None, use all basic metrics
         if basic_metrics is None and self.metrics is None:
-            basic_metrics = self.__basic_metrics 
+            basic_metrics = self.__basic_metrics
             field_metrics = field_metrics.loc[:, basic_metrics]
-        
+
         # Concatenate field name with the metric name
         field_metrics.columns = [f"{field}_{metric}" for metric in field_metrics.columns]
         return field_metrics
