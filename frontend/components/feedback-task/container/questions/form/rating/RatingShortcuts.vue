@@ -42,6 +42,14 @@ export default {
 
       const target = this.options.find(({ value }) => value == this.keyCode);
 
+      if (this.options.length < 10) {
+        if (target) document.getElementById(target.id).click();
+
+        this.reset();
+
+        return;
+      }
+
       this.timer = setTimeout(() => {
         if (target) document.getElementById(target.id).click();
 

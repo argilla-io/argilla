@@ -138,6 +138,13 @@ export default {
         this.isTouched = this.record.isSubmitted && this.record.isModified;
       },
     },
+    isSubmitButtonDisabled() {
+      if (this.record.questions.length > 1) return;
+
+      this.$nextTick(() => {
+        setTimeout(() => this.onSubmit(), 100);
+      });
+    },
   },
   mounted() {
     document.addEventListener("keydown", this.handleGlobalKeys);
@@ -180,7 +187,7 @@ export default {
           break;
         }
         case "Enter": {
-          if (shiftKey) this.onSubmit();
+          this.onSubmit();
           break;
         }
         case "Space": {

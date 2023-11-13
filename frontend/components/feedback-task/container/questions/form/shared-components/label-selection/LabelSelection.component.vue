@@ -1,5 +1,9 @@
 <template>
-  <div class="container" @keydown="keyboardHandler">
+  <div
+    class="container"
+    @keydown="keyboardHandler"
+    @keydown.meta="showShortcuts = !showShortcuts"
+  >
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -48,6 +52,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
+          :data-keyboard="index + 1"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -61,9 +66,11 @@
             round: !multiple,
           }"
           :for="option.id"
-          v-text="option.text"
           :title="option.text"
-        />
+        >
+          <span v-if="showShortcuts">⌨️ {{ index + 1 }}</span>
+          {{ option.text }}
+        </label>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -111,12 +118,18 @@ export default {
     return {
       searchInput: "",
       isExpanded: false,
+      timer: null,
+      keyCode: "",
+      showShortcuts: window.showShortcuts,
     };
   },
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
   },
   watch: {
+    showShortcuts(newValue) {
+      window.showShortcuts = newValue;
+    },
     isFocused: {
       immediate: true,
       handler(newValue) {
@@ -181,6 +194,8 @@ export default {
   },
   methods: {
     keyboardHandler($event) {
+      if (this.timer) clearTimeout(this.timer);
+
       if (
         $event.key === "Tab" ||
         $event.shiftKey ||
@@ -189,19 +204,52 @@ export default {
       )
         return;
 
-      if (!this.$refs.searchComponentRef) return;
-
       const isSearchActive =
-        document.activeElement === this.$refs.searchComponentRef.searchInputRef;
+        document.activeElement ===
+        this.$refs.searchComponentRef?.searchInputRef;
+
       if (isSearchActive) return;
 
       if ($event.code == "Space") {
         $event.preventDefault();
         document.activeElement.click();
+
         return;
       }
 
-      this.$refs.searchComponentRef.focusInSearch();
+      this.keyCode += $event.key;
+
+      if (isNaN(this.keyCode)) {
+        this.$refs.searchComponentRef?.focusInSearch();
+
+        return;
+      }
+
+      if (this.options.length < 10) {
+        this.selectByKeyCode($event, this.keyCode);
+
+        this.reset();
+        return;
+      }
+
+      this.timer = setTimeout(() => {
+        this.selectByKeyCode($event, this.keyCode);
+        this.reset();
+      }, 300);
+    },
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
+    selectByKeyCode($event, keyCode) {
+      const match = this.$refs.options.find(
+        (option) => option.dataset.keyboard === keyCode
+      );
+
+      if (match) {
+        $event.preventDefault();
+        match.click();
+      }
     },
     onSelect({ id, isSelected }) {
       if (this.multiple) return;
