@@ -10,6 +10,7 @@ export abstract class Criteria {
   abstract complete(urlParams: string);
 
   abstract reset();
+
   isEqual(criteria: Criteria) {
     return this.urlParams === criteria.urlParams;
   }
