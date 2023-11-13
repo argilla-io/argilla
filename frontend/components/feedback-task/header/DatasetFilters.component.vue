@@ -85,7 +85,11 @@ export default {
       return !!this.datasetMetadata.length || !!this.datasetQuestions.length;
     },
     isAnyFilterActive() {
-      return this.recordCriteria.isFilteredByMetadata;
+      return (
+        this.recordCriteria.isFilteredByMetadata ||
+        this.recordCriteria.isFilteredByResponse ||
+        this.recordCriteria.isFilteredBySuggestion
+      );
     },
     isSortedBy() {
       return this.recordCriteria.isSortedBy;

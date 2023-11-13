@@ -145,6 +145,14 @@ export class RecordCriteria {
     return this.committed.metadata.isCompleted;
   }
 
+  get isFilteredByResponse() {
+    return this.committed.response.isCompleted;
+  }
+
+  get isFilteredBySuggestion() {
+    return this.committed.suggestion.isCompleted;
+  }
+
   get isSortedBy() {
     return this.committed.sortBy.isCompleted;
   }
