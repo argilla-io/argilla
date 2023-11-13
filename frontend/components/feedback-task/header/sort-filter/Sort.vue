@@ -124,6 +124,7 @@ export default {
 <style lang="scss" scoped>
 $sort-filter-width: 312px;
 .sort-filter {
+  user-select: none;
   &__container {
     display: block;
     width: $sort-filter-width;

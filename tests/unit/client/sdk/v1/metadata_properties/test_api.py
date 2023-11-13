@@ -36,13 +36,16 @@ class TestSuiteMetadataPropertiesSDK:
                 "updated_at": "2021-09-13T12:00:00Z",
             },
         )
+
         response = update_metadata_property(
             client=mock_httpx_client, id=metadata_property_id, title="new-title", visible_for_annotators=False
         )
+
         assert response.status_code == 200
         assert response.parsed.title == "new-title"
-        assert response.parsed.visible_for_annotators is False
-        assert mock_httpx_client.patch.called_once_with(
+        assert response.parsed.visible_for_annotators == False
+
+        mock_httpx_client.patch.assert_called_once_with(
             url=f"/api/v1/metadata-properties/{metadata_property_id}",
             json={"title": "new-title", "visible_for_annotators": False},
         )

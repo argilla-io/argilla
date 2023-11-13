@@ -17,10 +17,49 @@ import re
 import argilla as rg
 import pytest
 from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
+from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
+from tests.integration.client.feedback.helpers import formatting_func_chat_completion
 
 
 def test_training_task_for_chat_completion(mocked_openai):
     dataset = rg.FeedbackDataset.from_huggingface("argilla/customer_assistant")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"formatting_func must return {TrainingTaskForChatCompletionFormat.__annotations__['format']}, not <class 'dict'>"
+        ),
+    ):
+        task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=lambda x: {"test": "test"})
+        rg.feedback.ArgillaTrainer(
+            dataset=dataset,
+            task=task,
+            framework="openai",
+        )
+
+    task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=formatting_func_chat_completion)
+
+    with pytest.raises(
+        NotImplementedError, match="Legacy models are not supported for OpenAI with the FeedbackDataset."
+    ):
+        rg.feedback.ArgillaTrainer(
+            dataset=dataset,
+            task=task,
+            framework="openai",
+            model="davinci",
+        )
+
+    trainer = rg.feedback.ArgillaTrainer(
+        dataset=dataset,
+        task=task,
+        framework="openai",
+    )
+    trainer.train("mock")
+
+
+def test_push_to_huggingface(mocked_openai):
+    dataset = FeedbackDataset.from_huggingface("argilla/customer_assistant")
     # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
     user_message_prompt = """Context information is below.
     ---------------------
@@ -47,34 +86,7 @@ def test_training_task_for_chat_completion(mocked_openai):
         else:
             return None
 
-    with pytest.raises(
-        ValueError,
-        match=re.escape(
-            f"formatting_func must return {TrainingTaskForChatCompletionFormat.__annotations__['format']}, not <class 'dict'>"
-        ),
-    ):
-        task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=lambda x: {"test": "test"})
-        rg.feedback.ArgillaTrainer(
-            dataset=dataset,
-            task=task,
-            framework="openai",
-        )
-
-    task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=formatting_func)
-
-    with pytest.raises(
-        NotImplementedError, match="Legacy models are not supported for OpenAI with the FeedbackDataset."
-    ):
-        rg.feedback.ArgillaTrainer(
-            dataset=dataset,
-            task=task,
-            framework="openai",
-            model="davinci",
-        )
-
-    trainer = rg.feedback.ArgillaTrainer(
-        dataset=dataset,
-        task=task,
-        framework="openai",
-    )
-    trainer.train("mock")
+    task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="openai")
+    with pytest.raises(NotImplementedError, match="This method is not implemented for `ArgillaOpenAITrainer`."):
+        trainer.push_to_huggingface("mocked", generate_card=True)
