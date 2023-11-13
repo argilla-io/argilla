@@ -1596,8 +1596,6 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     def _prepare_for_training_with_sentence_transformers(
         self, data: List[dict], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
-        from types import GeneratorType
-
         from sentence_transformers import InputExample
 
         if not len(data) > 0:
