@@ -30,7 +30,7 @@
       </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
-    <template v-if="visibleFilters">
+    <div class="filters__list__wrapper" v-if="visibleFilters">
       <transition name="filterAppear" appear>
         <div class="filters__list">
           <MetadataFilter
@@ -48,7 +48,7 @@
           />
         </div>
       </transition>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -165,6 +165,30 @@ $filters-inline-min-width: 540px;
     width: 100%;
     padding-top: $base-space;
     overflow: auto;
+    @extend %hide-scrollbar;
+    &__wrapper {
+      position: relative;
+      &:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: $base-space * 4;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgb(250 250 250) 50%
+        );
+        transition: all 0.3s ease;
+      }
+      &:hover {
+        &:after {
+          width: 0;
+          transition: all 0.3s ease;
+        }
+      }
+    }
   }
   &__total-records {
     flex-shrink: 0;

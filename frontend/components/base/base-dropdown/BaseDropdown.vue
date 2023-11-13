@@ -84,6 +84,10 @@ export default {
       this.$emit("visibility", !this.visible);
       if (this.isViewportBoundary) {
         this.setViewportPosition();
+        this.getScrollableParent(this.$refs.dropdown).addEventListener(
+          "scroll",
+          this.setViewportPosition
+        );
       }
     },
     setViewportPosition() {
@@ -93,6 +97,20 @@ export default {
         this.dropdownTop = top + height + this.gap;
         this.dropdownLeft = left;
       });
+    },
+    isScrollable(el) {
+      const hasScrollableContent =
+        el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth;
+      const overflowYStyle = window.getComputedStyle(el).overflow;
+      const isOverflowHidden = overflowYStyle.indexOf("hidden") !== -1;
+      return hasScrollableContent && !isOverflowHidden;
+    },
+    getScrollableParent(el) {
+      return !el || el === document.body
+        ? document.body
+        : this.isScrollable(el)
+        ? el
+        : this.getScrollableParent(el.parentNode);
     },
   },
   mounted() {
@@ -104,6 +122,10 @@ export default {
   beforeDestroy() {
     if (this.isViewportBoundary) {
       window.removeEventListener("resize", this.setViewportPosition);
+      this.getScrollableParent(this.$refs.dropdown).removeEventListener(
+        "scroll",
+        this.setViewportPosition
+      );
     }
   },
 };
