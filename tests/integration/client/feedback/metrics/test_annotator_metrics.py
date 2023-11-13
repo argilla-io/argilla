@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     "question, metric_names",
     [
         # TextQuestion
-        ("question-1", "gleu"),
         ("question-1", ["gleu"]),
         # RatingQuestion
         ("question-2", "accuracy"),

@@ -15,9 +15,8 @@
 """This module contains metrics to gather information related to inter-Annotator agreement. """
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Hashable, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Hashable, List, Tuple, Union
 
-# TODO(plaguss): hide this dependencies behind requires_dependencies
 from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
 from nltk.metrics.distance import binary_distance, edit_distance, interval_distance
 from pydantic import BaseModel
@@ -30,7 +29,6 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -42,6 +40,11 @@ FormattedResponses = List[Tuple[Any, Hashable, Hashable]]
 
 
 class AgreementMetricResult(BaseModel):
+    """Container for the result of an agreement metric.
+
+    It contains two fields, `metric_name` and `result` with the value of the metric.
+    """
+
     metric_name: str
     result: float
 
@@ -117,6 +120,16 @@ QUESTION_TO_DISTANCE = {
 
 class AgreementMetric:
     def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
+        """Initializes a `AgreementMetric` object to compute agreement metrics on
+        a `FeedbackDataset` for a given question.
+
+        Args:
+            dataset: FeedbackDataset to compute the metrics.
+            question_name: Name of the question for which we want to analyse the agreement.
+
+        Raises:
+            NotImplementedError: If the question type is not supported.
+        """
         self._dataset = dataset
         self._question_name = question_name
         self._question_type = type(self._dataset.question_by_name(question_name))
@@ -125,6 +138,18 @@ class AgreementMetric:
         self._allowed_metrics = METRICS_PER_QUESTION[self._question_type]
 
     def compute(self, metric_names: Union[str, List[str]], **kwargs) -> List[AgreementMetricResult]:
+        """Computes the agreement metrics for the given question.
+
+        Args:
+            metric_names: name or list of names for the metrics to compute. i.e. `alpha`.
+            kwargs: additional arguments to pass to the metric.
+
+        Raises:
+            ValueError: If the metric name is not supported for the given question.
+
+        Returns:
+            agreement_metrics: A list of `AgreementMetricResult` objects for the dataset.
+        """
         if isinstance(metric_names, str):
             metric_names = [metric_names]
 
@@ -151,25 +176,59 @@ class AgreementMetric:
 
 
 class AnnotationTaskMetricBase(ABC):
-    def __init__(self, annotated_dataset=None, distance_function=None) -> None:
+    """Base class for Agreement metrics."""
+
+    def __init__(self, annotated_dataset=None, distance_function: Callable = None) -> None:
+        """
+        Args:
+            annotated_dataset: Annotated dataset as expected by the metric.
+            distance_function: Distance function to use for the metric.
+                Depending on the type of data we need a function to compute the distance.
+                For example for binary data we can use the binary distance function,
+                while RatingQuestion works with an interval distance as we are dealing with
+                numeric values.
+        """
         self._dataset = annotated_dataset
         self._distance_function = distance_function
 
-    def compute(self, **kwargs):
+    def compute(self, **kwargs) -> float:
+        """General method to obtain the metric.
+
+        Args:
+            kwargs: Optional arguments that could be passed to the metric.
+
+        Returns:
+            metric: Metric result that will be stored in the `AgreementMetricResult`.
+        """
         data = self._pre_process(self._dataset)
         return self._compute(data, **kwargs)
 
     def _pre_process(self, data, **kwargs) -> Any:
+        """Optional data preprocessing. By default it just passes the data to the _compute method.
+
+        Args:
+            data: annotated dataset.
+            kwargs: optional arguments to be passed to the metric.
+
+        Returns:
+            data: dataset prepared for the _compute method.
+        """
         return data
 
     @abstractmethod
     def _compute(self, data, **kwargs):
+        """Abstract method where the computation is done.
+
+        Args:
+            data: Data as expected for the given metric.
+        """
         pass
 
 
 class NLTKAnnotationTaskMetric(NLTKAnnotationTask, AnnotationTaskMetricBase):
+    """Base class for metrics that use the nltk's AnnotationTask class."""
+
     def __init__(self, annotated_dataset=None, distance_function=binary_distance) -> None:
-        require_dependencies("nltk")
         AnnotationTaskMetricBase.__init__(
             self, annotated_dataset=annotated_dataset, distance_function=distance_function
         )
@@ -177,7 +236,24 @@ class NLTKAnnotationTaskMetric(NLTKAnnotationTask, AnnotationTaskMetricBase):
 
 
 class KrippendorfAlpha(NLTKAnnotationTaskMetric):
-    def _compute(self, dataset, **kwargs):
+    """Krippendorf's alpha agreement metric.
+
+    Is a statistical measure of the inter-annotator agreement achieved when coding a set
+    of units of analysis.
+
+    To interpret the results from this metric, we refer the reader to the wikipedia entry.
+    The common consensus dictates that a value of alpha >= 0.8 indicates a reliable annotation,
+    a value >= 0.667 can only guarantee tentative conclusions, while lower values suggest an
+    unreliable annotation.
+
+    Notes:
+        - Take a look at this metric definition:
+        https://en.wikipedia.org/wiki/Krippendorff%27s_alpha
+        - We use the implementation from nltk:
+        https://www.nltk.org/api/nltk.metrics.agreement.html#nltk.metrics.agreement.AnnotationTask.alpha
+    """
+
+    def _compute(self, dataset, **kwargs) -> float:
         return self.alpha()
 
 
