@@ -9,6 +9,12 @@ environment variable `ARGILLA_SEARCH_ENGINE=opensearch` or `ARGILLA_SEARCH_ENGIN
 The default value for this variable is set to `elasticsearch`. The minimal version for Elasticsearch is `8.5.0`, and for Opensearch is `2.4.0`.
 Please, review your backend and upgrade it if necessary.
 
+:::{warning}
+For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla. 
+See https://github.com/opensearch-project/k-NN/issues/1286
+
+This may result in unexpected results when combining filtering with vector search with this engine.
+:::
 
 ## Launching
 ### Using a proxy

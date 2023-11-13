@@ -97,6 +97,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not
             # created for requested user (with exists query clauses). This is not happening with Elasticsearch.
             # The only way make it work is to use them as a post_filter.
+            # See this issue for more details https://github.com/opensearch-project/k-NN/issues/1286
             body["post_filter"] = {"bool": bool_filter_query}
 
         return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
