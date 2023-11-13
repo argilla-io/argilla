@@ -97,6 +97,7 @@ export default {
     onToggleVisibility(value) {
       this.visibleDropdown = value;
       this.selectedSuggestion = null;
+      this.selectedConfiguration = null;
     },
     selectSuggestion(suggestion) {
       this.selectedSuggestion = suggestion;
@@ -134,7 +135,7 @@ export default {
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.questionFilters) return;
 
-      this.questionFilters.initializeWith(this.suggestionFiltered);
+      this.questionFilters.complete(this.suggestionFiltered);
 
       this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
     },
@@ -158,13 +159,6 @@ export default {
       },
     },
     suggestionFiltered() {
-      if (
-        !this.questionFilters.hasChangesSinceLatestCommitWith(
-          this.suggestionFiltered
-        )
-      )
-        return;
-
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },

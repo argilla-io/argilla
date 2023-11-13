@@ -44,7 +44,7 @@
           />
           <SuggestionFilter
             :datasetQuestions="datasetQuestions"
-            v-model="recordCriteria.suggestion"
+            v-model="recordCriteria.suggestion.value"
           />
         </div>
       </transition>
@@ -123,7 +123,7 @@ export default {
     "recordCriteria.response.value"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.suggestion"() {
+    "recordCriteria.suggestion.value"() {
       this.newFiltersChanged();
     },
   },

@@ -32,7 +32,7 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<string>("_metadata"),
       routes.getQueryParams<string>("_sort"),
       routes.getQueryParams<string>("_response"),
-      routes.getQueryParams<string>("_suggestion")?.split("+"),
+      routes.getQueryParams<string>("_suggestion"),
       routes.getQueryParams<string>("_similarity")
     )
   );
@@ -45,7 +45,7 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<string>("_metadata"),
       routes.getQueryParams<string>("_sort"),
       routes.getQueryParams<string>("_response"),
-      routes.getQueryParams<string>("_suggestion")?.split("+"),
+      routes.getQueryParams<string>("_suggestion"),
       routes.getQueryParams<string>("_similarity")
     );
   });
@@ -78,7 +78,7 @@ export const useAnnotationModeViewModel = () => {
       },
       {
         key: "_suggestion",
-        value: recordCriteria.value.committed.suggestion.join("+"),
+        value: recordCriteria.value.committed.suggestion.urlParams,
       },
       {
         key: "_similarity",

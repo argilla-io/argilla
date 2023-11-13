@@ -147,7 +147,6 @@ export default {
       },
     },
     metadataFiltered() {
-      debugger;
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },

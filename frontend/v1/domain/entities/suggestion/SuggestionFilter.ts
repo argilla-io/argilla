@@ -1,12 +1,25 @@
-import { Filter, FilterWithOption, FilterWithScore } from "../common/Filter";
+import {
+  Filter,
+  FilterWithOption,
+  FilterWithScore,
+  OptionForFilter,
+} from "../common/Filter";
 import { Question } from "../question/Question";
+import {
+  ConfigurationSearch,
+  SuggestionSearch,
+} from "../record/RecordCriteria";
 
-class ConfigurationValues extends FilterWithOption {
+class ConfigurationValues extends Filter {
+  private readonly options: FilterWithOption;
+
   constructor(
     public readonly question: Question,
     public operator: "and" | "or" = "and"
   ) {
-    super(
+    super();
+
+    this.options = new FilterWithOption(
       "values",
       question.settings.options.map(({ value }) => {
         return { selected: false, label: value.toString() };
@@ -14,25 +27,42 @@ class ConfigurationValues extends FilterWithOption {
     );
   }
 
-  get valueParams() {
-    const params = JSON.stringify({
-      values: super.valueParams,
-      operator: this.operator,
-    });
-
-    return `${this.name}=${params}`;
+  filterByText(text: string) {
+    return this.options.filterByText(text);
   }
 
-  completeMetadata(value: string) {
-    try {
-      const { values, operator } = JSON.parse(value);
+  get selectedOptions(): OptionForFilter[] {
+    return this.options.selectedOptions;
+  }
 
-      super.completeMetadata(values);
+  get name(): string {
+    return this.options.name;
+  }
 
-      this.operator = operator;
-    } catch {
-      // NOTHING
-    }
+  get isAnswered(): boolean {
+    return this.options.isAnswered;
+  }
+
+  complete(value: { values: string[]; operator: "and" | "or" }) {
+    const { values, operator } = value;
+
+    this.options.complete(values);
+
+    this.operator = operator;
+  }
+
+  get value(): {
+    values: string[];
+    operator: "and" | "or";
+  } {
+    return {
+      values: this.options.value,
+      operator: this.operator,
+    };
+  }
+
+  clear(): void {
+    this.options.clear();
   }
 }
 
@@ -43,17 +73,6 @@ class ConfigurationScore extends FilterWithScore {
 
   get isInteger(): boolean {
     return true;
-  }
-
-  get settings() {
-    return {
-      min: this.min,
-      max: this.max,
-    };
-  }
-
-  get valueParams() {
-    return `${this.name}=${super.valueParams}`;
   }
 }
 
@@ -66,14 +85,10 @@ class ConfigurationAgent extends FilterWithOption {
       })
     );
   }
-
-  get valueParams() {
-    return `${this.name}=${super.valueParams}`;
-  }
 }
 
 class SuggestionFilter extends Filter {
-  public readonly configurations = [];
+  public readonly configurations: Filter[] = [];
 
   constructor(private readonly question: Question) {
     super();
@@ -91,25 +106,26 @@ class SuggestionFilter extends Filter {
     return this.configurations.some((c) => c.isAnswered);
   }
 
-  get valueParams() {
+  get value(): ConfigurationSearch[] {
     return this.configurations
       .filter((c) => c.isAnswered)
-      .map((c) => c.valueParams)
-      .join("|");
+      .map((c) => {
+        return {
+          name: c.name,
+          value: c.value,
+        };
+      });
   }
 
   clear(): void {
     this.configurations.forEach((c) => c.clear());
   }
 
-  completeMetadata(value: string) {
-    const params = value.split("|");
-
-    params.forEach((param) => {
-      const [name, value] = param.split(/=(.*)/s);
+  complete(value: ConfigurationSearch[]) {
+    value.forEach(({ name, value }) => {
       const configuration = this.configurations.find((c) => c.name === name);
       if (configuration) {
-        configuration.completeMetadata(value);
+        configuration.complete(value);
       }
     });
   }
@@ -118,7 +134,7 @@ class SuggestionFilter extends Filter {
 export class SuggestionFilterList {
   public readonly questions: SuggestionFilter[];
   private readonly filteredSuggestions: SuggestionFilter[] = [];
-  private latestCommit: string[] = [];
+  private latestCommit: SuggestionSearch[] = [];
 
   constructor(questions: Question[]) {
     this.questions = questions
@@ -140,35 +156,32 @@ export class SuggestionFilterList {
     if (this.filtered.some((f) => !this.filteredSuggestions.includes(f)))
       return true;
 
-    return this.hasChangesSinceLatestCommitWith(this.convertToRouteParam());
+    return this.hasChangesSinceLatestCommitWith(this.createCommit());
   }
 
-  hasChangesSinceLatestCommitWith(compare: string[]) {
-    return this.latestCommit.join("") !== compare.join("");
+  hasChangesSinceLatestCommitWith(compare: SuggestionSearch[]) {
+    return JSON.stringify(this.latestCommit) !== JSON.stringify(compare);
   }
 
-  commit(): string[] {
+  commit(): SuggestionSearch[] {
     this.synchronizeFilteredMetadata();
 
-    this.latestCommit = this.convertToRouteParam();
+    this.latestCommit = this.createCommit();
 
     return this.latestCommit;
   }
 
-  initializeWith(params: string[]) {
+  complete(params: SuggestionSearch[]) {
+    if (!this.hasChangesSinceLatestCommitWith(params)) return;
+
     this.questions.forEach((m) => m.clear());
 
     if (!params.length) return;
 
-    const suggestionFilter = params.map((metadata) => {
-      const [name, value] = metadata.split(/:(.*)/s);
-      return { name, value };
-    });
-
-    suggestionFilter.forEach(({ name, value }) => {
+    params.forEach(({ name, value }) => {
       const category = this.findByCategory(name);
       if (category) {
-        category.completeMetadata(value);
+        category.complete(value);
 
         if (this.filteredSuggestions.includes(category)) return;
 
@@ -201,17 +214,11 @@ export class SuggestionFilterList {
     });
   }
 
-  private convertToRouteParam(): string[] {
-    return this.toQueryParams().map((metadata) => {
-      return `${metadata.name}:${metadata.value}`;
-    });
-  }
-
-  private toQueryParams() {
+  private createCommit(): SuggestionSearch[] {
     return this.filteredSuggestions.map((m) => {
       return {
         name: m.name,
-        value: m.valueParams,
+        value: m.value,
       };
     });
   }

@@ -11,12 +11,20 @@ export interface RangeValue {
 export abstract class Filter {
   abstract get name(): string;
 
+  abstract get value(): unknown;
+
+  abstract complete(value: unknown): void;
+
+  abstract clear(): void;
+
+  abstract get isAnswered(): boolean;
+
   get canFilter() {
     return true;
   }
 }
 
-export abstract class FilterWithOption extends Filter {
+export class FilterWithOption extends Filter {
   constructor(
     public readonly name: string,
     public readonly options: OptionForFilter[] = []
@@ -38,11 +46,11 @@ export abstract class FilterWithOption extends Filter {
     return this.selectedOptions.length > 0;
   }
 
-  get valueParams(): string | string[] {
+  get value(): string[] {
     return this.selectedOptions.map((option) => option.label);
   }
 
-  completeMetadata(value: string[]) {
+  complete(value: string[]) {
     value.forEach((label) => {
       const option = this.options.find((option) => option.label === label);
       if (option) option.selected = true;
@@ -69,23 +77,24 @@ export abstract class FilterWithScore extends Filter {
     };
   }
 
+  get settings() {
+    return {
+      min: this.min,
+      max: this.max,
+    };
+  }
+
   get isAnswered(): boolean {
     return this.value.ge !== this.min || this.value.le !== this.max;
   }
 
-  get valueParams() {
-    return JSON.stringify(this.value);
+  get values() {
+    return this.value;
   }
 
-  completeMetadata(value: string) {
-    try {
-      const { ge, le } = JSON.parse(value);
-      this.value.ge = ge;
-      this.value.le = le;
-    } catch (error) {
-      this.value.ge = this.min;
-      this.value.le = this.max;
-    }
+  complete({ ge, le }: RangeValue) {
+    this.value.ge = ge;
+    this.value.le = le;
   }
 
   clear(): void {

@@ -67,7 +67,7 @@ export class ResponseFilterList {
     params.forEach(({ name, value }) => {
       const response = this.findByCategory(name);
       if (response) {
-        response.completeMetadata(value);
+        response.complete(value);
 
         if (this.filteredResponses.includes(response)) return;
 
@@ -101,10 +101,10 @@ export class ResponseFilterList {
   }
 
   private createCommit(): ResponseSearch[] {
-    return this.filteredResponses.map((metadata) => {
+    return this.filteredResponses.map((m) => {
       return {
-        name: metadata.name,
-        value: metadata.valueParams,
+        name: m.name,
+        value: m.value,
       };
     });
   }
