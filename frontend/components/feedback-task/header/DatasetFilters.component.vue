@@ -65,7 +65,9 @@ export default {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      return this.totalRecords;
+      return this.totalRecords === 1
+        ? `${this.totalRecords} record`
+        : `${this.totalRecords} records`;
     },
     shouldShowTotalRecords() {
       return (
@@ -130,16 +132,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$filters-inline-min-width: 540px;
 .filters {
   display: flex;
   gap: $base-space;
   align-items: center;
   &__wrapper {
     width: 100%;
-    container-type: inline-size;
-    container-name: filters;
-    z-index: 1;
   }
   &__list {
     display: flex;
@@ -166,10 +164,10 @@ $filters-inline-min-width: 540px;
       background: none;
       &,
       :deep(.button) {
-        color: palette(purple, 200);
+        color: $primary-color;
       }
       &:hover {
-        background: palette(purple, 400);
+        background: lighten($primary-color, 44%);
       }
     }
   }
@@ -187,11 +185,5 @@ $filters-inline-min-width: 540px;
 .filterAppear-leave-to {
   opacity: 0;
   transform: translateY(-4px);
-}
-
-@container filters (max-width: #{$filters-inline-min-width}) {
-  .filters {
-    flex-wrap: wrap;
-  }
 }
 </style>

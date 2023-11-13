@@ -21,7 +21,17 @@ from argilla.server.enums import RecordInclude
 from argilla.server.search_engine import SearchEngine, SearchResponseItem, SearchResponses
 from httpx import AsyncClient
 
-from tests.factories import AdminFactory, AnnotatorFactory, DatasetFactory, OwnerFactory, RecordFactory, ResponseFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    DatasetFactory,
+    OwnerFactory,
+    RecordFactory,
+    ResponseFactory,
+    TextFieldFactory,
+    VectorFactory,
+    VectorSettingsFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -203,3 +213,27 @@ class TestSearchDatasetRecords:
         )
 
         assert response.status_code == 404
+
+    async def test_search_records_using_a_record_without_vector(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        vector_settings = await VectorSettingsFactory.create(name="vector", dimensions=3, dataset=dataset)
+
+        record = await RecordFactory.create(dataset=dataset)
+        record_without_vector = await RecordFactory.create(dataset=dataset)
+
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record)
+
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json={"query": {"vector": {"name": vector_settings.name, "record_id": str(record_without_vector.id)}}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`"
+        }

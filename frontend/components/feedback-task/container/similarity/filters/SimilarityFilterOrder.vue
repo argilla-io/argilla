@@ -19,6 +19,9 @@ export default {
     };
   },
   watch: {
+    value(newValue) {
+      this.selected = newValue;
+    },
     selected() {
       this.$emit("onValueChanged", this.selected);
     },
