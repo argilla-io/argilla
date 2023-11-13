@@ -23,6 +23,7 @@
           @on-click="toggleTooltip"
         />
         <FilterTooltip
+          boundary="viewport"
           v-if="visibleTooltip"
           class="filter-button-width-badges__tooltip"
         >
@@ -30,7 +31,7 @@
             class="badge"
             v-for="badge in collapsedBadges"
             :key="badge.name"
-            :text="badge.title"
+            :text="badge.title ?? badge.name"
             @on-click="onClickOnBadge(badge, $event)"
             @on-clear="onClickOnClear(badge, $event)"
           ></FilterBadge>
