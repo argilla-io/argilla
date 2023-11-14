@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import logging
 from typing import TYPE_CHECKING, List, Literal, Optional, Type, Union
 from uuid import UUID
 
@@ -66,6 +67,9 @@ if TYPE_CHECKING:
         FeedbackMetadataPropertyModel,
         FeedbackQuestionModel,
     )
+
+_LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
 
 def _prepare_workspace(client, workspace):
@@ -216,7 +220,7 @@ class ArgillaMixin:
         self: Union["FeedbackDataset", "ArgillaMixin"],
         name: str,
         workspace: Optional[Union[str, Workspace]] = None,
-        show_progress: bool = False,
+        show_progress: bool = True,
     ) -> RemoteFeedbackDataset:
         """Pushes the `FeedbackDataset` to Argilla.
 
@@ -273,6 +277,9 @@ class ArgillaMixin:
 
             if len(self.records) > 0:
                 remote_dataset.add_records(self.records, show_progress)
+
+            _LOGGER.info("\n\t✓ Dataset succesfully pushed to Argilla")
+            _LOGGER.info(remote_dataset)
 
             return remote_dataset
         except Exception as ex:
