@@ -114,6 +114,7 @@ feedback/train-reward-model-rlhf
 feedback/labelling-feedback-setfit
 feedback/trainer-feedback-setfit
 feedback/labelling-feedback-langchain-syntethic
+feedback/fine-tuning-sentencesimilarity-rag
 
 other_datasets/few_shot_learning_with_setfit
 other_datasets/few_shot_text_classification_with_active_learning
