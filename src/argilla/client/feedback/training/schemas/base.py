@@ -551,7 +551,7 @@ class TrainingTask:
                 List[Dict[str, str]],
             ],
         ] = None,
-        label_strategy: Optional[LabelQuestionUnification] = None,
+        label_strategy: Optional[Union[LabelQuestionUnification, RatingQuestionUnification]] = None,
     ) -> "TrainingTaskForSentenceSimilarity":
         """
 
@@ -626,8 +626,8 @@ class TrainingTask:
                     _LOGGER.info(f"No label strategy defined. Using default strategy for {type(label)}.")
                 if isinstance(label, LabelQuestion):
                     label = LabelQuestionUnification(**unification_kwargs)
-                elif isinstance(label, RankingQuestion):
-                    label = RankingQuestionUnification(**unification_kwargs)
+                elif isinstance(label, RatingQuestion):
+                    label = RatingQuestionUnification(**unification_kwargs)
                 else:
                     raise ValueError(f"Label type {type(label)} is not supported.")
             defaults = SentenceSimilarityDefaults(texts=texts, label=label)
