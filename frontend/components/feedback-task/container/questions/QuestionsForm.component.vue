@@ -2,7 +2,7 @@
   <form
     class="questions-form"
     :class="{
-      '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
+      '--focused-form': isTouched || formHasFocus,
     }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
@@ -270,11 +270,9 @@ export default {
     scroll-behavior: smooth;
   }
 
-  &.--pending {
-    border-color: transparent;
-    &:not(.--focused-form) {
-      box-shadow: $shadow;
-    }
+  &.--pending,
+  &.--draft {
+    border-color: palette(brown);
   }
   &.--discarded {
     border-color: #c3c3c3;
@@ -283,7 +281,11 @@ export default {
     border-color: $primary-color;
   }
   &.--focused-form {
-    border-color: palette(brown);
+    box-shadow: none;
+  }
+  &:not(.--focused-form) {
+    box-shadow: $shadow;
+    border-color: transparent;
   }
 }
 
