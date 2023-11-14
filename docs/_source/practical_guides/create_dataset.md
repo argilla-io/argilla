@@ -103,7 +103,7 @@ You can define the fields using the Python SDK providing the following arguments
 - `name`: The name of the field, as it will be seen internally.
 - `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
 - `required` (optional): Whether the field is required or not. Defaults to `True`. Note that at least one field must be required.
-- `use_markdown`(optional): Specify whether you want markdown rendered in the UI. Defaults to `False`.
+- `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
 
 ```python
 fields = [
