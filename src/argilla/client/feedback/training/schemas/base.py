@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import inspect
 import logging
 import textwrap
 import types
@@ -79,12 +80,14 @@ class TrainingData(ABC):
         return [Framework(name) for name in self._supported_frameworks_names]
 
     def __repr__(self) -> str:
+        def get_func_repr(func: Callable) -> str:
+            func_source = inspect.getsource(func)
+            return func_source
+
         return textwrap.dedent(
-            f"{self.__class__.__name__}" f"formatting_func:\n{self.formatting_func}, "
+            f"{self.__class__.__name__}\nformatting_func:\n{get_func_repr(self.formatting_func)}"
             if self.formatting_func
-            else "" f"defaults:\n{self.defaults}), "
-            if self.defaults
-            else ""
+            else f"\ndefaults:\n{self.defaults})"
         )
 
     def test_framework_support(self, framework: Union[str, Framework]):
