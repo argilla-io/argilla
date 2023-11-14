@@ -18,13 +18,11 @@
     <template slot="dropdown-content">
       <div class="similarity-filter__dropdown">
         <span class="similarity-filter__header">
-          <SimilarityFilterOrder
-            v-model="recordCriteria.similaritySearch.order"
-          />
+          <SimilarityFilterOrder v-model="order" />
           {{ $t("similarUsing") }}:
         </span>
         <SimilarityFilterVectorRadioButtons
-          v-model="recordCriteria.similaritySearch.vectorName"
+          v-model="vectorName"
           :vectors="availableVectors"
         />
         <div class="similarity-filter__buttons">
@@ -59,10 +57,14 @@ export default {
   data() {
     return {
       dropdownIsVisible: false,
+      vectorName: null,
+      order: null,
     };
   },
   mounted() {
     this.onSetDefaultVector();
+    this.vectorName = this.recordCriteria.similaritySearch.vectorName;
+    this.order = this.recordCriteria.similaritySearch.order;
   },
   methods: {
     onSetDefaultVector() {
@@ -84,6 +86,8 @@ export default {
     findSimilar() {
       this.onChangeDropDownVisibility(false);
       this.recordCriteria.similaritySearch.recordId = this.recordId;
+      this.recordCriteria.similaritySearch.vectorName = this.vectorName;
+      this.recordCriteria.similaritySearch.order = this.order;
 
       if (!this.recordCriteria.hasChanges) return;
       this.recordCriteria.page = 1;

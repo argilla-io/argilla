@@ -9,7 +9,7 @@
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.md), you can start annotating it through the Argilla UI.
 
-As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and to the right is the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
+As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and to the right is the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar and filters --as explained in the [🔎 Filter and query datasets page](/practical_guides/filter_dataset.md)-- to make the process faster and more efficient.
 
 ```{hint}
 It is important that the dataset has annotations for a wide variety of records with diverse content. Try not to restrict your annotations to records retrieved in a single search or records with very similar content.
@@ -96,13 +96,13 @@ If the dataset is set up as a **single label** text classification, you can anno
 
 ![Single label text classification record](/_static/reference/webapp/features-single_textclass_record.png)
 
-To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
+To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as _Pending_. Click _Reset_ if you want to discard your changes and recover the previous state of the record or _Validate_ to save your annotation into the dataset. The status will then change to _Validated_ in the upper left corner of the record card.
 
-If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on *Validate* and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
+If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on _Validate_ and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the _Clear_ button or discard a record from the dataset by clicking _Discard_.
 
 ![Multi-label text classification record](/_static/reference/webapp/features-multi_textclass_record.png)
 
-You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
+You can also remove all annotations using the _Clear_ button or discard a record from the dataset by clicking _Discard_.
 
 ```{note}
 When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
@@ -116,14 +116,14 @@ For token classification datasets, you can highlight words (tokens) in the text 
 
 To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
-After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click *Discard*.
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click _Validate_ to save the changes. The status will change to _Validated_ in the upper left corner of the record card. Alternatively, you can use the _Reset_ button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click _Discard_.
 
 #### Text2Text
 
 ![Text2Text record](/_static/reference/webapp/features-text2text_record.png)
-For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box. If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
+For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the _Validate_ button or edit the text making the changes directly in the text box. If you make any changes, the status will change to _Pending_ and you will need to press shift+Enter or click the _Validate_ button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
 
-Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button or empty the text field by clicking the *Clear* button. If you want to discard the record from the dataset, click *Discard*.
+Alternatively, you can discard your changes and revert to the previous state of the record using the _Reset_ button or empty the text field by clicking the _Clear_ button. If you want to discard the record from the dataset, click _Discard_.
 
 ### Search and filter records
 
@@ -147,7 +147,6 @@ This filter allows you to filter records with respect of their predictions:
 - **Predicted by**: filter records by the [prediction agent](/reference/python/python_client.rst#module-argilla.client.models).
 
 ##### Annotations filter
-
 
 This filter allows you to filter records with respect to their annotations:
 
@@ -199,7 +198,7 @@ For all tasks, you can use **bulk actions**. You can either select the records o
 
 For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
 
-In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
+In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click _Select_ to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
 
 ![Multi-label bulk annotation](/_static/reference/webapp/features-multiclass-bulk-labels.png)
 

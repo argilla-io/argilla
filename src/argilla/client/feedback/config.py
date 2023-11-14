@@ -22,10 +22,13 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
+import json
+
 from pydantic import BaseModel, Field
 
 try:
-    from yaml import SafeLoader, dump, load
+    from yaml import SafeLoader, load, safe_dump
+
 except ImportError:
     raise ImportError(
         "Please make sure to install `PyYAML` in order to use `DatasetConfig`. To do"
@@ -46,8 +49,16 @@ class DatasetConfig(BaseModel):
     allow_extra_metadata: bool = True
     vectors_settings: Optional[List[VectorSettings]] = None
 
+    class Config:
+        use_enum_values = True
+
     def to_yaml(self) -> str:
-        return dump(self.dict())
+        # THIS DOUBLE SERIALIZATION IS DONE TO AVOID GENERATING YAMLs WITH CUSTOM ENUM TYPES.
+        # SEE https://github.com/argilla-io/argilla/issues/4089
+        # A better solution must be applied. We must review all defined enums in Pydantic models and set up the
+        # `use_enum_values = True` flag.
+        # See also https://github.com/yaml/pyyaml/issues/722
+        return safe_dump(json.loads(self.json()))
 
     @classmethod
     def from_yaml(cls, yaml_str: str) -> "DatasetConfig":

@@ -73,7 +73,9 @@ export default {
     totalRecordsInfo() {
       if (!this.totalRecords || this.totalRecords === 0) return null;
 
-      return this.totalRecords;
+      return this.totalRecords === 1
+        ? `${this.totalRecords} record`
+        : `${this.totalRecords} records`;
     },
     shouldShowTotalRecords() {
       return (
@@ -149,7 +151,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$filters-inline-min-width: 540px;
 .filters {
   display: flex;
   gap: $base-space;
@@ -209,10 +210,10 @@ $filters-inline-min-width: 540px;
       background: none;
       &,
       :deep(.button) {
-        color: palette(purple, 200);
+        color: $primary-color;
       }
       &:hover {
-        background: palette(purple, 400);
+        background: lighten($primary-color, 44%);
       }
     }
   }

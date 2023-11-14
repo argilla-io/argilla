@@ -24,11 +24,19 @@ export const useRecordFeedbackTaskViewModel = ({
     mode: LoadRecordsMode,
     criteria: RecordCriteria
   ) => {
-    await getRecords.load(mode, criteria);
+    try {
+      await getRecords.load(mode, criteria);
+    } catch (err) {
+      criteria.reset();
+    }
   };
 
   const paginateRecords = (criteria: RecordCriteria) => {
-    return getRecords.paginate(criteria);
+    try {
+      return getRecords.paginate(criteria);
+    } catch (err) {
+      criteria.reset();
+    }
   };
 
   const loadVectors = async () => {

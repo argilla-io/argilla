@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import logging
-from typing import Tuple, Type
+from typing import Tuple
 
-import httpx
 from opensearchpy import OpenSearch
 from packaging.version import parse
 
 from argilla.server.daos.backend.base import GenericSearchError
 from argilla.server.daos.backend.client_adapters import ElasticsearchClient, IClientAdapter, OpenSearchClient
+from argilla.server.settings import settings as server_settings
 
 _LOGGER = logging.getLogger("argilla")
 
@@ -45,34 +45,25 @@ class ClientAdapterFactory:
 
         version, distribution = cls._fetch_cluster_version_info(client_config)
 
-        (client_class, support_vector_search) = cls._resolve_client_class_with_vector_support(version, distribution)
+        if distribution != server_settings.search_engine:
+            _LOGGER.warning(
+                f"The search engine distribution is not the same as the one configured in the server. "
+                f"The configuration will be automatically updated with ARGILLA_SEARCH_ENGINE={distribution}."
+            )
+            server_settings.search_engine = distribution
 
-        return client_class(
-            index_shards=index_shards, vector_search_supported=support_vector_search, config_backend=client_config
-        )
-
-    @classmethod
-    def _resolve_client_class_with_vector_support(cls, version: str, distribution: str) -> Tuple[Type, bool]:
-        support_vector_search = True
-
-        if distribution == "elasticsearch" and parse("8.5") <= parse(version):
-            if parse("8.5") <= parse(ElasticsearchClient.ES_CLIENT_VERSION):
-                client_class = ElasticsearchClient
-            else:
-                _LOGGER.warning(
-                    "Elasticsearch 8.5 backend found but installed\n"
-                    "client does not support vectors. Please upgrade your elasticsearch client\n"
-                    "if you want to support similarity search in argilla."
-                )
-                client_class = OpenSearchClient
-                support_vector_search = False
-        elif distribution == "opensearch" and parse("2.2") <= parse(version):
+        if distribution == "elasticsearch" and parse("8.5.0") <= parse(version):
+            client_class = ElasticsearchClient
+        elif distribution == "opensearch" and parse("2.4.0") <= parse(version):
             client_class = OpenSearchClient
         else:
-            client_class = OpenSearchClient
-            support_vector_search = False
+            raise ValueError(
+                f"Unsupported ElasticSearch/OpenSearch backend version :{version}. "
+                f"Minimal supported version are `8.5.0` for Elasticsearch and `2.4.0` for OpenSearch. "
+                "Please, upgrade the backend to a supported version."
+            )
 
-        return client_class, support_vector_search
+        return client_class(index_shards=index_shards, config_backend=client_config)
 
     @classmethod
     def _fetch_cluster_version_info(cls, client_config: dict) -> Tuple[str, str]:

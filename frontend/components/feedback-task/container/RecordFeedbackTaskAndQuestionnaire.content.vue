@@ -4,7 +4,6 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
-        v-if="!!record"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
@@ -197,7 +196,7 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: $base-space;
     height: 100%;
     min-width: 0;
   }

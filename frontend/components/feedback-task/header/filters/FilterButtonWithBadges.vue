@@ -38,7 +38,7 @@
           <BaseButton
             class="secondary full-width small clear filter-button-width-badges__tooltip__button"
             @on-click.stop="onClearAll"
-            >{{ $t("reset-all") }}</BaseButton
+            >{{ $t("reset") }}</BaseButton
           >
         </FilterTooltip>
       </div>

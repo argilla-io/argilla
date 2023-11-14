@@ -44,7 +44,7 @@ export default ({ $axios, app }) => {
       app.$auth.logout();
     }
 
-    const messageDetail = error.response.data.detail || {
+    const detail = error.response.data.detail || {
       code: undefined,
       params: {},
     };
@@ -52,29 +52,38 @@ export default ({ $axios, app }) => {
     switch (code) {
       case 400:
         Notification.dispatch("notify", {
-          message: Object.entries(messageDetail.params)
+          message: Object.entries(detail.params)
             .map(([k, v]) => `Error ${k}: ${v}`)
             .join("\n"),
           type: "error",
         });
         break;
-      case 422:
-        (messageDetail.params.errors || [undefined]).forEach(({ msg }) => {
+      case 422: {
+        if (typeof detail === "string") {
           Notification.dispatch("notify", {
-            message: "Error: " + (msg || "Unknown"),
+            message: `Error: ${detail}`,
             type: "error",
           });
-        });
+        } else {
+          (detail.params.errors || [undefined]).forEach(({ msg }) => {
+            Notification.dispatch("notify", {
+              message: "Error: " + (msg || "Unknown"),
+              type: "error",
+            });
+          });
+        }
+
         break;
+      }
       case 404:
         Notification.dispatch("notify", {
-          message: `Warning: ${messageDetail.params.detail}`,
+          message: `Warning: ${detail.params.detail}`,
           type: "warning",
         });
         break;
       default:
         Notification.dispatch("notify", {
-          message: `Error:  ${messageDetail.params.detail}`,
+          message: `Error: ${detail.params.details ?? detail.params.message}`,
           type: "error",
         });
     }

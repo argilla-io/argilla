@@ -4600,6 +4600,7 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        vector = await VectorFactory(record=records[0], vector_settings=vector_settings, value=[1, 2, 3])
 
         mock_search_engine.similarity_search.return_value = SearchResponses(
             items=[
