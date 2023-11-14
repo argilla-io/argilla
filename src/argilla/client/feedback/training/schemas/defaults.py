@@ -22,6 +22,12 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
+from argilla.client.feedback.unification import (
+    LabelQuestionUnification,
+    MultiLabelQuestionUnification,
+    RankingQuestionUnification,
+    RatingQuestionUnification,
+)
 from pydantic import BaseModel
 
 
@@ -33,6 +39,10 @@ class TextClassificationDefaults(BaseModel):
             LabelQuestion,
             MultiLabelQuestion,
             RankingQuestion,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RankingQuestionUnification,
+            RatingQuestionUnification,
         ]
     ] = None
 
@@ -45,4 +55,4 @@ class QuestionAnsweringDefaults(BaseModel):
 
 class SentenceSimilarityDefaults(BaseModel):
     texts: Optional[List[TextField]] = None
-    label: Optional[Union[LabelQuestion, RatingQuestion]] = None
+    label: Optional[Union[LabelQuestion, RatingQuestion, LabelQuestionUnification, RankingQuestionUnification]] = None
