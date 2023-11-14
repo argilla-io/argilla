@@ -70,10 +70,6 @@ class ConfigurationScore extends FilterWithScore {
   constructor(public readonly min: number, public readonly max: number) {
     super("score", min, max);
   }
-
-  get isInteger(): boolean {
-    return true;
-  }
 }
 
 class ConfigurationAgent extends FilterWithOption {
@@ -93,7 +89,7 @@ class SuggestionFilter extends Filter {
   constructor(private readonly question: Question) {
     super();
 
-    this.configurations.push(new ConfigurationScore(10, 90));
+    this.configurations.push(new ConfigurationScore(0, 1));
     this.configurations.push(new ConfigurationValues(question));
     this.configurations.push(new ConfigurationAgent(["model", "human"]));
   }
