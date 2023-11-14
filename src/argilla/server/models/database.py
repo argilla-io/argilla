@@ -14,7 +14,7 @@
 
 import secrets
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from pydantic import parse_obj_as
@@ -42,6 +42,8 @@ __all__ = [
     "Workspace",
     "WorkspaceUser",
     "MetadataProperty",
+    "Vector",
+    "VectorSettings",
 ]
 
 _USER_API_KEY_BYTES_LENGTH = 80
@@ -122,6 +124,53 @@ class Suggestion(DatabaseModel):
         )
 
 
+class Vector(DatabaseModel):
+    __tablename__ = "vectors"
+
+    value: Mapped[List[Any]] = mapped_column(JSON)
+    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
+    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
+
+    record: Mapped["Record"] = relationship(back_populates="vectors")
+    vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
+
+    __table_args__ = (
+        UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
+    )
+    __upsertable_columns__ = {"value"}
+
+    def __repr__(self) -> str:
+        return (
+            f"Vector(id={self.id}, vector_settings_id={self.vector_settings_id}, record_id={self.record_id}, "
+            f"inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+        )
+
+
+class VectorSettings(DatabaseModel):
+    __tablename__ = "vectors_settings"
+
+    name: Mapped[str] = mapped_column(index=True)
+    title: Mapped[str] = mapped_column(Text)
+    dimensions: Mapped[int] = mapped_column()
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+
+    dataset: Mapped["Dataset"] = relationship(back_populates="vectors_settings")
+    vectors: Mapped[List["Vector"]] = relationship(
+        back_populates="vector_settings",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Vector.inserted_at.asc(),
+    )
+
+    __table_args__ = (UniqueConstraint("name", "dataset_id", name="vector_settings_name_dataset_id_uq"),)
+
+    def __repr__(self) -> str:
+        return (
+            f"VectorSettings(id={self.id}, name={self.name}, dimensions={self.dimensions}, "
+            f"dataset_id={self.dataset_id}, inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+        )
+
+
 class Record(DatabaseModel):
     __tablename__ = "records"
 
@@ -143,6 +192,12 @@ class Record(DatabaseModel):
         passive_deletes=True,
         order_by=Suggestion.inserted_at.asc(),
     )
+    vectors: Mapped[List["Vector"]] = relationship(
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Vector.inserted_at.asc(),
+    )
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
@@ -151,6 +206,11 @@ class Record(DatabaseModel):
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
+
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
 
 
 class Question(DatabaseModel):
@@ -262,6 +322,12 @@ class Dataset(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=MetadataProperty.inserted_at.asc(),
+    )
+    vectors_settings: Mapped[List["VectorSettings"]] = relationship(
+        back_populates="dataset",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=VectorSettings.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)

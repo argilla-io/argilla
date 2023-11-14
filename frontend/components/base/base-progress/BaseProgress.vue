@@ -49,6 +49,10 @@ export default {
       default: false,
       type: Boolean,
     },
+    progressBg: {
+      type: String,
+      default: "#4c4ea3",
+    },
     color: {
       type: String,
       default: "#4c4ea3",
@@ -71,7 +75,7 @@ export default {
     },
     backgroundStyles() {
       return {
-        backgroundColor: this.color,
+        backgroundColor: this.progressBg,
       };
     },
     tooltipStyles() {

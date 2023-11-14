@@ -6,12 +6,18 @@ import { useRecords } from "~/v1/infrastructure/storage/RecordsStorage";
 
 export const useDatasetsFiltersViewModel = () => {
   const { state: records } = useRecords();
+  const datasetMetadataIsLoading = ref(false);
   const datasetMetadata = ref<Metadata[]>([]);
   const getMetadataUseCase = useResolve(GetMetadataUseCase);
 
   const loadMetadata = async (datasetId: string) => {
-    datasetMetadata.value = await getMetadataUseCase.execute(datasetId);
+    datasetMetadataIsLoading.value = true;
+    try {
+      datasetMetadata.value = await getMetadataUseCase.execute(datasetId);
+    } finally {
+      datasetMetadataIsLoading.value = false;
+    }
   };
 
-  return { records, datasetMetadata, loadMetadata };
+  return { records, datasetMetadataIsLoading, datasetMetadata, loadMetadata };
 };

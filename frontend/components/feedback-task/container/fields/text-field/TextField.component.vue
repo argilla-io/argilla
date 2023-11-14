@@ -53,12 +53,18 @@ export default {
 
 <style lang="scss" scoped>
 .text_field_component {
+  $this: &;
   display: flex;
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
   background: palette(grey, 800);
   border-radius: $border-radius-m;
+  &:hover {
+    #{$this}__copy-button {
+      opacity: 1;
+    }
+  }
   .title-area {
     display: flex;
     align-items: center;
@@ -82,6 +88,7 @@ export default {
     flex-shrink: 0;
     padding: 0;
     z-index: 2;
+    opacity: 0;
   }
 }
 .fade-enter-active,

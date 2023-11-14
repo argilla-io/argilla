@@ -30,9 +30,21 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<RecordStatus>("_status"),
       routes.getQueryParams<RecordStatus>("_search"),
       routes.getQueryParams<string>("_metadata")?.split("+"),
-      routes.getQueryParams<string>("_sort")?.split(",")
+      routes.getQueryParams<string>("_sort")?.split(","),
+      routes.getQueryParams<string>("_similarity", true)
     )
   );
+
+  routes.watchBrowserNavigation(() => {
+    recordCriteria.value.complete(
+      routes.getQueryParams<number>("_page"),
+      routes.getQueryParams<RecordStatus>("_status"),
+      routes.getQueryParams<RecordStatus>("_search"),
+      routes.getQueryParams<string>("_metadata")?.split("+"),
+      routes.getQueryParams<string>("_sort")?.split(","),
+      routes.getQueryParams<string>("_similarity", true)
+    );
+  });
 
   const updateQueryParams = async () => {
     await routes.setQueryParams(
@@ -55,6 +67,13 @@ export const useAnnotationModeViewModel = () => {
       {
         key: "_sort",
         value: recordCriteria.value.committed.sortBy.join(","),
+      },
+      {
+        key: "_similarity",
+        value: recordCriteria.value.committed.similaritySearch.isCompleted
+          ? JSON.stringify(recordCriteria.value.committed.similaritySearch)
+          : undefined,
+        encode: true,
       }
     );
   };

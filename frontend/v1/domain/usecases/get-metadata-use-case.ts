@@ -12,7 +12,8 @@ export class GetMetadataUseCase {
         metadata.id,
         metadata.name,
         metadata.title,
-        metadata.settings
+        metadata.settings,
+        metadata.visible_for_annotators
       );
     });
 

@@ -5,7 +5,7 @@ const RECORD_STATUS = Object.freeze({
 });
 
 const RECORD_STATUS_COLOR = Object.freeze({
-  PENDING: "#b6b9ff",
+  PENDING: "#bb720a",
   DISCARDED: "#c3c1c1",
   SUBMITTED: "#3e5cc9",
 });

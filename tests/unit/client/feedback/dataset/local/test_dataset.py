@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, List, Type
 
 import numpy.array_api
 import pytest
+from argilla import RatingQuestion
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
@@ -25,9 +26,14 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+    )
 
 
 @pytest.mark.parametrize(
@@ -42,6 +48,10 @@ if TYPE_CHECKING:
             fields={"required-field": "text", "optional-field": None},
             metadata={"terms-metadata": "a", "more-metadata": 3},
         ),
+        FeedbackRecord(
+            fields={"required-field": "text", "optional-field": None},
+            vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]},
+        ),
     ],
 )
 def test_add_records_validation(record: "FeedbackRecord") -> None:
@@ -52,6 +62,10 @@ def test_add_records_validation(record: "FeedbackRecord") -> None:
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
     )
 
@@ -110,6 +124,40 @@ def test_update_records_with_warning() -> None:
             ValueError,
             "extra fields not permitted",
         ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0, 4.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-1` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0, 5.0]},
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-2` has an invalid expected dimension.",
+        ),
+        (
+            FeedbackRecord(
+                fields={"required-field": "text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                    "vector-3": [1.0, 2.0, 3.0],
+                },
+            ),
+            False,
+            ValueError,
+            "Vector with name `vector-3` not present on dataset vector settings.",
+        ),
     ],
 )
 def test_add_records_validation_error(
@@ -122,6 +170,10 @@ def test_add_records_validation_error(
             TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
             IntegerMetadataProperty(name="int-metadata", min=0, max=10),
             FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
         ],
         allow_extra_metadata=allow_extra_metadata,
     )
@@ -295,6 +347,27 @@ def test_delete_metadata_properties_errors() -> None:
     assert len(dataset.metadata_properties) == 3
 
 
+def test_delete_vectors_settings() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="field", required=True)],
+        questions=[TextQuestion(name="question", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-settings-1", dimensions=10),
+            VectorSettings(name="vector-settings-2", dimensions=10),
+            VectorSettings(name="vector-settings-3", dimensions=10),
+        ],
+    )
+
+    deleted_vectors_settings = dataset.delete_vectors_settings("vector-settings-1")
+    assert isinstance(deleted_vectors_settings, VectorSettings)
+    assert len(dataset.vectors_settings) == 2
+
+    deleted_vectors_settings = dataset.delete_vectors_settings(["vector-settings-2", "vector-settings-3"])
+    assert isinstance(deleted_vectors_settings, list)
+    assert len(deleted_vectors_settings) == 2
+    assert len(dataset.vectors_settings) == 0
+
+
 def test_not_implemented_methods():
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
@@ -315,3 +388,167 @@ def test_not_implemented_methods():
         UserWarning, match="`filter_by` method is not supported for local datasets and won't take any effect. "
     ):
         assert dataset.filter_by() == dataset
+
+
+def test_init(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+) -> None:
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+        allow_extra_metadata=False,
+    )
+
+    assert dataset.guidelines == feedback_dataset_guidelines
+    assert dataset.fields == feedback_dataset_fields
+    assert dataset.questions == feedback_dataset_questions
+    assert dataset.allow_extra_metadata == False
+
+
+def test_init_wrong_guidelines(
+    feedback_dataset_fields: List["AllowedFieldTypes"], feedback_dataset_questions: List["AllowedQuestionTypes"]
+) -> None:
+    with pytest.raises(TypeError, match="Expected `guidelines` to be"):
+        FeedbackDataset(
+            guidelines=[],
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+    with pytest.raises(ValueError, match="Expected `guidelines` to be"):
+        FeedbackDataset(
+            guidelines="",
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+        )
+
+
+def test_init_wrong_fields(
+    feedback_dataset_guidelines: str, feedback_dataset_questions: List["AllowedQuestionTypes"]
+) -> None:
+    with pytest.raises(TypeError, match="Expected `fields` to be a list"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=None,
+            questions=feedback_dataset_questions,
+        )
+    with pytest.raises(TypeError, match="Expected `fields` to be a list of `TextField`"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[{"wrong": "field"}],
+            questions=feedback_dataset_questions,
+        )
+    with pytest.raises(ValueError, match="At least one field in `fields` must be required"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[TextField(name="test", required=False)],
+            questions=feedback_dataset_questions,
+        )
+    with pytest.raises(ValueError, match="Expected `fields` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=[
+                TextField(name="test", required=True),
+                TextField(name="test", required=True),
+            ],
+            questions=feedback_dataset_questions,
+        )
+
+
+def test_init_wrong_questions(
+    feedback_dataset_guidelines: str, feedback_dataset_fields: List["AllowedFieldTypes"]
+) -> None:
+    with pytest.raises(TypeError, match="Expected `questions` to be a list, got"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=None,
+        )
+    with pytest.raises(
+        TypeError,
+        match="Expected `questions` to be a list of",
+    ):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=[{"wrong": "question"}],
+        )
+    with pytest.raises(ValueError, match="At least one question in `questions` must be required"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=[
+                TextQuestion(name="question-1", required=False),
+                RatingQuestion(name="question-2", values=[1, 2], required=False),
+            ],
+        )
+    with pytest.raises(ValueError, match="Expected `questions` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=[
+                TextQuestion(name="question-1", required=True),
+                TextQuestion(name="question-1", required=True),
+            ],
+        )
+
+
+def test_init_wrong_metadata_properties(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+) -> None:
+    with pytest.raises(TypeError, match="Expected `metadata_properties` to be a list"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+            metadata_properties=["wrong type"],
+        )
+    with pytest.raises(ValueError, match="Expected `metadata_properties` to have unique names"):
+        FeedbackDataset(
+            guidelines=feedback_dataset_guidelines,
+            fields=feedback_dataset_fields,
+            questions=feedback_dataset_questions,
+            metadata_properties=[
+                IntegerMetadataProperty(name="metadata-property-1", min=0, max=10),
+                IntegerMetadataProperty(name="metadata-property-1", min=0, max=10),
+            ],
+        )
+
+
+@pytest.mark.parametrize(
+    "metadata_property",
+    (
+        TermsMetadataProperty(name="terms-metadata-diff-name", values=["a", "b", "c"]),
+        IntegerMetadataProperty(name="int-metadata-diff-name", min=0, max=10),
+        FloatMetadataProperty(name="float-metadata-diff-name", min=0.0, max=10.0),
+    ),
+)
+def test__unique_metadata_property(metadata_property: "AllowedMetadataPropertyTypes") -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="int-metadata", min=0, max=10),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+    dataset._unique_metadata_property(metadata_property)
+
+
+def test_properties_by_name() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
+        questions=[TextQuestion(name="question", required=True)],
+        metadata_properties=[TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"])],
+    )
+    assert dataset.field_by_name("mock") is None
+    assert dataset.question_by_name("mock") is None
+    assert dataset.metadata_property_by_name("mock") is None
+    assert isinstance(dataset.field_by_name("required-field"), TextField)
+    assert isinstance(dataset.question_by_name("question"), TextQuestion)
+    assert isinstance(dataset.metadata_property_by_name("terms-metadata"), TermsMetadataProperty)
