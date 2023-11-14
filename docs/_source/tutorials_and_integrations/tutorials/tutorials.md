@@ -50,10 +50,10 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 ```
-```{grid-item-card} Train QA with transformers
+```{grid-item-card} ❓ Train a QA model with transformers and ArgillaTrainer
 :link: feedback/training-qa-transformers.html
 
-Learn how to train a QA model with transformers.
+Learn how to fine-tune a QA model with transformers and annotated data using ArgillaTrainer
 ```
 
 ````
