@@ -1,4 +1,4 @@
-# Monitoring LLMs in LangChain apps, chains, and agents and tools
+# `LangChain`: Monitoring LLMs in apps, chains, and agents and tools
 
 This guide explains how to use the `ArgillaCallbackHandler` to integrate Argilla with LangChain apps. With this integration, Argilla can be used to evaluate and fine-tune LLMs. It works by collecting the interactions with LLMs and pushing them into a `FeedbackDataset` for continuous monitoring and human feedback. You just need to create a Langchain-compatible `FeedbackDataset` in Argilla and then instantiate the `ArgillaCallbackHandler` to be provided to `LangChain` LLMs, Chains, and/or Agents.
 

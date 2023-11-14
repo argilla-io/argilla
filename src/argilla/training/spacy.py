@@ -183,7 +183,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
 
         self._logger.warning(
             "Note that the spaCy training is expected to be used through the CLI rather"
-            " than programatically, so the dataset needs to be dumped into the disk and"
+            " than programmatically, so the dataset needs to be dumped into the disk and"
             " then loaded from disk. More information at"
             " https://spacy.io/usage/training#api"
         )

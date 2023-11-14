@@ -12,22 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from abc import ABC, abstractmethod
 from typing import Any, Dict, Literal, Optional
-from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, Extra, Field, validator
 
+from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
 
-FieldTypes = Literal["text"]
 
-
-class FieldSchema(BaseModel):
+class FieldSchema(BaseModel, ABC):
     """Base schema for the `FeedbackDataset` fields.
 
     Args:
-        id: The ID of the field in Argilla. Defaults to None, and is automatically
-            fulfilled internally once the field is pushed to Argilla.
         name: The name of the field. This is the only required field.
         title: The title of the field. If not provided, it will be capitalized from
             the `name` field. And its what will be shown in the UI.
@@ -36,9 +33,6 @@ class FieldSchema(BaseModel):
         type: The type of the field. Defaults to None, and ideally it should be defined
             in the class inheriting from this one to be able to use a discriminated union
             based on the `type` field.
-        settings: The settings of the field. Defaults to an empty dict, and it is
-            automatically fulfilled internally before the field is pushed to Argilla,
-            as the `settings` is part of the payload that will be sent to Argilla.
 
     Disclaimer:
         You should not use this class directly, but instead use the classes that inherit
@@ -46,19 +40,36 @@ class FieldSchema(BaseModel):
         to be supported by Argilla.
     """
 
-    id: Optional[UUID] = None
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     required: bool = True
-    type: Optional[FieldTypes] = None
-    settings: Dict[str, Any] = Field(default_factory=dict, allow_mutation=False)
+    type: Optional[FieldTypes] = Field(..., allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
 
     class Config:
         validate_assignment = True
         extra = Extra.forbid
-        exclude = {"id", "type"}
+        exclude = {"type"}
+
+    @property
+    @abstractmethod
+    def server_settings(self) -> Dict[str, Any]:
+        """Abstract property that should be implemented by the classes that inherit from
+        this one, and that will be used to create the `FeedbackDataset` in Argilla.
+        """
+        ...
+
+    def to_server_payload(self) -> Dict[str, Any]:
+        """Method that will be used to create the payload that will be sent to Argilla
+        to create a field in the `FeedbackDataset`.
+        """
+        return {
+            "name": self.name,
+            "title": self.title,
+            "required": self.required,
+            "settings": self.server_settings,
+        }
 
 
 class TextField(FieldSchema):
@@ -76,11 +87,12 @@ class TextField(FieldSchema):
         >>> TextField(name="text_field", title="Text Field")
     """
 
-    type: Literal["text"] = "text"
+    type: Literal[FieldTypes.text] = Field(FieldTypes.text.value, allow_mutation=False)
     use_markdown: bool = False
 
-    @root_validator(skip_on_failure=True)
-    def update_settings(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        values["settings"]["type"] = values.get("type")
-        values["settings"]["use_markdown"] = values.get("use_markdown", False)
-        return values
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "use_markdown": self.use_markdown,
+        }

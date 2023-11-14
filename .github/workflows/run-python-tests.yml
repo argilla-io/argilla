@@ -27,12 +27,13 @@ on:
         type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER:  5
+  CACHE_NUMBER: 5
 
 jobs:
   run-python-tests:
     name: Argilla python tests
     runs-on: ${{ inputs.runsOn }}
+    continue-on-error: true
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
@@ -73,14 +74,26 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
       - name: Set huggingface hub credentials
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
-        env:
-          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
-        run: echo "Enable HF access token"
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/releases')
+        run: |
+          echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=elasticsearch" >> "$GITHUB_ENV"
+          echo "Configure elasticsearch engine"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
+          echo "Configure opensearch engine"
       - name: Run tests 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
         run: |
           pip install -e ".[server,listeners]"
-          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }}
+          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:

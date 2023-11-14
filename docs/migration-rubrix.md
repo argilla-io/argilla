@@ -5,7 +5,7 @@ If you have already running a Rubrix server and want to upgrade to the new Argil
 ## Python module and command
 
 The module now is called `argilla` instead of `rubrix`, but the rest of the code remains fully compatible, so
-if you have to updgrade some codebase, you should just replace the line:
+if you have to upgrade some codebase, you should just replace the line:
 
 `import rubrix...`
 
@@ -42,7 +42,7 @@ Argilla also introduces a new name convention for the stored indices in Elastics
 For the index pattern containing all created datasets, the new namespace is `ar.datasets`, instead of `.rubrix.datasets-v0`
 
 For indices containing the dataset records, the new name convention is `ar.dataset.<dataset_id>`, instead of
-`.rubrix.dataset.<datset_id>.records-v0`
+`.rubrix.dataset.<dataset_id>.records-v0`
 
 ## Enable migration process
 
@@ -54,10 +54,10 @@ If you want the new Argilla Server to detect previous Rubrix datasets and make t
 ARGILLA_ENABLE_MIGRATION=1 argilla server start
 ```
 
-This will fetch info contained in the Rubrix instance `.rubrix.datasetsw-v0` index and
+This will fetch info contained in the Rubrix instance `.rubrix.datasets-v0` index and
 will copy the info into the new `ar.datasets` index.
 
-Then, for each old rubrix index, will create an alias with new new name convention format.
+Then, for each old rubrix index, will create an alias with new naming convention format.
 
 This will allow you to work with previous Rubrix datasets from your new Argilla Server without duplicating information and still see the changes from your previous Rubrix Server.
 

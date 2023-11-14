@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
@@ -30,11 +31,16 @@ class TestSuiteDatasetsPushCommand:
         cli_runner: "CliRunner",
         cli: "Typer",
         mocker: "MockerFixture",
+        feedback_dataset: "FeedbackDataset",
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         dataset_from_argilla_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
+            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
+        )
+        dataset_pull_mock = mocker.patch(
+            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.pull",
+            return_value=feedback_dataset,
         )
         push_to_huggingface_mock = mocker.patch(
             "argilla.client.feedback.integrations.huggingface.dataset.HuggingFaceDatasetMixin.push_to_huggingface",
@@ -48,7 +54,10 @@ class TestSuiteDatasetsPushCommand:
 
         assert result.exit_code == 0
         dataset_from_argilla_mock.assert_called_once_with(name="my-dataset", workspace="my-workspace")
-        push_to_huggingface_mock.assert_called_once_with(repo_id="argilla/my-dataset", private=True, token=None)
+        push_to_huggingface_mock.assert_called_once_with(
+            repo_id="argilla/my-dataset", generate_card=True, private=True, token=None
+        )
+        dataset_pull_mock.assert_called_once_with()
 
     def test_push_to_huggingface_missing_repo_id_arg(
         self,
@@ -58,7 +67,7 @@ class TestSuiteDatasetsPushCommand:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         mocker.patch(
-            "argilla.client.feedback.dataset.local.FeedbackDataset.from_argilla",
+            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
 

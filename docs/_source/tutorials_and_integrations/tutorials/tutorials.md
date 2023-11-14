@@ -9,6 +9,11 @@ Here you can find end-to-end examples to help you get started with curanting dat
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
+```{grid-item-card} Ⓜ️ Fine-tuning LLMs as chat assistants: Supervised Finetuning on Mistral 7B
+:link: feedback/training-llm-mistral-sft.html
+
+Learn how to fine-tune Mistral 7B into a chat assistant using supervised finetuning with the ArgillaTrainer and TRL.
+```
 ```{grid-item-card} 🪄 Fine-tuning and evaluating GPT-3.5 with human feedback for RAG
 :link: feedback/fine-tuning-openai-rag-feedback.html
 
@@ -19,7 +24,7 @@ Learn how to fine-tune and evaluate gpt3.5-turbo models with human feedback for 
 
 Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Setfit.
 ```
-```{grid-item-card} 🏆 Train a Reward Model for RLHF
+```{grid-item-card} 🏆 Fine-tuning a Reward Model for RLHF
 :link: feedback/train-reward-model-rlhf.html
 
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
@@ -29,7 +34,6 @@ Learn how to collect comparison or human preference data and train a reward mode
 :link: feedback/labelling-feedback-setfit.html
 
 Learn how to add suggestions to your Feedback Dataset using SetFit.
-
 ```
 ```{grid-item-card} 🧸 Using LLMs for text classification and summarization with spacy-llm
 :link: feedback/labelling-spacy-llm.html
@@ -109,6 +113,7 @@ Learn how to use the `spacy-llm` library to do few-shot token classification.
 :hidden:
 
 feedback/fine-tuning-openai-rag-feedback
+feedback/training-llm-mistral-sft
 feedback/curating-feedback-instructiondataset
 feedback/train-reward-model-rlhf
 feedback/labelling-feedback-setfit

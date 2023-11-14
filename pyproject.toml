@@ -23,7 +23,7 @@ authors = [{ name = "argilla", email = "contact@argilla.io" }]
 maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
-    "httpx >= 0.15,< 0.24",
+    "httpx >= 0.15,<= 0.25",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
@@ -42,7 +42,7 @@ dependencies = [
     # for logging, tracebacks, printing, progressbars
     "rich != 13.1.0",
     # for CLI
-    "typer >= 0.6.0, < 0.8.0", # spaCy only supports typer<0.8.0
+    "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
 ]
 dynamic = ["version"]
 
@@ -61,8 +61,6 @@ server = [
     "greenlet >= 2.0.0",
     # Async SQLite
     "aiosqlite >=0.19.0",
-    # Advanced query search dsl
-    "luqum >= 0.11,< 0.13",
     # metrics
     "scikit-learn >= 0.24.2",
     # Statics server
@@ -90,8 +88,8 @@ integrations = [
     "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
-    # TODO: some backward comp. problems introduced in 0.5.0. 0.13 does not match with setfit
-    "huggingface_hub >= 0.5.0,< 0.13",
+    # TODO: some backward comp. problems introduced in 0.5.0
+    "huggingface_hub >= 0.5.0",
     # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
     # Version 0.12.2 relaxes the `huggingface_hub` dependency
     "flair >= 0.12.2",
@@ -102,13 +100,14 @@ integrations = [
     "snorkel >= 0.9.7",
     "spacy == 3.5.3",
     "spacy-transformers >= 1.2.5",
+    "spacy-huggingface-hub >= 0.0.10",
     "transformers[torch] >= 4.30.0",
     "evaluate",
     "seqeval",
     "sentence-transformers",
-    "setfit",
+    "setfit>=0.7.0",
     "span_marker",
-    "openai>=0.27.10",
+    "openai>=0.27.10,<1.0.0",
     "peft",
     "trl>=0.5.0",
 ]
@@ -117,6 +116,7 @@ tests = [
     "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
+    "pytest-env",
     "factory_boy ~= 3.2.1",
 ]
 
@@ -138,13 +138,16 @@ version = { attr = "argilla.__version__" }
 "argilla.client.feedback.integrations.huggingface.card" = [
     "argilla_template.md",
 ]
+"argilla.client.feedback.integrations.huggingface.model_card" = [
+    "argilla_model_template.md",
+]
 
 [tool.pytest.ini_options]
 log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-env = ["ARGILLA_DATABASE_URL=sqlite+aiosqlite://$HOME/.argilla/test.db"]
+env = ["ARGILLA_ENABLE_TELEMETRY=0"]
 
 
 [tool.coverage.run]

@@ -15,6 +15,11 @@
 from typing import Union
 
 from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -22,6 +27,27 @@ from argilla.client.feedback.schemas.questions import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.metadata import (
+    RemoteFloatMetadataProperty,
+    RemoteIntegerMetadataProperty,
+    RemoteTermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.remote.questions import (
+    RemoteLabelQuestion,
+    RemoteMultiLabelQuestion,
+    RemoteRankingQuestion,
+    RemoteRatingQuestion,
+    RemoteTextQuestion,
+)
 
 AllowedFieldTypes = TextField
+AllowedRemoteFieldTypes = RemoteTextField
 AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]
+AllowedRemoteQuestionTypes = Union[
+    RemoteTextQuestion, RemoteRatingQuestion, RemoteLabelQuestion, RemoteMultiLabelQuestion, RemoteRankingQuestion
+]
+AllowedMetadataPropertyTypes = Union[TermsMetadataProperty, FloatMetadataProperty, IntegerMetadataProperty]
+AllowedRemoteMetadataPropertyTypes = Union[
+    RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty
+]

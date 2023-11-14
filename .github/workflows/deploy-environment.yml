@@ -26,7 +26,7 @@ jobs:
 
       # Authenticate in GCP using Workload Identity Federation
       - name: Authenticate to Google Cloud
-        uses: 'google-github-actions/auth@v1'
+        uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
@@ -39,12 +39,12 @@ jobs:
 
       - name: Deploy in Cloud Run
         id: deploy
-        uses: 'google-github-actions/deploy-cloudrun@v1'
+        uses: "google-github-actions/deploy-cloudrun@v1"
         with:
           service: argilla-quickstart-${{ inputs.image-version }}
           image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.image-version }}
           region: europe-southwest1
-          flags: '--min-instances=1 --max-instances=1 --port=6900 --cpu=2000m --memory=2048Mi --no-cpu-throttling --allow-unauthenticated'
+          flags: "--min-instances=1 --max-instances=1 --port=6900 --cpu=2000m --memory=4096Mi --no-cpu-throttling --allow-unauthenticated"
           env_vars: |
             OWNER_PASSWORD=${{ steps.credentials.outputs.owner }}
             OWNER_API_KEY=${{ steps.credentials.outputs.owner }}
@@ -52,6 +52,7 @@ jobs:
             ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}
             ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
+            ARGILLA_ENABLE_TELEMETRY=0
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials

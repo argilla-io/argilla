@@ -12,5 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# This line is included here since some enums are already imported from `argilla.server.models`.
+# We need to review and avoid this. This is only a workaround to not change everything right now
+
+from argilla.server.enums import *  # noqa: I001
 from .questions import *  # noqa: I001
-from .models import *  # noqa: I001
+from .database import *  # noqa: I001
+from .metadata_properties import *  # noqa: I001

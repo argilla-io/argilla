@@ -19,11 +19,6 @@ Methods to configure a dataset and push it to Argilla.
 
 Workflows to organize your annotation team.
 ```
-```{grid-item-card} 💫 Update a dataset
-:link: update_dataset.html
-
-Make changes to an existing dataset.
-```
 ```{grid-item-card} 🔎 Filter and query datasets
 :link: filter_dataset.html
 

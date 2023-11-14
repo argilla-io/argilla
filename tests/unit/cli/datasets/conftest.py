@@ -18,9 +18,10 @@ from uuid import uuid4
 
 import httpx
 import pytest
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla.client.feedback.schemas.remote.questions import RemoteTextQuestion
 from argilla.client.sdk.datasets.models import Dataset
 
 if TYPE_CHECKING:
@@ -36,8 +37,16 @@ def remote_feedback_dataset(workspace: "Workspace") -> RemoteFeedbackDataset:
         workspace=workspace,
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        fields=[TextField(name="prompt")],
-        questions=[TextQuestion(name="corrected")],
+        fields=[RemoteTextField(id=uuid4(), name="prompt")],
+        questions=[RemoteTextQuestion(id=uuid4(), name="corrected")],
+    )
+
+
+@pytest.fixture
+def feedback_dataset(remote_feedback_dataset: RemoteFeedbackDataset) -> FeedbackDataset:
+    return FeedbackDataset(
+        fields=[field.to_local() for field in remote_feedback_dataset.fields],
+        questions=[question.to_local() for question in remote_feedback_dataset.questions],
     )
 
 

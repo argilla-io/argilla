@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import BaseTableInfo from "@/components/base/table/BaseTableInfo";
+import BaseTableInfo from "@/components/base/base-table/BaseTableInfo";
 
 const mountBaseTableInfo = () =>
   mount(BaseTableInfo, {

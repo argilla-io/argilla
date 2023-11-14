@@ -96,7 +96,9 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             ).rename_column("float_label", "label")
 
         self.model_kwargs = {}
-        self.model_kwargs["pretrained_model_name_or_path"] = self._model
+        self.model_kwargs["pretrained_model_name_or_path"] = (
+            self._model if isinstance(self._model, str) else self._model.config._name_or_path
+        )
 
         if self._record_class in [TextClassificationRecord, TokenClassificationRecord]:
             self.model_kwargs["num_labels"] = len(self._label_list)
@@ -124,25 +126,27 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     def init_model(self, new: bool = False):
         from transformers import AutoTokenizer
 
-        if any(k in self.model_kwargs.get("pretrained_model_name_or_path") for k in ("gpt", "opt", "bloom")):
-            padding_side = "left"
-        else:
-            padding_side = "right"
+        if self._transformers_tokenizer is None:
+            if any(k in self.model_kwargs.get("pretrained_model_name_or_path") for k in ("gpt", "opt", "bloom")):
+                padding_side = "left"
+            else:
+                padding_side = "right"
 
-        self._transformers_tokenizer = AutoTokenizer.from_pretrained(
-            self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
-        )
-        if getattr(self._transformers_tokenizer, "pad_token_id") is None:
-            self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
-        if getattr(self._transformers_tokenizer, "model_max_length") is None:
-            self._transformers_tokenizer.model_max_length = 512
+            self._transformers_tokenizer = AutoTokenizer.from_pretrained(
+                self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
+            )
+            if getattr(self._transformers_tokenizer, "pad_token_id") is None:
+                self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
+            if getattr(self._transformers_tokenizer, "model_max_length") is None:
+                self._transformers_tokenizer.model_max_length = 512
 
         if new:
             model_kwargs = self.model_kwargs
         else:
             model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
 
-        self._transformers_model = self._model_class.from_pretrained(**model_kwargs, return_dict=True)
+        if self._transformers_model is None:
+            self._transformers_model = self._model_class.from_pretrained(**model_kwargs, return_dict=True)
         if new:
             self._transformers_model = self._transformers_model.to(self.device)
 

@@ -6,6 +6,8 @@
   "rating": "Rating",
   "saving": "Saving...",
   "saved": "Saved",
+  "minimize": "Minimize",
+  "expand": "Expand",
   "submit-your-feedback": "Submit your feedback",
   "button": {
     "ignore_and_continue": "Ignore and continue"
@@ -24,5 +26,16 @@
       "discard": "Discard (⇧ shift + ⌫ backspace)",
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
-  }
+  },
+  "filters": "Filters",
+  "filterBy": "Filter by...",
+  "findSimilar": "Find similar",
+  "similarTo": "Similar to",
+  "similarityScore": "Similarity Score",
+  "similarUsing": "similar using",
+  "metadata": "Metadata",
+  "reset": "Reset",
+  "with": "with",
+  "find": "Find",
+  "cancel": "Cancel"
 }
