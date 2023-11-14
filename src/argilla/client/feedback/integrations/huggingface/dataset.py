@@ -19,6 +19,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 
 from packaging.version import parse as parse_version
+from tqdm import trange
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import QuestionTypes
@@ -112,6 +113,13 @@ class HuggingFaceDatasetMixin:
         hf_features["metadata"] = Value(dtype="string", id="metadata")
         hf_dataset["metadata"] = []
 
+        vectors_settings = dataset.vectors_settings
+        if vectors_settings:
+            hf_features["vectors"] = {}
+            for vector_settings in vectors_settings:
+                hf_features["vectors"].update({vector_settings.name: Sequence(Value(dtype="float32"), id="vectors")})
+            hf_dataset["vectors"] = []
+
         for record in dataset.records:
             for field in dataset.fields:
                 hf_dataset[field.name].append(record.fields.get(field.name, None))
@@ -152,6 +160,12 @@ class HuggingFaceDatasetMixin:
 
             hf_dataset["metadata"].append(json.dumps(record.metadata) if record.metadata else {})
             hf_dataset["external_id"].append(record.external_id or None)
+
+            if vectors_settings:
+                vectors = {}
+                for vector_settings in vectors_settings:
+                    vectors.update({vector_settings.name: record.vectors.get(vector_settings.name, None)})
+                hf_dataset["vectors"].append(vectors)
 
         return Dataset.from_dict(hf_dataset, features=Features(hf_features))
 
@@ -205,6 +219,7 @@ class HuggingFaceDatasetMixin:
                     guidelines=self.guidelines,
                     metadata_properties=self.metadata_properties or None,
                     allow_extra_metadata=self.allow_extra_metadata,
+                    vectors_settings=self.vectors_settings or None,
                 ).to_yaml()
             )
             f.flush()
@@ -242,6 +257,8 @@ class HuggingFaceDatasetMixin:
                 argilla_fields=self.fields,
                 argilla_questions=self.questions,
                 argilla_guidelines=self.guidelines or None,
+                argilla_vectors_settings=self.vectors_settings or None,
+                argilla_metadata_properties=self.metadata_properties,
                 argilla_record=json.loads(sample_argilla_record.json()),
                 huggingface_record=sample_huggingface_record,
             )
@@ -249,7 +266,9 @@ class HuggingFaceDatasetMixin:
 
     @classmethod
     @requires_dependencies(["huggingface_hub", "datasets"])
-    def from_huggingface(cls: Type["FeedbackDataset"], repo_id: str, *args: Any, **kwargs: Any) -> "FeedbackDataset":
+    def from_huggingface(
+        cls: Type["FeedbackDataset"], repo_id: str, show_progress: bool = True, *args: Any, **kwargs: Any
+    ) -> "FeedbackDataset":
         """Loads a `FeedbackDataset` from the Hugging Face Hub.
 
         Args:
@@ -306,6 +325,7 @@ class HuggingFaceDatasetMixin:
                     guidelines=config.guidelines,
                     metadata_properties=config.metadata_properties,
                     allow_extra_metadata=config.allow_extra_metadata,
+                    vectors_settings=config.vectors_settings,
                 )
         except EntryNotFoundError:
             # TODO(alvarobartt): here for backwards compatibility, last used in 1.12.0
@@ -344,7 +364,7 @@ class HuggingFaceDatasetMixin:
             hfds = hfds[list(hfds.keys())[0]]
 
         records = []
-        for index in range(len(hfds)):
+        for index in trange(0, len(hfds), desc="Parsing records", disable=not show_progress):
             responses = {}
             suggestions = []
             user_without_id = False
@@ -420,12 +440,19 @@ class HuggingFaceDatasetMixin:
             if "metadata" in hfds[index] and hfds[index]["metadata"] is not None:
                 metadata = json.loads(hfds[index]["metadata"])
 
+            vectors = {}
+            if "vectors" in hfds[index] and hfds[index]["vectors"]:
+                for vector_settings in dataset.vectors_settings:
+                    if hfds[index]["vectors"].get(vector_settings.name, None) is not None:
+                        vectors.update({vector_settings.name: hfds[index]["vectors"][vector_settings.name]})
+
             records.append(
                 FeedbackRecord(
                     fields={field.name: hfds[index][field.name] for field in dataset.fields},
                     metadata=metadata or {},
                     responses=list(responses.values()) or [],
                     suggestions=[suggestion for suggestion in suggestions if suggestion["value"] is not None] or [],
+                    vectors=vectors or {},
                     external_id=hfds[index]["external_id"],
                 )
             )

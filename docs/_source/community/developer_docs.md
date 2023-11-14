@@ -166,7 +166,7 @@ conda activate argilla
 
 In the new Conda environment, Argilla will already be installed in editable mode with all the server dependencies. But if you’re willing to install any other dependency you can do so via `pip` to install your own, or just see the available extras besides the `server` extras, which are: `listeners`, `postgresql`, and `tests`; all those installable as `pip install -e ".[<EXTRA_NAME>]"`.
 
-Now, the Argilla package is set up on your system and you need to make further installments for a thorough development setup.
+Now, the Argilla package is set up on your system and you need to make further installations for a thorough development setup.
 
 ### Install Code Formatting Tools
 
@@ -193,7 +193,14 @@ To install Elasticsearch or Opensearch, and to work with Argilla on your server 
 To install ElasticSearch or OpenSearch, you can refer to the [Setup and Installation](/getting_started/installation/deployments/docker.md) guide.
 
 :::{note}
-Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17 and OpenSearch versions 1.3 and 2.3.
+Argilla supports ElasticSearch versions >=8.5, and OpenSearch versions >=2.4.
+:::
+
+:::{note}
+For vector search in OpenSearch, the filtering applied is using a `post_filter` step, since there is a bug that makes queries fail using filtering + knn from Argilla.
+See https://github.com/opensearch-project/k-NN/issues/1286
+
+This may result in unexpected results when combining filtering with vector search with this engine.
 :::
 
 ### Relational Database and Migration

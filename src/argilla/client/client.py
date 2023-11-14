@@ -250,7 +250,7 @@ class Argilla:
             else:
                 raise ValueError(f"Wrong provided workspace {workspace!r}")
 
-    def get_workspace(self) -> str:
+    def get_workspace(self) -> Optional[str]:
         """Returns the name of the active workspace.
 
         Returns:

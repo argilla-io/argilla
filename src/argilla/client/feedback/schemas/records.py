@@ -194,6 +194,7 @@ class FeedbackRecord(BaseModel):
 
     fields: Dict[str, Union[str, None]]
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    vectors: Dict[str, List[float]] = Field(default_factory=dict)
     responses: List[ResponseSchema] = Field(default_factory=list)
     suggestions: Union[Tuple[SuggestionSchema], List[SuggestionSchema]] = Field(default_factory=tuple)
     external_id: Optional[str] = None
@@ -250,6 +251,9 @@ class FeedbackRecord(BaseModel):
             payload["suggestions"] = [
                 suggestion.to_server_payload(question_name_to_id) for suggestion in self.suggestions
             ]
+
+        if self.vectors:
+            payload["vectors"] = self.vectors
         if self.metadata:
             payload["metadata"] = self.metadata
         if self.external_id:

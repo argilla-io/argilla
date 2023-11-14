@@ -1,7 +1,13 @@
 import { useRoute, useRouter } from "@nuxtjs/composition-api";
 import { Dataset } from "@/v1/domain/entities/Dataset";
 
-type KindOfParam = "_status" | "_page" | "_search" | "_metadata" | "_sort";
+type KindOfParam =
+  | "_status"
+  | "_page"
+  | "_search"
+  | "_metadata"
+  | "_sort"
+  | "_similarity";
 
 export const ROUTES = {
   datasets: "datasets",
@@ -43,13 +49,20 @@ export const useRoutes = () => {
     router.push({ path: `/${ROUTES.datasets}` });
   };
 
-  const setQueryParams = async (
-    ...params: { key: KindOfParam; value: string }[]
-  ) => {
+  type QueryParam = {
+    key: KindOfParam;
+    value: string;
+    encode?: boolean;
+  };
+
+  const setQueryParams = async (...params: QueryParam[]) => {
+    const actualQuery = route.value.query;
+    const funcToUse = Object.keys(actualQuery).length ? "push" : "replace";
     let newQuery = {};
 
-    params.forEach(({ key, value }) => {
+    params.forEach(({ key, value, encode }) => {
       if (!value) return;
+      if (encode) value = btoa(value);
 
       newQuery = {
         ...newQuery,
@@ -57,7 +70,7 @@ export const useRoutes = () => {
       };
     });
 
-    await router.push({
+    await router[funcToUse]({
       path: route.value.path,
       query: {
         ...newQuery,
@@ -65,8 +78,19 @@ export const useRoutes = () => {
     });
   };
 
-  const getQueryParams = <T>(key: KindOfParam): T => {
-    return route.value.query[key] as T;
+  const getQueryParams = <T>(key: KindOfParam, decode = false): T => {
+    const param = route.value.query[key] as string;
+
+    if (!!param && decode) {
+      try {
+        return atob(param) as T;
+      } catch {
+        // Encrypted param changed manually
+        return undefined;
+      }
+    }
+
+    return param as T;
   };
 
   return {
@@ -75,5 +99,8 @@ export const useRoutes = () => {
     getDatasetLink,
     setQueryParams,
     getQueryParams,
+    watchBrowserNavigation: (callBack: () => void) => {
+      window.addEventListener("popstate", callBack);
+    },
   };
 };
