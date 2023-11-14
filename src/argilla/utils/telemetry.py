@@ -129,11 +129,6 @@ def get_current_filename() -> Optional[str]:
         import ipynbname
 
         return Path(urllib.parse.unquote_plus(ipynbname.name())).stem
-    except Exception as e:
-        import warnings
-
-        warnings.warn("Couldn't determine the filename.")
-        return
 
 
 def tutorial_running() -> None:
