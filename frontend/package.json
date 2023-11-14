@@ -1,6 +1,6 @@
 {
   "name": "argilla",
-  "version": "1.16.0",
+  "version": "1.19.0",
   "private": true,
   "scripts": {
     "dev": "nuxt",
@@ -25,8 +25,8 @@
     "@nuxtjs/auth-next": "5.0.0-1613647907.37b1156",
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/composition-api": "^0.33.1",
-    "@nuxtjs/style-resources": "^1.0.0",
     "@nuxtjs/i18n": "^7.3.1",
+    "@nuxtjs/style-resources": "^1.0.0",
     "@pinia/nuxt": "^0.2.1",
     "@vuex-orm/core": "^0.36.4",
     "@vuex-orm/plugin-axios": "^0.9.3",
@@ -43,7 +43,7 @@
     "pinia": "^2.1.4",
     "sass": "^1.49.9",
     "stringz": "^2.1.0",
-    "ts-injecty": "^0.0.16",
+    "ts-injecty": "^0.0.18",
     "v-click-outside": "^3.1.2",
     "vue": "^2.7.14",
     "vue-demi": "^0.14.5",

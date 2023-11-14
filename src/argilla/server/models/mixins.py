@@ -16,10 +16,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Set, TypeVar, Union
 
 from pydantic import BaseModel
-from sqlalchemy import func, sql
+from sqlalchemy import sql
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Self
 
@@ -93,6 +94,21 @@ class CRUDMixin:
         return await updated.save(db, autocommit)
 
     @classmethod
+    async def update_many(
+        cls,
+        db: "AsyncSession",
+        objects: List[Dict[str, Any]],
+        autocommit: bool = True,
+    ) -> None:
+        if len(objects) == 0:
+            raise ValueError("Cannot update empty list of objects")
+
+        await db.execute(sql.update(cls), objects)
+
+        if autocommit:
+            await db.commit()
+
+    @classmethod
     async def upsert_many(
         cls,
         db: "AsyncSession",
@@ -158,6 +174,10 @@ class CRUDMixin:
         return self
 
 
+def inserted_at_current_value(context: DefaultExecutionContext) -> datetime:
+    return context.get_current_parameters(isolate_multiinsert_groups=False)["inserted_at"]
+
+
 class TimestampMixin:
-    inserted_at: Mapped[datetime] = mapped_column(default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
+    inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)

@@ -15,36 +15,48 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.fields import FieldSchema, TextField
+from argilla.client.feedback.schemas.enums import FieldTypes
+from argilla.client.feedback.schemas.fields import TextField
 from pydantic import ValidationError
 
 
-def test_field_schema() -> None:
-    schema = FieldSchema(name="completion-a")
-    assert schema.id is None
-    assert schema.name == "completion-a"
-    assert schema.title == "Completion-a"
-    assert schema.type is None
-    assert schema.settings == {}
-
-
-def test_field_schema_name_validation_error() -> None:
-    with pytest.raises(ValidationError, match=r"name\n  string does not match regex"):
-        FieldSchema(name="Completion-A")
-
-
 @pytest.mark.parametrize(
-    "schema_kwargs, expected_settings",
+    "schema_kwargs, server_payload",
     [
         (
-            {"name": "a", "title": "a", "required": True, "use_markdown": True},
-            {"type": "text", "use_markdown": True},
+            {"name": "a"},
+            {"name": "a", "title": "A", "required": True, "settings": {"type": "text", "use_markdown": False}},
         ),
         (
-            {"name": "a", "title": "a", "required": True, "use_markdown": False},
-            {"type": "text", "use_markdown": False},
+            {"name": "a", "title": "b"},
+            {"name": "a", "title": "b", "required": True, "settings": {"type": "text", "use_markdown": False}},
+        ),
+        (
+            {"name": "a", "title": "b", "required": False},
+            {"name": "a", "title": "b", "required": False, "settings": {"type": "text", "use_markdown": False}},
+        ),
+        (
+            {"name": "a", "title": "b", "required": False, "use_markdown": True},
+            {"name": "a", "title": "b", "required": False, "settings": {"type": "text", "use_markdown": True}},
         ),
     ],
 )
-def test_text_field(schema_kwargs: Dict[str, Any], expected_settings: Dict[str, Any]) -> None:
-    assert TextField(**schema_kwargs).dict(include={"settings"})["settings"] == expected_settings
+def test_text_field(schema_kwargs: Dict[str, Any], server_payload: Dict[str, Any]) -> None:
+    text_field = TextField(**schema_kwargs)
+    assert text_field.type == FieldTypes.text
+    assert text_field.server_settings == server_payload["settings"]
+    assert text_field.to_server_payload() == server_payload
+
+
+@pytest.mark.parametrize(
+    "schema_kwargs, exception_cls, exception_message",
+    [
+        ({"name": "a b"}, ValidationError, "name\n  string does not match regex"),
+        ({}, ValidationError, "name\n  field required"),
+        # The test case below won't match the full regex, as it will assume the type is QuestionType.text instead, only God knows why
+        ({"name": "a", "type": "other"}, ValidationError, "type\n  unexpected value; permitted:"),
+    ],
+)
+def test_text_field_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+    with pytest.raises(exception_cls, match=exception_message):
+        TextField(**schema_kwargs)

@@ -11,13 +11,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from argilla.client.feedback.schemas.fields import FieldSchema, FieldTypes, TextField
+from argilla.client.feedback.schemas.enums import FieldTypes, QuestionTypes, RecordSortField, SortOrder
+from argilla.client.feedback.schemas.fields import FieldSchema, TextField
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataFilter,
+    FloatMetadataProperty,
+    IntegerMetadataFilter,
+    IntegerMetadataProperty,
+    TermsMetadataFilter,
+    TermsMetadataProperty,
+)
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     QuestionSchema,
-    QuestionTypes,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
@@ -26,24 +33,36 @@ from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
     ResponseSchema,
+    SortBy,
     SuggestionSchema,
     ValueSchema,
 )
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 __all__ = [
-    "RatingQuestion",
-    "TextQuestion",
+    "FieldTypes",
+    "QuestionTypes",
+    "FieldSchema",
+    "TextField",
+    "FloatMetadataProperty",
+    "IntegerMetadataProperty",
+    "TermsMetadataProperty",
+    "TermsMetadataFilter",
+    "IntegerMetadataFilter",
+    "FloatMetadataFilter",
     "LabelQuestion",
     "MultiLabelQuestion",
-    "RankingQuestion",
     "QuestionSchema",
-    "QuestionTypes",
+    "RankingQuestion",
+    "RatingQuestion",
+    "TextQuestion",
     "FeedbackRecord",
-    "SuggestionSchema",
-    "ResponseSchema",
-    "ValueSchema",
     "RankingValueSchema",
-    "TextField",
-    "FieldSchema",
-    "FieldTypes",
+    "ResponseSchema",
+    "SuggestionSchema",
+    "ValueSchema",
+    "SortOrder",
+    "SortBy",
+    "RecordSortField",
+    "VectorSettings",
 ]

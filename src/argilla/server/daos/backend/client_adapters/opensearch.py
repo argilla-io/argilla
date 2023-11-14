@@ -52,12 +52,8 @@ class OpenSearchClient(IClientAdapter):
         index: str,
         vectors: Dict[str, int],
     ):
-        self._check_vector_supported()
+        self.set_index_settings(index=index, settings={"index.knn": False})
 
-        self.set_index_settings(
-            index=index,
-            settings={"index.knn": False},
-        )
         vector_mappings = {}
         for vector_name, vector_dimension in vectors.items():
             index_mapping = {
@@ -77,13 +73,6 @@ class OpenSearchClient(IClientAdapter):
             index=index,
             properties=vector_mappings,
         )
-
-    def _check_vector_supported(self):
-        if not self.vector_search_supported:
-            raise ValueError(
-                "The vector search is not supported for this elasticsearch version. "
-                "Please, update the server to use this feature"
-            )
 
     def search_docs(
         self,
@@ -742,9 +731,6 @@ class OpenSearchClient(IClientAdapter):
         size: int,
         routing: Optional[str] = None,
     ):
-        if "knn" in es_query["query"]:
-            self._check_vector_supported()
-
         results = self.__client__.search(
             index=index,
             body=es_query,

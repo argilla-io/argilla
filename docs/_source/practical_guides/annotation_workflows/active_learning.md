@@ -2,7 +2,7 @@
 
 ## Feedback Dataset
 
-```{warning}
+```{note}
 The `FeedbackDataset` does not offer support for active learning as of now. If you would like to use it, you will need to use one of the other datasets. To get more info about the dataset differences, you can have a look [here](/practical_guides/choose_dataset).
 ```
 

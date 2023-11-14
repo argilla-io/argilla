@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - python~=3.8.0
+  - python~=3.9.7
   - pip>=2.22.0
   - openjdk=11
   # pyparsing 3.0.5 seems to be buggy
@@ -13,7 +13,8 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-mock
-  - pytest-asyncio
+  - pytest-asyncio!=0.22.0
+  - pytest-env
   - factory_boy~=3.2.1
   # docs, pandoc needs conda ...
   - pandoc==2.12
@@ -32,11 +33,11 @@ dependencies:
       - sphinx-copybutton==0.5.0
       - sphinx-notfound-page==0.8.3
       # code formatting
-      - pre-commit~=2.15.0
+      - pre-commit~=3.2.0
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
-      - huggingface_hub
+      - huggingface_hub>=0.5.0
       - flair>=0.12.2
       - faiss-cpu
       - flyingsquid
@@ -46,12 +47,13 @@ dependencies:
       - spacy==3.5.3
       - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
       - spacy-transformers>=1.2.5
+      - spacy-huggingface-hub >= 0.0.10
       - transformers[torch]>=4.30.0 # <- required for DPO with TRL
       - evaluate
       - seqeval
-      - setfit
+      - setfit>=0.7.0
       - span_marker
-      - openai>=0.27.10
+      - openai>=0.27.10,<1.0.0
       - peft
       - trl>=0.5.0
       - sentence-transformers

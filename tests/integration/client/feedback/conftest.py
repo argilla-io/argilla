@@ -12,7 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import TYPE_CHECKING, Any, List
+
 import pytest
+from argilla.client import api
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla.client.feedback.schemas.metadata import (
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+    TermsMetadataProperty,
+)
+from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.client.models import Framework
+from argilla.client.workspaces import Workspace
+from argilla.feedback import TrainingTask
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla.client.sdk.users.models import UserModel as User
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture
@@ -43,3 +62,38 @@ def ranking_question_payload():
         "required": True,
         "values": ["1", "2"],
     }
+
+
+@pytest.fixture
+def mocked_is_on_huggingface(mocker: "MockerFixture") -> bool:
+    mocker.patch(
+        "argilla.client.feedback.integrations.huggingface.model_card.model_card.is_on_huggingface", return_value=True
+    )
+
+
+@pytest.fixture
+def test_remote_dataset_with_records(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_metadata: List[FeedbackRecord],
+    owner: "User",
+):
+    api.init(api_key=owner.api_key)
+    ws = Workspace.create(name="test-workspace")
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+        metadata_properties=[
+            TermsMetadataProperty(name="terms-metadata", values=["a", "b", "c"]),
+            IntegerMetadataProperty(name="integer-metadata"),
+            FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0),
+        ],
+    )
+
+    remote = dataset.push_to_argilla(name="test_dataset", workspace=ws)
+
+    remote.add_records(feedback_dataset_records_with_metadata)
+    return remote

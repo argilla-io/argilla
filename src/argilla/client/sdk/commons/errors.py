@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -45,21 +45,6 @@ class ApiCompatibilityError(BaseClientError):
         )
 
 
-class HttpResponseError(BaseClientError):
-    """Used for handle http errors other than defined in Argilla server"""
-
-    def __init__(self, response: httpx.Response):
-        self.status_code = response.status_code
-        self.detail = response.text
-
-    def __str__(self):
-        return (
-            "Received an HTTP error from server\n"
-            + f"Response status: {self.status_code}\n"
-            + f"Response content: {self.detail}\n"
-        )
-
-
 class ArApiResponseError(BaseClientError):
     HTTP_STATUS: int
 
@@ -67,9 +52,7 @@ class ArApiResponseError(BaseClientError):
         self.ctx = ctx
 
     def __str__(self):
-        return (
-            f"Argilla server returned an error with http status: {self.HTTP_STATUS}" + f"\nError details: [{self.ctx}]"
-        )
+        return f"Argilla server returned an error with http status: {self.HTTP_STATUS}. " f"Error details: {self.ctx!r}"
 
 
 class BadRequestApiError(ArApiResponseError):
@@ -99,8 +82,8 @@ class AlreadyExistsApiError(ArApiResponseError):
 class ValidationApiError(ArApiResponseError):
     HTTP_STATUS = 422
 
-    def __init__(self, client_ctx, params, **ctx):
-        for error in params.get("errors", []):
+    def __init__(self, client_ctx, params: Optional[dict] = None, **ctx):
+        for error in (params or {}).get("errors", []):
             current_level = client_ctx
             for loc in error["loc"]:
                 new_value = None
@@ -121,3 +104,19 @@ class ValidationApiError(ArApiResponseError):
 
 class GenericApiError(ArApiResponseError):
     HTTP_STATUS = 500
+
+
+class HttpResponseError(ArApiResponseError):
+    """Used for handle http errors other than defined in Argilla server"""
+
+    def __init__(self, response: httpx.Response):
+        self.status_code = response.status_code
+        self.detail = response.content
+        self.HTTP_STATUS = self.status_code
+
+    def __str__(self):
+        return (
+            "Received an HTTP error from server\n"
+            + f"Response status: {self.status_code}\n"
+            + f"Response content: {self.detail}\n"
+        )

@@ -19,6 +19,7 @@ from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
     ResponseSchema,
+    SortBy,
     SuggestionSchema,
     ValueSchema,
 )
@@ -54,6 +55,10 @@ from pydantic import ValidationError
                     "agent": "agent-1",
                 }
             ],
+            "vectors": {
+                "vector-1": [1.0, 2.0, 3.0],
+                "vector-2": [1.0, 2.0, 3.0, 4.0],
+            },
             "external_id": "entry-1",
         },
         {
@@ -88,6 +93,9 @@ from pydantic import ValidationError
 )
 def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
     assert FeedbackRecord(**schema_kwargs)
+
+
+# TODO(@alvaro): Check why there are missing tests cases checking feedback errors.
 
 
 @pytest.mark.parametrize(
@@ -198,7 +206,7 @@ def test_ranking_value_schema_errors(
         },
         {"values": {"question-1": {"value": 1}}},
         {"values": {"question-1": {"value": "This is a value"}}, "status": "submitted"},
-        {"values": {"question-1": {"value": ["This is a value"]}}, "status": "discarded"},
+        {"values": None, "status": "discarded"},
     ],
 )
 def test_response_schema(schema_kwargs: Dict[str, Any]) -> None:
@@ -223,3 +231,16 @@ def test_response_schema(schema_kwargs: Dict[str, Any]) -> None:
 )
 def test_suggestion_schema(schema_kwargs: Dict[str, Any]) -> None:
     assert SuggestionSchema(**schema_kwargs)
+
+
+@pytest.mark.parametrize(
+    "wrong_args",
+    [
+        dict(field="wrogn_name"),
+        dict(field="metadata.field", order="wrong_order"),
+        dict(dict="ascc", order="asc"),
+    ],
+)
+def test_sort_by_with_wrong_fields(wrong_args: Dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        SortBy(**wrong_args)
