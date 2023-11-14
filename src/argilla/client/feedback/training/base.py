@@ -227,6 +227,17 @@ class ArgillaTrainer(ArgillaTrainerV1):
         self._logger.info(self)
         self._track_trainer_usage(framework=framework, task=self._task.__class__.__name__)
 
+    @property
+    def task(self) -> TrainingTaskTypes:
+        """The task to be trained."""
+        return self._task
+
+    @property
+    def trainer(
+        self,
+    ):
+        return self._trainer
+
     def __repr__(self) -> str:
         """
         `trainer.__repr__()` prints out the trainer's parameters and a summary of how to use the trainer
