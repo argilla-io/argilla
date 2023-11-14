@@ -1475,7 +1475,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
                             value = int(value)
                         else:
                             value = float(value)
-                        if isinstance(self.label, RankingQuestionUnification):
+                        if isinstance(self.label, RatingQuestionUnification):
                             max_value = max([float(x) for x in self.label.question.__all_labels__])
                             value = (value / 100) * float(max_value)
                     record[v] = value
