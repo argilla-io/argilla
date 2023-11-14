@@ -65,7 +65,7 @@ if TYPE_CHECKING:
 
 
 class TrainingData(ABC):
-    formatting_func = None
+    formatting_func: Optional[BaseModel] = None
     defaults: Optional[BaseModel] = None
     _formatting_func_return_types = None
     _supported_frameworks_names: list = []
@@ -100,7 +100,8 @@ class TrainingData(ABC):
         try:
             if not isinstance(sample, types.GeneratorType):
                 self._formatting_func_return_types(format=sample)
-            return True
+            else:
+                [self._formatting_func_return_types(format=sample_i) for sample_i in sample]
         except Exception:
             raise ValueError(
                 f"formatting_func must return {self._formatting_func_return_types.__annotations__['format']}, not {type(sample)}"

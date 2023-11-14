@@ -15,14 +15,12 @@
 from typing import List, Optional, Union
 
 from argilla.client.feedback.schemas import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
     TextField,
     TextQuestion,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionUnification,
-    MultiLabelQuestionUnification,
-    RankingQuestionUnification,
-    RatingQuestionUnification,
 )
 from pydantic import BaseModel
 
@@ -31,10 +29,10 @@ class TextClassificationDefaults(BaseModel):
     text: Optional[TextField] = None
     label: Optional[
         Union[
-            RatingQuestionUnification,
-            LabelQuestionUnification,
-            MultiLabelQuestionUnification,
-            RankingQuestionUnification,
+            RatingQuestion,
+            LabelQuestion,
+            MultiLabelQuestion,
+            RankingQuestion,
         ]
     ] = None
 
@@ -47,4 +45,4 @@ class QuestionAnsweringDefaults(BaseModel):
 
 class SentenceSimilarityDefaults(BaseModel):
     texts: Optional[List[TextField]] = None
-    label: Optional[Union[LabelQuestionUnification, RankingQuestionUnification]] = None
+    label: Optional[Union[LabelQuestion, RatingQuestion]] = None

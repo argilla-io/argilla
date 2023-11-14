@@ -345,6 +345,25 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
 
+    def update_config(self, *args, **kwargs) -> None:
+        # TODO: allow for backwards compatability for old methods by unpacking the args and kwargs from Pydantic models
+        new_args = []
+        for arg in args:
+            if hasattr(arg, "__fields__"):
+                new_args.extend(arg.dict().values())
+            else:
+                new_args.append(arg)
+        args = tuple(new_args)
+
+        new_kwargs = {}
+        for key, value in kwargs.items():
+            if hasattr(value, "__fields__"):
+                new_kwargs.update(value.dict())
+            else:
+                new_kwargs[key] = value
+        kwargs = new_kwargs
+        return super().update_config(*args, **kwargs)
+
 
 class ArgillaTrainerSkeleton(ArgillaTrainerSkeletonV1):
     def __init__(
