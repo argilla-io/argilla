@@ -458,7 +458,7 @@ class TrainingTask:
             [Dict[str, Any]], Union[None, Tuple[str, str, str, str], Iterator[Tuple[str, str, str, str]]]
         ],
     ) -> "TrainingTaskForChatCompletion":
-        """Training data for chat comletion
+        """Training data for chat completion
         Args:
             formatting_func: A formatting function converting a dictionary of records into zero,
                 one or more chat-turn-role-content text tuples.
@@ -1276,7 +1276,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
 
 
 class TrainingTaskForChatCompletion(BaseModel, TrainingData):
-    """Training data for chat comletion
+    """Training data for chat completion
 
     Args:
         formatting_func: A formatting function converting a dictionary of records into zero,
