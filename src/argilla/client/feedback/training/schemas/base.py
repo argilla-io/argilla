@@ -199,8 +199,7 @@ class TrainingData(ABC):
             return self._prepare_for_training_with_openai(data=data, train_size=train_size, seed=seed)
         elif framework is Framework.TRL:
             return self._prepare_for_training_with_trl(data=data, train_size=train_size, seed=seed)
-        elif framework is Framework.TRLX:
-            return self._prepare_for_training_with_trlx(data=data, train_size=train_size, seed=seed)
+
         elif framework is Framework.SENTENCE_TRANSFORMERS:
             return self._prepare_for_training_with_sentence_transformers(data=data, train_size=train_size, seed=seed)
         else:
@@ -232,11 +231,6 @@ class TrainingData(ABC):
         self, data: List[dict], train_size, seed: int
     ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
         raise ValueError(f"{self.__class__.__name__} does not support the TRL framework.")
-
-    def _prepare_for_training_with_trlx(
-        self, data: List[dict], train_size, seed: int
-    ) -> Union[List[dict], Tuple[List[dict], List[dict]]]:
-        raise ValueError(f"{self.__class__.__name__} does not support the TRLX framework.")
 
 
 class TrainingTask:
@@ -690,7 +684,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
     ]
 
     @property
-    def __multi_label__(self):
+    def __multi_label__(self) -> bool:
         return isinstance(self.label.question, MultiLabelQuestion)
 
     @property
