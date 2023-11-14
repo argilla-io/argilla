@@ -2,7 +2,7 @@
   <div
     class="container"
     @keydown="keyboardHandler"
-    @keydown.meta="showShortcuts = !showShortcuts"
+    @keydown.ctrl="showShortcuts = !showShortcuts"
   >
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
