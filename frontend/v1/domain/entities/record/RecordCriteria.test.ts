@@ -10,8 +10,8 @@ describe("RecordCriteria", () => {
         "searchText",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -26,8 +26,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -42,8 +42,8 @@ describe("RecordCriteria", () => {
         undefined,
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -61,8 +61,8 @@ describe("RecordCriteria", () => {
         // eslint-disable-next-line quotes
         'your_feel:["happy","sad"]',
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -77,8 +77,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -93,8 +93,8 @@ describe("RecordCriteria", () => {
         "",
         undefined,
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -111,8 +111,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -129,8 +129,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -147,8 +147,8 @@ describe("RecordCriteria", () => {
         "Can AI help us?",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -165,8 +165,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -184,8 +184,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -202,8 +202,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         "record:1,vector:2,limit:50,order:most"
       );
 
@@ -220,8 +220,8 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        [],
-        [],
+        "",
+        "",
         null
       );
 
@@ -254,8 +254,8 @@ describe("RecordCriteria", () => {
         "Do you love ML?",
         "your_feel:[happy,sad]",
         "inserted_at:desc",
-        [],
-        [],
+        "",
+        "",
         "record:1,vector:2,limit:50,order:most"
       );
 

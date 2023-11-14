@@ -5,10 +5,7 @@ import {
   OptionForFilter,
 } from "../common/Filter";
 import { Question } from "../question/Question";
-import {
-  ConfigurationSearch,
-  SuggestionSearch,
-} from "../record/RecordCriteria";
+import { ConfigurationSearch, SuggestionSearch } from "./SuggestionCriteria";
 
 class ConfigurationValues extends Filter {
   private readonly options: FilterWithOption;
@@ -51,13 +48,22 @@ class ConfigurationValues extends Filter {
     this.operator = operator;
   }
 
+  get hasOperator() {
+    return this.question.isMultiLabelType;
+  }
+
   get value(): {
     values: string[];
-    operator: "and" | "or";
+    operator?: "and" | "or";
   } {
+    if (this.hasOperator)
+      return {
+        values: this.options.value,
+        operator: this.operator,
+      };
+
     return {
       values: this.options.value,
-      operator: this.operator,
     };
   }
 
