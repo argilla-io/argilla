@@ -15,16 +15,14 @@
 import os
 import textwrap
 import warnings
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.schemas import TrainingTaskForTextClassification, TrainingTaskTypes
+from argilla.client.feedback.training.schemas.base import TrainingTaskForTextClassification, TrainingTaskTypes
 from argilla.client.models import Framework, TextClassificationRecord
-from argilla.training import ArgillaTrainer as ArgillaTrainerV1
-
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+from argilla.training.base import ArgillaTrainer as ArgillaTrainerV1
+from argilla.training.base import ArgillaTrainerSkeleton as ArgillaTrainerSkeletonV1
 
 if TYPE_CHECKING:
     import spacy
@@ -32,7 +30,7 @@ if TYPE_CHECKING:
 
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard, FrameworkCardData
+    from argilla.client.feedback.integrations.huggingface.model_card import ArgillaModelCard
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import SortBy
 
@@ -229,6 +227,17 @@ class ArgillaTrainer(ArgillaTrainerV1):
         self._logger.info(self)
         self._track_trainer_usage(framework=framework, task=self._task.__class__.__name__)
 
+    @property
+    def task(self) -> TrainingTaskTypes:
+        """The task to be trained."""
+        return self._task
+
+    @property
+    def trainer(
+        self,
+    ):
+        return self._trainer
+
     def __repr__(self) -> str:
         """
         `trainer.__repr__()` prints out the trainer's parameters and a summary of how to use the trainer
@@ -347,8 +356,26 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
             model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
 
+    def update_config(self, *args, **kwargs) -> None:
+        """
+        Updates the `model_kwargs` and `trainer_kwargs` dictionaries with the keyword.add()
 
-class ArgillaTrainerSkeleton(ABC):
+        Provides a warning if the keyword argument is not valid for the trainer or model.
+        """
+        trainer_kwargs = self._trainer.get_trainer_kwargs()
+        model_kwargs = self._trainer.get_model_kwargs()
+        for kwarg in kwargs:
+            if kwarg not in trainer_kwargs and kwarg not in model_kwargs:
+                warnings.warn(
+                    f"{kwarg} is not a valid argument for {self._trainer.__class__}. "
+                    f"Valid arguments are: {list(trainer_kwargs.keys()) + list(model_kwargs.keys())}",
+                    UserWarning,
+                    stacklevel=2,
+                )
+        return super().update_config(*args, **kwargs)
+
+
+class ArgillaTrainerSkeleton(ArgillaTrainerSkeletonV1):
     def __init__(
         self,
         dataset: "FeedbackDataset",
@@ -372,51 +399,8 @@ class ArgillaTrainerSkeleton(ABC):
             self._record_class = TextClassificationRecord  # TODO: dirty hack to inherit from original trainers
         else:
             self._record_class = FeedbackRecord
-
-    @abstractmethod
-    def init_training_args(self) -> None:
-        """
-        Initializes the training arguments.
-        """
-
-    @abstractmethod
-    def init_model(self) -> None:
-        """
-        Initializes a model.
-        """
-
-    @abstractmethod
-    def update_config(self, *args, **kwargs) -> None:
-        """
-        Updates the configuration of the trainer, but the parameters depend on the trainer.subclass.
-        """
-
-    @abstractmethod
-    def predict(self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs) -> None:
-        """
-        Predicts the label of the text.
-        """
-
-    @abstractmethod
-    def train(self, output_dir: Optional[str] = None) -> None:
-        """
-        Trains the model.
-        """
-
-    @abstractmethod
-    def save(self, output_dir: str) -> None:
-        """
-        Saves the model to the specified path.
-        """
-
-    @abstractmethod
-    def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
-        """
-        Generates a `FrameworkCardData` instance to generate a model card from.
-        """
-
-    @abstractmethod
-    def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
-        """
-        Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
-        """
+        self.model_kwargs = {}
+        self.trainer_kwargs = {}
+        self.trainer_model = None
+        self.trainer_tokenizer = None
+        self._trainer = None

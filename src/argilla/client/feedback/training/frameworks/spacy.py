@@ -81,10 +81,10 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
         import spacy
 
-        self._nlp = None
+        self.trainer_model = None
         self._model = model
 
-        self.config = {}
+        self.trainer_kwargs = {}
 
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
@@ -168,7 +168,7 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         from spacy.cli.package import package
         from spacy_huggingface_hub import push
 
-        if self._nlp is None:
+        if self.trainer_model is None:
             raise ValueError(
                 "No pipeline was initialized, you must call either `init_model` or `train` before calling this method."
             )
@@ -287,6 +287,6 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
             pipeline=self._pipeline,  # Used only to keep track for the config arguments
-            update_config_kwargs=self.config["training"],
+            update_config_kwargs=self.trainer_kwargs["training"],
             **card_data_kwargs,
         )

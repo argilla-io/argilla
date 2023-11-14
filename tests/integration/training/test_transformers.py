@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 
-import argilla as rg
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training import ArgillaTrainer
 
