@@ -346,22 +346,21 @@ class ArgillaTrainer(ArgillaTrainerV1):
             model_card.push_to_hub(repo_id, repo_type="model", token=kwargs["token"])
 
     def update_config(self, *args, **kwargs) -> None:
-        # TODO: allow for backwards compatability for old methods by unpacking the args and kwargs from Pydantic models
-        new_args = []
-        for arg in args:
-            if hasattr(arg, "__fields__"):
-                new_args.extend(arg.dict().values())
-            else:
-                new_args.append(arg)
-        args = tuple(new_args)
+        """
+        Updates the `model_kwargs` and `trainer_kwargs` dictionaries with the keyword.add()
 
-        new_kwargs = {}
-        for key, value in kwargs.items():
-            if hasattr(value, "__fields__"):
-                new_kwargs.update(value.dict())
-            else:
-                new_kwargs[key] = value
-        kwargs = new_kwargs
+        Provides a warning if the keyword argument is not valid for the trainer or model.
+        """
+        trainer_kwargs = self._trainer.get_trainer_kwargs()
+        model_kwargs = self._trainer.get_model_kwargs()
+        for kwarg in kwargs:
+            if kwarg not in trainer_kwargs and kwarg not in model_kwargs:
+                warnings.warn(
+                    f"{kwarg} is not a valid argument for {self._trainer.__class__}. "
+                    f"Valid arguments are: {list(trainer_kwargs.keys()) + list(model_kwargs.keys())}",
+                    UserWarning,
+                    stacklevel=2,
+                )
         return super().update_config(*args, **kwargs)
 
 
