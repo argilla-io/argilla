@@ -1,6 +1,7 @@
 import { Criteria } from "../common/Criteria";
 import { SortSearch } from "./MetadataSort";
 
+const SORT_ELEMENT_SEPARATOR = ",";
 const SORT_KEY_SEPARATOR = ".";
 const ORDER_BY_SEPARATOR = ":";
 
@@ -15,31 +16,33 @@ export class SortCriteria extends Criteria {
     if (!this.isCompleted) return "";
 
     return this.value
-      .map((c) => `${c.key}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`)
-      .join(",");
+      .map((c) => {
+        if (c.key)
+          return `${c.key}${SORT_KEY_SEPARATOR}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`;
+
+        return `${c.name}${ORDER_BY_SEPARATOR}${c.sort}`;
+      })
+      .join(SORT_ELEMENT_SEPARATOR);
   }
 
   get backendParams(): string[] {
     if (!this.isCompleted) return [];
 
-    return this.value.map(
-      (c) => `${c.key}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`
-    );
+    return this.value.map((c) => {
+      if (c.key)
+        return `${c.key}${SORT_KEY_SEPARATOR}${c.name}${ORDER_BY_SEPARATOR}${c.sort}`;
+
+      return `${c.name}${ORDER_BY_SEPARATOR}${c.sort}`;
+    });
   }
 
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams.split(",").forEach((sortParam) => {
-      const categories = sortParam.split(SORT_KEY_SEPARATOR);
-      const [name, sort] =
-        categories[categories.length - 1].split(ORDER_BY_SEPARATOR);
+    urlParams.split(SORT_ELEMENT_SEPARATOR).forEach((sortParam) => {
+      const sortSearch = this.getSortSearch(sortParam);
 
-      this.value.push({
-        key: `${categories[0]}${SORT_KEY_SEPARATOR}`,
-        name,
-        sort: sort === "asc" ? "asc" : "desc",
-      });
+      if (sortSearch) this.value.push(sortSearch);
     });
   }
 
@@ -55,5 +58,21 @@ export class SortCriteria extends Criteria {
 
   reset() {
     this.value = [];
+  }
+
+  private getSortSearch(sort: string): SortSearch {
+    const sortParts = sort.split(ORDER_BY_SEPARATOR);
+
+    if (sortParts.length < 2) return;
+
+    const [rest, sortType] = sortParts;
+
+    const [name, key] = rest.split(SORT_KEY_SEPARATOR, 2).reverse();
+
+    return {
+      key,
+      name,
+      sort: sortType === "asc" ? "asc" : "desc",
+    };
   }
 }

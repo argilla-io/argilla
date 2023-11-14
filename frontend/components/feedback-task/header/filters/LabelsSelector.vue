@@ -11,7 +11,7 @@
       :selected-options="filter.selectedOptions"
     />
     <OptionsSelector
-      v-if="filter.operator"
+      v-if="filter.hasOperator"
       v-model="filter.operator"
       :options="['and', 'or']"
     />

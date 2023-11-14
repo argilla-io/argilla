@@ -29,7 +29,7 @@ abstract class Sort {
 
 class MetadataSort extends Sort {
   constructor(private metadata: Metadata) {
-    super("metadata.");
+    super("metadata");
   }
 
   get name() {
