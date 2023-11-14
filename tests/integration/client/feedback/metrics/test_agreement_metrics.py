@@ -120,3 +120,41 @@ def test_agreement_metrics(
         metrics_report = metric.compute(metric_names)
         assert isinstance(metrics_report, list)
         assert all([isinstance(m, AgreementMetricResult) for m in metrics_report])
+
+
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # RatingQuestion
+        ("question-2", {"alpha"}),
+        # LabelQuestion
+        ("question-3", {"alpha"}),
+        # MultiLabelQuestion
+        ("question-4", {"alpha"}),
+        # RankingQuestion
+        ("question-5", {"alpha"}),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+def test_allowed_metrics(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    metric = AgreementMetric(dataset=dataset, question_name=question)
+    assert set(metric.allowed_metrics) == metric_names

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.utils import get_responses_per_user
+from argilla.client.feedback.metrics.utils import get_responses_and_suggestions_per_user
 from argilla.client.feedback.schemas import FeedbackRecord
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ def test_responses_per_user(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    responses_per_user, suggestions = get_responses_per_user(dataset, question, response_status=status)
+    responses_per_user, suggestions = get_responses_and_suggestions_per_user(dataset, question, response_status=status)
     if status != "submitted":
         num_users = 0
         assert len(responses_per_user) == num_users

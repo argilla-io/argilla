@@ -17,7 +17,8 @@ from typing import TYPE_CHECKING, List, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics import AnnotatorMetric, AnnotatorMetricResult
+from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric
+from argilla.client.feedback.metrics.base import AnnotatorMetricResult
 from argilla.client.feedback.schemas import FeedbackRecord
 
 if TYPE_CHECKING:
@@ -34,9 +35,7 @@ if TYPE_CHECKING:
         ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
         # LabelQuestion
         ("question-3", "accuracy"),
-        # ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
-        ("question-3", ["accuracy", "f1-score", "precision", "recall", "pearson-r"]),
-        # ("question-3", "confusion-matrix"),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
         # No current implementation for MultiLabelQuestion
         ("question-4", "accuracy"),
         # RankingQuestion
@@ -81,4 +80,39 @@ def test_annotator_metric(
             metric_names = [metric_names]
 
         assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
-        # TODO: Check some values for the metrics
+
+
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # TextQuestion
+        ("question-1", {"gleu", "rouge"}),
+        # RatingQuestion
+        ("question-2", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"}),
+        # LabelQuestion
+        ("question-3", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"}),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+def test_allowed_metrics(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    metric = AnnotatorMetric(dataset, question)
+    assert set(metric.allowed_metrics) == metric_names

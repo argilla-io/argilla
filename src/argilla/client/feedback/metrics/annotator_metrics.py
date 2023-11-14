@@ -14,14 +14,13 @@
 
 """This module contains metrics to compare Annotator's suggestions vs responses. """
 
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
-from pydantic import BaseModel
 
-from argilla.client.feedback.metrics.utils import get_responses_per_user
+from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
+from argilla.client.feedback.metrics.utils import get_responses_and_suggestions_per_user, is_multiclass, map_str_to_int
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -34,49 +33,11 @@ from argilla.utils.dependency import requires_dependencies
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
 
-import pandas as pd
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    f1_score,
-    multilabel_confusion_matrix,
-    precision_score,
-    recall_score,
-)
 
-
-class AnnotatorMetricResult(BaseModel):
-    """Container for the result of an annotator metric.
-
-    It contains two fields, `metric_name` and `result` with the value of the metric.
-    """
-
-    metric_name: str
-    result: Union[float, Dict[str, float], pd.DataFrame, List[pd.DataFrame]]
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class AnnotatorMetric:
+class AnnotatorMetric(MetricBase):
     def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
-        """Initializes a `AnnotatorMetric` object to compute metrics on
-        a `FeedbackDataset` for a given question at the annotator level.
-
-        Args:
-            dataset: FeedbackDataset to compute the metrics.
-            question_name: Name of the question for which we want to analyse the analyze
-                the annotator responses vs the suggestions given.
-
-        Raises:
-            NotImplementedError: If the question type is not supported.
-        """
-        self._dataset = dataset
-        self._question_name = question_name
-        self._question_type = type(self._dataset.question_by_name(question_name))
-        if self._question_type in (MultiLabelQuestion, RankingQuestion):
-            raise NotImplementedError(f"No metrics are defined currently for {self._question_type.__name__}")
-        self._allowed_metrics = METRICS_PER_QUESTION[self._question_type]
+        self._metrics_per_question = METRICS_PER_QUESTION
+        super().__init__(dataset, question_name)
 
     def compute(self, metric_names: Union[str, List[str]], **kwargs) -> Dict[str, List[AnnotatorMetricResult]]:
         """Computes the annotator metrics for the given question.
@@ -103,7 +64,7 @@ class AnnotatorMetric:
 
         metric_classes = [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
 
-        responses_per_user, suggestions = get_responses_per_user(self._dataset, self._question_name)
+        responses_per_user, suggestions = get_responses_and_suggestions_per_user(self._dataset, self._question_name)
 
         metrics = defaultdict(list)
         for user_id, responses in responses_per_user.items():
@@ -113,52 +74,6 @@ class AnnotatorMetric:
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
         return dict(metrics)
-
-
-class AnnotatorMetricBase(ABC):
-    """Base class for Annotator metrics."""
-
-    def __init__(self, responses=None, suggestions=None) -> None:
-        """
-        Args:
-            responses: Responses given by the user.
-                Depending on the type of question it can be a list of strings, or integers.
-            suggestions: Suggestions offered for the annotators.
-                Same format as `responses`.
-        """
-        self._responses = responses
-        self._suggestions = suggestions
-
-    def compute(self, **kwargs):
-        responses, suggestions = self._pre_process(self._responses, self._suggestions)
-        return self._compute(responses, suggestions, **kwargs)
-
-    def _pre_process(self, responses, suggestions) -> Any:
-        """Optional data preprocessing. By default it just passes the data to the _compute method.
-
-        Args:
-            responses: Responses given by the user.
-            suggestions: Suggestions offered for the annotators.
-
-        Returns:
-            data: tuple with the preprocessed data.
-        """
-        return responses, suggestions
-
-    @abstractmethod
-    def _compute(self, responses, suggestions, **kwargs):
-        """Abstract method where the computation is done.
-
-        Args:
-            responses: Responses given by the user, as expected by the given metric.
-            suggestions: Suggestions offered for the annotators, as expected by the given metric.
-        """
-        pass
-
-
-def is_multiclass(data) -> bool:
-    """Helper function to check if a list of responses from LabelQuestion is also multiclass."""
-    return len(np.unique(data)) > 2
 
 
 class AccuracyMetric(AnnotatorMetricBase):
@@ -248,6 +163,7 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
 
     @requires_dependencies("scikit-learn")
     def _compute(self, responses, suggestions, **kwargs):
+        import pandas as pd
         from sklearn.metrics import confusion_matrix
 
         unique_responses = sorted(np.unique(responses))
@@ -255,20 +171,6 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
         result = confusion_matrix(responses, suggestions, labels=labels, **kwargs)
         return pd.DataFrame(result, index=labels, columns=labels)
-
-
-def map_str_to_int(values: List[str]) -> List[int]:
-    """Helper function to work with label questions as numerical values.
-
-    Args:
-        values: responses or suggestions with the string labels.
-
-    Returns:
-        values: corresponding values as integers to compute the metric
-    """
-    unique_values = np.unique(values)
-    map_values = {value: i for i, value in enumerate(unique_values)}
-    return [map_values[value] for value in values]
 
 
 class PearsonCorrelationCoefficientMetric(AnnotatorMetricBase):
@@ -335,6 +237,15 @@ class ROUGEMetric(AnnotatorMetricBase):
         return rouge.compute(predictions=responses, references=suggestions, **kwargs)
 
 
+# TODO(plaguss): Currently sklearn doesn't support any metrics for multiclass-multioutput
+# like the ones we offer for MultiLabel by default. We can either
+# restrict the type of MultiLabelQuestion so we can compute
+# for either multilabel or multiclass, or we have to define those metrics ourselves (or a use
+# a different library)
+# The following metric may work for RankingQuestion if the data is preprocessed
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.somersd.html.
+# Otherwise we have the same problem that appears with MultiLabelQuestion
+
 METRICS_PER_QUESTION = {
     LabelQuestion: {
         "accuracy": AccuracyMetric,
@@ -344,14 +255,6 @@ METRICS_PER_QUESTION = {
         "confusion-matrix": ConfusionMatrixMetric,
         "pearson-r": PearsonCorrelationCoefficientMetric,
     },
-    # TODO(plaguss): Currently sklearn doesn't support any metrics for multiclass-multioutput
-    # like the ones we offer for MultiLabel by default. We can either
-    # restrict the type of MultiLabelQuestion so we can compute
-    # for either multilabel or multiclass, or we have to define those metrics ourselves (or a use
-    # a different library)
-    MultiLabelQuestion: {
-        "accuracy": AccuracyMetric,
-    },
     RatingQuestion: {
         "accuracy": AccuracyMetric,
         "f1-score": F1ScoreMetric,
@@ -359,12 +262,6 @@ METRICS_PER_QUESTION = {
         "recall": RecallMetric,
         "confusion-matrix": ConfusionMatrixMetric,
         "spearman-r": SpearmanCorrelationCoefficientMetric,
-    },
-    # The following metric may work if the data os preprocessed
-    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.somersd.html.
-    # Otherwise we have the same problem that appears with MultiLabelQuestion
-    RankingQuestion: {
-        "accuracy": AccuracyMetric,
     },
     TextQuestion: {
         "gleu": GLEUMetric,

@@ -15,24 +15,22 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
+import numpy as np
+
 from argilla.client.feedback.schemas import RankingQuestion
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.feedback.metrics.base import Responses, Suggestions
 
 
-# Type aliases
-Responses = List[Union[float, int, str]]
-Suggestions = Responses
-
-
-def get_responses_per_user(
+def get_responses_and_suggestions_per_user(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
     response_status: str = ResponseStatusFilter.submitted.value,
-) -> Tuple[Dict[int, Responses], Suggestions]:
+) -> Tuple[Dict[int, "Responses"], "Suggestions"]:
     """Extract the responses per user and the suggestions from a FeedbackDataset.
 
     Helper function for the metrics module where we want to compare the responses
@@ -79,3 +77,22 @@ def get_responses_per_user(
         suggestions = [suggestion["value"] for suggestion in suggestions]
 
     return responses_per_user, suggestions
+
+
+def map_str_to_int(values: List[str]) -> List[int]:
+    """Helper function to work with label questions as numerical values.
+
+    Args:
+        values: responses or suggestions with the string labels.
+
+    Returns:
+        values: corresponding values as integers to compute the metric
+    """
+    unique_values = np.unique(values)
+    map_values = {value: i for i, value in enumerate(unique_values)}
+    return [map_values[value] for value in values]
+
+
+def is_multiclass(data) -> bool:
+    """Helper function to check if a list of responses from LabelQuestion is also multiclass."""
+    return len(np.unique(data)) > 2
