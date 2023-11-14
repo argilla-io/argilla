@@ -278,7 +278,7 @@ class ArgillaMixin:
             if len(self.records) > 0:
                 remote_dataset.add_records(self.records, show_progress)
 
-            _LOGGER.info("\n\t✓ Dataset succesfully pushed to Argilla")
+            _LOGGER.info("✓ Dataset succesfully pushed to Argilla")
             _LOGGER.info(remote_dataset)
 
             return remote_dataset
