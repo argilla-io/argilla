@@ -16,10 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Contributors
+### Added
 
-- @Racso-3141 Added a progress bar for parsing records process to `from_huggingface()` method with `trange` in `tqdm`.([#4132](https://github.com/argilla-io/argilla/pull/4132)).
+- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
 
+### Fixed
+
+- Fixed error in `ArgillaTrainer`, with numerical labels use `RatingQuestion` instead of `RankingQuestion` ([#4171](https://github.com/argilla-io/argilla/pull/4171))
+- Fixed error in `ArgillaTrainer`, now we can train for `extractive_question_answering` using a validation sample ([#4204](https://github.com/argilla-io/argilla/pull/4204))
 
 ## [1.19.0](https://github.com/argilla-io/argilla/compare/v1.18.0...v1.19.0)
 
