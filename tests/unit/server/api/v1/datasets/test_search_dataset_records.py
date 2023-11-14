@@ -214,9 +214,7 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 404
 
-    async def test_search_records_using_a_record_without_vector(
-        self, async_client: "AsyncClient", owner_auth_header: dict
-    ):
+    async def test_with_record_without_vector(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         await TextFieldFactory.create(name="input", dataset=dataset)
@@ -228,9 +226,16 @@ class TestSearchDatasetRecords:
         await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record)
 
         response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            self.url(dataset.id),
             headers=owner_auth_header,
-            json={"query": {"vector": {"name": vector_settings.name, "record_id": str(record_without_vector.id)}}},
+            json={
+                "query": {
+                    "vector": {
+                        "name": vector_settings.name,
+                        "record_id": str(record_without_vector.id),
+                    },
+                },
+            },
         )
 
         assert response.status_code == 422
