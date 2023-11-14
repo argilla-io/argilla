@@ -688,23 +688,36 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         return isinstance(self.label.question, MultiLabelQuestion)
 
     @property
-    def __all_labels__(self):
+    def __all_labels__(self) -> Union[Any, List[str]]:
         return self.label.question.__all_labels__
 
     @property
-    def __label2id__(self):
+    def __label2id__(self) -> Union[Any, Dict[str, int]]:
         return self.label.question.__label2id__
 
     @property
-    def __id2label__(self):
+    def __id2label__(self) -> Dict[int, str]:
         return self.label.question.__id2label__
 
     @property
-    def label(self):
+    def label(
+        self,
+    ) -> Optional[
+        Union[
+            RatingQuestion,
+            LabelQuestion,
+            MultiLabelQuestion,
+            RankingQuestion,
+            LabelQuestionUnification,
+            MultiLabelQuestionUnification,
+            RankingQuestionUnification,
+            RatingQuestionUnification,
+        ]
+    ]:
         return self.defaults.label
 
     @property
-    def text(self):
+    def text(self) -> Optional[TextField]:
         return self.defaults.text
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
@@ -1198,15 +1211,15 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
     _supported_frameworks_names = ["transformers"]
 
     @property
-    def question(self):
+    def question(self) -> TextField:
         return self.defaults.question
 
     @property
-    def context(self):
+    def context(self) -> TextField:
         return self.defaults.context
 
     @property
-    def answer(self):
+    def answer(self) -> TextQuestion:
         return self.defaults.answer
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
@@ -1392,26 +1405,28 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
     _supported_frameworks_names = ["sentence-transformers"]
 
     @property
-    def __all_labels__(self):
+    def __all_labels__(self) -> Optional[List[str]]:
         if self.label:
             return self.label.question.__all_labels__
 
     @property
-    def __label2id__(self):
+    def __label2id__(self) -> Optional[Dict[str, int]]:
         if self.label:
             return self.label.question.__label2id__
 
     @property
-    def __id2label__(self):
+    def __id2label__(self) -> Optional[Dict[int, str]]:
         if self.label:
             return self.label.question.__id2label__
 
     @property
-    def label(self):
+    def label(
+        self,
+    ) -> Optional[Union[LabelQuestion, RatingQuestion, LabelQuestionUnification, RankingQuestionUnification]]:
         return self.defaults.label
 
     @property
-    def texts(self):
+    def texts(self) -> Optional[List[str]]:
         return self.defaults.texts
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
