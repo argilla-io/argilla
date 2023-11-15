@@ -12,6 +12,7 @@
       :multiple="false"
       :isFocused="isFocused"
       @on-focus="onFocus"
+      @on-selected="onSelected"
     />
   </div>
 </template>
@@ -42,14 +43,8 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-  },
-  watch: {
-    "question.answer.values": {
-      deep: true,
-      handler(newOptions) {
-        if (newOptions.some((option) => option.isSelected))
-          this.$emit("on-user-answer");
-      },
+    onSelected() {
+      this.$emit("on-user-answer");
     },
   },
 };
