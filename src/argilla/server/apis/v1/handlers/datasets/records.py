@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
 from argilla.server.apis.v1.handlers.datasets.datasets import _get_dataset
-from argilla.server.contexts import datasets
+from argilla.server.contexts import datasets, search
 from argilla.server.database import get_async_db
 from argilla.server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla.server.models import Dataset as DatasetModel
@@ -38,6 +38,9 @@ from argilla.server.schemas.v1.datasets import (
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    SearchSuggestionOptions,
+    SearchSuggestionOptionsQuestion,
+    SearchSuggestionsOptions,
     TextQuery,
     VectorQuery,
     VectorSettings,
@@ -569,4 +572,32 @@ async def search_dataset_records(
 
     return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+    )
+
+
+@router.get(
+    "/datasets/{dataset_id}/records/search/suggestions/options",
+    status_code=status.HTTP_200_OK,
+    response_model=SearchSuggestionsOptions,
+)
+async def list_dataset_records_search_suggestions_options(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.search_records(dataset))
+
+    suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
+
+    return SearchSuggestionsOptions(
+        items=[
+            SearchSuggestionOptions(
+                question=SearchSuggestionOptionsQuestion(id=sa["question_id"], name=sa["question_name"]),
+                agents=sa["suggestion_agents"],
+            )
+            for sa in suggestion_agents_by_question
+        ]
     )
