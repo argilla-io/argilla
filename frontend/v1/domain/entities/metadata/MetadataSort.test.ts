@@ -92,11 +92,11 @@ describe("MetadataSort ", () => {
 
       const param = metadataSort.commit();
 
-      expect(param[0].key).toEqual("metadata.");
+      expect(param[0].key).toEqual("metadata");
       expect(param[0].name).toEqual("loss");
       expect(param[0].sort).toEqual("desc");
 
-      expect(param[1].key).toEqual("metadata.");
+      expect(param[1].key).toEqual("metadata");
       expect(param[1].name).toEqual("split");
       expect(param[1].sort).toEqual("asc");
     });
@@ -110,7 +110,7 @@ describe("MetadataSort ", () => {
         { key: "", name: "inserted_at", sort: "asc" },
       ]);
 
-      expect(metadataSort.selected[0].key).toEqual("metadata.");
+      expect(metadataSort.selected[0].key).toEqual("metadata");
       expect(metadataSort.selected[0].name).toEqual("loss");
       expect(metadataSort.selected[0].sort).toEqual("desc");
       expect(metadataSort.selected[1].key).toEqual("");

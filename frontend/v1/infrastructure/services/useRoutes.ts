@@ -67,7 +67,7 @@ export const useRoutes = () => {
 
       newQuery = {
         ...newQuery,
-        [key]: value,
+        [key]: encodeURIComponent(value),
       };
     });
 
@@ -80,7 +80,10 @@ export const useRoutes = () => {
   };
 
   const getQueryParams = <T>(key: KindOfParam): T => {
-    return route.value.query[key] as T;
+    const value = route.value.query[key] as string;
+    if (!value) return;
+
+    return decodeURIComponent(value) as T;
   };
 
   return {
