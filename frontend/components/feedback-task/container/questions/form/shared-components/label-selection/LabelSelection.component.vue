@@ -209,6 +209,10 @@ export default {
       this.options.forEach((option) => {
         option.isSelected = option.id === id ? isSelected : false;
       });
+
+      if (isSelected) {
+        this.$emit("on-selected");
+      }
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;
