@@ -63,7 +63,8 @@ class ExampleNotebook:
 
 
 def get_argilla_api_key() -> Optional[str]:
-    if api_key := os.environ.get("DEFAULT_USER_API_KEY"):
+    if api_key := os.environ.get("ADMIN_API_KEY"):
+        # Try to grab the api_key from the environment variable set in quickstart.Dockerfile
         return api_key
 
     from argilla.client.login import ArgillaCredentials
