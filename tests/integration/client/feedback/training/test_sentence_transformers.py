@@ -32,6 +32,7 @@ from sentence_transformers import CrossEncoder, InputExample, SentenceTransforme
 
 from tests.integration.client.feedback.helpers import (
     formatting_func_sentence_transformers,
+    formatting_func_sentence_transformers_all_lists,
     formatting_func_sentence_transformers_case_1_b,
     formatting_func_sentence_transformers_case_2,
     formatting_func_sentence_transformers_case_3_a,
@@ -63,6 +64,7 @@ def formatting_func_errored(sample):
     "formatting_func",
     [
         formatting_func_sentence_transformers,
+        formatting_func_sentence_transformers_all_lists,
         formatting_func_sentence_transformers_case_1_b,
         formatting_func_sentence_transformers_case_2,
         formatting_func_sentence_transformers_case_3_b,

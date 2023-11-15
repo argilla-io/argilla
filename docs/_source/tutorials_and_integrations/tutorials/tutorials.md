@@ -30,6 +30,16 @@ Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Set
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
 
 ```
+```{grid-item-card} ❓ Fine-tune a QnA model with transformers and ArgillaTrainer
+:link: feedback/training-qa-transformers.html
+
+Learn how to fine-tune a QnA model with transformers and annotated data using ArgillaTrainer
+```
+```{grid-item-card} 🌠 Fine-tune RAG pipelines by training retrieval and reranking models
+:link: feedback/fine-tuning-sentencesimilarity-rag.html
+
+Learn how to boost RAG performance through optimized retrieval and reranking models for better AI accuracy.
+```
 ```{grid-item-card} ✨ Add zero-shot text classification suggestions using SetFit
 :link: feedback/labelling-feedback-setfit.html
 
@@ -49,11 +59,6 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 :link: feedback/curating-feedback-instructiondataset.html
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
-```
-```{grid-item-card} ❓ Train a QA model with transformers and ArgillaTrainer
-:link: feedback/training-qa-transformers.html
-
-Learn how to fine-tune a QA model with transformers and annotated data using ArgillaTrainer
 ```
 
 ````
@@ -119,6 +124,7 @@ feedback/train-reward-model-rlhf
 feedback/labelling-feedback-setfit
 feedback/trainer-feedback-setfit
 feedback/labelling-feedback-langchain-syntethic
+feedback/fine-tuning-sentencesimilarity-rag
 
 other_datasets/few_shot_learning_with_setfit
 other_datasets/few_shot_text_classification_with_active_learning
