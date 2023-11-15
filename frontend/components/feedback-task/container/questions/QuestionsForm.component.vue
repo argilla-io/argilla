@@ -3,6 +3,8 @@
     class="questions-form"
     :class="{
       '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
+      '--animate-submit': animateSubmit,
+      '--animate-discard': animateDiscard,
     }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
@@ -106,6 +108,8 @@ export default {
       interactionCount: 0,
       isTouched: false,
       userComesFromOutside: false,
+      animateSubmit: false,
+      animateDiscard: false,
     };
   },
   setup() {
@@ -199,17 +203,21 @@ export default {
     },
     async onDiscard() {
       if (this.record.isDiscarded) return;
-
+      this.animateDiscard = true;
       await this.discard(this.record);
-
-      this.$emit("on-discard-responses");
+      setTimeout(() => {
+        this.$emit("on-discard-responses");
+        this.animateDiscard = false;
+      }, 300);
     },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
-
+      this.animateSubmit = true;
       await this.submit(this.record);
-
-      this.$emit("on-submit-responses");
+      setTimeout(() => {
+        this.$emit("on-submit-responses");
+        this.animateSubmit = false;
+      }, 300);
     },
     async onClear() {
       await this.clear(this.record);
@@ -342,6 +350,26 @@ export default {
       @extend %triangle-right;
       left: 100%;
     }
+  }
+}
+
+.--animate-submit {
+  animation: submit 0.3s ease-in-out;
+}
+@keyframes submit {
+  0%,
+  100% {
+    border-color: $primary-color;
+  }
+}
+
+.--animate-discard {
+  animation: discard 0.3s ease-in-out;
+}
+@keyframes discard {
+  0%,
+  100% {
+    border-color: #c3c3c3;
   }
 }
 </style>
