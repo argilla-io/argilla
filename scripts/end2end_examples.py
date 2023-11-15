@@ -25,7 +25,7 @@ $ python scripts/end2end_examples.py --help
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import papermill
 import typer
@@ -62,18 +62,27 @@ class ExampleNotebook:
             print(f"Removed output notebook: {self.dst_filename.stem}")
 
 
-def get_argilla_api_key() -> Optional[str]:
-    if api_key := os.environ.get("ADMIN_API_KEY"):
+def get_argilla_credentials() -> Tuple[Optional[str], Optional[str]]:
+    api_url = api_key = None
+
+    if api_url := os.environ.get("ARGILLA_API_URL"):
+        # Try to grab the api_url from the environment variable set in quickstart.Dockerfile
+        pass
+
+    if api_key := os.environ.get("ARGILLA_API_KEY"):
         # Try to grab the api_key from the environment variable set in quickstart.Dockerfile
-        return api_key
+        pass
+
+    if api_url and api_key:
+        return api_url, api_key
 
     from argilla.client.login import ArgillaCredentials
 
     if ArgillaCredentials.exists():
         credentials = ArgillaCredentials.load()
-        return credentials.api_key
+        return credentials.api_url, credentials.api_key
 
-    raise ValueError("No api_key found. Please set ADMIN_API_KEY environment variable.")
+    raise ValueError("No api_url and api_key found. Please set ADMIN_API_URL and ADMIN_API_KEY environment variables.")
 
 
 def get_huggingface_token() -> Optional[str]:
@@ -88,13 +97,17 @@ def get_huggingface_token() -> Optional[str]:
     raise ValueError("No token found. Please set HF_HUB_ACCESS_TOKEN environment variable.")
 
 
-def main(api_url: str = "http://localhost:6900", api_key: Optional[str] = None, hf_token: Optional[str] = None) -> None:
+def main(api_url: Optional[str] = None, api_key: Optional[str] = None, hf_token: Optional[str] = None) -> None:
     """
     Run the end2end example notebooks. If no arguments are passed, it
     will try to get the api_key and the hf_token from the environment variables.
     """
+    api_url_, api_key_ = get_argilla_credentials()
+
+    if not api_url:
+        api_url = api_url_
     if not api_key:
-        api_key = get_argilla_api_key()
+        api_key = api_key_
     if not hf_token:
         hf_token = get_huggingface_token()
 
@@ -104,13 +117,21 @@ def main(api_url: str = "http://localhost:6900", api_key: Optional[str] = None, 
         "hf_token": hf_token,
     }
 
-    examples = [
-        ExampleNotebook(
-            src_filename="text-classification-create-dataset.ipynb",
-            dst_filename="output-notebook.ipynb",
-            parameters=notebook_parameters,
-        ),
-    ]
+    import glob
+
+    # Name of the output notebook that will be removed after running the examples
+    output_notebook = "output_notebook.ipynb"
+
+    examples = []
+    for filename in glob.glob(str(EXAMPLES_FOLDER / "*.ipynb")):
+        examples.append(
+            ExampleNotebook(
+                src_filename=Path(filename).name,
+                dst_filename=output_notebook,
+                parameters=notebook_parameters,
+            )
+        )
+
     for example in examples:
         example.run()
         example.clean()
