@@ -12,8 +12,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-# %%
 import re
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -32,7 +30,6 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 
 
-# %%
 class TextDescriptivesExtractor:
     """This class extracts a number of basic text descriptives from FeedbackDataset
     records using the TextDescriptives library and adds them as record metadata."""
@@ -88,12 +85,12 @@ class TextDescriptivesExtractor:
             Optional[pd.DataFrame]: A dataframe containing the text descriptives metrics for the field, or None if the field is empty.
         """
         # If the field is empty, skip it
-        if not any(record.fields[field] for record in records):
+        field_text = [record.fields[field] for record in records if record.fields[field]]
+        if not field_text:
             return None
-        field_text = [record.fields[field] for record in records]
         field_metrics = td.extract_metrics(text=field_text, lang=self.model, metrics=self.metrics)
-        # Drop any column containing NaNs
-        field_metrics = field_metrics.dropna(axis=1, how="any")
+        # Drop text column and any column containing NaNs
+        field_metrics = field_metrics.dropna(axis=1, how="any").drop("text", axis=1)
         # If basic metrics is None, use all basic metrics
         if basic_metrics is None and self.metrics is None:
             basic_metrics = self.__basic_metrics
@@ -131,20 +128,6 @@ class TextDescriptivesExtractor:
         final_metrics = pd.concat(field_metrics, axis=1, keys=field_metrics.keys())
         return final_metrics
 
-    def _clean_column_name(self, col_name: str) -> str:
-        """
-        Clean the column name of a dataframe to fit a specific regex pattern.
-
-        Args:
-            col_name (str): A column name.
-
-        Returns:
-            str: A column name that fits the regex pattern.
-        """
-        col_name = col_name.lower()  # Convert to lowercase
-        col_name = re.sub(r"[^a-z0-9_]", "_", col_name)  # Replace non-alphanumeric characters with underscores
-        return col_name
-
     def _cast_to_python_types(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Convert integer, boolean and floats columns in a dataframe
@@ -178,21 +161,18 @@ class TextDescriptivesExtractor:
         Returns:
             List: A list of metadata properties.
         """
-        ### TO DO: Handle nans
         properties = []
         for col, dtype in df.dtypes.items():
-            name = f"{self._clean_column_name(col)}"
+            name = col
             title = name.replace("_", " ").title()
-            if dtype == "object":
-                prop = TermsMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
+            if dtype in ["object", "bool"]:
+                prop = TermsMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators, values=["True", "False"])
             elif dtype == "int64":
                 prop = IntegerMetadataProperty(
                     name=name, title=title, visible_for_annotators=self.visible_for_annotators
                 )
             elif dtype == "float64":
                 prop = FloatMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
-            elif dtype == "bool":
-                prop = TermsMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
             else:
                 print(f"Unhandled data type for column {col}: {dtype}")
                 continue
@@ -240,8 +220,12 @@ class TextDescriptivesExtractor:
         Returns:
             Union[FeedbackDataset, RemoteFeedbackDataset]: A FeedbackDataset or RemoteFeedbackDataset with text descriptives metrics added as metadata.
         """
-        # Extract records
-        records = dataset.records
+        if isinstance(dataset, FeedbackDataset):
+            records = dataset.records
+        elif isinstance(dataset, RemoteFeedbackDataset):
+            records = dataset.pull().records
+        else:
+            raise ValueError(f"Provided `dataset` is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed.")
         # Extract text descriptives metrics from records
         extracted_metrics = self._extract_metrics_for_all_fields(records)
         # Cast integer and boolean columns to Python native types
