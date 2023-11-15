@@ -194,6 +194,7 @@ class Argilla:
             + textwrap.indent(f"\nworkspaces={user.workspaces}", indent)
             + textwrap.indent(f"\ndatasets={ws_ds_dictionary}", indent)
             + textwrap.indent(f"\nupdated_at='{user.updated_at}'", indent)
+            + "\n)"
         )
 
     def _check_argilla_versions(self):
