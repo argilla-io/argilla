@@ -23,6 +23,7 @@ from argilla.server.models import SuggestionType
 class BaseSuggestion(BaseModel):
     question_id: UUID
     type: Optional[SuggestionType]
+    # TODO: we should add a validation to score only allowing values between 0 and 1
     score: Optional[float]
     value: Any
     agent: Optional[str]

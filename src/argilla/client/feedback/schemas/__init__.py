@@ -37,6 +37,7 @@ from argilla.client.feedback.schemas.records import (
     SuggestionSchema,
     ValueSchema,
 )
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 __all__ = [
     "FieldTypes",
@@ -63,4 +64,5 @@ __all__ = [
     "SortOrder",
     "SortBy",
     "RecordSortField",
+    "VectorSettings",
 ]

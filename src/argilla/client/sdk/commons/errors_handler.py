@@ -54,7 +54,6 @@ def handle_response_error(response: httpx.Response, parse_response: bool = True,
     elif response.status_code == ValidationApiError.HTTP_STATUS:
         error_type = ValidationApiError
         error_args["client_ctx"] = client_ctx
-        error_args["params"] = {}
     elif response.status_code == MethodNotAllowedApiError.HTTP_STATUS:
         error_type = MethodNotAllowedApiError
     elif response.status_code == GenericApiError.HTTP_STATUS:

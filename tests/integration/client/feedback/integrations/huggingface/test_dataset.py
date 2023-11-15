@@ -24,7 +24,7 @@ import pytest
 class TestSuiteHuggingFaceDatasetMixin:
     @classmethod
     def setup_class(cls: "TestSuiteHuggingFaceDatasetMixin") -> None:
-        github_ref_name = re.sub(r"[^a-zA-Z0-9-]", "-", os.getenv("GITHUB_REF_NAME", "fix/hello-world"))
+        github_ref_name = re.sub(r"[^a-zA-Z0-9-]", "-", os.getenv("GITHUB_REF_NAME", "test"))
         cls.repo_id = "argilla/test-integration-{}-{}".format(github_ref_name, uuid4())
         cls.dataset = rg.FeedbackDataset(
             fields=[
@@ -43,6 +43,9 @@ class TestSuiteHuggingFaceDatasetMixin:
                 rg.IntegerMetadataProperty(name="integer-metadata-property", min=0, max=100),
                 rg.FloatMetadataProperty(name="float-metadata-property", min=0.0, max=100.0),
             ],
+            vectors_settings=[
+                rg.VectorSettings(name="float-vector", dimensions=2),
+            ],
             guidelines="These are the guidelines",
         )
 
@@ -60,6 +63,7 @@ class TestSuiteHuggingFaceDatasetMixin:
                         "integer-metadata-property": 1,
                         "float-metadata-property": 1.0,
                     },
+                    vectors={"float-vector": [1.0, 2.0]},
                     external_id="external-id-1",
                 )
             ]
@@ -80,5 +84,52 @@ class TestSuiteHuggingFaceDatasetMixin:
         assert dataset.fields == self.dataset.fields
         assert dataset.questions == self.dataset.questions
         assert dataset.metadata_properties == self.dataset.metadata_properties
+        assert dataset.vectors_settings == self.dataset.vectors_settings
         assert dataset.guidelines == self.dataset.guidelines
         assert dataset.records == self.dataset.records
+
+
+# Separate edge cases for integration tests
+@pytest.mark.skipif(os.getenv("HF_HUB_ACCESS_TOKEN") is None, reason="`HF_HUB_ACCESS_TOKEN` is not set")
+def test_push_to_huggingface_with_vectors_with_field_names() -> None:
+    """Ensure that even if a field in the `FeedbackDataset` is named as a vector within the same dataset,
+    the dataset can still be pushed and pulled to/from HuggingFace Hub, respectively.
+    """
+    dataset = rg.FeedbackDataset(
+        fields=[
+            rg.TextField(name="text-field", required=True),
+        ],
+        questions=[
+            rg.TextQuestion(name="text-question", required=True),
+        ],
+        vectors_settings=[
+            # Named `text-field` to ensure that even if name is duplicated with a field/question, the
+            # vector is properly serialized under the `vectors` column in the `datasets.Dataset`
+            rg.VectorSettings(name="text-field", dimensions=2),
+        ],
+    )
+
+    dataset.add_records(
+        [
+            rg.FeedbackRecord(
+                fields={
+                    "text-field": "This is a text field",
+                },
+                vectors={"text-field": [1.0, 2.0]},
+            )
+        ]
+    )
+
+    github_ref_name = re.sub(r"[^a-zA-Z0-9-]", "-", os.getenv("GITHUB_REF_NAME", "test"))
+    repo_id = "argilla/test-integration-{}-{}".format(github_ref_name, uuid4())
+    dataset.push_to_huggingface(repo_id=repo_id, private=True, token=os.getenv("HF_HUB_ACCESS_TOKEN"))
+
+    try:
+        hf_dataset = rg.FeedbackDataset.from_huggingface(repo_id=repo_id, token=os.getenv("HF_HUB_ACCESS_TOKEN"))
+        assert isinstance(hf_dataset, rg.FeedbackDataset)
+        assert hf_dataset.records == dataset.records
+    except Exception as e:
+        from huggingface_hub import HfApi
+
+        HfApi().delete_repo(repo_id, repo_type="dataset", token=os.getenv("HF_HUB_ACCESS_TOKEN"))
+        raise e

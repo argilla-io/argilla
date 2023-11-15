@@ -20,7 +20,7 @@ You can deploy Argilla on Spaces with just a few clicks:
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to set up the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
+You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility** (`Public` or `Private`, in which case you will need to [set a `HF_TOKEN`](https://huggingface.co/settings/tokens)). If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
 
 <div class="flex justify-center">
 <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-new-space.png"/>
@@ -49,10 +49,6 @@ For quick experimentation, you can jump directly into the next section. If you w
 
 Once Argilla is running, you can use the UI with the Direct URL you'll find in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
 
-:::{warning}
-In order to obtain an HF Space direct URL, the space must be set the space to "public" and you can find the direct URL in the "Embed this Space" menu.
-:::
-
 ![HF_Space_Direct_URL](/_static/reference/webapp/HF_Space_Direct_URL.png)
 
 ### Create your first dataset
@@ -80,8 +76,11 @@ You can create your first dataset by logging it into Argilla using your endpoint
 ```python
 import argilla as rg
 
-# connect to your app endpoint (uses default team API key)
+# if you connect to your public app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey")
+
+# if you connect to your private app endpoint (uses default API key)
+rg.init(api_url="[your_space_url]", api_key="admin.apikey", extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"})
 
 # transform dataset into Argilla's format and log it
 rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")

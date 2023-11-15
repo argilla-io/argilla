@@ -67,9 +67,9 @@ There are different options to get started:
 
 1. Take a look at our [quickstart page](https://docs.argilla.io/en/latest/getting_started/quickstart.html) 🚀
 
-2. Start contributing by looking at our [contributor guidelines](#🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
+2. Start contributing by looking at our [contributor guidelines](##🫱🏾‍🫲🏼-contribute) 🫱🏾‍🫲🏼
 
-3. Skip some steps with our [cheatsheet](#🎼-cheatsheet) 🎼
+3. Skip some steps with our [cheatsheet](##🎼-cheatsheet) 🎼
 
 ## 🎼 Cheatsheet
 
@@ -249,16 +249,7 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 
 ## 🏘️ Community
 
-<iframe
-  src="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB"
-  width="100%"
-  height="600px"
-  frameborder="0"
-  style="border: 1px solid #bfcbda88; border-radius: 4px;"
-  allowfullscreen=""
-  aria-hidden="false"
-  tabindex="0"
-></iframe>
+🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
 🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
 
