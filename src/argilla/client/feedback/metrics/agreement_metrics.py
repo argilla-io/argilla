@@ -28,19 +28,12 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
 )
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.metrics.base import FormattedResponses
-
-
-QUESTION_TO_DISTANCE = {
-    LabelQuestion: binary_distance,
-    MultiLabelQuestion: masi_distance,
-    RatingQuestion: interval_distance,
-    RankingQuestion: lambda x, y: 1 - jaro_similarity(x, y),
-}
 
 
 def prepare_dataset_for_annotation_task(
@@ -95,13 +88,55 @@ def prepare_dataset_for_annotation_task(
 
             value = response["value"]
             if question_type == RankingQuestion:
-                value = tuple(value["value"])
+                value = tuple(value["rank"])
             elif question_type == MultiLabelQuestion:
                 value = frozenset(value)
 
             formatted_responses.append((user_id, question_name, value))
 
     return formatted_responses
+
+
+def kendall_tau_dist(x: List[int], y: List[int]) -> float:
+    r"""Kendall tau distance.
+
+    https://en.wikipedia.org/wiki/Kendall_tau_distance
+
+    Args:
+        x: Values of the first annotation.
+        y: Values of the first annotation.
+
+    Returns:
+        distance: Kendall tau distance.
+
+    Example:
+        >>> import itertools
+        >>> values = (1, 2, 3)
+        >>> for i, a in enumerate(itertools.permutations(values, len(values))):
+        ...     for j, b in enumerate(itertools.permutations(values, len(values))):
+        ...             if j >= i:
+        ...                     print((a, b), kendall_tau_dist(a,b))
+        ...
+        ((1, 2, 3), (1, 2, 3)) 0.0
+        ((1, 2, 3), (1, 3, 2)) 0.3333333333333333
+        ((1, 2, 3), (2, 1, 3)) 0.3333333333333333
+        ((1, 2, 3), (2, 3, 1)) 0.6666666666666667
+        ((1, 2, 3), (3, 1, 2)) 0.6666666666666667
+        ((1, 2, 3), (3, 2, 1)) 1.0
+        ...
+    """
+    from scipy.stats import kendalltau
+
+    coef, _ = kendalltau(x, y)
+    return 0.5 * (1 - coef)
+
+
+QUESTION_TO_DISTANCE = {
+    LabelQuestion: binary_distance,
+    MultiLabelQuestion: masi_distance,
+    RatingQuestion: interval_distance,
+    RankingQuestion: kendall_tau_dist,
+}
 
 
 class AgreementMetric(MetricBase):
