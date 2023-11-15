@@ -27,7 +27,6 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.server.settings import settings
 
-from tests import SUPPORTED_VECTOR_SEARCH
 from tests.factories import WorkspaceFactory
 
 if TYPE_CHECKING:
@@ -76,10 +75,6 @@ def test_delete_and_create_for_different_task(api: Argilla):
     api.load(dataset)
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 def test_similarity_search_in_python_client(api: Argilla):
     dataset = "test_similarity_search_in_python_client"
     text = "This is a text"
@@ -107,10 +102,6 @@ def test_similarity_search_in_python_client(api: Argilla):
         )
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
@@ -139,7 +130,6 @@ def test_log_data_with_vectors_and_update_ok(api: Argilla):
     assert ds[0].id == 3
 
 
-@pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
 def test_log_data_with_vectors_and_update_ko(argilla_user: "User"):
     dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"

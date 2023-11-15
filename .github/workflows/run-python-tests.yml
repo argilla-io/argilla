@@ -74,7 +74,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
       - name: Set huggingface hub credentials
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/releases')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/releases')
         run: |
           echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
           echo "Enable HF access token"

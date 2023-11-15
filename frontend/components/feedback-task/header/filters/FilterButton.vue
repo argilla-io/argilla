@@ -66,7 +66,10 @@ export default {
   &__button.button {
     padding: 0;
     border-radius: 0;
-    @include font-size(14px);
+    @include font-size(12px);
+    .filters & {
+      @include font-size(14px);
+    }
   }
   & > * {
     flex-shrink: 0;

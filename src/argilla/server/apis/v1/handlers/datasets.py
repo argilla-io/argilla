@@ -80,6 +80,8 @@ LIST_DATASET_RECORDS_LIMIT_LE = 1000
 LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
 
+CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
+
 router = APIRouter(tags=["datasets"])
 
 parse_record_include_param = parse_query_param(
@@ -227,6 +229,12 @@ async def _get_search_responses(
             record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
             await record.awaitable_attrs.vectors
 
+            if not record.vector_value_by_vector_settings(vector_settings):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
+                )
+
     if (
         text_query
         and text_query.field
@@ -317,8 +325,12 @@ async def _filter_records_using_search_engine(
     )
 
     record_ids = [response.record_id for response in search_responses.items]
+    user_id = user.id if user else None
+
     return (
-        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, records_ids=record_ids, include=include),
+        await datasets.get_records_by_ids(
+            db=db, dataset_id=dataset.id, user_id=user_id, records_ids=record_ids, include=include
+        ),
         search_responses.total,
     )
 
@@ -655,6 +667,13 @@ async def create_dataset_vector_settings(
     dataset = await _get_dataset(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.create_vector_settings(dataset))
+
+    count_vectors_settings_by_dataset_id = await datasets.count_vectors_settings_by_dataset_id(db, dataset_id)
+    if count_vectors_settings_by_dataset_id >= CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"The maximum number of vector settings has been reached for dataset with id `{dataset_id}`",
+        )
 
     if await datasets.get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset_id):
         raise HTTPException(

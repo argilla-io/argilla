@@ -8,7 +8,7 @@
   >
     <template slot="dropdown-header">
       {{ useExtraText }}
-      {{ value }}
+      {{ selectedValue }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
@@ -64,6 +64,15 @@ export default {
       dropdownIsVisible: false,
     };
   },
+  computed: {
+    selectedValue() {
+      const selectedOption = this.options.find(
+        (option) => this.value === this.getKeyProp(option)
+      );
+
+      return this.getDisplayProp(selectedOption);
+    },
+  },
   methods: {
     getDisplayProp(option) {
       if (this.useTextProp) {
@@ -94,8 +103,8 @@ export default {
   font-weight: 500;
 
   &__options {
-    list-style: none;
     min-width: 100px;
+    list-style: none;
     padding: calc($base-space / 2);
     margin: 0;
     &:hover :not(.similarity-config__option:hover) {
@@ -106,6 +115,8 @@ export default {
     padding: calc($base-space / 2);
     border-radius: $border-radius;
     transition: all 0.2s ease-in;
+    width: max-content;
+    min-width: 100%;
     cursor: pointer;
     &:hover {
       background: $black-4;
