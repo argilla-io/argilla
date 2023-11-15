@@ -1580,6 +1580,19 @@ TrainingTaskTypes = Union[
 ]
 
 
+# Helper map fr the creation of the model cards.
+TRAINING_TASK_MAPPING = {
+    TrainingTaskForTextClassification: "for_text_classification",
+    TrainingTaskForSFT: "for_supervised_fine_tuning",
+    TrainingTaskForRM: "for_reward_modeling",
+    TrainingTaskForPPO: "for_proximal_policy_optimization",
+    TrainingTaskForDPO: "for_direct_preference_optimization",
+    TrainingTaskForChatCompletion: "for_chat_completion",
+    TrainingTaskForQuestionAnswering: "for_question_answering",
+    TrainingTaskForSentenceSimilarity: "for_sentence_similarity",
+}
+
+
 # Old, deprecated variants.
 class RenamedDeprecationMixin:
     @classmethod
