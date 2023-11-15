@@ -270,11 +270,10 @@ export default {
     scroll-behavior: smooth;
   }
 
-  &.--pending {
-    border-color: transparent;
-    &:not(.--focused-form) {
-      box-shadow: $shadow;
-    }
+  &.--pending,
+  &.--draft {
+    box-shadow: $shadow;
+    transition: all 0.2s ease;
   }
   &.--discarded {
     border-color: #c3c3c3;
@@ -283,6 +282,8 @@ export default {
     border-color: $primary-color;
   }
   &.--focused-form {
+    box-shadow: none;
+    transition: all 0.2s ease;
     border-color: palette(brown);
   }
 }
