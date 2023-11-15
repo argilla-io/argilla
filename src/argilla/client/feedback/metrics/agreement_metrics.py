@@ -17,7 +17,7 @@
 from typing import TYPE_CHECKING, List, Union
 
 from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
-from nltk.metrics.distance import binary_distance, edit_distance, interval_distance
+from nltk.metrics.distance import binary_distance, interval_distance, jaro_similarity, masi_distance
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AgreementMetricResult, AnnotationTaskMetricBase, MetricBase
@@ -26,7 +26,6 @@ from argilla.client.feedback.schemas import (
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
-    TextQuestion,
 )
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
@@ -38,9 +37,9 @@ if TYPE_CHECKING:
 
 QUESTION_TO_DISTANCE = {
     LabelQuestion: binary_distance,
-    MultiLabelQuestion: edit_distance,
+    MultiLabelQuestion: masi_distance,
     RatingQuestion: interval_distance,
-    RankingQuestion: edit_distance,
+    RankingQuestion: lambda x, y: 1 - jaro_similarity(x, y),
 }
 
 
@@ -96,9 +95,9 @@ def prepare_dataset_for_annotation_task(
 
             value = response["value"]
             if question_type == RankingQuestion:
-                value = "".join(value["value"])
+                value = tuple(value["value"])
             elif question_type == MultiLabelQuestion:
-                value = "".join(value)
+                value = frozenset(value)
 
             formatted_responses.append((user_id, question_name, value))
 

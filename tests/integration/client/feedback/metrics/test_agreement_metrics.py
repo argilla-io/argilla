@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import uuid
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, FrozenSet, List, Tuple, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -29,13 +28,13 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "question, num_items",
+    "question, num_items, type_of_data",
     [
-        ("question-1", None),
-        ("question-2", 12),
-        ("question-3", 12),
-        ("question-4", 12),
-        ("question-5", 12),
+        ("question-1", None, None),
+        ("question-2", 12, int),
+        ("question-3", 12, str),
+        ("question-4", 12, frozenset),
+        ("question-5", 12, tuple),
     ],
 )
 @pytest.mark.usefixtures(
@@ -51,6 +50,7 @@ def test_prepare_dataset_for_annotation_task(
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
     num_items: int,
+    type_of_data: Union[str, int, FrozenSet, Tuple[str]],
 ):
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -72,7 +72,7 @@ def test_prepare_dataset_for_annotation_task(
         assert item[0].startswith("00000000-")  # beginning of our uuid for tests
         assert isinstance(item[1], str)
         assert item[1].startswith("question-")
-        assert isinstance(item[2], (int, str))
+        assert isinstance(item[2], type_of_data)
 
 
 @pytest.mark.parametrize(
