@@ -50,6 +50,11 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 ```
+```{grid-item-card} 🌠 Improving RAG by Optimizing Retrieval and Reranking Models
+:link: feedback/fine-tuning-sentencesimilarity-rag.html
+
+Learn how to boost RAG through optimized retrieval and reranking models for better AI accuracy.
+```
 
 ````
 
@@ -114,6 +119,7 @@ feedback/train-reward-model-rlhf
 feedback/labelling-feedback-setfit
 feedback/trainer-feedback-setfit
 feedback/labelling-feedback-langchain-syntethic
+feedback/fine-tuning-sentencesimilarity-rag
 
 other_datasets/few_shot_learning_with_setfit
 other_datasets/few_shot_text_classification_with_active_learning
