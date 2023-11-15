@@ -17,6 +17,7 @@ dependencies:
   - pip:
       # docs
       - sphinx-design==0.2.0
+      - sphinx-autobuild==2021.3.14
       - furo==2022.6.4.1
       - myst-parser==0.16.1
       - nbsphinx==0.8.9
