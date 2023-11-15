@@ -282,10 +282,12 @@ export default {
   }
   &.--focused-form {
     box-shadow: none;
+    transition: all 0.2s ease;
   }
   &:not(.--focused-form) {
     box-shadow: $shadow;
     border-color: transparent;
+    transition: all 0.2s ease;
   }
 }
 
