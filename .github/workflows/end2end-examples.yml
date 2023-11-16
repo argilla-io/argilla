@@ -25,7 +25,7 @@ on:
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
   CACHE_NUMBER: 5
-        
+
 jobs:
   # Runs depending on the result from the check-repo-files.yml
   call-check-repo-files:
