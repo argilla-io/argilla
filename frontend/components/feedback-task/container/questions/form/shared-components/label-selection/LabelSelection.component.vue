@@ -57,13 +57,13 @@
           class="label-text"
           :class="{
             'label-active': option.isSelected,
-            '--suggestion': suggestions?.includes(option.text),
+            '--suggestion': hasSuggestion(option.text),
             square: multiple,
             round: !multiple,
           }"
           :for="option.id"
           :title="
-            suggestions?.includes(option.text)
+            hasSuggestion(option.text)
               ? `${$t('suggestion')}: ${option.text}`
               : option.text
           "
@@ -235,6 +235,9 @@ export default {
       if (index === this.maxOptionsToShowBeforeCollapse - 1) {
         this.isExpanded = true;
       }
+    },
+    hasSuggestion(value) {
+      return this.suggestions?.includes(value) || false;
     },
   },
 };
