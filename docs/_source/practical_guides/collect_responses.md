@@ -120,6 +120,83 @@ Once you have unified your responses, you will have a dataset that's ready for [
 * *Duplicate the record*: You may consider that the different answers given by your annotation team are all valid options. In this case, you can duplicate the record to keep each answer. Again, this method does not guarantee the quality of the text, so it is recommended to check the quality of the text, for example using a rating question.
 
 
+### Annotation metrics
+
+There are multiple ways to analyse the annotations on a dataset. In this section we present two different approaches, from the point of view of the the annotators, to see how reliable their responses are, or from the point of view of a single annotator, to see whether the suggestions are simplify their annotation task.
+
+```{note}
+The following metrics only apply to the `FeedbackDataset`.
+```
+
+#### Agreement metrics
+
+After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable is the final responses after unifying the responses.
+
+```python
+import argilla as rg
+from argilla.client.feedback.metrics import AgreementMetric
+
+feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
+metric = AgreementMetric(dataset=feedback_dataset, question_name="question_name")
+agreement_metrics = metric.compute("alpha")
+# >>> agreement_metrics
+# [AgreementMetricResult(metric_name='alpha', result=0.0)]
+```
+
+Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all the questions types except the `TextQuestion`. It applies to any number of annotators, with possible missing responses from them.
+The value from this measure is in the range [0,1] and is usually interpreted in the following way: alpha >= 0.8 indicates a reliable annotation, alpha >= 0.667 allows making tentative conclusions, while the lower values suggest the unreliable annotation.
+
+```{note}
+In case you want to dig deeper into the measurement of the agreement between different annotators, take a look at [*Implementations of inter-annotator agreement coefficients surveyed by Artstein
+and Poesio (2007), Inter-Coder Agreement for Computational Linguistics*](https://www.researchgate.net/publication/200044186_Inter-Coder_Agreement_for_Computational_Linguistics).
+```
+
+##### Supported metrics
+
+We plan on adding more support for other metrics so feel free to reach out on our Slack or GitHub to help us prioritize each task.
+
+| Question type/Metric  | alpha  |
+|:----------------------|:-------|
+| LabelQuestion         | ✔️      |
+| MultiLabelQuestion    | ✔️      |
+| RatingQuestion        | ✔️      |
+| RankingQuestion       | ✔️      |
+| TextQuestion          |        |
+
+
+#### Annotator metrics
+
+To evaluate whether the suggestions are useful or not.
+
+```python
+import argilla as rg
+from argilla.client.feedback.metrics import AnnotatorMetric
+
+feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
+metric = AnnotatorMetric(dataset=feedback_dataset, question_name="question_name")
+annotator_metrics = metric.compute("alpha")
+# >>> annotator_metrics
+# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)]}
+```
+
+We would obtain a `dict` where the keys contain the `user_id` of a given annotator, and a list with the metrics requested. For the interpretation of these metrics we assume here that the *true* labels or responses corresponds to the points given by an annotator, and the *predictions* correspond to the suggestions given to a user. This way we can analyse whether we are offering good suggestions to a given annotator, and therefore simplifying it's work (shortening the annotation task), or otherwise we should change the suggestions given (or fine-tune our model if we can do it).
+
+##### Supported metrics
+
+We plan on adding more support for other metrics so feel free to reach out on our Slack or GitHub to help us prioritize each task.
+
+| Metric/Question type  | LabelQuestion  | MultiLabelQuestion | RatingQuestion | RankingQuestion | TextQuestion |
+|:----------------------|:---------------|:-------------------|:---------------|:----------------|:-------------|
+| accuracy              | ✔️              |                    | ✔️              |                 |              |
+| precision             | ✔️              |                    | ✔️              |                 |              |
+| recalll               | ✔️              |                    | ✔️              |                 |              |
+| f1-score              | ✔️              |                    | ✔️              |                 |              |
+| confusion-matrix      | ✔️              |                    | ✔️              |                 |              |
+| pearson-r             | ✔️              |                    |                |                 |              |
+| spearman-r            |                |                    | ✔️              |                 |              |
+| gleu                  |                |                    |                |                 | ✔️            |
+| rouge                 |                |                    |                |                 | ✔️            |
+
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
