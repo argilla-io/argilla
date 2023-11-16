@@ -6,6 +6,7 @@
     />
     <DndSelectionComponent
       :ranking="ranking"
+      :suggestions="question.suggestion?.suggestedAnswer"
       @on-reorder="onChanged"
       :isFocused="isFocused"
       @on-focus="onFocus"

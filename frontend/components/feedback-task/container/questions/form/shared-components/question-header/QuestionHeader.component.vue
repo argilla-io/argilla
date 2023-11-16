@@ -6,7 +6,7 @@
       v-required-field="{ show: question.isRequired, color: 'red' }"
       v-prefix-star="{
         enabled: showSuggestion,
-        show: question.matchSuggestion,
+        show: question.suggestion,
         tooltip: 'This question contains a suggestion',
       }"
     />

@@ -3,9 +3,9 @@
     <ul class="card-with-tabs__tabs">
       <li
         class="card-with-tabs__tab"
-        :class="{ '--active': tab === currentTab }"
+        :class="{ '--active': tab.id === currentTab.id }"
         v-for="tab in tabs"
-        :key="tab.name"
+        :key="tab.id"
       >
         <base-button class="small" @on-click="changeTab(tab)">{{
           tab.name
@@ -64,7 +64,7 @@ export default {
     &:not(.--active) {
       background: palette(grey, 600);
     }
-    &:last-child {
+    &:last-child:not(:first-child) {
       margin-left: -1px;
     }
   }

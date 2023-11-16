@@ -54,16 +54,21 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <label
-          class="label-text cursor-pointer"
+          class="label-text"
           :class="{
             'label-active': option.isSelected,
+            '--suggestion': suggestions?.includes(option.text),
             square: multiple,
             round: !multiple,
           }"
           :for="option.id"
-          v-text="option.text"
-          :title="option.text"
-        />
+          :title="
+            suggestions?.includes(option.text)
+              ? `${$t('suggestion')}: ${option.text}`
+              : option.text
+          "
+          ><span v-text="option.text"
+        /></label>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -85,6 +90,9 @@ export default {
     options: {
       type: Array,
       required: true,
+    },
+    suggestions: {
+      type: [Array, String],
     },
     placeholder: {
       type: String,
@@ -233,6 +241,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$suggestion-color: palette(yellow, 400);
+$label-color: palette(purple, 800);
+$label-dark-color: palette(purple, 200);
 .container {
   display: flex;
   flex-direction: column;
@@ -250,7 +261,7 @@ export default {
     border-radius: 5em;
     background: transparent;
     &:hover {
-      border-color: darken(palette(purple, 800), 12%);
+      border-color: darken($label-color, 12%);
     }
   }
 }
@@ -281,24 +292,42 @@ export default {
 }
 
 .label-text {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   width: 100%;
   height: 32px;
   min-width: 50px;
   max-width: 200px;
   text-align: center;
   padding-inline: 12px;
-  background: palette(purple, 800);
-  color: palette(purple, 200);
-  line-height: 32px;
+  background: $label-color;
+  color: $label-dark-color;
   font-weight: 500;
   outline: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border: 2px solid transparent;
   border-radius: $border-radius-rounded;
+  cursor: pointer;
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  &.--suggestion {
+    background: $suggestion-color;
+    &:not(.label-active):hover {
+      background: darken($suggestion-color, 8%);
+    }
+  }
   &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 8%);
+    background: darken($label-color, 8%);
+  }
+  &.label-active {
+    color: white;
+    background: $label-dark-color;
+    &.--suggestion {
+      border: 2px solid $suggestion-color;
+    }
   }
 }
 
@@ -329,16 +358,9 @@ input[type="checkbox"] {
     }
   }
 }
-.label-active {
-  color: white;
-  background: palette(purple, 200);
-}
 .no-result {
   display: block;
   height: $base-space * 4;
-}
-.cursor-pointer {
-  cursor: pointer;
 }
 
 .shuffle-move {

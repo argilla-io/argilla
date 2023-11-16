@@ -7,6 +7,7 @@
 
     <LabelSelectionComponent
       :componentId="question.id"
+      :suggestions="question.suggestion?.suggestedAnswer"
       v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"

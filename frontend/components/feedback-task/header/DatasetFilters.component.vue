@@ -157,7 +157,6 @@ export default {
   align-items: center;
   &__wrapper {
     width: 100%;
-    z-index: 1;
   }
   &__list {
     position: relative;

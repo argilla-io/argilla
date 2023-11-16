@@ -242,6 +242,7 @@ export default {
   flex-direction: column;
   flex-basis: clamp(33%, 520px, 40%);
   max-height: 100%;
+  min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
   border: 1px solid transparent;
@@ -290,9 +291,9 @@ export default {
     border-color: $primary-color;
   }
   &.--focused-form {
+    border-color: palette(brown);
     box-shadow: none;
     transition: all 0.2s ease;
-    border-color: palette(brown);
   }
 }
 
