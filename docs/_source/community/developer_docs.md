@@ -134,6 +134,12 @@ If you choose to install Argilla via `pip`, you can do it easily on your termina
 cd argilla
 ```
 
+Now, it is recommended to create a Python virtual environment, following these commands:
+```sh
+python -m venv .env
+source .env/bin/activate
+```
+
 Then, you just need to install Argilla with the command below. Note that we will install it in editable mode using the -e/--editable flag in the `pip` command to avoid having to re-install it on every code modification, but if you’re not planning to modify the code, you can just omit the -e/--editable flag.
 ```sh
 pip install -e .
