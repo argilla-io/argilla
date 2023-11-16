@@ -23,13 +23,15 @@ AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"
 AGENT_MIN_LENGTH = 1
 AGENT_MAX_LENGTH = 200
 
+SCORE_GREATER_THAN_OR_EQUAL = 0
+SCORE_LESS_THAN_OR_EQUAL = 1
+
 
 class BaseSuggestion(BaseModel):
     question_id: UUID
     type: Optional[SuggestionType]
     value: Any
     agent: Optional[str]
-    # TODO: we should add a validation to score only allowing values between 0 and 1
     score: Optional[float]
 
 
@@ -40,6 +42,12 @@ class SuggestionCreate(BaseSuggestion):
         min_length=AGENT_MIN_LENGTH,
         max_length=AGENT_MAX_LENGTH,
         description="Agent used to generate the suggestion",
+    )
+    score: Optional[float] = Field(
+        None,
+        ge=SCORE_GREATER_THAN_OR_EQUAL,
+        le=SCORE_LESS_THAN_OR_EQUAL,
+        description="The score assigned to the suggestion",
     )
 
 
