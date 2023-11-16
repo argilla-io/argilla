@@ -35,7 +35,7 @@ async def _get_dataset_suggestion_agents_by_question_postgresql(db: AsyncSession
             Question.name.label("question_name"),
             func.array_remove(func.array_agg(Suggestion.agent.distinct()), None).label("suggestion_agents"),
         )
-        .join(Suggestion)
+        .outerjoin(Suggestion)
         .where(Question.dataset_id == dataset_id)
         .group_by(Question.id)
         .order_by(Question.inserted_at)
@@ -51,7 +51,7 @@ async def _get_dataset_suggestion_agents_by_question_sqlite(db: AsyncSession, da
             Question.name.label("question_name"),
             func.group_concat(Suggestion.agent.distinct()).label("suggestion_agents"),
         )
-        .join(Suggestion)
+        .outerjoin(Suggestion)
         .where(Question.dataset_id == dataset_id)
         .group_by(Question.id)
         .order_by(Question.inserted_at)

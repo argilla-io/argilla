@@ -93,14 +93,45 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
 
     async def test_with_dataset_without_suggestions(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
-        await QuestionFactory.create(name="question-a", dataset=dataset)
-        await QuestionFactory.create(name="question-b", dataset=dataset)
-        await QuestionFactory.create(name="question-c", dataset=dataset)
+        question_a = await QuestionFactory.create(name="question-a", dataset=dataset)
+        question_b = await QuestionFactory.create(name="question-b", dataset=dataset)
+        question_c = await QuestionFactory.create(name="question-c", dataset=dataset)
+
+        extra_dataset = await DatasetFactory.create()
+        extra_question_a = await QuestionFactory.create(name="extra-question-a", dataset=extra_dataset)
+        extra_question_b = await QuestionFactory.create(name="extra-question-b", dataset=extra_dataset)
+
+        await SuggestionFactory.create(question=extra_question_a, agent="extra-agent-a")
+        await SuggestionFactory.create(question=extra_question_b, agent="extra-agent-b")
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
         assert response.status_code == 200
-        assert response.json() == {"items": []}
+        assert response.json() == {
+            "items": [
+                {
+                    "question": {
+                        "id": str(question_a.id),
+                        "name": question_a.name,
+                    },
+                    "agents": [],
+                },
+                {
+                    "question": {
+                        "id": str(question_b.id),
+                        "name": question_b.name,
+                    },
+                    "agents": [],
+                },
+                {
+                    "question": {
+                        "id": str(question_c.id),
+                        "name": question_c.name,
+                    },
+                    "agents": [],
+                },
+            ]
+        }
 
     async def test_as_owner(self, async_client: AsyncClient):
         dataset = await DatasetFactory.create()
