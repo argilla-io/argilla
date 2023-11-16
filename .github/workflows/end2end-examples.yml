@@ -1,21 +1,39 @@
-name: Run end2end-examples
+name: Run end2end sdk examples
 
 on:
-  workflow_dispatch:
-  schedule:
-    # “At 01:13 on Saturday.”
-    - cron: "13 1 * * 6"
-  inputs:
+  workflow_call:
+    inputs:
+      runsOn:
+        required: false
+        type: string
+        default: extended-runner
       argillaDockerImage:
         description: "The name of the Docker image of Argilla to use."
         default: argilla/argilla-quickstart:latest
         required: false
         type: string
-
+      searchEngineDockerImage:
+        description: "The name of the Docker image of the search engine to use."
+        default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+        required: false
+        type: string
+      searchEngineDockerEnv:
+        description: "The name of the Docker image of the search engine to use."
+        default: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+        required: false
+        type: string
+env:
+  # Increase this value to reset cache if etc/example-environment.yml has not changed
+  CACHE_NUMBER: 5
+        
 jobs:
+  # Runs depending on the result from the check-repo-files.yml
+  call-check-repo-files:
+    uses: ./.github/workflows/check-repo-files.yml
+
   end2end-examples:
     name: end2end notebook examples, FeedbackDataset for text-classification
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runsOn }}
     services:
       search_engine:
         image: ${{ inputs.argillaDockerImage }}
