@@ -14,10 +14,10 @@
 
 """This module contains metrics to gather information related to inter-Annotator agreement. """
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Callable, List, Union
 
 from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
-from nltk.metrics.distance import binary_distance, interval_distance, jaro_similarity, masi_distance
+from nltk.metrics.distance import binary_distance, interval_distance, masi_distance
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AgreementMetricResult, AnnotationTaskMetricBase, MetricBase
@@ -28,7 +28,6 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
 )
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -140,6 +139,16 @@ QUESTION_TO_DISTANCE = {
 
 
 class AgreementMetric(MetricBase):
+    """Main class to compute agreement metrics.
+
+    Example:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.metrics import AgreementMetric
+        >>> metric = AgreementMetric(dataset=dataset, question_name=question)
+        >>> metrics_report = metric.compute("alpha")
+
+    """
+
     def __init__(self, dataset: FeedbackDataset, question_name: str) -> None:
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
@@ -183,9 +192,65 @@ class AgreementMetric(MetricBase):
 
 
 class NLTKAnnotationTaskMetric(NLTKAnnotationTask, AnnotationTaskMetricBase):
-    """Base class for metrics that use the nltk's AnnotationTask class."""
+    """Base class for metrics that use the nltk's AnnotationTask class.
 
-    def __init__(self, annotated_dataset=None, distance_function=None) -> None:
+    These metrics make use of a distance function to compute the distance between
+
+    It is often the case that we don't want to treat two different
+    labels as complete disagreement, and so the AnnotationTask constructor can also
+    take a distance metric as a final argument. Distance metrics are functions that take two
+    arguments, and return a value between 0.0 and 1.0 indicating the distance between them.
+
+    By default, the following distance metrics are provided for each type of question:
+
+        For LabelQuestion, binary_distance:
+
+        >>> am.binary_distance("a", "b")
+        1.0
+        >>> am.binary_distance("a", "a")
+        0.0
+
+        For MultiLabelQuestion, masi_distance:
+
+        >>> label_sets = [
+        ...     [frozenset(["a", "b"]), frozenset(["b", "a"])],
+        ...     [frozenset(["a"]), frozenset(["a", "b"])],
+        ...     [frozenset(["c"]), frozenset(["a", "b"])],
+        ... ]
+        >>> for a, b in label_sets:
+        ...     print((a,b), am.masi_distance(a,b))
+        ...
+        (frozenset({'a', 'b'}), frozenset({'a', 'b'})) 0.0
+        (frozenset({'a'}), frozenset({'a', 'b'})) 0.665
+        (frozenset({'c'}), frozenset({'a', 'b'})) 1.0
+
+        For RatingQuestion, interval_distance:
+
+        >>> for a, b in [(1, 1), (1, 2), (3,6)]:
+        ...     print((a,b), am.interval_distance(a,b))
+        ...
+        (1, 1) 0
+        (1, 2) 1
+        (3, 6) 9
+
+        For RankingQuestion, kendall_tau_dist:
+
+        >>> for i, a in enumerate(itertools.permutations(values, len(values))):
+        ...     for j, b in enumerate(itertools.permutations(values, len(values))):
+        ...         if j >= i:
+        ...             print((a, b), kendall_tau_dist(a,b))
+        ...
+        ((1, 2, 3), (1, 2, 3)) 0.0
+        ((1, 2, 3), (1, 3, 2)) 0.3333333333333333
+        ((1, 2, 3), (2, 1, 3)) 0.3333333333333333
+        ((1, 2, 3), (2, 3, 1)) 0.6666666666666667
+        ((1, 2, 3), (3, 1, 2)) 0.6666666666666667
+        ((1, 2, 3), (3, 2, 1)) 1.0
+        ((1, 3, 2), (1, 3, 2)) 0.0
+        ...
+    """
+
+    def __init__(self, annotated_dataset: "FormattedResponses" = None, distance_function: Callable = None) -> None:
         AnnotationTaskMetricBase.__init__(
             self, annotated_dataset=annotated_dataset, distance_function=distance_function
         )
@@ -203,9 +268,10 @@ class KrippendorfAlpha(NLTKAnnotationTaskMetric):
     a value >= 0.667 can only guarantee tentative conclusions, while lower values suggest an
     unreliable annotation.
 
-    Notes:
+    See Also:
         - Take a look at this metric definition:
         https://en.wikipedia.org/wiki/Krippendorff%27s_alpha
+
         - We use the implementation from nltk:
         https://www.nltk.org/api/nltk.metrics.agreement.html#nltk.metrics.agreement.AnnotationTask.alpha
     """

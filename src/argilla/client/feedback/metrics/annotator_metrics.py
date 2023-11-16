@@ -23,8 +23,6 @@ from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorM
 from argilla.client.feedback.metrics.utils import get_responses_and_suggestions_per_user, is_multiclass, map_str_to_int
 from argilla.client.feedback.schemas import (
     LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
@@ -35,6 +33,16 @@ if TYPE_CHECKING:
 
 
 class AnnotatorMetric(MetricBase):
+    """Main class to compute agreement metrics.
+
+    Example:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.metrics import AnnotatorMetric
+        >>> metric = AnnotatorMetric(dataset=dataset, question_name=question)
+        >>> metrics_report = metric.compute("accuracy")
+
+    """
+
     def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
