@@ -29,6 +29,7 @@ These are the section headers that we use:
 ### Changed
 
 - Updated `push_to_argilla` to print `repr` of the pushed `RemoteFeedbackDataset` after push and changed `show_progress` to True by default. ([#4223](https://github.com/argilla-io/argilla/pull/4223))
+- Suggestions `agent` field is now validated when created or updated using a regular expression and an specific length. ([#4265](https://github.com/argilla-io/argilla/pull/4265))
 
 ## [1.19.0](https://github.com/argilla-io/argilla/compare/v1.18.0...v1.19.0)
 
