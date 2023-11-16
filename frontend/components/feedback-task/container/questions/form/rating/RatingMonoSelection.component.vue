@@ -67,6 +67,10 @@ export default {
       });
 
       this.$emit("on-change", this.options);
+
+      if (isSelected) {
+        this.$emit("on-selected");
+      }
     },
     onFocus() {
       this.$emit("on-focus");

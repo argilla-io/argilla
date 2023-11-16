@@ -10,7 +10,8 @@
         ref="ratingMonoSelectionRef"
         v-model="question.answer.values"
         :isFocused="isFocused"
-        @on-focus="$emit('on-focus')"
+        @on-focus="onFocus"
+        @on-selected="onSelected"
       />
     </div>
   </RatingShortcuts>
@@ -33,13 +34,12 @@ export default {
       default: () => false,
     },
   },
-  watch: {
-    "question.answer.values": {
-      deep: true,
-      handler(newOptions) {
-        if (newOptions.some((option) => option.isSelected))
-          this.$emit("on-user-answer");
-      },
+  methods: {
+    onFocus() {
+      this.$emit("on-focus");
+    },
+    onSelected() {
+      this.$emit("on-user-answer");
     },
   },
 };

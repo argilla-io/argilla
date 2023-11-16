@@ -52,7 +52,9 @@ export default {
   },
   watch: {
     selectedOptions() {
-      this.$refs.search.focus();
+      this.$nextTick(() => {
+        this.$refs.search.focus();
+      });
     },
   },
   mounted() {
