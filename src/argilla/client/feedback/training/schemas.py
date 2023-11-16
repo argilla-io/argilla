@@ -133,7 +133,6 @@ class TrainingData(ABC):
                         explode_columns.add(pydantic_field_name)
             formatted_data.append(data)
         df = pd.DataFrame(formatted_data)
-
         if explode_columns:
             df = df.explode(list(explode_columns))
         # In cases of MultiLabel datasets the label column contains a list,
@@ -1594,7 +1593,7 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
 
     @requires_dependencies("sentence-transformers")
     def _prepare_for_training_with_sentence_transformers(
-        self, data: List[dict], train_size: float, seed: int
+        self, data: Union[List[dict], List[List[dict]]], train_size: float, seed: int
     ) -> Union["InputExample", Tuple["InputExample", "InputExample"]]:
         from sentence_transformers import InputExample
 
@@ -1602,13 +1601,20 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             raise ValueError("The dataset must contain at least one sample to be able to train.")
 
         # Use the first sample to decide what type of dataset to generate:
-        sample_keys = set(data[0].keys())
+        if isinstance(data[0], list):
+            # In case we are returning lists, extract the first element of that list to check the fields.
+            sample_keys = set(data[0][0].keys())
+        elif isinstance(data[0], dict):
+            sample_keys = set(data[0].keys())
+        else:
+            raise ValueError(f"The type is not supported: {type(data[0])}.")
+
         if sample_keys == {"label", "sentence-1", "sentence-2"}:
 
             def dataset_fields(sample):
                 return {"texts": [sample["sentence-1"], sample["sentence-2"]], "label": sample["label"]}
 
-        elif sample_keys == sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
+        elif sample_keys == {"label", "sentence-1", "sentence-2", "sentence-3"}:
 
             def dataset_fields(sample):
                 return {
