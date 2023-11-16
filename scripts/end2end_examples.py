@@ -52,7 +52,9 @@ class ExampleNotebook:
 
     def run(self):
         try:
-            papermill.execute_notebook(str(self.src_filename), str(self.dst_filename), parameters=self.parameters)
+            papermill.execute_notebook(
+                str(self.src_filename), str(self.dst_filename), parameters=self.parameters, kernel_name="python3"
+            )
             print(f"✅  {self.src_filename.stem}")
         except Exception as e:
             print(f"❌  {self.src_filename.stem}")
