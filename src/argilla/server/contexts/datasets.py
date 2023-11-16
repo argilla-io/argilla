@@ -1046,6 +1046,7 @@ async def upsert_suggestion(
     db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
 ) -> Suggestion:
     question.parsed_settings.check_response(suggestion_create)
+
     return await Suggestion.upsert(
         db,
         schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
