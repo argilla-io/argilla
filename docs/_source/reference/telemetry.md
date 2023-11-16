@@ -54,7 +54,7 @@ Additionally, we report the usage of integration for our Python library:
 
 We also report the usage of our tutorials by `tutorial_running`:
 
-* The number that the tutorial is used and its name.
+* The tutorial usage count and its name.
 
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/blob/main/src/argilla/utils/telemetry.py).
 
