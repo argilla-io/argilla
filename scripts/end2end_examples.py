@@ -36,6 +36,7 @@ OUTPUT_FOLDER = EXAMPLES_FOLDER / "output_notebooks"
 
 @dataclass
 class ExampleNotebook:
+    sort_index: int = field(init=False)
     src_filename: Path
     dst_filename: Path
     parameters: Dict = field(default_factory=dict)
@@ -43,6 +44,7 @@ class ExampleNotebook:
     def __post_init__(self):
         self.src_filename = EXAMPLES_FOLDER / self.src_filename
         assert self.src_filename.exists(), f"File {self.src_filename} does not exist"
+        self.sort_index = int(self.src_filename.stem.split("-")[-1])
         dst_folder = OUTPUT_FOLDER
         if not dst_folder.exists():
             dst_folder.mkdir(exist_ok=True)
@@ -117,13 +119,11 @@ def main(api_url: Optional[str] = None, api_key: Optional[str] = None, hf_token:
         "hf_token": hf_token,
     }
 
-    import glob
-
     # Name of the output notebook that will be removed after running the examples
     output_notebook = "output_notebook.ipynb"
 
     examples = []
-    for filename in glob.glob(str(EXAMPLES_FOLDER / "*.ipynb")):
+    for filename in EXAMPLES_FOLDER.glob("*.ipynb"):
         examples.append(
             ExampleNotebook(
                 src_filename=Path(filename).name,
@@ -131,6 +131,7 @@ def main(api_url: Optional[str] = None, api_key: Optional[str] = None, hf_token:
                 parameters=notebook_parameters,
             )
         )
+    examples = sorted(examples, key=lambda x: x.sort_index)
 
     for example in examples:
         example.run()
