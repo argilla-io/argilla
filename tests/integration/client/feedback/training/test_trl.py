@@ -23,10 +23,12 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas.base import (
     TrainingTask,
-    TrainingTaskForDPOFormat,
-    TrainingTaskForPPOFormat,
-    TrainingTaskForRMFormat,
-    TrainingTaskForSFTFormat,
+)
+from argilla.client.feedback.training.schemas.return_types import (
+    DPOReturnTypes,
+    PPOReturnTypes,
+    RMReturnTypes,
+    SFTReturnTypes,
 )
 from datasets import Dataset, DatasetDict
 from peft import LoraConfig, TaskType
@@ -89,9 +91,7 @@ def test_prepare_for_training_sft(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_supervised_fine_tuning, format_func=TrainingTaskForSFTFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_supervised_fine_tuning, format_func=SFTReturnTypes)
 
     task = TrainingTask.for_supervised_fine_tuning(formatting_func_sft)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -157,7 +157,7 @@ def test_prepare_for_training_rm(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=TrainingTaskForRMFormat)
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_reward_modeling, format_func=RMReturnTypes)
 
     task = TrainingTask.for_reward_modeling(formatting_func_rm)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -216,9 +216,7 @@ def test_prepare_for_training_ppo(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_proximal_policy_optimization, format_func=TrainingTaskForPPOFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_proximal_policy_optimization, format_func=PPOReturnTypes)
 
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func_ppo)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
@@ -294,9 +292,7 @@ def test_prepare_for_training_dpo(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    try_wrong_format(
-        dataset=dataset, task=TrainingTask.for_direct_preference_optimization, format_func=TrainingTaskForDPOFormat
-    )
+    try_wrong_format(dataset=dataset, task=TrainingTask.for_direct_preference_optimization, format_func=DPOReturnTypes)
 
     task = TrainingTask.for_direct_preference_optimization(formatting_func_dpo)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
