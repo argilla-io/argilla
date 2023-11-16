@@ -18,7 +18,8 @@ These are the section headers that we use:
 
 ### Added
 
-- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
+- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4192](https://github.com/argilla-io/argilla/pull/4192)).
+- Added annotation metrics module for the `FeedbackDataset` (`argilla.client.feedback.metrics`). ([#4175](https://github.com/argilla-io/argilla/pull/4175)).
 
 ### Fixed
 
