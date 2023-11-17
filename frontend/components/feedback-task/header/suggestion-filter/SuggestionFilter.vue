@@ -1,5 +1,5 @@
 <template>
-  <div class="suggestion-filter" v-if="!!datasetQuestions">
+  <div class="suggestion-filter" v-if="isSuggestionFiltersLoaded">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"
@@ -21,7 +21,7 @@
           v-if="!selectedSuggestion"
           name="suggestions"
           class="suggestion-filter__categories"
-          :categories="questionFilters.questions"
+          :categories="suggestionFilters.questions"
           @select-category="selectSuggestion"
         />
         <template v-else>
@@ -76,8 +76,8 @@ import { useSuggestionFilterViewModel } from "./useSuggestionFilterViewModel";
 
 export default {
   props: {
-    datasetQuestions: {
-      type: Array,
+    datasetId: {
+      type: String,
       required: true,
     },
     suggestionFiltered: {
@@ -115,13 +115,13 @@ export default {
       this.filter();
     },
     filter() {
-      if (!this.questionFilters.hasChangesSinceLatestCommit) return;
+      if (!this.suggestionFilters.hasChangesSinceLatestCommit) return;
 
-      const newFilter = this.questionFilters.commit();
+      const newFilter = this.suggestionFilters.commit();
 
       this.$emit("onSuggestionFilteredChanged", newFilter);
 
-      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+      this.appliedCategoriesFilters = this.suggestionFilters.filteredCategories;
     },
     openSuggestionFilter(suggestion) {
       this.visibleDropdown = this.visibleDropdown
@@ -143,11 +143,11 @@ export default {
       this.applyFilter();
     },
     updateAppliedCategoriesFromMetadataFilter() {
-      if (!this.questionFilters) return;
+      if (!this.suggestionFilters) return;
 
-      this.questionFilters.complete(this.suggestionFiltered);
+      this.suggestionFilters.complete(this.suggestionFiltered);
 
-      this.appliedCategoriesFilters = this.questionFilters.filteredCategories;
+      this.appliedCategoriesFilters = this.suggestionFilters.filteredCategories;
     },
   },
   watch: {
@@ -158,7 +158,7 @@ export default {
         this.filter();
       }
     },
-    "questionFilters.questions": {
+    "suggestionFilters.questions": {
       deep: true,
       async handler() {
         this.debounce.stop();

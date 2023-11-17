@@ -1,5 +1,5 @@
 <template>
-  <div class="responses-filter" v-if="!!datasetQuestions">
+  <div class="responses-filter" v-if="isQuestionLoaded">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"
@@ -44,8 +44,8 @@ import "assets/icons/chevron-left";
 
 export default {
   props: {
-    datasetQuestions: {
-      type: Array,
+    datasetId: {
+      type: String,
       required: true,
     },
     responseFiltered: {

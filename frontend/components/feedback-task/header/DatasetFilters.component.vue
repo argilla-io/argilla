@@ -39,12 +39,12 @@
             v-model="recordCriteria.metadata.value"
           />
           <ResponsesFilter
-            :datasetQuestions="datasetQuestions"
             v-model="recordCriteria.response.value"
+            :datasetId="recordCriteria.datasetId"
           />
           <SuggestionFilter
-            :datasetQuestions="datasetQuestions"
             v-model="recordCriteria.suggestion.value"
+            :datasetId="recordCriteria.datasetId"
           />
         </div>
       </transition>
@@ -142,7 +142,6 @@ export default {
     });
 
     this.loadMetadata(this.recordCriteria.datasetId);
-    this.loadQuestions(this.recordCriteria.datasetId);
   },
   destroyed() {
     this.$root.$off("on-changed-total-records");

@@ -45,7 +45,7 @@ export default {
   computed: {
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) => {
-        const filterProp = cat.title ?? this.$t(cat.name);
+        const filterProp = cat.title ?? cat.name;
         return filterProp.toLowerCase().includes(this.searchText.toLowerCase());
       });
     },

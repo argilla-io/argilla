@@ -5,6 +5,7 @@ import {
   OptionForFilter,
 } from "../common/Filter";
 import { Question } from "../question/Question";
+import { Agent } from "./Agent";
 import { ConfigurationSearch, SuggestionSearch } from "./SuggestionCriteria";
 
 class ConfigurationValues extends Filter {
@@ -79,13 +80,17 @@ class ConfigurationScore extends FilterWithScore {
 }
 
 class ConfigurationAgent extends FilterWithOption {
-  constructor(agents: string[]) {
+  constructor(private readonly agents: string[]) {
     super(
       "agent",
       agents.map((value) => {
         return { selected: false, label: value };
       })
     );
+  }
+
+  get canFilter(): boolean {
+    return this.agents.length > 0;
   }
 }
 
@@ -97,7 +102,6 @@ class SuggestionFilter extends Filter {
 
     this.configurations.push(new ConfigurationScore(0, 1));
     this.configurations.push(new ConfigurationValues(question));
-    this.configurations.push(new ConfigurationAgent(["model", "human"]));
   }
 
   get name(): string {
@@ -121,6 +125,10 @@ class SuggestionFilter extends Filter {
 
   clear(): void {
     this.configurations.forEach((c) => c.clear());
+  }
+
+  addAgents(agents: string[]) {
+    this.configurations.push(new ConfigurationAgent(agents));
   }
 
   complete(value: ConfigurationSearch[]) {
@@ -159,6 +167,12 @@ export class SuggestionFilterList {
       return true;
 
     return this.hasChangesSinceLatestCommitWith(this.createCommit());
+  }
+
+  addAgents(agents: Agent[]) {
+    this.questions.forEach((q) => {
+      q.addAgents(agents.find((a) => a.question.name === q.name)?.agents);
+    });
   }
 
   hasChangesSinceLatestCommitWith(compare: SuggestionSearch[]) {
