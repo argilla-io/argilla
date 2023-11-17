@@ -22,8 +22,6 @@ from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
-from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
-from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -57,7 +55,7 @@ from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.metrics.agreement_metrics import AgreementMetricResult
-    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult, UnifiedAnnotatorMetricResult
+    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult, UnifiedAnnotationMetric
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
@@ -637,9 +635,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         metric_names: Union[str, List[str]],
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion],
         strategy: Optional[Union[str, LabelQuestionStrategy, RatingQuestionStrategy]] = None,
-    ) -> Union[
-        Dict[str, List["AnnotatorMetricResult"]], "UnifiedAnnotatorMetricResult", List["UnifiedAnnotatorMetricResult"]
-    ]:
+    ) -> Union[Dict[str, List["AnnotatorMetricResult"]], "AnnotatorMetricResult", List["AnnotatorMetricResult"]]:
         """Compute metrics for the annotators, or if a strategy is provided, for the unified responses.
 
         This metrics can be used to determine how useful the suggestions given to our annotators are.
@@ -663,9 +659,11 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
                 each annotator as a dict, where the key corresponds to the annotator id and the
                 values are a list with the metrics.
         """
+        from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
+
         if strategy:
             self.unify_responses(question, strategy)
-            return UnifiedAnnotatorMetric(self, question).compute(metric_names)
+            return UnifiedAnnotationMetric(self, question).compute(metric_names)
         else:
             return AnnotatorMetric(self, question).compute(metric_names)
 
@@ -690,4 +688,6 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             metrics_result: Agreement metrics result or a list of metrics results if a list of metric
                 names is provided.
         """
+        from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
+
         return AgreementMetric(self, question).compute(metric_names)

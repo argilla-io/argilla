@@ -118,6 +118,11 @@ def test_agreement_metrics(
     else:
         metric = AgreementMetric(dataset=dataset, question_name=question)
         metrics_report = metric.compute(metric_names)
+        if isinstance(metric_names, str):
+            metrics_report = [metrics_report]
+        elif isinstance(metric_names, list):
+            if len(metric_names) == 1:
+                metrics_report = [metrics_report]
         assert isinstance(metrics_report, list)
         assert all([isinstance(m, AgreementMetricResult) for m in metrics_report])
 

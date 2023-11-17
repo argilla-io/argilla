@@ -14,6 +14,6 @@
 
 
 from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
-from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
+from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
 
-__all__ = ["AnnotatorMetric", "AgreementMetric", "UnifiedAnnotatorMetric"]
+__all__ = ["AnnotatorMetric", "AgreementMetric", "UnifiedAnnotationMetric"]

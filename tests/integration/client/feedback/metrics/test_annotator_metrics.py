@@ -17,26 +17,9 @@ from typing import TYPE_CHECKING, List, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
+from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
 from argilla.client.feedback.metrics.base import AnnotatorMetricResult
-from argilla.client.feedback.schemas import (
-    FeedbackRecord,
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    LabelQuestionUnification,
-    MultiLabelQuestionStrategy,
-    MultiLabelQuestionUnification,
-    RankingQuestionStrategy,
-    RankingQuestionUnification,
-    RatingQuestionStrategy,
-    RatingQuestionUnification,
-    UnifiedValueSchema,
-)
+from argilla.client.feedback.schemas import FeedbackRecord
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -143,9 +126,9 @@ def test_annotator_metrics_unified(
 
     if question in ("question-1", "question-4", "question-5"):
         with pytest.raises(NotImplementedError):
-            UnifiedAnnotatorMetric(unified_dataset, question)
+            UnifiedAnnotationMetric(unified_dataset, question)
     else:
-        metric = UnifiedAnnotatorMetric(unified_dataset, question)
+        metric = UnifiedAnnotationMetric(unified_dataset, question)
         metrics_report = metric.compute(metric_names)
 
         if isinstance(metric_names, list):

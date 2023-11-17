@@ -82,7 +82,7 @@ class AnnotatorMetric(MetricBase):
         return dict(metrics)
 
 
-class UnifiedAnnotatorMetric(AnnotatorMetric):
+class UnifiedAnnotationMetric(AnnotatorMetric):
     """Main class to compute metrics for a unified dataset.
 
     Example:
