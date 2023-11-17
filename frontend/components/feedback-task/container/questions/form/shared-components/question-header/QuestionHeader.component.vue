@@ -2,7 +2,7 @@
   <div class="title-area --body1">
     <BaseTooltip
       v-if="question.suggestion"
-      :text="`This question contains a suggestion \n dede`"
+      :text="suggestionTooltipText"
       position="left"
     >
       <span
@@ -60,6 +60,11 @@ export default {
   computed: {
     showIcon() {
       return !!this.question.description?.length;
+    },
+    suggestionTooltipText() {
+      return `This question contains a suggestion \n agent: ${
+        this.question.suggestion.agent || "-"
+      } \n score: ${this.question.suggestion.score || "-"}`;
     },
   },
   watch: {

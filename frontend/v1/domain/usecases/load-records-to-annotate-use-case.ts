@@ -128,7 +128,9 @@ export class LoadRecordsToAnnotateUseCase {
           return new Suggestion(
             suggestion.id,
             suggestion.question_id,
-            suggestion.value
+            suggestion.value,
+            suggestion.score,
+            suggestion.agent
           );
         });
 
