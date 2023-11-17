@@ -169,6 +169,9 @@ class MetricBase:
         else:
             raise NotImplementedError(f"No metrics are defined currently for {self._question_type.__name__}")
 
+    def __repr__(self) -> str:
+        return type(self).__name__ + f"(question_name={self._question_name})"
+
     @property
     def allowed_metrics(self) -> List[str]:
         """Available metrics for the given question."""

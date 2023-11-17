@@ -117,6 +117,8 @@ def test_agreement_metrics(
             AgreementMetric(dataset=dataset, question_name=question)
     else:
         metric = AgreementMetric(dataset=dataset, question_name=question)
+        # Test for repr method
+        assert repr(metric) == f"AgreementMetric(question_name={question})"
         metrics_report = metric.compute(metric_names)
         if isinstance(metric_names, str):
             metrics_report = [metrics_report]

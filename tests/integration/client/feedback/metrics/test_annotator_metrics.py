@@ -68,6 +68,8 @@ def test_annotator_metric(
             AnnotatorMetric(dataset, question)
     else:
         metric = AnnotatorMetric(dataset, question)
+        # Test for repr method
+        assert repr(metric) == f"AnnotatorMetric(question_name={question})"
         metrics_report = metric.compute(metric_names)
         assert len(metrics_report) == 3  # Number of annotators
         assert isinstance(metrics_report, dict)
