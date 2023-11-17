@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import Mapping, List, Any
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -21,14 +21,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from argilla.server.models import Question, Suggestion
 
 
-async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID):
+async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
     if db.bind.dialect.name == postgresql.dialect.name:
         return await _get_dataset_suggestion_agents_by_question_postgresql(db, dataset_id)
     else:
         return await _get_dataset_suggestion_agents_by_question_sqlite(db, dataset_id)
 
 
-async def _get_dataset_suggestion_agents_by_question_postgresql(db: AsyncSession, dataset_id: UUID):
+async def _get_dataset_suggestion_agents_by_question_postgresql(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
     result = await db.execute(
         select(
             Question.id.label("question_id"),
@@ -44,7 +44,7 @@ async def _get_dataset_suggestion_agents_by_question_postgresql(db: AsyncSession
     return result.mappings().all()
 
 
-async def _get_dataset_suggestion_agents_by_question_sqlite(db: AsyncSession, dataset_id: UUID):
+async def _get_dataset_suggestion_agents_by_question_sqlite(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
     result = await db.execute(
         select(
             Question.id.label("question_id"),
