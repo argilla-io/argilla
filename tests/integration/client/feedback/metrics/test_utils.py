@@ -12,11 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.utils import get_responses_and_suggestions_per_user
+from argilla.client.feedback.metrics.utils import (
+    get_responses_and_suggestions_per_user,
+    get_unified_responses_and_suggestions,
+)
 from argilla.client.feedback.schemas import FeedbackRecord
 
 if TYPE_CHECKING:
@@ -67,3 +70,55 @@ def test_responses_per_user(
         responses = responses_per_user[list(responses_per_user.keys())[0]]
         assert len(suggestions) == len(responses)
         assert len(responses) == num_responses
+
+
+@pytest.mark.parametrize(
+    "question, expected_unified_responses, value_type, strategy",
+    [
+        # TextQuestion
+        ("question-1", None, None, None),
+        # RatingQuestion
+        ("question-2", None, None, None),
+        ("question-2", [1, 1, 1, 2], int, "majority"),
+        # LabelQuestion
+        ("question-3", [1, 1, 1, 2], str, "majority"),
+        # MultiLabelQuestion
+        ("question-4", [1, 1, 1, 2], list, "majority"),
+        # RankingQuestion
+        ("question-5", [1, 1, 1, 2], str, "majority"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+def test_get_unified_responses_and_suggestions(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    expected_unified_responses: Optional[Union[List, str, int]],
+    value_type: type,
+    strategy: str,
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    if question == "question-1":
+        with pytest.raises(NotImplementedError, match="^This function is not available"):
+            get_unified_responses_and_suggestions(dataset, question)
+    elif expected_unified_responses is None:
+        with pytest.raises(ValueError, match="^Please unify the responses first:"):
+            get_unified_responses_and_suggestions(dataset, question)
+    else:
+        unified_dataset = dataset.unify_responses(question, strategy)
+        unified_responses, suggestions = get_unified_responses_and_suggestions(unified_dataset, question)
+        assert len(unified_responses) == len(suggestions) == len(expected_unified_responses)
+        assert all([isinstance(response, value_type) for response in unified_responses])
