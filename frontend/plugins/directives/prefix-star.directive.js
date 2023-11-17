@@ -2,7 +2,7 @@ import Vue from "vue";
 
 const sparkIcon = {
   add: (element) => {
-    if (element.childNodes.length === 2) return;
+    if (element.childNodes.length === 1) return;
 
     const emoji = document.createTextNode("✨ ");
     const emojiWrapper = document.createElement("span");
@@ -12,7 +12,8 @@ const sparkIcon = {
     element.prepend(emojiWrapper);
   },
   remove: (element) => {
-    if (element.childNodes.length === 2)
+    console.log(element.childNodes);
+    if (element.childNodes.length === 1)
       element.removeChild(element.childNodes[0]);
   },
 };
