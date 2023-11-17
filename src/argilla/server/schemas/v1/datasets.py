@@ -714,8 +714,47 @@ class Query(BaseModel):
         return values
 
 
+# NOTE: Not sure if this filter is useful, if we don't need it we can offer TermsFilter only instead
+class TermFilter(BaseModel):
+    type: Literal["term"]
+    field: str
+    value: Union[str, float]
+
+
+# TODO: Add constraint to field length
+# TODO: Add constraint to values items length
+class TermsFilter(BaseModel):
+    type: Literal["terms"]
+    field: str
+    values: List[Union[str, float]]
+
+
+# TODO: Add constraint to field length
+# TODO: Add validation to have at least one value `gte` or `lte` (or both)
+class RangeFilter(BaseModel):
+    type: Literal["range"]
+    field: str
+    gte: Optional[float]
+    lte: Optional[float]
+
+
+Filter = Annotated[Union[TermFilter, TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
+
+
+# TODO: Add constraint to and_ items length
+class Filters(BaseModel):
+    and_: Optional[List[Filter]] = PydanticField(None, alias="and")
+
+
+class Order(BaseModel):
+    field: str
+    order: Union[Literal["asc"], Literal["desc"]]
+
+
 class SearchRecordsQuery(BaseModel):
     query: Query
+    filters: Optional[Filters]
+    sort: Optional[List[Order]]
 
 
 class SearchRecord(BaseModel):
