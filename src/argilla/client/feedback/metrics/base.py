@@ -173,3 +173,16 @@ class MetricBase:
     def allowed_metrics(self) -> List[str]:
         """Available metrics for the given question."""
         return list(self._allowed_metrics)
+
+    def _check_metrics(self, metric_names: Union[str, List[str]]) -> List[str]:
+        if isinstance(metric_names, str):
+            metric_names = [metric_names]
+
+        if any([metric not in self._allowed_metrics for metric in metric_names]):
+            raise ValueError(
+                f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}"
+            )
+        return metric_names
+
+    def _get_metric_classes(self, metric_names: Union[str, List[str]]) -> List[Tuple[str, Callable]]:
+        return [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]

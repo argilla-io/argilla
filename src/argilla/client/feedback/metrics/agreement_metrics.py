@@ -166,15 +166,8 @@ class AgreementMetric(MetricBase):
         Returns:
             agreement_metrics: A list of `AgreementMetricResult` objects for the dataset.
         """
-        if isinstance(metric_names, str):
-            metric_names = [metric_names]
-
-        if any([metric not in self._allowed_metrics for metric in metric_names]):
-            raise ValueError(
-                f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}"
-            )
-
-        metric_classes = [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
+        metric_names = self._check_metrics(metric_names)
+        metric_classes = self._get_metric_classes(metric_names)
 
         dataset = prepare_dataset_for_annotation_task(self._dataset, self._question_name)
 
@@ -187,6 +180,9 @@ class AgreementMetric(MetricBase):
             metric = metric_cls(annotated_dataset=dataset, distance_function=distance_function)
             result = metric.compute(**kwargs)
             metrics.append(AgreementMetricResult(metric_name=metric_name, result=result))
+
+        if len(metric_names) == 1:
+            return metrics[0]
 
         return metrics
 
