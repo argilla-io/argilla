@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 
-from argilla.client.feedback.schemas import RankingQuestion
+from argilla.client.feedback.schemas import RankingQuestion, TextQuestion
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 if TYPE_CHECKING:
@@ -77,6 +77,56 @@ def get_responses_and_suggestions_per_user(
         suggestions = [suggestion["value"] for suggestion in suggestions]
 
     return responses_per_user, suggestions
+
+
+def get_unified_responses_and_suggestions(
+    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
+    question_name: str,
+) -> Tuple["Responses", "Suggestions"]:
+    """Extract the unified responses and the suggestions from a FeedbackDataset.
+
+    Helper function for the metrics module where we want to compare the responses
+    in relation to the suggestions offered.
+
+    Args:
+        dataset: FeedbackDataset or RemoteFeedbackDataset.
+        question_name: The name of the question to filter from the dataset.
+
+    Raises:
+        NotImplementedError:
+            When asked for a TextQuestion.
+        ValueError:
+            If the dataset hasn't been unified yet.
+
+    Returns:
+        Tuple containing the unified responses and the suggestions.
+    """
+    question_type = type(dataset.question_by_name(question_name))
+    if question_type == TextQuestion:
+        raise NotImplementedError("This function is not available for `TextQuestion`.")
+
+    unified_responses = []
+    suggestions = []
+
+    if not dataset.records[0].unified_responses:
+        raise ValueError("Please unify the responses first: `dataset.unify_responses(question, strategy)`.")
+
+    # Get the position of the suggestion from the first record to avoid the nested loop,
+    # and the type of the value to cast the unified responses.
+    for idx_suggestion, suggestion in enumerate(dataset.records[0].suggestions):
+        if suggestion.question_name == question_name:
+            value_type = type(suggestion.value)
+            break
+
+    for record in dataset.records:
+        unified_responses.append(value_type(record.unified_responses[question_name][0].value))
+        suggestions.append(record.suggestions[idx_suggestion].value)
+
+    if question_type == RankingQuestion:
+        unified_responses = [resp[0] for resp in unified_responses]
+        suggestions = [suggestion[0]["value"] for suggestion in suggestions]
+
+    return unified_responses, suggestions
 
 
 def map_str_to_int(values: List[str]) -> List[int]:
