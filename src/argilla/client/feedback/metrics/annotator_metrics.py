@@ -20,7 +20,12 @@ from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 import numpy as np
 
 from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
-from argilla.client.feedback.metrics.utils import get_responses_and_suggestions_per_user, is_multiclass, map_str_to_int
+from argilla.client.feedback.metrics.utils import (
+    get_responses_and_suggestions_per_user,
+    get_unified_responses_and_suggestions,
+    is_multiclass,
+    map_str_to_int,
+)
 from argilla.client.feedback.schemas import (
     LabelQuestion,
     RatingQuestion,
@@ -33,7 +38,7 @@ if TYPE_CHECKING:
 
 
 class AnnotatorMetric(MetricBase):
-    """Main class to compute agreement metrics.
+    """Main class to compute annotator metrics.
 
     Example:
         >>> import argilla as rg
@@ -51,7 +56,7 @@ class AnnotatorMetric(MetricBase):
         """Computes the annotator metrics for the given question.
 
         Args:
-            metric_names: name or list of names for the metrics to compute. i.e. `alpha`
+            metric_names: name or list of names for the metrics to compute. i.e. `accuracy`
             kwargs: additional arguments to pass to the metric.
 
         Raises:
@@ -62,15 +67,8 @@ class AnnotatorMetric(MetricBase):
                 key corresponds to the user id and the values are a list with the
                 metric results.
         """
-        if isinstance(metric_names, str):
-            metric_names = [metric_names]
-
-        if any([metric not in self._allowed_metrics for metric in metric_names]):
-            raise ValueError(
-                f"Metrics allowed for question {self._question_name}: {list(self._allowed_metrics.keys())}"
-            )
-
-        metric_classes = [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
+        metric_names = self._check_metrics(metric_names)
+        metric_classes = self._get_metric_classes(metric_names)
 
         responses_per_user, suggestions = get_responses_and_suggestions_per_user(self._dataset, self._question_name)
 
@@ -82,6 +80,52 @@ class AnnotatorMetric(MetricBase):
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
         return dict(metrics)
+
+
+class UnifiedAnnotatorMetric(AnnotatorMetric):
+    """Main class to compute metrics for a unified dataset.
+
+    Example:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.metrics import UnifiedAnnotatorMetric
+        >>> metric = UnifiedAnnotatorMetric(dataset=dataset, question_name=question)
+        >>> metrics_report = metric.compute("accuracy")
+    """
+
+    def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
+        self._metrics_per_question = METRICS_PER_QUESTION_UNIFIED
+        super().__init__(dataset, question_name)
+
+    def compute(
+        self, metric_names: Union[str, List[str]], **kwargs
+    ) -> Union[AnnotatorMetricResult, List[AnnotatorMetricResult]]:
+        """Computes the unified annotation metrics for the given question.
+
+        Args:
+            metric_names: name or list of names for the metrics to compute. i.e. `accuracy`
+            kwargs: additional arguments to pass to the metric.
+
+        Raises:
+            ValueError: If the metric name is not supported for the given question.
+
+        Returns:
+            metrics: List of annotator metrics results if more than one metric is computed, or the result
+                container if only one metric is computed.
+        """
+        metric_names = self._check_metrics(metric_names)
+        metric_classes = self._get_metric_classes(metric_names)
+
+        unified_responses, suggestions = get_unified_responses_and_suggestions(self._dataset, self._question_name)
+        metrics = []
+        for metric_name, metric_cls in metric_classes:
+            metric = metric_cls(responses=unified_responses, suggestions=suggestions)
+            result = metric.compute(**kwargs)
+            metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result))
+
+        if len(metric_names) == 1:
+            return metrics[0]
+
+        return metrics
 
 
 class AccuracyMetric(AnnotatorMetricBase):
@@ -275,4 +319,10 @@ METRICS_PER_QUESTION = {
         "gleu": GLEUMetric,
         "rouge": ROUGEMetric,
     },
+}
+
+
+METRICS_PER_QUESTION_UNIFIED = {
+    LabelQuestion: METRICS_PER_QUESTION[LabelQuestion],
+    RatingQuestion: METRICS_PER_QUESTION[RatingQuestion],
 }
