@@ -155,7 +155,7 @@ export default {
       transform: translateX(-50%);
       border-width: 5px;
       border-style: solid;
-      border-color: black transparent transparent transparent;
+      border-color: $tooltip-bg transparent transparent transparent;
     }
   }
   &.position-bottom {
@@ -167,7 +167,7 @@ export default {
       transform: translateX(-50%);
       border-width: 5px;
       border-style: solid;
-      border-color: transparent transparent black transparent;
+      border-color: transparent transparent $tooltip-bg transparent;
     }
   }
   &.position-left {
@@ -179,7 +179,7 @@ export default {
       transform: translateY(50%);
       border-width: 5px;
       border-style: solid;
-      border-color: transparent transparent transparent black;
+      border-color: transparent transparent transparent $tooltip-bg;
     }
   }
   &.position-right {
@@ -191,7 +191,7 @@ export default {
       transform: translateY(50%);
       border-width: 5px;
       border-style: solid;
-      border-color: transparent black transparent transparent;
+      border-color: transparent $tooltip-bg transparent transparent;
     }
   }
 }
