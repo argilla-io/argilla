@@ -92,3 +92,33 @@ class TestUpsertSuggestion:
         )
 
         assert response.status_code == 422
+
+    async def test_with_invalid_lower_score(self, async_client: AsyncClient, owner_auth_header: dict):
+        response = await async_client.put(
+            self.url(uuid4()),
+            headers=owner_auth_header,
+            json={
+                "question_id": str(uuid4()),
+                "type": SuggestionType.model,
+                "value": "value",
+                "agent": "agent",
+                "score": -0.1,
+            },
+        )
+
+        assert response.status_code == 422
+
+    async def test_with_invalid_upper_score(self, async_client: AsyncClient, owner_auth_header: dict):
+        response = await async_client.put(
+            self.url(uuid4()),
+            headers=owner_auth_header,
+            json={
+                "question_id": str(uuid4()),
+                "type": SuggestionType.model,
+                "value": "value",
+                "agent": "agent",
+                "score": 1.1,
+            },
+        )
+
+        assert response.status_code == 422

@@ -29,6 +29,7 @@ These are the section headers that we use:
 ### Changed
 
 - [breaking] Suggestions `agent` field only accepts now some specific characters and a limited length. ([#4265](https://github.com/argilla-io/argilla/pull/4265))
+- [breaking] Suggestions `score` field only accepts now float values in the range `0` to `1`. ([#4266](https://github.com/argilla-io/argilla/pull/4266))
 - Updated `push_to_argilla` to print `repr` of the pushed `RemoteFeedbackDataset` after push and changed `show_progress` to True by default. ([#4223](https://github.com/argilla-io/argilla/pull/4223))
 
 ## [1.19.0](https://github.com/argilla-io/argilla/compare/v1.18.0...v1.19.0)
