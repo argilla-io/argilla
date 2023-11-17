@@ -111,7 +111,7 @@ def test_prepare_for_training_text_classification_with_defaults(
                 trainer.update_config(max_steps=1)
             elif framework in [Framework("transformers"), Framework("setfit")]:
                 trainer.update_config(num_iterations=1)
-            trainer.train(__OUTPUT_DIR__)
+            train_with_cleanup(trainer, __OUTPUT_DIR__)
 
     if Path(__OUTPUT_DIR__).exists():
         shutil.rmtree(__OUTPUT_DIR__)
@@ -157,7 +157,7 @@ def test_argilla_trainer_text_classification_with_model_tokenizer(
     if not (framework == Framework("peft") and sys.version_info < (3, 9)):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework, model=model, tokenizer=tokenizer)
         trainer.update_config(num_steps=1, target_modules=target_modules)
-        trainer.train(__OUTPUT_DIR__)
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
 
         # Assert that the provided tokenizer is used
         assert (
@@ -204,13 +204,13 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {TextClassificationReturnTypes.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {TextClassificationReturnTypes.__annotations__['format']}, not <class 'list'>"
         ),
     ):
         task = TrainingTask.for_text_classification(wrong_formatting_func)
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
         trainer.update_config(num_iterations=1)
-        trainer.train(__OUTPUT_DIR__)
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
 
     def correct_formatting_func(sample):
         data = wrong_formatting_func(sample)
@@ -222,7 +222,7 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     task = TrainingTask.for_text_classification(correct_formatting_func)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     trainer.update_config(num_iterations=1)
-    trainer.train(__OUTPUT_DIR__)
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
     def correct_formatting_func_with_yield(sample):
         data = wrong_formatting_func(sample)
@@ -234,7 +234,7 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     task = TrainingTask.for_text_classification(correct_formatting_func_with_yield)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework=framework)
     trainer.update_config(num_iterations=1)
-    trainer.train(__OUTPUT_DIR__)
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
 
 @pytest.mark.usefixtures(
@@ -255,13 +255,13 @@ def test_question_answering_with_formatting_func(
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {QuestionAnsweringReturnTypes.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {QuestionAnsweringReturnTypes.__annotations__['format']}, not <class 'list'>"
         ),
     ):
         task = TrainingTask.for_question_answering(lambda x: {})
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
         trainer.update_config(num_iterations=1)
-        trainer.train(__OUTPUT_DIR__)
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
 
     def formatting_func(sample):
         responses = []
@@ -276,7 +276,7 @@ def test_question_answering_with_formatting_func(
     task = TrainingTask.for_question_answering(formatting_func)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
     trainer.update_config(num_iterations=1)
-    trainer.train(__OUTPUT_DIR__)
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
     def formatting_func_with_yield(sample):
         question = sample["label"]
@@ -289,7 +289,7 @@ def test_question_answering_with_formatting_func(
     task = TrainingTask.for_question_answering(formatting_func_with_yield)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
     trainer.update_config(num_iterations=1)
-    trainer.train(__OUTPUT_DIR__)
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
 
 
 @pytest.mark.usefixtures(
@@ -446,7 +446,7 @@ def test_push_to_huggingface(
     # We have to train the model and push it with spacy before removing the
     # generated folder, as it needs to be packaged.
     if framework in (Framework("spacy"), Framework("spacy-transformers")):
-        trainer.train(__OUTPUT_DIR__)
+        train_with_cleanup(trainer, __OUTPUT_DIR__)
     else:
         train_with_cleanup(trainer, __OUTPUT_DIR__)
 
@@ -489,8 +489,7 @@ def test_trainer_with_filter_by_and_sort_by_and_max_records(
         for question in test_remote_dataset_with_records.questions
         if isinstance(question, (LabelQuestion, MultiLabelQuestion))
     ]
-    label = LabelQuestionUnification(question=questions[0])
-    task = TrainingTask.for_text_classification(text=test_remote_dataset_with_records.fields[0], label=label)
+    task = TrainingTask.for_text_classification(text=test_remote_dataset_with_records.fields[0], label=questions[0])
     filter_by = None if len(statuses) == 0 else {"response_status": statuses}
 
     assert len(test_remote_dataset_with_records) == 10  # Number of records before filtering/sorting

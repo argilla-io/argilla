@@ -124,7 +124,7 @@ def test_prepare_for_training_sentence_transformers(
     assert trainer._trainer.trainer_kwargs["epochs"] == 1
     train_with_cleanup(trainer, __OUTPUT_DIR__)
     # Check we have a bi-encoder/cross-encoder
-    assert isinstance(trainer._trainer.trainer, model_type)
+    assert isinstance(trainer.get_trainer(), model_type)
 
     eval_trainer = ArgillaTrainer(
         dataset=dataset,

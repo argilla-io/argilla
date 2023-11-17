@@ -197,7 +197,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         self.trainer_model.config.pad_token_id = self.trainer_tokenizer.pad_token_id
 
         if isinstance(self._task, (TrainingTaskForPPO, TrainingTaskForDPO)):
-            self._transformers_ref_model: PreTrainedModel = create_reference_model(self.trainer_model)
+            self.trainer_ref_model: PreTrainedModel = create_reference_model(self.trainer_model)
         if new:
             self.trainer_model.to(self.device)
 
@@ -307,7 +307,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             dataset.set_format(type="torch")
             self._trainer = self.trainer_cls(
                 model=self.trainer_model,
-                ref_model=self._transformers_ref_model,
+                ref_model=self.trainer_ref_model,
                 tokenizer=self.trainer_tokenizer,
                 dataset=dataset,
                 data_collator=data_collator,
@@ -316,7 +316,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         elif isinstance(self._task, TrainingTaskForDPO):
             self._trainer = self.trainer_cls(
                 model=self.trainer_model,
-                ref_model=self._transformers_ref_model,
+                ref_model=self.trainer_ref_model,
                 args=TrainingArguments(**self.training_args_kwargs),
                 train_dataset=self._train_dataset,
                 eval_dataset=self._eval_dataset,

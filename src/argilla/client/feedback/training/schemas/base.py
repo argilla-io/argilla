@@ -15,7 +15,7 @@
 import inspect
 import logging
 import textwrap
-import types
+import typing
 import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
@@ -91,24 +91,56 @@ class TrainingData(ABC):
         )
 
     def test_framework_support(self, framework: Union[str, Framework]):
+        """
+        Test if the framework is supported by this task.
+        """
         if isinstance(framework, str):
             framework = Framework(framework)
         if framework not in self.supported_frameworks:
             raise NotImplementedError(f"Framework {framework} is not supported for this {self.__class__}.")
 
-    def _test_output_formatting_func(self, sample: Any):
+    def _execute_formatting_func(self, dataset: "FeedbackDataset") -> Any:
         """
-        Test if the formatting function returns the expected format.
+        Execute the formatting function on the dataset and return the output.
         """
-        try:
-            if not isinstance(sample, types.GeneratorType):
-                self._formatting_func_return_types(format=sample)
+
+        def test_none_sample(sample: Any) -> list:
+            """
+            Check for None values in the sample. If there are None values, return an empty list.
+            """
+
+            if sample is None:
+                return []
+            if isinstance(sample, (list, typing.Generator)):
+                values = [test_none_sample(entry) for entry in sample]
+                values = [value for value in values if value]
+                values = [value[0] for value in values]
+                return values
             else:
-                [self._formatting_func_return_types(format=sample_i) for sample_i in sample]
-        except Exception:
-            raise ValueError(
-                f"formatting_func must return {self._formatting_func_return_types.__annotations__['format']}, not {type(sample)}"
-            )
+                return [sample]
+
+        def test_output_formatting_func(sample: Any):
+            """
+            Test if the formatting function returns the expected format.
+            """
+            try:
+                if isinstance(sample, list):
+                    return [self._formatting_func_return_types(format=entry).format for entry in sample]
+                else:
+                    return [self._formatting_func_return_types(format=sample).format]
+            except Exception:
+                raise ValueError(
+                    f"formatting_func must return {self._formatting_func_return_types.__annotations__['format']}, not {type(sample)}"
+                )
+
+        formatted_output = []
+        for sample in dataset.format_as("datasets"):
+            formatted_sample = self.formatting_func(sample)
+            formatted_sample = test_none_sample(formatted_sample)
+            if not formatted_sample:
+                continue
+            formatted_output += test_output_formatting_func(formatted_sample)
+        return formatted_output
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         formatted_data = []
@@ -724,27 +756,12 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func is not None:
-            output = set()
-
-            for sample in dataset.format_as("datasets"):
-                text_label = self.formatting_func(sample)
-                if text_label is None:
-                    continue
-
-                self._test_output_formatting_func(text_label)
-
-                if isinstance(text_label, tuple):
-                    text_label = {text_label}
-
-                output |= set(text_label)
+            output = self._execute_formatting_func(dataset)
 
             data = []
             _all_labels = set()
             for text_label in output:
-                if text_label is None:
-                    continue
-                else:
-                    text, label = text_label
+                text, label = text_label
                 data.append({"text": text, "label": label})
                 if isinstance(label, list):
                     _multi_label = True
@@ -946,19 +963,8 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
-        formatted_texts = set()
-        for sample in dataset.format_as("datasets"):
-            if texts := self.formatting_func(sample):
-                if texts is None:
-                    continue
-
-                self._test_output_formatting_func(texts)
-
-                if isinstance(texts, str):
-                    texts = {texts}
-
-                formatted_texts |= set(texts)
-        return [{"text": text} for text in formatted_texts]
+        formatted_output = self._execute_formatting_func(dataset)
+        return [{"text": text} for text in formatted_output]
 
     @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -1013,18 +1019,7 @@ class TrainingTaskForRM(BaseModel, TrainingData):
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
-        output = set()
-        for sample in dataset.format_as("datasets"):
-            chosen_rejecteds = self.formatting_func(sample)
-            if chosen_rejecteds is None:
-                continue
-
-            self._test_output_formatting_func(chosen_rejecteds)
-
-            if isinstance(chosen_rejecteds, tuple):
-                chosen_rejecteds = {chosen_rejecteds}
-
-            output |= set(chosen_rejecteds)
+        output = self._execute_formatting_func(dataset)
         return [{"chosen": chosen, "rejected": rejected} for chosen, rejected in output]
 
     @requires_dependencies("datasets>1.17.0")
@@ -1068,18 +1063,8 @@ class TrainingTaskForPPO(BaseModel, TrainingData):
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
-        formatted_texts = set()
-        for sample in dataset.format_as("datasets"):
-            if texts := self.formatting_func(sample):
-                if texts is None:
-                    continue
-
-                self._test_output_formatting_func(texts)
-
-                if isinstance(texts, str):
-                    texts = {texts}
-                formatted_texts |= set(texts)
-        return [{"query": text} for text in formatted_texts]
+        output = self._execute_formatting_func(dataset)
+        return [{"query": text} for text in output]
 
     @requires_dependencies("datasets>1.17.0")
     def _prepare_for_training_with_trl(
@@ -1133,18 +1118,7 @@ class TrainingTaskForDPO(BaseModel, TrainingData):
     _supported_frameworks_names = ["trl"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
-        output = set()
-        for sample in dataset.format_as("datasets"):
-            prompt_chosen_rejecteds = self.formatting_func(sample)
-            if prompt_chosen_rejecteds is None:
-                continue
-
-            self._test_output_formatting_func(prompt_chosen_rejecteds)
-
-            if isinstance(prompt_chosen_rejecteds, tuple):
-                prompt_chosen_rejecteds = {prompt_chosen_rejecteds}
-
-            output |= set(prompt_chosen_rejecteds)
+        output = self._execute_formatting_func(dataset)
         return [{"prompt": prompt, "chosen": chosen, "rejected": rejected} for prompt, chosen, rejected in output]
 
     @requires_dependencies("datasets>1.17.0")
@@ -1226,18 +1200,7 @@ class TrainingTaskForQuestionAnswering(BaseModel, TrainingData):
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
         if self.formatting_func is not None:
-            output = set()
-            for sample in dataset.format_as("datasets"):
-                question_context_answer = self.formatting_func(sample)
-                if question_context_answer is None:
-                    continue
-
-                self._test_output_formatting_func(question_context_answer)
-
-                if isinstance(question_context_answer, tuple):
-                    question_context_answer = {question_context_answer}
-
-                output |= set(question_context_answer)
+            output = self._execute_formatting_func(dataset)
             return [
                 {"question": question, "context": context, "answer": answer} for question, context, answer in output
             ]
@@ -1317,18 +1280,7 @@ class TrainingTaskForChatCompletion(BaseModel, TrainingData):
     _supported_frameworks_names = ["openai"]
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, str]]:
-        output = set()
-        for sample in dataset.format_as("datasets"):
-            chat_turn_role_content = self.formatting_func(sample)
-            if chat_turn_role_content is None:
-                continue
-
-            self._test_output_formatting_func(chat_turn_role_content)
-
-            if isinstance(chat_turn_role_content, tuple):
-                chat_turn_role_content = {chat_turn_role_content}
-
-            output |= set(chat_turn_role_content)
+        output = self._execute_formatting_func(dataset)
         return [{"chat": chat, "turn": turn, "role": role, "content": content} for chat, turn, role, content in output]
 
     @requires_dependencies("openai>=0.27.10")
@@ -1433,30 +1385,28 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
 
     def _format_data(self, dataset: "FeedbackDataset") -> List[Dict[str, Any]]:
         if self.formatting_func:
-            outputs = []
-            for sample in dataset.format_as("datasets"):
-                output = self.formatting_func(sample)
-                if output is None:
-                    continue
+            output = self._execute_formatting_func(dataset)
 
-                self._test_output_formatting_func(output)
-
-                outputs.append(output)
-
-            if "label" in outputs[0]:
+            if "label" in output[0]:
                 _all_labels = set()
-                for sample in outputs:
+                for sample in output:
                     if isinstance(sample, (list, tuple, set)):
                         for response in sample:
                             _all_labels.add(response["label"])
                     else:
                         _all_labels.add(sample["label"])
 
-                self.defaults.label = LabelQuestionUnification(
-                    question=LabelQuestion(name="custom_func", labels=list(_all_labels))
-                )
+                if self.defaults.label is None:
+                    labels = list(_all_labels)
+                    if isinstance(labels[0], int):
+                        label = RatingQuestionUnification(
+                            question=RatingQuestion(name="custom_func", values=labels), strategy="majority"
+                        )
+                    else:
+                        label = LabelQuestionUnification(question=LabelQuestion(name="custom_func", labels=labels))
+                    self.defaults.label = label
 
-            return outputs
+            return output
 
         else:
             formatted_data = super()._format_data(dataset)
@@ -1464,22 +1414,23 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
             # or directly done in super()._format_data(dataset).
             new_keys = {field.name: f"sentence-{i}" for i, field in enumerate(self.texts, start=1)}
             if self.defaults.label:
-                new_keys.update({self.label.question.name: "label"})
+                new_keys.update({self.defaults.label.question.name: "label"})
 
             outputs = []
             for example in formatted_data:
                 record = {}
                 for k, v in new_keys.items():
-                    value = example[k]
                     if v == "label":
+                        value = example[v]
                         # At this point the label must be either an int or a float, determine which one is it.
-                        if value.lstrip("-").isdigit():
-                            value = int(value)
-                        else:
-                            value = float(value)
-                        if isinstance(self.label, RatingQuestionUnification):
-                            max_value = max([float(x) for x in self.label.question.__all_labels__])
-                            value = (value / 100) * float(max_value)
+                        if isinstance(value, str):
+                            if value.lstrip("-").isdigit():
+                                value = int(value)
+                            else:
+                                value = float(value)
+                    else:
+                        value = example[k]
+
                     record[v] = value
                 outputs.append(record)
 

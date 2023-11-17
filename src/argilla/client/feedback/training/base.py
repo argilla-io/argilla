@@ -362,13 +362,25 @@ class ArgillaTrainer(ArgillaTrainerV1):
 
         Provides a warning if the keyword argument is not valid for the trainer or model.
         """
+
+        def get_all_keys(d):
+            keys = []
+            for k, v in d.items():
+                keys.append(k)
+                if isinstance(v, dict):
+                    keys += get_all_keys(v)
+            return keys
+
         trainer_kwargs = self._trainer.get_trainer_kwargs()
         model_kwargs = self._trainer.get_model_kwargs()
+
+        all_keys = get_all_keys({**trainer_kwargs, **model_kwargs})
+
         for kwarg in kwargs:
-            if kwarg not in trainer_kwargs and kwarg not in model_kwargs:
+            if kwarg not in all_keys:
                 warnings.warn(
                     f"{kwarg} is not a valid argument for {self._trainer.__class__}. "
-                    f"Valid arguments are: {list(trainer_kwargs.keys()) + list(model_kwargs.keys())}",
+                    f"Valid arguments are: {all_keys}",
                     UserWarning,
                     stacklevel=2,
                 )

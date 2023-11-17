@@ -73,14 +73,12 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         super().__init__(*args, **kwargs)
         import spacy
 
-        self.trainer_model = None
         self._model = model
 
         if self._model is None:
             self._model = "en_core_web_sm"
             self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
-        self.trainer_kwargs = {}
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
@@ -292,35 +290,35 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
 
         # We generate the config with GPU just when we are using `spacy-transformers`,
         # otherwise the default configuration will be messed up for `spacy`.
-        self.config = init_config(
+        self.trainer_kwargs = init_config(
             lang=self.language,
             pipeline=self._spacy_pipeline_components,
             optimize=self.optimize,
             gpu=False,
         )
 
-        self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._eval_dataset_path
-        self.config["system"]["seed"] = self._seed or 42
+        self.trainer_kwargs["paths"]["train"] = self._train_dataset_path
+        self.trainer_kwargs["paths"]["dev"] = self._eval_dataset_path
+        self.trainer_kwargs["system"]["seed"] = self._seed or 42
 
         # Now we can already set the GPU properties if we want to train/fine-tune a
         # `spacy` model using the GPU, or a `spacy-transformers` model using the CPU.
-        self.config["system"]["gpu_allocator"] = (
+        self.trainer_kwargs["system"]["gpu_allocator"] = (
             ("pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None) if self.use_gpu else None
         )
-        self.config["nlp"]["batch_size"] = 128 if self.use_gpu else 1000
+        self.trainer_kwargs["nlp"]["batch_size"] = 128 if self.use_gpu else 1000
 
-        if "tok2vec" in self.config["nlp"]["pipeline"]:
+        if "tok2vec" in self.trainer_kwargs["nlp"]["pipeline"]:
             # If we want to fine-tune the `tok2vec` component, then we need to set the
             # `init_tok2vec` path to the model we want to fine-tune.
             if self.freeze_tok2vec is False:
-                self.config["paths"]["init_tok2vec"] = self._model
+                self.trainer_kwargs["paths"]["init_tok2vec"] = self._model
             else:
                 # Otherwise, if we don't want to fine-tune the `tok2vec` component, then we
                 # need to set the `frozen_components` and `annotating_components` to
                 # `["tok2vec"]`.
-                self.config["training"]["frozen_components"] = ["tok2vec"]
-                self.config["training"]["annotating_components"] = ["tok2vec"]
+                self.trainer_kwargs["training"]["frozen_components"] = ["tok2vec"]
+                self.trainer_kwargs["training"]["annotating_components"] = ["tok2vec"]
 
 
 class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):

@@ -81,10 +81,7 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
         import spacy
 
-        self.trainer_model = None
         self._model = model
-
-        self.trainer_kwargs = {}
 
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
@@ -92,14 +89,14 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
-            self._pipeline = ["ner"]
+            self._spacy_pipeline_components = ["ner"]
         elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
-                self._pipeline = ["textcat_multilabel"]
+                self._spacy_pipeline_components = ["textcat_multilabel"]
             else:
                 self._column_mapping = {"text": "text", "label": "label"}
-                self._pipeline = ["textcat"]
+                self._spacy_pipeline_components = ["textcat"]
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
@@ -250,8 +247,8 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "freeze_tok2vec": self.freeze_tok2vec},
-            pipeline=self._pipeline,  # Used only to keep track for the config arguments
-            update_config_kwargs=self.config["training"],
+            pipeline=self._spacy_pipeline_components,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.trainer_kwargs["training"],
             **card_data_kwargs,
         )
 
@@ -286,7 +283,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
-            pipeline=self._pipeline,  # Used only to keep track for the config arguments
+            pipeline=self._spacy_pipeline_components,  # Used only to keep track for the config arguments
             update_config_kwargs=self.trainer_kwargs["training"],
             **card_data_kwargs,
         )

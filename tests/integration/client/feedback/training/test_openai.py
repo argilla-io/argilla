@@ -28,7 +28,7 @@ def test_training_task_for_chat_completion(mocked_openai):
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {ChatCompletionReturnTypes.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {ChatCompletionReturnTypes.__annotations__['format']}, not <class 'list'>"
         ),
     ):
         task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=lambda x: {"test": "test"})

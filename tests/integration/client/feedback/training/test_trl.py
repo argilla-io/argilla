@@ -54,7 +54,7 @@ def try_wrong_format(dataset, task, format_func: Any) -> None:
     task = task(lambda _: {"test": "test"})
     with pytest.raises(
         ValueError,
-        match=re.escape(f"formatting_func must return {format_func.__annotations__['format']}, not <class 'dict'>"),
+        match=re.escape(f"formatting_func must return {format_func.__annotations__['format']}, not <class 'list'>"),
     ):
         trainer = ArgillaTrainer(dataset=dataset, task=task, framework=FRAMEWORK)
         trainer.train(OUTPUT_DIR)
@@ -96,11 +96,11 @@ def test_prepare_for_training_sft(
     task = TrainingTask.for_supervised_fine_tuning(formatting_func_sft)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 2
+    assert len(train_dataset) == 4
     train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 1
+    assert len(train_dataset_dict["train"]) == 2
 
     small_model_id = "sshleifer/tiny-gpt2"
     loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
@@ -162,11 +162,11 @@ def test_prepare_for_training_rm(
     task = TrainingTask.for_reward_modeling(formatting_func_rm)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 2
+    assert len(train_dataset) == 6
     train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 1
+    assert len(train_dataset_dict["train"]) == 3
 
     small_model_id = "sshleifer/tiny-gpt2"
     loaded_model = AutoModelForSequenceClassification.from_pretrained(small_model_id)
@@ -221,11 +221,11 @@ def test_prepare_for_training_ppo(
     task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func_ppo)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 2
+    assert len(train_dataset) == 10
     train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 1
+    assert len(train_dataset_dict["train"]) == 5
 
     small_model_id = "sshleifer/tiny-gpt2"
     loaded_model = AutoModelForCausalLMWithValueHead.from_pretrained(small_model_id)
@@ -297,11 +297,11 @@ def test_prepare_for_training_dpo(
     task = TrainingTask.for_direct_preference_optimization(formatting_func_dpo)
     train_dataset = dataset.prepare_for_training(framework=FRAMEWORK, task=task)
     assert isinstance(train_dataset, Dataset)
-    assert len(train_dataset) == 2
+    assert len(train_dataset) == 6
     train_dataset_dict = dataset.prepare_for_training(framework=FRAMEWORK, task=task, train_size=0.5)
     assert isinstance(train_dataset_dict, DatasetDict)
     assert tuple(train_dataset_dict.keys()) == ("train", "test")
-    assert len(train_dataset_dict["train"]) == 1
+    assert len(train_dataset_dict["train"]) == 3
 
     small_model_id = "sshleifer/tiny-gpt2"
     loaded_model = AutoModelForCausalLM.from_pretrained(small_model_id)
