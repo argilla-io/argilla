@@ -4,7 +4,12 @@
       :question="question"
       :showSuggestion="showSuggestion"
     />
-    <BaseCardWithTabs :tabs="tabs">
+    <TextAreaContents
+      v-if="!question.suggestion"
+      :question="question"
+      :is-focused="isFocused"
+    />
+    <BaseCardWithTabs v-else :tabs="tabs">
       <template v-slot="{ currentComponent }">
         <component
           :question="question"
