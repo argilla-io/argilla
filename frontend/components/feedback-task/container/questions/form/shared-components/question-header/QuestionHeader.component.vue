@@ -1,14 +1,21 @@
 <template>
   <div class="title-area --body1">
+    <BaseTooltip
+      v-if="question.suggestion"
+      :text="`This question contains a suggestion \n dede`"
+      position="left"
+    >
+      <span
+        v-prefix-star="{
+          enabled: showSuggestion,
+          show: question.suggestion,
+        }"
+      ></span>
+    </BaseTooltip>
     <span
       class="suggestion-info"
       v-text="question.title"
       v-required-field="{ show: question.isRequired, color: 'red' }"
-      v-prefix-star="{
-        enabled: showSuggestion,
-        show: question.suggestion,
-        tooltip: 'This question contains a suggestion',
-      }"
     />
     <BaseIconWithBadge
       class="icon-info"
@@ -103,16 +110,6 @@ span {
     &:after {
       margin-top: 0;
     }
-  }
-}
-:deep([data-title]):hover {
-  position: relative;
-  cursor: pointer;
-  @extend %has-tooltip--top;
-  &:after {
-    transform: none;
-    right: auto;
-    left: -1.5em;
   }
 }
 </style>

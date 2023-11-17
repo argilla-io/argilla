@@ -1,13 +1,13 @@
 import Vue from "vue";
 
 const sparkIcon = {
-  add: (element, binding) => {
+  add: (element) => {
     if (element.childNodes.length === 2) return;
 
     const emoji = document.createTextNode("✨ ");
     const emojiWrapper = document.createElement("span");
-    emojiWrapper.setAttribute("data-title", binding?.value.tooltip);
     emojiWrapper.style.fontSize = "1.2em";
+    emojiWrapper.style.cursor = "pointer";
     emojiWrapper.appendChild(emoji);
     element.prepend(emojiWrapper);
   },
