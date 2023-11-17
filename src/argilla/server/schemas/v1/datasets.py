@@ -726,3 +726,17 @@ class SearchRecord(BaseModel):
 class SearchRecordsResult(BaseModel):
     items: List[SearchRecord]
     total: int = 0
+
+
+class SearchSuggestionOptionsQuestion(BaseModel):
+    id: UUID
+    name: str
+
+
+class SearchSuggestionOptions(BaseModel):
+    question: SearchSuggestionOptionsQuestion
+    agents: List[str]
+
+
+class SearchSuggestionsOptions(BaseModel):
+    items: List[SearchSuggestionOptions]
