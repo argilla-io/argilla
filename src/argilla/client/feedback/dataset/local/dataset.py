@@ -22,6 +22,8 @@ from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
+from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
+from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -54,6 +56,8 @@ from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.metrics.agreement_metrics import AgreementMetricResult
+    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult, UnifiedAnnotatorMetricResult
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
@@ -627,3 +631,63 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             UserWarning,
         )
         return []
+
+    def compute_annotator_metrics(
+        self,
+        metric_names: Union[str, List[str]],
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion],
+        strategy: Optional[Union[str, LabelQuestionStrategy, RatingQuestionStrategy]] = None,
+    ) -> Union[
+        Dict[str, List["AnnotatorMetricResult"]], "UnifiedAnnotatorMetricResult", List["UnifiedAnnotatorMetricResult"]
+    ]:
+        """Compute metrics for the annotators, or if a strategy is provided, for the unified responses.
+
+        This metrics can be used to determine how useful the suggestions given to our annotators are.
+        The metric interpretation is the same either for the annotators or the unified annotations.
+
+        Args:
+            metric_names: Metric name or list of metric names of the metrics, dependent on the question type.
+            question: Question for which we want to compute the metrics.
+            strategy: Unification strategy. If given, will unify the responses of the dataset and compute
+                the metrics on the unified responses vs the suggestions instead on a per user level.
+                See `unified_responses` method for more information. Defaults to None.
+
+        Note:
+            Currently, the following types of questions are supported:
+            - For annotator level questions: `LabelQuestion`, `RatingQuestion`, `TextQuestion`
+            - For unified responses: `LabelQuestion`, `RatingQuestion`.
+
+        Returns:
+            metrics_container: If strategy is provided it will unify the annotations and return
+                the metrics for the unified responses. Otherwise, it will return the metrics for
+                each annotator as a dict, where the key corresponds to the annotator id and the
+                values are a list with the metrics.
+        """
+        if strategy:
+            self.unify_responses(question, strategy)
+            return UnifiedAnnotatorMetric(self, question).compute(metric_names)
+        else:
+            return AnnotatorMetric(self, question).compute(metric_names)
+
+    def compute_agreement_metrics(
+        self,
+        metric_names: Union[str, List[str]],
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+    ) -> Union["AgreementMetricResult", List["AgreementMetricResult"]]:
+        """Compute agreement or reliability of annotation metrics.
+
+        This metrics can be used to determine the level of agreement across our annotation team,
+        or whether the guidelines are clear enough for example.
+
+        Args:
+            metric_names: Metric name or list of metric names of the metrics, dependent on the question type.
+            question: Question for which we want to compute the metrics.
+
+        Note:
+            Currently, TextQuestion is not supported.
+
+        Returns:
+            metrics_result: Agreement metrics result or a list of metrics results if a list of metric
+                names is provided.
+        """
+        return AgreementMetric(self, question).compute(metric_names)
