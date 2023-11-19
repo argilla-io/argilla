@@ -184,19 +184,15 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
         with Progress() as progress_bar:
             task = progress_bar.add_task("Pushing records to Argilla...", total=len(records), visible=show_progress)
-            
+
             for i in range(0, len(records), PUSHING_BATCH_SIZE):
                 batch = records[i : i + PUSHING_BATCH_SIZE]
                 datasets_api_v1.add_records(
                     client=self._client,
                     id=self.dataset.id,
-                    records=[
-                        record.to_server_payload(question_name_to_id=question_name_to_id)
-                        for record in batch
-                    ],
+                    records=[record.to_server_payload(question_name_to_id=question_name_to_id) for record in batch],
                 )
                 progress_bar.update(task, advance=len(batch))
-
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
@@ -218,7 +214,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
         with Progress() as progress_bar:
             task = progress_bar.add_task("Updating records in Argilla...", total=len(records), visible=show_progress)
-            
+
             for i in range(0, len(records), PUSHING_BATCH_SIZE):
                 batch = records[i : i + PUSHING_BATCH_SIZE]
                 datasets_api_v1.update_records(
@@ -229,7 +225,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
                         for record in batch
                     ],
                 )
-                progress_bar.update(task, advance=len(batch))        
+                progress_bar.update(task, advance=len(batch))
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self, records: List[RemoteFeedbackRecord]) -> None:
