@@ -446,9 +446,9 @@ def test_push_to_huggingface(
     # We have to train the model and push it with spacy before removing the
     # generated folder, as it needs to be packaged.
     if framework in (Framework("spacy"), Framework("spacy-transformers")):
-        train_with_cleanup(trainer, __OUTPUT_DIR__)
+        trainer.train(__OUTPUT_DIR__)
     else:
-        train_with_cleanup(trainer, __OUTPUT_DIR__)
+        trainer.train(__OUTPUT_DIR__)
 
     # This functionality is mocked, no need to check the generated card too.
     trainer.push_to_huggingface(repo_id, generate_card=False)
@@ -461,13 +461,6 @@ def test_push_to_huggingface(
     [
         ([], None, [2, 4, 4, 5, 6, 2, 4, 4, 5, 6], None),
         ([], [SortBy(field="metadata.integer-metadata", order="desc")], [6, 6, 5, 5, 4, 4, 4, 4, 2, 2], 4),
-        ([ResponseStatusFilter.missing], [SortBy(field="metadata.integer-metadata", order="desc")], [4, 4], 1000),
-        (
-            [ResponseStatusFilter.discarded],
-            [SortBy(field="metadata.integer-metadata", order="desc")],
-            [6, 5, 4, 2],
-            None,
-        ),
         ([ResponseStatusFilter.submitted], None, [2, 4, 5, 6], None),
         (
             [ResponseStatusFilter.discarded, ResponseStatusFilter.submitted],

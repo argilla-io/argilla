@@ -119,7 +119,7 @@ class TrainingData(ABC):
             else:
                 return [sample]
 
-        def test_output_formatting_func(sample: Any):
+        def test_output_formatting_func(sample: Any) -> list:
             """
             Test if the formatting function returns the expected format.
             """
@@ -196,7 +196,30 @@ class TrainingData(ABC):
         else:
             df = df.drop_duplicates()
         df = df.dropna(how="any")
-        return df.to_dict(orient="records")
+        records = df.to_dict(orient="records")
+
+        # Validate record format
+        if isinstance(self.defaults, SentenceSimilarityDefaults):
+            validated_records = []
+            for rec in records:
+                try:
+                    self._formatting_func_return_types(format=rec)
+                    validated_records.append(rec)
+                except Exception:
+                    continue
+        elif isinstance(self.defaults, (QuestionAnsweringDefaults, TextClassificationDefaults)):
+            required_keys = list(self.defaults.__fields__.keys())
+            validated_records = [item for item in records if all(key in item for key in required_keys)]
+        else:
+            raise NotImplementedError(
+                f"Defaults {self.defaults} is not supported. Choose from: {[e.value for e in Framework]}"
+            )
+        if not validated_records:
+            raise ValueError(
+                f"Your dataset does not contain any records with required responses for {required_keys}. "
+                "Try different `filter_by`and `max_records` params or a annotate some more records."
+            )
+        return records
 
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
         """Overwritten by subclasses"""
@@ -809,6 +832,7 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         multi_label = self.__multi_label__
 
         datasets_dict = {"id": [], "text": [], "label": []}
+
         for index, entry in enumerate(data):
             datasets_dict["id"].append(index)
             datasets_dict["text"].append(entry["text"])
