@@ -34,7 +34,7 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTaskTypes,
 )
 from argilla.client.feedback.unification import (
@@ -61,9 +61,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
-        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
