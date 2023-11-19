@@ -1,4 +1,6 @@
+import { Pagination } from "../Pagination";
 import { Record } from "./Record";
+import { RecordCriteria } from "./RecordCriteria";
 
 const NEXT_RECORDS_TO_FETCH = 10;
 
@@ -20,27 +22,37 @@ export class Records {
     return this.records.find((record) => record.page === page);
   }
 
-  getPageToFind(
-    page: number,
-    status: string
-  ): { fromRecord: number; howMany: number } {
-    const currentPage = {
-      fromRecord: page,
-      howMany: NEXT_RECORDS_TO_FETCH,
+  getById(recordId: string): Record {
+    return this.records.find((record) => record.id === recordId);
+  }
+
+  getPageToFind(criteria: RecordCriteria): Pagination {
+    const { page, status, isFilteringBySimilarity, similaritySearch } =
+      criteria;
+
+    if (isFilteringBySimilarity)
+      return { from: 1, many: similaritySearch.limit };
+
+    const currentPage: Pagination = {
+      from: page,
+      many: NEXT_RECORDS_TO_FETCH,
     };
+
     if (!this.hasRecordsToAnnotate) return currentPage;
-    const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+
     const isMovingToNext = page > this.lastRecord.page;
 
     if (isMovingToNext) {
+      const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+
       return {
-        fromRecord: this.lastRecord.page + 1 - recordsAnnotated,
-        howMany: NEXT_RECORDS_TO_FETCH,
+        from: this.lastRecord.page + 1 - recordsAnnotated,
+        many: NEXT_RECORDS_TO_FETCH,
       };
     } else if (this.firstRecord.page > page)
       return {
-        fromRecord: this.firstRecord.page - 1,
-        howMany: 1,
+        from: this.firstRecord.page - 1,
+        many: 1,
       };
 
     return currentPage;
@@ -56,5 +68,11 @@ export class Records {
 
   private quantityOfRecordsAnnotated(status: string) {
     return this.records.filter((record) => record.status !== status).length;
+  }
+}
+
+export class RecordsWithReference extends Records {
+  constructor(records: Record[], total, public readonly reference: Record) {
+    super(records, total);
   }
 }

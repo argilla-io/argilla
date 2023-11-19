@@ -240,11 +240,22 @@ Argilla is built on 5 core components:
 We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
 
 ## 🥇 Contributors
+
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
 <img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
 
 </a>
+
+## 🏘️ Community
+
+🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
+
+🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
+
+⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
+
+🎁 We've just printed stickers! Would you like some? [Order stickers for free](https://tally.so/r/nr5gg2).
 
 ## 🗺️ Roadmap
 

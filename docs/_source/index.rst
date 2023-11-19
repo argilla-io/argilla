@@ -29,7 +29,6 @@
    practical_guides/choose_dataset
    practical_guides/create_dataset
    practical_guides/assign_records
-   practical_guides/update_dataset
    practical_guides/filter_dataset
    practical_guides/annotate_dataset
    practical_guides/annotation_workflows/annotation_workflows

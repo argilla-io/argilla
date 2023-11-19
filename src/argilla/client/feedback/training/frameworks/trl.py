@@ -16,14 +16,14 @@ import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTaskForDPO,
     TrainingTaskForPPO,
     TrainingTaskForRM,
     TrainingTaskForSFT,
 )
 from argilla.training.utils import filter_allowed_args
-from argilla.utils.dependency import require_dependencies
+from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
     import transformers
@@ -94,8 +94,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         from datasets import DatasetDict
         from transformers import set_seed
 
-        self._transformers_model = model if not isinstance(model, str) else None
-        self._transformers_tokenizer = tokenizer
+        self.trainer_model = model if not isinstance(model, str) else None
+        self.trainer_tokenizer = tokenizer
         self.device = "cpu"
         if torch.backends.mps.is_available():
             self.device = "mps"
@@ -187,19 +187,19 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         elif isinstance(self._task, TrainingTaskForRM):
             auto_model_class = AutoModelForSequenceClassification
 
-        if self._transformers_model is None:
-            self._transformers_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
-        if self._transformers_tokenizer is None:
-            self._transformers_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
-                self._transformers_model.config.name_or_path
+        if self.trainer_model is None:
+            self.trainer_model: PreTrainedModel = auto_model_class.from_pretrained(self._model)
+        if self.trainer_tokenizer is None:
+            self.trainer_tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                self.trainer_model.config.name_or_path
             )
-            self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
-        self._transformers_model.config.pad_token_id = self._transformers_tokenizer.pad_token_id
+            self.trainer_tokenizer.pad_token_id = self.trainer_tokenizer.eos_token_id
+        self.trainer_model.config.pad_token_id = self.trainer_tokenizer.pad_token_id
 
         if isinstance(self._task, (TrainingTaskForPPO, TrainingTaskForDPO)):
-            self._transformers_ref_model: PreTrainedModel = create_reference_model(self._transformers_model)
+            self.trainer_ref_model: PreTrainedModel = create_reference_model(self.trainer_model)
         if new:
-            self._transformers_model.to(self.device)
+            self.trainer_model.to(self.device)
 
     def update_config(self, **kwargs) -> None:
         """
@@ -237,14 +237,13 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
         self.init_model(new=True)
 
         if isinstance(self._task, TrainingTaskForSFT):
-            self._training_args = TrainingArguments(**self.training_args_kwargs)
             self._trainer = self.trainer_cls(
-                self._transformers_model,
-                args=self._training_args,
+                self.trainer_model,
+                args=TrainingArguments(**self.training_args_kwargs),
                 train_dataset=self._train_dataset,
                 eval_dataset=self._eval_dataset,
                 dataset_text_field="text",
-                tokenizer=self._transformers_tokenizer,
+                tokenizer=self.trainer_tokenizer,
                 **self.trainer_kwargs,
             )
 
@@ -258,8 +257,8 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                     "attention_mask_rejected": [],
                 }
                 for chosen, rejected in zip(examples["chosen"], examples["rejected"]):
-                    tokenized_j = self._transformers_tokenizer(chosen, truncation=True)
-                    tokenized_k = self._transformers_tokenizer(rejected, truncation=True)
+                    tokenized_j = self.trainer_tokenizer(chosen, truncation=True)
+                    tokenized_k = self.trainer_tokenizer(rejected, truncation=True)
 
                     new_examples["input_ids_chosen"].append(tokenized_j["input_ids"])
                     new_examples["attention_mask_chosen"].append(tokenized_j["attention_mask"])
@@ -268,18 +267,17 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
                 return new_examples
 
-            self._training_args = TrainingArguments(**self.training_args_kwargs)
             train_dataset = self._train_dataset.map(preprocess_function, batched=True)
             eval_dataset = None
             if self._eval_dataset:
                 eval_dataset = self._eval_dataset.map(preprocess_function, batched=True)
 
             self._trainer = self.trainer_cls(
-                self._transformers_model,
-                args=self._training_args,
+                self.trainer_model,
+                args=TrainingArguments(**self.training_args_kwargs),
                 train_dataset=train_dataset,
                 eval_dataset=eval_dataset,
-                tokenizer=self._transformers_tokenizer,
+                tokenizer=self.trainer_tokenizer,
                 **self.trainer_kwargs,
             )
         elif isinstance(self._task, TrainingTaskForPPO):
@@ -288,14 +286,14 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             dataset = concatenate_datasets([x for x in [self._train_dataset, self._eval_dataset] if x is not None])
 
             def tokenize(sample):
-                sample["input_ids"] = self._transformers_tokenizer.encode(sample["query"], truncation=True)
+                sample["input_ids"] = self.trainer_tokenizer.encode(sample["query"], truncation=True)
                 return sample
 
             def data_collator(data):
                 return dict((key, [d[key] for d in data]) for key in data[0])
 
             def remove_truncated(sample):
-                return len(sample) < self._transformers_tokenizer.model_max_length
+                return len(sample) < self.trainer_tokenizer.model_max_length
 
             dataset = dataset.map(tokenize, batched=False)
             size_before = len(dataset)
@@ -308,22 +306,21 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                 )
             dataset.set_format(type="torch")
             self._trainer = self.trainer_cls(
-                model=self._transformers_model,
-                ref_model=self._transformers_ref_model,
-                tokenizer=self._transformers_tokenizer,
+                model=self.trainer_model,
+                ref_model=self.trainer_ref_model,
+                tokenizer=self.trainer_tokenizer,
                 dataset=dataset,
                 data_collator=data_collator,
                 **self.trainer_kwargs,
             )
         elif isinstance(self._task, TrainingTaskForDPO):
-            self._training_args = TrainingArguments(**self.training_args_kwargs)
             self._trainer = self.trainer_cls(
-                model=self._transformers_model,
-                ref_model=self._transformers_ref_model,
-                args=self._training_args,
+                model=self.trainer_model,
+                ref_model=self.trainer_ref_model,
+                args=TrainingArguments(**self.training_args_kwargs),
                 train_dataset=self._train_dataset,
                 eval_dataset=self._eval_dataset,
-                tokenizer=self._transformers_tokenizer,
+                tokenizer=self.trainer_tokenizer,
                 **self.trainer_kwargs,
             )
 
@@ -335,7 +332,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
 
             output_length_sampler = LengthSampler(**self.training_args_kwargs["length_sampler_kwargs"])
             generation_kwargs = self.training_args_kwargs["generation_kwargs"]
-            generation_kwargs["pad_token_id"] = self._transformers_tokenizer.eos_token_id
+            generation_kwargs["pad_token_id"] = self.trainer_tokenizer.eos_token_id
             reward_model = self.training_args_kwargs["reward_model"]
 
             for batch in tqdm(self._trainer.dataloader):
@@ -348,9 +345,7 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
                     length_sampler=output_length_sampler,
                     **generation_kwargs,
                 )
-                batch["response"] = self._transformers_tokenizer.batch_decode(
-                    response_tensors, skip_special_tokens=True
-                )
+                batch["response"] = self.trainer_tokenizer.batch_decode(response_tensors, skip_special_tokens=True)
 
                 #### Compute rewards scores
                 texts = [q + r for q, r in zip(batch["query"], batch["response"])]
@@ -419,3 +414,35 @@ class ArgillaTRLTrainer(ArgillaTrainerSkeleton):
             update_config_kwargs={**self.training_args_kwargs, **self.trainer_kwargs},
             **card_data_kwargs,
         )
+
+    @requires_dependencies("huggingface_hub")
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the transformer model and tokenizer to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters for PPO can be seen:
+        [here](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub)
+        and for the remaining types of trainers,
+        [here](https://huggingface.co/docs/transformers/main_classes/trainer#transformers.Trainer.push_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError: If the model doesn't exist, meaning it hasn't been instantiated yet.
+        """
+        if isinstance(self._task, TrainingTaskForPPO):
+            # `PPOTrainer` inherits from `trl.trainer.BaseTrainer`
+            model_url = self._trainer.push_to_hub(repo_id, **kwargs)
+        else:
+            # The remaining models inherit from `transformers.Trainer`.
+            # The `Trainer` itself generates the repo_id variable using the args
+            # passed to the `TrainingArguments`. To keep a similar API we overwrite
+            # the args.hub_model_id with the argument repo_id, and the repo_id
+            # will be obtained from there.
+            self._trainer.args.hub_model_id = repo_id
+            model_url = self._trainer.model.push_to_hub(repo_id, **kwargs)
+            self._trainer.tokenizer.push_to_hub(repo_id, **kwargs)
+
+        self._logger.info(f"Model pushed to: {model_url}")

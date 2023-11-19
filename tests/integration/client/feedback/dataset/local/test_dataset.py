@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 
 import datasets
 import pytest
-from argilla import Workspace
+from argilla import User, Workspace
 from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
@@ -30,7 +30,8 @@ from argilla.client.feedback.schemas.metadata import (
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
-from argilla.client.feedback.training.schemas import TrainingTask
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
@@ -223,6 +224,39 @@ def test_add_records(
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
+
+
+def test_add_records_with_vectors() -> None:
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text", required=True)],
+        questions=[TextQuestion(name="question-1", required=True)],
+        vectors_settings=[
+            VectorSettings(name="vector-1", dimensions=3),
+            VectorSettings(name="vector-2", dimensions=4),
+        ],
+    )
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                },
+            ),
+            FeedbackRecord(
+                fields={"text": "Text"},
+                vectors={
+                    "vector-1": [1.0, 2.0, 3.0],
+                    "vector-2": [1.0, 2.0, 3.0, 4.0],
+                },
+            ),
+        ]
+    )
+
+    assert len(dataset.records) == 2
+    assert dataset.records[0].vectors == {"vector-1": [1.0, 2.0, 3.0]}
+    assert dataset.records[1].vectors == {"vector-1": [1.0, 2.0, 3.0], "vector-2": [1.0, 2.0, 3.0, 4.0]}
 
 
 @pytest.mark.parametrize(
@@ -622,6 +656,47 @@ def test_prepare_for_training_text_classification(
 
     data = remote.prepare_for_training(framework=framework, task=task)
     assert data is not None
+
+
+def test_push_to_argilla_with_vector_settings(argilla_user: User):
+    api.init(api_key=argilla_user.api_key)
+
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+        vectors_settings=[VectorSettings(name="vector-settings", dimensions=100)],
+    )
+
+    remote = dataset.push_to_argilla(name="test-dataset-vector01")
+    assert len(remote.vectors_settings) == 1
+    assert remote.vectors_settings[0].name == "vector-settings"
+    assert remote.vectors_settings[0].dimensions == 100
+
+
+def test_add_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    new_settings = dataset.add_vector_settings(expected_settings)
+    assert expected_settings == new_settings
+    assert len(dataset.vectors_settings) == 1
+    assert dataset.vector_settings_by_name("vector-settings") == expected_settings
+
+
+def test_add_duplicated_vector_settings():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="required-field")],
+        questions=[TextQuestion(name="question")],
+    )
+
+    expected_settings = VectorSettings(name="vector-settings", dimensions=100)
+    dataset.add_vector_settings(expected_settings)
+
+    with pytest.raises(ValueError, match="Vector settings with name 'vector-settings' already exists"):
+        dataset.add_vector_settings(expected_settings)
 
 
 @pytest.mark.usefixtures(

@@ -17,8 +17,12 @@ from typing import TYPE_CHECKING
 from datasets import Dataset, DatasetDict
 
 from argilla.client.feedback.training.base import ArgillaTrainerSkeleton
-from argilla.client.feedback.training.schemas import TrainingTaskForQuestionAnswering, TrainingTaskForTextClassification
+from argilla.client.feedback.training.schemas.base import (
+    TrainingTaskForQuestionAnswering,
+    TrainingTaskForTextClassification,
+)
 from argilla.training.transformers import ArgillaTransformersTrainer as ArgillaTransformersTrainerV1
+from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.integrations.huggingface.model_card import TransformersModelCardData
@@ -37,9 +41,9 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
         )
 
         model = kwargs.get("model", None)
-        self._transformers_model = model if model and not isinstance(model, str) else None
-        self._transformers_tokenizer = kwargs.get("tokenizer", None)
-        self._pipeline = None
+        self.trainer_model = model if model and not isinstance(model, str) else None
+        self.trainer_tokenizer = kwargs.get("tokenizer", None)
+        self.trainer_pipeline = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():
@@ -100,3 +104,27 @@ class ArgillaTransformersTrainer(ArgillaTransformersTrainerV1, ArgillaTrainerSke
             update_config_kwargs=self.trainer_kwargs,
             **card_data_kwargs,
         )
+
+    @requires_dependencies("huggingface_hub")
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the transformer model and tokenizer to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [huggingface_hub](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError: If the model doesn't exist, meaning it hasn't been instantiated yet.
+        """
+        if not self.trainer_model:
+            raise ValueError(
+                "The model must be initialized prior to this point. You can either call `train` or `init_model`."
+            )
+        model_url = self.trainer_model.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Model pushed to: {model_url}")
+        tokenizer_url = self.trainer_tokenizer.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Tokenizer pushed to: {tokenizer_url}")

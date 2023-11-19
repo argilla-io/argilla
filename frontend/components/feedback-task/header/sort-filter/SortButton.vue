@@ -2,13 +2,12 @@
   <FilterButton
     button-name="Sort"
     icon-name="sort"
-    :show-icon="!!activeSortItemsCounter"
     :is-button-active="isButtonActive"
   >
     <span
       class="sort-button__text"
       v-if="activeSortItemsCounter"
-      v-text="`Sort (${activeSortItemsCounter})`"
+      v-text="`(${activeSortItemsCounter})`"
     />
   </FilterButton>
 </template>
@@ -36,11 +35,12 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-.sort-button {
-  &__text {
-    @include font-size(13px);
-    font-weight: 500;
+.filter-button--active {
+  background: none;
+  &:hover {
+    background: $black-4;
   }
 }
 </style>

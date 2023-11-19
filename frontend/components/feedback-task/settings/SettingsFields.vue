@@ -8,7 +8,7 @@
           class="settings__edition-form__fields"
         >
           <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium --capitalized" v-text="field.name" />
+            <h4 class="--body1 --medium" v-text="field.name" />
           </div>
 
           <Validation
@@ -16,7 +16,7 @@
             class="settings__edition-form__group"
           >
             <label for="field.id">Title</label>
-            <input type="type" id="field.id" v-model="field.title" />
+            <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
           <BaseSwitch v-model="field.settings.use_markdown"
@@ -137,7 +137,6 @@ export default {
 
     &__footer {
       width: 100%;
-      display: flex;
       flex-direction: row;
       justify-content: flex-end;
       align-items: center;

@@ -55,6 +55,10 @@ from pydantic import ValidationError
                     "agent": "agent-1",
                 }
             ],
+            "vectors": {
+                "vector-1": [1.0, 2.0, 3.0],
+                "vector-2": [1.0, 2.0, 3.0, 4.0],
+            },
             "external_id": "entry-1",
         },
         {
@@ -89,6 +93,9 @@ from pydantic import ValidationError
 )
 def test_feedback_record(schema_kwargs: Dict[str, Any]) -> None:
     assert FeedbackRecord(**schema_kwargs)
+
+
+# TODO(@alvaro): Check why there are missing tests cases checking feedback errors.
 
 
 @pytest.mark.parametrize(

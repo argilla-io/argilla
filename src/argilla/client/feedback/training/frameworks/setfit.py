@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 from argilla.client.feedback.training.frameworks.transformers import ArgillaTransformersTrainer
 from argilla.client.models import TextClassificationRecord
 from argilla.training.setfit import ArgillaSetFitTrainer as ArgillaSetFitTrainerV1
-from argilla.utils.dependency import require_dependencies
+from argilla.utils.dependency import require_dependencies, requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.integrations.huggingface.model_card import SetFitModelCardData
@@ -63,6 +63,26 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         return SetFitModelCardData(
             model_id=self._model,
             task=self._task,
-            update_config_kwargs={**self.setfit_model_kwargs, **self.setfit_trainer_kwargs},
+            update_config_kwargs={**self.model_kwargs, **self.trainer_kwargs},
             **card_data_kwargs,
         )
+
+    @requires_dependencies("huggingface_hub")
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
+        """Uploads the model to [huggingface's model hub](https://huggingface.co/models).
+
+        The full list of parameters can be seen at:
+        [huggingface_hub](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.ModelHubMixin.push_to_hub).
+
+        Args:
+            repo_id:
+                The name of the repository you want to push your model and tokenizer to.
+                It should contain your organization name when pushing to a given organization.
+
+        Raises:
+            NotImplementedError: If the model doesn't exist, meaning it hasn't been instantiated yet.
+        """
+        if not self._trainer:
+            raise ValueError("The `trainer` must be initialized prior to this point. You should call `train`.")
+        url = self._trainer.push_to_hub(repo_id, **kwargs)
+        self._logger.info(f"Model pushed to: {url}")

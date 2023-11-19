@@ -38,9 +38,9 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             set_seed,
         )
 
-        self._transformers_model = None
-        self._transformers_tokenizer = None
-        self._pipeline = None
+        self.trainer_model = None
+        self.trainer_tokenizer = None
+        self.trainer_pipeline = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():
@@ -126,29 +126,31 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
     def init_model(self, new: bool = False):
         from transformers import AutoTokenizer
 
-        if self._transformers_tokenizer is None:
+        if self.trainer_tokenizer is None:
             if any(k in self.model_kwargs.get("pretrained_model_name_or_path") for k in ("gpt", "opt", "bloom")):
                 padding_side = "left"
             else:
                 padding_side = "right"
 
-            self._transformers_tokenizer = AutoTokenizer.from_pretrained(
-                self.model_kwargs.get("pretrained_model_name_or_path"), padding_side=padding_side, add_prefix_space=True
+            self.trainer_tokenizer = AutoTokenizer.from_pretrained(
+                self.model_kwargs.get("pretrained_model_name_or_path"),
+                padding_side=padding_side,
+                add_prefix_space=True,
             )
-            if getattr(self._transformers_tokenizer, "pad_token_id") is None:
-                self._transformers_tokenizer.pad_token_id = self._transformers_tokenizer.eos_token_id
-            if getattr(self._transformers_tokenizer, "model_max_length") is None:
-                self._transformers_tokenizer.model_max_length = 512
+            if getattr(self.trainer_tokenizer, "pad_token_id") is None:
+                self.trainer_tokenizer.pad_token_id = self.trainer_tokenizer.eos_token_id
+            if getattr(self.trainer_tokenizer, "model_max_length") is None:
+                self.trainer_tokenizer.model_max_length = 512
 
         if new:
             model_kwargs = self.model_kwargs
         else:
             model_kwargs = {"pretrained_model_name_or_path": self.model_kwargs.get("pretrained_model_name_or_path")}
 
-        if self._transformers_model is None:
-            self._transformers_model = self._model_class.from_pretrained(**model_kwargs, return_dict=True)
+        if self.trainer_model is None:
+            self.trainer_model = self._model_class.from_pretrained(**model_kwargs, return_dict=True)
         if new:
-            self._transformers_model = self._transformers_model.to(self.device)
+            self.trainer_model = self.trainer_model.to(self.device)
 
     def init_pipeline(self):
         import transformers
@@ -164,26 +166,26 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                 kwargs = {"top_k": None}
             else:
                 kwargs = {"return_all_scores": True}
-            self._pipeline = pipeline(
+            self.trainer_pipeline = pipeline(
                 task="text-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
+                model=self.trainer_model,
+                tokenizer=self.trainer_tokenizer,
                 device=device,
                 **kwargs,
             )
         elif self._record_class == TokenClassificationRecord:
-            self._pipeline = pipeline(
+            self.trainer_pipeline = pipeline(
                 task="token-classification",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
+                model=self.trainer_model,
+                tokenizer=self.trainer_tokenizer,
                 aggregation_strategy="first",
                 device=device,
             )
         elif self._model_class == AutoModelForQuestionAnswering:
-            self._pipeline = pipeline(
+            self.trainer_pipeline = pipeline(
                 task="question-answering",
-                model=self._transformers_model,
-                tokenizer=self._transformers_tokenizer,
+                model=self.trainer_model,
+                tokenizer=self.trainer_tokenizer,
                 device=device,
             )
         else:
@@ -219,12 +221,10 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         def text_classification_preprocess_function(examples):
-            return self._transformers_tokenizer(examples["text"], truncation=True, max_length=None)
+            return self.trainer_tokenizer(examples["text"], truncation=True, max_length=None)
 
         def token_classification_preprocess_function(examples):
-            tokenized_inputs = self._transformers_tokenizer(
-                examples["tokens"], truncation=True, is_split_into_words=True
-            )
+            tokenized_inputs = self.trainer_tokenizer(examples["tokens"], truncation=True, is_split_into_words=True)
 
             labels = []
             for i, label in enumerate(examples["ner_tags"]):
@@ -246,7 +246,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
         def question_answering_preprocess_function(examples):
             questions = [q.strip() for q in examples["question"]]
-            inputs = self._transformers_tokenizer(
+            inputs = self.trainer_tokenizer(
                 questions,
                 examples["context"],
                 truncation="only_second",
@@ -294,10 +294,35 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             inputs["end_positions"] = end_positions
             return inputs
 
+        def question_answering_preprocess_function_validation(examples):
+            questions = [q.strip() for q in examples["question"]]
+            inputs = self.trainer_tokenizer(
+                questions,
+                examples["context"],
+                truncation="only_second",
+                return_overflowing_tokens=True,
+                return_offsets_mapping=True,
+                padding="max_length",
+            )
+
+            sample_map = inputs.pop("overflow_to_sample_mapping")
+            example_ids = []
+
+            for i in range(len(inputs["input_ids"])):
+                sample_idx = sample_map[i]
+                example_ids.append(examples["id"][sample_idx])
+
+                sequence_ids = inputs.sequence_ids(i)
+                offset = inputs["offset_mapping"][i]
+                inputs["offset_mapping"][i] = [o if sequence_ids[k] == 1 else None for k, o in enumerate(offset)]
+
+            inputs["example_id"] = example_ids
+            return inputs
+
         # set correct tokenization
         if self._record_class == TextClassificationRecord:
             preprocess_function = text_classification_preprocess_function
-            self._data_collator = DataCollatorWithPadding(tokenizer=self._transformers_tokenizer)
+            self._data_collator = DataCollatorWithPadding(tokenizer=self.trainer_tokenizer)
             if self._multi_label:
                 remove_columns = ["feat_id", "text", "feat_label"]
             else:
@@ -305,7 +330,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             replace_labels = True
         elif self._record_class == TokenClassificationRecord:
             preprocess_function = token_classification_preprocess_function
-            self._data_collator = DataCollatorForTokenClassification(tokenizer=self._transformers_tokenizer)
+            self._data_collator = DataCollatorForTokenClassification(tokenizer=self.trainer_tokenizer)
             remove_columns = ["id", "tokens", "ner_tags"]
             replace_labels = False
         elif self._model_class == AutoModelForQuestionAnswering:
@@ -323,15 +348,26 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             self._tokenized_train_dataset = self._tokenized_train_dataset.rename_column("label", "labels")
 
         if self._eval_dataset is not None:
-            self._tokenized_eval_dataset = self._eval_dataset.map(
-                preprocess_function, batched=True, remove_columns=remove_columns
-            )
+            if self._model_class == AutoModelForQuestionAnswering:
+                # We need to preprocess the validation dataset separately, because we need to return the example_id
+                self._tokenized_eval_dataset = self._eval_dataset.map(
+                    question_answering_preprocess_function_validation,
+                    batched=True,
+                    remove_columns=remove_columns,
+                )
+            else:
+                self._tokenized_eval_dataset = self._eval_dataset.map(
+                    preprocess_function, batched=True, remove_columns=remove_columns
+                )
+
             if replace_labels:
                 self._tokenized_eval_dataset = self._tokenized_eval_dataset.rename_column("label", "labels")
         else:
             self._tokenized_eval_dataset = None
 
     def compute_metrics(self):
+        import collections
+
         import evaluate
         import numpy as np
         from transformers import AutoModelForQuestionAnswering
@@ -391,19 +427,62 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
 
             func = compute_metrics
         elif AutoModelForQuestionAnswering:
-            f1 = evaluate.load("f1")
+            squad = evaluate.load("squad")
+
+            # Copy from https://huggingface.co/learn/nlp-course/chapter7/7?fw=pt#fine-tuning-the-model-with-the-trainer-api
+            n_best = 20
 
             def compute_metrics_question_answering(pred):
-                labels = pred.label_ids
-                preds = pred.predictions.argmax(-1)
+                start_logits, end_logits = pred.predictions
+                features = self._tokenized_eval_dataset
+                examples = self._eval_dataset
 
-                # Calculate Exact Match (EM)
-                em = sum([int(p == l) for p, l in zip(preds, labels)]) / len(labels)
+                example_to_features = collections.defaultdict(list)
+                for idx, feature in enumerate(features):
+                    example_to_features[feature["example_id"]].append(idx)
 
-                # Calculate F1-score
-                f1_score = f1(labels, preds, average="macro")
+                predicted_answers = []
+                for example in examples:
+                    example_id = example["id"]
+                    context = example["context"]
+                    answers = []
 
-                return {"exact_match": em, "f1": f1_score}
+                    # Loop through all features associated with that example
+                    for feature_index in example_to_features[example_id]:
+                        start_logit = start_logits[feature_index]
+                        end_logit = end_logits[feature_index]
+                        offsets = features[feature_index]["offset_mapping"]
+
+                        start_indexes = np.argsort(start_logit)[-1 : -n_best - 1 : -1].tolist()
+                        end_indexes = np.argsort(end_logit)[-1 : -n_best - 1 : -1].tolist()
+                        for start_index in start_indexes:
+                            for end_index in end_indexes:
+                                # Skip answers that are not fully in the context
+                                if offsets[start_index] is None or offsets[end_index] is None:
+                                    continue
+                                # Skip answers with a length that is either < 0 or > max_answer_length
+                                if (
+                                    end_index < start_index
+                                    or end_index - start_index + 1 > self.trainer_tokenizer.model_max_length
+                                ):
+                                    continue
+
+                                answer = {
+                                    "text": context[offsets[start_index][0] : offsets[end_index][1]],
+                                    "logit_score": start_logit[start_index] + end_logit[end_index],
+                                }
+                                answers.append(answer)
+
+                    # Select the answer with the best score
+                    if len(answers) > 0:
+                        best_answer = max(answers, key=lambda x: x["logit_score"])
+                        predicted_answers.append({"id": example_id, "prediction_text": best_answer["text"]})
+                    else:
+                        predicted_answers.append({"id": example_id, "prediction_text": ""})
+
+                theoretical_answers = [{"id": ex["id"], "answers": ex["answers"]} for ex in examples]
+
+                return squad.compute(predictions=predicted_answers, references=theoretical_answers)
 
             func = compute_metrics_question_answering
         else:
@@ -423,17 +502,16 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         # get metrics function
         compute_metrics = self.compute_metrics()
 
-        self._transformers_model.to(self.device)
+        self.trainer_model.to(self.device)
         # set trainer
         if self.device == "cuda":
             self.trainer_kwargs["no_cuda"] = False
         elif self.device == "mps":
             self.trainer_kwargs["use_mps_device"] = True
-        self._training_args = TrainingArguments(**self.trainer_kwargs)
-        self._transformers_trainer = Trainer(
-            args=self._training_args,
-            model=self._transformers_model,
-            tokenizer=self._transformers_tokenizer,
+        self._trainer = Trainer(
+            args=TrainingArguments(**self.trainer_kwargs),
+            model=self.trainer_model,
+            tokenizer=self.trainer_tokenizer,
             train_dataset=self._tokenized_train_dataset,
             eval_dataset=self._tokenized_eval_dataset,
             compute_metrics=compute_metrics,
@@ -441,9 +519,9 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         )
 
         #  train
-        self._transformers_trainer.train()
+        self._trainer.train()
         if self._tokenized_eval_dataset:
-            self._metrics = self._transformers_trainer.evaluate()
+            self._metrics = self._trainer.evaluate()
             self._logger.info(self._metrics)
         else:
             self._metrics = None
@@ -464,7 +542,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         Returns:
           A list of predictions
         """
-        if self._pipeline is None:
+        if self.trainer_pipeline is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model(new=False)
             self.init_pipeline()
@@ -474,7 +552,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
             text = [text]
             str_input = True
 
-        predictions = self._pipeline(text, **kwargs)
+        predictions = self.trainer_pipeline(text, **kwargs)
 
         if as_argilla_records:
             formatted_prediction = []
@@ -490,7 +568,7 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
                     )
                 elif self._record_class == TokenClassificationRecord:
                     _pred = [(value["entity_group"], value["start"], value["end"]) for value in pred]
-                    encoding = self._pipeline.tokenizer(val)
+                    encoding = self.trainer_pipeline.tokenizer(val)
                     word_ids = sorted(set(encoding.word_ids()) - {None})
                     tokens = []
                     for word_id in word_ids:
@@ -522,5 +600,5 @@ class ArgillaTransformersTrainer(ArgillaTrainerSkeleton):
         Args:
           output_dir (str): the path to save the model to
         """
-        self._transformers_model.save_pretrained(output_dir)
-        self._transformers_tokenizer.save_pretrained(output_dir)
+        self.trainer_model.save_pretrained(output_dir)
+        self.trainer_tokenizer.save_pretrained(output_dir)

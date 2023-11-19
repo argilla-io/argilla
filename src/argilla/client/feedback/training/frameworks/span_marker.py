@@ -31,7 +31,7 @@ class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleto
         import torch
         from span_marker import SpanMarkerModel
 
-        self._span_marker_model = None
+        self.trainer_model = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():
@@ -63,6 +63,11 @@ class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleto
         self.init_training_args()
 
     def get_model_card_data(self, **card_data_kwargs) -> "FrameworkCardData":
+        raise NotImplementedError(
+            "This method has to be implemented after `FeedbackDataset` allows for token classification."
+        )
+
+    def push_to_huggingface(self, repo_id: str, **kwargs) -> None:
         raise NotImplementedError(
             "This method has to be implemented after `FeedbackDataset` allows for token classification."
         )

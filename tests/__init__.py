@@ -27,15 +27,3 @@ os.environ.update(
     NUMEXPR_NUM_THREADS="1",
     MKL_NUM_THREADS="1",
 )
-
-try:
-    client = ClientAdapterFactory.get(
-        hosts=settings.elasticsearch,
-        index_shards=settings.es_records_index_shards,
-        ssl_verify=settings.elasticsearch_ssl_verify,
-        ca_path=settings.elasticsearch_ca_path,
-    )
-
-    SUPPORTED_VECTOR_SEARCH = client.vector_search_supported
-except Exception:
-    SUPPORTED_VECTOR_SEARCH = False
