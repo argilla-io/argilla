@@ -138,6 +138,10 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
 
         self.init_training_args()
 
+    def get_trainer_kwargs(self):
+        """Get the trainer kwargs to be used in the `spacy` trainer."""
+        return self.trainer_kwargs["training"]
+
     @requires_dependencies("spacy-huggingface-hub")
     def push_to_huggingface(self, output_dir: str, **kwargs) -> str:
         r"""Uploads the model to [huggingface's model hub](https://huggingface.co/models).
