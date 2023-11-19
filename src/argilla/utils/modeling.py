@@ -166,7 +166,9 @@ class TextDescriptivesExtractor:
             name = col
             title = name.replace("_", " ").title()
             if dtype in ["object", "bool"]:
-                prop = TermsMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators, values=["True", "False"])
+                prop = TermsMetadataProperty(
+                    name=name, title=title, visible_for_annotators=self.visible_for_annotators, values=["True", "False"]
+                )
             elif dtype == "int64":
                 prop = IntegerMetadataProperty(
                     name=name, title=title, visible_for_annotators=self.visible_for_annotators
@@ -225,7 +227,9 @@ class TextDescriptivesExtractor:
         elif isinstance(dataset, RemoteFeedbackDataset):
             records = dataset.pull().records
         else:
-            raise ValueError(f"Provided `dataset` is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed.")
+            raise ValueError(
+                f"Provided `dataset` is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
+            )
         # Extract text descriptives metrics from records
         extracted_metrics = self._extract_metrics_for_all_fields(records)
         # Cast integer and boolean columns to Python native types
