@@ -28,6 +28,7 @@ These are the section headers that we use:
 
 ### Changed
 
+- Changed the logging style while pulling and pushing `FeedbackDataset` to Argilla from `tqdm` style to `rich`. ([#4267](https://github.com/argilla-io/argilla/pull/4267))
 - Updated `push_to_argilla` to print `repr` of the pushed `RemoteFeedbackDataset` after push and changed `show_progress` to True by default. ([#4223](https://github.com/argilla-io/argilla/pull/4223))
 
 ## [1.19.0](https://github.com/argilla-io/argilla/compare/v1.18.0...v1.19.0)
