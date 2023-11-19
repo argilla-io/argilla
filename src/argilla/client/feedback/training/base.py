@@ -379,8 +379,8 @@ class ArgillaTrainer(ArgillaTrainerV1):
         for kwarg in kwargs:
             if kwarg not in all_keys:
                 warnings.warn(
-                    f"'{kwarg}' is not a valid argument for '{self._trainer.__class__.__name__}'. "
-                    f"Valid arguments are: {all_keys}",
+                    f"'{kwarg}' is not a valid default argument for '{self._trainer.__class__.__name__}'. "
+                    f"Valid default arguments are: {all_keys}. ",
                     UserWarning,
                     stacklevel=2,
                 )
