@@ -24,7 +24,7 @@ from huggingface_hub import CardData, ModelCard, dataset_info, model_info
 from huggingface_hub.utils import yaml_dump
 
 from argilla._version import version
-from argilla.client.feedback.training.schemas import TRAINING_TASK_MAPPING, TrainingTaskTypes
+from argilla.client.feedback.training.schemas.base import TRAINING_TASK_MAPPING, TrainingTaskTypes
 from argilla.client.models import FRAMEWORK_TO_NAME_MAPPING, Framework
 from argilla.training.utils import get_default_args
 

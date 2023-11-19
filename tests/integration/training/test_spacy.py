@@ -27,9 +27,9 @@ class TestSpaCyTrainer:
     def test_update_config(self, framework: str, model: str, dataset_text_classification: str) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
         trainer.update_config(max_steps=15000)
-        assert trainer._trainer.config["training"]["max_steps"] == 15000
+        assert trainer._trainer.trainer_kwargs["training"]["max_steps"] == 15000
         trainer.update_config(num_epochs=1000)
-        assert trainer._trainer.config["training"]["num_epochs"] == 1000
+        assert trainer._trainer.trainer_kwargs["training"]["num_epochs"] == 1000
 
     def test_train_textcat(self, framework: str, model: str, dataset_text_classification: str) -> None:
         trainer = ArgillaTrainer(name=dataset_text_classification, framework=framework, model=model)
