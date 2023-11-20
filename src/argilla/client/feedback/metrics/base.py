@@ -113,7 +113,7 @@ class AnnotationTaskMetricBase(ABC):
         self._dataset = annotated_dataset
         self._distance_function = distance_function
 
-    def compute(self, **kwargs) -> float:
+    def compute(self) -> float:
         """General method to obtain the metric.
 
         Args:
@@ -123,9 +123,9 @@ class AnnotationTaskMetricBase(ABC):
             metric: Metric result that will be stored in the `AgreementMetricResult`.
         """
         data = self._pre_process(self._dataset)
-        return self._compute(data, **kwargs)
+        return self._compute(data)
 
-    def _pre_process(self, data: FormattedResponses, **kwargs) -> Any:
+    def _pre_process(self, data: FormattedResponses) -> Any:
         """Optional data preprocessing. By default it just passes the data to the _compute method.
 
         Args:
@@ -138,7 +138,7 @@ class AnnotationTaskMetricBase(ABC):
         return data
 
     @abstractmethod
-    def _compute(self, data: FormattedResponses, **kwargs):
+    def _compute(self, data: FormattedResponses):
         """Abstract method where the computation is done.
 
         Args:

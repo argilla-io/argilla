@@ -162,7 +162,7 @@ class AgreementMetric(MetricBase):
         super().__init__(dataset, question_name)
         self._response_status = response_status
 
-    def compute(self, metric_names: Union[str, List[str]], **kwargs) -> List[AgreementMetricResult]:
+    def compute(self, metric_names: Union[str, List[str]]) -> List[AgreementMetricResult]:
         """Computes the agreement metrics for the given question.
 
         Args:
@@ -189,14 +189,12 @@ class AgreementMetric(MetricBase):
             self._dataset, self._question_name, response_status=self._response_status
         )
 
-        distance_function = kwargs.get("distance_function")
-        if not distance_function:
-            distance_function = QUESTION_TO_DISTANCE[self._question_type]
+        distance_function = QUESTION_TO_DISTANCE[self._question_type]
 
         metrics = []
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(annotated_dataset=dataset, distance_function=distance_function)
-            result = metric.compute(**kwargs)
+            result = metric.compute()
             metrics.append(AgreementMetricResult(metric_name=metric_name, result=result))
 
         return metrics
@@ -287,7 +285,7 @@ class KrippendorfAlpha(NLTKAnnotationTaskMetric):
         https://www.nltk.org/api/nltk.metrics.agreement.html#nltk.metrics.agreement.AnnotationTask.alpha
     """
 
-    def _compute(self, dataset, **kwargs) -> float:
+    def _compute(self, dataset) -> float:
         return self.alpha()
 
 

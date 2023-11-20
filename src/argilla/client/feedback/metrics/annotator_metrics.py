@@ -47,12 +47,11 @@ class AnnotatorMetric(MetricBase):
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
 
-    def compute(self, metric_names: Union[str, List[str]], **kwargs) -> Dict[str, List[AnnotatorMetricResult]]:
+    def compute(self, metric_names: Union[str, List[str]]) -> Dict[str, List[AnnotatorMetricResult]]:
         """Computes the annotator metrics for the given question.
 
         Args:
             metric_names: name or list of names for the metrics to compute. i.e. `alpha`
-            kwargs: additional arguments to pass to the metric.
 
         Raises:
             ValueError: If the metric name is not supported for the given question.
@@ -78,7 +77,7 @@ class AnnotatorMetric(MetricBase):
         for user_id, responses in responses_per_user.items():
             for metric_name, metric_cls in metric_classes:
                 metric = metric_cls(responses=responses, suggestions=suggestions)
-                result = metric.compute(**kwargs)
+                result = metric.compute()
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
         return dict(metrics)
@@ -97,10 +96,10 @@ class AccuracyMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("scikit-learn")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         from sklearn.metrics import accuracy_score
 
-        return accuracy_score(responses, suggestions, **kwargs)
+        return accuracy_score(responses, suggestions)
 
 
 class PrecisionMetric(AnnotatorMetricBase):
@@ -114,12 +113,12 @@ class PrecisionMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("scikit-learn")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         from sklearn.metrics import precision_score
 
+        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
-            if not kwargs.get("average"):
-                kwargs.update({"average": "macro"})
+            kwargs = {"average": "macro"}
         return precision_score(responses, suggestions, **kwargs)
 
 
@@ -134,12 +133,12 @@ class RecallMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("scikit-learn")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         from sklearn.metrics import recall_score
 
+        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
-            if not kwargs.get("average"):
-                kwargs.update({"average": "macro"})
+            kwargs = {"average": "macro"}
         return recall_score(responses, suggestions, **kwargs)
 
 
@@ -154,12 +153,12 @@ class F1ScoreMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("scikit-learn")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         from sklearn.metrics import f1_score
 
+        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
-            if not kwargs.get("average"):
-                kwargs.update({"average": "macro"})
+            kwargs = {"average": "macro"}
         return f1_score(responses, suggestions, **kwargs)
 
 
@@ -170,14 +169,14 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("scikit-learn")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         import pandas as pd
         from sklearn.metrics import confusion_matrix
 
         unique_responses = sorted(np.unique(responses))
         unique_suggestions = sorted(np.unique(suggestions))
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
-        result = confusion_matrix(responses, suggestions, labels=labels, **kwargs)
+        result = confusion_matrix(responses, suggestions, labels=labels)
         return pd.DataFrame(result, index=labels, columns=labels)
 
 
@@ -186,7 +185,7 @@ class PearsonCorrelationCoefficientMetric(AnnotatorMetricBase):
         return map_str_to_int(responses), map_str_to_int(suggestions)
 
     @requires_dependencies("scipy")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         import scipy.stats as stats
 
         return stats.pearsonr(responses, suggestions)[0]
@@ -194,7 +193,7 @@ class PearsonCorrelationCoefficientMetric(AnnotatorMetricBase):
 
 class SpearmanCorrelationCoefficientMetric(AnnotatorMetricBase):
     @requires_dependencies("scipy")
-    def _compute(self, responses, suggestions, **kwargs):
+    def _compute(self, responses, suggestions):
         import scipy.stats as stats
 
         return stats.spearmanr(responses, suggestions)[0]
@@ -217,11 +216,11 @@ class GLEUMetric(AnnotatorMetricBase):
         return responses, [[suggestion] for suggestion in suggestions]
 
     @requires_dependencies("evaluate")
-    def _compute(self, responses: List[str], suggestions: List[str], **kwargs):
+    def _compute(self, responses: List[str], suggestions: List[str]):
         import evaluate
 
         gleu = evaluate.load("google_bleu")
-        return gleu.compute(predictions=responses, references=suggestions, **kwargs)["google_bleu"]
+        return gleu.compute(predictions=responses, references=suggestions)["google_bleu"]
 
 
 class ROUGEMetric(AnnotatorMetricBase):
@@ -238,11 +237,11 @@ class ROUGEMetric(AnnotatorMetricBase):
     """
 
     @requires_dependencies("evaluate")
-    def _compute(self, responses: List[str], suggestions: List[str], **kwargs):
+    def _compute(self, responses: List[str], suggestions: List[str]):
         import evaluate
 
         rouge = evaluate.load("rouge")
-        return rouge.compute(predictions=responses, references=suggestions, **kwargs)
+        return rouge.compute(predictions=responses, references=suggestions)
 
 
 # TODO(plaguss): Currently sklearn doesn't support any metrics for multiclass-multioutput
