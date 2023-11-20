@@ -1,4 +1,4 @@
-import { Metadata } from "./Metadata";
+import { Metadata } from "../metadata/Metadata";
 
 const SORT_ASC = "asc";
 const SORT_DESC = "desc";
@@ -55,7 +55,7 @@ class RecordSort extends Sort {
   }
 }
 
-export class MetadataSortList {
+export class SortList {
   private metadataSorts: Sort[];
   private selectedCategories: Sort[] = [];
   private latestCommit: SortSearch[] = [];

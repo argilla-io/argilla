@@ -2,12 +2,12 @@ import {
   createMetadataMock,
   createMetadataWithNoValuesMock,
 } from "../__mocks__/metadata/mock";
-import { MetadataSortList } from "./MetadataSort";
+import { SortList } from "./SortList";
 
-describe("MetadataSort ", () => {
+describe("SortList ", () => {
   describe("Select", () => {
     test("should be able to select a category", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
 
       metadataSort.select("split");
 
@@ -22,7 +22,7 @@ describe("MetadataSort ", () => {
 
   describe("Unselect", () => {
     test("should be able to unselect a category", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.select("split");
 
       metadataSort.unselect("split");
@@ -36,7 +36,7 @@ describe("MetadataSort ", () => {
 
   describe("Replace", () => {
     test("should be able to replace a category", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.select("loss");
       expect(metadataSort.selected[0].name).toEqual("loss");
 
@@ -53,7 +53,7 @@ describe("MetadataSort ", () => {
 
   describe("Clear", () => {
     test("should be able to clear all selected categories", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.select("loss");
       expect(
         metadataSort.selected.map((m) => m.name).includes("loss")
@@ -73,7 +73,7 @@ describe("MetadataSort ", () => {
 
   describe("toggleSort", () => {
     test("should be able to toggle sort", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.select("loss");
       expect(metadataSort.selected[0].sort).toEqual("asc");
 
@@ -85,7 +85,7 @@ describe("MetadataSort ", () => {
 
   describe("commit should", () => {
     test("be able to convert to router params", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.select("loss");
       metadataSort.select("split");
       metadataSort.toggleSort("loss");
@@ -104,7 +104,7 @@ describe("MetadataSort ", () => {
 
   describe("Complete by Route Params", () => {
     test("should be able to complete by route params", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
       metadataSort.complete([
         { key: "metadata", name: "loss", sort: "desc" },
         { key: "", name: "inserted_at", sort: "asc" },
@@ -121,7 +121,7 @@ describe("MetadataSort ", () => {
 
   describe("Can sort should", () => {
     test("return true if the metadata sort has value", () => {
-      const metadataSort = new MetadataSortList(createMetadataMock());
+      const metadataSort = new SortList(createMetadataMock());
 
       metadataSort.noSelected.forEach((metadataSort) => {
         expect(metadataSort.canSort).toBeTruthy();
@@ -130,9 +130,7 @@ describe("MetadataSort ", () => {
 
     test("return false if the metadata sort has value", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const metadataSort = new MetadataSortList(
-        metadataForSortingWithoutValues
-      );
+      const metadataSort = new SortList(metadataForSortingWithoutValues);
 
       metadataSort.noSelected
         .filter((n) =>
@@ -145,9 +143,7 @@ describe("MetadataSort ", () => {
 
     test("return always true for metadata hardcoded like inserted at and updated at", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const metadataSort = new MetadataSortList(
-        metadataForSortingWithoutValues
-      );
+      const metadataSort = new SortList(metadataForSortingWithoutValues);
 
       metadataSort.select("inserted_at");
       metadataSort.select("updated_at");

@@ -1,5 +1,5 @@
 import { Criteria } from "../common/Criteria";
-import { SortSearch } from "./MetadataSort";
+import { SortSearch } from "./SortList";
 
 const SORT_ELEMENT_SEPARATOR = ",";
 const SORT_KEY_SEPARATOR = ".";

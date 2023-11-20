@@ -1,5 +1,5 @@
 import { SimilarityCriteria } from "../similarity/SimilarityCriteria";
-import { SortCriteria } from "../metadata/SortCriteria";
+import { SortCriteria } from "../sort/SortCriteria";
 import { MetadataCriteria } from "../metadata/MetadataCriteria";
 import { ResponseCriteria } from "../response/ResponseCriteria";
 import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";

@@ -14,7 +14,7 @@ import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
-import { SortCriteria } from "~/v1/domain/entities/metadata/SortCriteria";
+import { SortCriteria } from "~/v1/domain/entities/sort/SortCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { MetadataCriteria } from "~/v1/domain/entities/metadata/MetadataCriteria";
