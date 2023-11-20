@@ -1,8 +1,6 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent
-      :question="question"
-    />
+    <QuestionHeaderComponent :question="question" />
     <DndSelectionComponent
       :ranking="ranking"
       :suggestions="question.suggestion?.suggestedAnswer"
