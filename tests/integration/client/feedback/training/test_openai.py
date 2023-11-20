@@ -16,7 +16,7 @@ import re
 
 import argilla as rg
 import pytest
-from argilla.client.feedback.training.schemas import TrainingTaskForChatCompletionFormat
+from argilla.client.feedback.training.schemas.return_types import ChatCompletionReturnTypes
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 from tests.integration.client.feedback.helpers import formatting_func_chat_completion
@@ -28,7 +28,7 @@ def test_training_task_for_chat_completion(mocked_openai):
     with pytest.raises(
         ValueError,
         match=re.escape(
-            f"formatting_func must return {TrainingTaskForChatCompletionFormat.__annotations__['format']}, not <class 'dict'>"
+            f"formatting_func must return {ChatCompletionReturnTypes.__annotations__['format']}, not <class 'list'>"
         ),
     ):
         task = rg.feedback.TrainingTask.for_chat_completion(formatting_func=lambda x: {"test": "test"})
