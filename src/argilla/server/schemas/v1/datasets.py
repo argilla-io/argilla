@@ -97,6 +97,18 @@ RECORDS_CREATE_MAX_ITEMS = 1000
 RECORDS_UPDATE_MIN_ITEMS = 1
 RECORDS_UPDATE_MAX_ITEMS = 1000
 
+TERMS_FILTER_VALUES_MIN_ITEMS = 1
+TERMS_FILTER_VALUES_MAX_ITEMS = 250
+
+FILTER_FIELD_MIN_LENGTH = 1
+FILTER_FIELD_MAX_LENGTH = 250
+
+FILTERS_AND_MIN_ITEMS = 1
+FILTERS_AND_MAX_ITEMS = 50
+
+SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
+SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
 
 class Dataset(BaseModel):
     id: UUID
@@ -714,47 +726,44 @@ class Query(BaseModel):
         return values
 
 
-# NOTE: Not sure if this filter is useful, if we don't need it we can offer TermsFilter only instead
-class TermFilter(BaseModel):
-    type: Literal["term"]
-    field: str
-    value: Union[str, float]
+FilterField = Annotated[str, PydanticField(..., min_length=FILTER_FIELD_MIN_LENGTH, max_length=FILTER_FIELD_MAX_LENGTH)]
 
 
-# TODO: Add constraint to field length
-# TODO: Add constraint to values items length
 class TermsFilter(BaseModel):
     type: Literal["terms"]
-    field: str
-    values: List[Union[str, float]]
+    field: FilterField
+    values: List[str] = PydanticField(
+        ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
+    )
 
 
-# TODO: Add constraint to field length
-# TODO: Add validation to have at least one value `gte` or `lte` (or both)
 class RangeFilter(BaseModel):
     type: Literal["range"]
-    field: str
-    gte: Optional[float]
-    lte: Optional[float]
+    field: FilterField
+    gte: float
+    lte: float
 
 
-Filter = Annotated[Union[TermFilter, TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
+Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
 
 
-# TODO: Add constraint to and_ items length
 class Filters(BaseModel):
-    and_: Optional[List[Filter]] = PydanticField(None, alias="and")
+    and_: Optional[List[Filter]] = PydanticField(
+        None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS
+    )
 
 
 class Order(BaseModel):
-    field: str
+    field: FilterField
     order: Union[Literal["asc"], Literal["desc"]]
 
 
 class SearchRecordsQuery(BaseModel):
     query: Query
     filters: Optional[Filters]
-    sort: Optional[List[Order]]
+    sort: Optional[List[Order]] = PydanticField(
+        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+    )
 
 
 class SearchRecord(BaseModel):
