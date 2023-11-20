@@ -18,7 +18,6 @@ import warnings
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
-import magic
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb2hex
 
@@ -44,15 +43,13 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
 
     Raises:
         FileNotFoundError: If the file does not exist or is empty.
-        ValueError: If the provided file type is not supported.
+        ValueError: If no provided file type using bytes as input or the file type is not supported.
     """
 
     if isinstance(media_source, bytes):
         # Get the file type if not provided
         if not file_type:
-            type_detector = magic.Magic(mime=True)
-            mime_type = type_detector.from_buffer(media_source)
-            file_type = mime_type.removeprefix("video/").removeprefix("audio/").removeprefix("image/")
+            raise ValueError("File type must be provided if media source is a byte string.")
 
         file_data = media_source
 
@@ -68,6 +65,12 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
             file_type = file_path.suffix[1:].lower()
 
         file_data = file_path.read_bytes()
+
+    # Check the size of the file to be properly rendered
+    if len(file_data) > 5000000:
+        raise ValueError(
+            f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
+        )
 
     # Check if the file type is supported
     if file_type not in SUPPORTED_MEDIA_TYPES[media_type]:
@@ -88,7 +91,7 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
     if media_type == "video":
         html = f"<video controls><source src='{data_url}' type='video/{file_type}'></video>"
     elif media_type == "audio":
-        html = f"<audio controls autoplay><source src='{data_url}' type='audio/{file_type}'></audio>"
+        html = f"<audio controls><source src='{data_url}' type='audio/{file_type}'></audio>"
     elif media_type == "image":
         html = f'<img src="{data_url}">'
     else:

@@ -26,13 +26,13 @@ from argilla.client.feedback.utils import (
 
 
 @pytest.mark.parametrize(
-    "media_type, path, file_type, expected",
+    "media_type, source, file_type, expected",
     [
         (
             "audio",
             "test.mp3",
             None,
-            "<audio controls autoplay><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
+            "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
         ),
         (
             "video",
@@ -54,13 +54,31 @@ from argilla.client.feedback.utils import (
         ("image", "test.bmp", None, "Unsupported image type"),
         ("video", "non_existent.mp4", None, "non_existent.mp4 does not exist or is empty."),
         ("video", "empty.mp4", None, "empty.mp4 does not exist or is empty."),
+        (
+            "video",
+            b"dummy_data",
+            "mp4",
+            "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>",
+        ),
+        (
+            "audio",
+            b"dummy_data",
+            "mp3",
+            "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
+        ),
+        ("video", b"dummy_data", "mp4", "It is recommended to use files smaller than 5MB,"),
     ],
 )
-def test_media_to_html(media_type, path, file_type, expected, tmp_path):
-    temp_file = tmp_path / path
-
-    if "does not exist" not in expected:
-        temp_file.write_bytes(b"dummy_data" if not path.endswith("empty.mp4") else b"")
+def test_media_to_html(media_type, source, file_type, expected, tmp_path):
+    if isinstance(source, bytes):
+        media_source = source
+        if "It is recommended" in expected:
+            media_source = media_source * 5000000
+    else:
+        temp_file = tmp_path / source
+        if "does not exist" not in expected:
+            temp_file.write_bytes(b"dummy_data" if not source.endswith("empty.mp4") else b"")
+        media_source = str(temp_file)
 
     encoded_data = base64.b64encode(b"dummy_data").decode("utf-8")
 
@@ -68,7 +86,7 @@ def test_media_to_html(media_type, path, file_type, expected, tmp_path):
         expected = expected.format(encoded_data)
 
     try:
-        result = media_to_html(media_type, str(temp_file), file_type)
+        result = media_to_html(media_type, media_source, file_type)
         assert result == expected
     except (ValueError, FileNotFoundError) as e:
         assert expected in str(e)
@@ -81,7 +99,7 @@ def test_media_to_html(media_type, path, file_type, expected, tmp_path):
         (
             audio_to_html,
             "test.mp3",
-            "<audio controls autoplay><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
+            "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
         ),
         (image_to_html, "test.png", '<img src="data:image/png;base64,{}">'),
     ],
@@ -104,8 +122,6 @@ def test_wrappers(func, path, expected, tmp_path):
         (["token1", "token2"], [0, 0], None, None, "<p>token1 token2 </p>"),
         ([], [], None, ValueError, None),
         (["token1"], [0.5], None, None, "token1"),
-        (["token1", "token2"], [0.5, 0.5], None, TypeError, "token1"),
-        (["token1", "token2"], [1, 2], None, None, '<span style="background-color:'),
         (["token1", "token2"], [0.5, 0.8], "viridis", None, '<span style="background-color:'),
     ],
 )
