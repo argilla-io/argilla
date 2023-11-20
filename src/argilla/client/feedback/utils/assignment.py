@@ -13,17 +13,20 @@
 #  limitations under the License.
 
 
+import random
+from collections import defaultdict
+from typing import Any, Dict, List, Union
+
 from argilla.client.users import User
 from argilla.client.workspaces import Workspace
 
-from typing import Any, Dict, List, Union
-from collections import defaultdict
-import random
-
 # DOCS: Step 1: login argilla/ get all users (list/dict)/ get records
 
+
 # Step 2: assign records
-def assign_records_to_groups(groups: Dict[str, List[Any]], records: List[Any], overlap: int, shuffle: bool = True) -> Dict[str, Dict[str, Any]]:
+def assign_records_to_groups(
+    groups: Dict[str, List[Any]], records: List[Any], overlap: int, shuffle: bool = True
+) -> Dict[str, Dict[str, Any]]:
     """
     Assign records to predefined groups with controlled overlap (for the groups) and optional shuffle. All members of the same group will annotate the same records.
 
@@ -57,7 +60,6 @@ def assign_records_to_groups(groups: Dict[str, List[Any]], records: List[Any], o
             group_name = group_names[group_index]
             group_records[group_name].append(record)
 
-
     for group, users in groups.items():
         for user in users:
             assignments[user] = group_records[group]
@@ -67,7 +69,9 @@ def assign_records_to_groups(groups: Dict[str, List[Any]], records: List[Any], o
     return assignments_grouped
 
 
-def assign_records_individuals(users: List[Any], records: List[Any], overlap: int, shuffle: bool = True) -> Dict[str, List[Any]]:
+def assign_records_individuals(
+    users: List[Any], records: List[Any], overlap: int, shuffle: bool = True
+) -> Dict[str, List[Any]]:
     """
     Assign records to users with controlled overlap and optional shuffle.
 
@@ -97,8 +101,11 @@ def assign_records_individuals(users: List[Any], records: List[Any], overlap: in
 
     return assignments
 
+
 # Main function
-def assign_records(users: Union[Dict[str, List[Any]], List[Any]], records: List[Any], overlap: int, shuffle: bool = True) -> Union[Dict[str, List[Any]], Dict[str, Dict[str, Any]]]:
+def assign_records(
+    users: Union[Dict[str, List[Any]], List[Any]], records: List[Any], overlap: int, shuffle: bool = True
+) -> Union[Dict[str, List[Any]], Dict[str, Dict[str, Any]]]:
     """
     Assign records to either groups or individuals, with controlled overlap and optional shuffle.
 
@@ -120,16 +127,17 @@ def assign_records(users: Union[Dict[str, List[Any]], List[Any]], records: List[
 
 # Step 3: push dataset/s
 
+
 def assign_workspaces(assignments, workspace_type):
     for group, users in assignments.items():
-        if workspace_type == 'group':
+        if workspace_type == "group":
             workspace_name = group
             user_ids = [User.from_name(username).id for username in users.keys()]
-        elif workspace_type == 'group_personal':
+        elif workspace_type == "group_personal":
             for username in users.keys():
                 workspace_name = username
                 user_ids = [User.from_name(username).id]
-        elif workspace_type == 'individual':
+        elif workspace_type == "individual":
             workspace_name = group  # Here, 'group' is actually an individual's name
             user_ids = [User.from_name(workspace_name).id]
 
@@ -142,6 +150,7 @@ def assign_workspaces(assignments, workspace_type):
         # Add users to the workspace
         for user_id in user_ids:
             workspace.add_user(user_id)
+
 
 # DOCS:
 
@@ -170,12 +179,12 @@ def assign_workspaces(assignments, workspace_type):
 # assign_workspaces(assignments, workspace_type)
 
 # for group, users in assignments.items():  # for user, records in assigments.items():
-    # dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
-    # dataset.add_records(records)
-    # remote_dataset = dataset.push_to_argilla(name="my_dataset"", workspace=workspace.name)
+# dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
+# dataset.add_records(records)
+# remote_dataset = dataset.push_to_argilla(name="my_dataset"", workspace=workspace.name)
 
 # for group, users in assignments.items():
 #     for username, records in users.items():
-        # dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
-        # dataset.add_records(records)
-        # remote_dataset = dataset.push_to_argilla(name="my_dataset"", workspace=workspace.name)
+# dataset = rg.FeedbackDataset(fields=fields, questions=questions, guidelines=guidelines)
+# dataset.add_records(records)
+# remote_dataset = dataset.push_to_argilla(name="my_dataset"", workspace=workspace.name)
