@@ -73,28 +73,26 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         super().__init__(*args, **kwargs)
         import spacy
 
-        self._nlp = None
         self._model = model
 
         if self._model is None:
             self._model = "en_core_web_sm"
             self._logger.warning(f"No model defined. Using the default model {self._model}.")
 
-        self.config = {}
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
                 "text": "text",
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
-            self._pipeline = ["ner"]
+            self._spacy_pipeline_components = ["ner"]
         elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
-                self._pipeline = ["textcat_multilabel"]
+                self._spacy_pipeline_components = ["textcat_multilabel"]
             else:
                 self._column_mapping = {"text": "text", "label": "label"}
-                self._pipeline = ["textcat"]
+                self._spacy_pipeline_components = ["textcat"]
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
@@ -139,7 +137,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
     def init_model(self):
         import spacy
 
-        self._nlp = spacy.load(self._model)
+        self.trainer_model = spacy.load(self._model)
 
     def __repr__(self) -> None:
         """Return the string representation of the `ArgillaSpaCyTrainer` object containing
@@ -150,7 +148,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
             " the `training` arguments defined in the `config.yaml`."
         )
         formatted_string.append("\n`ArgillaSpaCyTrainer`")
-        for key, val in self.config["training"].items():
+        for key, val in self.trainer_kwargs["training"].items():
             if isinstance(val, dict):
                 continue
             formatted_string.append(f"\t{key}: {val}")
@@ -170,7 +168,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         Args:
             **spacy_training_config: The `spaCy` training config.
         """
-        self.config["training"].update(spacy_training_config)
+        self.trainer_kwargs["training"].update(spacy_training_config)
 
     def train(self, output_dir: Optional[str] = None) -> None:
         """Train the pipeline using `spaCy`.
@@ -197,8 +195,8 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         # cell if using the GPU, otherwise, since `thinc` is using `ContextVars` to
         # store the `Config` object, the `Config` object will be lost between cells and
         # the training will fail.
-        self._nlp = init_nlp(self.config, use_gpu=self.gpu_id)
-        self._nlp, _ = train_nlp(self._nlp, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
+        self.trainer_model = init_nlp(self.trainer_kwargs, use_gpu=self.gpu_id)
+        self.trainer_model, _ = train_nlp(self.trainer_model, use_gpu=self.gpu_id, stdout=sys.stdout, stderr=sys.stderr)
 
         if output_dir:
             self.save(output_dir)
@@ -212,7 +210,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
         output_dir = Path(output_dir) if isinstance(output_dir, str) else output_dir
         if output_dir and not output_dir.exists():
             output_dir.mkdir(parents=True)
-        self._nlp.to_disk(output_dir)
+        self.trainer_model.to_disk(output_dir)
 
     def predict(
         self, text: Union[List[str], str], as_argilla_records: bool = True, **kwargs
@@ -229,7 +227,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
             Either a `dict`, `BaseModel` (if `as_argilla_records` is True) or a `List[dict]`,
             `List[BaseModel]` (if `as_argilla_records` is True) with the predictions.
         """
-        if self._nlp is None:
+        if self.trainer_model is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model()
 
@@ -239,10 +237,10 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
             str_input = True
 
         formatted_prediction = []
-        docs = self._nlp.pipe(text, **kwargs)
+        docs = self.trainer_model.pipe(text, **kwargs)
         if as_argilla_records:
             for doc in docs:
-                if "ner" in self._pipeline:
+                if "ner" in self._spacy_pipeline_components:
                     entities = [(ent.label_, ent.start_char, ent.end_char) for ent in doc.ents]
                     pred = {
                         "text": doc.text,
@@ -250,7 +248,7 @@ class _ArgillaSpaCyTrainerBase(ArgillaTrainerSkeleton):
                         "prediction": entities,
                     }
                     pred = self._record_class(**pred)
-                elif any([p in self._pipeline for p in ["textcat", "textcat_multilabel"]]):
+                elif any([p in self._spacy_pipeline_components for p in ["textcat", "textcat_multilabel"]]):
                     pred = {
                         "text": doc.text,
                         "prediction": [(k, v) for k, v in doc.cats.items()],
@@ -292,35 +290,35 @@ class ArgillaSpaCyTrainer(_ArgillaSpaCyTrainerBase):
 
         # We generate the config with GPU just when we are using `spacy-transformers`,
         # otherwise the default configuration will be messed up for `spacy`.
-        self.config = init_config(
+        self.trainer_kwargs = init_config(
             lang=self.language,
-            pipeline=self._pipeline,
+            pipeline=self._spacy_pipeline_components,
             optimize=self.optimize,
             gpu=False,
         )
 
-        self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._eval_dataset_path
-        self.config["system"]["seed"] = self._seed or 42
+        self.trainer_kwargs["paths"]["train"] = self._train_dataset_path
+        self.trainer_kwargs["paths"]["dev"] = self._eval_dataset_path
+        self.trainer_kwargs["system"]["seed"] = self._seed or 42
 
         # Now we can already set the GPU properties if we want to train/fine-tune a
         # `spacy` model using the GPU, or a `spacy-transformers` model using the CPU.
-        self.config["system"]["gpu_allocator"] = (
+        self.trainer_kwargs["system"]["gpu_allocator"] = (
             ("pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None) if self.use_gpu else None
         )
-        self.config["nlp"]["batch_size"] = 128 if self.use_gpu else 1000
+        self.trainer_kwargs["nlp"]["batch_size"] = 128 if self.use_gpu else 1000
 
-        if "tok2vec" in self.config["nlp"]["pipeline"]:
+        if "tok2vec" in self.trainer_kwargs["nlp"]["pipeline"]:
             # If we want to fine-tune the `tok2vec` component, then we need to set the
             # `init_tok2vec` path to the model we want to fine-tune.
             if self.freeze_tok2vec is False:
-                self.config["paths"]["init_tok2vec"] = self._model
+                self.trainer_kwargs["paths"]["init_tok2vec"] = self._model
             else:
                 # Otherwise, if we don't want to fine-tune the `tok2vec` component, then we
                 # need to set the `frozen_components` and `annotating_components` to
                 # `["tok2vec"]`.
-                self.config["training"]["frozen_components"] = ["tok2vec"]
-                self.config["training"]["annotating_components"] = ["tok2vec"]
+                self.trainer_kwargs["training"]["frozen_components"] = ["tok2vec"]
+                self.trainer_kwargs["training"]["annotating_components"] = ["tok2vec"]
 
 
 class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
@@ -346,30 +344,30 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
 
         # We generate the config with GPU just when we are using `spacy-transformers`,
         # otherwise the default configuration will be messed up for `spacy`.
-        self.config = init_config(
+        self.trainer_kwargs = init_config(
             lang=self.language,
-            pipeline=self._pipeline,
+            pipeline=self._spacy_pipeline_components,
             optimize=self.optimize,
             gpu=True,
         )
 
-        self.config["paths"]["train"] = self._train_dataset_path
-        self.config["paths"]["dev"] = self._eval_dataset_path
-        self.config["system"]["seed"] = self._seed or 42
+        self.trainer_kwargs["paths"]["train"] = self._train_dataset_path
+        self.trainer_kwargs["paths"]["dev"] = self._eval_dataset_path
+        self.trainer_kwargs["system"]["seed"] = self._seed or 42
 
         # Now we can already set the GPU properties if we want to train/fine-tune a
         # `spacy` model using the GPU, or a `spacy-transformers` model using the CPU.
-        self.config["system"]["gpu_allocator"] = (
+        self.trainer_kwargs["system"]["gpu_allocator"] = (
             ("pytorch" if self.has_torch else "tensorflow" if self.has_tensorflow else None) if self.use_gpu else None
         )
-        self.config["nlp"]["batch_size"] = 128 if self.use_gpu else 16
+        self.trainer_kwargs["nlp"]["batch_size"] = 128 if self.use_gpu else 16
 
         # If we use `spacy-transformers` then we need to set the `transformer` component
         # in the pipeline, and we need to set the `name` of the model to load.
-        self.config["components"]["transformer"]["name"] = self._model
-        self.config["nlp"]["pipeline"] = ["transformer"] + self._pipeline
+        self.trainer_kwargs["components"]["transformer"]["name"] = self._model
+        self.trainer_kwargs["nlp"]["pipeline"] = ["transformer"] + self._spacy_pipeline_components
 
-        if "transformer" in self.config["nlp"]["pipeline"]:
+        if "transformer" in self.trainer_kwargs["nlp"]["pipeline"]:
             # The `transformer` component cannot be frozen, but we can set the `grad_factor`
             # to 0.0 to avoid updating the weights of the `transformer` component. Even though
             # the computation of those weights will be performed, the gradients will be
@@ -377,4 +375,4 @@ class ArgillaSpaCyTransformersTrainer(_ArgillaSpaCyTrainerBase):
             # self.config["training"]["frozen_components"] = ["transformer"]
             # self.config["training"]["annotating_components"] = ["transformer"]
             if not self.update_transformer:
-                self.config["components"]["transformer"]["grad_factor"] = 0.0
+                self.trainer_kwargs["components"]["transformer"]["grad_factor"] = 0.0
