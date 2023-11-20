@@ -39,6 +39,7 @@ from argilla.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
+    search_records,
     update_records,
 )
 from argilla.client.sdk.v1.datasets.models import (
@@ -48,7 +49,10 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackMetadataPropertyModel,
     FeedbackMetricsModel,
     FeedbackQuestionModel,
+    FeedbackRecordSearchModel,
     FeedbackRecordsModel,
+    FeedbackRecordsSearchModel,
+    FeedbackRecordsSearchVectorQuery,
     FeedbackSuggestionModel,
 )
 from argilla.client.sdk.v1.records.api import set_suggestion
@@ -367,9 +371,11 @@ async def test_update_records(test_dataset: FeedbackDataset, role: UserRole) -> 
     assert response.status_code == 204
 
 
+@pytest.mark.skip(reason="Enable when factories are removed from the test")
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_get_records(role: UserRole) -> None:
+    # TODO: Remote this test. It does not make sense as integration test
     dataset = await DatasetFactory.create(
         status=DatasetStatus.ready,
         fields=[await TextFieldFactory.create(required=True)],

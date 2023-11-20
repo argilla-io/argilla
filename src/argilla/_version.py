@@ -13,4 +13,4 @@
 #  limitations under the License.
 
 # coding: utf-8
-version = "1.19.0-dev"
+version = "1.20.0-dev"

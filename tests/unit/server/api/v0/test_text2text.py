@@ -24,8 +24,6 @@ from argilla.server.apis.v0.models.text2text import (
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 
-from tests import SUPPORTED_VECTOR_SEARCH
-
 if TYPE_CHECKING:
     from httpx import AsyncClient
 
@@ -116,10 +114,6 @@ async def search_data(
             assert vector_name in record.vectors
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 @pytest.mark.asyncio
 async def test_search_with_vectors(async_client: "AsyncClient", argilla_user: User):
     async_client.headers.update({API_KEY_HEADER_NAME: argilla_user.api_key})

@@ -12,17 +12,33 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import json
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import LabelQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
+    LabelQuestion,
+    LabelQuestionUnification,
+    RatingQuestion,
+    RatingQuestionUnification,
     TrainingTask,
 )
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
+from tests.integration.client.feedback.helpers import (
+    formatting_func_sentence_transformers,
+    formatting_func_sentence_transformers_case_1_b,
+    formatting_func_sentence_transformers_case_2,
+    formatting_func_sentence_transformers_case_3_a,
+    formatting_func_sentence_transformers_case_3_b,
+    formatting_func_sentence_transformers_case_4,
+    formatting_func_sentence_transformers_rating_question,
+)
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
@@ -30,116 +46,6 @@ if TYPE_CHECKING:
 
 __OUTPUT_DIR__ = "tmp"
 __FRAMEWORK__ = "sentence-transformers"
-
-
-# All the formatting functions generate dummy datasets with the formats allowed (almost a copy than those of trl)
-
-
-def formatting_func_case_1_a(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1}
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0},
-            ]
-
-
-def formatting_func_case_1_b(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786}
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.786},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "label": 0.56},
-            ]
-
-
-def formatting_func_case_2(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"]}
-        elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"]}] * 2
-
-
-def formatting_func_case_3_a(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        # Three cases for the tests: None, one tuple and yielding multiple tuples
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence": sample["text"], "label": 1}
-        elif labels[0] == "c":
-            return [{"sentence": sample["text"], "label": 1}, {"sentence": sample["text"], "label": 0}]
-
-
-def formatting_func_case_3_b(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {
-                "sentence-1": sample["text"],
-                "sentence-2": sample["text"],
-                "sentence-3": sample["text"],
-                "label": 1,
-            }
-        elif labels[0] == "c":
-            return [
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 1},
-                {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"], "label": 0},
-            ]
-
-
-def formatting_func_case_4(sample):
-    labels = [
-        annotation["value"]
-        for annotation in sample["question-3"]
-        if annotation["status"] == "submitted" and annotation["value"] is not None
-    ]
-    if labels:
-        if labels[0] == "a":
-            return None
-        elif labels[0] == "b":
-            return {"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}
-        elif labels[0] == "c":
-            return [{"sentence-1": sample["text"], "sentence-2": sample["text"], "sentence-3": sample["text"]}] * 2
 
 
 def formatting_func_errored(sample):
@@ -156,11 +62,12 @@ def formatting_func_errored(sample):
 @pytest.mark.parametrize(
     "formatting_func",
     [
-        formatting_func_case_1_a,
-        formatting_func_case_1_b,
-        formatting_func_case_2,
-        formatting_func_case_3_b,
-        formatting_func_case_4,
+        formatting_func_sentence_transformers,
+        formatting_func_sentence_transformers_case_1_b,
+        formatting_func_sentence_transformers_case_2,
+        formatting_func_sentence_transformers_case_3_b,
+        formatting_func_sentence_transformers_case_4,
+        formatting_func_sentence_transformers_rating_question,
     ],
 )
 @pytest.mark.usefixtures(
@@ -185,7 +92,12 @@ def test_prepare_for_training_sentence_transformers(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+    if formatting_func.__name__ == "formatting_func_sentence_transformers_rating_question":
+        label_strategy = RatingQuestionUnification(question=dataset.question_by_name("question-2"), strategy="majority")
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func, label_strategy=label_strategy)
+    else:
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+
     train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
 
     assert isinstance(train_dataset, list)
@@ -229,8 +141,40 @@ def test_prepare_for_training_sentence_transformers(
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
 
 
+def test_task_with_different_naming():
+    dataset = FeedbackDataset(
+        fields=[
+            TextField(name="query"),
+            TextField(name="retrieved_document_1"),
+        ],
+        questions=[
+            LabelQuestion(
+                name="sentence_similarity",
+                labels={"0": "Not-similar", "1": "Missing-information", "2": "Similar"},
+            ),
+        ],
+    )
+
+    records = [
+        FeedbackRecord(
+            fields={"query": "some text", "retrieved_document_1": "retrieved data"},
+            responses=[{"values": {"sentence_similarity": {"value": value}}}],
+        )
+        for value in ["0", "1", "2"]
+    ]
+
+    dataset.add_records(records)
+
+    task = TrainingTask.for_sentence_similarity(
+        texts=[dataset.field_by_name("query"), dataset.field_by_name("retrieved_document_1")],
+        label=dataset.question_by_name("sentence_similarity"),
+    )
+    train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
+    assert all(example.label == label for example, label in zip(train_dataset, [0, 1, 2]))
+
+
 @pytest.mark.parametrize("cross_encoder", [False, True])
-@pytest.mark.parametrize("formatting_func", [formatting_func_case_3_a, formatting_func_errored])
+@pytest.mark.parametrize("formatting_func", [formatting_func_sentence_transformers_case_3_a, formatting_func_errored])
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -308,3 +252,44 @@ def test_prepare_for_training_sentence_transformers_with_defaults(
 
     assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
+
+
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records",
+)
+def test_push_to_huggingface(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records: List[FeedbackRecord],
+    mocked_trainer_push_to_huggingface,
+) -> None:
+    # This framework is not implemented yet. Cross-Encoder models don't implement the functionality
+    # for pushing a model to huggingface, and SentenceTransformer models have the functionality
+    # but is outdated and doesn't work with the current versions of 'huggingface-hub'.
+    # The present test is let here for the future, when we either implement the functionality
+    # in 'argilla', or to 'sentence-transformers'.
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records * 2)
+
+    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func_sentence_transformers)
+
+    model = "all-MiniLM-L6-v2"
+
+    trainer = ArgillaTrainer(dataset=dataset, task=task, framework=__FRAMEWORK__, model=model)
+
+    trainer.update_config(max_steps=1)
+
+    train_with_cleanup(trainer, __OUTPUT_DIR__)
+    with pytest.raises(
+        NotImplementedError, match="This method is not implemented for `ArgillaSentenceTransformersTrainer`."
+    ):
+        trainer.push_to_huggingface("mocked", generate_card=True)

@@ -15,13 +15,13 @@
 import dataclasses
 import datetime
 from abc import abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter
+from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import (
     Dataset,
     Field,
@@ -31,6 +31,8 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
+    Vector,
+    VectorSettings,
 )
 from argilla.server.search_engine.base import (
     FloatMetadataFilter,
@@ -43,18 +45,14 @@ from argilla.server.search_engine.base import (
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    StringQuery,
     TermsMetadataFilter,
     TermsMetadataMetrics,
+    TextQuery,
+    UserResponse,
     UserResponseStatusFilter,
 )
 
 ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
-
-
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
 
 
 def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
@@ -68,6 +66,10 @@ def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, An
             search_engine_metadata[str(metadata_property.name)] = value
 
     return search_engine_metadata
+
+
+def _build_vectors_field_payload(vectors: List[Vector]) -> Dict[str, List[float]]:
+    return {str(vector.vector_settings.id): vector.value for vector in vectors}
 
 
 class SearchDocumentGetter(GetterDict):
@@ -87,6 +89,11 @@ class SearchDocumentGetter(GetterDict):
             }
         elif key == "metadata":
             return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
+        elif key == "vectors":
+            if not self._obj.is_relationship_loaded("vectors") or not self._obj.vectors:
+                return default
+
+            return _build_vectors_field_payload(self._obj.vectors)
 
         return super().get(key, default)
 
@@ -96,7 +103,8 @@ class SearchDocument(BaseModel):
     fields: Dict[str, Any]
 
     metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[Dict[str, UserResponse]]
+    responses: Optional[Dict[str, UserResponse]] = None
+    vectors: Optional[Dict[str, List[float]]] = None
 
     inserted_at: datetime.datetime
     updated_at: datetime.datetime
@@ -108,6 +116,10 @@ class SearchDocument(BaseModel):
 
 def index_name_for_dataset(dataset: Dataset):
     return f"rg.{dataset.id}"
+
+
+def field_name_for_vector_settings(vector_settings: VectorSettings) -> str:
+    return f"vectors.{vector_settings.id}"
 
 
 def _mapping_for_field(field: Field) -> dict:
@@ -197,7 +209,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         bulk_actions = [
             {
                 # If document exist, we update source with latest version
-                "_op_type": "index",
+                "_op_type": "index",  # TODO: Review and maybe change to partial update
                 "_id": record.id,
                 "_index": index_name,
                 **SearchDocument.from_orm(record).dict(exclude_unset=True),
@@ -236,10 +248,84 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
         )
 
+    async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
+        index_name = await self._get_index_or_raise(dataset)
+
+        bulk_actions = [
+            {
+                "_op_type": "update",
+                "_id": vector.record_id,
+                "_index": index_name,
+                "doc": {field_name_for_vector_settings(vector.vector_settings): vector.value},
+            }
+            for vector in vectors
+        ]
+
+        await self._bulk_op_request(bulk_actions)
+        await self._refresh_index_request(index_name)
+
+    async def similarity_search(
+        self,
+        dataset: Dataset,
+        vector_settings: VectorSettings,
+        value: Optional[List[float]] = None,
+        record: Optional[Record] = None,
+        query: Optional[Union[TextQuery, str]] = None,
+        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
+        metadata_filters: Optional[List[MetadataFilter]] = None,
+        max_results: int = 100,
+        order: SimilarityOrder = SimilarityOrder.most_similar,
+        threshold: Optional[float] = None,
+    ) -> SearchResponses:
+        if bool(value) == bool(record):
+            raise ValueError("Must provide either vector value or record to compute the similarity search")
+
+        vector_value = value
+        record_id = None
+
+        if not vector_value:
+            record_id = record.id
+            vector_value = record.vector_value_by_vector_settings(vector_settings)
+
+        if not vector_value:
+            raise ValueError("Cannot find a vector value to apply with provided info")
+
+        if order == SimilarityOrder.least_similar:
+            vector_value = self._inverse_vector(vector_value)
+
+        query_filters = []
+        if query:
+            query_filters.append(self._build_text_query(dataset, query))
+        if user_response_status_filter and user_response_status_filter.statuses:
+            query_filters.append(self._build_response_status_filter(user_response_status_filter))
+        if metadata_filters:
+            query_filters.extend(self._build_metadata_filters(metadata_filters))
+
+        index = await self._get_index_or_raise(dataset)
+        response = await self._request_similarity_search(
+            index=index,
+            vector_settings=vector_settings,
+            value=vector_value,
+            k=max_results,
+            excluded_id=record_id,
+            query_filters=query_filters,
+        )
+
+        return await self._process_search_response(response, threshold)
+
+    def _inverse_vector(self, vector_value: List[float]) -> List[float]:
+        return [vector_value[i] * -1 for i in range(0, len(vector_value))]
+
+    async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
+        index = await self._get_index_or_raise(vector_settings.dataset)
+
+        mappings = self._mapping_for_vector_settings(vector_settings)
+        await self.put_index_mapping_request(index, mappings)
+
     async def search(
         self,
         dataset: Dataset,
-        query: Optional[Union[StringQuery, str]] = None,
+        query: Optional[Union[TextQuery, str]] = None,
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         offset: int = 0,
@@ -248,10 +334,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
-        if isinstance(query, str):
-            query = StringQuery(q=query)
-
-        text_query = self._text_query_builder(dataset, text=query)
+        text_query = self._build_text_query(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
 
         query_filters = []
@@ -325,6 +408,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "metadata": {"dynamic": False, "type": "object"},
                 **self._mapping_for_fields(dataset.fields),
                 **self._mapping_for_metadata_properties(dataset.metadata_properties),
+                **self._mapping_for_vectors_settings(dataset.vectors_settings),
             },
         }
 
@@ -342,9 +426,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return SearchResponses(items=items, total=total)
 
     @staticmethod
-    def _text_query_builder(dataset: Dataset, text: Optional[StringQuery] = None) -> dict:
+    def _build_text_query(dataset: Dataset, text: Optional[Union[TextQuery, str]] = None) -> dict:
         if text is None:
             return {"match_all": {}}
+
+        if isinstance(text, str):
+            text = TextQuery(q=text)
+
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
@@ -471,6 +559,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return ",".join(sort_config)
 
+    def _mapping_for_vectors_settings(self, vectors_settings: List[VectorSettings]) -> dict:
+        mappings = {}
+        for vector in vectors_settings:
+            mappings.update(self._mapping_for_vector_settings(vector))
+
+        return mappings
+
     async def __terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
         aggregation_name = "terms_agg"
 
@@ -499,6 +594,27 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     @abstractmethod
     def _configure_index_settings(self) -> dict:
         """Defines settings configuration for the index. Depending on which backend is used, this may differ"""
+        pass
+
+    @abstractmethod
+    def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
+        """Defines one mapping property configuration for a vector_setting definition"""
+        pass
+
+    @abstractmethod
+    async def _request_similarity_search(
+        self,
+        index: str,
+        vector_settings: VectorSettings,
+        value: List[float],
+        k: int,
+        excluded_id: Optional[UUID] = None,
+        query_filters: Optional[List[dict]] = None,
+    ) -> dict:
+        """
+        Applies the similarity search request based on a vector configuration, a vector value,
+        the `k` number of results to retrieve and an optional filter configuration to apply
+        """
         pass
 
     @abstractmethod
