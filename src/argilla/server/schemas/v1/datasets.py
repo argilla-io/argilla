@@ -728,30 +728,30 @@ class Query(BaseModel):
         return values
 
 
-class SuggestionFilterEntity(BaseModel):
-    type: Literal["suggestion"]
+class SuggestionFilterScope(BaseModel):
+    entity: Literal["suggestion"]
     question: QuestionName
     property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
 
 
-class ResponseFilterEntity(BaseModel):
-    type: Literal["response"]
+class ResponseFilterScope(BaseModel):
+    entity: Literal["response"]
     question: QuestionName
 
 
-class MetadataFilterEntity(BaseModel):
-    type: Literal["metadata"]
+class MetadataFilterScope(BaseModel):
+    entity: Literal["metadata"]
     metadata_property: MetadataPropertyName
 
 
-FilterEntity = Annotated[
-    Union[SuggestionFilterEntity, ResponseFilterEntity, MetadataFilterEntity], PydanticField(..., discriminator="type")
+FilterScope = Annotated[
+    Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope], PydanticField(..., discriminator="entity")
 ]
 
 
 class TermsFilter(BaseModel):
     type: Literal["terms"]
-    entity: FilterEntity
+    scope: FilterScope
     values: List[str] = PydanticField(
         ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
     )
@@ -759,7 +759,7 @@ class TermsFilter(BaseModel):
 
 class RangeFilter(BaseModel):
     type: Literal["range"]
-    entity: FilterEntity
+    scope: FilterScope
     gte: Optional[float]
     lte: Optional[float]
 
@@ -786,7 +786,7 @@ class Filters(BaseModel):
 
 
 class Order(BaseModel):
-    entity: FilterEntity
+    scope: FilterScope
     order: Union[Literal["asc"], Literal["desc"]]
 
 
