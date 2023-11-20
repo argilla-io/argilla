@@ -1,7 +1,7 @@
 import { Criteria } from "../common/Criteria";
 import { RangeValue } from "../common/Filter";
 
-export type ValuesOption = {
+type ValuesOption = {
   values: string[];
   operator?: "and" | "or";
 };
@@ -56,6 +56,48 @@ export class SuggestionCriteria extends Criteria {
     if (!this.isCompleted) return "";
 
     return this.createParams().join("+");
+  }
+
+  get or() {
+    if (!this.isCompleted) return [];
+
+    const orSuggestion = this.value.map((s) => {
+      return s.value.map((v) => {
+        return {
+          question: { name: s.name },
+          isRange: v.name === "score",
+          configuration: {
+            name: v.name,
+            value: v.value,
+          },
+        };
+      });
+    });
+
+    return orSuggestion.flatMap((s) => s);
+  }
+
+  get and() {
+    if (!this.isCompleted) return [];
+
+    const andSuggestions = this.value.map((s) => {
+      return s.value
+        .filter((v) => {
+          const { operator } = v.value as ValuesOption;
+          return operator === "and";
+        })
+        .map((v) => {
+          return {
+            question: { name: s.name },
+            configuration: {
+              name: v.name,
+              value: v.value as string[],
+            },
+          };
+        });
+    });
+
+    return andSuggestions.flatMap((s) => s);
   }
 
   private createParams(): string[] {

@@ -9,7 +9,6 @@ import {
   BackedRecords,
   BackendRecordStatus,
   BackendSimilaritySearchOrder,
-  AndFilterBackendSearchQuery,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
@@ -20,7 +19,6 @@ import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { MetadataCriteria } from "~/v1/domain/entities/metadata/MetadataCriteria";
 import { RangeValue } from "~/v1/domain/entities/common/Filter";
-import { ValuesOption } from "~/v1/domain/entities/suggestion/SuggestionCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -227,46 +225,32 @@ export class RecordRepository {
       if (isFilteringBySuggestion) {
         body.filters.and = [];
 
-        suggestion.value.forEach((suggestion) => {
-          suggestion.value.forEach((configuration) => {
-            const filter: AndFilterBackendSearchQuery = {
-              type: "terms",
-              field: `suggestion.${suggestion.name}.${configuration.name}`,
-            };
+        suggestion.or.forEach((suggestion) => {
+          if (suggestion.isRange) {
+            const value = suggestion.configuration.value as RangeValue;
 
-            const rangeValue = configuration.value as RangeValue;
-            if (rangeValue.ge && rangeValue.le) {
-              filter.type = "range";
-              filter.gte = rangeValue.ge;
-              filter.lte = rangeValue.le;
+            body.filters.and.push({
+              type: "range",
+              field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+              gte: value.ge,
+              lte: value.le,
+            });
+          }
 
-              body.filters.and.push(filter);
+          const values = suggestion.configuration.value as string[];
 
-              return;
-            }
+          body.filters.and.push({
+            type: "terms",
+            field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+            values,
+          });
+        });
 
-            const valuesOption = configuration.value as ValuesOption;
-
-            if (valuesOption) {
-              if (valuesOption.operator === "and") {
-                valuesOption.values.forEach((orOption) => {
-                  body.filters.and.push({
-                    ...filter,
-                    values: [orOption],
-                  });
-                });
-              } else {
-                filter.values = valuesOption.values;
-
-                body.filters.and.push(filter);
-              }
-
-              return;
-            }
-
-            filter.values = configuration.value as string[];
-
-            body.filters.and.push(filter);
+        suggestion.and.forEach((suggestion) => {
+          body.filters.and.push({
+            type: "terms",
+            field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+            values: suggestion.configuration.value,
           });
         });
       }

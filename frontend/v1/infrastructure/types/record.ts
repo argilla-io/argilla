@@ -39,7 +39,7 @@ export interface BackendSearchRecords {
   query_score: number;
 }
 
-export interface AndFilterBackendSearchQuery {
+interface AndFilterBackendSearchQuery {
   type: "terms" | "range";
   field: string;
   values?: string[];
