@@ -7,7 +7,7 @@ import { SortList } from "./SortList";
 describe("SortList ", () => {
   describe("Select", () => {
     test("should be able to select a category", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
 
       categoriesSort.select("split");
 
@@ -22,7 +22,7 @@ describe("SortList ", () => {
 
   describe("Unselect", () => {
     test("should be able to unselect a category", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.select("split");
 
       categoriesSort.unselect("split");
@@ -36,7 +36,7 @@ describe("SortList ", () => {
 
   describe("Replace", () => {
     test("should be able to replace a category", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.select("loss");
       expect(categoriesSort.selected[0].name).toEqual("loss");
 
@@ -53,7 +53,7 @@ describe("SortList ", () => {
 
   describe("Clear", () => {
     test("should be able to clear all selected categories", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.select("loss");
       expect(
         categoriesSort.selected.map((m) => m.name).includes("loss")
@@ -73,7 +73,7 @@ describe("SortList ", () => {
 
   describe("toggleSort", () => {
     test("should be able to toggle sort", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.select("loss");
       expect(categoriesSort.selected[0].sort).toEqual("asc");
 
@@ -85,7 +85,7 @@ describe("SortList ", () => {
 
   describe("commit should", () => {
     test("be able to convert to router params", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.select("loss");
       categoriesSort.select("split");
       categoriesSort.toggleSort("loss");
@@ -104,7 +104,7 @@ describe("SortList ", () => {
 
   describe("Complete by Route Params", () => {
     test("should be able to complete by route params", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.complete([
         { key: "metadata", name: "loss", sort: "desc" },
         { key: "", name: "inserted_at", sort: "asc" },
@@ -121,7 +121,7 @@ describe("SortList ", () => {
 
   describe("Can sort should", () => {
     test("return true if the metadata sort has value", () => {
-      const categoriesSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock(), []);
 
       categoriesSort.noSelected.forEach((categoriesSort) => {
         expect(categoriesSort.canSort).toBeTruthy();
@@ -130,7 +130,7 @@ describe("SortList ", () => {
 
     test("return false if the metadata sort has value", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const categoriesSort = new SortList(metadataForSortingWithoutValues);
+      const categoriesSort = new SortList(metadataForSortingWithoutValues, []);
 
       categoriesSort.noSelected
         .filter((n) =>
@@ -143,7 +143,7 @@ describe("SortList ", () => {
 
     test("return always true for metadata hardcoded like inserted at and updated at", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const categoriesSort = new SortList(metadataForSortingWithoutValues);
+      const categoriesSort = new SortList(metadataForSortingWithoutValues, []);
 
       categoriesSort.select("inserted_at");
       categoriesSort.select("updated_at");
