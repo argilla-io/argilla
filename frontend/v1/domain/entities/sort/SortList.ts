@@ -15,7 +15,10 @@ export interface SortSearch {
 abstract class Sort {
   public sort: SortOptions = SORT_ASC;
 
-  constructor(public readonly key: string = "") {}
+  constructor(
+    public readonly key: string = "",
+    public readonly group: string = "General"
+  ) {}
 
   toggleSort() {
     this.sort = this.sort === SORT_ASC ? SORT_DESC : SORT_ASC;
@@ -30,7 +33,7 @@ abstract class Sort {
 
 class MetadataSort extends Sort {
   constructor(private metadata: Metadata) {
-    super("metadata");
+    super("metadata", "Metadata");
   }
 
   get name() {
@@ -48,7 +51,7 @@ class MetadataSort extends Sort {
 
 class SuggestionScoreSort extends Sort {
   constructor(private question: Question) {
-    super("suggestion");
+    super("suggestion", "Suggestion Score");
   }
 
   get name() {

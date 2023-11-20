@@ -7,10 +7,8 @@
       searchRef="sortFilter"
     />
     <ul class="sort-categories__list">
-      <template v-for="group in groups">
-        <span class="sort-categories__group" :key="group">{{
-          group || "general"
-        }}</span>
+      <template v-for="group in filteredGroups">
+        <span class="sort-categories__group" :key="group" v-text="group" />
         <li
           v-for="category in getCategoriesByGroup(group)"
           :key="category.name"
@@ -33,6 +31,10 @@ export default {
       type: Array,
       required: true,
     },
+    sortGroups: {
+      type: Array,
+      required: true,
+    },
   },
   data: () => {
     return {
@@ -45,9 +47,11 @@ export default {
         cat.title.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
-    groups() {
-      const groups = this.categoriesFilteredBySearchText.map((cat) => cat.key);
-      return [...new Set(groups)];
+    filteredGroups() {
+      const groups = this.categoriesFilteredBySearchText.map(
+        (cat) => cat.group
+      );
+      return this.sortGroups.filter((group) => groups.includes(group));
     },
   },
   methods: {
@@ -56,7 +60,7 @@ export default {
     },
     getCategoriesByGroup(group) {
       return this.categoriesFilteredBySearchText.filter(
-        (cat) => cat.key === group
+        (cat) => cat.group === group
       );
     },
   },
