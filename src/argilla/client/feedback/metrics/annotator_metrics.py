@@ -97,9 +97,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         self._metrics_per_question = METRICS_PER_QUESTION_UNIFIED
         super().__init__(dataset, question_name)
 
-    def compute(
-        self, metric_names: Union[str, List[str]], **kwargs
-    ) -> Union[AnnotatorMetricResult, List[AnnotatorMetricResult]]:
+    def compute(self, metric_names: Union[str, List[str]]) -> Union[AnnotatorMetricResult, List[AnnotatorMetricResult]]:
         """Computes the unified annotation metrics for the given question.
 
         Args:
@@ -120,7 +118,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         metrics = []
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(responses=unified_responses, suggestions=suggestions)
-            result = metric.compute(**kwargs)
+            result = metric.compute()
             metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
         if len(metric_names) == 1:
@@ -453,5 +451,7 @@ METRICS_PER_QUESTION = {
 
 METRICS_PER_QUESTION_UNIFIED = {
     LabelQuestion: METRICS_PER_QUESTION[LabelQuestion],
+    MultiLabelQuestion: METRICS_PER_QUESTION[MultiLabelQuestion],
     RatingQuestion: METRICS_PER_QUESTION[RatingQuestion],
+    RankingQuestion: METRICS_PER_QUESTION[RankingQuestion],
 }

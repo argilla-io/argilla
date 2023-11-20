@@ -36,7 +36,7 @@ if TYPE_CHECKING:
         # LabelQuestion
         ("question-3", "accuracy"),
         ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
-        # No current implementation for MultiLabelQuestion
+        # MultiLabelQuestion
         ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
         # RankingQuestion
         ("question-5", "ndcg-score"),
@@ -91,9 +91,9 @@ def test_annotator_metric(
         # LabelQuestion
         ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"], "majority"),
         # MultiLabelQuestion
-        ("question-4", None, None),
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"], "majority"),
         # RankingQuestion
-        ("question-5", None, None),
+        ("question-5", "ndcg-score", "majority"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -122,7 +122,7 @@ def test_annotator_metrics_unified(
 
     unified_dataset = dataset.unify_responses(question, strategy_name)
 
-    if question in ("question-1", "question-4", "question-5"):
+    if question in ("question-1",):
         with pytest.raises(NotImplementedError):
             UnifiedAnnotationMetric(unified_dataset, question)
     else:
