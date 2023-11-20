@@ -100,9 +100,6 @@ RECORDS_UPDATE_MAX_ITEMS = 1000
 TERMS_FILTER_VALUES_MIN_ITEMS = 1
 TERMS_FILTER_VALUES_MAX_ITEMS = 250
 
-FILTER_FIELD_MIN_LENGTH = 1
-FILTER_FIELD_MAX_LENGTH = 250
-
 FILTERS_AND_MIN_ITEMS = 1
 FILTERS_AND_MAX_ITEMS = 50
 
@@ -612,6 +609,16 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
+MetadataPropertyName = Annotated[
+    str,
+    PydanticField(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    ),
+]
+
 MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
     PydanticField(..., description="The title of the metadata property"),
@@ -624,12 +631,7 @@ MetadataPropertySettingsCreate = Annotated[
 
 
 class MetadataPropertyCreate(BaseModel):
-    name: str = PydanticField(
-        ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
-        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    )
+    name: MetadataPropertyName
     title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
@@ -726,12 +728,30 @@ class Query(BaseModel):
         return values
 
 
-FilterField = Annotated[str, PydanticField(..., min_length=FILTER_FIELD_MIN_LENGTH, max_length=FILTER_FIELD_MAX_LENGTH)]
+class SuggestionFilterEntity(BaseModel):
+    type: Literal["suggestion"]
+    question: QuestionName
+    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
+
+
+class ResponseFilterEntity(BaseModel):
+    type: Literal["response"]
+    question: QuestionName
+
+
+class MetadataFilterEntity(BaseModel):
+    type: Literal["metadata"]
+    metadata_property: MetadataPropertyName
+
+
+FilterEntity = Annotated[
+    Union[SuggestionFilterEntity, ResponseFilterEntity, MetadataFilterEntity], PydanticField(..., discriminator="type")
+]
 
 
 class TermsFilter(BaseModel):
     type: Literal["terms"]
-    field: FilterField
+    entity: FilterEntity
     values: List[str] = PydanticField(
         ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
     )
@@ -739,7 +759,7 @@ class TermsFilter(BaseModel):
 
 class RangeFilter(BaseModel):
     type: Literal["range"]
-    field: FilterField
+    entity: FilterEntity
     gte: Optional[float]
     lte: Optional[float]
 
@@ -766,7 +786,7 @@ class Filters(BaseModel):
 
 
 class Order(BaseModel):
-    field: FilterField
+    entity: FilterEntity
     order: Union[Literal["asc"], Literal["desc"]]
 
 
