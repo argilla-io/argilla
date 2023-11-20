@@ -26,7 +26,13 @@ from argilla.client.feedback.metrics.utils import (
     is_multiclass,
     map_str_to_int,
 )
-from argilla.client.feedback.schemas import LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion
+from argilla.client.feedback.schemas import (
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    RatingQuestion,
+    TextQuestion,
+)
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -388,14 +394,28 @@ class ROUGEMetric(AnnotatorMetricBase):
         return rouge.compute(predictions=responses, references=suggestions)
 
 
-# TODO(plaguss): Currently sklearn doesn't support any metrics for multiclass-multioutput
-# like the ones we offer for MultiLabel by default. We can either
-# restrict the type of MultiLabelQuestion so we can compute
-# for either multilabel or multiclass, or we have to define those metrics ourselves (or a use
-# a different library)
-# The following metric may work for RankingQuestion if the data is preprocessed
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.somersd.html.
-# Otherwise we have the same problem that appears with MultiLabelQuestion
+class NDCGMetric(AnnotatorMetricBase):
+    """Compute Normalized Discounted Cumulative Gain.
+
+    From the Wikipedia page for Discounted Cumulative Gain:
+
+    “Discounted cumulative gain (DCG) is a measure of ranking quality. In information retrieval,
+    it is often used to measure effectiveness of web search engine algorithms or related applications.
+    Using a graded relevance scale of documents in a search-engine result set, DCG measures the usefulness,
+    or gain, of a document based on its position in the result list. The gain is accumulated from the
+    top of the result list to the bottom, with the gain of each result discounted at lower ranks”
+
+    See Also:
+        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html
+        https://en.wikipedia.org/wiki/Discounted_cumulative_gain
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses: List[str], suggestions: List[str]):
+        from sklearn.metrics import ndcg_score
+
+        return ndcg_score(responses, suggestions)
+
 
 METRICS_PER_QUESTION = {
     LabelQuestion: {
@@ -424,6 +444,9 @@ METRICS_PER_QUESTION = {
     TextQuestion: {
         "gleu": GLEUMetric,
         "rouge": ROUGEMetric,
+    },
+    RankingQuestion: {
+        "ndcg-score": NDCGMetric,
     },
 }
 

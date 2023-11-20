@@ -66,7 +66,7 @@ def get_responses_and_suggestions_per_user(
                     "In order to use this functionality the records need to be assigned to a user."
                 )
             if question_type == RankingQuestion:
-                value = response["value"]["value"]
+                value = response["value"]["rank"]
             else:
                 value = response["value"]
 
@@ -74,7 +74,7 @@ def get_responses_and_suggestions_per_user(
 
     suggestions = hf_dataset[f"{question_name}-suggestion"]
     if question_type == RankingQuestion:
-        suggestions = [suggestion["value"] for suggestion in suggestions]
+        suggestions = [suggestion["rank"] for suggestion in suggestions]
 
     return responses_per_user, suggestions
 

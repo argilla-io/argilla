@@ -39,7 +39,7 @@ if TYPE_CHECKING:
         # No current implementation for MultiLabelQuestion
         ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
         # RankingQuestion
-        ("question-5", "accuracy"),
+        ("question-5", "ndcg-score"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -63,25 +63,21 @@ def test_annotator_metric(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    if question in ("question-5",):
-        with pytest.raises(NotImplementedError):
-            AnnotatorMetric(dataset, question)
-    else:
-        metric = AnnotatorMetric(dataset, question)
-        # Test for repr method
-        assert repr(metric) == f"AnnotatorMetric(question_name={question})"
-        metrics_report = metric.compute(metric_names)
-        assert len(metrics_report) == 3  # Number of annotators
-        assert isinstance(metrics_report, dict)
-        user_id = str(uuid.UUID(int=1))
-        metric_results = metrics_report[user_id]
-        assert isinstance(metric_results, list)
-        metric_result = metric_results[0]
-        assert isinstance(metric_result, AnnotatorMetricResult)
-        if isinstance(metric_names, str):
-            metric_names = [metric_names]
+    metric = AnnotatorMetric(dataset, question)
+    # Test for repr method
+    assert repr(metric) == f"AnnotatorMetric(question_name={question})"
+    metrics_report = metric.compute(metric_names)
+    assert len(metrics_report) == 3  # Number of annotators
+    assert isinstance(metrics_report, dict)
+    user_id = str(uuid.UUID(int=1))
+    metric_results = metrics_report[user_id]
+    assert isinstance(metric_results, list)
+    metric_result = metric_results[0]
+    assert isinstance(metric_result, AnnotatorMetricResult)
+    if isinstance(metric_names, str):
+        metric_names = [metric_names]
 
-        assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
+    assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
 
 
 @pytest.mark.parametrize(

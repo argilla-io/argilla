@@ -189,15 +189,16 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 
 | Metric/Question type  | LabelQuestion  | MultiLabelQuestion | RatingQuestion | RankingQuestion | TextQuestion |
 |:----------------------|:---------------|:-------------------|:---------------|:----------------|:-------------|
-| accuracy              | ✔️              |                    | ✔️              |                 |              |
-| precision             | ✔️              |                    | ✔️              |                 |              |
-| recalll               | ✔️              |                    | ✔️              |                 |              |
-| f1-score              | ✔️              |                    | ✔️              |                 |              |
-| confusion-matrix      | ✔️              |                    | ✔️              |                 |              |
+| accuracy              | ✔️              | ✔️                  | ✔️              |                 |              |
+| precision             | ✔️              | ✔️                  | ✔️              |                 |              |
+| recalll               | ✔️              | ✔️                  | ✔️              |                 |              |
+| f1-score              | ✔️              | ✔️                  | ✔️              |                 |              |
+| confusion-matrix      | ✔️              | ✔️                  | ✔️              |                 |              |
 | pearson-r             | ✔️              |                    |                |                 |              |
 | spearman-r            |                |                    | ✔️              |                 |              |
 | gleu                  |                |                    |                |                 | ✔️            |
 | rouge                 |                |                    |                |                 | ✔️            |
+| ndcg-score            |                |                    |                | ✔️               | ✔️            |
 
 ## Other datasets
 
