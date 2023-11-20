@@ -740,8 +740,20 @@ class TermsFilter(BaseModel):
 class RangeFilter(BaseModel):
     type: Literal["range"]
     field: FilterField
-    gte: float
-    lte: float
+    gte: Optional[float]
+    lte: Optional[float]
+
+    @root_validator
+    def check_gte_and_lte(cls, values: dict) -> dict:
+        gte, lte = values.get("gte"), values.get("lte")
+
+        if gte is None and lte is None:
+            raise ValueError("At least one of 'gte' or 'lte' must be provided")
+
+        if gte is not None and lte is not None and gte > lte:
+            raise ValueError("'gte' must have a value less than or equal to 'lte'")
+
+        return values
 
 
 Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
