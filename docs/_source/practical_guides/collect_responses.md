@@ -128,9 +128,9 @@ There are multiple ways to analyse the annotations on a dataset. In this section
 The following metrics only apply to the `FeedbackDataset`.
 ```
 
-#### Agreement metrics
+#### Annotator Agreement metrics
 
-After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable is the final responses after unifying the responses.
+After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable is the final responses after unifying the responses (these module covers what it's also named inter-coder reliability measures).
 
 ```python
 import argilla as rg
@@ -143,7 +143,7 @@ agreement_metrics = metric.compute("alpha")
 # [AgreementMetricResult(metric_name='alpha', result=0.0)]
 ```
 
-Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all the questions types except the `TextQuestion`. It applies to any number of annotators, with possible missing responses from them.
+Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all the questions types except the `TextQuestion`. This metric can be computed for any number of annotators, even if some of the responses are not submitted.
 The value from this measure is in the range [0,1] and is usually interpreted in the following way: alpha >= 0.8 indicates a reliable annotation, alpha >= 0.667 allows making tentative conclusions, while the lower values suggest the unreliable annotation.
 
 ```{note}
@@ -166,7 +166,9 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 
 #### Annotator metrics
 
-To evaluate whether the suggestions are useful or not.
+This section covers a per-annotator metrics. The `FeedbackDataset` allows adding suggestions to simplify the annotation process. In order to analyse how useful those suggestions are, we can compute a number of metrics per user, (the metrics available will depend on the type of question), and take actions regarding the suggestion model we are using.
+
+The following snippet shows an example of use:
 
 ```python
 import argilla as rg
@@ -174,7 +176,7 @@ from argilla.client.feedback.metrics import AnnotatorMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
 metric = AnnotatorMetric(dataset=feedback_dataset, question_name="question_name")
-annotator_metrics = metric.compute("alpha")
+annotator_metrics = metric.compute("accuracy")
 # >>> annotator_metrics
 # {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)]}
 ```
