@@ -37,14 +37,16 @@ export default {
       return [
         {
           id: "0",
-          name: this.question.matchSuggestion ? "✨ Suggestion" : "Write",
+          name: this.question.matchSuggestion ? "Suggestion" : "Write",
+          class: this.question.matchSuggestion ? "--suggestion" : null,
           component: "TextAreaContents",
         },
         ...(this.question.suggestion && !this.question.matchSuggestion
           ? [
               {
                 id: "1",
-                name: "✨ Suggestion",
+                name: "Suggestion",
+                class: "--suggestion",
                 component: "TextAreaSuggestion",
               },
             ]
@@ -56,9 +58,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$suggestion-color: palette(yellow, 400);
 .wrapper {
   display: flex;
   flex-direction: column;
   gap: $base-space;
+}
+.--suggestion {
+  :deep(.card-with-tabs__content) {
+    border-color: $suggestion-color;
+    background: lighten($suggestion-color, 24%);
+  }
+
+  :deep(.card-with-tabs__tab.--active) {
+    border-top-color: $suggestion-color;
+    border-left-color: $suggestion-color;
+    border-right-color: $suggestion-color;
+    border-bottom-color: lighten($suggestion-color, 24%);
+    background: lighten($suggestion-color, 24%);
+  }
 }
 </style>

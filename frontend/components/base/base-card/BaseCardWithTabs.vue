@@ -1,5 +1,5 @@
 <template>
-  <div class="card-with-tabs">
+  <div :class="['card-with-tabs', currentTab.class]">
     <ul class="card-with-tabs__tabs">
       <li
         class="card-with-tabs__tab"
