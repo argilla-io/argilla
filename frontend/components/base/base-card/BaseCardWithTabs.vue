@@ -50,19 +50,26 @@ export default {
   &__tabs {
     display: flex;
     align-items: center;
-    margin: 0 0 -1px 0;
+    margin: 0;
     padding: 0;
   }
   &__tab {
     list-style: none;
     border-top-right-radius: $border-radius;
     border-top-left-radius: $border-radius;
-    background: palette(grey, 800);
+    background: palette(white);
     border-top: 1px solid palette(grey, 600);
     border-left: 1px solid palette(grey, 600);
     border-right: 1px solid palette(grey, 600);
     &:not(.--active) {
-      background: palette(grey, 600);
+      background: palette(grey, 800);
+      .button {
+        color: $black-37;
+      }
+    }
+    &.--active {
+      margin-bottom: -1px;
+      border-bottom: 1px solid palette(white);
     }
     &:last-child:not(:first-child) {
       margin-left: -1px;
@@ -73,7 +80,7 @@ export default {
     border-top-right-radius: $border-radius;
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
-    background: palette(grey, 800);
+    background: palette(white);
     border: 1px solid palette(grey, 600);
   }
 }
