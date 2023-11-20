@@ -7,7 +7,7 @@
     >
       <span
         v-prefix-star="{
-          enabled: showSuggestion,
+          enabled: true,
           show: question.suggestion,
         }"
       ></span>
@@ -44,10 +44,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
   },
   data() {

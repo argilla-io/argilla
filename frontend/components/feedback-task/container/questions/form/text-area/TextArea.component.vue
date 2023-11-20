@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent
-      :question="question"
-      :showSuggestion="showSuggestion"
-    />
+    <QuestionHeaderComponent :question="question" />
     <TextAreaContents
       v-if="!question.suggestion"
       :question="question"
@@ -29,10 +26,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     isFocused: {
       type: Boolean,

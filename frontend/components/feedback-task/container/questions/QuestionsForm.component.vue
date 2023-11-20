@@ -45,7 +45,6 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="record.isPending || record.isDraft"
         :autofocusPosition="autofocusPosition"
         @on-focus="updateQuestionAutofocus"
       />

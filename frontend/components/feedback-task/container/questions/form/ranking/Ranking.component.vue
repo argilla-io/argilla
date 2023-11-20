@@ -2,7 +2,6 @@
   <div class="wrapper">
     <QuestionHeaderComponent
       :question="question"
-      :showSuggestion="showSuggestion"
     />
     <DndSelectionComponent
       :ranking="ranking"
@@ -23,10 +22,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     isFocused: {
       type: Boolean,

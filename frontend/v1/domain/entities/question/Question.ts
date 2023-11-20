@@ -159,11 +159,16 @@ export class Question {
     this.answer.forceComplete(answer);
   }
 
-  suggests(suggestion: Suggestion) {
+  completeSuggestions(suggestion: Suggestion) {
     if (!suggestion) return;
 
     this.suggestion = suggestion;
-    this.answer.complete(suggestion);
+  }
+
+  suggests(suggestion: Suggestion) {
+    if (!suggestion) return;
+
+    this.answer.complete(this.suggestion);
   }
 
   private createEmptyAnswers(): QuestionAnswer {
