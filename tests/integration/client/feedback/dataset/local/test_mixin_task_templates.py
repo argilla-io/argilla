@@ -24,11 +24,14 @@ from argilla.client.feedback.schemas import (
     TextQuestion,
 )
 from argilla.client.feedback.schemas.metadata import TermsMetadataProperty
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 parametrized_task_templates = {
-    "for_question_anwsering": (
+    "for_question_answering": (
         FeedbackDataset.for_question_answering(
-            use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+            use_markdown=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a question answering dataset",
         True,
@@ -37,7 +40,9 @@ parametrized_task_templates = {
     ),
     "for_text_classification_1": (
         FeedbackDataset.for_text_classification(
-            labels=["positive", "negative"], metadata_properties=[TermsMetadataProperty(name="test")]
+            labels=["positive", "negative"],
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a text classification",
         False,
@@ -46,7 +51,10 @@ parametrized_task_templates = {
     ),
     "for_text_classification_2": (
         FeedbackDataset.for_text_classification(
-            labels=["positive", "negative"], multi_label=True, metadata_properties=[TermsMetadataProperty(name="test")]
+            labels=["positive", "negative"],
+            multi_label=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a text classification",
         False,
@@ -54,7 +62,11 @@ parametrized_task_templates = {
         [MultiLabelQuestion],
     ),
     "for_summarization": (
-        FeedbackDataset.for_summarization(use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]),
+        FeedbackDataset.for_summarization(
+            use_markdown=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
+        ),
         "This is a summarization",
         True,
         1,
@@ -62,7 +74,11 @@ parametrized_task_templates = {
     ),
     "for_supervised_fine_tuning_1": (
         FeedbackDataset.for_supervised_fine_tuning(
-            context=False, use_markdown=False, guidelines=None, metadata_properties=[TermsMetadataProperty(name="test")]
+            context=False,
+            use_markdown=False,
+            guidelines=None,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a supervised fine-tuning",
         False,
@@ -75,6 +91,7 @@ parametrized_task_templates = {
             use_markdown=True,
             guidelines="Custom guidelines",
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "Custom guidelines",
         True,
@@ -87,6 +104,7 @@ parametrized_task_templates = {
             rating_scale=5,
             use_markdown=True,
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a retrieval augmented",
         True,
@@ -100,6 +118,7 @@ parametrized_task_templates = {
             use_markdown=False,
             guidelines="Custom guidelines",
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "Custom guidelines",
         False,
@@ -107,7 +126,10 @@ parametrized_task_templates = {
         [RatingQuestion, RatingQuestion, RatingQuestion, TextQuestion],
     ),
     "for_sentence_similarity_1": (
-        FeedbackDataset.for_sentence_similarity(metadata_properties=[TermsMetadataProperty(name="test")]),
+        FeedbackDataset.for_sentence_similarity(
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
+        ),
         "This is a sentence similarity",
         False,
         2,
@@ -119,6 +141,7 @@ parametrized_task_templates = {
             use_markdown=True,
             guidelines="Custom guidelines",
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "Custom guidelines",
         True,
@@ -127,7 +150,10 @@ parametrized_task_templates = {
     ),
     "for_preference_modeling": (
         FeedbackDataset.for_preference_modeling(
-            use_markdown=False, context=True, metadata_properties=[TermsMetadataProperty(name="test")]
+            use_markdown=False,
+            context=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a preference dataset",
         False,
@@ -135,7 +161,10 @@ parametrized_task_templates = {
         [RankingQuestion],
     ),
     "for_natural_language_inference_1": (
-        FeedbackDataset.for_natural_language_inference(metadata_properties=[TermsMetadataProperty(name="test")]),
+        FeedbackDataset.for_natural_language_inference(
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
+        ),
         "This is a natural language inference",
         False,
         2,
@@ -146,6 +175,7 @@ parametrized_task_templates = {
             labels=["yes", "no"],
             guidelines="Custom guidelines",
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "Custom guidelines",
         False,
@@ -153,7 +183,10 @@ parametrized_task_templates = {
         [LabelQuestion],
     ),
     "for_proximal_policy_optimization_1": (
-        FeedbackDataset.for_proximal_policy_optimization(metadata_properties=[TermsMetadataProperty(name="test")]),
+        FeedbackDataset.for_proximal_policy_optimization(
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
+        ),
         "This is a proximal policy optimization",
         False,
         1,
@@ -161,7 +194,10 @@ parametrized_task_templates = {
     ),
     "for_proximal_policy_optimization_2": (
         FeedbackDataset.for_proximal_policy_optimization(
-            context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+            context=True,
+            use_markdown=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a proximal policy optimization",
         True,
@@ -169,7 +205,10 @@ parametrized_task_templates = {
         [RatingQuestion],
     ),
     "for_direct_preference_optimization_1": (
-        FeedbackDataset.for_direct_preference_optimization(metadata_properties=[TermsMetadataProperty(name="test")]),
+        FeedbackDataset.for_direct_preference_optimization(
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
+        ),
         "This is a direct preference optimization",
         False,
         3,
@@ -177,7 +216,10 @@ parametrized_task_templates = {
     ),
     "for_direct_preference_optimization_2": (
         FeedbackDataset.for_direct_preference_optimization(
-            context=True, use_markdown=True, metadata_properties=[TermsMetadataProperty(name="test")]
+            context=True,
+            use_markdown=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a direct preference optimization",
         True,
@@ -186,7 +228,9 @@ parametrized_task_templates = {
     ),
     "for_multi_modal_classification_1": (
         FeedbackDataset.for_multi_modal_classification(
-            labels=["video", "audio", "image"], metadata_properties=[TermsMetadataProperty(name="test")]
+            labels=["video", "audio", "image"],
+            metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a multi-modal classification",
         True,
@@ -198,6 +242,7 @@ parametrized_task_templates = {
             labels=["video", "audio", "image"],
             multi_label=True,
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "This is a multi-modal classification",
         True,
@@ -206,9 +251,9 @@ parametrized_task_templates = {
     ),
     "for_multi_modal_transcription": (
         FeedbackDataset.for_multi_modal_transcription(
-            use_markdown_question=True,
             guidelines="Custom guidelines",
             metadata_properties=[TermsMetadataProperty(name="test")],
+            vectors_settings=[VectorSettings(name="vector", dimensions=768)],
         ),
         "Custom guidelines",
         True,
@@ -221,7 +266,7 @@ parametrized_task_templates = {
 @pytest.mark.parametrize(
     "dataset, guidelines_start, use_markdown, number_of_fields, question_types",
     [
-        parametrized_task_templates["for_question_anwsering"],
+        parametrized_task_templates["for_question_answering"],
         parametrized_task_templates["for_text_classification_1"],
         parametrized_task_templates["for_text_classification_2"],
         parametrized_task_templates["for_summarization"],
@@ -254,3 +299,5 @@ def test_task_templates(
         assert isinstance(question, question_type)
     for metadata in dataset.metadata_properties:
         assert metadata == TermsMetadataProperty(name="test")
+    for vector in dataset.vectors_settings:
+        assert vector == VectorSettings(name="vector", dimensions=768)

@@ -10,6 +10,7 @@ ds = rg.FeedbackDataset.for_text_classification(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -21,6 +22,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -33,6 +35,7 @@ ds = rg.FeedbackDataset.for_summarization(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -44,6 +47,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -56,6 +60,7 @@ ds = rg.FeedbackDataset.for_translation(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -67,6 +72,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -80,6 +86,7 @@ ds = rg.FeedbackDataset.for_natural_language_inference(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -92,6 +99,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -105,6 +113,7 @@ ds = rg.FeedbackDataset.for_sentence_similarity(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -117,6 +126,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -129,6 +139,7 @@ ds = rg.FeedbackDataset.for_question_answering(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -141,6 +152,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -154,6 +166,7 @@ ds = rg.FeedbackDataset.for_supervised_fine_tuning(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -166,6 +179,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -180,6 +194,7 @@ ds = rg.FeedbackDataset.for_preference_modeling(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -194,6 +209,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>"
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -208,6 +224,7 @@ ds = rg.FeedbackDataset.for_proximal_policy_optimization(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -220,6 +237,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -234,6 +252,7 @@ ds = rg.FeedbackDataset.for_direct_preference_optimization(
     use_markdown=True,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -248,6 +267,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -262,6 +282,7 @@ ds = rg.FeedbackDataset.for_retrieval_augmented_generation(
     use_markdown=False,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -275,6 +296,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -288,6 +310,7 @@ ds = rg.FeedbackDataset.for_multi_modal_classification(
     multi_label=False,
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -299,6 +322,7 @@ ds
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
@@ -308,9 +332,9 @@ ds
 import argilla as rg
 
 ds = rg.FeedbackDataset.for_multi_modal_transcription(
-    use_markdown_question=False, # In this task, use_markdown must be set to True for TextField.
     guidelines=None,
     metadata_properties=None,
+    vectors_settings=None,
 )
 ds
 # FeedbackDataset(
@@ -318,10 +342,11 @@ ds
 #         TextField(name="content", use_markdown=True, required=True),
 #     ],
 #     questions=[
-#         TextQuestion(name="description", use_markdown=False, required=True)
+#         TextQuestion(name="description", use_markdown=True, required=True)
 #     ],
 #     guidelines="<Guidelines for the task>",
 #     metadata_properties="<Metadata Properties>",
+#     vectors_settings="<Vectors Settings>",
 # )
 ```
 :::
