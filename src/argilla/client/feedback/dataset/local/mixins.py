@@ -480,6 +480,8 @@ class TaskTemplateMixin:
         "proximal_policy_optimization"
         "direct_preference_optimization"
         "retrieval_augmented_generation"
+        "multi_modal_classification"
+        "multi_modal_transcription"
     """
 
     @classmethod
@@ -920,6 +922,87 @@ class TaskTemplateMixin:
         return cls(
             fields=[TextField(name="query", use_markdown=use_markdown, required=True)] + document_fields,
             questions=total_questions,
+            guidelines=default_guidelines if guidelines is None else guidelines,
+            metadata_properties=metadata_properties,
+        )
+
+    @classmethod
+    def for_multi_modal_classification(
+        cls: Type["FeedbackDataset"],
+        labels: List[str],
+        multi_label: bool = False,
+        guidelines: Optional[str] = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for multi-modal (video, audio,image) classification tasks.
+
+        Args:
+            labels: A list of labels for your dataset
+            multi_label: Set this parameter to True if you want to add multiple labels to your dataset
+            guidelines: Contains the guidelines for the dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
+
+        Returns:
+            A `FeedbackDataset` object for multi-modal classification containing a "content" field with video, audio or image data and LabelQuestion or MultiLabelQuestion named "label"
+        """
+        default_guidelines = "This is a multi-modal classification dataset that contains videos, audios or images. Given a set of media files and a predefined set of labels, the goal of multi-modal classification is to assign one or more labels to each media file based on its content. Please classify the media file by making the correct selection."
+
+        description = "Classify the media content by selecting the correct label from the given list of labels."
+        return cls(
+            fields=[TextField(name="content", use_markdown=True, required=True)],
+            questions=[
+                LabelQuestion(
+                    name="label",
+                    labels=labels,
+                    description=description,
+                )
+                if not multi_label
+                else MultiLabelQuestion(
+                    name="label",
+                    labels=labels,
+                    description=description,
+                )
+            ],
+            guidelines=guidelines
+            if guidelines is not None
+            else default_guidelines
+            if multi_label
+            else default_guidelines.replace("one or more labels", "one label"),
+            metadata_properties=metadata_properties,
+        )
+
+    @classmethod
+    def for_multi_modal_transcription(
+        cls: Type["FeedbackDataset"],
+        use_markdown_question: bool = False,
+        guidelines: Optional[str] = None,
+        metadata_properties: List[AllowedMetadataPropertyTypes] = None,
+    ) -> "FeedbackDataset":
+        """
+        You can use this method to create a basic dataset for multi-modal (video, audio,image) transcription tasks.
+
+        Args:
+            use_markdown: Set this parameter to True if you want to use markdown in your TextQuestion. Defaults to `False`.
+            guidelines: Contains the guidelines for the dataset
+            metadata_properties: contains the metadata properties that will be indexed and could be used to filter the dataset. Defaults to `None`.
+
+        Returns:
+            A `FeedbackDataset` object for multi-modal transcription containing a "content" field with video, audio or image data and a TextQuestion named "description"
+        """
+        default_guidelines = "This is a multi-modal transcription dataset that contains video, audio or image data. Please describe the media content."
+        return cls(
+            fields=[
+                TextField(name="content", use_markdown=True, required=True),
+            ],
+            questions=[
+                TextQuestion(
+                    name="description",
+                    description="Provide a description of the media content, detailing the specific characteristics or elements present in each file.",
+                    use_markdown=use_markdown_question,
+                    required=True,
+                )
+            ],
             guidelines=default_guidelines if guidelines is None else guidelines,
             metadata_properties=metadata_properties,
         )

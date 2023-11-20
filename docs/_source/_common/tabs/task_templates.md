@@ -279,4 +279,51 @@ ds
 ```
 :::
 
+:::{tab-item} Multi-Modal Classification
+```python
+import argilla as rg
+
+ds = rg.FeedbackDataset.for_multi_modal_classification(
+    labels=["video", "audio", "image"],
+    multi_label=False,
+    guidelines=None,
+    metadata_properties=None,
+)
+ds
+# FeedbackDataset(
+#     fields=[
+#         TextField(name="content", use_markdown=True, required=True),
+#     ],
+#     questions=[
+#         LabelQuestion(name="label", labels=["video", "audio", "image"])
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
+# )
+```
+:::
+
+:::{tab-item} Multi-Modal Transcription
+```python
+import argilla as rg
+
+ds = rg.FeedbackDataset.for_multi_modal_transcription(
+    use_markdown_question=False, # In this task, use_markdown must be set to True for TextField.
+    guidelines=None,
+    metadata_properties=None,
+)
+ds
+# FeedbackDataset(
+#     fields=[
+#         TextField(name="content", use_markdown=True, required=True),
+#     ],
+#     questions=[
+#         TextQuestion(name="description", use_markdown=False, required=True)
+#     ],
+#     guidelines="<Guidelines for the task>",
+#     metadata_properties="<Metadata Properties>",
+# )
+```
+:::
+
 ::::

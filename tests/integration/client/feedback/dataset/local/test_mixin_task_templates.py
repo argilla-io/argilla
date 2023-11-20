@@ -184,6 +184,37 @@ parametrized_task_templates = {
         4,
         [RankingQuestion],
     ),
+    "for_multi_modal_classification_1": (
+        FeedbackDataset.for_multi_modal_classification(
+            labels=["video", "audio", "image"], metadata_properties=[TermsMetadataProperty(name="test")]
+        ),
+        "This is a multi-modal classification",
+        True,
+        1,
+        [LabelQuestion],
+    ),
+    "for_multi_modal_classification_2": (
+        FeedbackDataset.for_multi_modal_classification(
+            labels=["video", "audio", "image"],
+            multi_label=True,
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "This is a multi-modal classification",
+        True,
+        1,
+        [MultiLabelQuestion],
+    ),
+    "for_multi_modal_transcription": (
+        FeedbackDataset.for_multi_modal_transcription(
+            use_markdown_question=True,
+            guidelines="Custom guidelines",
+            metadata_properties=[TermsMetadataProperty(name="test")],
+        ),
+        "Custom guidelines",
+        True,
+        1,
+        [TextQuestion],
+    ),
 }
 
 
@@ -205,6 +236,9 @@ parametrized_task_templates = {
         parametrized_task_templates["for_proximal_policy_optimization_2"],
         parametrized_task_templates["for_direct_preference_optimization_1"],
         parametrized_task_templates["for_direct_preference_optimization_2"],
+        parametrized_task_templates["for_multi_modal_classification_1"],
+        parametrized_task_templates["for_multi_modal_classification_2"],
+        parametrized_task_templates["for_multi_modal_transcription"],
     ],
 )
 def test_task_templates(
