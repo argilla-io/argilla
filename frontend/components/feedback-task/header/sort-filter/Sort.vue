@@ -37,6 +37,10 @@ export default {
       type: Array,
       required: true,
     },
+    datasetQuestions: {
+      type: Array,
+      required: true,
+    },
     sortFilters: {
       type: Array,
       required: true,

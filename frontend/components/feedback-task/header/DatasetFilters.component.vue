@@ -17,6 +17,7 @@
       <Sort
         v-if="!datasetMetadataIsLoading"
         :datasetMetadata="datasetMetadata"
+        :datasetQuestions="datasetQuestions"
         v-model="recordCriteria.sortBy.value"
       />
       <BaseButton
