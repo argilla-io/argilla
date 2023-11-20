@@ -14,7 +14,7 @@
 
 """This module contains metrics to gather information related to inter-Annotator agreement. """
 
-from typing import TYPE_CHECKING, Callable, List, Union
+from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
 from nltk.metrics.distance import binary_distance, interval_distance, masi_distance
@@ -36,7 +36,9 @@ if TYPE_CHECKING:
 
 
 def prepare_dataset_for_annotation_task(
-    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"], question_name: str
+    dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
+    question_name: str,
+    response_status: Optional[Union[ResponseStatusFilter, str]] = ResponseStatusFilter.submitted.value,
 ) -> "FormattedResponses":
     """Helper function to prepare the dataset for the nltk's AnnotationTask.
 
@@ -56,6 +58,7 @@ def prepare_dataset_for_annotation_task(
     Args:
         dataset: FeedbackDataset to compute the metrics.
         question_name: Name of the question for which we want to analyse the agreement.
+        response_status: Status of the responses to consider. Defaults to `submitted`.
 
     Returns:
         formatted_responses: The responses formatted as a list of tuples of (user_id, question_id, value).
@@ -67,7 +70,7 @@ def prepare_dataset_for_annotation_task(
             f"Question '{question_name}' is of type '{question_type}', the supported question types are: {supported_question_types}."
         )
 
-    dataset = dataset.filter_by(response_status=ResponseStatusFilter.submitted.value)
+    dataset = dataset.filter_by(response_status=response_status)
 
     hf_dataset = dataset.format_as("datasets")
 
@@ -144,16 +147,22 @@ class AgreementMetric(MetricBase):
     Example:
         >>> import argilla as rg
         >>> from argilla.client.feedback.metrics import AgreementMetric
-        >>> metric = AgreementMetric(dataset=dataset, question_name=question)
+        >>> metric = AgreementMetric(dataset=dataset, question_name=question, response_status="submitted")
         >>> metrics_report = metric.compute("alpha")
 
     """
 
-    def __init__(self, dataset: FeedbackDataset, question_name: str) -> None:
+    def __init__(
+        self,
+        dataset: FeedbackDataset,
+        question_name: str,
+        response_status: Optional[Union[ResponseStatusFilter, str]] = ResponseStatusFilter.submitted.value,
+    ) -> None:
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
+        self._response_status = response_status
 
-    def compute(self, metric_names: Union[str, List[str]], **kwargs) -> List[AgreementMetricResult]:
+    def compute(self, metric_names: Union[str, List[str]]) -> List[AgreementMetricResult]:
         """Computes the agreement metrics for the given question.
 
         Args:
@@ -169,16 +178,16 @@ class AgreementMetric(MetricBase):
         metric_names = self._check_metrics(metric_names)
         metric_classes = self._get_metric_classes(metric_names)
 
-        dataset = prepare_dataset_for_annotation_task(self._dataset, self._question_name)
+        dataset = prepare_dataset_for_annotation_task(
+            self._dataset, self._question_name, response_status=self._response_status
+        )
 
-        distance_function = kwargs.get("distance_function")
-        if not distance_function:
-            distance_function = QUESTION_TO_DISTANCE[self._question_type]
+        distance_function = QUESTION_TO_DISTANCE[self._question_type]
 
         metrics = []
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(annotated_dataset=dataset, distance_function=distance_function)
-            result = metric.compute(**kwargs)
+            result = metric.compute()
             metrics.append(AgreementMetricResult(metric_name=metric_name, result=result))
 
         if len(metric_names) == 1:
@@ -272,7 +281,7 @@ class KrippendorfAlpha(NLTKAnnotationTaskMetric):
         https://www.nltk.org/api/nltk.metrics.agreement.html#nltk.metrics.agreement.AnnotationTask.alpha
     """
 
-    def _compute(self, dataset, **kwargs) -> float:
+    def _compute(self, dataset) -> float:
         return self.alpha()
 
 
