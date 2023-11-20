@@ -26,11 +26,7 @@ from argilla.client.feedback.metrics.utils import (
     is_multiclass,
     map_str_to_int,
 )
-from argilla.client.feedback.schemas import (
-    LabelQuestion,
-    RatingQuestion,
-    TextQuestion,
-)
+from argilla.client.feedback.schemas import LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -206,6 +202,89 @@ class F1ScoreMetric(AnnotatorMetricBase):
         return f1_score(responses, suggestions, **kwargs)
 
 
+class MultiLabelMetrics(AnnotatorMetricBase):
+    """Parent class for MultiLabel based metrics. It binarizes the data to compute the metrics."""
+
+    @requires_dependencies("scikit-learn")
+    def _pre_process(self, responses, suggestions) -> Any:
+        from sklearn.preprocessing import MultiLabelBinarizer
+
+        classes = sorted(set(np.ravel(responses)).union(set(np.ravel(responses))))
+        # We have to take into account string labels with length > 1
+        if any([len(c) > 1 for c in classes]):
+            classes = [classes]
+        # Keep the binarizer to access the classes later
+        self._multilabel_binarizer = MultiLabelBinarizer(classes=classes)
+        self._multilabel_binarizer.fit(classes)
+        responses = self._multilabel_binarizer.transform(responses)
+        suggestions = self._multilabel_binarizer.transform(suggestions)
+        return responses, suggestions
+
+    def _compute(self, responses, suggestions):
+        # Child classes are in charge of the implementation
+        pass
+
+
+class MultiLabelAccuracyMetric(MultiLabelMetrics):
+    """Computes the accuracy on the binarized data for multilabel classification.
+
+    See Also:
+        https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MultiLabelBinarizer.html
+        `AccuracyMetric`
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses, suggestions):
+        from sklearn.metrics import accuracy_score
+
+        return accuracy_score(responses, suggestions)
+
+
+class MultiLabelPrecisionMetric(MultiLabelMetrics):
+    """Computes the precision on the binarized data for multilabel classification.
+
+    See Also:
+        https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MultiLabelBinarizer.html
+        `PrecisionMetric`
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses, suggestions):
+        from sklearn.metrics import precision_score
+
+        return precision_score(responses, suggestions, average="macro")
+
+
+class MultiLabelRecallMetric(MultiLabelMetrics):
+    """Computes the recall on the binarized data for multilabel classification.
+
+    See Also:
+        https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MultiLabelBinarizer.html
+        `RecallMetric`
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses, suggestions):
+        from sklearn.metrics import recall_score
+
+        return recall_score(responses, suggestions, average="macro")
+
+
+class MultiLabelF1ScoreMetric(MultiLabelMetrics):
+    """Computes the f1-score on the binarized data for multilabel classification.
+
+    See Also:
+        https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MultiLabelBinarizer.html
+        `F1ScoreMetric`
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses, suggestions):
+        from sklearn.metrics import f1_score
+
+        return f1_score(responses, suggestions, average="macro")
+
+
 class ConfusionMatrixMetric(AnnotatorMetricBase):
     """Compute confusion matrix to evaluate the accuracy of an annotator.
 
@@ -222,6 +301,27 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
         result = confusion_matrix(responses, suggestions, labels=labels)
         return pd.DataFrame(result, index=labels, columns=labels)
+
+
+class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
+    """Compute confusion matrix to evaluate the accuracy of an annotator.
+
+    The data is binarized, so we will return a dict with the confusion matrix for each class.
+    """
+
+    @requires_dependencies("scikit-learn")
+    def _compute(self, responses, suggestions):
+        import pandas as pd
+        from sklearn.metrics import multilabel_confusion_matrix
+
+        unique_responses = sorted(np.unique(responses))
+        unique_suggestions = sorted(np.unique(suggestions))
+        labels = sorted(set(unique_responses).union(set(unique_suggestions)))
+        matrices = multilabel_confusion_matrix(responses, suggestions, labels=labels)
+        report = {}
+        for class_, matrix in zip(self._multilabel_binarizer.classes_, matrices):
+            report[class_] = pd.DataFrame(matrix, index=labels, columns=labels)
+        return report
 
 
 class PearsonCorrelationCoefficientMetric(AnnotatorMetricBase):
@@ -305,6 +405,13 @@ METRICS_PER_QUESTION = {
         "recall": RecallMetric,
         "confusion-matrix": ConfusionMatrixMetric,
         "pearson-r": PearsonCorrelationCoefficientMetric,
+    },
+    MultiLabelQuestion: {
+        "accuracy": MultiLabelAccuracyMetric,
+        "f1-score": MultiLabelF1ScoreMetric,
+        "precision": MultiLabelPrecisionMetric,
+        "recall": MultiLabelRecallMetric,
+        "confusion-matrix": MultiLabelConfusionMatrixMetric,
     },
     RatingQuestion: {
         "accuracy": AccuracyMetric,

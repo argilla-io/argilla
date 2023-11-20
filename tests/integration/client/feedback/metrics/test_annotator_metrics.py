@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         ("question-3", "accuracy"),
         ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
         # No current implementation for MultiLabelQuestion
-        ("question-4", "accuracy"),
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
         # RankingQuestion
         ("question-5", "accuracy"),
     ],
@@ -63,7 +63,7 @@ def test_annotator_metric(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    if question in ("question-4", "question-5"):
+    if question in ("question-5",):
         with pytest.raises(NotImplementedError):
             AnnotatorMetric(dataset, question)
     else:

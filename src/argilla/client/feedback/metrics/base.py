@@ -50,7 +50,7 @@ class AnnotatorMetricResult(MetricResultBase):
     It contains two fields, `metric_name` and `result` with the value of the metric.
     """
 
-    result: Union[float, Dict[str, float], pd.DataFrame, List[pd.DataFrame]]
+    result: Union[float, Dict[str, float], pd.DataFrame, Dict[str, pd.DataFrame]]
 
     class Config:
         arbitrary_types_allowed = True
