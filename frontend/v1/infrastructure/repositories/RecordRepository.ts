@@ -9,6 +9,7 @@ import {
   BackedRecords,
   BackendRecordStatus,
   BackendSimilaritySearchOrder,
+  AndFilterBackendSearchQuery,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
@@ -18,6 +19,8 @@ import { SortCriteria } from "~/v1/domain/entities/metadata/SortCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { MetadataCriteria } from "~/v1/domain/entities/metadata/MetadataCriteria";
+import { RangeValue } from "~/v1/domain/entities/common/Filter";
+import { ValuesOption } from "~/v1/domain/entities/suggestion/SuggestionCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -177,8 +180,12 @@ export class RecordRepository {
       sortBy,
       searchText,
       similaritySearch,
+      response,
+      suggestion,
       isFilteringByText,
       isFilteringBySimilarity,
+      isFilteringByResponse,
+      isFilteringBySuggestion,
     } = criteria;
     const { from, many } = pagination;
 
@@ -187,6 +194,9 @@ export class RecordRepository {
 
       const body: BackendAdvanceSearchQuery = {
         query: {},
+        filters: {
+          and: [],
+        },
       };
 
       if (isFilteringBySimilarity) {
@@ -202,6 +212,63 @@ export class RecordRepository {
         body.query.text = {
           q: searchText,
         };
+      }
+
+      if (isFilteringByResponse) {
+        response.value.forEach((r) => {
+          body.filters.and.push({
+            type: "terms",
+            field: `response.${r.name}.values`,
+            values: r.value,
+          });
+        });
+      }
+
+      if (isFilteringBySuggestion) {
+        body.filters.and = [];
+
+        suggestion.value.forEach((suggestion) => {
+          suggestion.value.forEach((configuration) => {
+            const filter: AndFilterBackendSearchQuery = {
+              type: "terms",
+              field: `suggestion.${suggestion.name}.${configuration.name}`,
+            };
+
+            const rangeValue = configuration.value as RangeValue;
+            if (rangeValue.ge && rangeValue.le) {
+              filter.type = "range";
+              filter.gte = rangeValue.ge;
+              filter.lte = rangeValue.le;
+
+              body.filters.and.push(filter);
+
+              return;
+            }
+
+            const valuesOption = configuration.value as ValuesOption;
+
+            if (valuesOption) {
+              if (valuesOption.operator === "and") {
+                valuesOption.values.forEach((orOption) => {
+                  body.filters.and.push({
+                    ...filter,
+                    values: [orOption],
+                  });
+                });
+              } else {
+                filter.values = valuesOption.values;
+
+                body.filters.and.push(filter);
+              }
+
+              return;
+            }
+
+            filter.values = configuration.value as string[];
+
+            body.filters.and.push(filter);
+          });
+        });
       }
 
       const params = this.createParams(from, many, status, metadata, sortBy);

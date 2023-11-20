@@ -41,7 +41,7 @@ class ConfigurationValues extends Filter {
     return this.options.isAnswered;
   }
 
-  complete(value: { values: string[]; operator: "and" | "or" }) {
+  complete(value: { values: string[]; operator?: "and" | "or" }) {
     const { values, operator } = value;
 
     this.options.complete(values);

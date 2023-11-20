@@ -39,6 +39,14 @@ export interface BackendSearchRecords {
   query_score: number;
 }
 
+export interface AndFilterBackendSearchQuery {
+  type: "terms" | "range";
+  field: string;
+  values?: string[];
+  gte?: number;
+  lte?: number;
+}
+
 export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
 
 export interface BackendAdvanceSearchQuery {
@@ -52,5 +60,8 @@ export interface BackendAdvanceSearchQuery {
     text?: {
       q: string;
     };
+  };
+  filters?: {
+    and: AndFilterBackendSearchQuery[];
   };
 }

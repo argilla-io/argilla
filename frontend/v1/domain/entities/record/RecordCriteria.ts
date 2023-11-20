@@ -65,6 +65,14 @@ export class RecordCriteria {
     return this.similaritySearch.isCompleted;
   }
 
+  get isFilteringByResponse() {
+    return this.response.isCompleted;
+  }
+
+  get isFilteringBySuggestion() {
+    return this.suggestion.isCompleted;
+  }
+
   get isFilteredByText() {
     return this.committed.searchText.length > 0;
   }

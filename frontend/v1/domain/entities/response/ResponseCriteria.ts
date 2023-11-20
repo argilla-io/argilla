@@ -39,12 +39,6 @@ export class ResponseCriteria extends Criteria {
     return this.createParams().join("+");
   }
 
-  get backendParams(): string[] {
-    if (!this.isCompleted) return [];
-
-    return this.createParams();
-  }
-
   private createParams(): string[] {
     return this.value.map((m) => {
       return `${m.name}:${m.value.join(",")}`;

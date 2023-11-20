@@ -1,21 +1,21 @@
 import { Criteria } from "../common/Criteria";
 import { RangeValue } from "../common/Filter";
 
+export type ValuesOption = {
+  values: string[];
+  operator?: "and" | "or";
+};
+
 export interface ConfigurationSearch {
-  name: string;
-  value:
-    | string[]
-    | RangeValue
-    | {
-        values: string[];
-        operator?: "and" | "or";
-      };
+  name: "score" | "values" | "agent";
+  value: string[] | RangeValue | ValuesOption;
 }
 
 export interface SuggestionSearch {
   name: string;
   value: ConfigurationSearch[];
 }
+
 export class SuggestionCriteria extends Criteria {
   public value: SuggestionSearch[] = [];
   complete(urlParams: string) {
@@ -56,12 +56,6 @@ export class SuggestionCriteria extends Criteria {
     if (!this.isCompleted) return "";
 
     return this.createParams().join("+");
-  }
-
-  get backendParams(): string[] {
-    if (!this.isCompleted) return [];
-
-    return this.createParams();
   }
 
   private createParams(): string[] {
