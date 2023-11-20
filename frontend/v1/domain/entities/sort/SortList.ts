@@ -1,4 +1,5 @@
 import { Metadata } from "../metadata/Metadata";
+import { Question } from "../question/Question";
 
 const SORT_ASC = "asc";
 const SORT_DESC = "desc";
@@ -45,6 +46,24 @@ class MetadataSort extends Sort {
   }
 }
 
+class SuggestionScoreSort extends Sort {
+  constructor(private question: Question) {
+    super("suggestion");
+  }
+
+  get name() {
+    return this.question.name;
+  }
+
+  get title() {
+    return this.question.title;
+  }
+
+  get canSort(): boolean {
+    return true;
+  }
+}
+
 class RecordSort extends Sort {
   constructor(public readonly name: string, public readonly title = name) {
     super();
@@ -56,14 +75,16 @@ class RecordSort extends Sort {
 }
 
 export class SortList {
-  private metadataSorts: Sort[];
+  private categoriesSorts: Sort[];
   private selectedCategories: Sort[] = [];
   private latestCommit: SortSearch[] = [];
 
   constructor(metadata: Metadata[] = []) {
-    this.metadataSorts = metadata.map((metadata) => new MetadataSort(metadata));
-    this.metadataSorts.push(new RecordSort("inserted_at"));
-    this.metadataSorts.push(new RecordSort("updated_at"));
+    this.categoriesSorts = metadata.map(
+      (metadata) => new MetadataSort(metadata)
+    );
+    this.categoriesSorts.push(new RecordSort("inserted_at"));
+    this.categoriesSorts.push(new RecordSort("updated_at"));
   }
 
   get selected() {
@@ -71,7 +92,7 @@ export class SortList {
   }
 
   get noSelected() {
-    return this.metadataSorts.filter(
+    return this.categoriesSorts.filter(
       (metadata) => !this.selectedCategories.includes(metadata)
     );
   }
@@ -86,7 +107,7 @@ export class SortList {
 
   unselect(category: string) {
     const indexOf = this.selectedCategories.findIndex(
-      (metadataSort) => metadataSort.name === category
+      (categoriesSort) => categoriesSort.name === category
     );
 
     if (indexOf > -1) {
@@ -98,7 +119,7 @@ export class SortList {
     const newCategoryFound = this.findByCategory(newCategory);
 
     const indexOf = this.selectedCategories.findIndex(
-      (metadataSort) => metadataSort.name === category
+      (categoriesSort) => categoriesSort.name === category
     );
 
     if (indexOf > -1) {
@@ -130,11 +151,11 @@ export class SortList {
   }
 
   private createSortCriteria(): SortSearch[] {
-    return this.selectedCategories.map((metadataSort) => {
+    return this.selectedCategories.map((categoriesSort) => {
       return {
-        key: metadataSort.key,
-        name: metadataSort.name,
-        sort: metadataSort.sort,
+        key: categoriesSort.key,
+        name: categoriesSort.name,
+        sort: categoriesSort.sort,
       };
     });
   }
@@ -160,6 +181,6 @@ export class SortList {
   }
 
   private findByCategory(category: string) {
-    return this.metadataSorts.find((m) => m.name === category);
+    return this.categoriesSorts.find((m) => m.name === category);
   }
 }

@@ -7,17 +7,22 @@
       searchRef="sortFilter"
     />
     <ul class="sort-categories__list">
-      <li
-        v-for="category in categoriesFilteredBySearchText"
-        :key="category.name"
-      >
-        <BaseButton
-          :disabled="!category.canSort"
-          @on-click="includeCategory(category)"
-          class="sort-categories__item"
-          ><span>{{ category.title }}</span></BaseButton
+      <template v-for="group in groups">
+        <span class="sort-categories__group" :key="group">{{
+          group || "general"
+        }}</span>
+        <li
+          v-for="category in getCategoriesByGroup(group)"
+          :key="category.name"
         >
-      </li>
+          <BaseButton
+            :disabled="!category.canSort"
+            @on-click="includeCategory(category)"
+            class="sort-categories__item"
+            ><span>{{ category.title }}</span></BaseButton
+          >
+        </li>
+      </template>
     </ul>
   </div>
 </template>
@@ -40,10 +45,19 @@ export default {
         cat.title.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
+    groups() {
+      const groups = this.categoriesFilteredBySearchText.map((cat) => cat.key);
+      return [...new Set(groups)];
+    },
   },
   methods: {
     includeCategory(category) {
       this.$emit("include-category", category.name);
+    },
+    getCategoriesByGroup(group) {
+      return this.categoriesFilteredBySearchText.filter(
+        (cat) => cat.key === group
+      );
     },
   },
 };
@@ -57,6 +71,17 @@ export default {
     margin: $base-space 0 0 0;
     overflow: auto;
     max-height: 200px;
+  }
+  &__group {
+    display: inline-block;
+    padding: $base-space * 2 $base-space 0 $base-space;
+    color: $black-37;
+    @include font-size(10px);
+    text-transform: uppercase;
+    font-weight: 400;
+    &:first-of-type {
+      padding-top: 0;
+    }
   }
   &__item {
     width: 100%;

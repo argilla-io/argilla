@@ -7,90 +7,90 @@ import { SortList } from "./SortList";
 describe("SortList ", () => {
   describe("Select", () => {
     test("should be able to select a category", () => {
-      const metadataSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock());
 
-      metadataSort.select("split");
+      categoriesSort.select("split");
 
       expect(
-        metadataSort.selected.map((m) => m.name).includes("split")
+        categoriesSort.selected.map((m) => m.name).includes("split")
       ).toBeTruthy();
       expect(
-        metadataSort.noSelected.map((m) => m.name).includes("split")
+        categoriesSort.noSelected.map((m) => m.name).includes("split")
       ).toBeFalsy();
     });
   });
 
   describe("Unselect", () => {
     test("should be able to unselect a category", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.select("split");
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.select("split");
 
-      metadataSort.unselect("split");
+      categoriesSort.unselect("split");
 
-      expect(metadataSort.selected).toHaveLength(0);
+      expect(categoriesSort.selected).toHaveLength(0);
       expect(
-        metadataSort.noSelected.map((m) => m.name).includes("split")
+        categoriesSort.noSelected.map((m) => m.name).includes("split")
       ).toBeTruthy();
     });
   });
 
   describe("Replace", () => {
     test("should be able to replace a category", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.select("loss");
-      expect(metadataSort.selected[0].name).toEqual("loss");
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.select("loss");
+      expect(categoriesSort.selected[0].name).toEqual("loss");
 
-      metadataSort.replace("loss", "split");
+      categoriesSort.replace("loss", "split");
 
       expect(
-        metadataSort.noSelected.map((m) => m.name).includes("loss")
+        categoriesSort.noSelected.map((m) => m.name).includes("loss")
       ).toBeTruthy();
       expect(
-        metadataSort.selected.map((m) => m.name).includes("split")
+        categoriesSort.selected.map((m) => m.name).includes("split")
       ).toBeTruthy();
     });
   });
 
   describe("Clear", () => {
     test("should be able to clear all selected categories", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.select("loss");
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.select("loss");
       expect(
-        metadataSort.selected.map((m) => m.name).includes("loss")
+        categoriesSort.selected.map((m) => m.name).includes("loss")
       ).toBeTruthy();
       expect(
-        metadataSort.noSelected.map((m) => m.name).includes("loss")
+        categoriesSort.noSelected.map((m) => m.name).includes("loss")
       ).toBeFalsy();
 
-      metadataSort.clear();
+      categoriesSort.clear();
 
-      expect(metadataSort.selected).toHaveLength(0);
+      expect(categoriesSort.selected).toHaveLength(0);
       expect(
-        metadataSort.noSelected.map((m) => m.name).includes("loss")
+        categoriesSort.noSelected.map((m) => m.name).includes("loss")
       ).toBeTruthy();
     });
   });
 
   describe("toggleSort", () => {
     test("should be able to toggle sort", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.select("loss");
-      expect(metadataSort.selected[0].sort).toEqual("asc");
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.select("loss");
+      expect(categoriesSort.selected[0].sort).toEqual("asc");
 
-      metadataSort.toggleSort("loss");
+      categoriesSort.toggleSort("loss");
 
-      expect(metadataSort.selected[0].sort).toEqual("desc");
+      expect(categoriesSort.selected[0].sort).toEqual("desc");
     });
   });
 
   describe("commit should", () => {
     test("be able to convert to router params", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.select("loss");
-      metadataSort.select("split");
-      metadataSort.toggleSort("loss");
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.select("loss");
+      categoriesSort.select("split");
+      categoriesSort.toggleSort("loss");
 
-      const param = metadataSort.commit();
+      const param = categoriesSort.commit();
 
       expect(param[0].key).toEqual("metadata");
       expect(param[0].name).toEqual("loss");
@@ -104,35 +104,35 @@ describe("SortList ", () => {
 
   describe("Complete by Route Params", () => {
     test("should be able to complete by route params", () => {
-      const metadataSort = new SortList(createMetadataMock());
-      metadataSort.complete([
+      const categoriesSort = new SortList(createMetadataMock());
+      categoriesSort.complete([
         { key: "metadata", name: "loss", sort: "desc" },
         { key: "", name: "inserted_at", sort: "asc" },
       ]);
 
-      expect(metadataSort.selected[0].key).toEqual("metadata");
-      expect(metadataSort.selected[0].name).toEqual("loss");
-      expect(metadataSort.selected[0].sort).toEqual("desc");
-      expect(metadataSort.selected[1].key).toEqual("");
-      expect(metadataSort.selected[1].name).toEqual("inserted_at");
-      expect(metadataSort.selected[1].sort).toEqual("asc");
+      expect(categoriesSort.selected[0].key).toEqual("metadata");
+      expect(categoriesSort.selected[0].name).toEqual("loss");
+      expect(categoriesSort.selected[0].sort).toEqual("desc");
+      expect(categoriesSort.selected[1].key).toEqual("");
+      expect(categoriesSort.selected[1].name).toEqual("inserted_at");
+      expect(categoriesSort.selected[1].sort).toEqual("asc");
     });
   });
 
   describe("Can sort should", () => {
     test("return true if the metadata sort has value", () => {
-      const metadataSort = new SortList(createMetadataMock());
+      const categoriesSort = new SortList(createMetadataMock());
 
-      metadataSort.noSelected.forEach((metadataSort) => {
-        expect(metadataSort.canSort).toBeTruthy();
+      categoriesSort.noSelected.forEach((categoriesSort) => {
+        expect(categoriesSort.canSort).toBeTruthy();
       });
     });
 
     test("return false if the metadata sort has value", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const metadataSort = new SortList(metadataForSortingWithoutValues);
+      const categoriesSort = new SortList(metadataForSortingWithoutValues);
 
-      metadataSort.noSelected
+      categoriesSort.noSelected
         .filter((n) =>
           metadataForSortingWithoutValues.some((m) => m.name === n.name)
         )
@@ -143,13 +143,13 @@ describe("SortList ", () => {
 
     test("return always true for metadata hardcoded like inserted at and updated at", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
-      const metadataSort = new SortList(metadataForSortingWithoutValues);
+      const categoriesSort = new SortList(metadataForSortingWithoutValues);
 
-      metadataSort.select("inserted_at");
-      metadataSort.select("updated_at");
+      categoriesSort.select("inserted_at");
+      categoriesSort.select("updated_at");
 
-      metadataSort.selected.forEach((metadataSort) => {
-        expect(metadataSort.canSort).toBeTruthy();
+      categoriesSort.selected.forEach((categoriesSort) => {
+        expect(categoriesSort.canSort).toBeTruthy();
       });
     });
   });

@@ -19,7 +19,7 @@
         />
         <SortSelector
           v-else
-          :sorting-items="metadataSort"
+          :sorting-items="categoriesSort"
           @clear-category="clearSortCategory"
           @apply-sort="applySort"
         />
@@ -53,10 +53,10 @@ export default {
   },
   computed: {
     nonSelectedSortingItems() {
-      return this.metadataSort.noSelected;
+      return this.categoriesSort.noSelected;
     },
     selectedSortingItems() {
-      return this.metadataSort.selected;
+      return this.categoriesSort.selected;
     },
   },
   methods: {
@@ -64,10 +64,10 @@ export default {
       this.visibleDropdown = value;
     },
     includeSortCategory(category) {
-      this.metadataSort.select(category);
+      this.categoriesSort.select(category);
     },
     clearSortCategory(category) {
-      this.metadataSort.unselect(category);
+      this.categoriesSort.unselect(category);
 
       this.applySort();
     },
@@ -77,16 +77,16 @@ export default {
       this.sort();
     },
     sort() {
-      if (!this.metadataSort.hasChanges) return;
+      if (!this.categoriesSort.hasChanges) return;
 
-      const newSorting = this.metadataSort.commit();
+      const newSorting = this.categoriesSort.commit();
 
       this.$emit("onSortFilteredChanged", newSorting);
     },
     updateAppliedCategoriesFromMetadataFilter() {
-      if (!this.metadataSort) return;
+      if (!this.categoriesSort) return;
 
-      this.metadataSort.complete(this.sortFilters);
+      this.categoriesSort.complete(this.sortFilters);
     },
   },
   watch: {
@@ -97,7 +97,7 @@ export default {
         this.sort();
       }
     },
-    "metadataSort.selected": {
+    "categoriesSort.selected": {
       deep: true,
       async handler() {
         this.debounce.stop();

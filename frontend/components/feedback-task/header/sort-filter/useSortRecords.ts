@@ -12,7 +12,7 @@ export const useSortRecords = ({
   const { getValue } = useFeatureToggle();
 
   const debounce = useDebounce(getValue("sort-delay", "integer") ?? 500);
-  const metadataSort = ref<SortList>(new SortList(datasetMetadata));
+  const categoriesSort = ref<SortList>(new SortList(datasetMetadata));
 
-  return { metadataSort, debounce };
+  return { categoriesSort, debounce };
 };
