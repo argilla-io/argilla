@@ -31,10 +31,6 @@ export default {
       type: Array,
       required: true,
     },
-    sortGroups: {
-      type: Array,
-      required: true,
-    },
   },
   data: () => {
     return {
@@ -42,6 +38,9 @@ export default {
     };
   },
   computed: {
+    groups() {
+      return [...new Set(this.categories.map((cat) => cat.group))];
+    },
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
         cat.title.toLowerCase().includes(this.searchText.toLowerCase())
@@ -51,7 +50,7 @@ export default {
       const groups = this.categoriesFilteredBySearchText.map(
         (cat) => cat.group
       );
-      return this.sortGroups.filter((group) => groups.includes(group));
+      return this.groups.filter((group) => groups.includes(group));
     },
   },
   methods: {

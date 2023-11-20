@@ -15,13 +15,11 @@
           v-if="!selectedSortingItems.length"
           class="sort-filter__selector"
           :categories="nonSelectedSortingItems"
-          :sortGroups="sortGroups"
           @include-category="includeSortCategory"
         />
         <SortSelector
           v-else
           :sorting-items="categoriesSort"
-          :sortGroups="sortGroups"
           @clear-category="clearSortCategory"
           @apply-sort="applySort"
         />

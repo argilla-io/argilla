@@ -15,10 +15,7 @@ export interface SortSearch {
 abstract class Sort {
   public sort: SortOptions = SORT_ASC;
 
-  constructor(
-    public readonly key: string = "",
-    public readonly group: string = "General"
-  ) {}
+  constructor(public readonly key: string, public readonly group: string) {}
 
   toggleSort() {
     this.sort = this.sort === SORT_ASC ? SORT_DESC : SORT_ASC;
@@ -33,7 +30,7 @@ abstract class Sort {
 
 class MetadataSort extends Sort {
   constructor(private metadata: Metadata) {
-    super("metadata", "Metadata");
+    super("metadata", "metadata");
   }
 
   get name() {
@@ -51,7 +48,7 @@ class MetadataSort extends Sort {
 
 class SuggestionScoreSort extends Sort {
   constructor(private question: Question) {
-    super("suggestion", "Suggestion Score");
+    super("suggestion", "score");
   }
 
   get name() {
@@ -69,7 +66,7 @@ class SuggestionScoreSort extends Sort {
 
 class RecordSort extends Sort {
   constructor(public readonly name: string, public readonly title = name) {
-    super();
+    super("", "general");
   }
 
   get canSort(): boolean {
@@ -78,13 +75,16 @@ class RecordSort extends Sort {
 }
 
 export class SortList {
-  private categoriesSorts: Sort[];
+  private categoriesSorts: Sort[] = [];
   private selectedCategories: Sort[] = [];
   private latestCommit: SortSearch[] = [];
 
-  constructor(metadata: Metadata[] = []) {
-    this.categoriesSorts = metadata.map(
-      (metadata) => new MetadataSort(metadata)
+  constructor(metadata: Metadata[], questions: Question[]) {
+    metadata?.forEach((metadata) =>
+      this.categoriesSorts.push(new MetadataSort(metadata))
+    );
+    questions?.forEach((question) =>
+      this.categoriesSorts.push(new SuggestionScoreSort(question))
     );
     this.categoriesSorts.push(new RecordSort("inserted_at"));
     this.categoriesSorts.push(new RecordSort("updated_at"));

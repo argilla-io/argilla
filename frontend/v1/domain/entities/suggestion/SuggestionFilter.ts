@@ -117,7 +117,7 @@ class SuggestionFilter extends Filter {
       .filter((c) => c.isAnswered)
       .map((c) => {
         return {
-          name: c.name,
+          name: c.name as "score" | "values" | "agent",
           value: c.value,
         };
       });

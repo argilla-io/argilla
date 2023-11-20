@@ -16,7 +16,6 @@
       <span slot="dropdown-content">
         <SortCategoriesList
           :categories="availableCategories"
-          :sortGroups="sortGroups"
           @include-category="replaceCategory"
         ></SortCategoriesList>
       </span>
@@ -57,10 +56,6 @@ export default {
     },
     availableCategories: {
       type: Array,
-    },
-    sortGroups: {
-      type: Array,
-      required: true,
     },
   },
   data: () => {

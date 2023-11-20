@@ -5,7 +5,6 @@
       :key="category.name"
       :category="category"
       :available-categories="nonSelectedSortingItems"
-      :sortGroups="sortGroups"
       @clear-category="onClear(category.name)"
       @change-sort-direction="onChangeSortDirection(category.name)"
       @replace-sort-category="
@@ -25,7 +24,6 @@
         <SortCategoriesList
           v-click-outside="onToggleVisibility"
           :categories="nonSelectedSortingItems"
-          :sortGroups="sortGroups"
           @include-category="includeSortCategory"
         />
       </span>
@@ -37,10 +35,6 @@ export default {
   props: {
     sortingItems: {
       type: Object,
-      required: true,
-    },
-    sortGroups: {
-      type: Array,
       required: true,
     },
   },
