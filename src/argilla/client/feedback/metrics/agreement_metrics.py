@@ -27,20 +27,21 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
 )
-from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.metrics.base import FormattedResponses
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.schemas.records import SortBy
 
 
 def prepare_dataset_for_annotation_task(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
-    filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = {
-        "response_status": "submitted"
-    },
+    filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+    sort_by: Optional[List["SortBy"]] = None,
+    max_records: Optional[int] = None,
 ) -> "FormattedResponses":
     """Helper function to prepare the dataset for the nltk's AnnotationTask.
 
@@ -62,7 +63,10 @@ def prepare_dataset_for_annotation_task(
         question_name: Name of the question for which we want to analyse the agreement.
         filter_by: A dict with key the field to filter by, and values the filters to apply.
             Can be one of: draft, pending, submitted, and discarded. If set to None,
-            no filter will be applied. By default it will filter by submitted responses.
+            no filter will be applied. Defaults to None (no filter is applied).
+        sort_by: A list of `SortBy` objects to sort your dataset by.
+            Defaults to None (no filter is applied).
+        max_records: The maximum number of records to use for training. Defaults to None.
 
     Returns:
         formatted_responses: The responses formatted as a list of tuples of (user_id, question_id, value).
@@ -76,6 +80,10 @@ def prepare_dataset_for_annotation_task(
 
     if filter_by:
         dataset = dataset.filter_by(**filter_by)
+    if sort_by:
+        dataset = dataset.sort_by(sort_by)
+    if max_records:
+        dataset = dataset.pull(max_records=max_records)
 
     hf_dataset = dataset.format_as("datasets")
 
@@ -84,7 +92,7 @@ def prepare_dataset_for_annotation_task(
     for responses_ in hf_dataset[question_name]:
         for response in responses_:
             # We do this check here because local datasets don't implement the filter_by method.
-            if response["status"] != ResponseStatusFilter.submitted.value:
+            if response["status"] != "submitted":
                 continue
             user_id = response["user_id"]
 
@@ -161,22 +169,27 @@ class AgreementMetric(MetricBase):
         self,
         dataset: FeedbackDataset,
         question_name: str,
-        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = {
-            "response_status": "submitted"
-        },
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
     ) -> None:
         """Initialize a `AgreementMetric` object to compute agreement metrics.
 
         Args:
             dataset: FeedbackDataset to compute the metrics.
             question_name: Name of the question for which we want to analyse the agreement.
-            filter_by: A dict with key the field to filter by, and values the filters to apply.
-                Can be one of: draft, pending, submitted, and discarded. If set to None,
-                no filter will be applied. By default it will filter by submitted responses.
+        filter_by: A dict with key the field to filter by, and values the filters to apply.
+            Can be one of: draft, pending, submitted, and discarded. If set to None,
+            no filter will be applied. Defaults to None (no filter is applied).
+        sort_by: A list of `SortBy` objects to sort your dataset by.
+            Defaults to None (no filter is applied).
+        max_records: The maximum number of records to use for training. Defaults to None.
         """
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
         self._filter_by = filter_by
+        self._sort_by = sort_by
+        self._max_records = max_records
 
     def compute(self, metric_names: Union[str, List[str]]) -> List[AgreementMetricResult]:
         """Computes the agreement metrics for the given question.
@@ -194,7 +207,13 @@ class AgreementMetric(MetricBase):
         metric_names = self._check_metrics(metric_names)
         metric_classes = self._get_metric_classes(metric_names)
 
-        dataset = prepare_dataset_for_annotation_task(self._dataset, self._question_name, filter_by=self._filter_by)
+        dataset = prepare_dataset_for_annotation_task(
+            self._dataset,
+            self._question_name,
+            filter_by=self._filter_by,
+            sort_by=self._sort_by,
+            max_records=self._max_records,
+        )
 
         distance_function = QUESTION_TO_DISTANCE[self._question_type]
 
