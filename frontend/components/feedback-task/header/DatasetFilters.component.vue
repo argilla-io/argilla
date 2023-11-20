@@ -15,7 +15,7 @@
         :is-button-active="isAnyFilterActive"
       />
       <Sort
-        v-if="!datasetMetadataIsLoading"
+        v-if="datasetMetadataIsLoaded && datasetQuestionIsLoaded"
         :datasetMetadata="datasetMetadata"
         :datasetQuestions="datasetQuestions"
         v-model="recordCriteria.sortBy.value"
@@ -35,17 +35,18 @@
       <transition name="filterAppear" appear>
         <div class="filters__list">
           <MetadataFilter
-            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            v-if="datasetMetadataIsLoaded && !!datasetMetadata.length"
             :datasetMetadata="datasetMetadata"
             v-model="recordCriteria.metadata.value"
           />
           <ResponsesFilter
             v-model="recordCriteria.response.value"
-            :datasetId="recordCriteria.datasetId"
+            :datasetQuestions="datasetQuestions"
           />
           <SuggestionFilter
             v-model="recordCriteria.suggestion.value"
             :datasetId="recordCriteria.datasetId"
+            :datasetQuestions="datasetQuestions"
           />
         </div>
       </transition>
@@ -134,15 +135,13 @@ export default {
       this.newFiltersChanged();
     },
   },
-  setup() {
-    return useDatasetsFiltersViewModel();
+  setup(props) {
+    return useDatasetsFiltersViewModel(props);
   },
   mounted() {
     this.$root.$on("on-changed-total-records", (totalRecords) => {
       this.totalRecords = totalRecords;
     });
-
-    this.loadMetadata(this.recordCriteria.datasetId);
   },
   destroyed() {
     this.$root.$off("on-changed-total-records");

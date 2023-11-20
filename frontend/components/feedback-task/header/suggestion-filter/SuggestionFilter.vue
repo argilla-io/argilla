@@ -1,5 +1,5 @@
 <template>
-  <div class="suggestion-filter" v-if="isSuggestionFiltersLoaded">
+  <div class="suggestion-filter">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"
@@ -78,6 +78,10 @@ export default {
   props: {
     datasetId: {
       type: String,
+      required: true,
+    },
+    datasetQuestions: {
+      type: Array,
       required: true,
     },
     suggestionFiltered: {

@@ -25,11 +25,13 @@ abstract class Sort {
 
   abstract get title(): string;
 
-  abstract get canSort(): boolean;
+  get canSort(): boolean {
+    return true;
+  }
 }
 
 class MetadataSort extends Sort {
-  constructor(private metadata: Metadata) {
+  constructor(private readonly metadata: Metadata) {
     super("metadata", "metadata");
   }
 
@@ -47,7 +49,7 @@ class MetadataSort extends Sort {
 }
 
 class SuggestionScoreSort extends Sort {
-  constructor(private question: Question) {
+  constructor(private readonly question: Question) {
     super("suggestion", "score");
   }
 
@@ -56,11 +58,7 @@ class SuggestionScoreSort extends Sort {
   }
 
   get title() {
-    return this.question.title;
-  }
-
-  get canSort(): boolean {
-    return true;
+    return this.question.name;
   }
 }
 

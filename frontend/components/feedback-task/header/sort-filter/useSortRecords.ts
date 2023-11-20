@@ -15,7 +15,9 @@ export const useSortRecords = ({
   const { getValue } = useFeatureToggle();
 
   const debounce = useDebounce(getValue("sort-delay", "integer") ?? 500);
-  const categoriesSort = ref<SortList>(new SortList(datasetMetadata));
+  const categoriesSort = ref<SortList>(
+    new SortList(datasetMetadata, datasetQuestions)
+  );
   const sortGroups = ["General", "Suggestion score", "Metadata"];
   return { categoriesSort, debounce, sortGroups };
 };

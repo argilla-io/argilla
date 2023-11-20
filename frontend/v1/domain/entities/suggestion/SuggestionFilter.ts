@@ -80,7 +80,7 @@ class ConfigurationScore extends FilterWithScore {
 }
 
 class ConfigurationAgent extends FilterWithOption {
-  constructor(private readonly agents: string[]) {
+  constructor(private readonly agents: string[] = []) {
     super(
       "agent",
       agents.map((value) => {
@@ -169,7 +169,7 @@ export class SuggestionFilterList {
     return this.hasChangesSinceLatestCommitWith(this.createCommit());
   }
 
-  addAgents(agents: Agent[]) {
+  addAgents(agents: Agent[] = []) {
     this.questions.forEach((q) => {
       q.addAgents(agents.find((a) => a.question.name === q.name)?.agents);
     });
