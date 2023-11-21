@@ -92,6 +92,7 @@ jobs:
       - name: Run end2end examples 📈
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
+          HF_HUB_ACCESS_TOKEN: ${{ secrets.HF_HUB_ACCESS_TOKEN }}
         run: |
           pip install papermill
           python scripts/end2end_examples.py
