@@ -65,14 +65,14 @@ $suggestion-color: palette(yellow, 400);
 }
 .--suggestion {
   :deep(.card-with-tabs__content) {
-    border-color: $suggestion-color;
+    border-color: darken($suggestion-color, 24%);
     background: lighten($suggestion-color, 24%);
   }
 
   :deep(.card-with-tabs__tab.--active) {
-    border-top-color: $suggestion-color;
-    border-left-color: $suggestion-color;
-    border-right-color: $suggestion-color;
+    border-top-color: darken($suggestion-color, 24%);
+    border-left-color: darken($suggestion-color, 24%);
+    border-right-color: darken($suggestion-color, 24%);
     border-bottom-color: lighten($suggestion-color, 24%);
     background: lighten($suggestion-color, 24%);
   }
