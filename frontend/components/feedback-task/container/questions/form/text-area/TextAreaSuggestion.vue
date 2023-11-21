@@ -50,5 +50,8 @@ export default {
   .button {
     padding: 0;
   }
+  .svg-icon {
+    color: $black-37;
+  }
 }
 </style>
