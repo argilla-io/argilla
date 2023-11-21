@@ -7,11 +7,6 @@ on:
         required: false
         type: string
         default: extended-runner
-      argillaDockerImage:
-        description: "The name of the Docker image of Argilla to use."
-        default: argilla/argilla-quickstart:latest
-        required: false
-        type: string
       searchEngineDockerImage:
         description: "The name of the Docker image of the search engine to use."
         default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
@@ -36,9 +31,10 @@ jobs:
     runs-on: ${{ inputs.runsOn }}
     services:
       search_engine:
-        image: ${{ inputs.argillaDockerImage }}
+        image: ${{ inputs.searchEngineDockerImage }}
         ports:
-          - 6900:6900
+          - 9200:9200
+        env: ${{ fromJson(inputs.searchEngineDockerEnv) }}
     defaults:
       run:
         shell: bash -l {0}
@@ -85,10 +81,17 @@ jobs:
         run: |
           echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
           echo "Configure opensearch engine"
-      - name: Run end2end examples 📈
+      - name: Launch Argilla Server
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
         run: |
           pip install -e .
+          python -m argilla server database migrate
+          python -m argilla server database users create_default
+          uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 --reload
+      - name: Run end2end examples 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
+        run: |
           pip install papermill
           python scripts/end2end_examples.py
