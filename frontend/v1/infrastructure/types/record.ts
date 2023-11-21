@@ -61,7 +61,11 @@ export interface BackendAdvanceSearchQuery {
       q: string;
     };
   };
-  filters?: {
+  filters: {
     and: AndFilterBackendSearchQuery[];
   };
+  sort: {
+    field: string;
+    order: "asc" | "desc";
+  }[];
 }

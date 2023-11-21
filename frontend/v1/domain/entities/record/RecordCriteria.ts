@@ -73,6 +73,10 @@ export class RecordCriteria {
     return this.suggestion.isCompleted;
   }
 
+  get isSortingBy() {
+    return this.sortBy.isCompleted;
+  }
+
   get isFilteredByText() {
     return this.committed.searchText.length > 0;
   }

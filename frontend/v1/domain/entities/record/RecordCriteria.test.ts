@@ -1,6 +1,193 @@
 import { RecordCriteria } from "./RecordCriteria";
 
 describe("RecordCriteria", () => {
+  describe("isFilteringByText", () => {
+    test("should return true if searchText is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "searchText",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(true);
+    });
+
+    test("should return false if searchText is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(false);
+    });
+
+    test("should return false if searchText is undefined", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        undefined,
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(false);
+    });
+  });
+
+  describe("isFilteringBySimilarity", () => {
+    test("should return true if similaritySearch is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
+      );
+
+      expect(criteria.isFilteringBySimilarity).toBe(true);
+    });
+
+    test("should return false if similaritySearch is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringBySimilarity).toBe(false);
+    });
+  });
+
+  describe("isFilteringByResponse", () => {
+    test("should return true if response is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response1:value1",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(true);
+    });
+
+    test("should return false if response is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(false);
+    });
+  });
+
+  describe("isFilteringBySuggestion", () => {
+    test("should return true if suggestion is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        // eslint-disable-next-line quotes
+        'suggestion:["test"]',
+        null
+      );
+
+      expect(criteria.isFilteringBySuggestion).toBe(true);
+    });
+
+    test("should return false if suggestion is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringBySuggestion).toBe(false);
+    });
+  });
+
+  describe("isSortingBy", () => {
+    test("should return true if sortBy is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "inserted_at:asc",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isSortingBy).toBe(true);
+    });
+
+    test("should return false if sortBy is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isSortingBy).toBe(false);
+    });
+  });
+
   describe("isFilteredByText", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
@@ -99,6 +286,43 @@ describe("RecordCriteria", () => {
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
+    });
+  });
+
+  describe("isFilteredByResponse", () => {
+    test("should return true if response is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response1:value1",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByResponse).toBe(true);
+    });
+  });
+
+  describe("isFilteredBySuggestion", () => {
+    test("should return true if suggestion is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        // eslint-disable-next-line quotes
+        'suggestion:["test"]',
+        null
+      );
+
+      expect(criteria.isFilteredBySuggestion).toBe(true);
     });
   });
 

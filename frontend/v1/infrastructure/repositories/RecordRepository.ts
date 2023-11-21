@@ -184,6 +184,7 @@ export class RecordRepository {
       isFilteringBySimilarity,
       isFilteringByResponse,
       isFilteringBySuggestion,
+      isSortingBy,
     } = criteria;
     const { from, many } = pagination;
 
@@ -195,6 +196,7 @@ export class RecordRepository {
         filters: {
           and: [],
         },
+        sort: [],
       };
 
       if (isFilteringBySimilarity) {
@@ -251,6 +253,15 @@ export class RecordRepository {
             type: "terms",
             field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
             values: suggestion.configuration.value,
+          });
+        });
+      }
+
+      if (isSortingBy) {
+        sortBy.value.forEach((sort) => {
+          body.sort.push({
+            field: sort.name, // Review this
+            order: sort.sort,
           });
         });
       }
