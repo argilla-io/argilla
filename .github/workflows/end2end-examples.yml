@@ -88,7 +88,7 @@ jobs:
           pip install -e .
           python -m argilla server database migrate
           python -m argilla server database users create_default
-          uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 --reload
+          uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 &
       - name: Run end2end examples 📈
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
