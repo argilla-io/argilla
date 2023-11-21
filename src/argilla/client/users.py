@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Iterator, List, Optional, Union
@@ -149,11 +150,19 @@ class User:
         return self.role == UserRole.annotator
 
     def __repr__(self) -> str:
+        indent = "   "
+        first_name = self.first_name or None
         return (
-            f"User(id={self.id}, username={self.username}, role={self.role},"
-            f" api_key={self.api_key}, first_name={self.first_name},"
-            f" last_name={self.last_name}, inserted_at={self.inserted_at},"
-            f" updated_at={self.updated_at})"
+            "User("
+            + textwrap.indent(f"\nid={self.id}", indent)
+            + textwrap.indent(f"\nusername={self.username}", indent)
+            + textwrap.indent(f"\nrole={self.role}", indent)
+            + textwrap.indent(f"\napi_key={self.api_key}", indent)
+            + textwrap.indent(f"\nfirst_name={first_name}", indent)
+            + textwrap.indent(f"\nlast_name={self.last_name}", indent)
+            + textwrap.indent(f"\ninserted_at={self.inserted_at}", indent)
+            + textwrap.indent(f"\nupdated_at={self.updated_at}", indent)
+            + "\n)"
         )
 
     @staticmethod

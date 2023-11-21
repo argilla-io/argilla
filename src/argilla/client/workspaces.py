@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import textwrap
 import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Iterator, List, Optional, Union
@@ -119,9 +120,14 @@ class Workspace:
         return workspaces_api.list_workspace_users(self._client, self.id).parsed
 
     def __repr__(self) -> str:
+        indent = "   "
         return (
-            f"Workspace(id={self.id}, name={self.name},"
-            f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+            "Workspace("
+            + textwrap.indent(f"\id={self.id}", indent)
+            + textwrap.indent(f"\nname={self.name}", indent)
+            + textwrap.indent(f"\ninserted_at={self.inserted_at}", indent)
+            + textwrap.indent(f"\nupdated_at={self.updated_at}", indent)
+            + "\n)"
         )
 
     @allowed_for_roles(roles=[UserRole.owner])

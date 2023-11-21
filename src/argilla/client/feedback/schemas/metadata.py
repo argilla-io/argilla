@@ -33,6 +33,7 @@ from argilla.client.feedback.schemas.validators import (
     validate_numeric_metadata_filter_bounds,
     validate_numeric_metadata_property_bounds,
 )
+from argilla.textwrapping import text_wrapper
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 1
 TERMS_METADATA_FILTER_MIN_VALUES = 1
@@ -61,6 +62,9 @@ class MetadataPropertySchema(BaseModel, ABC):
     title: Optional[str] = None
     visible_for_annotators: Optional[bool] = True
     type: MetadataPropertyTypes = Field(..., allow_mutation=False)
+
+    def __repr__(self) -> str:
+        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         validate_assignment = True
@@ -325,6 +329,9 @@ class MetadataFilterSchema(BaseModel, ABC):
 
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     type: MetadataPropertyTypes = Field(..., allow_mutation=False)
+
+    def __repr__(self) -> str:
+        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         validate_assignment = True

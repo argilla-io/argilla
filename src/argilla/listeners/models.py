@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import textwrap
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from prodict import Prodict
@@ -35,6 +36,15 @@ class Search:
 
     total: int
     query_params: Optional[Dict[str, Any]] = None
+
+    def __repr__(self) -> str:
+        indent = "   "
+        return (
+            "Search("
+            + textwrap.indent(f"\ntotal={self.total}", indent)
+            + textwrap.indent(f"\nquery_params={self.query_params}", indent)
+            + "\n)"
+        )
 
 
 class Metrics(Prodict):
@@ -66,6 +76,16 @@ class RGListenerContext:
     search: Optional[Search] = None
     metrics: Optional[Metrics] = None
     query_params: Optional[Dict[str, Any]] = None
+
+    def __repr__(self) -> str:
+        indent = "   "
+        return (
+            "RGListenerContext("
+            + textwrap.indent(f"\nsearch={self.search}", indent)
+            + textwrap.indent(f"\ntitle={self.metrics}", indent)
+            + textwrap.indent(f"\nrequired={self.query_params}", indent)
+            + "\n)"
+        )
 
     def __post_init__(self):
         self.__listener__ = self.listener

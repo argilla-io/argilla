@@ -21,6 +21,7 @@ from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, v
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
+from argilla.textwrapping import text_wrapper
 
 
 class QuestionSchema(BaseModel, ABC):
@@ -52,6 +53,9 @@ class QuestionSchema(BaseModel, ABC):
     type: Optional[QuestionTypes] = Field(..., allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
+
+    def __repr__(self) -> str:
+        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         validate_assignment = True

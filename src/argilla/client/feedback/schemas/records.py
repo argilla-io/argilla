@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
+from argilla.textwrapping import text_wrapper
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -69,6 +70,9 @@ class ResponseSchema(BaseModel):
     user_id: Optional[UUID] = None
     values: Union[Dict[str, ValueSchema], None]
     status: ResponseStatus = ResponseStatus.submitted
+
+    def __repr__(self) -> str:
+        return text_wrapper(self)
 
     class Config:
         extra = Extra.forbid
@@ -123,6 +127,9 @@ class SuggestionSchema(BaseModel):
     score: Optional[float] = None
     value: Any
     agent: Optional[str] = None
+
+    def __repr__(self):
+        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         extra = Extra.forbid
@@ -200,6 +207,9 @@ class FeedbackRecord(BaseModel):
     external_id: Optional[str] = None
 
     _unified_responses: Optional[Dict[str, List["UnifiedValueSchema"]]] = PrivateAttr(default_factory=dict)
+
+    def __repr__(self):
+        return text_wrapper(self, attr_multiline=["fields", "metadata"])
 
     class Config:
         extra = Extra.forbid

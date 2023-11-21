@@ -19,6 +19,7 @@ from pydantic import BaseModel, Extra, Field, validator
 
 from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
+from argilla.textwrapping import text_wrapper
 
 
 class FieldSchema(BaseModel, ABC):
@@ -46,6 +47,9 @@ class FieldSchema(BaseModel, ABC):
     type: Optional[FieldTypes] = Field(..., allow_mutation=False)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)
+
+    def __repr__(self) -> str:
+        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         validate_assignment = True
