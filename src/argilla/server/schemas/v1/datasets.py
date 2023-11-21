@@ -97,6 +97,15 @@ RECORDS_CREATE_MAX_ITEMS = 1000
 RECORDS_UPDATE_MIN_ITEMS = 1
 RECORDS_UPDATE_MAX_ITEMS = 1000
 
+TERMS_FILTER_VALUES_MIN_ITEMS = 1
+TERMS_FILTER_VALUES_MAX_ITEMS = 250
+
+FILTERS_AND_MIN_ITEMS = 1
+FILTERS_AND_MAX_ITEMS = 50
+
+SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
+SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
 
 class Dataset(BaseModel):
     id: UUID
@@ -600,6 +609,16 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
+MetadataPropertyName = Annotated[
+    str,
+    PydanticField(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    ),
+]
+
 MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
     PydanticField(..., description="The title of the metadata property"),
@@ -612,12 +631,7 @@ MetadataPropertySettingsCreate = Annotated[
 
 
 class MetadataPropertyCreate(BaseModel):
-    name: str = PydanticField(
-        ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
-        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    )
+    name: MetadataPropertyName
     title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
@@ -714,8 +728,74 @@ class Query(BaseModel):
         return values
 
 
+class SuggestionFilterScope(BaseModel):
+    entity: Literal["suggestion"]
+    question: QuestionName
+    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
+
+
+class ResponseFilterScope(BaseModel):
+    entity: Literal["response"]
+    question: QuestionName
+
+
+class MetadataFilterScope(BaseModel):
+    entity: Literal["metadata"]
+    metadata_property: MetadataPropertyName
+
+
+FilterScope = Annotated[
+    Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope], PydanticField(..., discriminator="entity")
+]
+
+
+class TermsFilter(BaseModel):
+    type: Literal["terms"]
+    scope: FilterScope
+    values: List[str] = PydanticField(
+        ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
+    )
+
+
+class RangeFilter(BaseModel):
+    type: Literal["range"]
+    scope: FilterScope
+    gte: Optional[float]
+    lte: Optional[float]
+
+    @root_validator
+    def check_gte_and_lte(cls, values: dict) -> dict:
+        gte, lte = values.get("gte"), values.get("lte")
+
+        if gte is None and lte is None:
+            raise ValueError("At least one of 'gte' or 'lte' must be provided")
+
+        if gte is not None and lte is not None and gte > lte:
+            raise ValueError("'gte' must have a value less than or equal to 'lte'")
+
+        return values
+
+
+Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
+
+
+class Filters(BaseModel):
+    and_: Optional[List[Filter]] = PydanticField(
+        None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS
+    )
+
+
+class Order(BaseModel):
+    scope: FilterScope
+    order: Union[Literal["asc"], Literal["desc"]]
+
+
 class SearchRecordsQuery(BaseModel):
     query: Query
+    filters: Optional[Filters]
+    sort: Optional[List[Order]] = PydanticField(
+        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+    )
 
 
 class SearchRecord(BaseModel):
