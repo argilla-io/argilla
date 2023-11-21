@@ -216,7 +216,7 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def unify_responses(self, *args, **kwargs):
+    def compute_unified_responses(self, *args, **kwargs):
         """Unifies the responses for a given question."""
         pass
 

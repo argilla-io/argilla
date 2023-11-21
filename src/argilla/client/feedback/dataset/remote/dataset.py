@@ -987,7 +987,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
         return new_dataset
 
-    def unify_responses(
+    def compute_unified_responses(
         self,
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[
@@ -995,7 +995,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         ],
     ) -> "FeedbackDataset":
         """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        The `compute_unified_responses` function takes a question and a strategy as input and applies the strategy
         to unify the responses for that question.
 
         Args:
@@ -1007,12 +1007,12 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         """
         warnings.warn(
             "A local `FeedbackDataset` returned because "
-            "`unify_responses` is not supported for `RemoteFeedbackDataset`. "
-            "`RemoteFeedbackDataset`.pull().unify_responses(*args, **kwargs)` is applied.",
+            "`compute_unified_responses` is not supported for `RemoteFeedbackDataset`. "
+            "`RemoteFeedbackDataset`.pull().compute_unified_responses(*args, **kwargs)` is applied.",
             UserWarning,
         )
         local = self.pull()
-        return local.unify_responses(question=question, strategy=strategy)
+        return local.compute_unified_responses(question=question, strategy=strategy)
 
     def prepare_for_training(
         self,

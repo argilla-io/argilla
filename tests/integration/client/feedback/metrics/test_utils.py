@@ -118,7 +118,7 @@ def test_get_unified_responses_and_suggestions(
         with pytest.raises(ValueError, match="^Please unify the responses first:"):
             get_unified_responses_and_suggestions(dataset, question)
     else:
-        unified_dataset = dataset.unify_responses(question, strategy)
+        unified_dataset = dataset.compute_unified_responses(question, strategy)
         unified_responses, suggestions = get_unified_responses_and_suggestions(unified_dataset, question)
         assert len(unified_responses) == len(suggestions) == len(expected_unified_responses)
         assert all([isinstance(response, value_type) for response in unified_responses])

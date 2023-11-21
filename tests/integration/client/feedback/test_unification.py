@@ -61,7 +61,7 @@ def test_rating_question_strategy(strategy, unified_response):
     }
     question = RatingQuestion(**question_payload)
     strategy = RatingQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
+    strategy.compute_unified_responses([record], question)
     unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert RatingQuestionUnification(question=question, strategy=strategy)
@@ -95,7 +95,7 @@ def test_ranking_question_strategy(strategy, unified_response):
     }
     question = RankingQuestion(**question_payload)
     strategy = RankingQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
+    strategy.compute_unified_responses([record], question)
     unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert RankingQuestionUnification(question=question, strategy=strategy)
@@ -134,7 +134,7 @@ def test_label_question_strategy(strategy, unified_response):
     }
     question = LabelQuestion(**question_payload)
     strategy = LabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
+    strategy.compute_unified_responses([record], question)
     unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert LabelQuestionUnification(question=question, strategy=strategy)
@@ -173,7 +173,7 @@ def test_multi_label_question_strategy(strategy, unified_response):
     }
     question = MultiLabelQuestion(**question_payload)
     strategy = MultiLabelQuestionStrategy(strategy)
-    strategy.unify_responses([record], question)
+    strategy.compute_unified_responses([record], question)
     unified_response = [UnifiedValueSchema(**resp) for resp in unified_response]
     assert record._unified_responses[question_name] == unified_response
     assert MultiLabelQuestionUnification(question=question, strategy=strategy)

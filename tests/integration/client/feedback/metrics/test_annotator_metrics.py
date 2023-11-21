@@ -120,7 +120,7 @@ def test_annotator_metrics_unified(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    unified_dataset = dataset.unify_responses(question, strategy_name)
+    unified_dataset = dataset.compute_unified_responses(question, strategy_name)
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError):

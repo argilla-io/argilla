@@ -109,7 +109,7 @@ def get_unified_responses_and_suggestions(
     suggestions = []
 
     if not dataset.records[0].unified_responses:
-        raise ValueError("Please unify the responses first: `dataset.unify_responses(question, strategy)`.")
+        raise ValueError("Please unify the responses first: `dataset.compute_unified_responses(question, strategy)`.")
 
     # Get the position of the suggestion from the first record to avoid the nested loop,
     # and the type of the value to cast the unified responses.

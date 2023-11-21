@@ -420,7 +420,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._metadata_properties = list(metadata_properties_mapping.values())
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
-    def unify_responses(
+    def compute_unified_responses(
         self: "FeedbackDatasetBase",
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
         strategy: Union[
@@ -428,7 +428,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         ],
     ) -> "FeedbackDataset":
         """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
+        The `compute_unified_responses` function takes a question and a strategy as input and applies the strategy
         to unify the responses for that question.
 
         Args:
@@ -455,7 +455,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             else:
                 raise ValueError(f"Question {question} is not supported yet")
 
-        strategy.unify_responses(self.records, question)
+        strategy.compute_unified_responses(self.records, question)
         return self
 
     # TODO(alvarobartt,davidberenstein1957): we should consider having something like
@@ -513,12 +513,12 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             if task.formatting_func is None:
                 # in sentence-transformer models we can train without labels
                 if task.label:
-                    local_dataset = local_dataset.unify_responses(
+                    local_dataset = local_dataset.compute_unified_responses(
                         question=task.label.question, strategy=task.label.strategy
                     )
         elif isinstance(task, TrainingTaskForQuestionAnswering):
             if task.formatting_func is None:
-                local_dataset = self.unify_responses(question=task.answer.name, strategy="disagreement")
+                local_dataset = self.compute_unified_responses(question=task.answer.name, strategy="disagreement")
         elif not isinstance(
             task,
             (
@@ -625,7 +625,7 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
 
         if strategy:
-            self.unify_responses(question, strategy)
+            self.compute_unified_responses(question, strategy)
             return UnifiedAnnotationMetric(self, question).compute(metric_names)
         else:
             return AnnotatorMetric(self, question).compute(metric_names)
