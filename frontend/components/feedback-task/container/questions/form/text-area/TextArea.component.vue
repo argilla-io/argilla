@@ -38,7 +38,6 @@ export default {
         {
           id: "0",
           name: this.question.matchSuggestion ? "Suggestion" : "Write",
-          class: this.question.matchSuggestion ? "--suggestion" : null,
           component: "TextAreaContents",
         },
         ...(this.question.suggestion && !this.question.matchSuggestion
