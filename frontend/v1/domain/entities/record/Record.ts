@@ -115,11 +115,10 @@ export class Record {
       const suggestion = this.suggestions?.find(
         (s) => s.questionId === question.id
       );
-      question.completeSuggestions(suggestion);
+      question.addSuggestion(suggestion);
 
       if (this.isPending || this.isDraft) {
         question.complete(answerForQuestion);
-        question.suggests(suggestion);
       } else {
         question.forceComplete(answerForQuestion);
       }

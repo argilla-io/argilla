@@ -5,12 +5,7 @@
       :text="suggestionTooltipText"
       position="left"
     >
-      <span
-        v-prefix-star="{
-          enabled: true,
-          show: question.suggestion,
-        }"
-      ></span>
+      <span class="title-area__suggestion-icon" v-text="`✨ `" />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -81,6 +76,9 @@ export default {
 .title-area {
   color: $black-87;
   font-weight: 500;
+  &__suggestion-icon {
+    font-size: 1.2em;
+  }
 }
 
 .icon {
