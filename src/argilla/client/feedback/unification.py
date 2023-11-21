@@ -45,7 +45,9 @@ class UnifiedValueSchema(ValueSchema):
         >>> value = {"value": "Yes", "strategy": "majority"}
     """
 
-    strategy: Union["RatingQuestionStrategy", "LabelQuestionStrategy", "MultiLabelQuestionStrategy"]
+    strategy: Union[
+        "RatingQuestionStrategy", "LabelQuestionStrategy", "MultiLabelQuestionStrategy", "RankingQuestionStrategy"
+    ]
 
 
 class RatingQuestionStrategyMixin:
@@ -202,13 +204,11 @@ class TextQuestionStrategy(Enum):
 class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
     """
     Options:
-        - "mean": the mean value of the rankings
         - "majority": the majority value of the rankings
         - "max": the max value of the rankings
         - "min": the min value of the rankings
     """
 
-    MEAN: str = "mean"
     MAJORITY: str = "majority"
     MAX: str = "max"
     MIN: str = "min"
@@ -238,29 +238,36 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
-            ratings = []
+            total_values = []
+            total_ranks = []
             for resp in responses:
                 if question in resp.values:
+                    values = []
+                    ranks = []
                     for value in resp.values[question].value:
-                        ratings.append([value.value, value.rank])
-            if not ratings:
+                        values.append(value.value)
+                        ranks.append(value.rank)
+
+                    total_values.append(tuple(values))
+                    total_ranks.append(tuple(ranks))
+
+            if not total_values:
                 continue
-            df = pd.DataFrame(ratings, columns=["value", "rank"])
+            df = pd.DataFrame({"value": total_values, "rank": total_ranks})
+
             # unified response
-            if self.value == self.MEAN.value:
-                df = df.groupby("value", sort=False).mean().reset_index()
-                df = df.sort_values(by="rank", ascending=True)
-            elif self.value == self.MAX.value:
-                df = df.groupby("value", sort=False).min().reset_index()  # inverse due to higher rank better
-                df = df.sort_values(by="rank", ascending=True)
+            if self.value == self.MAX.value:
+                df = df[df["rank"] == df["rank"].max()]
             elif self.value == self.MIN.value:
-                df = df.groupby("value", sort=False).max().reset_index()  # inverse due to higher rank better
+                df = df[df["rank"] == df["rank"].min()]
             else:
                 raise ValueError("Invalid aggregation method")
-            options = df["value"].tolist()
-            if options:
-                unified_value = options[0]
-                rec._unified_responses[question] = [UnifiedValueSchema(value=unified_value, strategy=self.value)]
+
+            if len(df) > 0:
+                # Extract the first of the possible values (in case there is more than one).
+                unified_rank = [{"rank": item[1], "value": item[0]} for item in zip(*df.iloc[0].to_list())]
+                rec._unified_responses[question] = [UnifiedValueSchema(value=unified_rank, strategy=self.value)]
+
         return records
 
     def _majority(self, records: List[FeedbackRecord], question: str):
@@ -288,21 +295,30 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
             # only allow for submitted responses
             responses = [resp for resp in rec.responses if resp.status == "submitted"]
             # get responses with a value that is most frequent
+            ranks = []
             for resp in responses:
                 if question in resp.values:
+                    rank_per_response = []
                     for value in resp.values[question].value:
-                        counter.update([value.value] * value.rank)
+                        rank_per_response.append((value.rank, value.value))
+                    ranks.append(tuple(rank_per_response))
+
+            counter.update(ranks)
             if not counter.values():
                 continue
-            # Find the minimum count
-            min_count = min(counter.values())
-            # Get a list of values with the minimum count
-            least_common_values = [value for value, count in counter.items() if count == min_count]
-            if len(least_common_values) > 1:
-                majority_value = random.choice(least_common_values)
+            # Find the maximum count
+            max_count = max(counter.values())
+            # Get a list of values with the maximum count
+            most_common_values = [value for value, count in counter.items() if count == max_count]
+            if len(most_common_values) > 1:
+                majority_value = random.choice(most_common_values)
             else:
-                majority_value = counter.most_common()[-1][0]
-            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
+                majority_value = counter.most_common()[0][0]
+
+            # Recreate the final ranking
+            majority_rank = [{"rank": item[0], "value": item[1]} for item in majority_value]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_rank, strategy=self.value)]
+
         return records
 
 

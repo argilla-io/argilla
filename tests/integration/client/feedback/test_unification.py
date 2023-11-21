@@ -70,10 +70,9 @@ def test_rating_question_strategy(strategy, unified_response):
 @pytest.mark.parametrize(
     "strategy, unified_response",
     [
-        ("mean", [{"value": "yes", "strategy": "mean"}]),
-        ("majority", [{"value": "yes", "strategy": "majority"}]),
-        ("max", [{"value": "no", "strategy": "max"}]),
-        ("min", [{"value": "yes", "strategy": "min"}]),
+        ("majority", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}], "strategy": "majority"}]),
+        ("max", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}], "strategy": "max"}]),
+        ("min", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 1, "value": "no"}], "strategy": "min"}]),
     ],
 )
 def test_ranking_question_strategy(strategy, unified_response):
