@@ -89,7 +89,7 @@ jobs:
     name: Run end2end tests
     uses: ./.github/workflows/end2end-examples.yml
     needs: check_repo_files
-    if: needs.check_repo_files.outputs.pythonChanges == 'true'
+    if: needs.check_repo_files.outputs.end2endChanges == 'true'
     with:
       runsOn: ${{ matrix.runsOn }}
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
@@ -138,10 +138,6 @@ jobs:
       coverageReport: coverage-extra
       pytestArgs: tests/integration
     secrets: inherit
-
-
-
-
 
   push_coverage:
     name: Upload code coverage

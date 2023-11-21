@@ -6,6 +6,9 @@ on:
       pythonChanges:
         description: "True if some files in python code have changed"
         value: ${{ jobs.check-repo-files.outputs.pythonChanges }}
+      end2endChanges:
+        description: "True if some files in python code have changed"
+        value: ${{ jobs.check-repo-files.outputs.end2endChanges }}
       buildChanges:
         description: "True if some files affecting the build have changed"
         value: ${{ jobs.check-repo-files.outputs.buildChanges }}
@@ -17,6 +20,7 @@ jobs:
     outputs:
       pythonChanges: ${{ steps.path_filter.outputs.pythonChanges }}
       buildChanges: ${{ steps.path_filter.outputs.buildChanges }}
+      end2endChanges: ${{ steps.path_filter.outputs.end2endChanges }}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
@@ -30,6 +34,12 @@ jobs:
               - 'tests/**'
               - 'pyproject.toml'
               - 'setup.py'
+            end2endChanges:
+              - 'src/**'
+              - 'pyproject.toml'
+              - 'setup.py'
+              - 'scripts/end2end_examples.py'
+              - 'docs/_source/practical_guides/examples/**/**'
             buildChanges:
               - 'src/**'
               - 'frontend/**'
