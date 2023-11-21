@@ -303,8 +303,10 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
         unique_responses = sorted(np.unique(responses))
         unique_suggestions = sorted(np.unique(suggestions))
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
+        labels_index = [f"responses_{label}" for label in labels]
+        labels_columns = [f"suggestions_{label}" for label in labels]
         result = confusion_matrix(responses, suggestions, labels=labels)
-        return pd.DataFrame(result, index=labels, columns=labels)
+        return pd.DataFrame(result, index=labels_index, columns=labels_columns)
 
 
 class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
@@ -321,10 +323,12 @@ class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
         unique_responses = sorted(np.unique(responses))
         unique_suggestions = sorted(np.unique(suggestions))
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
+        labels_index = [f"responses_{label}" for label in labels]
+        labels_columns = [f"suggestions_{label}" for label in labels]
         matrices = multilabel_confusion_matrix(responses, suggestions, labels=labels)
         report = {}
         for class_, matrix in zip(self._multilabel_binarizer.classes_, matrices):
-            report[class_] = pd.DataFrame(matrix, index=labels, columns=labels)
+            report[class_] = pd.DataFrame(matrix, index=labels_index, columns=labels_columns)
         return report
 
 

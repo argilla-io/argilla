@@ -119,12 +119,15 @@ def get_unified_responses_and_suggestions(
             break
 
     for record in dataset.records:
-        unified_responses.append(value_type(record.unified_responses[question_name][0].value))
+        unified_response = value_type(record.unified_responses[question_name][0].value)
+        unified_responses.append(unified_response)
         suggestions.append(record.suggestions[idx_suggestion].value)
 
     if question_type == RankingQuestion:
-        unified_responses = [resp[0] for resp in unified_responses]
-        suggestions = [suggestion[0]["value"] for suggestion in suggestions]
+        # TODO: Not ready yet
+        map_rank_value = {rank_value["value"]: rank_value["rank"] for rank_value in suggestion.value}
+        unified_responses = [map_rank_value[resp[0]] for resp in unified_responses]
+        suggestions = [suggestion[0]["rank"] for suggestion in suggestions]
 
     return unified_responses, suggestions
 
