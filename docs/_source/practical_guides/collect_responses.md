@@ -198,7 +198,7 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 | spearman-r            |                |                    | ✔️              |                 |              |
 | gleu                  |                |                    |                |                 | ✔️            |
 | rouge                 |                |                    |                |                 | ✔️            |
-| ndcg-score            |                |                    |                | ✔️               | ✔️            |
+| ndcg-score            |                |                    |                | ✔️               |              |
 
 ## Other datasets
 
