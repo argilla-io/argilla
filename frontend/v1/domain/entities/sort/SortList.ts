@@ -78,14 +78,16 @@ export class SortList {
   private latestCommit: SortSearch[] = [];
 
   constructor(metadata: Metadata[], questions: Question[]) {
-    metadata?.forEach((metadata) =>
-      this.categoriesSorts.push(new MetadataSort(metadata))
-    );
+    this.categoriesSorts.push(new RecordSort("inserted_at"));
+    this.categoriesSorts.push(new RecordSort("updated_at"));
+
     questions?.forEach((question) =>
       this.categoriesSorts.push(new SuggestionScoreSort(question))
     );
-    this.categoriesSorts.push(new RecordSort("inserted_at"));
-    this.categoriesSorts.push(new RecordSort("updated_at"));
+
+    metadata?.forEach((metadata) =>
+      this.categoriesSorts.push(new MetadataSort(metadata))
+    );
   }
 
   get selected() {

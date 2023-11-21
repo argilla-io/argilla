@@ -27,6 +27,11 @@
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
   },
+  "sorting": {
+    "score": "suggestion score",
+    "general": "general",
+    "metadata": "metadata"
+  },
   "filters": "Filters",
   "filterBy": "Filter by...",
   "findSimilar": "Find similar",

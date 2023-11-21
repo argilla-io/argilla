@@ -8,7 +8,9 @@
     />
     <ul class="sort-categories__list">
       <template v-for="group in filteredGroups">
-        <span class="sort-categories__group" :key="group" v-text="group" />
+        <span class="sort-categories__group" :key="group">{{
+          $t(`sorting.${group}`)
+        }}</span>
         <li
           v-for="category in getCategoriesByGroup(group)"
           :key="category.name"
