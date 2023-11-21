@@ -14,7 +14,21 @@
 
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
+from typing import (
+    Annotated,
+    Any,
+    AsyncGenerator,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator
@@ -46,7 +60,56 @@ __all__ = [
     "TermsMetadataMetrics",
     "IntegerMetadataMetrics",
     "FloatMetadataMetrics",
+    "SuggestionFilterScope",
+    "ResponseFilterScope",
+    "MetadataFilterScope",
+    "FilterScope",
+    "TermsFilter",
+    "RangeFilter",
+    "AndFilter",
+    "Filter",
+    "Order",
 ]
+
+
+class SuggestionFilterScope(BaseModel):
+    question: str
+    property: str
+
+
+class ResponseFilterScope(BaseModel):
+    question: Optional[str]
+    property: Optional[str]
+
+
+class MetadataFilterScope(BaseModel):
+    metadata_property: str
+
+
+FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope]
+
+
+class TermsFilter(BaseModel):
+    scope: FilterScope
+    values: List[str]
+
+
+class RangeFilter(BaseModel):
+    scope: FilterScope
+    gte: Optional[float]
+    lte: Optional[float]
+
+
+class AndFilter(BaseModel):
+    filters: List["Filter"]
+
+
+Filter = Union[AndFilter, TermsFilter, RangeFilter]
+
+
+class Order(BaseModel):
+    scope: FilterScope
+    order: SortOrder
 
 
 class UserResponse(BaseModel):
@@ -246,9 +309,11 @@ class SearchEngine(metaclass=ABCMeta):
         self,
         dataset: Dataset,
         query: Optional[Union[TextQuery, str]] = None,
-        # TODO(@frascuchon): The search records method should receive a generic list of filters
+        filter: Optional[Filter] = None,
+        # TODO: remove in next PR and use filter instead
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        # END TODO
         offset: int = 0,
         limit: int = 100,
         sort_by: Optional[List[SortBy]] = None,
@@ -274,8 +339,11 @@ class SearchEngine(metaclass=ABCMeta):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
+        filter: Optional[Filter] = None,
+        # TODO: remove in next PR and use filter instead
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
