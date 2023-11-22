@@ -6,7 +6,8 @@ Annotation metrics
 Here we describe the available metrics in Argilla:
 
 - :ref:`python ref agreement_metrics`: Metrics of agreement on an annotation task
-- :ref:`python ref annotator_metrics`: Metrics for annotators
+- :ref:`python ref annotator_metrics`: Metrics for annotators. Includes both metrics per annotator and unified metrics
+  for all annotators.
 
 .. _python ref metrics:
 
@@ -40,4 +41,7 @@ Annotator Metrics
    :members:
 
 .. autoclass:: argilla.client.feedback.metrics.annotator_metrics.AnnotatorMetric
+   :members: __init__, compute
+
+.. autoclass:: argilla.client.feedback.metrics.annotator_metrics.UnifiedAnnotationMetric
    :members: __init__, compute

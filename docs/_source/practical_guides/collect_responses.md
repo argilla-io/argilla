@@ -200,6 +200,44 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 | rouge                 |                |                    |                |                 | ✔️            |
 | ndcg-score            |                |                    |                | ✔️               |              |
 
+
+#### Unified annotation metrics
+
+This section covers a the metrics for unified annotations. After we have unified our responses we can analyse the annotations (unified responses) against the suggestions, to gather a different perspective from the final dataset prepared for training.
+
+The following snippet shows an example of use:
+
+```python
+import argilla as rg
+from argilla.client.feedback.metrics import UnifiedAnnotationMetric
+
+feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
+metric = UnifiedAnnotationMetric(dataset=feedback_dataset, question_name="question_name")
+unified_metrics = metric.compute("accuracy")
+# >>> unified_metrics
+# AnnotatorMetricResult(metric_name='accuracy', result=0.25)
+```
+
+We obtain the same container for the metrics result, but in this case it's not associated to any annotator. The same interpretation that we saw for the Annotator metrics holds here regarding the labels and suggestions.
+
+##### Supported metrics
+
+We plan on adding more support for other metrics so feel free to reach out on our Slack or GitHub to help us prioritize each task.
+
+| Metric/Question type  | LabelQuestion  | MultiLabelQuestion | RatingQuestion | RankingQuestion | TextQuestion |
+|:----------------------|:---------------|:-------------------|:---------------|:----------------|:-------------|
+| accuracy              | ✔️              | ✔️                  | ✔️              |                 |              |
+| precision             | ✔️              | ✔️                  | ✔️              |                 |              |
+| recalll               | ✔️              | ✔️                  | ✔️              |                 |              |
+| f1-score              | ✔️              | ✔️                  | ✔️              |                 |              |
+| confusion-matrix      | ✔️              | ✔️                  | ✔️              |                 |              |
+| pearson-r             | ✔️              |                    |                |                 |              |
+| spearman-r            |                |                    | ✔️              |                 |              |
+| gleu                  |                |                    |                |                 | ✔️            |
+| rouge                 |                |                    |                |                 | ✔️            |
+| ndcg-score            |                |                    |                | ✔️               |              |
+
+
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
