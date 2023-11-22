@@ -40,6 +40,7 @@ from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
+    from argilla.client.feedback.metrics.base import Responses, Suggestions
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import SortBy
 
@@ -62,6 +63,7 @@ class AnnotatorMetric(MetricBase):
         filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
         sort_by: Optional[List["SortBy"]] = None,
         max_records: Optional[int] = None,
+        responses_vs_suggestions: bool = True,
     ) -> None:
         """Initialize a `AnnotatorMetric` object to compute agreement metrics.
 
@@ -74,12 +76,34 @@ class AnnotatorMetric(MetricBase):
             sort_by: A list of `SortBy` objects to sort your dataset by.
                 Defaults to None (no filter is applied).
             max_records: The maximum number of records to use for training. Defaults to None.
+            responses_vs_suggestions: Whether to compare the responses vs the suggestions, or the
+                other way around. Defaults to True (the metrics will be compared assuming the
+                responses are the ground truth and the suggestions are the predictions).
         """
         self._metrics_per_question = METRICS_PER_QUESTION
-        super().__init__(dataset, question_name)
+        super().__init__(dataset, question_name, responses_vs_suggestions=responses_vs_suggestions)
         self._filter_by = filter_by
         self._sort_by = sort_by
         self._max_records = max_records
+
+    def _check_responses_and_suggestions(
+        self, responses_per_user: Dict[int, "Responses"], suggestions: "Suggestions"
+    ) -> Tuple[Dict[int, "Responses"], "Suggestions"]:
+        # Check for possible missing suggestions
+        df_suggestions = pd.Series(suggestions)
+        df_responses_per_user = pd.DataFrame(responses_per_user)
+        df_responses_per_user = df_responses_per_user[df_suggestions.notna()]
+        df_suggestions = df_suggestions[df_suggestions.notna()]
+        total_responses = len(suggestions)
+
+        responses_per_user = df_responses_per_user.to_dict(orient="list")
+        suggestions = df_suggestions.to_list()
+
+        if len(suggestions) == 0:
+            raise ValueError("All the suggestions are None, the metric cannot be computed.")
+        elif len(suggestions) < total_responses:
+            warnings.warn("Some suggestions are None, the metric will be computed without them.")
+        return responses_per_user, suggestions
 
     def compute(self, metric_names: Union[str, List[str]]) -> Dict[str, List[AnnotatorMetricResult]]:
         """Computes the annotator metrics for the given question.
@@ -105,25 +129,13 @@ class AnnotatorMetric(MetricBase):
             sort_by=self._sort_by,
             max_records=self._max_records,
         )
-        # Check for possible missing suggestions
-        df_suggestions = pd.Series(suggestions)
-        df_responses_per_user = pd.DataFrame(responses_per_user)
-        df_responses_per_user = df_responses_per_user[df_suggestions.notna()]
-        df_suggestions = df_suggestions[df_suggestions.notna()]
-        total_responses = len(suggestions)
-
-        responses_per_user = df_responses_per_user.to_dict(orient="list")
-        suggestions = df_suggestions.to_list()
-
-        if len(suggestions) == 0:
-            raise ValueError("All the suggestions are None, the metric cannot be computed.")
-        elif len(suggestions) < total_responses:
-            warnings.warn("Some suggestions are None, the metric will be computed without them.")
+        responses_per_user, suggestions = self._check_responses_and_suggestions(responses_per_user, suggestions)
 
         metrics = defaultdict(list)
         for user_id, responses in responses_per_user.items():
+            as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
             for metric_name, metric_cls in metric_classes:
-                metric = metric_cls(responses=responses, suggestions=suggestions)
+                metric = metric_cls(responses=as_responses, suggestions=as_suggestions)
                 result = metric.compute()
                 metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 
@@ -147,12 +159,32 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
         sort_by: Optional[List["SortBy"]] = None,
         max_records: Optional[int] = None,
+        responses_vs_suggestions: bool = True,
     ) -> None:
         self._metrics_per_question = METRICS_PER_QUESTION_UNIFIED
-        super().__init__(dataset, question_name)
+        super().__init__(dataset, question_name, responses_vs_suggestions=responses_vs_suggestions)
         self._filter_by = filter_by
         self._sort_by = sort_by
         self._max_records = max_records
+
+    def _check_responses_and_suggestions(
+        self, unified_responses: "Responses", suggestions: "Suggestions"
+    ) -> Tuple["Responses", "Suggestions"]:
+        # Check for possible missing suggestions
+        df_suggestions = pd.Series(suggestions)
+        df_responses = pd.Series(unified_responses)
+        df_responses = df_responses[df_suggestions.notna()]
+        df_suggestions = df_suggestions[df_suggestions.notna()]
+        total_responses = len(suggestions)
+
+        unified_responses = df_responses.to_list()
+        suggestions = df_suggestions.to_list()
+
+        if len(suggestions) == 0:
+            raise ValueError("All the suggestions are None, the metric cannot be computed.")
+        elif len(suggestions) < total_responses:
+            warnings.warn("Some suggestions are None, the metric will be computed without them.")
+        return unified_responses, suggestions
 
     def compute(self, metric_names: Union[str, List[str]]) -> Union[AnnotatorMetricResult, List[AnnotatorMetricResult]]:
         """Computes the unified annotation metrics for the given question.
@@ -178,25 +210,12 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
             sort_by=self._sort_by,
             max_records=self._max_records,
         )
+        self._check_responses_and_suggestions(unified_responses, suggestions)
 
-        # Check for possible missing suggestions
-        df_suggestions = pd.Series(suggestions)
-        df_responses = pd.Series(unified_responses)
-        df_responses = df_responses[df_suggestions.notna()]
-        df_suggestions = df_suggestions[df_suggestions.notna()]
-        total_responses = len(suggestions)
-
-        unified_responses = df_responses.to_list()
-        suggestions = df_suggestions.to_list()
-
-        if len(suggestions) == 0:
-            raise ValueError("All the suggestions are None, the metric cannot be computed.")
-        elif len(suggestions) < total_responses:
-            warnings.warn("Some suggestions are None, the metric will be computed without them.")
-
+        as_unified_responses, as_suggestions = self._prepare_responses_and_suggestions(unified_responses, suggestions)
         metrics = []
         for metric_name, metric_cls in metric_classes:
-            metric = metric_cls(responses=unified_responses, suggestions=suggestions)
+            metric = metric_cls(responses=as_unified_responses, suggestions=as_suggestions)
             result = metric.compute()
             metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result))
 

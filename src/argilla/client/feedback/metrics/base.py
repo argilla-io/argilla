@@ -150,13 +150,16 @@ class AnnotationTaskMetricBase(ABC):
 class MetricBase:
     _metrics_per_question: Dict[str, Callable] = {}
 
-    def __init__(self, dataset: "FeedbackDataset", question_name: str) -> None:
+    def __init__(self, dataset: "FeedbackDataset", question_name: str, responses_vs_suggestions: bool = True) -> None:
         """Initializes a `AgreementMetric` object to compute agreement metrics on
         a `FeedbackDataset` for a given question.
 
         Args:
             dataset: FeedbackDataset to compute the metrics.
             question_name: Name of the question for which we want to analyse the agreement.
+            responses_vs_suggestions: Whether to compare the responses vs the suggestions, or the
+                other way around. Defaults to True (the metrics will be compared assuming the
+                responses are the ground truth and the suggestions are the predictions).
 
         Raises:
             NotImplementedError: If the question type is not supported.
@@ -168,6 +171,7 @@ class MetricBase:
             self._allowed_metrics = allowed_metrics
         else:
             raise NotImplementedError(f"No metrics are defined currently for {self._question_type.__name__}")
+        self._responses_vs_suggestions = responses_vs_suggestions
 
     def __repr__(self) -> str:
         return type(self).__name__ + f"(question_name={self._question_name})"
@@ -189,3 +193,21 @@ class MetricBase:
 
     def _get_metric_classes(self, metric_names: Union[str, List[str]]) -> List[Tuple[str, Callable]]:
         return [(metric_name, self._allowed_metrics[metric_name]) for metric_name in metric_names]
+
+    def _prepare_responses_and_suggestions(
+        self, responses: Responses, suggestions: Responses
+    ) -> Union[Tuple[Responses, Suggestions], Tuple[Suggestions, Responses]]:
+        """Helper function to determine the order in which the responses and suggestions should be passed to the metric,
+        to avoid duplicating code in the metrics.
+
+        Args:
+            responses: Responses
+            suggestions: Responses
+
+        Returns:
+            Union[Tuple[Responses, Suggestions], Tuple[Suggestions, Responses]]
+        """
+        if self._responses_vs_suggestions:
+            return responses, suggestions
+        else:
+            return suggestions, responses
