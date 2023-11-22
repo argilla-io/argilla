@@ -14,10 +14,13 @@
 
 """This module contains metrics to compare Annotator's suggestions vs responses. """
 
+import random
+import warnings
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
+import pandas as pd
 
 from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
 from argilla.client.feedback.metrics.utils import (
@@ -72,6 +75,25 @@ class AnnotatorMetric(MetricBase):
         metric_classes = self._get_metric_classes(metric_names)
 
         responses_per_user, suggestions = get_responses_and_suggestions_per_user(self._dataset, self._question_name)
+        # Check for possible missing suggestions
+        df_suggestions = pd.Series(suggestions)
+        df_responses_per_user = pd.DataFrame(responses_per_user)
+        df_responses_per_user = df_responses_per_user[df_suggestions.notna()]
+        df_suggestions = df_suggestions[df_suggestions.notna()]
+        total_responses = len(suggestions)
+
+        responses_per_user = df_responses_per_user.to_dict(orient="list")
+        suggestions = df_suggestions.to_list()
+        # for idx, suggestion in enumerate(suggestions.copy()):
+        #     if suggestion is None:
+        #         for user_id, responses in responses_per_user.items():
+        #             responses.pop(idx)
+        #             suggestions.pop(idx)
+
+        if len(suggestions) == 0:
+            raise ValueError("All the suggestions are None, the metric cannot be computed.")
+        elif len(suggestions) < total_responses:
+            warnings.warn("Some suggestions are None, the metric will be computed without them.")
 
         metrics = defaultdict(list)
         for user_id, responses in responses_per_user.items():
@@ -160,9 +182,10 @@ class PrecisionMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import precision_score
 
-        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
+        else:
+            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
         return precision_score(responses, suggestions, **kwargs)
 
 
@@ -180,9 +203,10 @@ class RecallMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import recall_score
 
-        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
+        else:
+            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
         return recall_score(responses, suggestions, **kwargs)
 
 
@@ -200,9 +224,11 @@ class F1ScoreMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import f1_score
 
-        kwargs = {}
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
+        else:
+            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
+
         return f1_score(responses, suggestions, **kwargs)
 
 
