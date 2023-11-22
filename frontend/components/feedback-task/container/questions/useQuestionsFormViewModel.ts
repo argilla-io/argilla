@@ -96,11 +96,13 @@ export const useQuestionFormViewModel = () => {
   };
 
   return {
+    draftSaving,
+    isDiscarding,
+    isSubmitting,
     clear,
     submit,
     discard,
     saveDraft,
-    draftSaving,
     saveDraftImmediately,
   };
 };
