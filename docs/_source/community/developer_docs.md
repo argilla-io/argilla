@@ -326,6 +326,8 @@ Then, to run Argilla backend, you will need an ElasticSearch instance up and run
 docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 ```
 
+You will also need the vector database set up, as we show in the [Vector Database](#vector-database) section.
+
 #### Create the Default User
 
 To run the Argilla server on your system, you should at least create the default user. Alternatively, you may skip a default user and directly create user(s) whose credentials you will set up. You can refer to the [user management](../getting_started/installation/configurations/user_management.md#create-a-user) page for detailed information.
