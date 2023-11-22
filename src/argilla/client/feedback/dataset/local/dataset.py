@@ -54,7 +54,7 @@ from argilla.client.models import Framework
 
 if TYPE_CHECKING:
     from argilla.client.feedback.metrics.agreement_metrics import AgreementMetricResult
-    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult, UnifiedAnnotationMetric
+    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
@@ -613,8 +613,8 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
 
         Note:
             Currently, the following types of questions are supported:
-            - For annotator level questions: `LabelQuestion`, `RatingQuestion`, `TextQuestion`
-            - For unified responses: `LabelQuestion`, `RatingQuestion`.
+            - For annotator level questions: all the types of questions
+            - For unified responses: all the questions except the `TextQuestion`.
 
         Returns:
             metrics_container: If strategy is provided it will unify the annotations and return
