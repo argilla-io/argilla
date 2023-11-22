@@ -338,7 +338,13 @@ argilla server database users create_default
 
 #### Launch Argilla Server
 
-Now that your system has the Argilla backend server, you are ready to start your server and access Argilla:
+Now that your system has the Argilla backend server, you are ready to start your server and access Argilla. You can either use the CLI command, which uses the port 6900 and the host 0.0.0.0 as default.
+
+```sh
+argilla server start
+```
+
+Or you can start the server through uvicorn, with the following command:
 
 ```sh
 ARGILLA_ENABLE_TELEMETRY=0 uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 --reload
