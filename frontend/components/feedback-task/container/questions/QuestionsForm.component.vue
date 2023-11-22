@@ -3,8 +3,8 @@
     class="questions-form"
     :class="{
       '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
-      '--animate-submit': animateSubmit,
-      '--animate-discard': animateDiscard,
+      '--animate-submit': isSubmitting,
+      '--animate-discard': isDiscarding,
     }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
@@ -108,8 +108,6 @@ export default {
       interactionCount: 0,
       isTouched: false,
       userComesFromOutside: false,
-      animateSubmit: false,
-      animateDiscard: false,
     };
   },
   setup() {
@@ -203,21 +201,17 @@ export default {
     },
     async onDiscard() {
       if (this.record.isDiscarded) return;
-      this.animateDiscard = true;
+
       await this.discard(this.record);
-      setTimeout(() => {
-        this.$emit("on-discard-responses");
-        this.animateDiscard = false;
-      }, 300);
+
+      this.$emit("on-discard-responses");
     },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
-      this.animateSubmit = true;
+
       await this.submit(this.record);
-      setTimeout(() => {
-        this.$emit("on-submit-responses");
-        this.animateSubmit = false;
-      }, 300);
+
+      this.$emit("on-submit-responses");
     },
     async onClear() {
       await this.clear(this.record);
