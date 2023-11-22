@@ -15,6 +15,11 @@ Are you new to Argilla and do you want to walk through low-key notebooks to repr
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
+```{grid-item-card} Configuring Users and Workspaces
+:link: feedback/end2end_examples/configure-users-and-workspaces.html
+
+Learn how configure `Users` and `Workspaces`.
+```
 ```{grid-item-card} Creating a FeedbackDataset
 :link: feedback/end2end_examples/create-dataset.html
 
