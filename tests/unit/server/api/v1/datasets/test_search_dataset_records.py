@@ -194,7 +194,16 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
 
-    async def test_with_non_existent_field(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+        response = await async_client.post(
+            self.url(uuid4()),
+            headers=owner_auth_header,
+            json={"query": {"text": {"q": "text"}}},
+        )
+
+        assert response.status_code == 404
+
+    async def test_with_text_query_using_non_existent_field(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -205,16 +214,9 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
 
-    async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
-        response = await async_client.post(
-            self.url(uuid4()),
-            headers=owner_auth_header,
-            json={"query": {"text": {"q": "text"}}},
-        )
-
-        assert response.status_code == 404
-
-    async def test_with_record_without_vector(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_vector_query_using_record_without_vector(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         await TextFieldFactory.create(name="input", dataset=dataset)
@@ -241,4 +243,50 @@ class TestSearchDatasetRecords:
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`"
+        }
+
+    async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "query": {
+                    "text": {"q": "text", "field": "non-existent"},
+                },
+                "filters": {
+                    "and": [
+                        {
+                            "type": "terms",
+                            "scope": {"entity": "response", "question": "non-existent"},
+                            "values": ["value-a"],
+                        }
+                    ],
+                },
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+        }
+
+    async def test_with_invalid_sort(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "query": {
+                    "text": {"q": "text", "field": "non-existent"},
+                },
+                "sort": [{"scope": {"entity": "response", "question": "non-existent"}, "order": "asc"}],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         }

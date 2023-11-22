@@ -75,6 +75,10 @@ class SearchRecordsQueryValidator:
         )
 
 
+async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID) -> None:
+    await SearchRecordsQueryValidator(db, query, dataset_id).validate()
+
+
 async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
     if db.bind.dialect.name == postgresql.dialect.name:
         return await _get_dataset_suggestion_agents_by_question_postgresql(db, dataset_id)

@@ -17,6 +17,7 @@ from uuid import uuid4
 import pytest
 from argilla.server.contexts.search import SearchRecordsQueryValidator
 from argilla.server.schemas.v1.datasets import SearchRecordsQuery
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -117,11 +118,12 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value) == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            str(no_result_found.value)
+            == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
     async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
@@ -144,11 +146,12 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value) == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            str(no_result_found.value)
+            == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
     async def test_validate_metadata_filter_scope_in_filters_with_non_existent_metadata_property(
@@ -173,11 +176,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value)
+            str(no_result_found.value)
             == f"Metadata property with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -205,11 +208,12 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value) == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            str(no_result_found.value)
+            == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
     async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
@@ -224,11 +228,12 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value) == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            str(no_result_found.value)
+            == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
     async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(self, db: AsyncSession):
@@ -243,10 +248,10 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(ValueError) as value_error:
+        with pytest.raises(NoResultFound) as no_result_found:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(value_error.value)
+            str(no_result_found.value)
             == f"Metadata property with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
