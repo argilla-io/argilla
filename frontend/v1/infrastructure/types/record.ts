@@ -10,6 +10,8 @@ interface BackendSuggestion {
   id: string;
   question_id: string;
   value: BackendAnswerCombinations;
+  score: number;
+  agent: string;
 }
 export type BackendRecordStatus = "submitted" | "discarded" | "draft";
 
