@@ -19,7 +19,7 @@ from argilla.server.search_engine import (
     TextQuery,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, es_index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from sqlalchemy.orm import Session
 
@@ -59,7 +59,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
     dataset = await DatasetFactory.create(fields=[], questions=[])
     records = await RecordFactory.create_batch(size=100, dataset=dataset)
     await dataset.awaitable_attrs.records
-    index_name = index_name_for_dataset(dataset)
+    index_name = es_index_name_for_dataset(dataset)
 
     opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
 
@@ -210,7 +210,7 @@ async def test_banking_sentiment_dataset_with_vectors(
 
     await elasticsearch_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
 
-    opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+    opensearch.indices.refresh(index=es_index_name_for_dataset(test_banking_sentiment_dataset))
 
     await _refresh_dataset(test_banking_sentiment_dataset)
     await test_banking_sentiment_dataset.awaitable_attrs.records
@@ -253,7 +253,7 @@ class TestSuiteElasticSearchEngine:
 
         await elasticsearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -293,7 +293,7 @@ class TestSuiteElasticSearchEngine:
 
         await elasticsearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -341,7 +341,7 @@ class TestSuiteElasticSearchEngine:
 
         await elasticsearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -412,7 +412,7 @@ class TestSuiteElasticSearchEngine:
 
         await elasticsearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
@@ -449,7 +449,7 @@ class TestSuiteElasticSearchEngine:
         query: Union[str, TextQuery],
         expected_items: int,
     ):
-        opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+        opensearch.indices.refresh(index=es_index_name_for_dataset(test_banking_sentiment_dataset))
 
         result = await elasticsearch_engine.search(test_banking_sentiment_dataset, query=query)
 
@@ -552,7 +552,7 @@ class TestSuiteElasticSearchEngine:
         await elasticsearch_engine.create_index(dataset)
         await elasticsearch_engine.index_records(dataset, records)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
@@ -586,7 +586,7 @@ class TestSuiteElasticSearchEngine:
         records_to_delete, records_to_keep = records[:5], records[5:]
         await elasticsearch_engine.delete_records(dataset, records_to_delete)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         deleted_docs = [
@@ -619,7 +619,7 @@ class TestSuiteElasticSearchEngine:
         await record.awaitable_attrs.dataset
         await elasticsearch_engine.update_record_response(response)
 
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+        index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
         opensearch.indices.refresh(index=index_name)
 
         results = opensearch.get(index=index_name, id=record.id)
@@ -659,7 +659,7 @@ class TestSuiteElasticSearchEngine:
         await record.awaitable_attrs.dataset
         await elasticsearch_engine.update_record_response(response)
 
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+        index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
 
         opensearch.indices.refresh(index=index_name)
 
@@ -687,7 +687,7 @@ class TestSuiteElasticSearchEngine:
         await _refresh_dataset(dataset)
         await elasticsearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -827,7 +827,7 @@ class TestSuiteElasticSearchEngine:
     async def _configure_record_responses(
         self, opensearch: OpenSearch, dataset: Dataset, response_status: List[ResponseStatusFilter], user: User
     ):
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         another_user = await UserFactory.create()
 
         # Create two responses with the same status (one in each record)

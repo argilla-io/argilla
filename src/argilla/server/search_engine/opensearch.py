@@ -20,7 +20,7 @@ from opensearchpy import AsyncOpenSearch, helpers
 
 from argilla.server.models import VectorSettings
 from argilla.server.search_engine.base import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, es_field_for_vector_settings
 from argilla.server.settings import settings
 
 
@@ -60,7 +60,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            field_name_for_vector_settings(vector_settings): {
+            es_field_for_vector_settings(vector_settings): {
                 "type": "knn_vector",
                 "dimension": vector_settings.dimensions,
                 "method": {
@@ -91,7 +91,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             # Will work from Opensearch >= v2.4.0
             knn_query.update({"filter": {"bool": {"must_not": [{"ids": {"values": [str(excluded_id)]}}]}}})
 
-        body = {"query": {"knn": {field_name_for_vector_settings(vector_settings): knn_query}}}
+        body = {"query": {"knn": {es_field_for_vector_settings(vector_settings): knn_query}}}
 
         if bool_filter_query:
             # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not

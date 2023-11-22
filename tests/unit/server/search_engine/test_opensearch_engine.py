@@ -23,7 +23,7 @@ from argilla.server.search_engine import (
     TextQuery,
     UserResponseStatusFilter,
 )
-from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, index_name_for_dataset
+from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, es_index_name_for_dataset
 from argilla.server.settings import settings as server_settings
 from opensearchpy import RequestError
 
@@ -66,7 +66,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
     dataset = await DatasetFactory.create(fields=[], questions=[])
     records = await RecordFactory.create_batch(size=100, dataset=dataset)
     await dataset.awaitable_attrs.records
-    index_name = index_name_for_dataset(dataset)
+    index_name = es_index_name_for_dataset(dataset)
 
     opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
 
@@ -207,7 +207,7 @@ async def test_banking_sentiment_dataset(opensearch_engine: OpenSearchEngine, op
     )
     await dataset.awaitable_attrs.records
 
-    opensearch.indices.refresh(index=index_name_for_dataset(dataset))
+    opensearch.indices.refresh(index=es_index_name_for_dataset(dataset))
 
     return dataset
 
@@ -236,7 +236,7 @@ async def test_banking_sentiment_dataset_with_vectors(
 
     await opensearch_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
 
-    opensearch.indices.refresh(index=index_name_for_dataset(test_banking_sentiment_dataset))
+    opensearch.indices.refresh(index=es_index_name_for_dataset(test_banking_sentiment_dataset))
 
     await test_banking_sentiment_dataset.awaitable_attrs.vectors_settings
     await test_banking_sentiment_dataset.awaitable_attrs.records
@@ -278,7 +278,7 @@ class TestSuiteOpenSearchEngine:
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -319,7 +319,7 @@ class TestSuiteOpenSearchEngine:
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -365,7 +365,7 @@ class TestSuiteOpenSearchEngine:
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.configure_metadata_property(dataset, float_property)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -391,7 +391,7 @@ class TestSuiteOpenSearchEngine:
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -446,7 +446,7 @@ class TestSuiteOpenSearchEngine:
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -515,7 +515,7 @@ class TestSuiteOpenSearchEngine:
 
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
@@ -769,7 +769,7 @@ class TestSuiteOpenSearchEngine:
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.index_records(dataset, records)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
@@ -794,7 +794,7 @@ class TestSuiteOpenSearchEngine:
         terms_property = await TermsMetadataPropertyFactory.create(name="terms")
         await opensearch_engine.configure_metadata_property(dataset, terms_property)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"]["properties"]["metadata"] == {
             "dynamic": "false",
@@ -819,7 +819,7 @@ class TestSuiteOpenSearchEngine:
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.index_records(dataset, records)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
@@ -858,7 +858,7 @@ class TestSuiteOpenSearchEngine:
         await opensearch_engine.create_index(dataset)
         await opensearch_engine.index_records(dataset, records)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
@@ -893,7 +893,7 @@ class TestSuiteOpenSearchEngine:
         records_to_delete, records_to_keep = records[:5], records[5:]
         await opensearch_engine.delete_records(dataset, records_to_delete)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         opensearch.indices.refresh(index=index_name)
 
         deleted_docs = [
@@ -926,7 +926,7 @@ class TestSuiteOpenSearchEngine:
         await record.awaitable_attrs.dataset
         await opensearch_engine.update_record_response(response)
 
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+        index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
         opensearch.indices.refresh(index=index_name)
 
         results = opensearch.get(index=index_name, id=record.id)
@@ -966,7 +966,7 @@ class TestSuiteOpenSearchEngine:
         await record.awaitable_attrs.dataset
         await opensearch_engine.update_record_response(response)
 
-        index_name = index_name_for_dataset(test_banking_sentiment_dataset)
+        index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
 
         opensearch.indices.refresh(index=index_name)
 
@@ -1062,7 +1062,7 @@ class TestSuiteOpenSearchEngine:
         await _refresh_dataset(dataset)
         await opensearch_engine.create_index(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
@@ -1194,7 +1194,7 @@ class TestSuiteOpenSearchEngine:
         number_of_answered_records: int,
         user: Optional[User] = None,
     ):
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
 
         all_statuses = [
             ResponseStatusFilter.draft,
