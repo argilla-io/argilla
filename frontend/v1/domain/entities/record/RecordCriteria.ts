@@ -73,8 +73,22 @@ export class RecordCriteria {
     return this.suggestion.isCompleted;
   }
 
+  get isFilteringByMetadata() {
+    return this.metadata.isCompleted;
+  }
+
   get isSortingBy() {
     return this.sortBy.isCompleted;
+  }
+
+  get isFilteringByAdvanceSearch() {
+    return (
+      this.isFilteringByText ||
+      this.isFilteringByMetadata ||
+      this.isFilteringBySimilarity ||
+      this.isFilteringByResponse ||
+      this.isFilteringBySuggestion
+    );
   }
 
   get isFilteredByText() {

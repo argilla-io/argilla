@@ -9,15 +9,14 @@ import {
   BackedRecords,
   BackendRecordStatus,
   BackendSimilaritySearchOrder,
+  BackendSort,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
-import { SortCriteria } from "~/v1/domain/entities/sort/SortCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
-import { MetadataCriteria } from "~/v1/domain/entities/metadata/MetadataCriteria";
 import { RangeValue } from "~/v1/domain/entities/common/Filter";
 
 const RECORD_API_ERRORS = {
@@ -42,7 +41,7 @@ export class RecordRepository {
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {
-    if (criteria.isFilteringByText || criteria.isFilteringBySimilarity)
+    if (criteria.isFilteringByAdvanceSearch)
       return this.getRecordsByAdvanceSearch(criteria, pagination);
 
     return this.getRecordsByDatasetId(criteria, pagination);
@@ -141,12 +140,12 @@ export class RecordRepository {
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {
-    const { datasetId, status, metadata, sortBy } = criteria;
+    const { datasetId, status } = criteria;
     const { from, many } = pagination;
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(from, many, status, metadata, sortBy);
+      const params = this.createParams(from, many, status);
 
       const { data } = await this.axios.get<ResponseWithTotal<BackedRecord[]>>(
         url,
@@ -174,13 +173,14 @@ export class RecordRepository {
     const {
       datasetId,
       status,
+      searchText,
       metadata,
       sortBy,
-      searchText,
       similaritySearch,
       response,
       suggestion,
       isFilteringByText,
+      isFilteringByMetadata,
       isFilteringBySimilarity,
       isFilteringByResponse,
       isFilteringBySuggestion,
@@ -214,11 +214,43 @@ export class RecordRepository {
         };
       }
 
+      if (isFilteringByMetadata) {
+        metadata.value.forEach((m) => {
+          const range = m.value as RangeValue;
+
+          if (range.ge && range.le) {
+            body.filters.and.push({
+              type: "range",
+              scope: {
+                entity: "metadata",
+                metadata_property: m.name,
+              },
+              gte: range.ge,
+              lte: range.le,
+            });
+
+            return;
+          }
+
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "metadata",
+              metadata_property: m.name,
+            },
+            values: m.value as string[],
+          });
+        });
+      }
+
       if (isFilteringByResponse) {
         response.value.forEach((r) => {
           body.filters.and.push({
             type: "terms",
-            field: `response.${r.name}.values`,
+            scope: {
+              entity: "response",
+              question: r.name,
+            },
             values: r.value,
           });
         });
@@ -228,12 +260,16 @@ export class RecordRepository {
         body.filters.and = [];
 
         suggestion.or.forEach((suggestion) => {
-          if (suggestion.isRange) {
-            const value = suggestion.configuration.value as RangeValue;
+          const value = suggestion.configuration.value as RangeValue;
 
+          if (value.ge && value.le) {
             body.filters.and.push({
               type: "range",
-              field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
               gte: value.ge,
               lte: value.le,
             });
@@ -243,7 +279,11 @@ export class RecordRepository {
 
           body.filters.and.push({
             type: "terms",
-            field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+            scope: {
+              entity: "suggestion",
+              question: suggestion.question.name,
+              property: suggestion.configuration.name,
+            },
             values,
           });
         });
@@ -251,7 +291,11 @@ export class RecordRepository {
         suggestion.and.forEach((suggestion) => {
           body.filters.and.push({
             type: "terms",
-            field: `suggestion.${suggestion.question.name}.${suggestion.configuration.name}`,
+            scope: {
+              entity: "suggestion",
+              question: suggestion.question.name,
+              property: suggestion.configuration.name,
+            },
             values: suggestion.configuration.value,
           });
         });
@@ -259,14 +303,23 @@ export class RecordRepository {
 
       if (isSortingBy) {
         sortBy.value.forEach((sort) => {
-          body.sort.push({
-            field: sort.name, // Review this
+          const backendSort: BackendSort = {
+            scope: {
+              entity: sort.key,
+              property: sort.property,
+            },
             order: sort.sort,
-          });
+          };
+
+          if (sort.question) {
+            backendSort.scope.question = sort.question;
+          }
+
+          body.sort.push(backendSort);
         });
       }
 
-      const params = this.createParams(from, many, status, metadata, sortBy);
+      const params = this.createParams(from, many, status);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -313,13 +366,7 @@ export class RecordRepository {
     };
   }
 
-  private createParams(
-    fromRecord: number,
-    howMany: number,
-    status: string,
-    metadata: MetadataCriteria,
-    sortBy: SortCriteria
-  ) {
+  private createParams(fromRecord: number, howMany: number, status: string) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
@@ -331,14 +378,6 @@ export class RecordRepository {
     params.append("response_status", backendStatus);
 
     if (backendStatus === "missing") params.append("response_status", "draft");
-
-    metadata.backendParams.forEach((metadata) => {
-      params.append("metadata", metadata);
-    });
-
-    sortBy.backendParams.forEach((sort) => {
-      params.append("sort_by", sort);
-    });
 
     return params;
   }
