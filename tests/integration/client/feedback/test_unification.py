@@ -73,6 +73,7 @@ def test_rating_question_strategy(strategy, unified_response):
         ("majority", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}], "strategy": "majority"}]),
         ("max", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 3, "value": "no"}], "strategy": "max"}]),
         ("min", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 1, "value": "no"}], "strategy": "min"}]),
+        ("mean", [{"value": [{"rank": 2, "value": "yes"}, {"rank": 2, "value": "no"}], "strategy": "mean"}]),
     ],
 )
 def test_ranking_question_strategy(strategy, unified_response):

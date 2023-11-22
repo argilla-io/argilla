@@ -209,6 +209,7 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
         - "min": the min value of the rankings
     """
 
+    MEAN: str = "mean"
     MAJORITY: str = "majority"
     MAX: str = "max"
     MIN: str = "min"
@@ -232,6 +233,9 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
         the updated list of FeedbackRecord objects after aggregating the responses for the
         specified question.
         """
+        if self.value == self.MEAN.value:
+            return self._mean(records, question)
+
         for rec in records:
             if not rec.responses:
                 continue
@@ -267,6 +271,55 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
                 # Extract the first of the possible values (in case there is more than one).
                 unified_rank = [{"rank": item[1], "value": item[0]} for item in zip(*df.iloc[0].to_list())]
                 rec._unified_responses[question] = [UnifiedValueSchema(value=unified_rank, strategy=self.value)]
+
+        return records
+
+    def _mean(self, records: List[FeedbackRecord], question: str):
+        """
+        The function `_mean` takes a list of `FeedbackRecord` objects and a question, and
+        aggregates the responses for that question based on the average of the ranks.
+
+        Args:
+        - records The `records` parameter is a list of `FeedbackRecord` objects. Each
+        `FeedbackRecord` object represents a feedback record and contains information about the
+        responses given for a particular feedback.
+        - question The `question` parameter in the `_aggregate` method is a string that represents
+        the question for which the responses are being aggregated.
+
+        Returns:
+        the updated list of FeedbackRecord objects after aggregating the responses for the
+        specified question.
+        """
+        from collections import defaultdict
+
+        UnifiedValueSchema.update_forward_refs()
+
+        for rec in records:
+            if not rec.responses:
+                continue
+            # only allow for submitted responses
+            responses = [resp for resp in rec.responses if resp.status == "submitted"]
+            # Step 1: Create an empty dictionary to store cumulative ranks and counts
+            cumulative_ranks = defaultdict(lambda: {"sum": 0, "count": 0})
+
+            # Step 2: Iterate through each ranking and update cumulative ranks and counts
+            for resp in responses:
+                if question in resp.values:
+                    for item in resp.values[question].value:
+                        value = item.value
+                        rank = item.rank
+                        cumulative_ranks[value]["sum"] += rank
+                        cumulative_ranks[value]["count"] += 1
+
+            # Step 3: Calculate the average rank for each response
+            average_ranking = [
+                {"rank": round(cumulative_ranks[value]["sum"] / cumulative_ranks[value]["count"]), "value": value}
+                for value in cumulative_ranks
+            ]
+
+            # Step 4: Create a new list representing the average ranking
+            average_ranking = sorted(average_ranking, key=lambda x: x["rank"])
+            rec._unified_responses[question] = [UnifiedValueSchema(value=average_ranking, strategy=self.value)]
 
         return records
 
@@ -545,7 +598,7 @@ class RankingQuestionUnification(BaseModel):
 
     Args:
         question (RankingQuestion): ranking question
-        strategy (Union[str, RankingQuestionStrategy]): unification strategy. Defaults to "mean".
+        strategy (Union[str, RankingQuestionStrategy]): unification strategy. Defaults to "majority".
             mean (str): the mean value of the ratings.
             majority (str): the majority value of the ratings.
             max (str): the max value of the ratings
@@ -553,13 +606,13 @@ class RankingQuestionUnification(BaseModel):
 
     Examples:
         >>> from argilla import RankingQuestionUnification, RankingQuestionStrategy, RankingQuestion
-        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy="mean")
+        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy="majority")
         >>> # or use a RankingQuestionStrategy
-        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy=RankingQuestionStrategy.MEAN)
+        >>> RankingQuestionUnification(question=RankingQuestion(...), strategy=RankingQuestionStrategy.MAJORITY)
     """
 
     question: RankingQuestion
-    strategy: Union[str, RankingQuestionStrategy] = "mean"
+    strategy: Union[str, RankingQuestionStrategy] = "majority"
 
     @validator("strategy", always=True)
     def strategy_must_be_valid(cls, v: Union[str, RankingQuestionStrategy]) -> RankingQuestionStrategy:
