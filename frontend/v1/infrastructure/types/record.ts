@@ -41,13 +41,27 @@ export interface BackendSearchRecords {
 
 interface AndFilterBackendSearchQuery {
   type: "terms" | "range";
-  field: string;
+  scope: {
+    entity: "response" | "suggestion" | "metadata";
+    question?: string;
+    property?: "values" | "score" | "agent";
+    metadata_property?: string;
+  };
   values?: string[];
   gte?: number;
   lte?: number;
 }
 
 export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
+
+export interface BackendSort {
+  scope: {
+    entity: "suggestion" | "record" | "metadata";
+    question?: string;
+    property?: string;
+  };
+  order: "asc" | "desc";
+}
 
 export interface BackendAdvanceSearchQuery {
   query: {
@@ -64,8 +78,5 @@ export interface BackendAdvanceSearchQuery {
   filters: {
     and: AndFilterBackendSearchQuery[];
   };
-  sort: {
-    field: string;
-    order: "asc" | "desc";
-  }[];
+  sort: BackendSort[];
 }

@@ -65,7 +65,6 @@ export class SuggestionCriteria extends Criteria {
       return s.value.map((v) => {
         return {
           question: { name: s.name },
-          isRange: v.name === "score",
           configuration: {
             name: v.name,
             value: v.value,

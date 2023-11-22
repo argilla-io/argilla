@@ -162,7 +162,13 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         "",
-        "inserted_at:asc",
+        JSON.stringify([
+          {
+            key: "record",
+            property: "inserted_at",
+            sort: "asc",
+          },
+        ]),
         "",
         "",
         null
@@ -413,7 +419,15 @@ describe("RecordCriteria", () => {
         null
       );
 
-      criteria.sortBy.complete("inserted_at:asc");
+      criteria.sortBy.complete(
+        JSON.stringify([
+          {
+            key: "record",
+            property: "inserted_at",
+            sort: "asc",
+          },
+        ])
+      );
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -456,7 +470,9 @@ describe("RecordCriteria", () => {
         { name: "metadata1", value: ["value1"] },
         { name: "metadata2", value: ["value2"] },
       ];
-      criteria.sortBy.value = [{ key: "", name: "inserted_at", sort: "asc" }];
+      criteria.sortBy.value = [
+        { key: "record", property: "inserted_at", sort: "asc" },
+      ];
 
       criteria.similaritySearch.order = "least";
       criteria.similaritySearch.recordId = "1";

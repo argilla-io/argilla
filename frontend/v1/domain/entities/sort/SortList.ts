@@ -4,18 +4,24 @@ import { Question } from "../question/Question";
 const SORT_ASC = "asc";
 const SORT_DESC = "desc";
 
-type SortOptions = "asc" | "desc";
+type SortOrderOptions = "asc" | "desc";
+
+type SortOptions = "metadata" | "record" | "suggestion";
 
 export interface SortSearch {
-  key: string;
-  name: string;
-  sort: SortOptions;
+  key: SortOptions;
+  property: string;
+  question?: string;
+  sort: SortOrderOptions;
 }
 
 abstract class Sort {
-  public sort: SortOptions = SORT_ASC;
+  public sort: SortOrderOptions = SORT_ASC;
 
-  constructor(public readonly key: string, public readonly group: string) {}
+  constructor(
+    public readonly key: SortOptions,
+    public readonly group: string
+  ) {}
 
   toggleSort() {
     this.sort = this.sort === SORT_ASC ? SORT_DESC : SORT_ASC;
@@ -64,11 +70,7 @@ class SuggestionScoreSort extends Sort {
 
 class RecordSort extends Sort {
   constructor(public readonly name: string, public readonly title = name) {
-    super("", "general");
-  }
-
-  get canSort(): boolean {
-    return true;
+    super("record", "general");
   }
 }
 
@@ -154,11 +156,19 @@ export class SortList {
   }
 
   private createSortCriteria(): SortSearch[] {
-    return this.selectedCategories.map((categoriesSort) => {
+    return this.selectedCategories.map(({ key, name, sort }) => {
+      if (key === "suggestion")
+        return {
+          key,
+          property: "score",
+          question: name,
+          sort,
+        };
+
       return {
-        key: categoriesSort.key,
-        name: categoriesSort.name,
-        sort: categoriesSort.sort,
+        key,
+        property: name,
+        sort,
       };
     });
   }
@@ -170,8 +180,8 @@ export class SortList {
 
     if (!sort.length) return;
 
-    sort.forEach(({ name, sort }) => {
-      const found = this.findByCategory(name);
+    sort.forEach(({ property, sort }) => {
+      const found = this.findByCategory(property);
 
       if (found) {
         found.sort = sort;
