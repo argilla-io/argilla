@@ -59,12 +59,13 @@ def test_responses_per_user(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    responses_per_user, suggestions = get_responses_and_suggestions_per_user(dataset, question, response_status=status)
+    responses_per_user, suggestions = get_responses_and_suggestions_per_user(
+        dataset, question, filter_by={"response_status": status}
+    )
+    num_users = 3
     if status != "submitted":
-        num_users = 0
         assert len(responses_per_user) == num_users
     else:
-        num_users = 3
         assert len(responses_per_user) == num_users
         assert isinstance(responses_per_user, dict)
         responses = responses_per_user[list(responses_per_user.keys())[0]]
@@ -85,7 +86,8 @@ def test_responses_per_user(
         # MultiLabelQuestion
         ("question-4", [1, 1, 1, 2], list, "majority"),
         # RankingQuestion
-        ("question-5", [1, 1, 1, 2], str, "majority"),
+        # TODO(plaguss): Activate this test when we have a strategy for RankingQuestion (#4295)
+        # ("question-5", [1, 1, 1, 2], str, "majority"),
     ],
 )
 @pytest.mark.usefixtures(

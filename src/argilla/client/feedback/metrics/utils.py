@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -24,12 +24,16 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
     from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.metrics.base import Responses, Suggestions
+    from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+    from argilla.client.feedback.schemas.records import SortBy
 
 
 def get_responses_and_suggestions_per_user(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
-    response_status: str = ResponseStatusFilter.submitted.value,
+    filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+    sort_by: Optional[List["SortBy"]] = None,
+    max_records: Optional[int] = None,
 ) -> Tuple[Dict[int, "Responses"], "Suggestions"]:
     """Extract the responses per user and the suggestions from a FeedbackDataset.
 
@@ -39,7 +43,12 @@ def get_responses_and_suggestions_per_user(
     Args:
         dataset: FeedbackDataset or RemoteFeedbackDataset.
         question_name: The name of the question to filter from the dataset.
-        response_status: The responses status for the responses. Defaults to "submitted".
+        filter_by: A dict with key the field to filter by, and values the filters to apply.
+            Can be one of: draft, pending, submitted, and discarded. If set to None,
+            no filter will be applied. Defaults to None (no filter is applied).
+        sort_by: A list of `SortBy` objects to sort your dataset by.
+            Defaults to None (no filter is applied).
+        max_records: The maximum number of records to use for training. Defaults to None.
 
     Raises:
         NotImplementedError:
@@ -49,7 +58,12 @@ def get_responses_and_suggestions_per_user(
         Tuple containing the responses per user as a dict, with keys the user id and values the responses,
         and the suggestions.
     """
-    dataset = dataset.filter_by(response_status=response_status)
+    if filter_by:
+        dataset = dataset.filter_by(**filter_by)
+    if sort_by:
+        dataset = dataset.sort_by(sort_by)
+    if max_records:
+        dataset = dataset.pull(max_records=max_records)
 
     hf_dataset = dataset.format_as("datasets")
     question_type = type(dataset.question_by_name(question_name))
@@ -58,7 +72,7 @@ def get_responses_and_suggestions_per_user(
     for responses_ in hf_dataset[question_name]:
         for response in responses_:
             # We do this check here because local datasets don't implement the filter_by method.
-            if response["status"] != response_status:
+            if response["status"] != "submitted":
                 continue
             user_id = response["user_id"]
             if user_id is None:
@@ -82,6 +96,9 @@ def get_responses_and_suggestions_per_user(
 def get_unified_responses_and_suggestions(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
+    filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+    sort_by: Optional[List["SortBy"]] = None,
+    max_records: Optional[int] = None,
 ) -> Tuple["Responses", "Suggestions"]:
     """Extract the unified responses and the suggestions from a FeedbackDataset.
 
@@ -91,6 +108,12 @@ def get_unified_responses_and_suggestions(
     Args:
         dataset: FeedbackDataset or RemoteFeedbackDataset.
         question_name: The name of the question to filter from the dataset.
+        filter_by: A dict with key the field to filter by, and values the filters to apply.
+            Can be one of: draft, pending, submitted, and discarded. If set to None,
+            no filter will be applied. Defaults to None (no filter is applied).
+        sort_by: A list of `SortBy` objects to sort your dataset by.
+            Defaults to None (no filter is applied).
+        max_records: The maximum number of records to use for training. Defaults to None.
 
     Raises:
         NotImplementedError:
@@ -101,6 +124,13 @@ def get_unified_responses_and_suggestions(
     Returns:
         Tuple containing the unified responses and the suggestions.
     """
+    if filter_by:
+        dataset = dataset.filter_by(**filter_by)
+    if sort_by:
+        dataset = dataset.sort_by(sort_by)
+    if max_records:
+        dataset = dataset.pull(max_records=max_records)
+
     question_type = type(dataset.question_by_name(question_name))
     if question_type == TextQuestion:
         raise NotImplementedError("This function is not available for `TextQuestion`.")

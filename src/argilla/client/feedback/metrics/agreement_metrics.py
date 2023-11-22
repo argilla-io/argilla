@@ -178,12 +178,12 @@ class AgreementMetric(MetricBase):
         Args:
             dataset: FeedbackDataset to compute the metrics.
             question_name: Name of the question for which we want to analyse the agreement.
-        filter_by: A dict with key the field to filter by, and values the filters to apply.
-            Can be one of: draft, pending, submitted, and discarded. If set to None,
-            no filter will be applied. Defaults to None (no filter is applied).
-        sort_by: A list of `SortBy` objects to sort your dataset by.
-            Defaults to None (no filter is applied).
-        max_records: The maximum number of records to use for training. Defaults to None.
+            filter_by: A dict with key the field to filter by, and values the filters to apply.
+                Can be one of: draft, pending, submitted, and discarded. If set to None,
+                no filter will be applied. Defaults to None (no filter is applied).
+            sort_by: A list of `SortBy` objects to sort your dataset by.
+                Defaults to None (no filter is applied).
+            max_records: The maximum number of records to use for training. Defaults to None.
         """
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name)
