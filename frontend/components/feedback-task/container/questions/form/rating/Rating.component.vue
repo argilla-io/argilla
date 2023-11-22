@@ -1,13 +1,11 @@
 <template>
   <RatingShortcuts>
     <div class="wrapper">
-      <QuestionHeaderComponent
-        :question="question"
-        :showSuggestion="showSuggestion"
-      />
+      <QuestionHeaderComponent :question="question" />
 
       <RatingMonoSelectionComponent
         ref="ratingMonoSelectionRef"
+        :suggestions="question.suggestion?.suggestedAnswer"
         v-model="question.answer.values"
         :isFocused="isFocused"
         @on-focus="onFocus"
@@ -24,10 +22,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     isFocused: {
       type: Boolean,
