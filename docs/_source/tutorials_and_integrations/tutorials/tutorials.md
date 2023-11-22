@@ -1,11 +1,28 @@
 # Tutorials
 
+Whether you’re a beginner or an experienced user, these tutorials will walk you through our features and functionalities making it easy for you to understand and implement them.
+
 **Feedback Dataset**
 
 ```{include} /_common/feedback_dataset.md
 ```
 
-Here you can find end-to-end examples to help you get started with curanting datasets and collecting feedback to fine-tune LLMs and other language models.
+*Beginner*
+
+Are you new to Argilla and do you want to walk through low-key notebooks to reproduce specific features, these tutorials are perfect for you.
+
+````{grid}  1 1 3 3
+:class-container: tuto-section-2
+```{grid-item-card} Creating a FeedbackDataset
+:link: feedback/end2end_examples/create-dataset.html
+
+Learn how configure a `FeedbackDataset` and add `FeedbackRecords` to it.
+```
+````
+
+*Advanced*
+
+Here you can find more advanced applied examples to help you get started with curating datasets and collecting feedback to fine-tune LLMs and other language models.
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
