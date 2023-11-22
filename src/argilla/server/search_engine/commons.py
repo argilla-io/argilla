@@ -162,7 +162,7 @@ def es_field_for_vector_settings(vector_settings: VectorSettings) -> str:
     return f"vectors.{vector_settings.id}"
 
 
-def es_field_for_record_property(property:str) -> str:
+def es_field_for_record_property(property: str) -> str:
     return property
 
 
@@ -244,7 +244,6 @@ def _unify_sort_by_with_order(sort_by: List[SortBy], order: List[Order]) -> List
         new_order.append(Order(scope=scope, order=sort.order))
 
     return new_order
-
 
 
 @dataclasses.dataclass
