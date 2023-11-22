@@ -19,9 +19,9 @@ from uuid import UUID
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
+from argilla import errors
 from argilla.server.contexts import accounts
 from argilla.server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla.server.models import (
@@ -238,7 +238,7 @@ async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dat
 async def get_question_by_name_and_dataset_id_or_raise(db: "AsyncSession", name: str, dataset_id: UUID) -> Question:
     question = await get_question_by_name_and_dataset_id(db, name, dataset_id)
     if question is None:
-        raise NoResultFound(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
+        raise errors.NotFoundError(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
 
     return question
 
@@ -256,7 +256,7 @@ async def get_metadata_property_by_name_and_dataset_id_or_raise(
 ) -> MetadataProperty:
     metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name, dataset_id)
     if metadata_property is None:
-        raise NoResultFound(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
+        raise errors.NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
 
     return metadata_property
 

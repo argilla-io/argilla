@@ -15,9 +15,9 @@
 from uuid import uuid4
 
 import pytest
+from argilla import errors
 from argilla.server.contexts.search import SearchRecordsQueryValidator
 from argilla.server.schemas.v1.datasets import SearchRecordsQuery
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -118,11 +118,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -146,11 +146,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -176,11 +176,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Metadata property with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -208,11 +208,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -228,11 +228,11 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
         )
 
@@ -248,10 +248,10 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(NoResultFound) as no_result_found:
+        with pytest.raises(errors.NotFoundError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(no_result_found.value)
+            str(not_found_error.value)
             == f"Metadata property with name `non-existent` not found for dataset with id `{dataset.id}`"
         )

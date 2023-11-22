@@ -17,10 +17,10 @@ from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
+from argilla import errors
 from argilla.server.apis.v1.handlers.datasets.datasets import _get_dataset
 from argilla.server.contexts import datasets, search
 from argilla.server.database import get_async_db
@@ -289,7 +289,7 @@ async def _build_sort_by(
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
-    except (NoResultFound, ValueError) as e:
+    except (ValueError, errors.NotFoundError) as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
 
