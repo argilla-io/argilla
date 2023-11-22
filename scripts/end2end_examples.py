@@ -30,7 +30,9 @@ from typing import Dict, Optional
 import papermill
 import typer
 
-EXAMPLES_FOLDER = Path(__file__).parent.parent / "docs/_source/practical_guides/examples/text_classification"
+EXAMPLES_FOLDER = (
+    Path(__file__).parent.parent / "docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples"
+)
 OUTPUT_FOLDER = EXAMPLES_FOLDER / "output_notebooks"
 
 
