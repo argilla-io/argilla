@@ -34,7 +34,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         import torch
         from span_marker import SpanMarkerModel
 
-        self._span_marker_model = None
+        self.trainer_model = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():
@@ -78,7 +78,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         self.trainer_kwargs["weight_decay"] = 0.01
 
     def init_model(self) -> None:
-        self._span_marker_model = self._model_class.from_pretrained(**self.model_kwargs).to(self.device)
+        self.trainer_model = self._model_class.from_pretrained(**self.model_kwargs).to(self.device)
 
     def update_config(self, **kwargs) -> None:
         """
@@ -114,18 +114,17 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         self.init_model()
 
         # set trainer
-        self._training_args = TrainingArguments(**self.trainer_kwargs)
-        self._span_marker_trainer = Trainer(
-            args=self._training_args,
-            model=self._span_marker_model,
+        self.trainer = Trainer(
+            args=TrainingArguments(**self.trainer_kwargs),
+            model=self.trainer_model,
             train_dataset=self._train_dataset,
             eval_dataset=self._eval_dataset,
         )
 
         # train
-        self._span_marker_trainer.train()
+        self.trainer.train()
         if self._eval_dataset:
-            self._metrics = self._span_marker_trainer.evaluate()
+            self._metrics = self.trainer.evaluate()
             self._logger.info(self._metrics)
         else:
             self._metrics = None
@@ -146,7 +145,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         """
         from datasets import Dataset
 
-        if self._span_marker_model is None:
+        if self.trainer_model is None:
             self._logger.warning("Using model without fine-tuning.")
             self.init_model()
 
@@ -155,7 +154,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
             text = [text]
             str_input = True
 
-        entities_list = self._span_marker_model.predict(text, **kwargs)
+        entities_list = self.trainer_model.predict(text, **kwargs)
 
         if as_argilla_records:
             formatted_prediction = []
@@ -166,7 +165,7 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
                     for entity in entities
                 ]
                 dataset = Dataset.from_dict({"tokens": text})
-                encoding = self._span_marker_model.tokenizer({"tokens": dataset["tokens"]}, return_batch_encoding=True)[
+                encoding = self.trainer_model.tokenizer({"tokens": dataset["tokens"]}, return_batch_encoding=True)[
                     "batch_encoding"
                 ]
                 word_ids = sorted(set(encoding.word_ids()) - {None})
@@ -190,4 +189,4 @@ class ArgillaSpanMarkerTrainer(ArgillaTrainerSkeleton):
         Args:
           output_dir (str): the path to save the model to
         """
-        self._span_marker_model.save_pretrained(output_dir)
+        self.trainer_model.save_pretrained(output_dir)
