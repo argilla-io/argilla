@@ -39,7 +39,7 @@ jobs:
               - 'pyproject.toml'
               - 'setup.py'
               - 'scripts/end2end_examples.py'
-              - 'docs/_source/practical_guides/examples/**/**'
+              - 'docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples/**'
             buildChanges:
               - 'src/**'
               - 'frontend/**'
