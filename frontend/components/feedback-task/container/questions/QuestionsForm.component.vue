@@ -110,8 +110,8 @@ export default {
   },
   computed: {
     questionFormClass() {
-      if (this.isSubmitting) return "--animate-submit";
-      if (this.isDiscarding) return "--animate-discard";
+      if (this.isSubmitting) return "--submitted --waiting";
+      if (this.isDiscarding) return "--discarded --waiting";
 
       if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
         return "--focused-form";
@@ -278,18 +278,23 @@ export default {
   &.--pending,
   &.--draft {
     box-shadow: $shadow;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease;
   }
   &.--discarded {
     border-color: #c3c3c3;
+    box-shadow: none;
   }
   &.--submitted {
     border-color: $primary-color;
+    box-shadow: none;
   }
   &.--focused-form {
     border-color: palette(brown);
     box-shadow: none;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease;
+  }
+  &.--waiting .questions-form__content {
+    opacity: 0.7;
   }
 }
 
@@ -348,13 +353,5 @@ export default {
       left: 100%;
     }
   }
-}
-
-.--animate-submit {
-  border-color: $primary-color;
-}
-
-.--animate-discard {
-  border-color: #c3c3c3;
 }
 </style>
