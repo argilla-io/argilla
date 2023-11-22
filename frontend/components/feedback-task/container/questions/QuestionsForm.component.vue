@@ -1,11 +1,7 @@
 <template>
   <form
     class="questions-form"
-    :class="{
-      '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
-      '--animate-submit': isSubmitting,
-      '--animate-discard': isDiscarding,
-    }"
+    :class="questionFormClass"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
@@ -113,6 +109,13 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
+    questionFormClass() {
+      if (this.isSubmitting) return "--animate-submit";
+      if (this.isDiscarding) return "--animate-discard";
+
+      if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
+        return "--focused-form";
+    },
     formHasFocus() {
       return this.autofocusPosition || this.autofocusPosition == 0;
     },
@@ -348,22 +351,10 @@ export default {
 }
 
 .--animate-submit {
-  animation: submit 0.3s ease-in-out;
-}
-@keyframes submit {
-  0%,
-  100% {
-    border-color: $primary-color;
-  }
+  border-color: $primary-color;
 }
 
 .--animate-discard {
-  animation: discard 0.3s ease-in-out;
-}
-@keyframes discard {
-  0%,
-  100% {
-    border-color: #c3c3c3;
-  }
+  border-color: #c3c3c3;
 }
 </style>
