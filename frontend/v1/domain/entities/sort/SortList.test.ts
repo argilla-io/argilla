@@ -92,13 +92,13 @@ describe("SortList ", () => {
 
       const param = categoriesSort.commit();
 
-      expect(param[0].key).toEqual("metadata");
-      expect(param[0].property).toEqual("loss");
-      expect(param[0].sort).toEqual("desc");
+      expect(param[0].entity).toEqual("metadata");
+      expect(param[0].name).toEqual("loss");
+      expect(param[0].order).toEqual("desc");
 
-      expect(param[1].key).toEqual("metadata");
-      expect(param[1].property).toEqual("split");
-      expect(param[1].sort).toEqual("asc");
+      expect(param[1].entity).toEqual("metadata");
+      expect(param[1].name).toEqual("split");
+      expect(param[1].order).toEqual("asc");
     });
   });
 
@@ -106,8 +106,8 @@ describe("SortList ", () => {
     test("should be able to complete by route params", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
       categoriesSort.complete([
-        { key: "metadata", property: "loss", sort: "desc" },
-        { key: "record", property: "inserted_at", sort: "asc" },
+        { entity: "metadata", name: "loss", order: "desc" },
+        { entity: "record", name: "inserted_at", order: "asc" },
       ]);
 
       expect(categoriesSort.selected[0].key).toEqual("metadata");

@@ -1,7 +1,7 @@
 import { Criteria } from "../common/Criteria";
 import { RangeValue } from "../common/Filter";
 
-type ValuesOption = {
+export type ValuesOption = {
   values: string[];
   operator?: "and" | "or";
 };
@@ -61,7 +61,15 @@ export class SuggestionCriteria extends Criteria {
   get or() {
     if (!this.isCompleted) return [];
 
-    const orSuggestion = this.value.map((s) => {
+    const orSuggestions = this.value.filter((s) =>
+      s.value.some((v) => {
+        const { operator } = v.value as ValuesOption;
+
+        return operator !== "and";
+      })
+    );
+
+    return orSuggestions.flatMap((s) => {
       return s.value.map((v) => {
         return {
           question: { name: s.name },
@@ -72,31 +80,33 @@ export class SuggestionCriteria extends Criteria {
         };
       });
     });
-
-    return orSuggestion.flatMap((s) => s);
   }
 
   get and() {
     if (!this.isCompleted) return [];
 
-    const andSuggestions = this.value.map((s) => {
-      return s.value
-        .filter((v) => {
-          const { operator } = v.value as ValuesOption;
-          return operator === "and";
-        })
-        .map((v) => {
+    const andSuggestions = this.value.filter((s) =>
+      s.value.some((v) => {
+        const { operator } = v.value as ValuesOption;
+
+        return operator === "and";
+      })
+    );
+
+    return andSuggestions.flatMap((s) => {
+      return s.value.flatMap((v) => {
+        const value = v.value as ValuesOption;
+        return value.values.map((m) => {
           return {
             question: { name: s.name },
             configuration: {
               name: v.name,
-              value: v.value as string[],
+              value: m,
             },
           };
         });
+      });
     });
-
-    return andSuggestions.flatMap((s) => s);
   }
 
   private createParams(): string[] {

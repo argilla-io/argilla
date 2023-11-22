@@ -87,7 +87,8 @@ export class RecordCriteria {
       this.isFilteringByMetadata ||
       this.isFilteringBySimilarity ||
       this.isFilteringByResponse ||
-      this.isFilteringBySuggestion
+      this.isFilteringBySuggestion ||
+      this.isSortingBy
     );
   }
 

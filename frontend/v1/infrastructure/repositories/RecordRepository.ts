@@ -18,6 +18,7 @@ import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { RangeValue } from "~/v1/domain/entities/common/Filter";
+import { ValuesOption } from "~/v1/domain/entities/suggestion/SuggestionCriteria";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -193,10 +194,6 @@ export class RecordRepository {
 
       const body: BackendAdvanceSearchQuery = {
         query: {},
-        filters: {
-          and: [],
-        },
-        sort: [],
       };
 
       if (isFilteringBySimilarity) {
@@ -214,11 +211,21 @@ export class RecordRepository {
         };
       }
 
+      if (
+        isFilteringByMetadata ||
+        isFilteringByResponse ||
+        isFilteringBySuggestion
+      ) {
+        body.filters = {
+          and: [],
+        };
+      }
+
       if (isFilteringByMetadata) {
         metadata.value.forEach((m) => {
           const range = m.value as RangeValue;
 
-          if (range.ge && range.le) {
+          if ("ge" in range && "le" in range) {
             body.filters.and.push({
               type: "range",
               scope: {
@@ -257,12 +264,10 @@ export class RecordRepository {
       }
 
       if (isFilteringBySuggestion) {
-        body.filters.and = [];
-
         suggestion.or.forEach((suggestion) => {
-          const value = suggestion.configuration.value as RangeValue;
+          if (suggestion.configuration.name === "score") {
+            const value = suggestion.configuration.value as RangeValue;
 
-          if (value.ge && value.le) {
             body.filters.and.push({
               type: "range",
               scope: {
@@ -275,17 +280,34 @@ export class RecordRepository {
             });
           }
 
-          const values = suggestion.configuration.value as string[];
+          if (suggestion.configuration.name === "values") {
+            const valuesOptions = suggestion.configuration
+              .value as ValuesOption;
 
-          body.filters.and.push({
-            type: "terms",
-            scope: {
-              entity: "suggestion",
-              question: suggestion.question.name,
-              property: suggestion.configuration.name,
-            },
-            values,
-          });
+            body.filters.and.push({
+              type: "terms",
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
+              values: valuesOptions.values,
+            });
+          }
+
+          if (suggestion.configuration.name === "agent") {
+            const values = suggestion.configuration.value as string[];
+
+            body.filters.and.push({
+              type: "terms",
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
+              values,
+            });
+          }
         });
 
         suggestion.and.forEach((suggestion) => {
@@ -296,23 +318,29 @@ export class RecordRepository {
               question: suggestion.question.name,
               property: suggestion.configuration.name,
             },
-            values: suggestion.configuration.value,
+            values: [suggestion.configuration.value],
           });
         });
       }
 
       if (isSortingBy) {
+        body.sort = [];
+
         sortBy.value.forEach((sort) => {
           const backendSort: BackendSort = {
             scope: {
-              entity: sort.key,
-              property: sort.property,
+              entity: sort.entity,
             },
-            order: sort.sort,
+            order: sort.order,
           };
 
-          if (sort.question) {
-            backendSort.scope.question = sort.question;
+          if (sort.entity === "suggestion") {
+            backendSort.scope.question = sort.name;
+            backendSort.scope.property = sort.property;
+          } else if (sort.entity === "metadata") {
+            backendSort.scope.metadata_property = sort.name;
+          } else if (sort.entity === "record") {
+            backendSort.scope.property = sort.name;
           }
 
           body.sort.push(backendSort);

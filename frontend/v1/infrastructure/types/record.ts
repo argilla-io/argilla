@@ -41,14 +41,16 @@ export interface BackendSearchRecords {
   query_score: number;
 }
 
+type BackendFilterAndSortScope = {
+  entity: "suggestion" | "record" | "metadata" | "response";
+  question?: string;
+  property?: string;
+  metadata_property?: string;
+};
+
 interface AndFilterBackendSearchQuery {
   type: "terms" | "range";
-  scope: {
-    entity: "response" | "suggestion" | "metadata";
-    question?: string;
-    property?: "values" | "score" | "agent";
-    metadata_property?: string;
-  };
+  scope: BackendFilterAndSortScope;
   values?: string[];
   gte?: number;
   lte?: number;
@@ -57,11 +59,7 @@ interface AndFilterBackendSearchQuery {
 export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
 
 export interface BackendSort {
-  scope: {
-    entity: "suggestion" | "record" | "metadata";
-    question?: string;
-    property?: string;
-  };
+  scope: BackendFilterAndSortScope;
   order: "asc" | "desc";
 }
 
@@ -77,8 +75,8 @@ export interface BackendAdvanceSearchQuery {
       q: string;
     };
   };
-  filters: {
+  filters?: {
     and: AndFilterBackendSearchQuery[];
   };
-  sort: BackendSort[];
+  sort?: BackendSort[];
 }

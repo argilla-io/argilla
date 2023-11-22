@@ -9,10 +9,10 @@ type SortOrderOptions = "asc" | "desc";
 type SortOptions = "metadata" | "record" | "suggestion";
 
 export interface SortSearch {
-  key: SortOptions;
-  property: string;
-  question?: string;
-  sort: SortOrderOptions;
+  entity: SortOptions;
+  name: string;
+  property?: string;
+  order: SortOrderOptions;
 }
 
 abstract class Sort {
@@ -156,19 +156,19 @@ export class SortList {
   }
 
   private createSortCriteria(): SortSearch[] {
-    return this.selectedCategories.map(({ key, name, sort }) => {
-      if (key === "suggestion")
+    return this.selectedCategories.map(({ key: entity, name, sort: order }) => {
+      if (entity === "suggestion")
         return {
-          key,
+          entity,
+          name,
           property: "score",
-          question: name,
-          sort,
+          order,
         };
 
       return {
-        key,
-        property: name,
-        sort,
+        entity,
+        name,
+        order,
       };
     });
   }
@@ -180,11 +180,11 @@ export class SortList {
 
     if (!sort.length) return;
 
-    sort.forEach(({ property, sort }) => {
-      const found = this.findByCategory(property);
+    sort.forEach(({ name, order }) => {
+      const found = this.findByCategory(name);
 
       if (found) {
-        found.sort = sort;
+        found.sort = order;
 
         this.selectedCategories.push(found);
       }

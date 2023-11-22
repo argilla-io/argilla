@@ -164,9 +164,9 @@ describe("RecordCriteria", () => {
         "",
         JSON.stringify([
           {
-            key: "record",
-            property: "inserted_at",
-            sort: "asc",
+            entity: "record",
+            name: "inserted_at",
+            order: "asc",
           },
         ]),
         "",
@@ -422,9 +422,9 @@ describe("RecordCriteria", () => {
       criteria.sortBy.complete(
         JSON.stringify([
           {
-            key: "record",
-            property: "inserted_at",
-            sort: "asc",
+            entity: "record",
+            name: "inserted_at",
+            order: "asc",
           },
         ])
       );
@@ -471,7 +471,7 @@ describe("RecordCriteria", () => {
         { name: "metadata2", value: ["value2"] },
       ];
       criteria.sortBy.value = [
-        { key: "record", property: "inserted_at", sort: "asc" },
+        { entity: "record", name: "inserted_at", order: "asc" },
       ];
 
       criteria.similaritySearch.order = "least";

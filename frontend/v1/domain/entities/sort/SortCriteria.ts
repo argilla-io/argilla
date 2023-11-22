@@ -21,7 +21,7 @@ export class SortCriteria extends Criteria {
       const sorts = JSON.parse(urlParams) as SortSearch[];
 
       sorts.forEach((sort) => {
-        if (sort.key && sort.property && sort.sort) this.value.push(sort);
+        if (sort.entity && sort.order) this.value.push(sort);
       });
     } catch {
       // Manipulated
@@ -29,14 +29,7 @@ export class SortCriteria extends Criteria {
   }
 
   witValue(value: SortSearch[]) {
-    this.value = value.map((v) => {
-      return {
-        key: v.key,
-        property: v.property,
-        question: v.question,
-        sort: v.sort,
-      };
-    });
+    this.value = value.map((v) => ({ ...v }));
   }
 
   reset() {
