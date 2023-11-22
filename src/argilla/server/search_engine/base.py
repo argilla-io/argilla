@@ -72,44 +72,57 @@ __all__ = [
 ]
 
 
-class SuggestionFilterScope(BaseModel):
-    question: str
-    property: str
+class SuggestionFilterScope:
+    def __init__(self, question: str, property: str):
+        self.question = question
+        self.property = property
 
 
-class ResponseFilterScope(BaseModel):
-    question: Optional[str]
-    property: Optional[str]
+class ResponseFilterScope:
+    def __init__(self, question: Optional[str] = None, property: Optional[str] = None, user: Optional[User] = None):
+        self.question = question
+        self.property = property
+        self.user = user
 
 
-class MetadataFilterScope(BaseModel):
-    metadata_property: str
+class MetadataFilterScope:
+    def __init__(self, metadata_property: str):
+        self.metadata_property = metadata_property
 
 
-FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope]
+class RecordFilterScope:
+    def __init__(self, property: str):
+        self.property = property
 
 
-class TermsFilter(BaseModel):
-    scope: FilterScope
-    values: List[str]
+FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope, RecordFilterScope]
 
 
-class RangeFilter(BaseModel):
-    scope: FilterScope
-    gte: Optional[float]
-    lte: Optional[float]
+class TermsFilter:
+    def __init__(self, scope: FilterScope, values: List[str]):
+        self.scope = scope
+        self.values = values
 
 
-class AndFilter(BaseModel):
-    filters: List["Filter"]
+class RangeFilter:
+    def __init__(self, scope: FilterScope, ge: Optional[float] = None, le: Optional[float] = None):
+        self.scope = scope
+        self.ge = ge
+        self.le = le
+
+
+class AndFilter:
+    def __init__(self, filters: List["Filter"]):
+        self.filters = filters
 
 
 Filter = Union[AndFilter, TermsFilter, RangeFilter]
 
 
-class Order(BaseModel):
-    scope: FilterScope
-    order: SortOrder
+class Order:
+    def __init__(self, scope: FilterScope, order: SortOrder):
+        self.scope = scope
+        self.order = order
 
 
 class UserResponse(BaseModel):
@@ -310,13 +323,14 @@ class SearchEngine(metaclass=ABCMeta):
         dataset: Dataset,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove in next PR and use filter instead
+        sort: Optional[List[Order]] = None,
+        # TODO: remove them and keep filter and order
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        sort_by: Optional[List[SortBy]] = None,
         # END TODO
         offset: int = 0,
         limit: int = 100,
-        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         pass
 
@@ -340,7 +354,7 @@ class SearchEngine(metaclass=ABCMeta):
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove in next PR and use filter instead
+        # TODO: remove them and keep filter
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
         # END TODO
