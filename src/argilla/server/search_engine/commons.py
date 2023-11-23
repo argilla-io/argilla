@@ -132,7 +132,7 @@ def es_terms_query(field_name: str, values: List[str]) -> dict:
     return {"terms": {field_name: values}}
 
 
-def es_range_query(field_name: str, gte: Optional[int] = None, lte: Optional[int] = None) -> dict:
+def es_range_query(field_name: str, gte: Optional[float] = None, lte: Optional[float] = None) -> dict:
     query = {}
     if gte is not None:
         query["gte"] = gte
