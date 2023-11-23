@@ -150,9 +150,9 @@ class ResponsesMetric(AnnotatorMetric):
         self,
         dataset: FeedbackDataset,
         question_name: str,
-        filter_by: Dict[str, ResponseStatusFilter | List[ResponseStatusFilter]] | None = None,
-        sort_by: List[SortBy] | None = None,
-        max_records: int | None = None,
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
     ) -> None:
         super().__init__(
             dataset,
@@ -169,9 +169,9 @@ class SuggestionMetric(AnnotatorMetric):
         self,
         dataset: FeedbackDataset,
         question_name: str,
-        filter_by: Dict[str, ResponseStatusFilter | List[ResponseStatusFilter]] | None = None,
-        sort_by: List[SortBy] | None = None,
-        max_records: int | None = None,
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
     ) -> None:
         super().__init__(
             dataset,
