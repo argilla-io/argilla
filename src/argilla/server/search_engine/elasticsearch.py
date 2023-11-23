@@ -20,7 +20,7 @@ from elasticsearch8 import AsyncElasticsearch, helpers
 
 from argilla.server.models import VectorSettings
 from argilla.server.search_engine import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
+from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, es_field_for_vector_settings
 from argilla.server.settings import settings
 
 
@@ -67,7 +67,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            field_name_for_vector_settings(vector_settings): {
+            es_field_for_vector_settings(vector_settings): {
                 "type": "dense_vector",
                 "dims": vector_settings.dimensions,
                 "index": True,
@@ -88,7 +88,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         query_filters: Optional[List[dict]] = None,
     ) -> dict:
         knn_query = {
-            "field": field_name_for_vector_settings(vector_settings),
+            "field": es_field_for_vector_settings(vector_settings),
             "query_vector": value,
             "k": k,
             "num_candidates": _compute_num_candidates_from_k(k=k),
