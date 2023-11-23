@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
+from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
 from argilla.client.feedback.metrics.utils import (
     get_responses_and_suggestions_per_user,
@@ -36,6 +37,8 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     TextQuestion,
 )
+from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.records import SortBy
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
@@ -142,6 +145,44 @@ class AnnotatorMetric(MetricBase):
         return dict(metrics)
 
 
+class ResponsesMetric(AnnotatorMetric):
+    def __init__(
+        self,
+        dataset: FeedbackDataset,
+        question_name: str,
+        filter_by: Dict[str, ResponseStatusFilter | List[ResponseStatusFilter]] | None = None,
+        sort_by: List[SortBy] | None = None,
+        max_records: int | None = None,
+    ) -> None:
+        super().__init__(
+            dataset,
+            question_name,
+            filter_by=filter_by,
+            sort_by=sort_by,
+            max_records=max_records,
+            responses_vs_suggestions=True,
+        )
+
+
+class SuggestionMetric(AnnotatorMetric):
+    def __init__(
+        self,
+        dataset: FeedbackDataset,
+        question_name: str,
+        filter_by: Dict[str, ResponseStatusFilter | List[ResponseStatusFilter]] | None = None,
+        sort_by: List[SortBy] | None = None,
+        max_records: int | None = None,
+    ) -> None:
+        super().__init__(
+            dataset,
+            question_name,
+            filter_by=filter_by,
+            sort_by=sort_by,
+            max_records=max_records,
+            responses_vs_suggestions=False,
+        )
+
+
 class UnifiedAnnotationMetric(AnnotatorMetric):
     """Main class to compute metrics for a unified dataset.
 
@@ -223,6 +264,44 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
             return metrics[0]
 
         return metrics
+
+
+class UnifiedResponsesMetric(UnifiedAnnotationMetric):
+    def __init__(
+        self,
+        dataset: "FeedbackDataset",
+        question_name: str,
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
+    ) -> None:
+        super().__init__(
+            dataset,
+            question_name,
+            filter_by=filter_by,
+            sort_by=sort_by,
+            max_records=max_records,
+            responses_vs_suggestions=True,
+        )
+
+
+class UnifiedSuggestionsMetric(UnifiedAnnotationMetric):
+    def __init__(
+        self,
+        dataset: "FeedbackDataset",
+        question_name: str,
+        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
+        sort_by: Optional[List["SortBy"]] = None,
+        max_records: Optional[int] = None,
+    ) -> None:
+        super().__init__(
+            dataset,
+            question_name,
+            filter_by=filter_by,
+            sort_by=sort_by,
+            max_records=max_records,
+            responses_vs_suggestions=False,
+        )
 
 
 class AccuracyMetric(AnnotatorMetricBase):
