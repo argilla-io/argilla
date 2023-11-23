@@ -12,9 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import uuid
 from typing import TYPE_CHECKING, FrozenSet, List, Tuple, Union
 
 import pytest
+from argilla import User
+from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.agreement_metrics import (
     AgreementMetric,
@@ -22,6 +25,8 @@ from argilla.client.feedback.metrics.agreement_metrics import (
     prepare_dataset_for_annotation_task,
 )
 from argilla.client.feedback.schemas import FeedbackRecord
+
+from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -165,3 +170,66 @@ def test_allowed_metrics(
 
     metric = AgreementMetric(dataset=dataset, question_name=question)
     assert set(metric.allowed_metrics) == metric_names
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # TextQuestion
+        ("question-1", None),
+        # RatingQuestion
+        ("question-2", "alpha"),
+        ("question-2", ["alpha"]),
+        # LabelQuestion
+        ("question-3", "alpha"),
+        # MultiLabelQuestion
+        ("question-4", "alpha"),
+        # RankingQuestion
+        ("question-5", "alpha"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+async def test_agreement_metrics(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+    owner: User,
+):
+    api.init(api_key=owner.api_key)
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    # Add the 4 users for the sample dataset
+    for i in range(1, 4):
+        await UserFactory.create(username=f"test_user{i}", id=uuid.UUID(int=i))
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+    remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
+
+    if question in ("question-1",):
+        with pytest.raises(NotImplementedError, match=r"^No metrics are defined currently for"):
+            AgreementMetric(dataset=remote, question_name=question)
+    else:
+        metric = AgreementMetric(dataset=remote, question_name=question)
+        # Test for repr method
+        assert repr(metric) == f"AgreementMetric(question_name={question})"
+        metrics_report = metric.compute(metric_names)
+        if isinstance(metric_names, str):
+            metrics_report = [metrics_report]
+        elif isinstance(metric_names, list):
+            if len(metric_names) == 1:
+                metrics_report = [metrics_report]
+        assert isinstance(metrics_report, list)
+        assert all([isinstance(m, AgreementMetricResult) for m in metrics_report])

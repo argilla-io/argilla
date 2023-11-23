@@ -27,6 +27,7 @@ from argilla.client.feedback.schemas import (
     RankingQuestion,
     RatingQuestion,
 )
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -72,6 +73,10 @@ def prepare_dataset_for_annotation_task(
         formatted_responses: The responses formatted as a list of tuples of (user_id, question_id, value).
     """
     question_type = type(dataset.question_by_name(question_name))
+    # Check to assume the remote questions behave just like local ones
+    if issubclass(question_type, RemoteSchema):
+        question_type = type(dataset.question_by_name(question_name).to_local())
+
     supported_question_types = list(QUESTION_TO_DISTANCE.keys())
     if question_type not in supported_question_types:
         raise NotImplementedError(

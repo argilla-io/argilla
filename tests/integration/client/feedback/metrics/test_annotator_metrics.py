@@ -16,10 +16,14 @@ import uuid
 from typing import TYPE_CHECKING, List, Union
 
 import pytest
+from argilla import User
+from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
 from argilla.client.feedback.metrics.base import AnnotatorMetricResult
 from argilla.client.feedback.schemas import FeedbackRecord
+
+from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -177,3 +181,69 @@ def test_allowed_metrics(
 
     metric = AnnotatorMetric(dataset, question)
     assert set(metric.allowed_metrics) == metric_names
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # TextQuestion
+        ("question-1", ["gleu"]),
+        # RatingQuestion
+        ("question-2", "accuracy"),
+        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
+        # LabelQuestion
+        ("question-3", "accuracy"),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
+        # MultiLabelQuestion
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
+        # RankingQuestion
+        ("question-5", "ndcg-score"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+async def test_annotator_metric_with_remote_feedback_dataset(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+    responses_vs_suggestions: bool,
+    owner: User,
+):
+    api.init(api_key=owner.api_key)
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    # Add the 4 users for the sample dataset
+    for i in range(1, 4):
+        await UserFactory.create(username=f"test_user{i}", id=uuid.UUID(int=i))
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
+    metric = AnnotatorMetric(remote, question, responses_vs_suggestions=responses_vs_suggestions)
+    # Test for repr method
+    assert repr(metric) == f"AnnotatorMetric(question_name={question})"
+    metrics_report = metric.compute(metric_names)
+    assert len(metrics_report) == 3  # Number of annotators
+    assert isinstance(metrics_report, dict)
+    user_id = str(uuid.UUID(int=1))
+    metric_results = metrics_report[user_id]
+    assert isinstance(metric_results, list)
+    metric_result = metric_results[0]
+    assert isinstance(metric_result, AnnotatorMetricResult)
+    if isinstance(metric_names, str):
+        metric_names = [metric_names]
+
+    assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])

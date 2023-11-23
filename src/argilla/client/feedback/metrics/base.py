@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Hashable, List, Tuple, Un
 import pandas as pd
 from pydantic import BaseModel
 
+from argilla.client.feedback.schemas.remote.shared import RemoteSchema
+
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
 
@@ -167,6 +169,11 @@ class MetricBase:
         self._dataset = dataset
         self._question_name = question_name
         self._question_type = type(self._dataset.question_by_name(question_name))
+
+        # Check to assume the remote questions behave just like local ones
+        if issubclass(self._question_type, RemoteSchema):
+            self._question_type = type(self._dataset.question_by_name(question_name).to_local())
+
         if allowed_metrics := self._metrics_per_question.get(self._question_type):
             self._allowed_metrics = allowed_metrics
         else:
