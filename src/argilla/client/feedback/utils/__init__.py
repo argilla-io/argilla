@@ -13,17 +13,27 @@
 #  limitations under the License.
 
 
-from argilla.client.feedback.utils.html import (
+from argilla.client.feedback.utils.assignment import (
+    assign_records,
+    assign_records_to_groups,
+    assign_records_to_individuals,
+    assign_workspaces,
+    check_user,
+    check_workspace,
+)
+from argilla.client.feedback.utils.html_utils import (
     audio_to_html,
     create_token_highlights,
     image_to_html,
     media_to_html,
     video_to_html,
 )
-from argilla.client.feedback.utils.internal import (
-    feedback_dataset_in_argilla,
-    generate_pydantic_schema_for_fields,
-    generate_pydantic_schema_for_metadata,
-)
 
-__all__ = ["audio_to_html", "video_to_html", "image_to_html", "create_token_highlights"]
+__all__ = [
+    "audio_to_html",
+    "video_to_html",
+    "image_to_html",
+    "create_token_highlights",
+    "assign_records",
+    "assign_workspaces",
+]
