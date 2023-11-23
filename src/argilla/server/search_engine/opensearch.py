@@ -20,7 +20,11 @@ from opensearchpy import AsyncOpenSearch, helpers
 
 from argilla.server.models import VectorSettings
 from argilla.server.search_engine.base import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, es_field_for_vector_settings
+from argilla.server.search_engine.commons import (
+    BaseElasticAndOpenSearchEngine,
+    es_bool_query,
+    es_field_for_vector_settings, es_ids_query,
+)
 from argilla.server.settings import settings
 
 
@@ -83,22 +87,19 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     ) -> dict:
         knn_query = {"vector": value, "k": k}
 
-        bool_filter_query = {}
-        if query_filters:
-            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
         if excluded_id:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
             # Will work from Opensearch >= v2.4.0
-            knn_query.update({"filter": {"bool": {"must_not": [{"ids": {"values": [str(excluded_id)]}}]}}})
+            knn_query["filter"] = es_bool_query(must_not=[es_ids_query([str(excluded_id)])])
 
         body = {"query": {"knn": {es_field_for_vector_settings(vector_settings): knn_query}}}
 
-        if bool_filter_query:
+        if query_filters:
             # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not
             # created for requested user (with exists query clauses). This is not happening with Elasticsearch.
             # The only way make it work is to use them as a post_filter.
             # See this issue for more details https://github.com/opensearch-project/k-NN/issues/1286
-            body["post_filter"] = {"bool": bool_filter_query}
+            body["post_filter"] = es_bool_query(should=query_filters, minimum_should_match=len(query_filters))
 
         return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
 
