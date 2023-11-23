@@ -38,6 +38,7 @@ export default {
         {
           id: "0",
           name: this.question.matchSuggestion ? "Suggestion" : "Write",
+          class: this.question.matchSuggestion ? "--suggestion" : null,
           component: "TextAreaContents",
         },
         ...(this.question.suggestion && !this.question.matchSuggestion
@@ -58,6 +59,9 @@ export default {
 
 <style lang="scss" scoped>
 $suggestion-color: palette(yellow, 400);
+$suggestion-color-darken: darken($suggestion-color, 24%);
+$suggestion-color-lighten: lighten($suggestion-color, 24%);
+
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -65,16 +69,15 @@ $suggestion-color: palette(yellow, 400);
 }
 .--suggestion {
   :deep(.card-with-tabs__content) {
-    border-color: darken($suggestion-color, 24%);
-    background: lighten($suggestion-color, 24%);
+    border-color: $suggestion-color-darken;
+    background: $suggestion-color-lighten;
   }
-
-  :deep(.card-with-tabs__tab.--active) {
-    border-top-color: darken($suggestion-color, 24%);
-    border-left-color: darken($suggestion-color, 24%);
-    border-right-color: darken($suggestion-color, 24%);
-    border-bottom-color: lighten($suggestion-color, 24%);
-    background: lighten($suggestion-color, 24%);
-  }
+}
+:deep(.card-with-tabs__tab.--suggestion) {
+  border-top-color: $suggestion-color-darken;
+  border-left-color: $suggestion-color-darken;
+  border-right-color: $suggestion-color-darken;
+  border-bottom-color: $suggestion-color-lighten;
+  background: $suggestion-color-lighten;
 }
 </style>

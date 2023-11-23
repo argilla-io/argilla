@@ -1,9 +1,9 @@
 <template>
-  <div :class="['card-with-tabs', currentTab.class]">
+  <div :class="['card-with-tabs', tabClass]">
     <ul class="card-with-tabs__tabs">
       <li
         class="card-with-tabs__tab"
-        :class="{ '--active': tab.id === currentTab.id }"
+        :class="[{ '--active': tab.id === currentTab.id }, tab?.class]"
         v-for="tab in tabs"
         :key="tab.id"
       >
@@ -35,6 +35,9 @@ export default {
   computed: {
     currentComponent() {
       return this.currentTab.component;
+    },
+    tabClass() {
+      return this.tabs.find((tab) => tab.id === this.currentTab.id)?.class;
     },
   },
   methods: {
