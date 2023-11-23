@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
+@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
 @pytest.mark.parametrize(
     "question, metric_names",
     [
@@ -55,6 +56,7 @@ def test_annotator_metric(
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
     metric_names: Union[str, List[str]],
+    responses_vs_suggestions: bool,
 ):
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -63,7 +65,7 @@ def test_annotator_metric(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    metric = AnnotatorMetric(dataset, question)
+    metric = AnnotatorMetric(dataset, question, responses_vs_suggestions=responses_vs_suggestions)
     # Test for repr method
     assert repr(metric) == f"AnnotatorMetric(question_name={question})"
     metrics_report = metric.compute(metric_names)
@@ -80,6 +82,7 @@ def test_annotator_metric(
     assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
 
 
+@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
 @pytest.mark.parametrize(
     "question, metric_names, strategy_name",
     [
@@ -110,6 +113,7 @@ def test_annotator_metrics_unified(
     question: str,
     metric_names: Union[str, List[str]],
     strategy_name: str,
+    responses_vs_suggestions: bool,
 ):
     if not strategy_name:
         return
@@ -126,7 +130,7 @@ def test_annotator_metrics_unified(
         with pytest.raises(NotImplementedError):
             UnifiedAnnotationMetric(unified_dataset, question)
     else:
-        metric = UnifiedAnnotationMetric(unified_dataset, question)
+        metric = UnifiedAnnotationMetric(unified_dataset, question, responses_vs_suggestions=responses_vs_suggestions)
         metrics_report = metric.compute(metric_names)
 
         if isinstance(metric_names, list):
