@@ -14,8 +14,8 @@
 
 from uuid import uuid4
 
+import argilla.server.errors.future as errors
 import pytest
-from argilla import errors
 from argilla.server.contexts.search import SearchRecordsQueryValidator
 from argilla.server.schemas.v1.datasets import SearchRecordsQuery
 from sqlalchemy.ext.asyncio import AsyncSession

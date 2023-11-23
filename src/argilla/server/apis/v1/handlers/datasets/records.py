@@ -20,7 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
-from argilla import errors
+import argilla.server.errors.future as errors
 from argilla.server.apis.v1.handlers.datasets.datasets import _get_dataset
 from argilla.server.contexts import datasets, search
 from argilla.server.database import get_async_db

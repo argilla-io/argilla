@@ -21,7 +21,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla import errors
+import argilla.server.errors.future as errors
 from argilla.server.contexts import accounts
 from argilla.server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla.server.models import (
