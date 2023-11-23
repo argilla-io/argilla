@@ -91,11 +91,7 @@ def prepare_dataset_for_annotation_task(
 
     for responses_ in hf_dataset[question_name]:
         for response in responses_:
-            # We do this check here because local datasets don't implement the filter_by method.
-            if response["status"] != "submitted":
-                continue
             user_id = response["user_id"]
-
             if user_id is None:
                 raise ValueError(
                     "Please push your dataset to argilla to have the user_id necessary for this computation."
