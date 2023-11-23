@@ -95,7 +95,7 @@ So, once the documentation is written or fixed, if the installation was smooth, 
 sphinx-autobuild docs/_source docs/_build/html
 ```
 
-This will create a \_build/html folder that is served at [http://127.0.0.1:8000](http://127.0.0.1:8000). Also, it starts watching for changes in the docs/source directory. When a change is detected in docs/source, the documentation is rebuilt and any open browser windows are reloaded automatically. Make sure that all files are indexed correctly. KeyboardInterrupt (ctrl+c) will stop the server. Below is an example of the server output running and stopping:
+This will create a _build/html folder that is served at [http://127.0.0.1:8000](http://127.0.0.1:8000). Also, it starts watching for changes in the docs/source directory. When a change is detected in docs/source, the documentation is rebuilt and any open browser windows are reloaded automatically. Make sure that all files are indexed correctly. KeyboardInterrupt (ctrl+c) will stop the server. Below is an example of the server output running and stopping:
 
 ```sh
 The HTML pages are in docs\_build\html.
