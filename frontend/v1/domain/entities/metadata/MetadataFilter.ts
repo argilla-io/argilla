@@ -6,6 +6,7 @@ export interface MetadataSearch {
   value: string[] | RangeValue;
 }
 
+// TODO: Add base class to support two types of filter, like a SuggestionFilter.ts
 class MetadataFilter {
   public value: RangeValue;
   public options: OptionForFilter[] = [];
@@ -33,6 +34,10 @@ class MetadataFilter {
 
   get isTerms() {
     return this.metadata.isTerms;
+  }
+
+  get isInteger() {
+    return this.metadata.isInteger;
   }
 
   get settings() {
