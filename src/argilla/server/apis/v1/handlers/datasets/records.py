@@ -187,12 +187,14 @@ def _to_search_engine_filter(filters: Filters) -> SearchEngineFilter:
 
     for filter in filters.and_:
         engine_scope = _to_search_engine_scope(filter.scope)
+
         if isinstance(filter, TermsFilter):
             engine_filter = SearchEngineTermsFilter(scope=engine_scope, values=filter.values)
         elif isinstance(filter, RangeFilter):
             engine_filter = SearchEngineRangeFilter(scope=engine_scope, ge=filter.ge, le=filter.le)
         else:
             raise Exception(f"Unknown filter type {type(filter)}")
+
         engine_filters.append(engine_filter)
 
     return AndFilter(filters=engine_filters)
@@ -252,34 +254,40 @@ async def _get_search_responses(
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
     sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
 
-    search_engine_filter = _to_search_engine_filter(filters)
-    search_engine_sort = _to_search_engine_sort(sort)
-
     if vector_query and vector_settings:
-        return await search_engine.similarity_search(
-            dataset=dataset,
-            vector_settings=vector_settings,
-            value=vector_query.value,
-            record=record,
-            query=text_query,
-            filter=search_engine_filter,
-            order=vector_query.order,
-            metadata_filters=metadata_filters,
-            user_response_status_filter=response_status_filter,
-            max_results=limit,
-        )
+        similarity_search_params = {
+            "dataset": dataset,
+            "vector_settings": vector_settings,
+            "value": vector_query.value,
+            "record": record,
+            "query": text_query,
+            "order": vector_query.order,
+            "metadata_filters": metadata_filters,
+            "user_response_status_filter": response_status_filter,
+            "max_results": limit,
+        }
+
+        if filters:
+            similarity_search_params["filter"] = _to_search_engine_filter(filters)
+
+        return await search_engine.similarity_search(**similarity_search_params)
     else:
-        return await search_engine.search(
-            dataset=dataset,
-            query=text_query,
-            filter=search_engine_filter,
-            sort=search_engine_sort,
-            metadata_filters=metadata_filters,
-            user_response_status_filter=response_status_filter,
-            offset=offset,
-            limit=limit,
-            sort_by=sort_by,
-        )
+        search_params = {
+            "dataset": dataset,
+            "query": text_query,
+            "metadata_filters": metadata_filters,
+            "user_response_status_filter": response_status_filter,
+            "offset": offset,
+            "limit": limit,
+            "sort_by": sort_by,
+        }
+
+        if filters:
+            search_params["filter"] = _to_search_engine_filter(filters)
+        if sort:
+            search_params["sort"] = _to_search_engine_sort(sort)
+
+        return await search_engine.search(**search_params)
 
 
 async def _build_metadata_filters(
