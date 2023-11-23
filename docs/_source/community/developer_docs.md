@@ -113,7 +113,7 @@ The HTML pages are in docs\_build\html.
 
 ## Set up the Development Environment
 
-To work and develop for the core product of Argilla, you need to have all of Argilla's subsystem correctly running. In this section, we'll show how to install the Argilla package, the databases, the frontend and the server.
+To work and develop for the core product of Argilla, you need to have all of Argilla's subsystem correctly running. In this section, we'll show how to install the Argilla package, the databases and the server. The frontend is optional and only required for running the UI, but you can also find how to run it here.
 
 ### Creating the Python Environment
 
