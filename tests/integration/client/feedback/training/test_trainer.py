@@ -237,6 +237,30 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     train_with_cleanup(trainer, __OUTPUT_DIR__)
 
 
+def formatting_func_std(sample):
+    responses = []
+    question = sample["label"]
+    context = sample["text"]
+    for answer in sample["question-1"]:
+        if not all([question, context, answer["value"]]):
+            continue
+        responses.append((question, context, answer["value"]))
+    return responses
+
+
+def formatting_func_with_yield(sample):
+    question = sample["label"]
+    context = sample["text"]
+    for answer in sample["question-1"]:
+        if not all([question, context, answer["value"]]):
+            continue
+        yield question, context, answer["value"]
+
+
+@pytest.mark.parametrize(
+    "formatting_func",
+    (formatting_func_std, formatting_func_with_yield),
+)
 @pytest.mark.usefixtures(
     "feedback_dataset_guidelines",
     "feedback_dataset_fields",
@@ -244,14 +268,18 @@ def test_prepare_for_training_text_classification_with_formatting_func(
     "feedback_dataset_records",
 )
 def test_question_answering_with_formatting_func(
-    feedback_dataset_fields, feedback_dataset_questions, feedback_dataset_records, feedback_dataset_guidelines
+    feedback_dataset_fields,
+    feedback_dataset_questions,
+    feedback_dataset_records,
+    feedback_dataset_guidelines,
+    formatting_func,
 ):
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
-    dataset.add_records(records=feedback_dataset_records * 5)
+    dataset.add_records(records=feedback_dataset_records * 2)
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -259,34 +287,9 @@ def test_question_answering_with_formatting_func(
         ),
     ):
         task = TrainingTask.for_question_answering(lambda x: {})
-        trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
-        trainer.update_config(num_iterations=1)
-        train_with_cleanup(trainer, __OUTPUT_DIR__)
-
-    def formatting_func(sample):
-        responses = []
-        question = sample["label"]
-        context = sample["text"]
-        for answer in sample["question-1"]:
-            if not all([question, context, answer["value"]]):
-                continue
-            responses.append((question, context, answer["value"]))
-        return responses
+        ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
 
     task = TrainingTask.for_question_answering(formatting_func)
-    trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
-    trainer.update_config(num_iterations=1)
-    train_with_cleanup(trainer, __OUTPUT_DIR__)
-
-    def formatting_func_with_yield(sample):
-        question = sample["label"]
-        context = sample["text"]
-        for answer in sample["question-1"]:
-            if not all([question, context, answer["value"]]):
-                continue
-            yield question, context, answer["value"]
-
-    task = TrainingTask.for_question_answering(formatting_func_with_yield)
     trainer = ArgillaTrainer(dataset=dataset, task=task, framework="transformers")
     trainer.update_config(num_iterations=1)
     train_with_cleanup(trainer, __OUTPUT_DIR__)
