@@ -3,7 +3,7 @@ import { onBeforeMount, ref } from "vue-demi";
 import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
-import { GetDatasetQuestionsUseCase } from "~/v1/domain/usecases/get-dataset-questions-use-case";
+import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
 import { GetMetadataUseCase } from "~/v1/domain/usecases/get-metadata-use-case";
 import { useRecords } from "~/v1/infrastructure/storage/RecordsStorage";
 
@@ -18,7 +18,7 @@ export const useDatasetsFiltersViewModel = ({
   const datasetMetadata = ref<Metadata[]>([]);
   const datasetQuestions = ref<Question[]>([]);
   const getMetadataUseCase = useResolve(GetMetadataUseCase);
-  const getQuestionsUseCase = useResolve(GetDatasetQuestionsUseCase);
+  const getQuestionsUseCase = useResolve(GetDatasetQuestionsFilterUseCase);
 
   const loadMetadata = async () => {
     try {

@@ -232,8 +232,8 @@ export class RecordRepository {
                 entity: "metadata",
                 metadata_property: m.name,
               },
-              gte: range.ge,
-              lte: range.le,
+              ge: range.ge,
+              le: range.le,
             });
 
             return;
@@ -275,8 +275,8 @@ export class RecordRepository {
                 question: suggestion.question.name,
                 property: suggestion.configuration.name,
               },
-              gte: value.ge,
-              lte: value.le,
+              ge: value.ge,
+              le: value.le,
             });
           }
 

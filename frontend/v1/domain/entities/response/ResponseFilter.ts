@@ -23,9 +23,11 @@ export class ResponseFilterList {
   private latestCommit: ResponseSearch[] = [];
 
   constructor(questions: Question[]) {
-    this.responses = questions
-      .filter(this.visibleTypeOfQuestions)
-      .map((question) => new ResponseFilter(question));
+    this.responses = questions.map((question) => new ResponseFilter(question));
+  }
+
+  get hasFilters() {
+    return this.responses.length > 0;
   }
 
   get filteredCategories() {
@@ -107,13 +109,5 @@ export class ResponseFilterList {
         value: m.value,
       };
     });
-  }
-
-  private visibleTypeOfQuestions(question: Question): boolean {
-    return (
-      question.isMultiLabelType ||
-      question.isSingleLabelType ||
-      question.isRatingType
-    );
   }
 }

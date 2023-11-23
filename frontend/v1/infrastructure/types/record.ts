@@ -52,8 +52,8 @@ interface AndFilterBackendSearchQuery {
   type: "terms" | "range";
   scope: BackendFilterAndSortScope;
   values?: string[];
-  gte?: number;
-  lte?: number;
+  ge?: number;
+  le?: number;
 }
 
 export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";

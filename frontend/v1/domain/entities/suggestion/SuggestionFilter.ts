@@ -147,9 +147,13 @@ export class SuggestionFilterList {
   private latestCommit: SuggestionSearch[] = [];
 
   constructor(questions: Question[]) {
-    this.questions = questions
-      .filter(this.visibleTypeOfQuestions)
-      .map((question) => new SuggestionFilter(question));
+    this.questions = questions.map(
+      (question) => new SuggestionFilter(question)
+    );
+  }
+
+  get hasFilters() {
+    return this.questions.length > 0;
   }
 
   get filteredCategories() {
@@ -237,13 +241,5 @@ export class SuggestionFilterList {
         value: m.value,
       };
     });
-  }
-
-  private visibleTypeOfQuestions(question: Question): boolean {
-    return (
-      question.isMultiLabelType ||
-      question.isSingleLabelType ||
-      question.isRatingType
-    );
   }
 }

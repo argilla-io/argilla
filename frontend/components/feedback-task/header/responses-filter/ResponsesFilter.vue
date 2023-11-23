@@ -1,5 +1,5 @@
 <template>
-  <div class="responses-filter">
+  <div class="responses-filter" v-if="questionFilters.hasFilters">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"
