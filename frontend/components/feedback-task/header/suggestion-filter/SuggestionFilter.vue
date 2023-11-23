@@ -1,5 +1,5 @@
 <template>
-  <div class="suggestion-filter">
+  <div class="suggestion-filter" v-if="suggestionFilters.hasFilters">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"

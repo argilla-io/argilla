@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="metadata-filter"
-    v-if="!!metadataFilters && metadataFilters.hasFilters"
-  >
+  <div class="metadata-filter" v-if="metadataFilters.hasFilters">
     <BaseDropdown
       boundary="viewport"
       :visible="visibleDropdown"

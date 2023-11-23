@@ -1,7 +1,7 @@
 import { Question } from "../entities/question/Question";
 import { QuestionRepository } from "~/v1/infrastructure/repositories";
 
-export class GetDatasetQuestionsUseCase {
+export class GetDatasetQuestionsFilterUseCase {
   constructor(private readonly questionRepository: QuestionRepository) {}
 
   async execute(datasetId: string): Promise<Question[]> {
@@ -9,7 +9,7 @@ export class GetDatasetQuestionsUseCase {
       datasetId
     );
 
-    return backendQuestions.map((question) => {
+    const questions = backendQuestions.map((question) => {
       return new Question(
         question.id,
         question.name,
@@ -20,5 +20,15 @@ export class GetDatasetQuestionsUseCase {
         question.settings
       );
     });
+
+    return questions.filter(this.visibleTypeOfQuestions);
+  }
+
+  private visibleTypeOfQuestions(question: Question): boolean {
+    return (
+      question.isMultiLabelType ||
+      question.isSingleLabelType ||
+      question.isRatingType
+    );
   }
 }

@@ -37,7 +37,7 @@ import { UpdateDatasetSettingUseCase } from "@/v1/domain/usecases/dataset-settin
 import { GetMetadataUseCase } from "@/v1/domain/usecases/get-metadata-use-case";
 import { GetDatasetVectorsUseCase } from "@/v1/domain/usecases/get-dataset-vectors-use-case";
 import { UpdateVectorSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-vector-setting-use-case";
-import { GetDatasetQuestionsUseCase } from "@/v1/domain/usecases/get-dataset-questions-use-case";
+import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
 import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
 
@@ -126,7 +126,7 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetDatasetVectorsUseCase).withDependency(VectorRepository).build(),
 
-    register(GetDatasetQuestionsUseCase)
+    register(GetDatasetQuestionsFilterUseCase)
       .withDependency(QuestionRepository)
       .build(),
 

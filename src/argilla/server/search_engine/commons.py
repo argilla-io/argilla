@@ -15,10 +15,10 @@
 import dataclasses
 import datetime
 from abc import abstractmethod
-from typing import Any, Dict, Iterable, List, Literal, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
 from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
@@ -35,16 +35,26 @@ from argilla.server.models import (
     VectorSettings,
 )
 from argilla.server.search_engine.base import (
+    AndFilter,
+    Filter,
+    FilterScope,
     FloatMetadataFilter,
     FloatMetadataMetrics,
     IntegerMetadataFilter,
     IntegerMetadataMetrics,
     MetadataFilter,
+    MetadataFilterScope,
     MetadataMetrics,
+    Order,
+    RangeFilter,
+    RecordFilterScope,
+    ResponseFilterScope,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
     SortBy,
+    SuggestionFilterScope,
+    TermsFilter,
     TermsMetadataFilter,
     TermsMetadataMetrics,
     TextQuery,
@@ -53,23 +63,6 @@ from argilla.server.search_engine.base import (
 )
 
 ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
-
-
-def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
-    if metadata is None:
-        return {}
-
-    search_engine_metadata = {}
-    for metadata_property in dataset.metadata_properties:
-        value = metadata.get(metadata_property.name)
-        if value is not None:
-            search_engine_metadata[str(metadata_property.name)] = value
-
-    return search_engine_metadata
-
-
-def _build_vectors_field_payload(vectors: List[Vector]) -> Dict[str, List[float]]:
-    return {str(vector.vector_settings.id): vector.value for vector in vectors}
 
 
 class SearchDocumentGetter(GetterDict):
@@ -88,14 +81,31 @@ class SearchDocumentGetter(GetterDict):
                 for response in self._obj.responses
             }
         elif key == "metadata":
-            return _build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
+            return self._build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
         elif key == "vectors":
             if not self._obj.is_relationship_loaded("vectors") or not self._obj.vectors:
                 return default
 
-            return _build_vectors_field_payload(self._obj.vectors)
+            return self._build_vectors_field_payload(self._obj.vectors)
 
         return super().get(key, default)
+
+    @staticmethod
+    def _build_vectors_field_payload(vectors: List[Vector]) -> Dict[str, List[float]]:
+        return {str(vector.vector_settings.id): vector.value for vector in vectors}
+
+    @staticmethod
+    def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
+        if metadata is None:
+            return {}
+
+        search_engine_metadata = {}
+        for metadata_property in dataset.metadata_properties:
+            value = metadata.get(metadata_property.name)
+            if value is not None:
+                search_engine_metadata[str(metadata_property.name)] = value
+
+        return search_engine_metadata
 
 
 class SearchDocument(BaseModel):
@@ -114,15 +124,75 @@ class SearchDocument(BaseModel):
         getter_dict = SearchDocumentGetter
 
 
-def index_name_for_dataset(dataset: Dataset):
+def es_index_name_for_dataset(dataset: Dataset):
     return f"rg.{dataset.id}"
 
 
-def field_name_for_vector_settings(vector_settings: VectorSettings) -> str:
+def es_terms_query(field_name: str, values: List[str]) -> dict:
+    return {"terms": {field_name: values}}
+
+
+def es_range_query(field_name: str, gte: Optional[float] = None, lte: Optional[float] = None) -> dict:
+    query = {}
+    if gte is not None:
+        query["gte"] = gte
+    if lte is not None:
+        query["lte"] = lte
+    return {"range": {field_name: query}}
+
+
+def es_bool_query(
+    *,
+    must_not: Optional[List[dict]] = None,
+    should: Optional[List[dict]] = None,
+    minimum_should_match: Optional[Union[int, str]] = None,
+) -> Dict[str, Any]:
+    bool_query = {}
+
+    if should:
+        bool_query["should"] = should
+    if must_not:
+        bool_query["must_not"] = must_not
+
+    if not bool_query:
+        raise ValueError("Cannot build a boolean query without any clause")
+
+    if minimum_should_match:
+        bool_query["minimum_should_match"] = minimum_should_match
+
+    return {"bool": bool_query}
+
+
+def es_ids_query(ids: List[str]) -> dict:
+    return {"ids": {"values": ids}}
+
+
+def es_field_for_response_value(user: str, question: str) -> str:
+    return f"responses.{user}.values.{question}"
+
+
+def es_field_for_suggestion_property(question: str, property: str) -> str:
+    return f"suggestion.{question}.{property}"
+
+
+def es_field_for_vector_settings(vector_settings: VectorSettings) -> str:
     return f"vectors.{vector_settings.id}"
 
 
-def _mapping_for_field(field: Field) -> dict:
+def es_field_for_record_property(property: str) -> str:
+    return property
+
+
+def es_field_for_metadata_property(metadata_property: Union[str, MetadataProperty]) -> str:
+    if isinstance(metadata_property, MetadataProperty):
+        property_name = metadata_property.name
+    else:
+        property_name = metadata_property
+
+    return f"metadata.{property_name}"
+
+
+def es_mapping_for_field(field: Field) -> dict:
     field_type = field.settings["type"]
 
     if field_type == FieldType.text:
@@ -131,34 +201,66 @@ def _mapping_for_field(field: Field) -> dict:
         raise ValueError(f"Index configuration for field of type {field_type} cannot be generated")
 
 
-def _mapping_key_for_metadata_property(metadata_property: MetadataProperty) -> str:
-    return f"metadata.{metadata_property.name}"
-
-
-def _mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
+def es_mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
     property_type = metadata_property.settings["type"]
 
     if property_type == MetadataPropertyType.terms:
-        return {_mapping_key_for_metadata_property(metadata_property): {"type": "keyword"}}
+        return {es_field_for_metadata_property(metadata_property): {"type": "keyword"}}
     elif property_type == MetadataPropertyType.integer:
-        return {_mapping_key_for_metadata_property(metadata_property): {"type": "long"}}
+        return {es_field_for_metadata_property(metadata_property): {"type": "long"}}
     elif property_type == MetadataPropertyType.float:
-        return {_mapping_key_for_metadata_property(metadata_property): {"type": "float"}}
+        return {es_field_for_metadata_property(metadata_property): {"type": "float"}}
     else:
         raise ValueError(f"Index configuration for metadata property of type {property_type} cannot be generated")
 
 
-def _aggregation_for_metadata_property(metadata_property: MetadataProperty) -> dict:
-    if metadata_property.type == MetadataPropertyType.terms:
-        return {
-            f"{metadata_property.name}": {"terms": {"field": _mapping_key_for_metadata_property(metadata_property)}}
-        }
-    if metadata_property.type in [MetadataPropertyType.integer, MetadataPropertyType.float]:
-        return {
-            f"{metadata_property.name}": {"stats": {"field": _mapping_key_for_metadata_property(metadata_property)}}
-        }
+# This function will be moved once the `metadata_filters` argument is removed from search and similarity_search methods
+def _unify_metadata_filters_with_filter(metadata_filters: List[MetadataFilter], filter: Optional[Filter]) -> Filter:
+    filters = []
+    if filter:
+        filters.append(filter)
+
+    for metadata_filter in metadata_filters:
+        metadata_scope = MetadataFilterScope(metadata_property=metadata_filter.metadata_property.name)
+        if isinstance(metadata_filter, TermsMetadataFilter):
+            new_filter = TermsFilter(scope=metadata_scope, values=metadata_filter.values)
+        elif isinstance(metadata_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
+            new_filter = RangeFilter(scope=metadata_scope, ge=metadata_filter.ge, le=metadata_filter.le)
+        else:
+            raise ValueError(f"Cannot process request for metadata filter {metadata_filter}")
+        filters.append(new_filter)
+
+    return AndFilter(filters=filters)
+
+
+# This function will be moved once the response status filter is removed from search and similarity_search methods
+def _unify_user_response_status_filter_with_filter(
+    user_response_status_filter: UserResponseStatusFilter, filter: Optional[Filter]
+) -> Filter:
+    scope = ResponseFilterScope(user=user_response_status_filter.user, property="status")
+    response_filter = TermsFilter(scope=scope, values=[status.value for status in user_response_status_filter.statuses])
+
+    if filter:
+        return AndFilter(filters=[filter, response_filter])
     else:
-        raise ValueError(f"Cannot process request for metadata property {metadata_property}")
+        return response_filter
+
+
+# This function will be moved once the `sort_by` argument is removed from search and similarity_search methods
+def _unify_sort_by_with_order(sort_by: List[SortBy], order: List[Order]) -> List[Order]:
+    if order:
+        return order
+
+    new_order = []
+    for sort in sort_by:
+        if isinstance(sort.field, MetadataProperty):
+            scope = MetadataFilterScope(metadata_property=sort.field.name)
+        else:
+            scope = RecordFilterScope(property=sort.field)
+
+        new_order.append(Order(scope=scope, order=sort.order))
+
+    return new_order
 
 
 @dataclasses.dataclass
@@ -189,17 +291,17 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         settings = self._configure_index_settings()
         mappings = self._configure_index_mappings(dataset)
 
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         await self._create_index_request(index_name, mappings, settings)
 
     async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
-        mapping = _mapping_for_metadata_property(metadata_property)
+        mapping = es_mapping_for_metadata_property(metadata_property)
         index_name = await self._get_index_or_raise(dataset)
 
         await self.put_index_mapping_request(index_name, mapping)
 
     async def delete_index(self, dataset: Dataset):
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
 
         await self._delete_index_request(index_name)
 
@@ -256,7 +358,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "_op_type": "update",
                 "_id": vector.record_id,
                 "_index": index_name,
-                "doc": {field_name_for_vector_settings(vector.vector_settings): vector.value},
+                "doc": {es_field_for_vector_settings(vector.vector_settings): vector.value},
             }
             for vector in vectors
         ]
@@ -271,12 +373,22 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
+        filter: Optional[Filter] = None,
+        # TODO: remove them and keep filter
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
+        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
+        if metadata_filters:
+            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
+        if user_response_status_filter and user_response_status_filter.statuses:
+            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
+        # END TODO
+
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 
@@ -294,12 +406,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             vector_value = self._inverse_vector(vector_value)
 
         query_filters = []
-        if query:
-            query_filters.append(self._build_text_query(dataset, query))
-        if user_response_status_filter and user_response_status_filter.statuses:
-            query_filters.append(self._build_response_status_filter(user_response_status_filter))
-        if metadata_filters:
-            query_filters.extend(self._build_metadata_filters(metadata_filters))
+        if filter:
+            # Wrapping filter in a list to use easily on each engine implementation
+            query_filters = [self.build_elasticsearch_filter(filter)]
 
         index = await self._get_index_or_raise(dataset)
         response = await self._request_similarity_search(
@@ -312,6 +421,81 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
         return await self._process_search_response(response, threshold)
+
+    def build_elasticsearch_filter(self, filter: Filter) -> Dict[str, Any]:
+        def is_response_status_scope(scope: FilterScope) -> bool:
+            if not isinstance(scope, ResponseFilterScope):
+                return False
+
+            if not scope.property == "status":
+                return False
+
+            if scope.question is not None:
+                return False
+
+            return True
+
+        if isinstance(filter, AndFilter):
+            filters = [self.build_elasticsearch_filter(f) for f in filter.filters]
+            return es_bool_query(should=filters, minimum_should_match=len(filters))
+
+        # This is a special case for response status filter, since it's compound by multiple filters
+        if is_response_status_scope(filter.scope):
+            status_filter = UserResponseStatusFilter(
+                user=filter.scope.user, statuses=[ResponseStatusFilter(v) for v in filter.values]
+            )
+            return self._build_response_status_filter(status_filter)
+
+        es_field = self._scope_to_elasticsearch_field(filter.scope)
+
+        if isinstance(filter, TermsFilter):
+            return es_terms_query(es_field, values=filter.values)
+        elif isinstance(filter, RangeFilter):
+            return es_range_query(es_field, gte=filter.ge, lte=filter.le)
+        else:
+            raise ValueError(f"Cannot process request for filter {filter}")
+
+    def build_elasticsearch_sort(self, sort: List[Order]) -> str:
+        sort_config = []
+
+        for order in sort:
+            sort_field_name = self._scope_to_elasticsearch_field(order.scope)
+            sort_config.append(f"{sort_field_name}:{order.order}")
+
+        return ",".join(sort_config)
+
+    @staticmethod
+    def _scope_to_elasticsearch_field(scope: FilterScope) -> str:
+        if isinstance(scope, MetadataFilterScope):
+            return es_field_for_metadata_property(scope.metadata_property)
+        elif isinstance(scope, SuggestionFilterScope):
+            return es_field_for_suggestion_property(question=scope.question, property=scope.property)
+        elif isinstance(scope, ResponseFilterScope):
+            return es_field_for_response_value(scope.user.username, question=scope.question)
+        elif isinstance(scope, RecordFilterScope):
+            return es_field_for_record_property(scope.property)
+        raise ValueError(f"Cannot process request for search scope {scope}")
+
+    @staticmethod
+    def _build_response_status_filter(status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
+        if status_filter.user is None:
+            response_field = ALL_RESPONSES_STATUSES_FIELD
+        else:
+            response_field = f"responses.{status_filter.user.username}.status"
+
+        filters = []
+        statuses = [
+            ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
+        ]
+        if ResponseStatusFilter.missing in status_filter.statuses:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+            filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
+
+        if statuses:
+            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
+            filters.append(es_terms_query(response_field, values=statuses))
+
+        return {"bool": {"should": filters, "minimum_should_match": 1}}
 
     def _inverse_vector(self, vector_value: List[float]) -> List[float]:
         return [vector_value[i] * -1 for i in range(0, len(vector_value))]
@@ -326,30 +510,39 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         self,
         dataset: Dataset,
         query: Optional[Union[TextQuery, str]] = None,
+        filter: Optional[Filter] = None,
+        sort: Optional[List[Order]] = None,
+        # TODO: Remove these arguments
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        sort_by: Optional[List[SortBy]] = None,
+        # END TODO
         offset: int = 0,
         limit: int = 100,
-        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
+
+        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
+        if metadata_filters:
+            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
+        if user_response_status_filter and user_response_status_filter.statuses:
+            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
+
+        if sort_by:
+            sort = _unify_sort_by_with_order(sort_by, sort)
+        # END TODO
 
         text_query = self._build_text_query(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
 
-        query_filters = []
-        if metadata_filters:
-            query_filters.extend(self._build_metadata_filters(metadata_filters))
-        if user_response_status_filter and user_response_status_filter.statuses:
-            query_filters.append(self._build_response_status_filter(user_response_status_filter))
-        if query_filters:
-            bool_query["filter"] = {"bool": {"should": query_filters, "minimum_should_match": "100%"}}
+        if filter:
+            bool_query["filter"] = self.build_elasticsearch_filter(filter)
 
-        _query = {"bool": bool_query}
+        es_query = {"bool": bool_query}
         index = await self._get_index_or_raise(dataset)
 
-        sort = self._build_sort_configuration(sort_by)
-        response = await self._index_search_request(index, query=_query, size=limit, from_=offset, sort=sort)
+        es_sort = self.build_elasticsearch_sort(sort) if sort else None
+        response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
 
         return await self._process_search_response(response)
 
@@ -365,7 +558,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def _metrics_for_numeric_property(
         self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
     ) -> Union[IntegerMetadataMetrics, FloatMetadataMetrics]:
-        field_name = _mapping_key_for_metadata_property(metadata_property)
+        field_name = es_field_for_metadata_property(metadata_property)
         query = query or {"match_all": {}}
 
         stats = await self.__stats_aggregation(index_name, field_name, query)
@@ -379,7 +572,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def _metrics_for_terms_property(
         self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
     ) -> TermsMetadataMetrics:
-        field_name = _mapping_key_for_metadata_property(metadata_property)
+        field_name = es_field_for_metadata_property(metadata_property)
         query = query or {"match_all": {}}
 
         total_terms = await self.__value_count_aggregation(index_name, field_name=field_name, query=query)
@@ -446,7 +639,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _mapping_for_fields(self, fields: List[Field]) -> dict:
         mappings = {}
         for field in fields:
-            mappings.update(_mapping_for_field(field))
+            mappings.update(es_mapping_for_field(field))
 
         return mappings
 
@@ -454,7 +647,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         mappings = {}
 
         for metadata_property in metadata_properties:
-            mappings.update(_mapping_for_metadata_property(metadata_property))
+            mappings.update(es_mapping_for_metadata_property(metadata_property))
 
         return mappings
 
@@ -497,67 +690,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
 
     async def _get_index_or_raise(self, dataset: Dataset):
-        index_name = index_name_for_dataset(dataset)
+        index_name = es_index_name_for_dataset(dataset)
         if not await self._index_exists_request(index_name):
             raise ValueError(f"Cannot access to index for dataset {dataset.id}: the specified index does not exist")
 
         return index_name
-
-    def _build_metadata_filters(self, metadata_filters: List[MetadataFilter]) -> List[Dict[str, Any]]:
-        filters = []
-        for metadata_property_filter in metadata_filters:
-            metadata_property = metadata_property_filter.metadata_property
-            if isinstance(metadata_property_filter, TermsMetadataFilter):
-                query_filter = {
-                    "terms": {_mapping_key_for_metadata_property(metadata_property): metadata_property_filter.values}
-                }
-            elif isinstance(metadata_property_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
-                query = {}
-
-                if metadata_property_filter.ge is not None:
-                    query["gte"] = metadata_property_filter.ge
-                if metadata_property_filter.le is not None:
-                    query["lte"] = metadata_property_filter.le
-
-                query_filter = {"range": {_mapping_key_for_metadata_property(metadata_property): query}}
-            else:
-                raise ValueError(f"Wrong metadata property type {metadata_property.type}")
-            filters.append(query_filter)
-        return filters
-
-    def _build_response_status_filter(self, status_filter: UserResponseStatusFilter) -> Dict[str, Any]:
-        if status_filter.user is None:
-            response_field = ALL_RESPONSES_STATUSES_FIELD
-        else:
-            response_field = f"responses.{status_filter.user.username}.status"
-
-        filters = []
-        statuses = [
-            ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
-        ]
-        if ResponseStatusFilter.missing in status_filter.statuses:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
-
-        if statuses:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            filters.append({"terms": {response_field: statuses}})
-
-        return {"bool": {"should": filters, "minimum_should_match": 1}}
-
-    def _build_sort_configuration(self, sort_by: Optional[List[SortBy]] = None) -> Optional[str]:
-        if not sort_by:
-            return None
-
-        sort_config = []
-        for sort in sort_by:
-            if isinstance(sort.field, MetadataProperty):
-                sort_field_name = _mapping_key_for_metadata_property(sort.field)
-            else:
-                sort_field_name = sort.field
-            sort_config.append(f"{sort_field_name}:{sort.order}")
-
-        return ",".join(sort_config)
 
     def _mapping_for_vectors_settings(self, vectors_settings: List[VectorSettings]) -> dict:
         mappings = {}

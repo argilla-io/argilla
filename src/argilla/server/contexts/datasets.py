@@ -21,6 +21,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
+import argilla.server.errors.future as errors
 from argilla.server.contexts import accounts
 from argilla.server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla.server.models import (
@@ -230,18 +231,34 @@ async def get_question_by_id(db: "AsyncSession", question_id: UUID) -> Union[Que
 
 async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Question, None]:
     result = await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))
+
     return result.scalar_one_or_none()
 
 
-async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Union[MetadataProperty, None]:
-    return await MetadataProperty.read(db, id=metadata_property_id)
+async def get_question_by_name_and_dataset_id_or_raise(db: "AsyncSession", name: str, dataset_id: UUID) -> Question:
+    question = await get_question_by_name_and_dataset_id(db, name, dataset_id)
+    if question is None:
+        raise errors.NotFoundError(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
+
+    return question
 
 
 async def get_metadata_property_by_name_and_dataset_id(
     db: "AsyncSession", name: str, dataset_id: UUID
 ) -> Union[MetadataProperty, None]:
     result = await db.execute(select(MetadataProperty).filter_by(name=name, dataset_id=dataset_id))
+
     return result.scalar_one_or_none()
+
+
+async def get_metadata_property_by_name_and_dataset_id_or_raise(
+    db: "AsyncSession", name: str, dataset_id: UUID
+) -> MetadataProperty:
+    metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name, dataset_id)
+    if metadata_property is None:
+        raise errors.NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
+
+    return metadata_property
 
 
 async def delete_metadata_property(db: "AsyncSession", metadata_property: MetadataProperty) -> MetadataProperty:
