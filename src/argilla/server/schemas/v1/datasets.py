@@ -716,17 +716,6 @@ class Query(BaseModel):
     text: Optional[TextQuery] = None
     vector: Optional[VectorQuery] = None
 
-    @root_validator
-    def check_required(cls, values: dict) -> dict:
-        """Check that either 'text' or 'vector' is provided"""
-        text = values.get("text")
-        vector = values.get("vector")
-
-        if text is None and vector is None:
-            raise ValueError("Either 'text' or 'vector' must be provided")
-
-        return values
-
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
@@ -798,7 +787,7 @@ class Order(BaseModel):
 
 
 class SearchRecordsQuery(BaseModel):
-    query: Query
+    query: Optional[Query]
     filters: Optional[Filters]
     sort: Optional[List[Order]] = PydanticField(
         None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
