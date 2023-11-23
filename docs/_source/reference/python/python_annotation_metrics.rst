@@ -43,5 +43,17 @@ Annotator Metrics
 .. autoclass:: argilla.client.feedback.metrics.annotator_metrics.AnnotatorMetric
    :members: __init__, compute
 
+.. autoclass:: argilla.client.feedback.metrics.annotator_metrics.ResponsesMetric
+   :members: __init__, compute
+
+.. autoclass:: argilla.client.feedback.metrics.annotator_metrics.SuggestionsMetric
+   :members: __init__, compute
+
 .. autoclass:: argilla.client.feedback.metrics.annotator_metrics.UnifiedAnnotationMetric
+   :members: __init__, compute
+
+.. autoclass:: argilla.client.feedback.metrics.annotator_metrics.UnifiedResponsesMetric
+   :members: __init__, compute
+
+.. autoclass:: argilla.client.feedback.metrics.annotator_metrics.UnifiedSuggestionsMetric
    :members: __init__, compute
