@@ -18,12 +18,17 @@ Are you new to Argilla and do you want to walk through low-key notebooks to repr
 ```{grid-item-card} Configuring Users and Workspaces
 :link: feedback/end2end_examples/configure-users-and-workspaces-000.html
 
-Learn how configure `Users` and `Workspaces`.
+Learn how to configure `Users` and `Workspaces`.
 ```
 ```{grid-item-card} Creating a FeedbackDataset
 :link: feedback/end2end_examples/create-dataset-001.html
 
-Learn how configure a `FeedbackDataset` and add `FeedbackRecords` to it.
+Learn how to configure a `FeedbackDataset` and add `FeedbackRecords` to it.
+```
+```{grid-item-card} Adding Metadata to a FeedbackDataset
+:link: feedback/end2end_examples/add-metadata-003.html
+
+Learn how to add metadata properties to a `FeedbackDataset`.
 ```
 ````
 
