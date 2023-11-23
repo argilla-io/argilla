@@ -169,7 +169,7 @@ async def _filter_records_using_search_engine(
     )
 
 
-def _to_search_engine_scope(scope: FilterScope, user: Optional[User] = None) -> SearchEngineFilterScope:
+def _to_search_engine_scope(scope: FilterScope, user: Optional[User]) -> SearchEngineFilterScope:
     if isinstance(scope, RecordFilterScope):
         return SearchEngineRecordFilterScope(property=scope.property)
     elif isinstance(scope, MetadataFilterScope):
@@ -182,11 +182,11 @@ def _to_search_engine_scope(scope: FilterScope, user: Optional[User] = None) -> 
         raise Exception(f"Unknown scope type {type(scope)}")
 
 
-def _to_search_engine_filter(filters: Filters) -> SearchEngineFilter:
+def _to_search_engine_filter(filters: Filters, user: Optional[User]) -> SearchEngineFilter:
     engine_filters = []
 
     for filter in filters.and_:
-        engine_scope = _to_search_engine_scope(filter.scope)
+        engine_scope = _to_search_engine_scope(filter.scope, user=user)
 
         if isinstance(filter, TermsFilter):
             engine_filter = SearchEngineTermsFilter(scope=engine_scope, values=filter.values)
@@ -200,11 +200,11 @@ def _to_search_engine_filter(filters: Filters) -> SearchEngineFilter:
     return AndFilter(filters=engine_filters)
 
 
-def _to_search_engine_sort(sort: List[Order]) -> List[SearchEngineOrder]:
+def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[SearchEngineOrder]:
     engine_sort = []
 
     for order in sort:
-        engine_scope = _to_search_engine_scope(order.scope)
+        engine_scope = _to_search_engine_scope(order.scope, user=user)
         engine_sort.append(SearchEngineOrder(scope=engine_scope, order=order.order))
 
     return engine_sort
@@ -268,7 +268,7 @@ async def _get_search_responses(
         }
 
         if filters:
-            similarity_search_params["filter"] = _to_search_engine_filter(filters)
+            similarity_search_params["filter"] = _to_search_engine_filter(filters, user=user)
 
         return await search_engine.similarity_search(**similarity_search_params)
     else:
@@ -283,9 +283,9 @@ async def _get_search_responses(
         }
 
         if filters:
-            search_params["filter"] = _to_search_engine_filter(filters)
+            search_params["filter"] = _to_search_engine_filter(filters, user=user)
         if sort:
-            search_params["sort"] = _to_search_engine_sort(sort)
+            search_params["sort"] = _to_search_engine_sort(sort, user=user)
 
         return await search_engine.search(**search_params)
 
