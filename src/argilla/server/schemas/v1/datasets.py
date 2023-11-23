@@ -787,7 +787,7 @@ Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discrimin
 
 
 class Filters(BaseModel):
-    and_: Optional[List[Filter]] = PydanticField(
+    and_: List[Filter] = PydanticField(
         None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS
     )
 
