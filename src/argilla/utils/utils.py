@@ -16,11 +16,14 @@ import asyncio
 import importlib
 import os
 import sys
+import textwrap
 import threading
 import warnings
 from itertools import chain
 from types import ModuleType
 from typing import Any, Optional, Tuple
+
+from pydantic import BaseModel
 
 
 class LazyargillaModule(ModuleType):
@@ -166,3 +169,62 @@ def setup_loop_in_thread() -> Tuple[asyncio.AbstractEventLoop, threading.Thread]
         thread.start()
         __LOOP__, __THREAD__ = loop, thread
     return __LOOP__, __THREAD__
+
+
+class TextWrappedBaseModel(BaseModel):
+    # currently, it uses the "default" attr in the field to determine if the field should be ignored in the __repr__ method instead of "repr", which should be changed
+    def get_ignored_attr(cls):
+        ignored_attr = []
+        for key, value in cls.__fields__.items():
+            if value.default == "ignore":
+                ignored_attr.append(key)
+        return ignored_attr
+
+    def create_wrapped_list(self):
+        ignored_attr = self.get_ignored_attr()
+
+        attr_multiline = []  # to remove/change
+
+        attribute_list = []
+        for field, field_value in self.__fields__.items():
+            if field not in ignored_attr:
+                value = str(getattr(self, field)).replace("\n", " ").replace("\t", " ")
+
+                if (
+                    getattr(self, field) != None and field_value.type_ == str and len(getattr(self, field)) > 50
+                ):  # ConstrainedStrValue problem
+                    value = f"{value[:22]} ... {value[-22:]}"
+
+                if field in attr_multiline:  # to remove/change
+                    pre_indent = " " * (len(field) - 4)
+                    value = f"\n\t{pre_indent}".join(
+                        f"'{item[0]}': '{item[1]}'" for item in getattr(self, field).items()
+                    )
+
+                attribute_list.append(f"{field}={value}")
+        else:
+            indent = "   "
+            indented_elements = [textwrap.indent(element, prefix=indent) for element in attribute_list]
+            return indented_elements
+
+    def __repr__(self):
+        """
+        This is a general function that creates __repr__ methods for classes that inherit from pydantic.BaseModel.
+
+        Args:
+            self: The class that inherits from pydantic.BaseModel.
+            attr_ignore: A list of attributes that should be ignored in the __repr__ method.
+            attr_multiline: A list of attributes that should be printed in multiple lines in the __repr__ method. The attribute given should be a dictionary.
+
+        Returns:
+            A string for the __repr__ method of the class that inherits from pydantic.BaseModel.
+        """
+
+        return_text = ""
+        return_text += self.__class__.__name__ + "("
+        for attribute in self.create_wrapped_list():
+            return_text += "\n" + attribute
+        else:
+            return_text += "\n)"
+
+        return return_text

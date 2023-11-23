@@ -18,9 +18,10 @@ from pydantic import BaseModel, Field, PositiveInt, validator
 
 from argilla.client.feedback.schemas.validators import title_must_have_value
 from argilla.textwrapping import text_wrapper
+from argilla.utils.utils import TextWrappedBaseModel
 
 
-class VectorSettings(BaseModel):
+class VectorSettings(TextWrappedBaseModel):
     """Schema for the `FeedbackDataset` vectors settings. The vectors setttings are used
     to define the configuration of the vectors associated to the records of a `FeedbackDataset`
     that will be used to perform the vector search.
@@ -40,8 +41,5 @@ class VectorSettings(BaseModel):
     name: str = Field(..., regex=r"^(?=.*[a-z0-9])[a-z0-9_-]+$")
     title: Optional[str] = None
     dimensions: PositiveInt
-
-    def __repr__(self) -> str:
-        return text_wrapper(self)
 
     _title_must_have_value = validator("title", always=True, allow_reuse=True)(title_must_have_value)

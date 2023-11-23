@@ -20,6 +20,7 @@ from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr,
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
 from argilla.textwrapping import text_wrapper
+from argilla.utils.utils import TextWrappedBaseModel
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
@@ -101,7 +102,7 @@ class ResponseSchema(BaseModel):
         }
 
 
-class SuggestionSchema(BaseModel):
+class SuggestionSchema(TextWrappedBaseModel):
     """Schema for the suggestions for the questions related to the record.
 
     Args:
@@ -123,13 +124,10 @@ class SuggestionSchema(BaseModel):
     """
 
     question_name: str
-    type: Optional[Literal["model", "human"]] = None
+    type: Optional[Literal["model", "human"]] = Field(default="ignore")
     score: Optional[float] = None
     value: Any
     agent: Optional[str] = None
-
-    def __repr__(self):
-        return text_wrapper(self, attr_ignore=["type"])
 
     class Config:
         extra = Extra.forbid
