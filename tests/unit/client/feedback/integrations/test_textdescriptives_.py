@@ -11,21 +11,18 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from unittest.mock import MagicMock
 
+import numpy as np
+import pandas as pd
+import pytest
+from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-
-from unittest.mock import MagicMock
-
-import pytest
-import pandas as pd
-import numpy as np
-
-from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
+from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
 @pytest.mark.parametrize(
