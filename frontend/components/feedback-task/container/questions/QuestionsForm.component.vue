@@ -280,10 +280,10 @@ export default {
     border-color: $black-10;
   }
   &.--discarded {
-    border-color: #c3c3c3;
+    border-color: $discarded-color;
   }
   &.--submitted {
-    border-color: $primary-color;
+    border-color: $submitted-color;
   }
   &.--focused-form {
     border-color: palette(brown);
