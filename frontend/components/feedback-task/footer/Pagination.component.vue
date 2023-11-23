@@ -135,8 +135,9 @@ export default {
   &__button.button {
     justify-content: center;
     padding: $base-space;
+    background: $black-4;
     &:hover:not([disabled]) {
-      background: $black-4;
+      background: $black-6;
     }
   }
 }
