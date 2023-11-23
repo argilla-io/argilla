@@ -277,21 +277,16 @@ export default {
 
   &.--pending,
   &.--draft {
-    box-shadow: $shadow;
-    transition: box-shadow 0.2s ease;
+    border-color: $black-10;
   }
   &.--discarded {
     border-color: #c3c3c3;
-    box-shadow: none;
   }
   &.--submitted {
     border-color: $primary-color;
-    box-shadow: none;
   }
   &.--focused-form {
     border-color: palette(brown);
-    box-shadow: none;
-    transition: box-shadow 0.2s ease;
   }
   &.--waiting .questions-form__content {
     opacity: 0.7;
