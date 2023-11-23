@@ -237,16 +237,6 @@ Argilla will use SQLite as the default built-in option to store information abou
 
 By default, the database file will be created at `~/.argilla/argilla.db`, this can be configured by setting different values for `ARGILLA_DATABASE_URL` and `ARGILLA_HOME_PATH` environment variables.
 
-##### Create the Default User
-
-To run the Argilla server on your system, you should at least create the default user. Alternatively, you may skip a default user and directly create user(s) whose credentials you will set up. You can refer to the [user management](../getting_started/installation/configurations/user_management.md#create-a-user) page for detailed information.
-
-To create a default user, you can run the following command:
-
-```sh
-argilla server database users create_default
-```
-
 ##### Run Database Migration
 
 Starting from Argilla 1.16.0, the data of the FeedbackDataset along with the user and workspace information are stored in an SQL database (SQLite or PostgreSQL). With each Argilla release, you may need to update the database schema to the newer version. Here, you can find how to do this database migration.
