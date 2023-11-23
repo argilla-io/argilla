@@ -47,7 +47,6 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
     """
 
     if isinstance(media_source, bytes):
-        # Get the file type if not provided
         if not file_type:
             raise ValueError("File type must be provided if media source is a byte string.")
 
@@ -56,23 +55,19 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
     else:
         file_path = Path(media_source)
 
-        # Validate file existence and non-emptiness
         if not file_path.exists() or file_path.stat().st_size == 0:
             raise FileNotFoundError(f"File {file_path} does not exist or is empty.")
 
-        # Get the file type if not provided
         if not file_type:
             file_type = file_path.suffix[1:].lower()
 
         file_data = file_path.read_bytes()
 
-    # Check the size of the file to be properly rendered
     if len(file_data) > 5000000:
         raise ValueError(
             f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
         )
 
-    # Check if the file type is supported
     if file_type not in SUPPORTED_MEDIA_TYPES[media_type]:
         raise ValueError(
             f"Unsupported {media_type} type: {file_type}. Supported types are {SUPPORTED_MEDIA_TYPES[media_type]}"
@@ -81,13 +76,10 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
     if file_type == "ogg":
         warnings.warn("'ogg' files might not be supported in Safari.", category=UserWarning)
 
-    # Encode the media data as base64
     media_base64 = base64.b64encode(file_data).decode("utf-8")
 
-    # Create the Data URL
     data_url = f"data:{media_type}/{file_type};base64,{media_base64}"
 
-    # Create HTML based on media type
     if media_type == "video":
         html = f"<video controls><source src='{data_url}' type='video/{file_type}'></video>"
     elif media_type == "audio":
@@ -100,7 +92,6 @@ def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: O
     return html
 
 
-# Functions to convert media files to HTML (for user friendliness)
 def video_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
     """
     Convert a video file to an HTML tag with embedded base64 data.
@@ -184,24 +175,20 @@ def create_token_highlights(
         >>> html = create_token_highlights(tokens, weights, c_map=custom_RGB)
     """
 
-    # Validate the inputs
     if len(tokens) != len(weights):
         raise ValueError("Length of tokens and weights must be the same.")
 
     if not tokens or not weights:
         raise ValueError("Token or weight lists must not be empty.")
 
-    # Normalize the weights to be between 0 and 1
     max_weight = max(weights)
     min_weight = min(weights)
     normalized_weights = [
         (w - min_weight) / (max_weight - min_weight) if max_weight != min_weight else 0 for w in weights
     ]
 
-    # Generate the HTML string with highlighted tokens
     html_str = ["<p>"]
     for token, weight in zip(tokens, normalized_weights):
-        # If the normalized weight is 0, do not highlight the token
         if weight == 0:
             html_str.append(f"{token} ")
             continue
