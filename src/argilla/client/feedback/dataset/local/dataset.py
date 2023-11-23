@@ -21,7 +21,7 @@ from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
-from argilla.client.feedback.dataset.mixings import MetricsMixin
+from argilla.client.feedback.dataset.mixins import MetricsMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
