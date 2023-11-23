@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
+import argilla.server.errors.future as errors
 from argilla.server.apis.v1.handlers.datasets.datasets import _get_dataset
 from argilla.server.contexts import datasets, search
 from argilla.server.database import get_async_db
@@ -285,6 +286,13 @@ async def _build_sort_by(
     return sorts_by
 
 
+async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
+    try:
+        await search.validate_search_records_query(db, query, dataset_id)
+    except (ValueError, errors.NotFoundError) as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+
 async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> "Record":
     record = await datasets.get_record_by_id(db, record_id)
     if record is None or record.dataset_id != dataset.id:
@@ -478,6 +486,8 @@ async def search_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
+    await _validate_search_records_query(db, body, dataset_id)
+
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
@@ -539,6 +549,8 @@ async def search_dataset_records(
     dataset = await _get_dataset(db, dataset_id, with_fields=True)
 
     await authorize(current_user, DatasetPolicyV1.search_records_with_all_responses(dataset))
+
+    await _validate_search_records_query(db, body, dataset_id)
 
     search_responses = await _get_search_responses(
         db=db,
