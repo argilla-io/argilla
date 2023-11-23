@@ -23,7 +23,8 @@ from argilla.server.search_engine import SearchEngine
 from argilla.server.search_engine.commons import (
     BaseElasticAndOpenSearchEngine,
     es_bool_query,
-    es_field_for_vector_settings, es_ids_query,
+    es_field_for_vector_settings,
+    es_ids_query,
 )
 from argilla.server.settings import settings
 

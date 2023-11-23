@@ -163,7 +163,7 @@ def es_bool_query(
     return {"bool": bool_query}
 
 
-def es_ids_query(ids: List[str] ) -> dict:
+def es_ids_query(ids: List[str]) -> dict:
     return {"ids": {"values": ids}}
 
 
