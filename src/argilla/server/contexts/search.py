@@ -41,7 +41,7 @@ class SearchRecordsQueryValidator:
 
     async def validate(self) -> None:
         if self._query.filters:
-            for filter in self._query.filters.and_ or []:
+            for filter in self._query.filters.and_:
                 await self._validate_filter_scope(filter.scope)
 
         if self._query.sort:
