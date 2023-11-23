@@ -344,7 +344,7 @@ You will also need the vector database set up, as we show in the [Vector Databas
 Now that your system has the Argilla backend server, you are ready to start your server and access Argilla. You can either use the CLI command, which uses the port 6900 and the host 0.0.0.0 as default.
 
 ```sh
-argilla server start
+argilla server start ARGILLA_ENABLE_TELEMETRY=0
 ```
 
 Or you can start the server through uvicorn, with the following command:
