@@ -53,6 +53,10 @@ You can define the fields using the Python SDK providing the following arguments
 - `required` (optional): Whether the field is required or not. Defaults to `True`. Note that at least one field must be required.
 - `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
 
+```{note}
+Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
+```
+
 ```python
 fields = [
     rg.TextField(name="question", required=True),
@@ -87,6 +91,10 @@ The following arguments apply to specific question types:
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
+
+```{note}
+Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
+```
 
 Check out the following tabs to learn how to set up questions according to their type:
 
