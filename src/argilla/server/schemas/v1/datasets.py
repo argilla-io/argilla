@@ -22,7 +22,7 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import RecordInclude, SimilarityOrder
+from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -246,15 +246,15 @@ class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     )
 
     @validator("options")
-    def check_option_value_range(cls, value: List[RatingQuestionSettingsOption]):
+    def check_option_value_range(cls, options: List[RatingQuestionSettingsOption]):
         """Validator to control all values are in allowed range 1 <= x <= 10"""
-        for option in value:
+        for option in options:
             if not RATING_LOWER_VALUE_ALLOWED <= option.value <= RATING_UPPER_VALUE_ALLOWED:
                 raise ValueError(
                     f"Option value {option.value!r} out of range "
                     f"[{RATING_LOWER_VALUE_ALLOWED!r}, {RATING_UPPER_VALUE_ALLOWED!r}]"
                 )
-        return value
+        return options
 
 
 class ValueTextQuestionSettingsOption(BaseModel):
@@ -728,15 +728,21 @@ class Query(BaseModel):
         return values
 
 
-class SuggestionFilterScope(BaseModel):
-    entity: Literal["suggestion"]
-    question: QuestionName
-    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
+class RecordFilterScope(BaseModel):
+    entity: Literal["record"]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
 
 
 class ResponseFilterScope(BaseModel):
     entity: Literal["response"]
+    question: Optional[QuestionName]
+    property: Optional[Literal["status"]]
+
+
+class SuggestionFilterScope(BaseModel):
+    entity: Literal["suggestion"]
     question: QuestionName
+    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
 
 
 class MetadataFilterScope(BaseModel):
@@ -745,7 +751,8 @@ class MetadataFilterScope(BaseModel):
 
 
 FilterScope = Annotated[
-    Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope], PydanticField(..., discriminator="entity")
+    Union[RecordFilterScope, ResponseFilterScope, SuggestionFilterScope, MetadataFilterScope],
+    PydanticField(..., discriminator="entity"),
 ]
 
 
@@ -760,18 +767,18 @@ class TermsFilter(BaseModel):
 class RangeFilter(BaseModel):
     type: Literal["range"]
     scope: FilterScope
-    gte: Optional[float]
-    lte: Optional[float]
+    ge: Optional[float]
+    le: Optional[float]
 
     @root_validator
-    def check_gte_and_lte(cls, values: dict) -> dict:
-        gte, lte = values.get("gte"), values.get("lte")
+    def check_ge_and_le(cls, values: dict) -> dict:
+        ge, le = values.get("ge"), values.get("le")
 
-        if gte is None and lte is None:
-            raise ValueError("At least one of 'gte' or 'lte' must be provided")
+        if ge is None and le is None:
+            raise ValueError("At least one of 'ge' or 'le' must be provided")
 
-        if gte is not None and lte is not None and gte > lte:
-            raise ValueError("'gte' must have a value less than or equal to 'lte'")
+        if ge is not None and le is not None and ge > le:
+            raise ValueError("'ge' must have a value less than or equal to 'le'")
 
         return values
 
@@ -787,7 +794,7 @@ class Filters(BaseModel):
 
 class Order(BaseModel):
     scope: FilterScope
-    order: Union[Literal["asc"], Literal["desc"]]
+    order: SortOrder
 
 
 class SearchRecordsQuery(BaseModel):

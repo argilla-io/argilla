@@ -141,13 +141,30 @@ def es_range_query(field_name: str, gte: Optional[float] = None, lte: Optional[f
     return {"range": {field_name: query}}
 
 
-def es_bool_query(should_filters: List[Dict[str, Any]], minimum_should_match: Union[int, str]) -> Dict[str, Any]:
-    return {
-        "bool": {
-            "should": should_filters,
-            "minimum_should_match": minimum_should_match,
-        }
-    }
+def es_bool_query(
+    *,
+    must_not: Optional[List[dict]] = None,
+    should: Optional[List[dict]] = None,
+    minimum_should_match: Optional[Union[int, str]] = None,
+) -> Dict[str, Any]:
+    bool_query = {}
+
+    if should:
+        bool_query["should"] = should
+    if must_not:
+        bool_query["must_not"] = must_not
+
+    if not bool_query:
+        raise ValueError("Cannot build a boolean query without any clause")
+
+    if minimum_should_match:
+        bool_query["minimum_should_match"] = minimum_should_match
+
+    return {"bool": bool_query}
+
+
+def es_ids_query(ids: List[str]) -> dict:
+    return {"ids": {"values": ids}}
 
 
 def es_field_for_response_value(user: str, question: str) -> str:
@@ -356,12 +373,22 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
+        filter: Optional[Filter] = None,
+        # TODO: remove them and keep filter
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
+        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
+        if metadata_filters:
+            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
+        if user_response_status_filter and user_response_status_filter.statuses:
+            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
+        # END TODO
+
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 
@@ -379,12 +406,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             vector_value = self._inverse_vector(vector_value)
 
         query_filters = []
-        if query:
-            query_filters.append(self._build_text_query(dataset, query))
-        if user_response_status_filter and user_response_status_filter.statuses:
-            query_filters.append(self._build_response_status_filter(user_response_status_filter))
-        if metadata_filters:
-            query_filters.extend(self._build_metadata_filters(metadata_filters))
+        if filter:
+            # Wrapping filter in a list to use easily on each engine implementation
+            query_filters = [self.build_elasticsearch_filter(filter)]
 
         index = await self._get_index_or_raise(dataset)
         response = await self._request_similarity_search(
@@ -413,7 +437,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         if isinstance(filter, AndFilter):
             filters = [self.build_elasticsearch_filter(f) for f in filter.filters]
-            return es_bool_query(should_filters=filters, minimum_should_match=len(filters))
+            return es_bool_query(should=filters, minimum_should_match=len(filters))
 
         # This is a special case for response status filter, since it's compound by multiple filters
         if is_response_status_scope(filter.scope):
@@ -671,37 +695,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             raise ValueError(f"Cannot access to index for dataset {dataset.id}: the specified index does not exist")
 
         return index_name
-
-    def _build_metadata_filters(self, metadata_filters: List[MetadataFilter]) -> List[Dict[str, Any]]:
-        filters = []
-        for metadata_property_filter in metadata_filters:
-            metadata_property = metadata_property_filter.metadata_property
-            field_name = es_field_for_metadata_property(metadata_property)
-
-            if isinstance(metadata_property_filter, TermsMetadataFilter):
-                query_filter = es_terms_query(field_name, values=metadata_property_filter.values)
-            elif isinstance(metadata_property_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
-                query_filter = es_range_query(
-                    field_name, gte=metadata_property_filter.ge, lte=metadata_property_filter.le
-                )
-            else:
-                raise ValueError(f"Wrong metadata property type {metadata_property.type}")
-            filters.append(query_filter)
-        return filters
-
-    def _build_sort_configuration(self, sort_by: Optional[List[SortBy]] = None) -> Optional[str]:
-        if not sort_by:
-            return None
-
-        sort_config = []
-        for sort in sort_by:
-            if isinstance(sort.field, MetadataProperty):
-                sort_field_name = es_field_for_metadata_property(sort.field)
-            else:
-                sort_field_name = sort.field
-            sort_config.append(f"{sort_field_name}:{sort.order}")
-
-        return ",".join(sort_config)
 
     def _mapping_for_vectors_settings(self, vectors_settings: List[VectorSettings]) -> dict:
         mappings = {}
