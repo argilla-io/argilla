@@ -22,6 +22,7 @@ from rich.progress import Progress
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
+from argilla.client.feedback.dataset.mixings import MetricsMixin
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
@@ -384,7 +385,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return include
 
 
-class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
+class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMixin):
     # TODO: Call super method once the base init contains only commons init attributes
     def __init__(
         self,

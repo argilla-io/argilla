@@ -29,6 +29,42 @@ if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # TextQuestion
+        ("question-1", {"gleu", "rouge"}),
+        # RatingQuestion
+        ("question-2", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"}),
+        # LabelQuestion
+        ("question-3", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"}),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+def test_allowed_metrics(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    metric = AnnotatorMetric(dataset, question)
+    assert set(metric.allowed_metrics) == metric_names
+
+
 @pytest.mark.parametrize("responses_vs_suggestions", [True, False])
 @pytest.mark.parametrize(
     "question, metric_names",
@@ -70,6 +106,127 @@ def test_annotator_metric(
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
     metric = AnnotatorMetric(dataset, question, responses_vs_suggestions=responses_vs_suggestions)
+    # Test for repr method
+    assert repr(metric) == f"AnnotatorMetric(question_name={question})"
+    metrics_report = metric.compute(metric_names)
+    assert len(metrics_report) == 3  # Number of annotators
+    assert isinstance(metrics_report, dict)
+    user_id = str(uuid.UUID(int=1))
+    metric_results = metrics_report[user_id]
+    assert isinstance(metric_results, list)
+    metric_result = metric_results[0]
+    assert isinstance(metric_result, AnnotatorMetricResult)
+    if isinstance(metric_names, str):
+        metric_names = [metric_names]
+
+    assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
+
+
+@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # RatingQuestion
+        ("question-2", "accuracy"),
+        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
+        # LabelQuestion
+        ("question-3", "accuracy"),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
+        # MultiLabelQuestion
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
+        # RankingQuestion
+        ("question-5", "ndcg-score"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+def test_annotator_metric_from_feedback_dataset(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+    responses_vs_suggestions: bool,
+):
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+    if responses_vs_suggestions:
+        metrics_report = dataset.compute_responses_metrics(question_name=question, metric_names=metric_names)
+    else:
+        metrics_report = dataset.compute_suggestions_metrics(question_name=question, metric_names=metric_names)
+
+    assert len(metrics_report) == 3  # Number of annotators
+    assert isinstance(metrics_report, dict)
+    user_id = str(uuid.UUID(int=1))
+    metric_results = metrics_report[user_id]
+    assert isinstance(metric_results, list)
+    metric_result = metric_results[0]
+    assert isinstance(metric_result, AnnotatorMetricResult)
+    if isinstance(metric_names, str):
+        metric_names = [metric_names]
+
+    assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize(
+    "question, metric_names",
+    [
+        # TextQuestion (Tested only once for speed)
+        # ("question-1", ["gleu"]),
+        # RatingQuestion
+        ("question-2", "accuracy"),
+        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
+        # LabelQuestion
+        ("question-3", "accuracy"),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
+        # MultiLabelQuestion
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
+        # RankingQuestion
+        ("question-5", "ndcg-score"),
+    ],
+)
+@pytest.mark.usefixtures(
+    "feedback_dataset_guidelines",
+    "feedback_dataset_fields",
+    "feedback_dataset_questions",
+    "feedback_dataset_records_with_paired_suggestions",
+)
+async def test_annotator_metric_from_remote_feedback_dataset(
+    feedback_dataset_guidelines: str,
+    feedback_dataset_fields: List["AllowedFieldTypes"],
+    feedback_dataset_questions: List["AllowedQuestionTypes"],
+    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
+    question: str,
+    metric_names: Union[str, List[str]],
+    responses_vs_suggestions: bool,
+    owner: User,
+):
+    api.init(api_key=owner.api_key)
+    workspace = await WorkspaceFactory.create(name="test_workspace")
+    # Add the 4 users for the sample dataset
+    for i in range(1, 4):
+        await UserFactory.create(username=f"test_user{i}", id=uuid.UUID(int=i))
+
+    dataset = FeedbackDataset(
+        guidelines=feedback_dataset_guidelines,
+        fields=feedback_dataset_fields,
+        questions=feedback_dataset_questions,
+    )
+    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
+
+    remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
+    metric = AnnotatorMetric(remote, question, responses_vs_suggestions=responses_vs_suggestions)
     # Test for repr method
     assert repr(metric) == f"AnnotatorMetric(question_name={question})"
     metrics_report = metric.compute(metric_names)
@@ -147,59 +304,19 @@ def test_annotator_metrics_unified(
         assert all([result.metric_name == name for result, name in zip(metrics_report, metric_names)])
 
 
-@pytest.mark.parametrize(
-    "question, metric_names",
-    [
-        # TextQuestion
-        ("question-1", {"gleu", "rouge"}),
-        # RatingQuestion
-        ("question-2", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"}),
-        # LabelQuestion
-        ("question-3", {"accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"}),
-    ],
-)
-@pytest.mark.usefixtures(
-    "feedback_dataset_guidelines",
-    "feedback_dataset_fields",
-    "feedback_dataset_questions",
-    "feedback_dataset_records_with_paired_suggestions",
-)
-def test_allowed_metrics(
-    feedback_dataset_guidelines: str,
-    feedback_dataset_fields: List["AllowedFieldTypes"],
-    feedback_dataset_questions: List["AllowedQuestionTypes"],
-    feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
-    question: str,
-    metric_names: Union[str, List[str]],
-):
-    dataset = FeedbackDataset(
-        guidelines=feedback_dataset_guidelines,
-        fields=feedback_dataset_fields,
-        questions=feedback_dataset_questions,
-    )
-    dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
-
-    metric = AnnotatorMetric(dataset, question)
-    assert set(metric.allowed_metrics) == metric_names
-
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize("responses_vs_suggestions", [True, False])
 @pytest.mark.parametrize(
-    "question, metric_names",
+    "question, metric_names, strategy_name",
     [
-        # TextQuestion
-        ("question-1", ["gleu"]),
         # RatingQuestion
-        ("question-2", "accuracy"),
-        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"]),
+        ("question-2", "accuracy", "majority"),
+        ("question-2", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "spearman-r"], "majority"),
         # LabelQuestion
-        ("question-3", "accuracy"),
-        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"]),
+        ("question-3", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix", "pearson-r"], "majority"),
         # MultiLabelQuestion
-        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"]),
+        ("question-4", ["accuracy", "f1-score", "precision", "recall", "confusion-matrix"], "majority"),
         # RankingQuestion
-        ("question-5", "ndcg-score"),
+        ("question-5", "ndcg-score", "majority"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -208,22 +325,18 @@ def test_allowed_metrics(
     "feedback_dataset_questions",
     "feedback_dataset_records_with_paired_suggestions",
 )
-async def test_annotator_metric_with_remote_feedback_dataset(
+def test_annotator_metrics_unified_from_feedback_dataset(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
     metric_names: Union[str, List[str]],
+    strategy_name: str,
     responses_vs_suggestions: bool,
-    owner: User,
 ):
-    api.init(api_key=owner.api_key)
-    workspace = await WorkspaceFactory.create(name="test_workspace")
-    # Add the 4 users for the sample dataset
-    for i in range(1, 4):
-        await UserFactory.create(username=f"test_user{i}", id=uuid.UUID(int=i))
-
+    if not strategy_name:
+        return
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
         fields=feedback_dataset_fields,
@@ -231,19 +344,22 @@ async def test_annotator_metric_with_remote_feedback_dataset(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
-    metric = AnnotatorMetric(remote, question, responses_vs_suggestions=responses_vs_suggestions)
-    # Test for repr method
-    assert repr(metric) == f"AnnotatorMetric(question_name={question})"
-    metrics_report = metric.compute(metric_names)
-    assert len(metrics_report) == 3  # Number of annotators
-    assert isinstance(metrics_report, dict)
-    user_id = str(uuid.UUID(int=1))
-    metric_results = metrics_report[user_id]
-    assert isinstance(metric_results, list)
-    metric_result = metric_results[0]
-    assert isinstance(metric_result, AnnotatorMetricResult)
-    if isinstance(metric_names, str):
+    unified_dataset = dataset.compute_unified_responses(question, strategy_name)
+
+    if responses_vs_suggestions:
+        metrics_report = unified_dataset.compute_responses_metrics(
+            question_name=question, metric_names=metric_names, strategy=strategy_name
+        )
+    else:
+        metrics_report = unified_dataset.compute_suggestions_metrics(
+            question_name=question, metric_names=metric_names, strategy=strategy_name
+        )
+
+    if isinstance(metric_names, list):
+        assert isinstance(metrics_report, list)
+    else:
+        assert isinstance(metrics_report, AnnotatorMetricResult)
+        metrics_report = [metrics_report]
         metric_names = [metric_names]
 
-    assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
+    assert all([result.metric_name == name for result, name in zip(metrics_report, metric_names)])
