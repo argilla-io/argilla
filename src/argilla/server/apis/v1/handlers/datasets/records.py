@@ -30,18 +30,27 @@ from argilla.server.models import Record, User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Dataset,
+    Filter,
+    FilterScope,
+    Filters,
+    MetadataFilterScope,
     MetadataParsedQueryParam,
     MetadataQueryParams,
+    Order, RangeFilter,
+    RecordFilterScope,
     RecordIncludeParam,
     Records,
     RecordsCreate,
     RecordsUpdate,
+    ResponseFilterScope,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
     SearchSuggestionOptions,
     SearchSuggestionOptionsQuestion,
     SearchSuggestionsOptions,
+    SuggestionFilterScope,
+    TermsFilter,
     TextQuery,
     VectorQuery,
     VectorSettings,
@@ -50,6 +59,7 @@ from argilla.server.schemas.v1.datasets import (
     Record as RecordSchema,
 )
 from argilla.server.search_engine import (
+    AndFilter,
     FloatMetadataFilter,
     IntegerMetadataFilter,
     MetadataFilter,
@@ -59,6 +69,15 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
     get_search_engine,
+    Filter as SearchEngineFilter,
+    TermsFilter as SearchEngineTermsFilter,
+    RangeFilter as SearchEngineRangeFilter,
+    FilterScope as SearchEngineFilterScope,
+    ResponseFilterScope as SearchEngineResponseFilterScope,
+    SuggestionFilterScope as SearchEngineSuggestionFilterScope,
+    RecordFilterScope as SearchEngineRecordFilterScope,
+    MetadataFilterScope as SearchEngineMetadataFilterScope,
+    Order as SearchEngineOrder,
 )
 from argilla.server.security import auth
 from argilla.server.utils import parse_query_param, parse_uuids
@@ -131,6 +150,44 @@ async def _filter_records_using_search_engine(
     )
 
 
+def _to_search_engine_scope(scope: FilterScope, user: Optional[User] = None) -> SearchEngineFilterScope:
+    if isinstance(scope, RecordFilterScope):
+        return SearchEngineRecordFilterScope(property=scope.property)
+    elif isinstance(scope, MetadataFilterScope):
+        return SearchEngineMetadataFilterScope(metadata_property=scope.metadata_property)
+    elif isinstance(scope, SuggestionFilterScope):
+        return SearchEngineSuggestionFilterScope(question=scope.question, property=scope.property)
+    elif isinstance(scope, ResponseFilterScope):
+        return SearchEngineResponseFilterScope(question=scope.question, property=scope.property, user=user)
+    else:
+        raise Exception(f"Unknown scope type {type(scope)}")
+
+
+def _to_search_engine_filter(filters: Filters) -> SearchEngineFilter:
+    engine_filters = []
+
+    for filter in filters.and_:
+        engine_scope = _to_search_engine_scope(filter.scope)
+        if isinstance(filter, TermsFilter):
+            engine_filter = SearchEngineTermsFilter(scope=engine_scope, values=filter.values)
+        elif isinstance(filter, RangeFilter):
+            engine_filter = SearchEngineRangeFilter(scope=engine_scope, ge=filter.ge, le=filter.le)
+        else:
+            raise Exception(f"Unknown filter type {type(filter)}")
+        engine_filters.append(engine_filter)
+
+    return AndFilter(filters=engine_filters)
+
+
+def _to_search_engine_sort(sort: List[Order]) -> List[SearchEngineOrder]:
+    engine_sort = []
+
+    for order in sort:
+        engine_scope = _to_search_engine_scope(order.scope)
+        engine_sort.append(SearchEngineOrder(scope=engine_scope, order=order.order))
+
+    return engine_sort
+
 async def _get_search_responses(
     db: "AsyncSession",
     search_engine: "SearchEngine",
@@ -140,6 +197,8 @@ async def _get_search_responses(
     offset: int,
     text_query: Optional["TextQuery"] = None,
     vector_query: Optional["VectorQuery"] = None,
+    filters: Optional[Filters] = None,
+    sort: Optional[List[Order]] = None,
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
@@ -173,6 +232,9 @@ async def _get_search_responses(
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
     sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
 
+    search_engine_filter = _to_search_engine_filter(filters)
+    search_engine_sort = _to_search_engine_sort(sort)
+
     if vector_query and vector_settings:
         return await search_engine.similarity_search(
             dataset=dataset,
@@ -180,6 +242,7 @@ async def _get_search_responses(
             value=vector_query.value,
             record=record,
             query=text_query,
+            filter=search_engine_filter,
             order=vector_query.order,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
@@ -189,6 +252,8 @@ async def _get_search_responses(
         return await search_engine.search(
             dataset=dataset,
             query=text_query,
+            filter=search_engine_filter,
+            sort=search_engine_sort,
             metadata_filters=metadata_filters,
             user_response_status_filter=response_status_filter,
             offset=offset,
@@ -494,6 +559,8 @@ async def search_current_user_dataset_records(
         dataset=dataset,
         text_query=body.query.text,
         vector_query=body.query.vector,
+        filters=body.filters,
+        sort=body.sort,
         parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,
