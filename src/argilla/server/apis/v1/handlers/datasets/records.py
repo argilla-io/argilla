@@ -31,12 +31,13 @@ from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Dataset,
     Filter,
-    FilterScope,
     Filters,
+    FilterScope,
     MetadataFilterScope,
     MetadataParsedQueryParam,
     MetadataQueryParams,
-    Order, RangeFilter,
+    Order,
+    RangeFilter,
     RecordFilterScope,
     RecordIncludeParam,
     Records,
@@ -69,15 +70,33 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
     get_search_engine,
+)
+from argilla.server.search_engine import (
     Filter as SearchEngineFilter,
-    TermsFilter as SearchEngineTermsFilter,
-    RangeFilter as SearchEngineRangeFilter,
+)
+from argilla.server.search_engine import (
     FilterScope as SearchEngineFilterScope,
-    ResponseFilterScope as SearchEngineResponseFilterScope,
-    SuggestionFilterScope as SearchEngineSuggestionFilterScope,
-    RecordFilterScope as SearchEngineRecordFilterScope,
+)
+from argilla.server.search_engine import (
     MetadataFilterScope as SearchEngineMetadataFilterScope,
+)
+from argilla.server.search_engine import (
     Order as SearchEngineOrder,
+)
+from argilla.server.search_engine import (
+    RangeFilter as SearchEngineRangeFilter,
+)
+from argilla.server.search_engine import (
+    RecordFilterScope as SearchEngineRecordFilterScope,
+)
+from argilla.server.search_engine import (
+    ResponseFilterScope as SearchEngineResponseFilterScope,
+)
+from argilla.server.search_engine import (
+    SuggestionFilterScope as SearchEngineSuggestionFilterScope,
+)
+from argilla.server.search_engine import (
+    TermsFilter as SearchEngineTermsFilter,
 )
 from argilla.server.security import auth
 from argilla.server.utils import parse_query_param, parse_uuids
@@ -187,6 +206,7 @@ def _to_search_engine_sort(sort: List[Order]) -> List[SearchEngineOrder]:
         engine_sort.append(SearchEngineOrder(scope=engine_scope, order=order.order))
 
     return engine_sort
+
 
 async def _get_search_responses(
     db: "AsyncSession",
