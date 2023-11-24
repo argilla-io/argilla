@@ -21,7 +21,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
@@ -137,12 +136,7 @@ class AnnotatorMetric(MetricBase):
         )
 
         metrics = defaultdict(list)
-        for user_id, resp_and_suggest in tqdm(
-            responses_and_suggestions_per_user.items(),
-            desc="Computing metrics",
-            total=len(responses_and_suggestions_per_user),
-            disable=not show_progress,
-        ):
+        for user_id, resp_and_suggest in responses_and_suggestions_per_user.items():
             responses = resp_and_suggest["responses"]
             suggestions = resp_and_suggest["suggestions"]
             as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
@@ -512,11 +506,11 @@ class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
         unique_responses = sorted(np.unique(responses))
         unique_suggestions = sorted(np.unique(suggestions))
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
-        labels_index = [f"responses_{label}" for label in labels]
-        labels_columns = [f"suggestions_{label}" for label in labels]
         matrices = multilabel_confusion_matrix(responses, suggestions, labels=labels)
         report = {}
         for class_, matrix in zip(self._mlb.classes_, matrices):
+            labels_index = [f"responses_{class_}_{i}" for i in ["true", "false"]]
+            labels_columns = [f"suggestions_{class_}_{i}" for i in ["true", "false"]]
             report[class_] = pd.DataFrame(matrix, index=labels_index, columns=labels_columns)
         return report
 
