@@ -15,7 +15,6 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import (
-    Annotated,
     Any,
     AsyncGenerator,
     ClassVar,
@@ -46,7 +45,6 @@ from argilla.server.models import Dataset, MetadataProperty, Record, Response, U
 
 __all__ = [
     "SearchEngine",
-    "UserResponse",
     "TextQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
@@ -124,10 +122,6 @@ class Order:
         self.scope = scope
         self.order = order
 
-
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
 
 
 class TextQuery(BaseModel):
