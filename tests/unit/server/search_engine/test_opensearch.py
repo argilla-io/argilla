@@ -13,13 +13,10 @@
 #  limitations under the License.
 
 import pytest
-from opensearchpy import OpenSearch, RequestError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from argilla.server.search_engine import OpenSearchEngine
 from argilla.server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, es_index_name_for_dataset
 from argilla.server.settings import settings
-from opensearchpy import OpenSearch
+from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import DatasetFactory, VectorSettingsFactory

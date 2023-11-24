@@ -516,6 +516,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 ],
             ],
         }
+
     @pytest.mark.parametrize(
         ("query", "expected_items"),
         [
