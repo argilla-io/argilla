@@ -86,7 +86,7 @@ describe("RecordCriteria", () => {
   });
 
   describe("isFilteringByResponse", () => {
-    test("should return true if response is not empty", () => {
+    test("should return true if response is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
@@ -94,12 +94,23 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        JSON.stringify([
-          {
-            name: "response1",
-            value: ["value1"],
-          },
-        ]),
+        "response.ge.1le.5",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(true);
+    });
+
+    test("should return true if response is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.option1~option2",
         "",
         null
       );
@@ -134,8 +145,12 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        // eslint-disable-next-line quotes
-        'suggestion:["test"]',
+        JSON.stringify([
+          {
+            name: "suggestion1",
+            value: ["value1"],
+          },
+        ]),
         null
       );
 
@@ -250,14 +265,29 @@ describe("RecordCriteria", () => {
   });
 
   describe("isFilteredByMetadata should", () => {
-    test("return true if metadata is not empty", () => {
+    test("return true if metadata is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
         "pending",
         "",
-        // eslint-disable-next-line quotes
-        'your_feel:["happy","sad"]',
+        "metadata.ge.1le.5",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByMetadata).toBe(true);
+    });
+
+    test("return true if metadata is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "metadata.option1~option2",
         "",
         "",
         "",
@@ -301,7 +331,7 @@ describe("RecordCriteria", () => {
   });
 
   describe("isFilteredByResponse", () => {
-    test("should return true if response is not empty", () => {
+    test("should return true if response is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
@@ -309,12 +339,23 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        JSON.stringify([
-          {
-            name: "response1",
-            value: ["value1"],
-          },
-        ]),
+        "response.ge.1le.5",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByResponse).toBe(true);
+    });
+
+    test("should return true if response is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.option1~option2",
         "",
         null
       );
@@ -333,8 +374,12 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        // eslint-disable-next-line quotes
-        'suggestion:["test"]',
+        JSON.stringify([
+          {
+            name: "suggestion1",
+            value: ["value1"],
+          },
+        ]),
         null
       );
 
@@ -410,8 +455,7 @@ describe("RecordCriteria", () => {
         null
       );
 
-      // eslint-disable-next-line quotes
-      criteria.metadata.complete('your_feel:["happy","sad"]');
+      criteria.metadata.complete("your_feel.happy~sad");
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -502,7 +546,7 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "Do you love ML?",
-        "your_feel:[happy,sad]",
+        "your_feel.happy~sad",
         "inserted_at:desc",
         "",
         "",
@@ -512,8 +556,8 @@ describe("RecordCriteria", () => {
       criteria.page = 1;
       criteria.status = "discarded";
       criteria.searchText = "Do you love AI?";
-      criteria.metadata.complete("your_feel:[sad]");
-      criteria.sortBy.complete("inserted_at:asc");
+      criteria.metadata.complete("your_feel.sad");
+      criteria.sortBy.complete("record.inserted_at.asc");
       criteria.similaritySearch.order = "least";
 
       criteria.rollback();
