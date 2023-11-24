@@ -123,7 +123,6 @@ class Order:
         self.order = order
 
 
-
 class TextQuery(BaseModel):
     q: str
     field: Optional[str] = None

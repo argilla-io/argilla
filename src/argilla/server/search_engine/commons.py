@@ -17,7 +17,6 @@ from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-
 from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import (
     Dataset,
@@ -28,9 +27,9 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
+    Suggestion,
     Vector,
     VectorSettings,
-    Suggestion,
 )
 from argilla.server.search_engine.base import (
     AndFilter,
