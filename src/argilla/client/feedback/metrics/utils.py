@@ -16,6 +16,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from tqdm import tqdm
 
 from argilla.client.feedback.schemas import RankingQuestion, TextQuestion
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
@@ -34,6 +35,7 @@ def get_responses_and_suggestions_per_user(
     filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
     sort_by: Optional[List["SortBy"]] = None,
     max_records: Optional[int] = None,
+    show_progress: bool = True,
 ) -> Tuple[Dict[int, "Responses"], "Suggestions"]:
     """Extract the responses per user and the suggestions from a FeedbackDataset.
 
@@ -70,7 +72,12 @@ def get_responses_and_suggestions_per_user(
 
     responses_and_suggestions_per_user = defaultdict(lambda: defaultdict(list))
 
-    for responses_, suggestion in zip(hf_dataset[question_name], hf_dataset[f"{question_name}-suggestion"]):
+    for responses_, suggestion in tqdm(
+        zip(hf_dataset[question_name], hf_dataset[f"{question_name}-suggestion"]),
+        desc="Extracting responses and suggestions per user",
+        total=len(hf_dataset),
+        disable=not show_progress,
+    ):
         if question_type == RankingQuestion:
             suggestion = suggestion["rank"]
 

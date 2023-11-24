@@ -228,7 +228,7 @@ class AgreementMetric(MetricBase):
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(annotated_dataset=dataset, distance_function=distance_function)
             result = metric.compute()
-            metrics.append(AgreementMetricResult(metric_name=metric_name, result=result))
+            metrics.append(AgreementMetricResult(metric_name=metric_name, result=result, count=len(dataset)))
 
         if len(metric_names) == 1:
             return metrics[0]
