@@ -619,7 +619,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await _load_users_from_record_responses(records)
+        await refresh_records(records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -788,6 +788,19 @@ async def _update_record(
     return params, suggestions, vectors, needs_search_engine_update, caches
 
 
+async def refresh_records(records: List[Record]):
+    # TODO: This behavior must be reviewed !!!
+    for record in records:
+        await record.awaitable_attrs.suggestions
+        await record.awaitable_attrs.responses
+        await record.awaitable_attrs.vectors
+
+        for response in record.responses:
+            await response.awiatable_attrs.user
+        for suggestion in record.suggestions:
+            await suggestion.awaitable_attrs.question
+
+
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
@@ -866,6 +879,8 @@ async def update_records(
                 include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
             )
             await dataset.awaitable_attrs.vectors_settings
+            # This must be done to be sure that the engine index the updated vectors property
+            await refresh_records(records)
             await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -905,6 +920,7 @@ async def update_record(
 
         if needs_search_engine_update:
             await record.dataset.awaitable_attrs.vectors_settings
+            await refresh_records([record])
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
