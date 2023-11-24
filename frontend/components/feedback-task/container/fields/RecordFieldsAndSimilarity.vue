@@ -56,11 +56,6 @@ export default {
       required: true,
     },
   },
-  data: () => {
-    return {
-      totalRecords: null,
-    };
-  },
 };
 </script>
 <style lang="scss" scoped>
