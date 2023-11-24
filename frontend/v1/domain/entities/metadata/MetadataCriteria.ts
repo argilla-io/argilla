@@ -7,18 +7,12 @@ export class MetadataCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams.split("+").forEach((metadata) => {
-      const [name, value] = metadata.split(".");
+    urlParams.split("~").forEach((metadata) => {
+      const [name] = metadata.split(".");
+      const values = metadata.split(".").slice(1);
 
-      if (value.includes("~")) {
-        const values = value.split("~");
-
-        this.value.push({
-          name,
-          value: values,
-        });
-      } else {
-        const [ge, le] = value.split("le.");
+      if (values.some((v) => v.includes("ge") || v.includes("le"))) {
+        const [ge, le] = values.map((v) => v.replace(/ge|le/, ""));
 
         this.value.push({
           name,
@@ -26,6 +20,11 @@ export class MetadataCriteria extends Criteria {
             ge: Number(ge),
             le: Number(le),
           },
+        });
+      } else {
+        this.value.push({
+          name,
+          value: values,
         });
       }
     });
@@ -52,17 +51,17 @@ export class MetadataCriteria extends Criteria {
     if (!this.isCompleted) return "";
 
     return this.value
-      .map((metadata) => {
-        const rangeValue = metadata.value as RangeValue;
+      .map((response) => {
+        const rangeValue = response.value as RangeValue;
 
         if ("ge" in rangeValue && "le" in rangeValue) {
-          return `${metadata.name}.ge.${rangeValue.ge}le.${rangeValue.le}`;
+          return `${response.name}.ge${rangeValue.ge}.le${rangeValue.le}`;
         }
 
-        const values = metadata.value as string[];
+        const values = response.value as string[];
 
-        return `${metadata.name}.${values.map((v) => v).join("~")}`;
+        return `${response.name}.${values.map((v) => v).join(".")}`;
       })
-      .join("+");
+      .join("~");
   }
 }

@@ -8,18 +8,12 @@ export class ResponseCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams.split("+").forEach((metadata) => {
-      const [name, value] = metadata.split(".");
+    urlParams.split("~").forEach((response) => {
+      const [name] = response.split(".");
+      const values = response.split(".").slice(1);
 
-      if (value.includes("~")) {
-        const values = value.split("~");
-
-        this.value.push({
-          name,
-          value: values,
-        });
-      } else {
-        const [ge, le] = value.split("le.");
+      if (values.some((v) => v.includes("ge") || v.includes("le"))) {
+        const [ge, le] = values.map((v) => v.replace(/ge|le/, ""));
 
         this.value.push({
           name,
@@ -27,6 +21,11 @@ export class ResponseCriteria extends Criteria {
             ge: Number(ge),
             le: Number(le),
           },
+        });
+      } else {
+        this.value.push({
+          name,
+          value: values,
         });
       }
     });
@@ -57,13 +56,13 @@ export class ResponseCriteria extends Criteria {
         const rangeValue = response.value as RangeValue;
 
         if ("ge" in rangeValue && "le" in rangeValue) {
-          return `${response.name}.ge.${rangeValue.ge}le.${rangeValue.le}`;
+          return `${response.name}.ge${rangeValue.ge}.le${rangeValue.le}`;
         }
 
         const values = response.value as string[];
 
-        return `${response.name}.${values.map((v) => v).join("~")}`;
+        return `${response.name}.${values.map((v) => v).join(".")}`;
       })
-      .join("+");
+      .join("~");
   }
 }

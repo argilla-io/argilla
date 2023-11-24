@@ -7,17 +7,8 @@ export class SortCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams.split("+").forEach((sort) => {
-      const [entity, name, property, order] = sort.split(".");
-      const value = {
-        entity,
-        name,
-        order,
-      } as SortSearch;
-
-      if (property && order) {
-        value.property = property;
-      }
+    urlParams.split("~").forEach((sort) => {
+      const value = this.parseUrlParams(sort);
 
       this.value.push(value);
     });
@@ -46,6 +37,25 @@ export class SortCriteria extends Criteria {
 
         return `${sort.entity}.${sort.name}.${sort.order}`;
       })
-      .join("+");
+      .join("~");
+  }
+
+  private parseUrlParams(sort: string): SortSearch {
+    const [entity, name, third, fourth] = sort.split(".");
+
+    if (third && fourth) {
+      return {
+        entity,
+        name,
+        order: fourth,
+        property: third,
+      } as SortSearch;
+    }
+
+    return {
+      entity,
+      name,
+      order: third,
+    } as SortSearch;
   }
 }
