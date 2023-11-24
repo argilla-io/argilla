@@ -557,6 +557,9 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
                 if count >= majority:
                     majority_value.append(value)
 
+            if not majority_value:
+                majority_value = [random.choice(list(counter.keys()))]
+
             rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
         return records
 
