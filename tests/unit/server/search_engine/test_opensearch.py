@@ -1,5 +1,5 @@
 import pytest
-from opensearchpy import OpenSearch
+from opensearchpy import OpenSearch, RequestError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.search_engine import OpenSearchEngine
@@ -75,3 +75,16 @@ class TestOpenSearchEngine:
         }
 
         assert index["settings"]["index"]["knn"] == "false"
+
+    async def test_create_index_with_existing_index(self, search_engine: OpenSearchEngine, opensearch: OpenSearch):
+        dataset = await DatasetFactory.create()
+
+        await refresh_dataset(dataset)
+
+        await search_engine.create_index(dataset)
+
+        index_name = es_index_name_for_dataset(dataset)
+        assert opensearch.indices.exists(index=index_name)
+
+        with pytest.raises(RequestError, match="resource_already_exists_exception"):
+            await search_engine.create_index(dataset)

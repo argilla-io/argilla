@@ -516,24 +516,6 @@ class TestBaseElasticAndOpenSearchEngine:
                 ],
             ],
         }
-
-    async def test_create_index_with_existing_index(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch, db: Session
-    ):
-        from elasticsearch8 import RequestError
-
-        dataset = await DatasetFactory.create()
-
-        await refresh_dataset(dataset)
-
-        await search_engine.create_index(dataset)
-
-        index_name = es_index_name_for_dataset(dataset)
-        assert opensearch.indices.exists(index=index_name)
-
-        with pytest.raises(RequestError, match="resource_already_exists_exception"):
-            await search_engine.create_index(dataset)
-
     @pytest.mark.parametrize(
         ("query", "expected_items"),
         [
@@ -1184,29 +1166,6 @@ class TestBaseElasticAndOpenSearchEngine:
         metrics = await search_engine.compute_metrics_for(property)
 
         assert metrics.dict() == {"type": property_type, **expected_metrics}
-
-    async def test_create_dataset_index_with_vectors(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
-    ):
-        vectors_settings = await VectorSettingsFactory.create_batch(5)
-        dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
-
-        await refresh_dataset(dataset)
-        await search_engine.create_index(dataset)
-
-        index_name = es_index_name_for_dataset(dataset)
-        assert opensearch.indices.exists(index=index_name)
-
-        index = opensearch.indices.get(index=index_name)[index_name]
-        assert index["mappings"]["properties"]["vectors"]["properties"] == {
-            str(settings.id): {
-                "type": "dense_vector",
-                "dims": settings.dimensions,
-                "index": True,
-                "similarity": "cosine",
-            }
-            for settings in vectors_settings
-        }
 
     async def test_similarity_search_with_incomplete_inputs(
         self,
