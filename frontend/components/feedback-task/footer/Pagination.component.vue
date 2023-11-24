@@ -55,6 +55,7 @@ export default {
     isFirstPage() {
       return this.currentPage === 1;
     },
+    // TODO: Do PageCriteria to support this
     totalPages() {
       return Math.ceil(this.items / this.itemsPerPage);
     },
