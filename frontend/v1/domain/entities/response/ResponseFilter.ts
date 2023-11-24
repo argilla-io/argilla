@@ -7,6 +7,7 @@ export interface ResponseSearch {
 }
 
 class ResponseFilter extends FilterWithOption {
+  public readonly tooltip: string;
   constructor(question: Question) {
     super(
       question.name,
@@ -14,6 +15,7 @@ class ResponseFilter extends FilterWithOption {
         return { selected: false, label: value.toString() };
       })
     );
+    this.tooltip = question.title;
   }
 }
 

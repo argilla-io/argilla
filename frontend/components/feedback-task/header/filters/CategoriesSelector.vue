@@ -10,6 +10,7 @@
       <li
         v-for="category in categoriesFilteredBySearchText"
         :key="category.name"
+        :title="category.tooltip"
       >
         <BaseButton
           @on-click="selectCategory(category)"

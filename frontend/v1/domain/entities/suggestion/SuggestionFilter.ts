@@ -104,6 +104,10 @@ class SuggestionFilter extends Filter {
     this.configurations.push(new ConfigurationValues(question));
   }
 
+  get tooltip(): string {
+    return this.question.title;
+  }
+
   get name(): string {
     return this.question.name;
   }
