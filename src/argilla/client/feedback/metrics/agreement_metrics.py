@@ -103,6 +103,12 @@ def prepare_dataset_for_annotation_task(
                 )
 
             value = response["value"]
+            if value is None:
+                continue
+            # To avoid errors with the MASI distance function
+            if isinstance(value, list):
+                if len(value) == 0:
+                    continue
             if question_type == RankingQuestion:
                 value = tuple(value["rank"])
             elif question_type == MultiLabelQuestion:
