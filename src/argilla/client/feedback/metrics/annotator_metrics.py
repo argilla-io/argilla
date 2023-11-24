@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
@@ -108,7 +109,9 @@ class AnnotatorMetric(MetricBase):
             warnings.warn("Some suggestions are None, the metric will be computed without them.")
         return responses_per_user, suggestions
 
-    def compute(self, metric_names: Union[str, List[str]]) -> Dict[str, List[AnnotatorMetricResult]]:
+    def compute(
+        self, metric_names: Union[str, List[str]], show_progress: bool = True
+    ) -> Dict[str, List[AnnotatorMetricResult]]:
         """Computes the annotator metrics for the given question.
 
         Args:
@@ -134,7 +137,12 @@ class AnnotatorMetric(MetricBase):
         )
 
         metrics = defaultdict(list)
-        for user_id, resp_and_suggest in responses_and_suggestions_per_user.items():
+        for user_id, resp_and_suggest in tqdm(
+            responses_and_suggestions_per_user.items(),
+            desc="Computing metrics",
+            total=len(responses_and_suggestions_per_user),
+            disable=not show_progress,
+        ):
             responses = resp_and_suggest["responses"]
             suggestions = resp_and_suggest["suggestions"]
             as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
@@ -397,12 +405,12 @@ class MultiLabelMetrics(AnnotatorMetricBase):
     def _pre_process(self, responses, suggestions) -> Any:
         from sklearn.preprocessing import MultiLabelBinarizer
 
-        classes = sorted(set(np.ravel(responses)).union(set(np.ravel(suggestions))))
+        classes = sorted(set(responses).union(set(suggestions)))
         # Keep the binarizer to access the classes later
-        self._multilabel_binarizer = MultiLabelBinarizer(classes=classes)
-        self._multilabel_binarizer.fit(classes)
-        responses = self._multilabel_binarizer.transform(responses)
-        suggestions = self._multilabel_binarizer.transform(suggestions)
+        self._mlb = MultiLabelBinarizer()
+        self._mlb.fit(classes)
+        responses = self._mlb.transform(responses)
+        suggestions = self._mlb.transform(suggestions)
         return responses, suggestions
 
     def _compute(self, responses, suggestions):
@@ -508,7 +516,7 @@ class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
         labels_columns = [f"suggestions_{label}" for label in labels]
         matrices = multilabel_confusion_matrix(responses, suggestions, labels=labels)
         report = {}
-        for class_, matrix in zip(self._multilabel_binarizer.classes_, matrices):
+        for class_, matrix in zip(self._mlb.classes_, matrices):
             report[class_] = pd.DataFrame(matrix, index=labels_index, columns=labels_columns)
         return report
 
