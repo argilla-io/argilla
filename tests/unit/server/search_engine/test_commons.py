@@ -16,10 +16,6 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from opensearchpy import OpenSearch
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
-
 from argilla.server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import Dataset, Question, Record, User, VectorSettings
 from argilla.server.search_engine import (
@@ -38,6 +34,10 @@ from argilla.server.search_engine.commons import (
     es_index_name_for_dataset,
 )
 from argilla.server.settings import settings as server_settings
+from opensearchpy import OpenSearch
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
 from tests.factories import (
     DatasetFactory,
     FloatMetadataPropertyFactory,
