@@ -24,7 +24,14 @@ from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
+from argilla.server.enums import (
+    DatasetStatus,
+    MetadataPropertyType,
+    QuestionType,
+    ResponseStatus,
+    SuggestionType,
+    UserRole,
+)
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.mixins import inserted_at_current_value
@@ -236,6 +243,10 @@ class Question(DatabaseModel):
     @property
     def parsed_settings(self) -> QuestionSettings:
         return parse_obj_as(QuestionSettings, self.settings)
+
+    @property
+    def type(self) -> QuestionType:
+        return QuestionType(self.settings["type"])
 
     def __repr__(self):
         return (
