@@ -35,6 +35,7 @@ class MetricResultBase(BaseModel):
     """Base class for the result of a metric."""
 
     metric_name: str
+    count: int
 
 
 class AgreementMetricResult(MetricResultBase):

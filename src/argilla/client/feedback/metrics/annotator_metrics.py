@@ -125,22 +125,25 @@ class AnnotatorMetric(MetricBase):
         metric_names = self._check_metrics(metric_names)
         metric_classes = self._get_metric_classes(metric_names)
 
-        responses_per_user, suggestions = get_responses_and_suggestions_per_user(
+        responses_and_suggestions_per_user = get_responses_and_suggestions_per_user(
             self._dataset,
             self._question_name,
             filter_by=self._filter_by,
             sort_by=self._sort_by,
             max_records=self._max_records,
         )
-        responses_per_user, suggestions = self._check_responses_and_suggestions(responses_per_user, suggestions)
 
         metrics = defaultdict(list)
-        for user_id, responses in responses_per_user.items():
+        for user_id, resp_and_suggest in responses_and_suggestions_per_user.items():
+            responses = resp_and_suggest["responses"]
+            suggestions = resp_and_suggest["suggestions"]
             as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
             for metric_name, metric_cls in metric_classes:
                 metric = metric_cls(responses=as_responses, suggestions=as_suggestions)
                 result = metric.compute()
-                metrics[user_id].append(AnnotatorMetricResult(metric_name=metric_name, result=result))
+                metrics[user_id].append(
+                    AnnotatorMetricResult(metric_name=metric_name, result=result, count=len(responses))
+                )
 
         return dict(metrics)
 
@@ -394,10 +397,7 @@ class MultiLabelMetrics(AnnotatorMetricBase):
     def _pre_process(self, responses, suggestions) -> Any:
         from sklearn.preprocessing import MultiLabelBinarizer
 
-        classes = sorted(set(np.ravel(responses)).union(set(np.ravel(responses))))
-        # We have to take into account string labels with length > 1
-        if any([len(c) > 1 for c in classes]):
-            classes = [classes]
+        classes = sorted(set(np.ravel(responses)).union(set(np.ravel(suggestions))))
         # Keep the binarizer to access the classes later
         self._multilabel_binarizer = MultiLabelBinarizer(classes=classes)
         self._multilabel_binarizer.fit(classes)

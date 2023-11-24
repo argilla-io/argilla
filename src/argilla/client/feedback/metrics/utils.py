@@ -67,9 +67,17 @@ def get_responses_and_suggestions_per_user(
 
     hf_dataset = dataset.format_as("datasets")
     question_type = type(dataset.question_by_name(question_name))
-    responses_per_user = defaultdict(list)
 
-    for responses_ in hf_dataset[question_name]:
+    responses_and_suggestions_per_user = defaultdict(lambda: defaultdict(list))
+
+    for responses_, suggestion in zip(hf_dataset[question_name], hf_dataset[f"{question_name}-suggestion"]):
+        if question_type == RankingQuestion:
+            suggestion = suggestion["rank"]
+
+        if isinstance(suggestion, list):
+            # To make it hashable
+            suggestion = tuple(suggestion)
+
         for response in responses_:
             user_id = response["user_id"]
             if user_id is None:
@@ -77,17 +85,26 @@ def get_responses_and_suggestions_per_user(
                     "In order to use this functionality the records need to be assigned to a user."
                 )
             if question_type == RankingQuestion:
+                # value = response["value"]["rank"]
                 value = response["value"]["rank"]
             else:
                 value = response["value"]
 
-            responses_per_user[user_id].append(value)
+            if value is None:
+                continue
+            # To avoid errors with the MASI distance function
+            if isinstance(value, list):
+                if len(value) == 0:
+                    continue
 
-    suggestions = hf_dataset[f"{question_name}-suggestion"]
-    if question_type == RankingQuestion:
-        suggestions = [suggestion["rank"] for suggestion in suggestions]
+            if isinstance(value, list):
+                # To make it hashable
+                value = tuple(value)
 
-    return responses_per_user, suggestions
+            responses_and_suggestions_per_user[user_id]["responses"].append(value)
+            responses_and_suggestions_per_user[user_id]["suggestions"].append(suggestion)
+
+    return responses_and_suggestions_per_user
 
 
 def get_unified_responses_and_suggestions(

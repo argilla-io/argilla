@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     "feedback_dataset_questions",
     "feedback_dataset_records_with_paired_suggestions",
 )
-def test_responses_per_user(
+def test_responses_and_suggestions_per_user(
     feedback_dataset_guidelines: str,
     feedback_dataset_fields: List["AllowedFieldTypes"],
     feedback_dataset_questions: List["AllowedQuestionTypes"],
@@ -59,18 +59,23 @@ def test_responses_per_user(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    responses_per_user, suggestions = get_responses_and_suggestions_per_user(
+    responses_and_suggestions_per_user = get_responses_and_suggestions_per_user(
         dataset, question, filter_by={"response_status": status}
     )
     num_users = 3
     if status != "submitted":
-        assert len(responses_per_user) == num_users
+        assert len(responses_and_suggestions_per_user) == num_users
     else:
-        assert len(responses_per_user) == num_users
-        assert isinstance(responses_per_user, dict)
-        responses = responses_per_user[list(responses_per_user.keys())[0]]
-        assert len(suggestions) == len(responses)
-        assert len(responses) == num_responses
+        assert len(responses_and_suggestions_per_user) == num_users
+        assert isinstance(responses_and_suggestions_per_user, dict)
+        assert all(
+            [
+                set(user_data.keys()) == {"responses", "suggestions"}
+                for user_id, user_data in responses_and_suggestions_per_user.items()
+            ]
+        )
+        user_data = responses_and_suggestions_per_user[list(responses_and_suggestions_per_user.keys())[0]]
+        assert len(user_data["responses"]) == len(user_data["suggestions"]) == num_responses
 
 
 @pytest.mark.parametrize(
