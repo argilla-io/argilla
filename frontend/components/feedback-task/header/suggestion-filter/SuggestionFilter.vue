@@ -54,11 +54,15 @@
                 <svgicon name="chevron-left" width="12" height="12" />
               </div>
               <div class="suggestion-filter__content">
-                <div v-if="selectedConfiguration.name === 'values'">
-                  <LabelsSelector :filter="selectedConfiguration" />
-                </div>
                 <div v-if="selectedConfiguration.name === 'value'">
-                  <RangeSelector :filter="selectedConfiguration.rangeValue" />
+                  <LabelsSelector
+                    v-if="selectedConfiguration.isTerms"
+                    :filter="selectedConfiguration"
+                  />
+                  <RangeSelector
+                    v-else
+                    :filter="selectedConfiguration.rangeValue"
+                  />
                 </div>
                 <div v-if="selectedConfiguration.name === 'score'">
                   <RangeSelector :filter="selectedConfiguration" />
@@ -112,6 +116,7 @@ export default {
     },
     selectSuggestion(suggestion) {
       this.selectedSuggestion = suggestion;
+      this.selectedConfiguration = null;
     },
     selectConfiguration(configuration) {
       this.selectedConfiguration = configuration;

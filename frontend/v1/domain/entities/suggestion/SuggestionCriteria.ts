@@ -7,7 +7,7 @@ export type ValuesOption = {
 };
 
 export interface ConfigurationSearch {
-  name: "score" | "values" | "value" | "agent";
+  name: "score" | "value" | "agent";
   value: string[] | RangeValue | ValuesOption;
 }
 

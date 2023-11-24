@@ -55,8 +55,6 @@ class ConfigurationValues extends Filter {
   }
 
   get name() {
-    if (this.isTerms) return "values";
-
     return "value";
   }
 
@@ -151,7 +149,7 @@ class SuggestionFilter extends Filter {
       .filter((c) => c.isAnswered)
       .map((c) => {
         return {
-          name: c.name as "score" | "values" | "agent",
+          name: c.name as ConfigurationSearch["name"],
           value: c.value,
         };
       });

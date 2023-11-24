@@ -310,10 +310,10 @@ export class RecordRepository {
                 ge: value.ge,
                 le: value.le,
               });
-            }
-          }
 
-          if (suggestion.configuration.name === "values") {
+              return;
+            }
+
             const valuesOptions = suggestion.configuration
               .value as ValuesOption;
 
