@@ -21,18 +21,7 @@ export class SuggestionCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    try {
-      urlParams.split("+").forEach((m) => {
-        const [name, value] = m.split(/:(.*)/s);
-
-        this.value.push({
-          name,
-          value: JSON.parse(value),
-        });
-      });
-    } catch (error) {
-      // TODO: Manipulated
-    }
+    this.value = JSON.parse(urlParams) as SuggestionSearch[];
   }
 
   withValue(value: SuggestionSearch[]) {
@@ -55,7 +44,7 @@ export class SuggestionCriteria extends Criteria {
   get urlParams(): string {
     if (!this.isCompleted) return "";
 
-    return this.createParams().join("+");
+    return JSON.stringify(this.value);
   }
 
   get or() {
@@ -106,12 +95,6 @@ export class SuggestionCriteria extends Criteria {
           };
         });
       });
-    });
-  }
-
-  private createParams(): string[] {
-    return this.value.map((m) => {
-      return `${m.name}:${JSON.stringify(m.value)}`;
     });
   }
 }

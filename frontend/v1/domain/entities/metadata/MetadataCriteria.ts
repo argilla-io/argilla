@@ -6,22 +6,7 @@ export class MetadataCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams
-      .split("+")
-      .map((metadata) => {
-        const [name, value] = metadata.split(/:(.*)/s);
-        return { name, value };
-      })
-      .forEach(({ name, value }) => {
-        try {
-          this.value.push({
-            name,
-            value: JSON.parse(value),
-          });
-        } catch (e) {
-          // TODO: Manipulated
-        }
-      });
+    this.value = JSON.parse(urlParams) as MetadataSearch[];
   }
 
   withValue(value: MetadataSearch[]) {
@@ -44,18 +29,6 @@ export class MetadataCriteria extends Criteria {
   get urlParams(): string {
     if (!this.isCompleted) return "";
 
-    return this.createParams().join("+");
-  }
-
-  get backendParams(): string[] {
-    if (!this.isCompleted) return [];
-
-    return this.createParams();
-  }
-
-  private createParams(): string[] {
-    return this.value.map((m) => {
-      return `${m.name}:${JSON.stringify(m.value)}`;
-    });
+    return JSON.stringify(this.value);
   }
 }
