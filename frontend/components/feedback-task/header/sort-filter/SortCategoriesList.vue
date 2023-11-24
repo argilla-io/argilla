@@ -81,8 +81,8 @@ export default {
     display: inline-block;
     padding: $base-space * 2 $base-space 0 $base-space;
     color: $black-37;
-    @include font-size(10px);
-    text-transform: uppercase;
+    @include font-size(12px);
+    text-transform: capitalize;
     font-weight: 400;
     &:first-of-type {
       padding-top: 0;

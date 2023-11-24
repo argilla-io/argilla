@@ -34,6 +34,10 @@ class ResponseFilter extends Filter {
     }
   }
 
+  get tooltip() {
+    return this.question.title;
+  }
+
   get isTerms() {
     return !this.question.isRatingType;
   }
