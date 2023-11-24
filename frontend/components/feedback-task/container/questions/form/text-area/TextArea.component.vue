@@ -67,17 +67,21 @@ $suggestion-color-lighten: lighten($suggestion-color, 24%);
   flex-direction: column;
   gap: $base-space;
 }
-.--suggestion {
-  :deep(.card-with-tabs__content) {
-    border-color: $suggestion-color-darken;
-    background: $suggestion-color-lighten;
+.card-with-tabs {
+  &.--suggestion {
+    :deep(.card-with-tabs__content) {
+      border-color: $suggestion-color-darken;
+      background: $suggestion-color-lighten;
+    }
   }
-}
-:deep(.card-with-tabs__tab.--suggestion) {
-  border-top-color: $suggestion-color-darken;
-  border-left-color: $suggestion-color-darken;
-  border-right-color: $suggestion-color-darken;
-  border-bottom-color: $suggestion-color-lighten;
-  background: $suggestion-color-lighten;
+  :deep(.card-with-tabs__tab.--suggestion) {
+    border-top-color: $suggestion-color-darken;
+    border-left-color: $suggestion-color-darken;
+    border-right-color: $suggestion-color-darken;
+    border-bottom-color: $suggestion-color-lighten;
+    .button {
+      background: $suggestion-color-lighten;
+    }
+  }
 }
 </style>
