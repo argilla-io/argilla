@@ -24,12 +24,12 @@
             : null
         "
         v-for="(option, index) in labelsFilteredBySearchText"
-        :key="option.label"
+        :key="option.value"
         :value="option.selected"
         v-model="option.selected"
         @mouseover.native="preSelectionIndex = index"
       >
-        {{ option.label }}
+        {{ option.text ?? option.value }}
       </BaseCheckbox>
     </div>
   </div>

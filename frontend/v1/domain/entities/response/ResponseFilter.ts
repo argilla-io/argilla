@@ -2,6 +2,7 @@ import {
   Filter,
   FilterWithOption,
   FilterWithScore,
+  OptionForFilter,
   RangeValue,
 } from "../common/Filter";
 import { Question } from "../question/Question";
@@ -20,8 +21,12 @@ class ResponseFilter extends Filter {
     if (this.isTerms) {
       this.options = new FilterWithOption(
         question.name,
-        question.settings.options.map(({ value }) => {
-          return { selected: false, label: value.toString() };
+        question.settings.options.map(({ value, text }) => {
+          return {
+            selected: false,
+            value: value.toString(),
+            text,
+          } as OptionForFilter;
         })
       );
     } else {

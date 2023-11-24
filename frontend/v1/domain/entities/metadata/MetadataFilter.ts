@@ -14,7 +14,7 @@ class MetadataFilter {
     if (this.isTerms) {
       this.options =
         this.settings.values?.map((value: string) => {
-          return { selected: false, label: value };
+          return { selected: false, value };
         }) ?? [];
     } else {
       this.value = {
@@ -50,7 +50,7 @@ class MetadataFilter {
 
   filterByText(text: string) {
     return this.options.filter((option) =>
-      option.label.toLowerCase().includes(text.toLowerCase())
+      option.value.toLowerCase().includes(text.toLowerCase())
     );
   }
 
@@ -72,7 +72,7 @@ class MetadataFilter {
       // TODO: The base method resolve this
       const labels = value as string[];
       labels.forEach((label) => {
-        const option = this.options.find((option) => option.label === label);
+        const option = this.options.find((option) => option.value === label);
         if (option) option.selected = true;
       });
     } else {
@@ -164,7 +164,7 @@ export class MetadataFilterList {
       return {
         name: metadata.name,
         value: metadata.isTerms
-          ? metadata.selectedOptions.map((s) => s.label)
+          ? metadata.selectedOptions.map((s) => s.value)
           : {
               ge: metadata.value.ge,
               le: metadata.value.le,

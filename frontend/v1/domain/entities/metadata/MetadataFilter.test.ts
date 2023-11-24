@@ -134,7 +134,7 @@ describe("MetadataFilter ", () => {
 
       expect(
         find(metadataFilter, "split").selectedOptions.map(
-          (option) => option.label
+          (option) => option.value
         )
       ).toEqual(["test", "train"]);
 
@@ -180,7 +180,7 @@ describe("MetadataFilter ", () => {
 
       expect(
         find(metadataFilter, "split").selectedOptions.map(
-          (option) => option.label
+          (option) => option.value
         )
       ).toEqual([]);
     });
@@ -224,7 +224,7 @@ describe("MetadataFilter ", () => {
 
       metadata.completeMetadata(["test", "train"]);
 
-      expect(metadata.selectedOptions.map((option) => option.label)).toEqual([
+      expect(metadata.selectedOptions.map((option) => option.value)).toEqual([
         "test",
         "train",
       ]);
@@ -246,7 +246,7 @@ describe("MetadataFilter ", () => {
 
       metadata.clear();
 
-      expect(metadata.selectedOptions.map((option) => option.label)).toEqual(
+      expect(metadata.selectedOptions.map((option) => option.value)).toEqual(
         []
       );
     });

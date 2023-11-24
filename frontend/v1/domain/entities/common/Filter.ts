@@ -1,6 +1,7 @@
 export interface OptionForFilter {
   selected: boolean;
-  label: string;
+  value: string;
+  text?: string;
 }
 
 export interface RangeValue {
@@ -34,7 +35,7 @@ export class FilterWithOption extends Filter {
 
   filterByText(text: string) {
     return this.options.filter((option) =>
-      option.label.toLowerCase().includes(text.toLowerCase())
+      (option.text ?? option.value).toLowerCase().includes(text.toLowerCase())
     );
   }
 
@@ -47,12 +48,12 @@ export class FilterWithOption extends Filter {
   }
 
   get value(): string[] {
-    return this.selectedOptions.map((option) => option.label);
+    return this.selectedOptions.map((option) => option.value);
   }
 
   complete(value: string[]) {
     value.forEach((label) => {
-      const option = this.options.find((option) => option.label === label);
+      const option = this.options.find((option) => option.value === label);
       if (option) option.selected = true;
     });
   }

@@ -24,8 +24,12 @@ class ConfigurationValues extends Filter {
     if (this.isTerms) {
       this.options = new FilterWithOption(
         this.name,
-        question.settings.options.map(({ value }) => {
-          return { selected: false, label: value.toString() };
+        question.settings.options.map(({ value, text }) => {
+          return {
+            selected: false,
+            value: value.toString(),
+            text,
+          } as OptionForFilter;
         })
       );
     } else {
@@ -112,7 +116,7 @@ class ConfigurationAgent extends FilterWithOption {
     super(
       "agent",
       agents.map((value) => {
-        return { selected: false, label: value };
+        return { selected: false, value };
       })
     );
   }

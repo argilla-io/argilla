@@ -1,12 +1,35 @@
 import { Criteria } from "../common/Criteria";
+import { RangeValue } from "../common/Filter";
 import { ResponseSearch } from "./ResponseFilter";
 
 export class ResponseCriteria extends Criteria {
   public value: ResponseSearch[] = [];
+
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    this.value = JSON.parse(urlParams);
+    urlParams.split("+").forEach((metadata) => {
+      const [name, value] = metadata.split(".");
+
+      if (value.includes("~")) {
+        const values = value.split("~");
+
+        this.value.push({
+          name,
+          value: values,
+        });
+      } else {
+        const [ge, le] = value.split("le.");
+
+        this.value.push({
+          name,
+          value: {
+            ge: Number(ge),
+            le: Number(le),
+          },
+        });
+      }
+    });
   }
 
   withValue(value: ResponseSearch[]) {
@@ -29,6 +52,18 @@ export class ResponseCriteria extends Criteria {
   get urlParams(): string {
     if (!this.isCompleted) return "";
 
-    return JSON.stringify(this.value);
+    return this.value
+      .map((response) => {
+        const rangeValue = response.value as RangeValue;
+
+        if ("ge" in rangeValue && "le" in rangeValue) {
+          return `${response.name}.ge.${rangeValue.ge}le.${rangeValue.le}`;
+        }
+
+        const values = response.value as string[];
+
+        return `${response.name}.${values.map((v) => v).join("~")}`;
+      })
+      .join("+");
   }
 }

@@ -4,28 +4,23 @@ import { SortSearch } from "./SortList";
 export class SortCriteria extends Criteria {
   public value: SortSearch[] = [];
 
-  get isCompleted(): boolean {
-    return this.value.length > 0;
-  }
-
-  get urlParams(): string {
-    if (!this.isCompleted) return "";
-
-    return JSON.stringify(this.value);
-  }
-
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    try {
-      const sorts = JSON.parse(urlParams) as SortSearch[];
+    urlParams.split("+").forEach((sort) => {
+      const [entity, name, property, order] = sort.split(".");
+      const value = {
+        entity,
+        name,
+        order,
+      } as SortSearch;
 
-      sorts.forEach((sort) => {
-        if (sort.entity && sort.order) this.value.push(sort);
-      });
-    } catch {
-      // Manipulated
-    }
+      if (property && order) {
+        value.property = property;
+      }
+
+      this.value.push(value);
+    });
   }
 
   witValue(value: SortSearch[]) {
@@ -34,5 +29,23 @@ export class SortCriteria extends Criteria {
 
   reset() {
     this.value = [];
+  }
+
+  get isCompleted(): boolean {
+    return this.value.length > 0;
+  }
+
+  get urlParams(): string {
+    if (!this.isCompleted) return "";
+
+    return this.value
+      .map((sort) => {
+        if (sort.property) {
+          return `${sort.entity}.${sort.name}.${sort.property}.${sort.order}`;
+        }
+
+        return `${sort.entity}.${sort.name}.${sort.order}`;
+      })
+      .join("+");
   }
 }

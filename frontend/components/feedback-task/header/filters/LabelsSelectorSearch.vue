@@ -4,8 +4,8 @@
       <FilterBadge
         class="search-area__badge"
         v-for="option in selectedOptions"
-        :key="option.label"
-        :text="option.label"
+        :key="option.value"
+        :text="option.text ?? option.value"
         @on-clear="removeSelectedOption(option)"
       ></FilterBadge>
     </span>
