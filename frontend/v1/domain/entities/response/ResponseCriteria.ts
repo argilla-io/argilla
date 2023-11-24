@@ -6,14 +6,7 @@ export class ResponseCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    urlParams.split("+").forEach((m) => {
-      const [name, value] = m.split(/:(.*)/s);
-
-      this.value.push({
-        name,
-        value: value.split(","),
-      });
-    });
+    this.value = JSON.parse(urlParams);
   }
 
   withValue(value: ResponseSearch[]) {
@@ -36,12 +29,6 @@ export class ResponseCriteria extends Criteria {
   get urlParams(): string {
     if (!this.isCompleted) return "";
 
-    return this.createParams().join("+");
-  }
-
-  private createParams(): string[] {
-    return this.value.map((m) => {
-      return `${m.name}:${m.value.join(",")}`;
-    });
+    return JSON.stringify(this.value);
   }
 }

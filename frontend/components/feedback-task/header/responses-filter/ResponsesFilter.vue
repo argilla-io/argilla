@@ -30,7 +30,11 @@
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="responses-filter__content">
-            <LabelsSelector :filter="selectedResponse" />
+            <LabelsSelector
+              v-if="selectedResponse.isTerms"
+              :filter="selectedResponse.options"
+            />
+            <RangeSelector v-else :filter="selectedResponse.rangeValue" />
           </div>
         </template>
       </span>

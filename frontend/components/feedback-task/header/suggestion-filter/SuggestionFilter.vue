@@ -57,6 +57,9 @@
                 <div v-if="selectedConfiguration.name === 'values'">
                   <LabelsSelector :filter="selectedConfiguration" />
                 </div>
+                <div v-if="selectedConfiguration.name === 'value'">
+                  <RangeSelector :filter="selectedConfiguration.rangeValue" />
+                </div>
                 <div v-if="selectedConfiguration.name === 'score'">
                   <RangeSelector :filter="selectedConfiguration" />
                 </div>

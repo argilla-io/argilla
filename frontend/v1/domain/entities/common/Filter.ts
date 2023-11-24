@@ -62,12 +62,13 @@ export class FilterWithOption extends Filter {
   }
 }
 
-export abstract class FilterWithScore extends Filter {
+export class FilterWithScore extends Filter {
   public value: RangeValue;
   constructor(
     public readonly name: string,
     public readonly min: number,
-    public readonly max: number
+    public readonly max: number,
+    public readonly isInteger = false
   ) {
     super();
 

@@ -1,19 +1,75 @@
-import { FilterWithOption } from "../common/Filter";
+import {
+  Filter,
+  FilterWithOption,
+  FilterWithScore,
+  RangeValue,
+} from "../common/Filter";
 import { Question } from "../question/Question";
 
 export interface ResponseSearch {
   name: string;
-  value: string[];
+  value: string[] | RangeValue;
 }
 
-class ResponseFilter extends FilterWithOption {
-  constructor(question: Question) {
-    super(
-      question.name,
-      question.settings.options.map(({ value }) => {
-        return { selected: false, label: value.toString() };
-      })
-    );
+class ResponseFilter extends Filter {
+  public readonly rangeValue: FilterWithScore;
+  public readonly options: FilterWithOption;
+  constructor(private readonly question: Question) {
+    super();
+
+    if (this.isTerms) {
+      this.options = new FilterWithOption(
+        question.name,
+        question.settings.options.map(({ value }) => {
+          return { selected: false, label: value.toString() };
+        })
+      );
+    } else {
+      this.rangeValue = new FilterWithScore(
+        question.name,
+        question.settings.options[0].value,
+        question.settings.options[question.settings.options.length - 1].value,
+        true
+      );
+    }
+  }
+
+  get isTerms() {
+    return !this.question.isRatingType;
+  }
+
+  get name(): string {
+    return this.question.name;
+  }
+
+  get value(): unknown {
+    if (this.isTerms) {
+      return this.options.value;
+    }
+
+    return this.rangeValue.value;
+  }
+
+  complete(value: unknown): void {
+    if (this.isTerms) {
+      this.options.complete(value as string[]);
+    } else {
+      this.rangeValue.complete(value as RangeValue);
+    }
+  }
+
+  clear(): void {
+    if (this.isTerms) {
+      this.options.clear();
+    } else {
+      this.rangeValue.clear();
+    }
+  }
+
+  get isAnswered(): boolean {
+    if (this.isTerms) return this.options.isAnswered;
+
+    return this.rangeValue.isAnswered;
   }
 }
 

@@ -94,7 +94,12 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        "response1:value1",
+        JSON.stringify([
+          {
+            name: "response1",
+            value: ["value1"],
+          },
+        ]),
         "",
         null
       );
@@ -304,7 +309,12 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        "response1:value1",
+        JSON.stringify([
+          {
+            name: "response1",
+            value: ["value1"],
+          },
+        ]),
         "",
         null
       );

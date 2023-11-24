@@ -252,13 +252,29 @@ export class RecordRepository {
 
       if (isFilteringByResponse) {
         response.value.forEach((r) => {
+          const value = r.value as RangeValue;
+
+          if ("ge" in value && "le" in value) {
+            body.filters.and.push({
+              type: "range",
+              scope: {
+                entity: "response",
+                question: r.name,
+              },
+              ge: value.ge,
+              le: value.le,
+            });
+
+            return;
+          }
+
           body.filters.and.push({
             type: "terms",
             scope: {
               entity: "response",
               question: r.name,
             },
-            values: r.value,
+            values: r.value as string[],
           });
         });
       }
@@ -278,6 +294,23 @@ export class RecordRepository {
               ge: value.ge,
               le: value.le,
             });
+          }
+
+          if (suggestion.configuration.name === "value") {
+            const value = suggestion.configuration.value as RangeValue;
+
+            if ("ge" in value && "le" in value) {
+              body.filters.and.push({
+                type: "range",
+                scope: {
+                  entity: "suggestion",
+                  question: suggestion.question.name,
+                  property: suggestion.configuration.name,
+                },
+                ge: value.ge,
+                le: value.le,
+              });
+            }
           }
 
           if (suggestion.configuration.name === "values") {

@@ -3,26 +3,41 @@ import {
   FilterWithOption,
   FilterWithScore,
   OptionForFilter,
+  RangeValue,
 } from "../common/Filter";
 import { Question } from "../question/Question";
 import { Agent } from "./Agent";
-import { ConfigurationSearch, SuggestionSearch } from "./SuggestionCriteria";
+import {
+  ConfigurationSearch,
+  SuggestionSearch,
+  ValuesOption,
+} from "./SuggestionCriteria";
 
 class ConfigurationValues extends Filter {
+  public readonly rangeValue: FilterWithScore;
   private readonly options: FilterWithOption;
+  public operator: "and" | "or" = "and";
 
-  constructor(
-    public readonly question: Question,
-    public operator: "and" | "or" = "and"
-  ) {
+  constructor(public readonly question: Question) {
     super();
 
-    this.options = new FilterWithOption(
-      "values",
-      question.settings.options.map(({ value }) => {
-        return { selected: false, label: value.toString() };
-      })
-    );
+    if (this.isTerms) {
+      this.options = new FilterWithOption(
+        this.name,
+        question.settings.options.map(({ value }) => {
+          return { selected: false, label: value.toString() };
+        })
+      );
+    } else {
+      this.rangeValue = new FilterWithScore(
+        this.name,
+        this.question.settings.options[0].value,
+        this.question.settings.options[
+          this.question.settings.options.length - 1
+        ].value,
+        true
+      );
+    }
   }
 
   filterByText(text: string) {
@@ -33,43 +48,58 @@ class ConfigurationValues extends Filter {
     return this.options.selectedOptions;
   }
 
-  get name(): string {
-    return this.options.name;
-  }
-
   get isAnswered(): boolean {
-    return this.options.isAnswered;
+    if (this.isTerms) return this.options.isAnswered;
+
+    return this.rangeValue.isAnswered;
   }
 
-  complete(value: { values: string[]; operator?: "and" | "or" }) {
-    const { values, operator } = value;
+  get name() {
+    if (this.isTerms) return "values";
 
-    this.options.complete(values);
+    return "value";
+  }
 
-    this.operator = operator;
+  get isTerms() {
+    return !this.question.isRatingType;
+  }
+
+  complete(value: { values: string[] | RangeValue; operator?: "and" | "or" }) {
+    if (this.isTerms) {
+      const { values, operator } = value;
+
+      this.options.complete(values as string[]);
+
+      this.operator = operator;
+    } else {
+      this.rangeValue.complete(value as RangeValue);
+    }
   }
 
   get hasOperator() {
     return this.question.isMultiLabelType;
   }
 
-  get value(): {
-    values: string[];
-    operator?: "and" | "or";
-  } {
-    if (this.hasOperator)
+  get value(): ValuesOption | RangeValue {
+    if (this.isTerms) {
+      if (this.hasOperator)
+        return {
+          values: this.options.value,
+          operator: this.operator,
+        };
+
       return {
         values: this.options.value,
-        operator: this.operator,
       };
+    }
 
-    return {
-      values: this.options.value,
-    };
+    return this.rangeValue.values;
   }
 
   clear(): void {
-    this.options.clear();
+    if (this.isTerms) return this.options.clear();
+
+    this.rangeValue.clear();
   }
 }
 
