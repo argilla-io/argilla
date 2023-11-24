@@ -79,7 +79,9 @@ $suggestion-color-lighten: lighten($suggestion-color, 24%);
     border-left-color: $suggestion-color-darken;
     border-right-color: $suggestion-color-darken;
     border-bottom-color: $suggestion-color-lighten;
-    background: $suggestion-color-lighten;
+    .button {
+      background: $suggestion-color-lighten;
+    }
   }
 }
 </style>
