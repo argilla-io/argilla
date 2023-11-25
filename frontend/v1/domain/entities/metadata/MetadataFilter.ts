@@ -8,7 +8,7 @@ export interface MetadataSearch {
 
 // TODO: Add base class to support two types of filter, like a SuggestionFilter.ts
 class MetadataFilter {
-  public value: RangeValue;
+  public rangeValue: RangeValue;
   public options: OptionForFilter[] = [];
   constructor(private metadata: Metadata) {
     if (this.isTerms) {
@@ -17,7 +17,7 @@ class MetadataFilter {
           return { selected: false, value };
         }) ?? [];
     } else {
-      this.value = {
+      this.rangeValue = {
         ge: this.settings.min,
         le: this.settings.max,
       };
@@ -57,8 +57,8 @@ class MetadataFilter {
   get isAnswered(): boolean {
     return this.isTerms
       ? this.selectedOptions.length > 0
-      : this.value.ge !== this.settings.min ||
-          this.value.le !== this.settings.max;
+      : this.rangeValue.ge !== this.settings.min ||
+          this.rangeValue.le !== this.settings.max;
   }
 
   get selectedOptions(): OptionForFilter[] {
@@ -78,16 +78,16 @@ class MetadataFilter {
     } else {
       const { ge, le } = value as RangeValue;
 
-      this.value.ge = ge;
-      this.value.le = le;
+      this.rangeValue.ge = ge;
+      this.rangeValue.le = le;
     }
   }
 
   clear(): void {
     if (this.isTerms) return this.options.forEach((o) => (o.selected = false));
 
-    this.value.ge = this.settings.min;
-    this.value.le = this.settings.max;
+    this.rangeValue.ge = this.settings.min;
+    this.rangeValue.le = this.settings.max;
   }
 }
 
@@ -166,8 +166,8 @@ export class MetadataFilterList {
         value: metadata.isTerms
           ? metadata.selectedOptions.map((s) => s.value)
           : {
-              ge: metadata.value.ge,
-              le: metadata.value.le,
+              ge: metadata.rangeValue.ge,
+              le: metadata.rangeValue.le,
             },
       };
     });

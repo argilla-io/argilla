@@ -95,7 +95,7 @@ class ConfigurationValues extends Filter {
       };
     }
 
-    return this.rangeValue.values;
+    return this.rangeValue.value;
   }
 
   clear(): void {
@@ -170,6 +170,7 @@ class SuggestionFilter extends Filter {
   complete(value: ConfigurationSearch[]) {
     value.forEach(({ name, value }) => {
       const configuration = this.configurations.find((c) => c.name === name);
+
       if (configuration) {
         configuration.complete(value);
       }

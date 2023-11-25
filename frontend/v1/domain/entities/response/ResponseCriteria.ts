@@ -10,19 +10,20 @@ export class ResponseCriteria extends Criteria {
 
     urlParams.split("~").forEach((response) => {
       const [name] = response.split(".");
-      const values = response.split(".").slice(1);
 
-      if (values.some((v) => v.includes("ge") || v.includes("le"))) {
-        const [ge, le] = values.map((v) => v.replace(/ge|le/, ""));
+      const score = this.getRangeValue(response);
 
+      if (score) {
         this.value.push({
           name,
           value: {
-            ge: Number(ge),
-            le: Number(le),
+            ge: score.ge,
+            le: score.le,
           },
         });
       } else {
+        const values = response.split(".").slice(1);
+
         this.value.push({
           name,
           value: values,

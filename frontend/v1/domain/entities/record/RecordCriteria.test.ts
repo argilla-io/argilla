@@ -145,12 +145,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        JSON.stringify([
-          {
-            name: "suggestion1",
-            value: ["value1"],
-          },
-        ]),
+        "content_class.value.operator.and.values.hate.pii",
         null
       );
 
@@ -374,12 +369,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        JSON.stringify([
-          {
-            name: "suggestion1",
-            value: ["value1"],
-          },
-        ]),
+        "content_class.score.ge0.le0.24",
         null
       );
 

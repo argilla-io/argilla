@@ -16,14 +16,14 @@ export default {
   },
   data() {
     return {
-      sliderValues: [this.filter.value.ge, this.filter.value.le],
+      sliderValues: [this.filter.rangeValue.ge, this.filter.rangeValue.le],
       step: this.filter.isInteger ? 1 : 0.01,
     };
   },
   watch: {
     sliderValues() {
-      this.filter.value.ge = this.parse(this.sliderValues[0]);
-      this.filter.value.le = this.parse(this.sliderValues[1]);
+      this.filter.rangeValue.ge = this.parse(this.sliderValues[0]);
+      this.filter.rangeValue.le = this.parse(this.sliderValues[1]);
     },
   },
   methods: {

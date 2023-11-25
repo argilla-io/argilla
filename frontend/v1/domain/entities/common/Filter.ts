@@ -64,7 +64,7 @@ export class FilterWithOption extends Filter {
 }
 
 export class FilterWithScore extends Filter {
-  public value: RangeValue;
+  public rangeValue: RangeValue;
   constructor(
     public readonly name: string,
     public readonly min: number,
@@ -73,7 +73,7 @@ export class FilterWithScore extends Filter {
   ) {
     super();
 
-    this.value = {
+    this.rangeValue = {
       ge: min,
       le: max,
     };
@@ -87,20 +87,23 @@ export class FilterWithScore extends Filter {
   }
 
   get isAnswered(): boolean {
-    return this.value.ge !== this.min || this.value.le !== this.max;
+    return this.rangeValue.ge !== this.min || this.rangeValue.le !== this.max;
   }
 
-  get values() {
-    return this.value;
+  get value() {
+    return {
+      ge: this.rangeValue.ge,
+      le: this.rangeValue.le,
+    };
   }
 
   complete({ ge, le }: RangeValue) {
-    this.value.ge = ge;
-    this.value.le = le;
+    this.rangeValue.ge = ge;
+    this.rangeValue.le = le;
   }
 
   clear(): void {
-    this.value.ge = this.min;
-    this.value.le = this.max;
+    this.rangeValue.ge = this.min;
+    this.rangeValue.le = this.max;
   }
 }

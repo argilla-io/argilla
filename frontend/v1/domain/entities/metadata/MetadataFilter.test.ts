@@ -138,11 +138,11 @@ describe("MetadataFilter ", () => {
         )
       ).toEqual(["test", "train"]);
 
-      expect(find(metadataFilter, "loss").value).toEqual({
+      expect(find(metadataFilter, "loss").rangeValue).toEqual({
         ge: 10,
         le: 20,
       });
-      expect(find(metadataFilter, "float").value).toEqual({
+      expect(find(metadataFilter, "float").rangeValue).toEqual({
         ge: 0.5,
         le: 0.6,
       });
@@ -235,7 +235,7 @@ describe("MetadataFilter ", () => {
 
       metadata.completeMetadata({ ge: 10, le: 20 });
 
-      expect(metadata.value).toEqual({ ge: 10, le: 20 });
+      expect(metadata.rangeValue).toEqual({ ge: 10, le: 20 });
     });
   });
 
@@ -257,7 +257,7 @@ describe("MetadataFilter ", () => {
       metadata.completeMetadata({ ge: 10, le: 20 });
       metadata.clear();
 
-      expect(metadata.value).toEqual({ ge: 0, le: 2 });
+      expect(metadata.rangeValue).toEqual({ ge: 0, le: 2 });
     });
   });
 
