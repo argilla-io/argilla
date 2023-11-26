@@ -35,7 +35,7 @@ An admin user can only access the workspaces it has been assigned to and cannot 
 - **Annotation**: It can annotate datasets in the assigned workspaces via the Argilla UI.
 - **Feedback**: It can provide feedback with the Argilla UI.
 
-## Annotator
+### Annotator
 
 An annotator user is limited to accessing only the datasets assigned to it within the workspace. It has two specific permissions:
 
@@ -113,7 +113,7 @@ argilla users create
 So for example, to create a new user with `admin` role and member of `ws1` and `ws2` workspaces, you can run the following command:
 
 ```bash
-argilla users create --username new-user --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
+argilla users create --username new-user --password new-password --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
 ```
 
 :::
