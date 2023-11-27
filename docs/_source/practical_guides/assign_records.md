@@ -31,7 +31,7 @@ records = [...]
 
  - `users`: The list of users or the dictionary with groups and the corresponding users. This will allow you to make the assignments among users or groups of users.
  - `records`: The list of records.
- - `overlap`: The number of annotations per record. Take in mind that a groups will be treated as a unique annotator and all the members of the same group will annotate the same records.
+ - `overlap`: The number of annotations per record. Take in mind that a group will be treated as a unique annotator and all the members of the same group will annotate the same records.
  - `shuffle`: Whether to shuffle the records before assigning them. Defaults to `True`.
 
 ```python
@@ -41,26 +41,27 @@ assignments = assign_records(
     records=records,
     overlap=1,
     shuffle=True
-    )
+)
 ```
 
 3. Assign the records by pushing a dataset to their corresponding workspaces. For this, you can use `assign_workspaces` that will check if there exists the workspace or create it if needed. You can specify the parameters by providing the following arguments:
 
-- `assignments`: The dictionary with the assignments got from the previous step.
+- `assignments`: The dictionary with the assignments from the previous step.
 - `workspace_type`: Either `group`, `group_personal` or `individual`. Selecting `group` means each group shares a workspace and annotates the same dataset. If you choose `group_personal`, every group member gets a personal workspace. Use `individual` when you are not working with groups (i.e., a list of individual users), where each user will have a separate workspace.
 
 ```python
 from argilla.client.feedback.utils import assign_workspaces
-wk_assignments = assign_workspaces(
+
+assignments = assign_workspaces(
     assignments=assignments,
     workspace_type="individual"
-    )
+)
 
 for username, records in assignments.items():
     dataset = rg.FeedbackDataset(
         fields=fields, questions=questions, metadata=metadata,
         vector_settings=vector_settings, guidelines=guidelines
-        )
+    )
     dataset.add_records(records)
     remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=username)
 ```
