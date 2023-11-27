@@ -34,6 +34,7 @@ jobs:
     name: Argilla python tests
     runs-on: ${{ inputs.runsOn }}
     continue-on-error: true
+    timeout-minutes: 30
     services:
       search_engine:
         image: ${{ inputs.searchEngineDockerImage }}
@@ -94,7 +95,6 @@ jobs:
         run: |
           pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
-        timeout-minutes: 30
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:
