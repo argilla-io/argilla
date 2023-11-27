@@ -132,8 +132,8 @@ class SuggestionFilter extends Filter {
   constructor(private readonly question: Question) {
     super();
 
-    this.configurations.push(new ConfigurationScore(0, 1));
     this.configurations.push(new ConfigurationValues(question));
+    this.configurations.push(new ConfigurationScore(0, 1));
   }
 
   get tooltip(): string {

@@ -27,6 +27,8 @@ from argilla.utils.telemetry import get_telemetry_client
 if TYPE_CHECKING:
     import spacy
 
+    from argilla.client.feedback.integrations.huggingface import FrameworkCardData
+
 
 class ArgillaTrainer(object):
     _logger = logging.getLogger("ArgillaTrainer")
@@ -407,13 +409,11 @@ class ArgillaTrainerSkeleton(ABC):
         Saves the model to the specified path.
         """
 
-    @abstractmethod
     def get_model_card_data(self, card_data_kwargs: Dict[str, Any]) -> "FrameworkCardData":
         """
         Generates a `FrameworkCardData` instance to generate a model card from.
         """
 
-    @abstractmethod
     def push_to_huggingface(self, repo_id: str, **kwargs) -> Optional[str]:
         """
         Uploads the model to [Huggingface Hub](https://huggingface.co/docs/hub/models-the-hub).
