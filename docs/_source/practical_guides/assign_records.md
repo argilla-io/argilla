@@ -16,7 +16,7 @@ The Feedback Task supports having multiple annotations for your records by defau
 
 We provide easy-to-use utility functions for distributing records among your team. Below, we outline a general approach for this task. For a more comprehensive example, please refer to our end-to-end tutorials.
 
-1. Get the list of users who will be annotating and the records:
+1. Get the list of users who will be annotating and the records.
 
 ```python
 import argilla as rg
@@ -27,34 +27,40 @@ users = [u for u in rg.User.list() if u.role == "annotator"]
 records = [...]
 ```
 
-2. Assign the annotations using the `assign_records` function:
+2. Use the `assign_records` function to assign the annotations. You can specify the assignment parameters by providing the following arguments:
+
+ - `users`: The list of users or the dictionary with groups and the corresponding users. This will allow you to make the assignments among users or groups of users.
+ - `records`: The list of records.
+ - `overlap`: The number of annotations per record. Take in mind that a groups will be treated as a unique annotator and all the members of the same group will annotate the same records.
+ - `shuffle`: Whether to shuffle the records before assigning them. Defaults to `True`.
 
 ```python
 from argilla.client.feedback.utils import assign_records
-assignments = assign_records(users, records, 1, True)
-
-# assign_records(users, records, overlap, shuffle): a dictionary with the assignments
-    # users: a list of users or a dictionary with groups of users
-    # records: a list of records
-    # overlap: the number of annotations per record
-    # shuffle: whether to shuffle the records before assigning them
+assignments = assign_records(
+    users=users,
+    records=records,
+    overlap=1,
+    shuffle=True
+    )
 ```
 
-3. Assign the records by pushing a dataset to their personal workspace using `assign_workspaces`:
+3. Assign the records by pushing a dataset to their corresponding workspaces. For this, you can use `assign_workspaces` that will check if there exists the workspace or create it if needed. You can specify the parameters by providing the following arguments:
+
+- `assignments`: The dictionary with the assignments got from the previous step.
+- `workspace_type`: Either `group`, `group_personal` or `individual`. Selecting `group` means each group shares a workspace and annotates the same dataset. If you choose `group_personal`, every group member gets a personal workspace. Use `individual` when you are not working with groups (i.e., a list of individual users), where each user will have a separate workspace.
 
 ```python
 from argilla.client.feedback.utils import assign_workspaces
-wk_assignments = assign_workspaces(assignments, "individual")
-
-# assign_workspace(assignments, workspace_type): to check the workspaces
-    # assignments: a dictionary with the assignments got from the previous step
-    # workspace_type: either 'group' (each group in a workspace),
-    #                        'group_personal' (each member in a workspace) or
-    #                        'individual' (each person in a workspace).
+wk_assignments = assign_workspaces(
+    assignments=assignments,
+    workspace_type="individual"
+    )
 
 for username, records in assignments.items():
-    dataset = rg.FeedbackDataset(fields=fields, questions=questions,
-                metadata=metadata, vector_settings=vector_settings, guidelines=guidelines)
+    dataset = rg.FeedbackDataset(
+        fields=fields, questions=questions, metadata=metadata,
+        vector_settings=vector_settings, guidelines=guidelines
+        )
     dataset.add_records(records)
     remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=username)
 ```
