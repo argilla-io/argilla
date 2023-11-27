@@ -156,7 +156,7 @@ def create_token_highlights(
         tokens: List of tokens to highlight.
         weights: List of weights corresponding to each token.
         c_map: Optional color map to use for highlighting. Can be a string (name of a matplotlib colormap)
-                    or a callable that returns an RGBA tuple
+                    or a callable that returns an RGB tuple
 
     Returns:
         An HTML string with the tokens highlighted.
@@ -170,7 +170,7 @@ def create_token_highlights(
         >>> from argilla.client.feedback.utils import create_token_highlights
         >>> tokens = ["This", "is", "a", "test"]
         >>> weights = [0.1, 0.2, 0.3, 0.4]
-        >>> html = create_token_highlights(tokens, weights, c_map=None)
+        >>> html = create_token_highlights(tokens, weights)
         >>> html = create_token_highlights(tokens, weights, c_map='viridis')
         >>> html = create_token_highlights(tokens, weights, c_map=custom_RGB)
     """
