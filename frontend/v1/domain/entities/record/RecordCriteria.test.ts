@@ -62,7 +62,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        "record:1,vector:2,limit:50,order:most"
+        "record.1.vector.2.limit.50.order.most"
       );
 
       expect(criteria.isFilteringBySimilarity).toBe(true);
@@ -177,13 +177,7 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         "",
-        JSON.stringify([
-          {
-            entity: "record",
-            name: "inserted_at",
-            order: "asc",
-          },
-        ]),
+        "suggestion.relevant.score.asc",
         "",
         "",
         null
@@ -486,7 +480,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        "record:1,vector:2,limit:50,order:most"
+        "record.1.vector.2.limit.50.order.most"
       );
 
       criteria.similaritySearch.order = "least";

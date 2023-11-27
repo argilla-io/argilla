@@ -18,13 +18,13 @@ export class SimilarityCriteria extends Criteria {
   complete(urlParams: string) {
     if (!urlParams) return;
 
-    const params = urlParams.split(",");
-    const [recordId, vectorName, limit, order] = params;
+    const params = urlParams.split(".");
+    if (params.length !== 8) return;
 
-    this.recordId = recordId.split(":")[1];
-    this.vectorName = vectorName.split(":")[1];
-    this.limit = parseInt(limit.split(":")[1]);
-    this.order = order.split(":")[1] as SimilarityOrder;
+    this.recordId = params[1];
+    this.vectorName = params[3];
+    this.limit = parseInt(params[5]);
+    this.order = params[7] as SimilarityOrder;
   }
 
   withValue(
@@ -53,7 +53,7 @@ export class SimilarityCriteria extends Criteria {
   get urlParams(): string {
     if (!this.isCompleted) return "";
 
-    return `record:${this.recordId},vector:${this.vectorName},limit:${this.limit},order:${this.order}`;
+    return `record.${this.recordId}.vector.${this.vectorName}.limit.${this.limit}.order.${this.order}`;
   }
 
   reset() {

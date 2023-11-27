@@ -233,7 +233,7 @@ describe("Records", () => {
         "",
         "",
         "",
-        "record:1,vector:2,limit:50,order:most"
+        "record.1.vector.2.limit.50.order.most"
       );
       const records = new Records([]);
 
@@ -252,7 +252,7 @@ describe("Records", () => {
         "",
         "",
         "",
-        "record:1,vector:2,limit:50,order:most"
+        "record.1.vector.2.limit.50.order.most"
       );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 3),

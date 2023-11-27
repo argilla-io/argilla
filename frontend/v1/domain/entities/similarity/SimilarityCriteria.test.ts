@@ -84,4 +84,18 @@ describe("SimilarityCriteria ", () => {
       expect(criteria.isEqual(other)).toBe(false);
     });
   });
+
+  describe("complete", () => {
+    test("should set criteria values from urlParams", () => {
+      const criteria = new SimilarityCriteria();
+      criteria.complete(
+        "record.cc74af18-8b40-4278-a527-83c38868e8f1.vector.mini-lm-sentence-transformers.limit.50.order.most"
+      );
+
+      expect(criteria.recordId).toBe("cc74af18-8b40-4278-a527-83c38868e8f1");
+      expect(criteria.vectorName).toBe("mini-lm-sentence-transformers");
+      expect(criteria.limit).toBe(50);
+      expect(criteria.order).toBe("most");
+    });
+  });
 });
