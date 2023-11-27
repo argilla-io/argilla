@@ -619,7 +619,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await _preload_records_associations(records)
+        await _preload_records_relationships_before_index(db, records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -788,22 +788,21 @@ async def _update_record(
     return params, suggestions, vectors, needs_search_engine_update, caches
 
 
-async def _preload_records_associations(records: List[Record]) -> None:
+async def _preload_records_relationships_before_index(db: "AsyncSession", records: List[Record]) -> None:
     for record in records:
-        await _preload_record_associations(record)
+        await _preload_record_relationships_before_index(db, record)
 
 
-async def _preload_record_associations(record: Record) -> None:
-    # TODO: This behavior must be reviewed !!!
-    await record.awaitable_attrs.suggestions
-    await record.awaitable_attrs.responses
-    await record.awaitable_attrs.vectors
-
-    for response in record.responses:
-        await response.awiatable_attrs.user
-
-    for suggestion in record.suggestions:
-        await suggestion.awaitable_attrs.question
+async def _preload_record_relationships_before_index(db: "AsyncSession", record: Record) -> None:
+    await db.execute(
+        select(Record)
+        .filter_by(id=record.id)
+        .options(
+            selectinload(Record.responses).selectinload(Response.user),
+            selectinload(Record.suggestions).selectinload(Suggestion.question),
+            selectinload(Record.vectors),
+        )
+    )
 
 
 async def update_records(
@@ -884,8 +883,7 @@ async def update_records(
                 include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
             )
             await dataset.awaitable_attrs.vectors_settings
-            # This must be done to be sure that the engine index the updated vectors property
-            await _preload_records_associations(records)
+            await _preload_records_relationships_before_index(db, records)
             await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -925,7 +923,7 @@ async def update_record(
 
         if needs_search_engine_update:
             await record.dataset.awaitable_attrs.vectors_settings
-            await _preload_records_associations([record])
+            await _preload_record_relationships_before_index(db, record)
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
