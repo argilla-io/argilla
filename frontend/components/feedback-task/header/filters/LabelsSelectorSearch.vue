@@ -83,7 +83,7 @@ export default {
   flex-direction: column;
   padding: 0 $base-space;
   border: 1px solid $black-10;
-  border-radius: $border-radius-m;
+  border-radius: $border-radius;
   background: palette(white);
   overflow: hidden;
   transition: all 0.2s ease-out;
