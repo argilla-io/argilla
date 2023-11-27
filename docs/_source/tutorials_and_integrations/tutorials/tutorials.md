@@ -30,7 +30,13 @@ Learn how to configure a `FeedbackDataset` and add `FeedbackRecords` to it.
 
 Learn how to add metadata properties to a `FeedbackDataset`.
 ```
+```{grid-item-card} Adding Responses and Suggestions to a FeedbackDataset
+:link: feedback/end2end_examples/add-suggestions-and-responses-005.html
+
+Learn how to add metadata properties to a `FeedbackDataset`.
+```
 ````
+
 
 *Advanced*
 
