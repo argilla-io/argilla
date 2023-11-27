@@ -24,7 +24,7 @@ from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.search_engine import OpenSearchEngine, SearchEngine, get_search_engine
-from argilla.server.server import argilla_app
+from argilla.server.server import app
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.settings import settings
 from argilla.utils import telemetry
@@ -88,13 +88,13 @@ async def async_client(
 
     mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
-    argilla_app.dependency_overrides[get_async_db] = override_get_async_db
-    argilla_app.dependency_overrides[get_search_engine] = override_get_search_engine
+    app.dependency_overrides[get_async_db] = override_get_async_db
+    app.dependency_overrides[get_search_engine] = override_get_search_engine
 
-    async with AsyncClient(app=argilla_app, base_url="http://testserver") as async_client:
+    async with AsyncClient(app=app, base_url="http://testserver") as async_client:
         yield async_client
 
-    argilla_app.dependency_overrides.clear()
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(autouse=True)
