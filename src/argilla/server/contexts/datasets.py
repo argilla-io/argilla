@@ -619,7 +619,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await refresh_records(records)
+        await _preload_records_associations(records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -806,8 +806,6 @@ async def _preload_record_associations(record: Record) -> None:
         await suggestion.awaitable_attrs.question
 
 
-
-
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
@@ -887,7 +885,7 @@ async def update_records(
             )
             await dataset.awaitable_attrs.vectors_settings
             # This must be done to be sure that the engine index the updated vectors property
-            await refresh_records(records)
+            await _preload_records_associations(records)
             await search_engine.index_records(dataset, records)
 
     await db.commit()
