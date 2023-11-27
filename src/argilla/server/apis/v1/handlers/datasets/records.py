@@ -653,6 +653,8 @@ async def search_dataset_records(
         dataset=dataset,
         text_query=body.query.text,
         vector_query=body.query.vector,
+        filters=body.filters,
+        sort=body.sort,
         parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,
