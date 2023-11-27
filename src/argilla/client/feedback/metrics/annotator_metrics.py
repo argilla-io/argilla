@@ -256,6 +256,8 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
             sort_by=self._sort_by,
             max_records=self._max_records,
         )
+        print("UNIFIED", unified_responses)
+        print("UNIFIED", suggestions)
         self._check_responses_and_suggestions(unified_responses, suggestions)
 
         as_unified_responses, as_suggestions = self._prepare_responses_and_suggestions(unified_responses, suggestions)
@@ -263,7 +265,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(responses=as_unified_responses, suggestions=as_suggestions)
             result = metric.compute()
-            metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result))
+            metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result, count=len(unified_responses)))
 
         if len(metric_names) == 1:
             return metrics[0]
@@ -599,8 +601,8 @@ class NDCGMetric(AnnotatorMetricBase):
     def _compute(self, responses: List[str], suggestions: List[str]):
         from sklearn.metrics import ndcg_score
 
-        print("HEY", responses)
-        print("HEY", suggestions)
+        print("RESPONSES**", responses)
+        print("SUGGESTIONS**", suggestions)
         return ndcg_score(responses, suggestions)
 
 

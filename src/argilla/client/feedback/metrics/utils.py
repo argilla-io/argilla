@@ -171,16 +171,20 @@ def get_unified_responses_and_suggestions(
             value_type = type(suggestion.value)
             break
 
+    if value_type == list:
+        # To make MultiLabelQuestion hashable
+        value_type = tuple
+
     for record in dataset.records:
         unified_response = value_type(record.unified_responses[question_name][0].value)
         unified_responses.append(unified_response)
-        suggestions.append(record.suggestions[idx_suggestion].value)
+        suggestions.append(value_type(record.suggestions[idx_suggestion].value))
 
     if question_type == RankingQuestion:
-        # TODO: Not ready yet
-        map_rank_value = {rank_value["value"]: rank_value["rank"] for rank_value in suggestion.value}
-        unified_responses = [map_rank_value[resp[0]] for resp in unified_responses]
-        suggestions = [suggestion[0]["rank"] for suggestion in suggestions]
+        unified_responses = [
+            tuple(ranking_schema.rank for ranking_schema in response) for response in unified_responses
+        ]
+        suggestions = [tuple(s["rank"] for s in suggestion) for suggestion in suggestions]
 
     return unified_responses, suggestions
 
