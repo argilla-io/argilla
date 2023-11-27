@@ -137,7 +137,6 @@ class AnnotatorMetric(MetricBase):
         metrics = defaultdict(list)
         for user_id, resp_and_suggest in responses_and_suggestions_per_user.items():
             responses = resp_and_suggest["responses"]
-            print("HEY", responses)
             suggestions = resp_and_suggest["suggestions"]
             as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
             for metric_name, metric_cls in metric_classes:
@@ -169,7 +168,7 @@ class ResponsesMetric(AnnotatorMetric):
         )
 
 
-class SuggestionMetric(AnnotatorMetric):
+class SuggestionsMetric(AnnotatorMetric):
     def __init__(
         self,
         dataset: FeedbackDataset,
