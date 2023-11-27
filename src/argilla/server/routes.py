@@ -78,6 +78,6 @@ api_router.include_router(vectors_settings_v1.router, prefix="/v1")
 api_router.include_router(workspaces_v1.router, prefix="/v1")
 
 
-@api_router.route("/{full_path:path}")
+@api_router.route("/{_:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 def endpoint_not_found_controller(request: Request):
     raise HTTPException(status_code=404, detail=f"Endpoint {request.url.path!r} not found")

@@ -17,8 +17,9 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_route_not_found_response(async_client: AsyncClient):
-    response = await async_client.get("/api/not-found-route")
+@pytest.mark.parametrize("http_method", ["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def test_route_not_found_response(async_client: AsyncClient, http_method: str):
+    response = await async_client.request(method=http_method, url="/api/not/found/route")
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "Endpoint '/api/not-found-route' not found"}
+    assert response.json() == {"detail": "Endpoint '/api/not/found/route' not found"}
