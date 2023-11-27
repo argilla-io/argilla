@@ -47,9 +47,8 @@
                 @click="selectConfiguration(null)"
               >
                 <span
-                  >{{ selectedConfiguration.name }} - ({{
-                    selectedSuggestion.name
-                  }})</span
+                  >{{ selectedConfiguration.name }} /
+                  <strong>{{ selectedSuggestion.name }}</strong></span
                 >
                 <svgicon name="chevron-left" width="12" height="12" />
               </div>
