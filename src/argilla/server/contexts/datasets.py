@@ -806,8 +806,6 @@ async def _preload_record_associations(record: Record) -> None:
         await suggestion.awaitable_attrs.question
 
 
-
-
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
