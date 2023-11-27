@@ -788,17 +788,24 @@ async def _update_record(
     return params, suggestions, vectors, needs_search_engine_update, caches
 
 
-async def refresh_records(records: List[Record]):
-    # TODO: This behavior must be reviewed !!!
+async def _preload_records_associations(records: List[Record]) -> None:
     for record in records:
-        await record.awaitable_attrs.suggestions
-        await record.awaitable_attrs.responses
-        await record.awaitable_attrs.vectors
+        await _preload_record_associations(record)
 
-        for response in record.responses:
-            await response.awiatable_attrs.user
-        for suggestion in record.suggestions:
-            await suggestion.awaitable_attrs.question
+
+async def _preload_record_associations(record: Record) -> None:
+    # TODO: This behavior must be reviewed !!!
+    await record.awaitable_attrs.suggestions
+    await record.awaitable_attrs.responses
+    await record.awaitable_attrs.vectors
+
+    for response in record.responses:
+        await response.awiatable_attrs.user
+
+    for suggestion in record.suggestions:
+        await suggestion.awaitable_attrs.question
+
+
 
 
 async def update_records(
