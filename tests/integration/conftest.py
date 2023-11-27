@@ -30,7 +30,7 @@ from argilla.client.sdk.users import api as users_api
 from argilla.datasets.__init__ import configure_dataset
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.server import app, app
+from argilla.server.server import app
 from argilla.server.settings import settings
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
