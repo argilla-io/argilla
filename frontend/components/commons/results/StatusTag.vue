@@ -39,9 +39,14 @@ export default {
           };
 
         case "pending":
-        case "draft":
           return {
             name: "Pending",
+            icon: null,
+            class: "--pending",
+          };
+        case "draft":
+          return {
+            name: "Draft",
             icon: null,
             class: "--pending",
           };

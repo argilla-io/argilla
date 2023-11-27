@@ -266,8 +266,6 @@ export class RecordRepository {
     params.append("limit", howMany.toString());
     params.append("response_status", backendStatus);
 
-    if (backendStatus === "missing") params.append("response_status", "draft");
-
     metadata.forEach((query) => {
       params.append("metadata", query);
     });

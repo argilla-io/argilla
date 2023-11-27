@@ -40,6 +40,10 @@ export default {
     return {
       options: [
         {
+          id: "draft",
+          name: "Draft",
+        },
+        {
           id: "pending",
           name: "Pending",
         },
