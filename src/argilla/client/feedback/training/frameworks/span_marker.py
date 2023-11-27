@@ -31,7 +31,7 @@ class ArgillaSpanMarkerTrainer(ArgillaSpanMarkerTrainerV1, ArgillaTrainerSkeleto
         import torch
         from span_marker import SpanMarkerModel
 
-        self._span_marker_model = None
+        self.trainer_model = None
 
         self.device = "cpu"
         if torch.backends.mps.is_available():

@@ -34,12 +34,12 @@ ds = rg.FeedbackDataset.from_huggingface("<huggingface_dataset_id>")
 
 #### Task Templates
 
-The `FeedbackDataset` has a set of predefined task templates that you can use to quickly set up your dataset. These templates include the `fields` and `questions` needed for the task, as well as the `guidelines` to provide to the annotators. Additionally, you can customize the `fields`, `questions`, and `guidelines` to fit your specific needs using a [custom configuration](#custom-configuration).
+The `FeedbackDataset` has a set of predefined task templates that you can use to quickly set up your dataset. These templates include the `fields` and `questions` needed for the task, as well as the `guidelines` to provide to the annotators. Additionally, you can customize the `fields`, `questions`, `guidelines`, `metadata` and `vectors` to fit your specific needs using a [custom configuration](#custom-configuration).
 
 ```{include} /_common/tabs/task_templates.md
 ```
 
-After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using approached to [update configuration](#update-configuration).
+After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, `guidelines`, `metadata` and `vectors` to fit our specific needs you can refer to the [update configuration](#update-configuration) section.
 
 #### Custom Configuration
 
