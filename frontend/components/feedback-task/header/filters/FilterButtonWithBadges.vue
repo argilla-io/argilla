@@ -129,6 +129,7 @@ export default {
     gap: calc($base-space / 2);
     .badge {
       margin-right: auto;
+      margin-bottom: calc($base-space / 2);
     }
     &__button {
       margin: $base-space auto 0 auto;
