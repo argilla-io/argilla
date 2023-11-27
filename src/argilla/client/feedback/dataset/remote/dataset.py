@@ -1018,6 +1018,20 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMi
         local = self.pull()
         return local.compute_unified_responses(question=question, strategy=strategy)
 
+    def unify_responses(
+        self: "FeedbackDatasetBase",
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`unify_responses` method is deprecated and will be removed in future releases. "
+            "Please use `compute_unified_responses` instead.",
+            DeprecationWarning,
+        )
+        return self.compute_unified_responses(question=question, strategy=strategy)
+
     def prepare_for_training(
         self,
         framework: Union[Framework, str],

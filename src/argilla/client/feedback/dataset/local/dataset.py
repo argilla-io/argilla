@@ -421,6 +421,20 @@ class FeedbackDataset(
         self._metadata_properties = list(metadata_properties_mapping.values())
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
+    def unify_responses(
+        self: "FeedbackDatasetBase",
+        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
+        strategy: Union[
+            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
+        ],
+    ) -> "FeedbackDataset":
+        warnings.warn(
+            "`unify_responses` method is deprecated and will be removed in future releases. "
+            "Please use `compute_unified_responses` instead.",
+            DeprecationWarning,
+        )
+        return self.compute_unified_responses(question=question, strategy=strategy)
+
     def compute_unified_responses(
         self: "FeedbackDatasetBase",
         question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
