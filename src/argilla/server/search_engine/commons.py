@@ -13,13 +13,9 @@
 #  limitations under the License.
 
 import dataclasses
-import datetime
 from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
-
-from pydantic import BaseModel
-from pydantic.utils import GetterDict
 
 from argilla.server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla.server.models import (
@@ -31,6 +27,7 @@ from argilla.server.models import (
     Record,
     Response,
     ResponseStatus,
+    Suggestion,
     Vector,
     VectorSettings,
 )
@@ -58,70 +55,10 @@ from argilla.server.search_engine.base import (
     TermsMetadataFilter,
     TermsMetadataMetrics,
     TextQuery,
-    UserResponse,
     UserResponseStatusFilter,
 )
 
 ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
-
-
-class SearchDocumentGetter(GetterDict):
-    def get(self, key: Any, default: Any = None) -> Any:
-        if key == "responses":
-            # `responses` of the record haven't been loaded, set the default value so when using
-            # `SearchDocument(...).dict(exclude_unset=True)` the field is not included.
-            if not self._obj.is_relationship_loaded("responses"):
-                return default
-
-            return {
-                response.user.username: UserResponse(
-                    values={k: v["value"] for k, v in response.values.items()} if response.values else None,
-                    status=response.status,
-                )
-                for response in self._obj.responses
-            }
-        elif key == "metadata":
-            return self._build_metadata_field_payload(self._obj.dataset, self._obj.metadata_)
-        elif key == "vectors":
-            if not self._obj.is_relationship_loaded("vectors") or not self._obj.vectors:
-                return default
-
-            return self._build_vectors_field_payload(self._obj.vectors)
-
-        return super().get(key, default)
-
-    @staticmethod
-    def _build_vectors_field_payload(vectors: List[Vector]) -> Dict[str, List[float]]:
-        return {str(vector.vector_settings.id): vector.value for vector in vectors}
-
-    @staticmethod
-    def _build_metadata_field_payload(dataset: Dataset, metadata: Union[Dict[str, Any], None] = None) -> Dict[str, Any]:
-        if metadata is None:
-            return {}
-
-        search_engine_metadata = {}
-        for metadata_property in dataset.metadata_properties:
-            value = metadata.get(metadata_property.name)
-            if value is not None:
-                search_engine_metadata[str(metadata_property.name)] = value
-
-        return search_engine_metadata
-
-
-class SearchDocument(BaseModel):
-    id: UUID
-    fields: Dict[str, Any]
-
-    metadata: Optional[Dict[str, Any]] = None
-    responses: Optional[Dict[str, UserResponse]] = None
-    vectors: Optional[Dict[str, List[float]]] = None
-
-    inserted_at: datetime.datetime
-    updated_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
-        getter_dict = SearchDocumentGetter
 
 
 def es_index_name_for_dataset(dataset: Dataset):
@@ -172,7 +109,7 @@ def es_field_for_response_value(user: str, question: str) -> str:
 
 
 def es_field_for_suggestion_property(question: str, property: str) -> str:
-    return f"suggestion.{question}.{property}"
+    return f"suggestions.{question}.{property}"
 
 
 def es_field_for_vector_settings(vector_settings: VectorSettings) -> str:
@@ -192,17 +129,21 @@ def es_field_for_metadata_property(metadata_property: Union[str, MetadataPropert
     return f"metadata.{property_name}"
 
 
+def es_field_for_record_field(field_name: str) -> str:
+    return f"fields.{field_name}"
+
+
 def es_mapping_for_field(field: Field) -> dict:
     field_type = field.settings["type"]
 
     if field_type == FieldType.text:
-        return {f"fields.{field.name}": {"type": "text"}}
+        return {es_field_for_record_field(field.name): {"type": "text"}}
     else:
-        raise ValueError(f"Index configuration for field of type {field_type} cannot be generated")
+        raise Exception(f"Index configuration for field of type {field_type} cannot be generated")
 
 
 def es_mapping_for_metadata_property(metadata_property: MetadataProperty) -> dict:
-    property_type = metadata_property.settings["type"]
+    property_type = metadata_property.type
 
     if property_type == MetadataPropertyType.terms:
         return {es_field_for_metadata_property(metadata_property): {"type": "keyword"}}
@@ -211,7 +152,40 @@ def es_mapping_for_metadata_property(metadata_property: MetadataProperty) -> dic
     elif property_type == MetadataPropertyType.float:
         return {es_field_for_metadata_property(metadata_property): {"type": "float"}}
     else:
-        raise ValueError(f"Index configuration for metadata property of type {property_type} cannot be generated")
+        raise Exception(f"Index configuration for metadata property of type {property_type} cannot be generated")
+
+
+def es_mapping_for_question(question: Question) -> dict:
+    question_type = question.type
+
+    if question_type == QuestionType.rating:
+        # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
+        return {"type": "integer"}
+    elif question_type == QuestionType.text:
+        # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead.
+        #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
+        #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
+        return {"type": "text", "index": False}
+    elif question_type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
+        return {"type": "keyword"}
+    elif question_type == QuestionType.ranking:
+        return {"type": "nested"}  # TODO: Disable indexing rating for now
+    else:
+        raise Exception(f"ElasticSearch mappings for Question of type {question_type} cannot be generated")
+
+
+def es_mapping_for_question_suggestion(question: Question) -> dict:
+    return {
+        f"suggestions.{question.name}": {
+            "type": "object",
+            "properties": {
+                "value": es_mapping_for_question(question),
+                "score": {"type": "float"},
+                "agent": {"type": "keyword"},
+                "type": {"type": "keyword"},
+            },
+        }
+    }
 
 
 # This function will be moved once the `metadata_filters` argument is removed from search and similarity_search methods
@@ -314,7 +288,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "_op_type": "index",  # TODO: Review and maybe change to partial update
                 "_id": record.id,
                 "_index": index_name,
-                **SearchDocument.from_orm(record).dict(exclude_unset=True),
+                **self._map_record_to_es_document(record),
             }
             for record in records
         ]
@@ -333,14 +307,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         record = response.record
         index_name = await self._get_index_or_raise(record.dataset)
 
-        es_response = UserResponse(
-            values={k: v["value"] for k, v in response.values.items()} if response.values else None,
-            status=response.status,
-        )
+        es_responses = self._map_record_responses_to_es([response])
 
-        await self._update_document_request(
-            index_name, id=record.id, body={"doc": {"responses": {response.user.username: es_response.dict()}}}
-        )
+        await self._update_document_request(index_name, id=record.id, body={"doc": {"responses": es_responses}})
 
     async def delete_record_response(self, response: Response):
         record = response.record
@@ -500,6 +469,64 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _inverse_vector(self, vector_value: List[float]) -> List[float]:
         return [vector_value[i] * -1 for i in range(0, len(vector_value))]
 
+    def _map_record_to_es_document(self, record: Record) -> Dict[str, Any]:
+        document = {
+            "id": str(record.id),
+            "fields": record.fields,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
+        }
+
+        if record.metadata_:
+            document["metadata"] = self._map_record_metadata_to_es(record.metadata_, record.dataset.metadata_properties)
+        if record.responses:
+            document["responses"] = self._map_record_responses_to_es(record.responses)
+        if record.suggestions:
+            document["suggestions"] = self._map_record_suggestions_to_es(record.suggestions)
+        if record.vectors:
+            document["vectors"] = self._map_record_vectors_to_es(record.vectors)
+
+        return document
+
+    @staticmethod
+    def _map_record_responses_to_es(responses: List[Response]) -> Dict[str, Any]:
+        return {
+            response.user.username: {
+                "values": {k: v["value"] for k, v in response.values.items()} if response.values else None,
+                "status": response.status,
+            }
+            for response in responses
+        }
+
+    @staticmethod
+    def _map_record_suggestions_to_es(suggestions: List[Suggestion]) -> Dict[str, str]:
+        return {
+            suggestion.question.name: {
+                "type": suggestion.type,
+                "agent": suggestion.agent,
+                "score": suggestion.score,
+                "value": suggestion.value,
+            }
+            for suggestion in suggestions
+        }
+
+    @staticmethod
+    def _map_record_vectors_to_es(vectors: List[Vector]) -> Dict[str, List[float]]:
+        return {str(vector.vector_settings.id): vector.value for vector in vectors}
+
+    @staticmethod
+    def _map_record_metadata_to_es(
+        metadata: Dict[str, Any], metadata_properties: List[MetadataProperty]
+    ) -> Dict[str, Any]:
+        search_engine_metadata = {}
+
+        for metadata_property in metadata_properties:
+            value = metadata.get(metadata_property.name)
+            if value is not None:
+                search_engine_metadata[str(metadata_property.name)] = value
+
+        return search_engine_metadata
+
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
         index = await self._get_index_or_raise(vector_settings.dataset)
 
@@ -597,9 +624,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},  # To add all users responses
-                # metadata properties without mappings will be ignored
-                "metadata": {"dynamic": False, "type": "object"},
                 **self._mapping_for_fields(dataset.fields),
+                **self._mapping_for_suggestions(dataset.questions),
                 **self._mapping_for_metadata_properties(dataset.metadata_properties),
                 **self._mapping_for_vectors_settings(dataset.vectors_settings),
             },
@@ -629,12 +655,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if not text.field:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
             field_names = [
-                f"fields.{field.name}" for field in dataset.fields if field.settings.get("type") == FieldType.text
+                es_field_for_record_field(field.name)
+                for field in dataset.fields
+                if field.settings.get("type") == FieldType.text
             ]
             return {"multi_match": {"query": text.q, "type": "cross_fields", "fields": field_names, "operator": "and"}}
         else:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
-            return {"match": {f"fields.{text.field}": {"query": text.q, "operator": "and"}}}
+            return {"match": {es_field_for_record_field(text.field): {"query": text.q, "operator": "and"}}}
 
     def _mapping_for_fields(self, fields: List[Field]) -> dict:
         mappings = {}
@@ -644,10 +672,21 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return mappings
 
     def _mapping_for_metadata_properties(self, metadata_properties: List[MetadataProperty]) -> dict:
-        mappings = {}
+        mappings = {
+            # metadata properties without mappings will be ignored
+            "metadata": {"dynamic": False, "type": "object"},
+        }
 
         for metadata_property in metadata_properties:
             mappings.update(es_mapping_for_metadata_property(metadata_property))
+
+        return mappings
+
+    def _mapping_for_suggestions(self, questions: List[Question]) -> dict:
+        mappings = {}
+
+        for question in questions:
+            mappings.update(es_mapping_for_question_suggestion(question))
 
         return mappings
 
@@ -664,30 +703,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 {
                     f"{question.name}_responses": {
                         "path_match": f"responses.*.values.{question.name}",
-                        "mapping": self._field_mapping_for_question(question),
+                        "mapping": es_mapping_for_question(question),
                     },
                 }
                 for question in questions
             ],
         ]
-
-    def _field_mapping_for_question(self, question: Question):
-        settings = question.parsed_settings
-
-        if settings.type == QuestionType.rating:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
-            return {"type": "integer"}
-        elif settings.type == QuestionType.text:
-            # TODO: Review mapping for label selection. Could make sense to use `keyword` mapping instead.
-            #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
-            #  See https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
-            return {"type": "text", "index": False}
-        elif settings.type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
-            return {"type": "keyword"}
-        elif settings.type == QuestionType.ranking:
-            return {"type": "nested"}
-        else:
-            raise ValueError(f"ElasticSearch mappings for Question of type {settings.type} cannot be generated")
 
     async def _get_index_or_raise(self, dataset: Dataset):
         index_name = es_index_name_for_dataset(dataset)

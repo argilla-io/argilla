@@ -619,7 +619,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await _load_users_from_record_responses(records)
+        await _preload_records_relationships_before_index(db, records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -788,6 +788,23 @@ async def _update_record(
     return params, suggestions, vectors, needs_search_engine_update, caches
 
 
+async def _preload_records_relationships_before_index(db: "AsyncSession", records: List[Record]) -> None:
+    for record in records:
+        await _preload_record_relationships_before_index(db, record)
+
+
+async def _preload_record_relationships_before_index(db: "AsyncSession", record: Record) -> None:
+    await db.execute(
+        select(Record)
+        .filter_by(id=record.id)
+        .options(
+            selectinload(Record.responses).selectinload(Response.user),
+            selectinload(Record.suggestions).selectinload(Suggestion.question),
+            selectinload(Record.vectors),
+        )
+    )
+
+
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
@@ -866,6 +883,7 @@ async def update_records(
                 include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
             )
             await dataset.awaitable_attrs.vectors_settings
+            await _preload_records_relationships_before_index(db, records)
             await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -905,6 +923,7 @@ async def update_record(
 
         if needs_search_engine_update:
             await record.dataset.awaitable_attrs.vectors_settings
+            await _preload_record_relationships_before_index(db, record)
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()

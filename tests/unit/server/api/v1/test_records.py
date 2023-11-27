@@ -188,7 +188,7 @@ class TestSuiteRecords:
                 "extra-metadata": "yes",
             },
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [
                 {
                     "question_id": str(question_0.id),
@@ -241,7 +241,7 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
