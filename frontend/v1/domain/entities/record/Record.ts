@@ -83,7 +83,7 @@ export class Record {
 
       if (!questionReference) return;
 
-      question.forceComplete(questionReference.answer.value);
+      question.response(questionReference.answer.answer);
     });
   }
 
@@ -123,10 +123,10 @@ export class Record {
 
   private completeQuestion() {
     return this.questions.map((question) => {
-      const answerForQuestion = this.answer?.value[question.name];
+      const answer = this.answer?.value[question.name];
 
       if (this.isPending || this.isDraft) {
-        question.complete(answerForQuestion);
+        question.responseIfUnanswered(answer);
 
         const suggestion = this.suggestions?.find(
           (s) => s.questionId === question.id
@@ -134,7 +134,7 @@ export class Record {
 
         question.suggests(suggestion);
       } else {
-        question.forceComplete(answerForQuestion);
+        question.response(answer);
       }
 
       return question;

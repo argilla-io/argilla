@@ -9,7 +9,7 @@ export type QuestionType =
   | "multi_label_selection";
 
 export abstract class QuestionAnswer {
-  private answer: Answer;
+  private _answer: Answer;
   constructor(public readonly type: QuestionType) {}
 
   get isPartiallyValid(): boolean {
@@ -20,20 +20,19 @@ export abstract class QuestionAnswer {
     return true;
   }
 
-  get value() {
-    return this.answer;
+  get answer() {
+    return this._answer;
   }
 
-  complete(answer: Answer) {
-    if (this.answer) return;
+  responseIfUnanswered(answer: Answer) {
+    if (this._answer) return;
 
-    this.answer = answer;
-    this.fill(answer);
+    this.response(answer);
   }
 
-  forceComplete(answer: Answer) {
-    this.answer = answer;
-    this.fill(answer);
+  response(answer: Answer) {
+    this._answer = answer;
+    this.fill(this._answer);
   }
 
   protected abstract fill(answer: Answer);

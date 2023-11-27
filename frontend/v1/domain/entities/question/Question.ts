@@ -147,23 +147,23 @@ export class Question {
     this.initializeOriginal();
   }
 
-  complete(answer: Answer) {
+  responseIfUnanswered(answer: Answer) {
     if (!answer) return;
 
-    this.answer.complete(answer);
+    this.answer.responseIfUnanswered(answer);
   }
 
-  forceComplete(answer: Answer) {
+  response(answer: Answer) {
     if (!answer) return;
 
-    this.answer.forceComplete(answer);
+    this.answer.response(answer);
   }
 
   suggests(suggestion: Suggestion) {
     if (!suggestion) return;
 
     this.suggestion = suggestion;
-    this.answer.complete(suggestion);
+    this.answer.responseIfUnanswered(suggestion);
   }
 
   private createEmptyAnswers(): QuestionAnswer {
