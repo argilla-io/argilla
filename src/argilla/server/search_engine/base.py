@@ -63,6 +63,7 @@ __all__ = [
     "SuggestionFilterScope",
     "ResponseFilterScope",
     "MetadataFilterScope",
+    "RecordFilterScope",
     "FilterScope",
     "TermsFilter",
     "RangeFilter",
