@@ -20,6 +20,7 @@ from tqdm import tqdm
 
 from argilla.client.feedback.schemas import RankingQuestion, TextQuestion
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla.client.feedback.schemas.remote.questions import RemoteRankingQuestion
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
@@ -69,6 +70,7 @@ def get_responses_and_suggestions_per_user(
 
     hf_dataset = dataset.format_as("datasets")
     question_type = type(dataset.question_by_name(question_name))
+    is_ranking_question = (question_type == RankingQuestion) or (question_type == RemoteRankingQuestion)
 
     responses_and_suggestions_per_user = defaultdict(lambda: defaultdict(list))
 
@@ -78,7 +80,7 @@ def get_responses_and_suggestions_per_user(
         total=len(hf_dataset),
         disable=not show_progress,
     ):
-        if question_type == RankingQuestion:
+        if is_ranking_question:
             suggestion = suggestion["rank"]
 
         if isinstance(suggestion, list):
@@ -91,8 +93,8 @@ def get_responses_and_suggestions_per_user(
                 raise NotImplementedError(
                     "In order to use this functionality the records need to be assigned to a user."
                 )
-            if question_type == RankingQuestion:
-                # value = response["value"]["rank"]
+
+            if is_ranking_question:
                 value = response["value"]["rank"]
             else:
                 value = response["value"]

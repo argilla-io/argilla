@@ -134,10 +134,10 @@ class AnnotatorMetric(MetricBase):
             sort_by=self._sort_by,
             max_records=self._max_records,
         )
-
         metrics = defaultdict(list)
         for user_id, resp_and_suggest in responses_and_suggestions_per_user.items():
             responses = resp_and_suggest["responses"]
+            print("HEY", responses)
             suggestions = resp_and_suggest["suggestions"]
             as_responses, as_suggestions = self._prepare_responses_and_suggestions(responses, suggestions)
             for metric_name, metric_cls in metric_classes:
@@ -599,6 +599,8 @@ class NDCGMetric(AnnotatorMetricBase):
     def _compute(self, responses: List[str], suggestions: List[str]):
         from sklearn.metrics import ndcg_score
 
+        print("HEY", responses)
+        print("HEY", suggestions)
         return ndcg_score(responses, suggestions)
 
 

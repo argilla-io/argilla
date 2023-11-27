@@ -224,12 +224,12 @@ async def test_annotator_metric_from_remote_feedback_dataset(
         questions=feedback_dataset_questions,
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
-
     remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
-    metric = AnnotatorMetric(remote, question, responses_vs_suggestions=responses_vs_suggestions)
-    # Test for repr method
-    assert repr(metric) == f"AnnotatorMetric(question_name={question})"
-    metrics_report = metric.compute(metric_names)
+    if responses_vs_suggestions:
+        metrics_report = remote.compute_responses_metrics(question_name=question, metric_names=metric_names)
+    else:
+        metrics_report = remote.compute_suggestions_metrics(question_name=question, metric_names=metric_names)
+
     assert len(metrics_report) == 3  # Number of annotators
     assert isinstance(metrics_report, dict)
     user_id = str(uuid.UUID(int=1))

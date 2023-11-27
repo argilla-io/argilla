@@ -569,7 +569,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
     q4_options = [["a", "b"], ["b", "c"], ["a", "c"]]
     q5_options = [
         [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
-        [{"rank": 2, "value": "b"}, {"rank": 1, "value": "a"}],
+        [{"rank": 2, "value": "a"}, {"rank": 1, "value": "b"}],
         [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
     ]
 
