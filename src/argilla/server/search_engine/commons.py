@@ -155,7 +155,9 @@ def es_mapping_for_metadata_property(metadata_property: MetadataProperty) -> dic
         raise Exception(f"Index configuration for metadata property of type {property_type} cannot be generated")
 
 
-def es_mapping_for_question_type(question_type: QuestionType):
+def es_mapping_for_question(question: Question) -> dict:
+    question_type = question.type
+
     if question_type == QuestionType.rating:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
         return {"type": "integer"}
@@ -177,7 +179,7 @@ def es_mapping_for_question_suggestion(question: Question) -> dict:
         f"suggestions.{question.name}": {
             "type": "object",
             "properties": {
-                "value": es_mapping_for_question_type(question.type),
+                "value": es_mapping_for_question(question),
                 "score": {"type": "float"},
                 "agent": {"type": "keyword"},
                 "type": {"type": "keyword"},
@@ -701,7 +703,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 {
                     f"{question.name}_responses": {
                         "path_match": f"responses.*.values.{question.name}",
-                        "mapping": es_mapping_for_question_type(question.type),
+                        "mapping": es_mapping_for_question(question),
                     },
                 }
                 for question in questions
