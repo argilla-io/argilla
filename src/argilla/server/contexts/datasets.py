@@ -925,7 +925,7 @@ async def update_record(
 
         if needs_search_engine_update:
             await record.dataset.awaitable_attrs.vectors_settings
-            await refresh_records([record])
+            await _preload_records_associations([record])
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
