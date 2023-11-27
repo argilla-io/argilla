@@ -1,4 +1,4 @@
-import { RecordAnswer } from "../record/RecordAnswer";
+import { Answer } from "../IAnswer";
 import {
   QuestionAnswer,
   QuestionType,
@@ -147,13 +147,13 @@ export class Question {
     this.initializeOriginal();
   }
 
-  complete(answer: RecordAnswer) {
+  complete(answer: Answer) {
     if (!answer) return;
 
     this.answer.complete(answer);
   }
 
-  forceComplete(answer: RecordAnswer) {
+  forceComplete(answer: Answer) {
     if (!answer) return;
 
     this.answer.forceComplete(answer);

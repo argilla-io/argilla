@@ -7,9 +7,22 @@ export type QuestionType =
   | "ranking"
   | "label_selection"
   | "multi_label_selection";
+
 export abstract class QuestionAnswer {
   private answer: Answer;
   constructor(public readonly type: QuestionType) {}
+
+  get isPartiallyValid(): boolean {
+    return false;
+  }
+
+  get hasValidValues(): boolean {
+    return true;
+  }
+
+  get value() {
+    return this.answer;
+  }
 
   complete(answer: Answer) {
     if (this.answer) return;
@@ -26,15 +39,6 @@ export abstract class QuestionAnswer {
   protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
-
-  get isPartiallyValid(): boolean {
-    return false;
-  }
-
-  get hasValidValues(): boolean {
-    return true;
-  }
-
   abstract get valuesAnswered();
 
   abstract matchSuggestion(suggestion: Suggestion): boolean;

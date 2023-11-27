@@ -75,6 +75,18 @@ export class Record {
     this.initialize();
   }
 
+  answerWith(recordReference: Record) {
+    this.questions.forEach((question) => {
+      const questionReference = recordReference.questions.find(
+        (q) => q.id === question.id
+      );
+
+      if (!questionReference) return;
+
+      question.forceComplete(questionReference.answer.value);
+    });
+  }
+
   initialize() {
     this.completeQuestion();
 
