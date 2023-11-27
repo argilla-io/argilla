@@ -89,7 +89,6 @@ export default {
   transition: all 0.2s ease-out;
   &:focus-within {
     border-color: $primary-color;
-    box-shadow: $shadow-300;
   }
   &:hover {
     transition: all 0.2s ease-in;
