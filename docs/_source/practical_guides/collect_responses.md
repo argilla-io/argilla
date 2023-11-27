@@ -130,7 +130,7 @@ The following metrics only apply to the `FeedbackDataset`.
 
 #### Annotator Agreement metrics
 
-After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable is the final responses after unifying the responses (these module covers what it's also named inter-coder reliability measures).
+After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable are the final responses after the unification (these module covers what it's also named inter-coder reliability measures).
 
 ```python
 import argilla as rg
@@ -140,7 +140,21 @@ feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
 metric = AgreementMetric(dataset=feedback_dataset, question_name="question_name")
 agreement_metrics = metric.compute("alpha")
 # >>> agreement_metrics
-# [AgreementMetricResult(metric_name='alpha', result=0.0)]
+# [AgreementMetricResult(metric_name='alpha', count=3, result=0.0)]
+```
+
+We will obtain a container that stores the `metric_name`, the `result`, and the number of records used to compute the given metric (`count`).
+
+The metrics can also be computed from the `FeedbackDataset`:
+
+```python
+import argilla as rg
+
+dataset = rg.FeedbackDataset.from_huggingface("argilla/go_emotions_raw")
+
+agreement_metrics = dataset.compute_agreement_metrics(question_name="label", metric_names="alpha")
+agreement_metrics
+# AgreementMetricResult(metric_name='alpha', count=191792, result=0.0)
 ```
 
 Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all the questions types except the `TextQuestion`. This metric can be computed for any number of annotators, even if some of the responses are not submitted.
@@ -166,22 +180,61 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 
 #### Annotator metrics
 
-This section covers a per-annotator metrics. The `FeedbackDataset` allows adding suggestions to simplify the annotation process. In order to analyse how useful those suggestions are, we can compute a number of metrics per user, (the metrics available will depend on the type of question), and take actions regarding the suggestion model we are using.
+This section covers the per-annotator metrics. The `FeedbackDataset` allows adding suggestions to simplify the annotation process. In order to analyse how useful those suggestions are, we can compute a number of metrics per user, (the metrics available will depend on the type of question), and take actions regarding the suggestion model we are using.
 
 The following snippet shows an example of use:
 
 ```python
 import argilla as rg
-from argilla.client.feedback.metrics import AnnotatorMetric
+from argilla.client.feedback.metrics import ResponsesMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = AnnotatorMetric(dataset=feedback_dataset, question_name="question_name")
+metric = ResponsesMetric(dataset=feedback_dataset, question_name="question_name")
 annotator_metrics = metric.compute("accuracy")
 # >>> annotator_metrics
-# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', result=0.5)]}
+# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
 ```
 
 We would obtain a `dict` where the keys contain the `user_id` of a given annotator, and a list with the metrics requested. For the interpretation of these metrics we assume here that the *true* labels or responses corresponds to the points given by an annotator, and the *predictions* correspond to the suggestions given to a user. This way we can analyse whether we are offering good suggestions to a given annotator, and therefore simplifying it's work (shortening the annotation task), or otherwise we should change the suggestions given (or fine-tune our model if we can do it).
+
+If instead of taking the `responses` as the reference for the true labels, we want to assume the suggestions are our reference labels, we can use the equivalent corresponding class, that works just the same way:
+
+```python
+import argilla as rg
+from argilla.client.feedback.metrics import SuggestionsMetric
+
+feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
+metric = SuggestionsMetric(dataset=feedback_dataset, question_name="question_name")
+annotator_metrics = metric.compute("accuracy")
+# >>> annotator_metrics
+# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
+```
+
+We can compute the metrics directly from our feedback dataset. Let's use the following dataset for this, and compute the metrics for the responses:
+
+```python
+# Compute the metrics per annotator, assuming the true labels correspond to the responses, and the predicted labels are the suggestions
+responses_metrics = dataset.compute_responses_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
+responses_metrics['00000000-0000-0000-0000-000000000001']
+# [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
+#  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.6166023130799764),
+#  AnnotatorMetricResult(metric_name='recall', count=1269, result=0.5593881715337764),
+#  AnnotatorMetricResult(metric_name='f1-score', count=1269, result=0.5448304082545485)]
+```
+
+and using the suggestions as the reference true labels vs the responses:
+
+```python
+suggestions_metrics = dataset.compute_suggestions_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
+suggestions_metrics['00000000-0000-0000-0000-000000000001']
+# [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
+#  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
+#  AnnotatorMetricResult(metric_name='recall', count=1269, result=0.6166023130799764),
+#  AnnotatorMetricResult(metric_name='f1-score', count=1269, result=0.5448304082545485)]
+```
+
+Keep in mind this dataset is quite big, and it may take some time both to download and compute the metrics. You can check it here: [argilla/go_emotions_raw](https://huggingface.co/datasets/argilla/go_emotions_raw).
+
 
 ##### Supported metrics
 
@@ -203,22 +256,59 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 
 #### Unified annotation metrics
 
-This section covers a the metrics for unified annotations. After we have unified our responses we can analyse the annotations (unified responses) against the suggestions, to gather a different perspective from the final dataset prepared for training.
+This section covers the metrics for unified annotations. After we have unified our responses we can analyse the annotations (unified responses) against the suggestions (or the other way around), to gather a different perspective from the final dataset prepared for training.
 
-The following snippet shows an example of use:
+The following snippet shows an example of use where we use as true labels the responses:
 
 ```python
 import argilla as rg
-from argilla.client.feedback.metrics import UnifiedAnnotationMetric
+from argilla.client.feedback.metrics import UnifiedResponsesMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = UnifiedAnnotationMetric(dataset=feedback_dataset, question_name="question_name")
+strategy_name = "majority"
+unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_name)
+metric = UnifiedResponsesMetric(dataset=unified_dataset, question_name="question_name")
 unified_metrics = metric.compute("accuracy")
 # >>> unified_metrics
-# AnnotatorMetricResult(metric_name='accuracy', result=0.25)
+# AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
+```
+
+And the same but assuming our true labels are the suggestions:
+
+```python
+import argilla as rg
+from argilla.client.feedback.metrics import UnifiedSuggestionsMetric
+
+feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
+strategy_name = "majority"
+unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_name)
+metric = UnifiedSuggestionsMetric(dataset=unified_dataset, question_name="question_name")
+unified_metrics = metric.compute("accuracy")
+# >>> unified_metrics
+# AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
 We obtain the same container for the metrics result, but in this case it's not associated to any annotator. The same interpretation that we saw for the Annotator metrics holds here regarding the labels and suggestions.
+
+Once again we can make use of the same methods we saw for the annotator metrics directly from the `FeedbackDataset`, but note the use of the strategy argument used here:
+
+```python
+responses_metrics_unified = dataset.compute_responses_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
+responses_metrics_unified
+# [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8057232820892758),
+#  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.7700497205894691),
+#  AnnotatorMetricResult(metric_name='recall', count=53990, result=0.8051097334033145),
+#  AnnotatorMetricResult(metric_name='f1-score', count=53990, result=0.7855678821135942)]
+
+suggestions_metrics_unified = dataset.compute_suggestions_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
+suggestions_metrics_unified
+# [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
+#  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
+#  AnnotatorMetricResult(metric_name='recall', count=53990, result=0.7679974812646655),
+#  AnnotatorMetricResult(metric_name='f1-score', count=53990, result=0.786466989240015)]
+```
+
+By default, the responses will not be unified and we will have the responses at the annotator level, but if we ask for a specific strategy (see the strategies available for each question), they will be unified automatically and computed.
 
 ##### Supported metrics
 
