@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 """
-To run this script you need to install papermill apart from argilla:
+To run this script you need to install papermill first:
 
 $ pip install papermill
 
-Then run the script:
+Then run the script from the argilla repo root:
 
+$ cd argilla-repo
 $ python scripts/end2end_examples.py --help
 """
 
@@ -30,8 +31,6 @@ from typing import Dict, Optional
 import papermill
 import typer
 from argilla._constants import DEFAULT_API_KEY
-
-ROOT_FOLDER = Path(__file__).parent.parent
 
 
 @dataclass
@@ -85,7 +84,7 @@ def main(
     api_url: Optional[str] = "http://localhost:6900",
     api_key: Optional[str] = DEFAULT_API_KEY,
     hf_token: Optional[str] = None,
-    examples_folder: Optional[str] = "docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples",
+    examples_folder: Optional[Path] = "docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples",
 ) -> None:
     """
     Run the end2end example notebooks. If no arguments are passed, it
@@ -103,7 +102,6 @@ def main(
     # Name of the output notebook that will be removed after running the examples
     output_notebook = "output_notebook.ipynb"
 
-    examples_folder = ROOT_FOLDER / examples_folder
     output_folder = examples_folder.parent / "end2end_outputs"
 
     examples = []
