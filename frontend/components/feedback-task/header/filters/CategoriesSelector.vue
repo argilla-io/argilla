@@ -18,7 +18,7 @@
           :disabled="!category.canFilter"
         >
           <span v-if="!!category.title" v-text="category.title" />
-          <span v-else v-text="category.name" />
+          <span v-else>{{ $t(`${prefixTranslation}${category.name}`) }}</span>
           <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>
@@ -36,6 +36,10 @@ export default {
     name: {
       type: String,
       required: true,
+    },
+    prefixTranslation: {
+      type: String,
+      default: "",
     },
   },
   data: () => {

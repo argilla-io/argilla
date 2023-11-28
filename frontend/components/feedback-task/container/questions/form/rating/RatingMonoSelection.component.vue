@@ -6,7 +6,7 @@
         v-for="option in options"
         :key="option.id"
         @keydown.enter.prevent
-        :title="suggestions === option.value ? $t('suggestion') : null"
+        :title="suggestions === option.value ? $t('suggestion.name') : null"
       >
         <input
           ref="options"

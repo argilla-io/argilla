@@ -32,6 +32,16 @@
     "general": "general",
     "metadata": "metadata"
   },
+  "suggestion": {
+    "filter": {
+      "value": "Suggestion values",
+      "score": "Score",
+      "agent": "Agent"
+    },
+    "plural": "Suggestions",
+    "suggested-rank": "✨ Suggested rank",
+    "name": "✨ Suggestion"
+  },
   "filters": "Filters",
   "filterBy": "Filter by...",
   "findSimilar": "Find similar",
@@ -40,9 +50,6 @@
   "similarUsing": "similar using",
   "metadata": "Metadata",
   "responses": "Responses",
-  "suggestions": "Suggestions",
-  "suggested-rank": "✨ Suggested rank",
-  "suggestion": "✨ Suggestion",
   "reset-all": "Reset all",
   "reset": "Reset",
   "with": "with",

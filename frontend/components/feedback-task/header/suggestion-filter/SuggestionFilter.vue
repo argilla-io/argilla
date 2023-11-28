@@ -13,7 +13,7 @@
           @click-on-badge="openSuggestionFilter"
           @click-on-clear="clearSuggestionFilter"
           @click-on-clear-all="clearAllSuggestionFilter"
-          :name="$t('suggestions')"
+          :name="$t('suggestion.plural')"
         />
       </span>
       <span slot="dropdown-content" class="suggestion-filter__container">
@@ -38,6 +38,7 @@
               v-if="!selectedConfiguration"
               name="suggestionsConfiguration"
               class="suggestion-filter__categories"
+              prefix-translation="suggestion.filter."
               :categories="selectedSuggestion.configurations"
               @select-category="selectConfiguration"
             />
@@ -47,7 +48,7 @@
                 @click="selectConfiguration(null)"
               >
                 <span
-                  >{{ selectedConfiguration.name }} /
+                  >{{ $t(`suggestion.filter.${selectedConfiguration.name}`) }} /
                   <strong>{{ selectedSuggestion.name }}</strong></span
                 >
                 <svgicon name="chevron-left" width="12" height="12" />

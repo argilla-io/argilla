@@ -64,7 +64,7 @@
           :for="option.id"
           :title="
             hasSuggestion(option.text)
-              ? `${$t('suggestion')}: ${option.text}`
+              ? `${$t('suggestion.name')}: ${option.text}`
               : option.text
           "
           ><span v-text="option.text"

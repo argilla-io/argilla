@@ -24,7 +24,7 @@
           :id="`${item.value}-span`"
         />
         <span
-          :title="$t('suggested-rank')"
+          :title="$t('suggestion.suggested-rank')"
           class="draggable__suggestion"
           v-if="findRankSuggestion(item.value)"
           >{{ findRankSuggestion(item.value).rank }}</span
@@ -66,7 +66,7 @@
               :id="`${item.value}-span`"
             />
             <span
-              :title="$t('suggested-rank')"
+              :title="$t('suggestion.suggested-rank')"
               class="draggable__suggestion"
               v-if="findRankSuggestion(item.value)"
               >{{ findRankSuggestion(item.value).rank }}</span
