@@ -47,13 +47,19 @@ export class SuggestionCriteria extends Criteria {
         const operator = rest[0] === "operator" ? rest[1] : undefined;
         const values = operator ? rest.slice(3) : rest.slice(1);
 
-        const configuration = {
+        const configuration: ConfigurationSearch = {
           name: configurationName,
           value: {
-            operator: operator as ValuesOption["operator"],
             values,
           },
         };
+
+        if (operator) {
+          configuration.value = {
+            ...configuration.value,
+            operator: operator as ValuesOption["operator"],
+          };
+        }
 
         return this.addConfiguration(questionName, configuration);
       }

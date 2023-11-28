@@ -103,6 +103,46 @@ describe("SuggestionCriteria", () => {
     ]);
   });
 
+  test("should be able to parse url params with values with operator", () => {
+    const criteria = new SuggestionCriteria();
+    criteria.complete("content_class.value.operator.and.values.hate.pii");
+
+    expect(criteria.value).toEqual([
+      {
+        name: "content_class",
+        value: [
+          {
+            name: "value",
+            value: {
+              operator: "and",
+              values: ["hate", "pii"],
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
+  test("should be able to parse url params with values without operator", () => {
+    const criteria = new SuggestionCriteria();
+    criteria.complete("content_class.value.values.hate.pii");
+
+    expect(criteria.value).toEqual([
+      {
+        name: "content_class",
+        value: [
+          {
+            name: "value",
+            value: {
+              values: ["hate", "pii"],
+            },
+          },
+        ],
+      },
+    ]);
+    expect("operator" in criteria.value[0].value[0].value).toBeFalsy();
+  });
+
   test("should be able to parse url params with value as range for rating questions", () => {
     const criteria = new SuggestionCriteria();
     criteria.complete("rating.value.ge1.le3");
