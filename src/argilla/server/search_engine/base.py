@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import dataclasses
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import (
@@ -71,57 +71,57 @@ __all__ = [
 ]
 
 
+@dataclasses.dataclass
 class SuggestionFilterScope:
-    def __init__(self, question: str, property: str):
-        self.question = question
-        self.property = property
+    question: str
+    property: str
 
 
+@dataclasses.dataclass
 class ResponseFilterScope:
-    def __init__(self, question: Optional[str] = None, property: Optional[str] = None, user: Optional[User] = None):
-        self.question = question
-        self.property = property
-        self.user = user
+    question: Optional[str] = None
+    property: Optional[str] = None
+    user: Optional[User] = None
 
 
+@dataclasses.dataclass
 class MetadataFilterScope:
-    def __init__(self, metadata_property: str):
-        self.metadata_property = metadata_property
+    metadata_property: str
 
 
+@dataclasses.dataclass
 class RecordFilterScope:
-    def __init__(self, property: str):
-        self.property = property
+    property: str
 
 
 FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope, RecordFilterScope]
 
 
+@dataclasses.dataclass
 class TermsFilter:
-    def __init__(self, scope: FilterScope, values: List[str]):
-        self.scope = scope
-        self.values = values
+    scope: FilterScope
+    values: List[str]
 
 
+@dataclasses.dataclass
 class RangeFilter:
-    def __init__(self, scope: FilterScope, ge: Optional[float] = None, le: Optional[float] = None):
-        self.scope = scope
-        self.ge = ge
-        self.le = le
+    scope: FilterScope
+    ge: Optional[float] = None
+    le: Optional[float] = None
 
 
+@dataclasses.dataclass
 class AndFilter:
-    def __init__(self, filters: List["Filter"]):
-        self.filters = filters
+    filters: List["Filter"]
 
 
 Filter = Union[AndFilter, TermsFilter, RangeFilter]
 
 
+@dataclasses.dataclass
 class Order:
-    def __init__(self, scope: FilterScope, order: SortOrder):
-        self.scope = scope
-        self.order = order
+    scope: FilterScope
+    order: SortOrder
 
 
 class TextQuery(BaseModel):
