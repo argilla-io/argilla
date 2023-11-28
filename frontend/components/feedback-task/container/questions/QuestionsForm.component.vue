@@ -155,7 +155,7 @@ export default {
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    tryToSubmitWithKeyboard() {
+    async tryToSubmitWithKeyboard() {
       if (!this.isTouched) return;
       if (this.isSubmitButtonDisabled) return;
       if (this.record.questions.length > 1) return;
@@ -163,7 +163,7 @@ export default {
       const question = this.record.questions[0];
 
       if (question.isSingleLabelType || question.isRatingType) {
-        setTimeout(() => this.onSubmit(), 300);
+        await this.onSubmit();
       }
     },
     focusOnFirstQuestionFromOutside(event) {
