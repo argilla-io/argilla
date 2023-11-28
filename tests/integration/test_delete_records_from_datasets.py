@@ -15,10 +15,11 @@
 import time
 
 import pytest
-from argilla.client.api import delete, delete_records, init, load, log
+from argilla.client.api import delete, delete_records, load, log
 from argilla.client.client import Argilla
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.client.singleton import init
 from argilla.server.models import User, UserRole
 
 from tests.factories import AnnotatorFactory, UserFactory, WorkspaceFactory

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import argilla as rg
 import pytest
-from argilla.client.api import delete, init, load, log
+from argilla.client.api import delete, load, log
 from argilla.client.client import Argilla
 from argilla.client.datasets import read_datasets
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
@@ -25,6 +25,7 @@ from argilla.client.sdk.commons.errors import (
     GenericApiError,
     ValidationApiError,
 )
+from argilla.client.singleton import init
 from argilla.server.settings import settings
 
 from tests.factories import WorkspaceFactory

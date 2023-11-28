@@ -30,11 +30,9 @@ from argilla._constants import (
     WORKSPACE_HEADER_NAME,
 )
 from argilla.client.api import (
-    active_client,
     delete,
     delete_records,
     get_workspace,
-    init,
     load,
     log,
     set_workspace,
@@ -68,6 +66,7 @@ from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces.models import WorkspaceModel
+from argilla.client.singleton import active_client, init
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecordInputs,

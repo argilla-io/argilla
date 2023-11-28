@@ -14,8 +14,8 @@
 from time import sleep
 
 import pytest
-from argilla.client.api import active_api, init
 from argilla.client.sdk.commons.errors import NotFoundApiError
+from argilla.client.singleton import active_api, init
 from argilla.server.models import User
 
 

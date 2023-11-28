@@ -26,87 +26,9 @@ from argilla.client.sdk.datasets.models import Dataset as DatasetModel
 from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
+from argilla.client.singleton import ArgillaSingleton
 
 Api = Argilla  # Backward compatibility
-
-
-class ArgillaSingleton:
-    """The active argilla singleton instance"""
-
-    _INSTANCE: Optional[Argilla] = None
-
-    @classmethod
-    def get(cls) -> Argilla:
-        if cls._INSTANCE is None:
-            return cls.init()
-        return cls._INSTANCE
-
-    @classmethod
-    def clear(cls) -> None:
-        cls._INSTANCE = None
-
-    @classmethod
-    def init(
-        cls,
-        api_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        workspace: Optional[str] = None,
-        timeout: int = 60,
-        extra_headers: Optional[Dict[str, str]] = None,
-    ) -> Argilla:
-        cls._INSTANCE = None
-
-        cls._INSTANCE = Argilla(
-            api_url=api_url,
-            api_key=api_key,
-            timeout=timeout,
-            workspace=workspace,
-            extra_headers=extra_headers,
-        )
-
-        return cls._INSTANCE
-
-
-def init(
-    api_url: Optional[str] = None,
-    api_key: Optional[str] = None,
-    workspace: Optional[str] = None,
-    timeout: int = 60,
-    extra_headers: Optional[Dict[str, str]] = None,
-) -> None:
-    """Init the Python client.
-
-    If this function is called with `api_url=None` and `api_key=None` and no values have been set for the environment
-    variables `ARGILLA_API_URL` and `ARGILLA_API_KEY`, then the local credentials stored by a previous call to `argilla
-    login` command will be used. If local credentials are not found, then `api_url` and `api_key` will fallback to the
-    default values.
-
-    Args:
-        api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
-            it will default to `http://localhost:6900`.
-        api_key: Authentication key for the REST API. If `None` (default) and the env variable ``ARGILLA_API_KEY``
-            is not set, it will default to `argilla.apikey`.
-        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
-            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
-        timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
-        extra_headers: Extra HTTP headers sent to the server. You can use this to customize
-            the headers of argilla client requests, like additional security restrictions. Default: `None`.
-
-    Examples:
-        >>> import argilla as rg
-        >>>
-        >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
-        >>> # Customizing request headers
-        >>> headers = {"X-Client-id":"id","X-Secret":"secret"}
-        >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
-    """
-    ArgillaSingleton.init(
-        api_url=api_url,
-        api_key=api_key,
-        workspace=workspace,
-        timeout=timeout,
-        extra_headers=extra_headers,
-    )
 
 
 def log(
@@ -469,14 +391,3 @@ def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
         and last_updated.
     """
     return ArgillaSingleton.get().list_datasets(workspace=workspace)
-
-
-def active_client() -> Argilla:
-    """Returns the active argilla client.
-
-    If Active client is None, initialize a default one.
-    """
-    return ArgillaSingleton.get()
-
-
-active_api = active_client  # backward compatibility

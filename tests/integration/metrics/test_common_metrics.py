@@ -14,6 +14,7 @@
 #  limitations under the License.
 import argilla
 import argilla as rg
+import argilla.client.singleton
 import pytest
 from argilla.client.api import delete, log
 from argilla.client.models import TextClassificationRecord
@@ -147,11 +148,11 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
 
 
 def test_failing_metrics(argilla_user: "User"):
-    argilla.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    argilla.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     dataset_name = "test_failing_metrics"
 
     argilla.delete(dataset_name)
     argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
 
     with pytest.raises(AssertionError, match="Metric missing-metric not found"):
-        argilla.active_client().compute_metric(name=dataset_name, metric="missing-metric")
+        argilla.client.singleton.active_client().compute_metric(name=dataset_name, metric="missing-metric")

@@ -15,7 +15,7 @@ import logging
 import warnings
 from typing import Optional
 
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.apis.datasets import Settings, TextClassificationSettings, TokenClassificationSettings
 
 __all__ = [TextClassificationSettings, TokenClassificationSettings, Settings]
@@ -34,7 +34,7 @@ def load_dataset_settings(name: str, workspace: Optional[str] = None) -> Optiona
     Returns:
         The dataset settings
     """
-    active_api = api.active_api()
+    active_api = singleton.active_api()
     datasets = active_api.datasets
 
     settings = datasets.load_settings(name, workspace=workspace)
@@ -56,7 +56,7 @@ def configure_dataset_settings(name: str, settings: Settings, workspace: Optiona
         settings: The dataset settings
         workspace: The workspace name where the dataset will belongs to
     """
-    active_api = api.active_api()
+    active_api = singleton.active_api()
     datasets = active_api.datasets
     datasets.configure(name, workspace=workspace or active_api.get_workspace(), settings=settings)
 

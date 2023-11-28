@@ -17,10 +17,11 @@ from uuid import uuid4
 
 import pytest
 from argilla import Workspace
-from argilla.client import api
-from argilla.client.api import delete, get_workspace, init
+from argilla.client import singleton
+from argilla.client.api import delete, get_workspace
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.client.singleton import init
 from argilla.datasets import (
     TextClassificationSettings,
     TokenClassificationSettings,
@@ -67,7 +68,7 @@ def test_settings_workflow(
     delete(dataset)
     configure_dataset(dataset, settings=settings_, workspace=workspace)
 
-    current_api = api.active_api()
+    current_api = singleton.active_api()
     datasets_api = current_api.datasets
 
     found_settings = datasets_api.load_settings(dataset)
@@ -137,7 +138,7 @@ def test_configure_dataset_deprecation_warning(
 
 
 def test_list_dataset(mocked_client: "SecuredClient"):
-    from argilla.client.api import active_client
+    from argilla.client.singleton import active_client
 
     client = active_client()
     datasets = client.http_client.get("/api/datasets")

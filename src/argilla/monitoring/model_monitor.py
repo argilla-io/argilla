@@ -16,7 +16,7 @@ import logging
 import warnings
 from typing import Optional, Union
 
-from ..client.api import active_api
+from ..client.singleton import active_api
 from ._flair import SequenceTagger, flair_monitor
 from ._spacy import Language, ner_monitor
 from ._transformers import Pipeline, huggingface_monitor
