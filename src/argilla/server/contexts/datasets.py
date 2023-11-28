@@ -1112,7 +1112,6 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
 async def delete_suggestion(db: "AsyncSession", search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
     async with db.begin_nested():
         suggestion = await suggestion.delete(db, autocommit=False)
-        # TODO: Should we touch here dataset last_activity?
         await search_engine.delete_record_suggestion(suggestion)
 
     await db.commit()
