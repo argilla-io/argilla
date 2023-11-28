@@ -24,6 +24,7 @@ $ python scripts/end2end_examples.py --help
 """
 
 import os
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Optional
@@ -102,26 +103,20 @@ def main(
     # Name of the output notebook that will be removed after running the examples
     output_notebook = "output_notebook.ipynb"
 
-    output_folder = examples_folder.parent / "end2end_outputs"
-
-    examples = []
-    for filename in examples_folder.glob("*.ipynb"):
-        examples.append(
-            ExampleNotebook(
-                src_filename=filename,
-                dst_filename=output_folder / output_notebook,
-                parameters=notebook_parameters,
+    with tempfile.TemporaryDirectory() as tmpdir:
+        examples = []
+        for filename in examples_folder.glob("*.ipynb"):
+            examples.append(
+                ExampleNotebook(
+                    src_filename=filename,
+                    dst_filename=Path(tmpdir) / output_notebook,
+                    parameters=notebook_parameters,
+                )
             )
-        )
-    examples = sorted(examples, key=lambda x: x.sort_index)
+        examples = sorted(examples, key=lambda x: x.sort_index)
 
-    for example in examples:
-        example.run()
-        example.clean()
-
-    if output_folder.exists():
-        output_folder.rmdir()
-        print(f"Removed output folder: {output_folder.name}")
+        for example in examples:
+            example.run()
 
 
 if __name__ == "__main__":
