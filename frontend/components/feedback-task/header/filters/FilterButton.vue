@@ -57,6 +57,7 @@ export default {
   &--active {
     background: $black-4;
     @extend .filter-button;
+    padding: calc($base-space / 2) $base-space;
   }
   &--active {
     &:hover {
