@@ -146,14 +146,15 @@ async def _filter_records_using_search_engine(
     include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List["Record"], int]:
+
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
         dataset=dataset,
-        parsed_metadata=parsed_metadata,
         limit=limit,
         offset=offset,
         user=user,
+        parsed_metadata=parsed_metadata,
         response_statuses=response_statuses,
         sort_by_query_param=sort_by_query_param,
     )
@@ -217,14 +218,23 @@ async def _get_search_responses(
     parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
-    text_query: Optional["TextQuery"] = None,
-    vector_query: Optional["VectorQuery"] = None,
-    filters: Optional[Filters] = None,
-    sort: Optional[List[Order]] = None,
+    search_records_query: Optional[SearchRecordsQuery] = None,
     user: Optional[User] = None,
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
+
+    search_records_query = search_records_query or SearchRecordsQuery()
+
+    text_query = None
+    vector_query = None
+    if search_records_query.query:
+        text_query = search_records_query.query.text
+        vector_query = search_records_query.query.vector
+
+    filters = search_records_query.filters
+    sort = search_records_query.sort
+
     vector_settings = None
     record = None
 
@@ -585,10 +595,7 @@ async def search_current_user_dataset_records(
         db=db,
         search_engine=search_engine,
         dataset=dataset,
-        text_query=body.query.text,
-        vector_query=body.query.vector,
-        filters=body.filters,
-        sort=body.sort,
+        search_records_query=body,
         parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,
@@ -651,13 +658,10 @@ async def search_dataset_records(
         db=db,
         search_engine=search_engine,
         dataset=dataset,
-        text_query=body.query.text,
-        vector_query=body.query.vector,
-        filters=body.filters,
-        sort=body.sort,
-        parsed_metadata=metadata.metadata_parsed,
+        search_records_query=body,
         limit=limit,
         offset=offset,
+        parsed_metadata=metadata.metadata_parsed,
         response_statuses=response_statuses,
         sort_by_query_param=sort_by_query_param,
     )

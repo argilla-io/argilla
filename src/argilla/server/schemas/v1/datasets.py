@@ -787,7 +787,7 @@ class Order(BaseModel):
 
 
 class SearchRecordsQuery(BaseModel):
-    query: Optional[Query] = PydanticField(default_factory=Query)
+    query: Optional[Query]
     filters: Optional[Filters]
     sort: Optional[List[Order]] = PydanticField(
         None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
