@@ -15,32 +15,39 @@
         :is-button-active="isAnyFilterActive"
       />
       <Sort
-        v-if="!datasetMetadataIsLoading"
+        v-if="datasetMetadataIsLoaded && datasetQuestionIsLoaded"
         :datasetMetadata="datasetMetadata"
-        v-model="recordCriteria.sortBy"
+        :datasetQuestions="datasetQuestions"
+        v-model="recordCriteria.sortBy.value"
       />
       <BaseButton
         v-if="isAnyFilterActive || isSortedBy"
         class="small clear filters__reset-button"
-        @on-click="resetFiltersAndSortBy()"
+        @on-click="resetFilters()"
         >{{ $t("reset") }}</BaseButton
       >
-      <p v-if="shouldShowTotalRecords" class="filters__total-records">
-        {{ totalRecordsInfo }}
-      </p>
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
     </div>
-    <template v-if="visibleFilters">
+    <div class="filters__list__wrapper" v-if="visibleFilters">
       <transition name="filterAppear" appear>
         <div class="filters__list">
           <MetadataFilter
-            v-if="!datasetMetadataIsLoading && !!datasetMetadata.length"
+            v-if="datasetMetadataIsLoaded && !!datasetMetadata.length"
             :datasetMetadata="datasetMetadata"
-            v-model="recordCriteria.metadata"
+            v-model="recordCriteria.metadata.value"
+          />
+          <ResponsesFilter
+            v-model="recordCriteria.response.value"
+            :datasetQuestions="datasetQuestions"
+          />
+          <SuggestionFilter
+            v-model="recordCriteria.suggestion.value"
+            :datasetId="recordCriteria.datasetId"
+            :datasetQuestions="datasetQuestions"
           />
         </div>
       </transition>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -57,29 +64,19 @@ export default {
   },
   data: () => {
     return {
-      totalRecords: null,
       visibleFilters: false,
     };
   },
   computed: {
-    totalRecordsInfo() {
-      if (!this.totalRecords || this.totalRecords === 0) return null;
-
-      return this.totalRecords === 1
-        ? `${this.totalRecords} record`
-        : `${this.totalRecords} records`;
-    },
-    shouldShowTotalRecords() {
-      return (
-        this.recordCriteria.isFilteredByText ||
-        this.recordCriteria.isFilteredByMetadata
-      );
-    },
     isAnyAvailableFilter() {
-      return !!this.datasetMetadata.length;
+      return !!this.datasetMetadata.length || !!this.datasetQuestions.length;
     },
     isAnyFilterActive() {
-      return this.recordCriteria.isFilteredByMetadata;
+      return (
+        this.recordCriteria.isFilteredByMetadata ||
+        this.recordCriteria.isFilteredByResponse ||
+        this.recordCriteria.isFilteredBySuggestion
+      );
     },
     isSortedBy() {
       return this.recordCriteria.isSortedBy;
@@ -97,8 +94,8 @@ export default {
     toggleVisibilityOfFilters() {
       this.visibleFilters = !this.visibleFilters;
     },
-    resetFiltersAndSortBy() {
-      this.recordCriteria.resetFiltersAndSortBy();
+    resetFilters() {
+      this.recordCriteria.reset();
     },
   },
   watch: {
@@ -108,25 +105,21 @@ export default {
     "recordCriteria.status"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.metadata"() {
+    "recordCriteria.metadata.value"() {
       this.newFiltersChanged();
     },
-    "recordCriteria.sortBy"() {
+    "recordCriteria.sortBy.value"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.response.value"() {
+      this.newFiltersChanged();
+    },
+    "recordCriteria.suggestion.value"() {
       this.newFiltersChanged();
     },
   },
-  setup() {
-    return useDatasetsFiltersViewModel();
-  },
-  mounted() {
-    this.$root.$on("on-changed-total-records", (totalRecords) => {
-      this.totalRecords = totalRecords;
-    });
-
-    this.loadMetadata(this.recordCriteria.datasetId);
-  },
-  destroyed() {
-    this.$root.$off("on-changed-total-records");
+  setup(props) {
+    return useDatasetsFiltersViewModel(props);
   },
 };
 </script>
@@ -140,16 +133,36 @@ export default {
     width: 100%;
   }
   &__list {
+    position: relative;
     display: flex;
     gap: $base-space;
     width: 100%;
     padding-top: $base-space;
-  }
-  &__total-records {
-    flex-shrink: 0;
-    margin: 0;
-    @include font-size(13px);
-    color: $black-37;
+    overflow: auto;
+    @extend %hide-scrollbar;
+    &__wrapper {
+      position: relative;
+      &:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: $base-space * 4;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgb(250 250 250) 50%
+        );
+        transition: all 0.3s ease;
+      }
+      &:hover {
+        &:after {
+          width: 0;
+          transition: all 0.3s ease;
+        }
+      }
+    }
   }
   &__status {
     margin-left: auto;
