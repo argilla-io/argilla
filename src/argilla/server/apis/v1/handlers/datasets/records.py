@@ -146,7 +146,6 @@ async def _filter_records_using_search_engine(
     include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List["Record"], int]:
-
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
@@ -223,7 +222,6 @@ async def _get_search_responses(
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
-
     search_records_query = search_records_query or SearchRecordsQuery()
 
     text_query = None
