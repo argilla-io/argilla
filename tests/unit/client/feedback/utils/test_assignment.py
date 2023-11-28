@@ -57,9 +57,16 @@ def mock_workspace_factory():
         mock = Mock(spec=Workspace)
         mock.users = []
 
+        def create_mock_user(user_id):
+            user_mock = Mock()
+            user_mock.id = user_id
+            return user_mock
+
         def add_user(user_id):
-            if user_id not in mock.users:
-                mock.users.append(user_id)
+            # Check if a user with this ID already exists in the list
+            if not any(user.id == user_id for user in mock.users):
+                mock_user = create_mock_user(user_id)
+                mock.users.append(mock_user)
 
         mock.add_user.side_effect = add_user
 

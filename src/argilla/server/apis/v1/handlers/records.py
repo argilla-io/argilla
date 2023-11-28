@@ -138,6 +138,7 @@ async def get_record_suggestions(
 async def upsert_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     suggestion_create: SuggestionCreate,
     current_user: User = Security(auth.get_current_user),
@@ -161,7 +162,7 @@ async def upsert_suggestion(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return await datasets.upsert_suggestion(db, record, question, suggestion_create)
+        return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 

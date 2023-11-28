@@ -1092,16 +1092,39 @@ async def get_suggestion_by_record_id_and_question_id(
     return result.scalar_one_or_none()
 
 
+async def _preload_suggestion_relationships_before_index(db: "AsyncSession", suggestion: Suggestion) -> None:
+    await db.execute(
+        select(Suggestion)
+        .filter_by(id=suggestion.id)
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
+    )
+
+
 async def upsert_suggestion(
-    db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
+    db: "AsyncSession",
+    search_engine: SearchEngine,
+    record: Record,
+    question: Question,
+    suggestion_create: "SuggestionCreate",
 ) -> Suggestion:
     question.parsed_settings.check_response(suggestion_create)
 
-    return await Suggestion.upsert(
-        db,
-        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
-        constraints=[Suggestion.record_id, Suggestion.question_id],
-    )
+    async with db.begin_nested():
+        suggestion = await Suggestion.upsert(
+            db,
+            schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+            constraints=[Suggestion.record_id, Suggestion.question_id],
+            autocommit=False,
+        )
+        await _preload_suggestion_relationships_before_index(db, suggestion)
+        await search_engine.update_record_suggestion(suggestion)
+
+    await db.commit()
+
+    return suggestion
 
 
 async def delete_suggestions(

@@ -310,6 +310,10 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    async def update_record_suggestion(self, suggestion: Suggestion):
+        pass
+
+    @abstractmethod
     async def delete_record_suggestion(self, suggestion: Suggestion):
         pass
 

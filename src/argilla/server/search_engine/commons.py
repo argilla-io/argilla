@@ -319,6 +319,17 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
         )
 
+    async def update_record_suggestion(self, suggestion: Suggestion):
+        index_name = await self._get_index_or_raise(suggestion.record.dataset)
+
+        es_suggestions = self._map_record_suggestions_to_es([suggestion])
+
+        await self._update_document_request(
+            index_name,
+            id=suggestion.record_id,
+            body={"doc": {"suggestions": es_suggestions}},
+        )
+
     async def delete_record_suggestion(self, suggestion: Suggestion):
         index_name = await self._get_index_or_raise(suggestion.record.dataset)
 
