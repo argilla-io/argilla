@@ -130,7 +130,7 @@ export class MetadataFilterList {
   }
 
   commit(): MetadataSearch[] {
-    this.synchronizeFilteredMetadata();
+    this.synchronizeFiltered();
 
     this.latestCommit = this.createCommit();
 
@@ -177,7 +177,7 @@ export class MetadataFilterList {
     return this.metadata.find((cat) => cat.name === category);
   }
 
-  private synchronizeFilteredMetadata() {
+  private synchronizeFiltered() {
     const newFiltered = this.filtered.filter(
       (category) => !this.filteredMetadata.includes(category)
     );

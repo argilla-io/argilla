@@ -117,7 +117,7 @@ export class ResponseFilterList {
   }
 
   commit(): ResponseSearch[] {
-    this.synchronizeFilteredMetadata();
+    this.synchronizeFiltered();
 
     this.latestCommit = this.createCommit();
 
@@ -149,7 +149,7 @@ export class ResponseFilterList {
     return this.responses.find((cat) => cat.name === category);
   }
 
-  private synchronizeFilteredMetadata() {
+  private synchronizeFiltered() {
     const newFiltered = this.filtered.filter(
       (category) => !this.filteredResponses.includes(category)
     );
