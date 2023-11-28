@@ -59,6 +59,9 @@ export default {
     @extend .filter-button;
   }
   &--active {
+    &:has(.filter-button-width-badges__badges) {
+      padding: 6px $base-space;
+    }
     &:hover {
       background: $black-6;
     }
