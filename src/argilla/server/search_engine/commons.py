@@ -169,7 +169,7 @@ def es_mapping_for_question(question: Question) -> dict:
     elif question_type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
         return {"type": "keyword"}
     elif question_type == QuestionType.ranking:
-        return {"type": "nested"}  # TODO: Disable indexing rating for now
+        return {"type": "nested", "properties": {"rank": {"type": "integer"}, "value": {"type": "keyword"}}}
     else:
         raise Exception(f"ElasticSearch mappings for Question of type {question_type} cannot be generated")
 
