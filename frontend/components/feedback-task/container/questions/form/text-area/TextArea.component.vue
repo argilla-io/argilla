@@ -59,7 +59,6 @@ export default {
 
 <style lang="scss" scoped>
 $suggestion-color: palette(yellow, 400);
-$suggestion-color-darken: darken($suggestion-color, 24%);
 $suggestion-color-lighten: lighten($suggestion-color, 24%);
 
 .wrapper {
@@ -70,14 +69,14 @@ $suggestion-color-lighten: lighten($suggestion-color, 24%);
 .card-with-tabs {
   &.--suggestion {
     :deep(.card-with-tabs__content) {
-      border-color: $suggestion-color-darken;
+      border-color: $suggestion-color;
       background: $suggestion-color-lighten;
     }
   }
   :deep(.card-with-tabs__tab.--suggestion) {
-    border-top-color: $suggestion-color-darken;
-    border-left-color: $suggestion-color-darken;
-    border-right-color: $suggestion-color-darken;
+    border-top-color: $suggestion-color;
+    border-left-color: $suggestion-color;
+    border-right-color: $suggestion-color;
     border-bottom-color: $suggestion-color-lighten;
     .button {
       background: $suggestion-color-lighten;
