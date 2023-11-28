@@ -30,6 +30,11 @@ Learn how to configure a `FeedbackDataset` and add `FeedbackRecords` to it.
 
 Learn how to add metadata properties to a `FeedbackDataset`.
 ```
+```{grid-item-card} Adding Vectors to a FeedbackDataset
+:link: feedback/end2end_examples/add-vectors-004.html
+
+Learn how to add vectors and vector settings to a `FeedbackDataset`.
+```
 ````
 
 *Advanced*
