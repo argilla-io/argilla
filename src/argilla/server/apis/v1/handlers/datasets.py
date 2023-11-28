@@ -229,6 +229,12 @@ async def _get_search_responses(
             record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
             await record.awaitable_attrs.vectors
 
+            if not record.vector_value_by_vector_settings(vector_settings):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
+                )
+
     if (
         text_query
         and text_query.field
@@ -319,8 +325,12 @@ async def _filter_records_using_search_engine(
     )
 
     record_ids = [response.record_id for response in search_responses.items]
+    user_id = user.id if user else None
+
     return (
-        await datasets.get_records_by_ids(db=db, dataset_id=dataset.id, records_ids=record_ids, include=include),
+        await datasets.get_records_by_ids(
+            db=db, dataset_id=dataset.id, user_id=user_id, records_ids=record_ids, include=include
+        ),
         search_responses.total,
     )
 

@@ -17,20 +17,28 @@ from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
 from argilla.client.feedback.dataset import FeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import LabelQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
 from argilla.client.feedback.training.schemas import (
+    LabelQuestion,
+    LabelQuestionUnification,
+    RatingQuestion,
+    RatingQuestionUnification,
     TrainingTask,
 )
 from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
 
 from tests.integration.client.feedback.helpers import (
     formatting_func_sentence_transformers,
+    formatting_func_sentence_transformers_all_lists,
     formatting_func_sentence_transformers_case_1_b,
     formatting_func_sentence_transformers_case_2,
     formatting_func_sentence_transformers_case_3_a,
     formatting_func_sentence_transformers_case_3_b,
     formatting_func_sentence_transformers_case_4,
+    formatting_func_sentence_transformers_rating_question,
 )
 from tests.integration.training.helpers import train_with_cleanup
 
@@ -56,10 +64,12 @@ def formatting_func_errored(sample):
     "formatting_func",
     [
         formatting_func_sentence_transformers,
+        formatting_func_sentence_transformers_all_lists,
         formatting_func_sentence_transformers_case_1_b,
         formatting_func_sentence_transformers_case_2,
         formatting_func_sentence_transformers_case_3_b,
         formatting_func_sentence_transformers_case_4,
+        formatting_func_sentence_transformers_rating_question,
     ],
 )
 @pytest.mark.usefixtures(
@@ -84,7 +94,12 @@ def test_prepare_for_training_sentence_transformers(
     )
     dataset.add_records(records=feedback_dataset_records * 2)
 
-    task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+    if formatting_func.__name__ == "formatting_func_sentence_transformers_rating_question":
+        label_strategy = RatingQuestionUnification(question=dataset.question_by_name("question-2"), strategy="majority")
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func, label_strategy=label_strategy)
+    else:
+        task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
+
     train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
 
     assert isinstance(train_dataset, list)
@@ -126,6 +141,38 @@ def test_prepare_for_training_sentence_transformers(
 
     assert len(eval_trainer.predict([["first sentence", "second sentence"], ["to compare", "another one"]])) == 2
     assert len(eval_trainer.predict(["first sentence", ["to compare", "another one"]])) == 2
+
+
+def test_task_with_different_naming():
+    dataset = FeedbackDataset(
+        fields=[
+            TextField(name="query"),
+            TextField(name="retrieved_document_1"),
+        ],
+        questions=[
+            LabelQuestion(
+                name="sentence_similarity",
+                labels={"0": "Not-similar", "1": "Missing-information", "2": "Similar"},
+            ),
+        ],
+    )
+
+    records = [
+        FeedbackRecord(
+            fields={"query": "some text", "retrieved_document_1": "retrieved data"},
+            responses=[{"values": {"sentence_similarity": {"value": value}}}],
+        )
+        for value in ["0", "1", "2"]
+    ]
+
+    dataset.add_records(records)
+
+    task = TrainingTask.for_sentence_similarity(
+        texts=[dataset.field_by_name("query"), dataset.field_by_name("retrieved_document_1")],
+        label=dataset.question_by_name("sentence_similarity"),
+    )
+    train_dataset = dataset.prepare_for_training(framework=__FRAMEWORK__, task=task)
+    assert all(example.label == label for example, label in zip(train_dataset, [0, 1, 2]))
 
 
 @pytest.mark.parametrize("cross_encoder", [False, True])
