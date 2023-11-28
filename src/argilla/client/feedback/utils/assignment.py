@@ -241,7 +241,7 @@ def assign_workspaces(
                     except:
                         pass
 
-                wk_assignments[workspace_name] = [User.from_id(user).username for user in workspace.users]
+                wk_assignments[workspace_name] = [User.from_id(user.id).username for user in workspace.users]
 
             continue
 
@@ -257,6 +257,6 @@ def assign_workspaces(
             except:
                 pass
 
-        wk_assignments[workspace_name] = [User.from_id(user).username for user in workspace.users]
+        wk_assignments[workspace_name] = [User.from_id(user.id).username for user in workspace.users]
 
     return wk_assignments
