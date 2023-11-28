@@ -59,7 +59,7 @@ class ConfigurationValues extends Filter {
   }
 
   get name() {
-    return "value";
+    return "Suggestion values";
   }
 
   get isTerms() {
@@ -107,14 +107,14 @@ class ConfigurationValues extends Filter {
 
 class ConfigurationScore extends FilterWithScore {
   constructor(public readonly min: number, public readonly max: number) {
-    super("score", min, max);
+    super("Score", min, max);
   }
 }
 
 class ConfigurationAgent extends FilterWithOption {
   constructor(private readonly agents: string[] = []) {
     super(
-      "agent",
+      "Agent",
       agents.map((value) => {
         return { selected: false, value };
       })
