@@ -103,7 +103,7 @@ export default {
   gap: $base-space;
   padding: $base-space 12px;
   justify-content: space-between;
-  max-width: min(600px, 100%);
+  max-width: 100%;
   margin-right: auto;
   border-radius: $border-radius;
   color: $black-54;
@@ -159,6 +159,11 @@ export default {
   :deep(.dropdown__header) {
     background: none;
     cursor: pointer;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
   }
   :deep(.dropdown__content) {
     left: -$base-space;

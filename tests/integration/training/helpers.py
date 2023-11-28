@@ -32,6 +32,6 @@ def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = T
 
 def cleanup_spacy_config(trainer: ArgillaTrainer) -> None:
     for split in ["train", "dev"]:
-        path = trainer._trainer.config["paths"][split]
+        path = trainer._trainer.trainer_kwargs["paths"][split]
         if path is not None and Path(path).exists():
             os.remove(path)

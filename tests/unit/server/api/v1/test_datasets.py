@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla.server.apis.v1.handlers.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla.server.enums import (
     DatasetStatus,
     RecordInclude,

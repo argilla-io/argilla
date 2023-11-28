@@ -1,18 +1,17 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent
-      :question="question"
-      :showSuggestion="showSuggestion"
-    />
+    <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
       v-model="question.answer.values"
       :componentId="question.id"
+      :suggestions="question.suggestion?.suggestedAnswer"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="false"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
       @on-focus="onFocus"
+      @on-selected="onSelected"
     />
   </div>
 </template>
@@ -24,10 +23,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     isFocused: {
       type: Boolean,
@@ -47,14 +42,8 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-  },
-  watch: {
-    "question.answer.values": {
-      deep: true,
-      handler(newOptions) {
-        if (newOptions.some((option) => option.isSelected))
-          this.$emit("on-user-answer");
-      },
+    onSelected() {
+      this.$emit("on-user-answer");
     },
   },
 };

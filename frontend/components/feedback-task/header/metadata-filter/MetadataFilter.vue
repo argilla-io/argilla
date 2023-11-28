@@ -1,20 +1,19 @@
 <template>
-  <div
-    class="metadata-filter"
-    v-if="!!metadataFilters && metadataFilters.hasFilters"
-  >
+  <div class="metadata-filter" v-if="metadataFilters.hasFilters">
     <BaseDropdown
+      boundary="viewport"
       :visible="visibleDropdown"
       @visibility="onMetadataToggleVisibility"
     >
       <span slot="dropdown-header">
-        <MetadataButton
+        <FilterButtonWithBadges
           :is-active="visibleDropdown"
           :badges="appliedCategoriesFilters"
           :active-badge="visibleCategory"
           @click-on-badge="openCategoryFilter"
-          @click-on-clear="removeCategoryFilters"
+          @click-on-clear="clearCategoryFilter"
           @click-on-clear-all="clearAllCategories"
+          :name="$t('metadata')"
         />
       </span>
       <span
@@ -22,8 +21,9 @@
         slot="dropdown-content"
         class="metadata-filter__container"
       >
-        <MetadataCategoriesSelector
+        <CategoriesSelector
           v-if="!visibleCategory"
+          name="metadataCategories"
           class="metadata-filter__categories"
           :categories="metadataFilters.categories"
           @select-category="selectMetadataCategory"
@@ -37,12 +37,12 @@
             <svgicon name="chevron-left" width="12" height="12" />
           </div>
           <div class="metadata-filter__content">
-            <MetadataLabelsSelector
+            <LabelsSelector
               v-if="visibleCategory.isTerms"
-              :metadata="visibleCategory"
+              :filter="visibleCategory"
             />
             <div v-else>
-              <MetadataRangeSelector :metadata="visibleCategory" />
+              <RangeSelector :filter="visibleCategory" />
             </div>
           </div>
         </template>
@@ -74,7 +74,6 @@ export default {
     return {
       visibleDropdown: false,
       visibleCategory: null,
-      selectedOptions: [],
       appliedCategoriesFilters: [],
     };
   },
@@ -84,7 +83,11 @@ export default {
       this.visibleCategory = null;
     },
     selectMetadataCategory(category) {
-      this.visibleCategory = category;
+      this.visibleCategory = null;
+
+      this.$nextTick(() => {
+        this.visibleCategory = category;
+      });
     },
     applyFilter() {
       this.visibleDropdown = false;
@@ -107,7 +110,7 @@ export default {
 
       this.selectMetadataCategory(category);
     },
-    removeCategoryFilters(category) {
+    clearCategoryFilter(category) {
       category.clear();
 
       this.applyFilter();
@@ -122,7 +125,7 @@ export default {
     updateAppliedCategoriesFromMetadataFilter() {
       if (!this.metadataFilters) return;
 
-      this.metadataFilters.initializeWith(this.metadataFiltered);
+      this.metadataFilters.complete(this.metadataFiltered);
 
       this.appliedCategoriesFilters = this.metadataFilters.filteredCategories;
     },
@@ -146,13 +149,6 @@ export default {
       },
     },
     metadataFiltered() {
-      if (
-        !this.metadataFilters.hasChangesSinceLatestCommitWith(
-          this.metadataFiltered
-        )
-      )
-        return;
-
       this.updateAppliedCategoriesFromMetadataFilter();
     },
   },

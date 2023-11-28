@@ -57,6 +57,7 @@ export default {
   &--active {
     background: $black-4;
     @extend .filter-button;
+    padding: calc($base-space / 2) $base-space;
   }
   &--active {
     &:hover {
@@ -66,10 +67,8 @@ export default {
   &__button.button {
     padding: 0;
     border-radius: 0;
-    @include font-size(12px);
-    .filters & {
-      @include font-size(14px);
-    }
+    @include font-size(14px);
+    line-height: 1.3;
   }
   & > * {
     flex-shrink: 0;

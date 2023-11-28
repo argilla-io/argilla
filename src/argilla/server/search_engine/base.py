@@ -11,10 +11,23 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import dataclasses
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Type, TypeVar, Union
+from typing import (
+    Any,
+    AsyncGenerator,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator
@@ -32,7 +45,6 @@ from argilla.server.models import Dataset, MetadataProperty, Record, Response, U
 
 __all__ = [
     "SearchEngine",
-    "UserResponse",
     "TextQuery",
     "MetadataFilter",
     "TermsMetadataFilter",
@@ -46,12 +58,70 @@ __all__ = [
     "TermsMetadataMetrics",
     "IntegerMetadataMetrics",
     "FloatMetadataMetrics",
+    "SuggestionFilterScope",
+    "ResponseFilterScope",
+    "MetadataFilterScope",
+    "RecordFilterScope",
+    "FilterScope",
+    "TermsFilter",
+    "RangeFilter",
+    "AndFilter",
+    "Filter",
+    "Order",
 ]
 
 
-class UserResponse(BaseModel):
-    values: Optional[Dict[str, Any]]
-    status: ResponseStatus
+@dataclasses.dataclass
+class SuggestionFilterScope:
+    question: str
+    property: str
+
+
+@dataclasses.dataclass
+class ResponseFilterScope:
+    question: Optional[str] = None
+    property: Optional[str] = None
+    user: Optional[User] = None
+
+
+@dataclasses.dataclass
+class MetadataFilterScope:
+    metadata_property: str
+
+
+@dataclasses.dataclass
+class RecordFilterScope:
+    property: str
+
+
+FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope, RecordFilterScope]
+
+
+@dataclasses.dataclass
+class TermsFilter:
+    scope: FilterScope
+    values: List[str]
+
+
+@dataclasses.dataclass
+class RangeFilter:
+    scope: FilterScope
+    ge: Optional[float] = None
+    le: Optional[float] = None
+
+
+@dataclasses.dataclass
+class AndFilter:
+    filters: List["Filter"]
+
+
+Filter = Union[AndFilter, TermsFilter, RangeFilter]
+
+
+@dataclasses.dataclass
+class Order:
+    scope: FilterScope
+    order: SortOrder
 
 
 class TextQuery(BaseModel):
@@ -246,12 +316,15 @@ class SearchEngine(metaclass=ABCMeta):
         self,
         dataset: Dataset,
         query: Optional[Union[TextQuery, str]] = None,
-        # TODO(@frascuchon): The search records method should receive a generic list of filters
+        filter: Optional[Filter] = None,
+        sort: Optional[List[Order]] = None,
+        # TODO: remove them and keep filter and order
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        sort_by: Optional[List[SortBy]] = None,
+        # END TODO
         offset: int = 0,
         limit: int = 100,
-        sort_by: Optional[List[SortBy]] = None,
     ) -> SearchResponses:
         pass
 
@@ -274,8 +347,11 @@ class SearchEngine(metaclass=ABCMeta):
         value: Optional[List[float]] = None,
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
+        filter: Optional[Filter] = None,
+        # TODO: remove them and keep filter
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         metadata_filters: Optional[List[MetadataFilter]] = None,
+        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,

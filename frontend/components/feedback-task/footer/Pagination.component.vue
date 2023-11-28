@@ -1,5 +1,8 @@
 <template>
   <div class="pagination">
+    <span class="pagination__info" v-if="!!items">
+      {{ currentPaginationRange }} of {{ items }}</span
+    >
     <div class="pagination__buttons">
       <BaseButton
         class="pagination__button"
@@ -12,8 +15,7 @@
             : $t('shortcuts.pagination.go_to_previous_record')
         "
       >
-        <svgicon name="chevron-left" width="8" height="8" />
-        {{ prevButtonMessage }}
+        <svgicon name="chevron-left" width="12" height="12" />
       </BaseButton>
 
       <BaseButton
@@ -26,8 +28,7 @@
             : $t('shortcuts.pagination.go_to_next_record')
         "
       >
-        {{ nextButtonMessage }}
-        <svgicon name="chevron-right" width="8" height="8" />
+        <svgicon name="chevron-right" width="12" height="12" />
       </BaseButton>
     </div>
   </div>
@@ -41,21 +42,35 @@ export default {
       type: Number,
       default: () => 1,
     },
-    nextButtonMessage: {
-      type: String,
-      default: () => "Next",
+    items: {
+      type: Number,
+      default: () => 0,
     },
-    prevButtonMessage: {
-      type: String,
-      default: () => "Prev",
+    itemsPerPage: {
+      type: Number,
+      default: () => 1,
     },
   },
   computed: {
     isFirstPage() {
       return this.currentPage === 1;
     },
-    pageFromRoute() {
-      return parseFloat(this.$route.query?._page) || 1;
+    // TODO: Do PageCriteria to support this
+    totalPages() {
+      return Math.ceil(this.items / this.itemsPerPage);
+    },
+    currentPaginationRange() {
+      return this.itemsPerPage > 1
+        ? `${this.currentRangeFrom} - ${this.currentRangeTo}`
+        : this.currentPage;
+    },
+    currentRangeFrom() {
+      return this.itemsPerPage * this.currentPage - (this.itemsPerPage - 1);
+    },
+    currentRangeTo() {
+      return this.itemsPerPage * this.currentPage > this.items
+        ? this.items
+        : this.itemsPerPage * this.currentPage;
     },
   },
   mounted() {
@@ -106,46 +121,25 @@ export default {
 
 <style lang="scss" scoped>
 .pagination {
-  display: grid;
-  grid-template-areas: "left center right";
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 56px;
-  background: #fafafa;
-  border-top: 1px solid $black-10;
-  &__buttons {
-    grid-area: center;
-    display: flex;
-    gap: $base-space;
-    justify-content: center;
-    align-items: center;
-  }
-  &__page-number-area {
-    display: flex;
-    gap: $base-space;
-  }
-  &__button {
-    min-width: 30px;
-    min-height: 30px;
-    justify-content: center;
-    padding: 0 10px;
-    .pagination__page-number-area & {
-      padding: 5px;
-    }
-    &:hover:not([disabled]) {
-      background: $black-4;
-    }
-  }
-}
-
-.number-of-records-by-page-area {
-  grid-area: right;
-  padding-right: $base-space * 7;
-}
-
-.total-records-area {
-  grid-area: left;
   display: flex;
+  gap: $base-space;
+  justify-content: right;
   align-items: center;
-  padding-left: $base-space * 7;
+  &__buttons {
+    display: flex;
+    gap: $base-space;
+  }
+  &__info {
+    @include font-size(13px);
+    color: $black-37;
+  }
+  &__button.button {
+    justify-content: center;
+    padding: $base-space;
+    background: $black-4;
+    &:hover:not([disabled]) {
+      background: $black-6;
+    }
+  }
 }
 </style>

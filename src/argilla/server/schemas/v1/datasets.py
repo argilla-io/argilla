@@ -22,7 +22,7 @@ from pydantic import Field as PydanticField
 from pydantic.generics import GenericModel
 from pydantic.utils import GetterDict
 
-from argilla.server.enums import RecordInclude, SimilarityOrder
+from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -96,6 +96,15 @@ RECORDS_CREATE_MAX_ITEMS = 1000
 
 RECORDS_UPDATE_MIN_ITEMS = 1
 RECORDS_UPDATE_MAX_ITEMS = 1000
+
+TERMS_FILTER_VALUES_MIN_ITEMS = 1
+TERMS_FILTER_VALUES_MAX_ITEMS = 250
+
+FILTERS_AND_MIN_ITEMS = 1
+FILTERS_AND_MAX_ITEMS = 50
+
+SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
+SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
 
 
 class Dataset(BaseModel):
@@ -237,15 +246,15 @@ class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     )
 
     @validator("options")
-    def check_option_value_range(cls, value: List[RatingQuestionSettingsOption]):
+    def check_option_value_range(cls, options: List[RatingQuestionSettingsOption]):
         """Validator to control all values are in allowed range 1 <= x <= 10"""
-        for option in value:
+        for option in options:
             if not RATING_LOWER_VALUE_ALLOWED <= option.value <= RATING_UPPER_VALUE_ALLOWED:
                 raise ValueError(
                     f"Option value {option.value!r} out of range "
                     f"[{RATING_LOWER_VALUE_ALLOWED!r}, {RATING_UPPER_VALUE_ALLOWED!r}]"
                 )
-        return value
+        return options
 
 
 class ValueTextQuestionSettingsOption(BaseModel):
@@ -600,6 +609,16 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
     type: Literal[MetadataPropertyType.float]
 
 
+MetadataPropertyName = Annotated[
+    str,
+    PydanticField(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    ),
+]
+
 MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
     PydanticField(..., description="The title of the metadata property"),
@@ -612,12 +631,7 @@ MetadataPropertySettingsCreate = Annotated[
 
 
 class MetadataPropertyCreate(BaseModel):
-    name: str = PydanticField(
-        ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
-        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    )
+    name: MetadataPropertyName
     title: MetadataPropertyTitle
     settings: MetadataPropertySettingsCreate
     visible_for_annotators: bool = True
@@ -702,20 +716,82 @@ class Query(BaseModel):
     text: Optional[TextQuery] = None
     vector: Optional[VectorQuery] = None
 
-    @root_validator
-    def check_required(cls, values: dict) -> dict:
-        """Check that either 'text' or 'vector' is provided"""
-        text = values.get("text")
-        vector = values.get("vector")
 
-        if text is None and vector is None:
-            raise ValueError("Either 'text' or 'vector' must be provided")
+class RecordFilterScope(BaseModel):
+    entity: Literal["record"]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
+
+
+class ResponseFilterScope(BaseModel):
+    entity: Literal["response"]
+    question: Optional[QuestionName]
+    property: Optional[Literal["status"]]
+
+
+class SuggestionFilterScope(BaseModel):
+    entity: Literal["suggestion"]
+    question: QuestionName
+    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
+
+
+class MetadataFilterScope(BaseModel):
+    entity: Literal["metadata"]
+    metadata_property: MetadataPropertyName
+
+
+FilterScope = Annotated[
+    Union[RecordFilterScope, ResponseFilterScope, SuggestionFilterScope, MetadataFilterScope],
+    PydanticField(..., discriminator="entity"),
+]
+
+
+class TermsFilter(BaseModel):
+    type: Literal["terms"]
+    scope: FilterScope
+    values: List[str] = PydanticField(
+        ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
+    )
+
+
+class RangeFilter(BaseModel):
+    type: Literal["range"]
+    scope: FilterScope
+    ge: Optional[float]
+    le: Optional[float]
+
+    @root_validator
+    def check_ge_and_le(cls, values: dict) -> dict:
+        ge, le = values.get("ge"), values.get("le")
+
+        if ge is None and le is None:
+            raise ValueError("At least one of 'ge' or 'le' must be provided")
+
+        if ge is not None and le is not None and ge > le:
+            raise ValueError("'ge' must have a value less than or equal to 'le'")
 
         return values
 
 
+Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
+
+
+class Filters(BaseModel):
+    and_: List[Filter] = PydanticField(
+        None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS
+    )
+
+
+class Order(BaseModel):
+    scope: FilterScope
+    order: SortOrder
+
+
 class SearchRecordsQuery(BaseModel):
-    query: Query
+    query: Optional[Query]
+    filters: Optional[Filters]
+    sort: Optional[List[Order]] = PydanticField(
+        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+    )
 
 
 class SearchRecord(BaseModel):
@@ -726,3 +802,17 @@ class SearchRecord(BaseModel):
 class SearchRecordsResult(BaseModel):
     items: List[SearchRecord]
     total: int = 0
+
+
+class SearchSuggestionOptionsQuestion(BaseModel):
+    id: UUID
+    name: str
+
+
+class SearchSuggestionOptions(BaseModel):
+    question: SearchSuggestionOptionsQuestion
+    agents: List[str]
+
+
+class SearchSuggestionsOptions(BaseModel):
+    items: List[SearchSuggestionOptions]

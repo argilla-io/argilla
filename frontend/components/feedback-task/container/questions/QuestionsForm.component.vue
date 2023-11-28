@@ -1,10 +1,7 @@
 <template>
   <form
     class="questions-form"
-    :class="{
-      '--focused-form':
-        isSubmittedTouched || (formHasFocus && interactionCount > 1),
-    }"
+    :class="questionFormClass"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
@@ -44,7 +41,6 @@
 
       <QuestionsComponent
         :questions="record.questions"
-        :showSuggestion="record.isPending || record.isDraft"
         :autofocusPosition="autofocusPosition"
         @on-focus="updateQuestionAutofocus"
       />
@@ -114,6 +110,16 @@ export default {
     return useQuestionFormViewModel();
   },
   computed: {
+    questionFormClass() {
+      if (this.isSubmitting) return "--submitted --waiting";
+      if (this.isDiscarding) return "--discarded --waiting";
+
+      if (
+        this.isSubmittedTouched ||
+        (this.formHasFocus && this.interactionCount > 1)
+      )
+        return "--focused-form";
+    },
     formHasFocus() {
       return this.autofocusPosition || this.autofocusPosition == 0;
     },
@@ -251,6 +257,7 @@ export default {
   flex-direction: column;
   flex-basis: clamp(33%, 520px, 40%);
   max-height: 100%;
+  min-width: 0;
   justify-content: space-between;
   border-radius: $border-radius-m;
   border: 1px solid transparent;
@@ -287,20 +294,21 @@ export default {
     scroll-behavior: smooth;
   }
 
-  &.--pending {
-    border-color: transparent;
-    &:not(.--focused-form) {
-      box-shadow: $shadow;
-    }
+  &.--pending,
+  &.--draft {
+    border-color: $black-10;
   }
   &.--discarded {
-    border-color: #c3c3c3;
+    border-color: $discarded-color;
   }
   &.--submitted {
-    border-color: $primary-color;
+    border-color: $submitted-color;
   }
   &.--focused-form {
     border-color: palette(brown);
+  }
+  &.--waiting .questions-form__content {
+    opacity: 0.7;
   }
 }
 
