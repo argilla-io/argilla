@@ -319,6 +319,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
         )
 
+    async def delete_record_suggestion(self, suggestion: Suggestion):
+        index_name = await self._get_index_or_raise(suggestion.record.dataset)
+
+        await self._update_document_request(
+            index_name,
+            id=suggestion.record_id,
+            body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
+        )
+
     async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
         index_name = await self._get_index_or_raise(dataset)
 

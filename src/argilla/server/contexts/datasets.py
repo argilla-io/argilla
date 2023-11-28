@@ -1092,6 +1092,7 @@ async def upsert_suggestion(
 
 async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
     params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
+
     await Suggestion.delete_many(db=db, params=params)
 
 
@@ -1099,13 +1100,24 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
     result = await db.execute(
         select(Suggestion)
         .filter_by(id=suggestion_id)
-        .options(selectinload(Suggestion.record).selectinload(Record.dataset))
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
     )
+
     return result.scalar_one_or_none()
 
 
-async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
-    return await suggestion.delete(db)
+async def delete_suggestion(db: "AsyncSession", search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
+    async with db.begin_nested():
+        suggestion = await suggestion.delete(db, autocommit=False)
+        # TODO: Should we touch here dataset last_activity?
+        await search_engine.delete_record_suggestion(suggestion)
+
+    await db.commit()
+
+    return suggestion
 
 
 async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Optional[MetadataProperty]:
