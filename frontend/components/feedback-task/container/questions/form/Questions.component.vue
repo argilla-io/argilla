@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @keydown="showKeyboardHelper">
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
@@ -26,6 +26,7 @@
           ref="singleLabel"
           :question="question"
           :showSuggestion="showSuggestion"
+          :showShortcutsHelper="shortcutsHelper.showShortcutsHelper"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
@@ -36,6 +37,7 @@
           v-if="question.isMultiLabelType"
           :question="question"
           :showSuggestion="showSuggestion"
+          :showShortcutsHelper="shortcutsHelper.showShortcutsHelper"
           :visibleOptions="question.settings.visible_options"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -65,6 +67,7 @@
 </template>
 
 <script>
+import { useQuestionsViewModel } from "./useQuestionsViewModel";
 export default {
   name: "QuestionsComponent",
   props: {
@@ -156,6 +159,9 @@ export default {
     checkIfQuestionIsFocused(index) {
       return this.autofocusPosition === index;
     },
+  },
+  setup() {
+    return useQuestionsViewModel();
   },
 };
 </script>

@@ -2,7 +2,8 @@
   <form
     class="questions-form"
     :class="{
-      '--focused-form': isTouched || (formHasFocus && interactionCount > 1),
+      '--focused-form':
+        isSubmittedTouched || (formHasFocus && interactionCount > 1),
     }"
     @submit.prevent="onSubmit"
     v-click-outside="onClickOutside"
@@ -104,6 +105,7 @@ export default {
     return {
       autofocusPosition: 0,
       interactionCount: 0,
+      isSubmittedTouched: false,
       isTouched: false,
       userComesFromOutside: false,
     };
@@ -123,7 +125,7 @@ export default {
     },
     isSubmitButtonDisabled() {
       if (this.record.isSubmitted)
-        return !this.isTouched || !this.questionAreCompletedCorrectly;
+        return !this.isSubmittedTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
     },
@@ -135,15 +137,9 @@ export default {
       handler() {
         if (this.record.isModified) this.saveDraft(this.record);
 
-        this.isTouched = this.record.isSubmitted && this.record.isModified;
+        this.isTouched = this.record.isModified;
+        this.isSubmittedTouched = this.isTouched && this.record.isSubmitted;
       },
-    },
-    isSubmitButtonDisabled() {
-      if (this.record.questions.length > 1) return;
-
-      this.$nextTick(() => {
-        setTimeout(() => this.onSubmit(), 100);
-      });
     },
   },
   mounted() {
@@ -153,6 +149,17 @@ export default {
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
+    tryToSubmitWithKeyboard() {
+      if (!this.isTouched) return;
+      if (this.isSubmitButtonDisabled) return;
+      if (this.record.questions.length > 1) return;
+
+      const question = this.record.questions[0];
+
+      if (question.isSingleLabelType || question.isRatingType) {
+        setTimeout(() => this.onSubmit(), 300);
+      }
+    },
     focusOnFirstQuestionFromOutside(event) {
       if (!this.userComesFromOutside) return;
       if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
@@ -187,7 +194,7 @@ export default {
           break;
         }
         case "Enter": {
-          this.onSubmit();
+          if (shiftKey) this.onSubmit();
           break;
         }
         case "Space": {
@@ -201,7 +208,10 @@ export default {
           if (shiftKey) this.onDiscard();
           break;
         }
-        default:
+        default: {
+          this.tryToSubmitWithKeyboard();
+          break;
+        }
       }
     },
     async onDiscard() {

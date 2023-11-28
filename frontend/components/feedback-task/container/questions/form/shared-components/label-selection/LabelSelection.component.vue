@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="container"
-    @keydown="keyboardHandler"
-    @keydown.ctrl="showShortcuts = !showShortcuts"
-  >
+  <div class="container" @keydown="keyboardHandler">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -68,7 +64,7 @@
           :for="option.id"
           :title="option.text"
         >
-          <span v-if="showShortcuts">⌨️ {{ index + 1 }}</span>
+          <span v-if="showShortcutsHelper">⌨️ {{ index + 1 }}</span>
           {{ option.text }}
         </label>
       </div>
@@ -109,6 +105,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -120,16 +120,12 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
-      showShortcuts: window.showShortcuts,
     };
   },
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
   },
   watch: {
-    showShortcuts(newValue) {
-      window.showShortcuts = newValue;
-    },
     isFocused: {
       immediate: true,
       handler(newValue) {
