@@ -120,9 +120,8 @@ Filter = Union[AndFilter, TermsFilter, RangeFilter]
 
 @dataclasses.dataclass
 class Order:
-    def __init__(self, scope: FilterScope, order: SortOrder):
-        self.scope = scope
-        self.order = order
+    scope: FilterScope
+    order: SortOrder
 
 
 class TextQuery(BaseModel):
