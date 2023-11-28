@@ -175,6 +175,7 @@ async def upsert_suggestion(
 async def delete_record_suggestions(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
@@ -195,7 +196,7 @@ async def delete_record_suggestions(
             detail=f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once",
         )
 
-    await datasets.delete_suggestions(db, record, suggestion_ids)
+    await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)

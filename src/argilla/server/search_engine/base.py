@@ -22,7 +22,6 @@ from typing import (
     Generic,
     Iterable,
     List,
-    Literal,
     Optional,
     Type,
     TypeVar,
@@ -36,7 +35,6 @@ from pydantic.generics import GenericModel
 from argilla.server.enums import (
     MetadataPropertyType,
     RecordSortField,
-    ResponseStatus,
     ResponseStatusFilter,
     SimilarityOrder,
     SortOrder,
@@ -313,6 +311,10 @@ class SearchEngine(metaclass=ABCMeta):
 
     @abstractmethod
     async def update_record_suggestion(self, suggestion: Suggestion):
+        pass
+
+    @abstractmethod
+    async def delete_record_suggestion(self, suggestion: Suggestion):
         pass
 
     @abstractmethod
