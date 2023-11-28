@@ -83,7 +83,11 @@ export default {
       this.visibleCategory = null;
     },
     selectMetadataCategory(category) {
-      this.visibleCategory = category;
+      this.visibleCategory = null;
+
+      this.$nextTick(() => {
+        this.visibleCategory = category;
+      });
     },
     applyFilter() {
       this.visibleDropdown = false;

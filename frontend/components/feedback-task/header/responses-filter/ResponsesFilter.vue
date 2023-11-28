@@ -74,7 +74,11 @@ export default {
       this.selectedResponse = null;
     },
     selectResponse(response) {
-      this.selectedResponse = response;
+      this.selectedResponse = null;
+
+      this.$nextTick(() => {
+        this.selectedResponse = response;
+      });
     },
     applyFilter() {
       this.visibleDropdown = false;

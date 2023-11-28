@@ -115,8 +115,13 @@ export default {
       this.selectedConfiguration = null;
     },
     selectSuggestion(suggestion) {
-      this.selectedSuggestion = suggestion;
-      this.selectedConfiguration = null;
+      this.selectedSuggestion = null;
+
+      this.$nextTick(() => {
+        this.selectedSuggestion = suggestion;
+
+        this.selectedConfiguration = null;
+      });
     },
     selectConfiguration(configuration) {
       this.selectedConfiguration = configuration;
