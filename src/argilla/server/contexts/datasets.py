@@ -13,7 +13,21 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 import sqlalchemy
@@ -1090,10 +1104,18 @@ async def upsert_suggestion(
     )
 
 
-async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
+async def delete_suggestions(
+    db: "AsyncSession", search_engine: SearchEngine, record: Record, suggestions_ids: List[UUID]
+) -> None:
     params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
+    suggestions = await list_suggestions_by_id_and_record_id(db, suggestions_ids, record.id)
 
-    await Suggestion.delete_many(db=db, params=params)
+    async with db.begin_nested():
+        await Suggestion.delete_many(db=db, params=params, autocommit=False)
+        for suggestion in suggestions:
+            await search_engine.delete_record_suggestion(suggestion)
+
+    await db.commit()
 
 
 async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Union[Suggestion, None]:
@@ -1107,6 +1129,21 @@ async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Uni
     )
 
     return result.scalar_one_or_none()
+
+
+async def list_suggestions_by_id_and_record_id(
+    db: "AsyncSession", suggestion_ids: List[UUID], record_id: UUID
+) -> Sequence[Suggestion]:
+    result = await db.execute(
+        select(Suggestion)
+        .filter(Suggestion.record_id == record_id, Suggestion.id.in_(suggestion_ids))
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
+    )
+
+    return result.scalars().all()
 
 
 async def delete_suggestion(db: "AsyncSession", search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:

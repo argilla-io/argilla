@@ -14,6 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Type
+from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
@@ -1340,7 +1341,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(
-        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
     ) -> None:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1360,6 +1361,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
+
+        expected_calls = [call(suggestion) for suggestion in suggestions]
+        mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
 
     async def test_delete_record_suggestions_with_no_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict
