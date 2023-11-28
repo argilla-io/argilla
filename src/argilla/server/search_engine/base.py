@@ -41,7 +41,7 @@ from argilla.server.enums import (
     SimilarityOrder,
     SortOrder,
 )
-from argilla.server.models import Dataset, MetadataProperty, Record, Response, User, Vector, VectorSettings
+from argilla.server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
 
 __all__ = [
     "SearchEngine",
@@ -309,6 +309,10 @@ class SearchEngine(metaclass=ABCMeta):
 
     @abstractmethod
     async def delete_record_response(self, response: Response):
+        pass
+
+    @abstractmethod
+    async def update_record_suggestion(self, suggestion: Suggestion):
         pass
 
     @abstractmethod

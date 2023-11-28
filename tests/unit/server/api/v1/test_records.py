@@ -1214,7 +1214,7 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
     async def test_create_record_suggestion_update(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1238,6 +1238,8 @@ class TestSuiteRecords:
             "agent": None,
         }
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
+        mock_search_engine.update_record_suggestion.assert_called_once_with(suggestion)
 
     @pytest.mark.parametrize(
         "payload",
