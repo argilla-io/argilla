@@ -151,7 +151,9 @@ def elasticsearch_config():
 
 @pytest_asyncio.fixture(scope="function")
 async def owner() -> User:
-    return await OwnerFactory.create(first_name="Owner", username="owner", api_key="owner.apikey")
+    return await OwnerFactory.create(
+        first_name="Owner", username="owner", api_key="owner.apikey", workspaces=[Workspace(name="owner")]
+    )
 
 
 @pytest_asyncio.fixture(scope="function")

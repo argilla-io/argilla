@@ -44,6 +44,11 @@ from argilla.client.datasets import (
     DatasetForTextClassification,
     DatasetForTokenClassification,
 )
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
@@ -356,6 +361,25 @@ def test_log_something(argilla_user: User):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
+def test_load_feedback_dataset(owner: User):
+    init(api_key=owner.api_key, workspace=owner.username)
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        FeedbackRecord(
+            fields={"text-field": "unit-test"},
+        )
+    )
+
+    dataset.push_to_argilla(name="unit-test", workspace=owner.username)
+
+    with pytest.warns(UserWarning):
+        remote = load(name="unit-test", workspace=owner.username)
+
+    assert isinstance(remote, RemoteFeedbackDataset)
+
+
 def test_load_empty_string(argilla_user: User):
     dataset_name = "test-dataset"
 
@@ -631,6 +655,26 @@ def test_delete_dataset(argilla_user: User):
     sleep(1)
     with pytest.raises(NotFoundApiError):
         load(name=dataset_name)
+
+
+def test_delete_feedback_dataset(owner: User):
+    init(api_key=owner.api_key, workspace=owner.username)
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        FeedbackRecord(
+            fields={"text-field": "unit-test"},
+        )
+    )
+
+    dataset.push_to_argilla(name="unit-test", workspace=owner.username)
+
+    with pytest.warns(UserWarning):
+        delete(name="unit-test", workspace=owner.username)
+
+    with pytest.raises(ValueError):
+        FeedbackDataset.from_argilla(name="unit-test", workspace=owner.username)
 
 
 def test_log_with_wrong_name(argilla_user: User):
