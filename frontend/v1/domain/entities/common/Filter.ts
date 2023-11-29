@@ -9,6 +9,11 @@ export interface RangeValue {
   le?: number;
 }
 
+export type ValuesOption = {
+  values: string[];
+  operator?: "and" | "or";
+};
+
 export abstract class Filter {
   abstract get name(): string;
 
