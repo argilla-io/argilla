@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <transition name="progress" :duration="2500" appear>
+  <transition name="progress" :duration="3500" appear>
     <div class="progress__container">
       <p v-if="tooltip" class="progress__tooltip" :style="tooltipStyles">
         <span class="triangle" :style="tooltipTriangleStyles"></span
@@ -217,7 +217,7 @@ export default {
     background: #22b2ae;
     transition: width 1s linear, left 1s linear;
     .progress-enter-active & {
-      animation: progress 1s 2.5s;
+      animation: progress 2s 2.5s;
       animation-fill-mode: backwards;
     }
   }

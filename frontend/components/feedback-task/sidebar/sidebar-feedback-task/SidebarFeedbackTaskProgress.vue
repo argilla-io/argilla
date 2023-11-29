@@ -30,12 +30,12 @@
       re-mode="determinate"
       :multiple="true"
       :progress="(totalSubmitted * 100) / progressTotal"
-      :progress-secondary="(totalDiscarded * 100) / progressTotal"
-      :progress-tertiary="(totalDraft * 100) / progressTotal"
+      :progress-secondary="(totalDraft * 100) / progressTotal"
+      :progress-tertiary="(totalDiscarded * 100) / progressTotal"
       progress-bg="#bb720a"
       :color="itemColor(2)"
-      :color-secondary="itemColor(3)"
-      :color-tertiary="itemColor(1)"
+      :color-secondary="itemColor(1)"
+      :color-tertiary="itemColor(3)"
     >
     </BaseProgress>
     <div class="scroll">
