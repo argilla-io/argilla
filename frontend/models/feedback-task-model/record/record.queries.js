@@ -9,7 +9,7 @@ const RECORD_STATUS_COLOR = Object.freeze({
   PENDING: "#bb720a",
   DISCARDED: "#c3c1c1",
   SUBMITTED: "#3e5cc9",
-  DRAFT: "#22b2ae",
+  DRAFT: "#08a4bd",
 });
 
 export { RECORD_STATUS, RECORD_STATUS_COLOR };

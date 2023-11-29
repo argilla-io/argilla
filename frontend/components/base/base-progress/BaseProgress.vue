@@ -66,7 +66,7 @@ export default {
     },
     colorTertiary: {
       type: String,
-      default: "#22b2ae",
+      default: "#08a4bd",
     },
     tooltip: {
       default: undefined,
@@ -214,7 +214,7 @@ export default {
     @extend .progress-track;
     left: auto;
     right: 0;
-    background: #22b2ae;
+    background: #08a4bd;
     transition: width 1s linear, left 1s linear;
     .progress-enter-active & {
       animation: progress 2s 2.5s;
