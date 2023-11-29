@@ -77,6 +77,10 @@ export default {
       type: Number,
       required: true,
     },
+    totalDraft: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     progressItems() {
@@ -95,6 +99,11 @@ export default {
           name: RECORD_STATUS.DISCARDED,
           color: RECORD_STATUS_COLOR.DISCARDED,
           progress: this.totalDiscarded,
+        },
+        {
+          name: RECORD_STATUS.DRAFT,
+          color: RECORD_STATUS_COLOR.DRAFT,
+          progress: this.totalDraft,
         },
       ];
     },

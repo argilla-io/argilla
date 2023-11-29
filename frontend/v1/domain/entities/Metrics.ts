@@ -3,6 +3,7 @@ export class Metrics {
     public readonly records: number,
     public readonly responses: number,
     public readonly submitted: number,
-    public readonly discarded: number
+    public readonly discarded: number,
+    public readonly draft: number
   ) {}
 }
