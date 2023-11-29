@@ -25,6 +25,11 @@ Learn how to configure `Users` and `Workspaces`.
 
 Learn how to configure a `FeedbackDataset` and add `FeedbackRecords` to it.
 ```
+```{grid-item-card} Assign records to your team
+:link: feedback/end2end_examples/assign-records-002.html
+
+Learn how to easily assign records to your team.
+```
 ```{grid-item-card} Adding Metadata to a FeedbackDataset
 :link: feedback/end2end_examples/add-metadata-003.html
 
