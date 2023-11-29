@@ -16,17 +16,19 @@
 import asyncio
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from argilla.client.client import Argilla
 from argilla.client.datasets import Dataset
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
 from argilla.client.sdk.datasets.models import Dataset as DatasetModel
-from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
-from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
 from argilla.client.singleton import ArgillaSingleton
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 
 Api = Argilla  # Backward compatibility
 
@@ -158,22 +160,6 @@ async def log_async(
     return await asyncio.wrap_future(future)
 
 
-def _check_if_feedback_dataset_exists(client: Argilla, name: str, workspace: str) -> bool:
-    response = list_workspaces_api_v0(client.http_client.httpx)
-    workspace_id = None
-    for ws in response.parsed:
-        if ws.name == workspace:
-            workspace_id = ws.id
-            break
-
-    response = list_datasets_api_v1(client.http_client.httpx)
-    for dataset in response.parsed:
-        if dataset.name == name and dataset.workspace_id == workspace_id:
-            return True
-
-    return False
-
-
 def load(
     name: str,
     workspace: Optional[str] = None,
@@ -187,7 +173,7 @@ def load(
     include_vectors: bool = True,
     include_metrics: bool = True,
     as_pandas: Optional[bool] = None,
-) -> Dataset:
+) -> Union[Dataset, "RemoteFeedbackDataset"]:
     """Loads a argilla dataset.
 
     Args:
@@ -249,14 +235,23 @@ def load(
             include_vectors=include_vectors,
             as_pandas=as_pandas,
         )
-    except errors.NotFoundApiError as e:
+    except errors.NotFoundApiError:
         workspace = workspace or argilla.get_workspace()
-        if _check_if_feedback_dataset_exists(client=argilla, name=name, workspace=workspace):
+        try:
+            dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
+        except ValueError:
             raise ValueError(
-                f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
-                " instead to load it."
+                f"Could not load dataset with name '{name}' and workspace '{workspace}' because it was not found"
             )
-        raise e
+
+        warnings.warn(
+            "Loaded dataset is a `FeedbackDataset`. It's recommended to use `rg.FeedbackDataset.from_argilla` class "
+            "method instead.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+        return dataset
 
 
 def copy(dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
@@ -282,18 +277,47 @@ def copy(dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> No
 
 def delete(name: str, workspace: Optional[str] = None) -> None:
     """
-    Deletes a dataset.
+    Deletes an Argilla dataset from the server. It can be used with both `Dataset` and `FeedbackDataset`, although
+    for the latter it's recommended to use `rg.FeedbackDataset.delete` instead.
 
     Args:
-        name: The dataset name.
-        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
-            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
+        name: The name of the dataset to delete.
+        workspace: The workspace to which the dataset belongs. If `None` (default) and the env variable
+            ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
+
+    Raises:
+        ValueError: If no dataset is found with the given name and workspace.
+        PermissionError: If the dataset that's being deleted is a `FeedbackDataset` and the user doesn't have enough
+            permissions to delete it.
+        RuntimeError: If the dataset that's being deleted is a `FeedbackDataset` and some kind of error occurs during
+            the deletion process.
 
     Examples:
         >>> import argilla as rg
         >>> rg.delete(name="example-dataset")
     """
-    ArgillaSingleton.get().delete(name=name, workspace=workspace)
+    argilla = ArgillaSingleton.get()
+    workspace = workspace or argilla.get_workspace()
+    try:
+        # `delete` method is always successful, even if the dataset does not exist and that's why we need the extra
+        # call to `get_dataset` to check if the dataset exists. If it doesn't exist, then we try to delete a `FeedbackDataset`.
+        argilla.get_dataset(name=name, workspace=workspace)
+        argilla.delete(name=name, workspace=workspace)
+    except errors.NotFoundApiError:
+        try:
+            dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
+        except ValueError:
+            raise ValueError(
+                f"Could not delete dataset with name '{name}' and workspace '{workspace}' because it was not found"
+            )
+
+        dataset.delete()
+
+        warnings.warn(
+            "Removed dataset was a `FeedbackDataset`. It's recommended to use `rg.FeedbackDataset.delete` instead.",
+            UserWarning,
+            stacklevel=2,
+        )
 
 
 def delete_records(
@@ -377,7 +401,7 @@ def list_workspaces() -> List[WorkspaceModel]:
     return ArgillaSingleton.get().list_workspaces()
 
 
-def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
+def list_datasets(workspace: Optional[str] = None) -> List[Union[DatasetModel, "RemoteFeedbackDataset"]]:
     """Lists all the available datasets for the current user in Argilla.
 
     Args:
@@ -390,4 +414,6 @@ def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
         attributes: tags, metadata, name, id, task, owner, workspace, created_at,
         and last_updated.
     """
-    return ArgillaSingleton.get().list_datasets(workspace=workspace)
+    old_datasets = ArgillaSingleton.get().list_datasets(workspace=workspace)
+    datasets = FeedbackDataset.list(workspace=workspace)
+    return old_datasets + datasets

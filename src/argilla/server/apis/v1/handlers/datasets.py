@@ -364,6 +364,7 @@ async def list_current_user_datasets(
         if current_user.is_owner:
             dataset_list = await datasets.list_datasets(db)
         else:
+            # TODO: explicitly query the datasets for the user
             await current_user.awaitable_attrs.datasets
             dataset_list = current_user.datasets
     else:

@@ -18,9 +18,9 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from argilla.client.api import get_workspace, load
 from argilla.client.datasets import DatasetForText2Text, DatasetForTextClassification, DatasetForTokenClassification
 from argilla.client.models import Framework, Text2TextRecord, TextClassificationRecord, TokenClassificationRecord
+from argilla.client.singleton import active_client
 from argilla.datasets import TextClassificationSettings, TokenClassificationSettings, load_dataset_settings
 from argilla.utils.telemetry import get_telemetry_client
 
@@ -73,8 +73,10 @@ class ArgillaTrainer(object):
             framework_kwargs (dict): additional arguments for the framework.
             **load_kwargs: arguments for the rg.load() function.
         """
+        argilla = active_client()
+
         self._name = name
-        self._workspace = workspace or get_workspace()
+        self._workspace = workspace or argilla.get_workspace()
         self._multi_label = False
         self._split_applied = False
         self._train_size = train_size
@@ -103,7 +105,7 @@ class ArgillaTrainer(object):
         else:
             raise NotImplementedError(f"Dataset type {type(self.rg_dataset_snapshot)} is not supported.")
 
-        self.dataset_full = load(name=self._name, **load_kwargs)
+        self.dataset_full = argilla.load(name=self._name, **load_kwargs)
 
         # settings for the dataset
         self._settings = load_dataset_settings(name=self._name, workspace=workspace)
