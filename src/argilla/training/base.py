@@ -91,7 +91,7 @@ class ArgillaTrainer(object):
             os.environ[_pytorch_fallback_env] = "1"
             warnings.warn(f"{_pytorch_fallback_env} not set. Setting it to 1.", UserWarning, stacklevel=2)
 
-        self.rg_dataset_snapshot = load(name=self._name, limit=1, workspace=workspace)
+        self.rg_dataset_snapshot = argilla.load(name=self._name, limit=1, workspace=workspace)
         if not len(self.rg_dataset_snapshot) > 0:
             raise ValueError(f"Dataset {self._name} is empty")
 
