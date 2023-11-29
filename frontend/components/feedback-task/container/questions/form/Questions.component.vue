@@ -14,7 +14,6 @@
       >
         <TextAreaComponent
           v-if="question.isTextType"
-          ref="text"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"

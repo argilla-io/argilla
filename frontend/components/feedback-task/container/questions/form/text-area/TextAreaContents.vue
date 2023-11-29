@@ -5,7 +5,7 @@
     :class="classes"
     @focus="onFocus"
     :tabindex="isEditionModeActive ? '-1' : '0'"
-    @keydown.enter.exact.prevent="onEditMode"
+    @keydown.shift.enter.exact.prevent="onEditMode"
   >
     <RenderMarkdownBaseComponent
       v-if="question.settings.use_markdown && !isEditionModeActive"
@@ -51,7 +51,17 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        this.isEditionModeActive = newValue;
+        if (this.question.isRequired) {
+          this.onChangeFocus(newValue);
+
+          return;
+        }
+
+        if (newValue) {
+          this.$nextTick(() => {
+            this.onExitEditionMode();
+          });
+        }
       },
     },
   },
