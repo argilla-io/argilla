@@ -35,7 +35,11 @@ def gutenberg_spacy_ner(mocked_client):
 
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
+    try:
+        argilla.delete(dataset)
+    except Exception:
+        pass
+
     argilla.log(name=dataset, records=dataset_rb)
 
     return dataset
