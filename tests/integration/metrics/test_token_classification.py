@@ -13,9 +13,8 @@
 #  limitations under the License.
 
 import argilla
-import argilla as rg
 import pytest
-from argilla.client.api import delete, load, log
+from argilla.client.api import load, log
 from argilla.client.models import TokenClassificationRecord
 from argilla.metrics import entity_consistency
 from argilla.metrics.token_classification import (
@@ -33,8 +32,15 @@ from argilla.metrics.token_classification import (
 )
 
 
+def delete(dataset: str) -> None:
+    try:
+        argilla.delete(dataset)
+    except Exception:
+        pass
+
+
 def log_some_data(dataset: str):
-    argilla.delete(dataset)
+    delete(dataset)
     text = "My first great example \n"
     tokens = text.split(" ")
     log(
@@ -175,7 +181,7 @@ def test_entity_labels(mocked_client):
 
 def test_entity_capitalness(mocked_client):
     dataset = "test_entity_capitalness"
-    argilla.delete(dataset)
+    delete(dataset)
     log_some_data(dataset)
 
     results = entity_capitalness(dataset)
@@ -191,7 +197,7 @@ def test_entity_capitalness(mocked_client):
 
 def test_top_k_mentions_consistency(mocked_client):
     dataset = "test_top_k_mentions_consistency"
-    argilla.delete(dataset)
+    delete(dataset)
     log_some_data(dataset)
 
     mentions = {

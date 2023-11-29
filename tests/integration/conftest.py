@@ -21,14 +21,15 @@ import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.cli.server.database.migrate import migrate_db
-from argilla.client.api import delete, log
+from argilla.client.api import delete as api_delete
+from argilla.client.api import log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
 from argilla.client.datasets import read_datasets
 from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
-from argilla.datasets.__init__ import configure_dataset
+from argilla.datasets import configure_dataset
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.server import app
@@ -259,6 +260,13 @@ def mocked_client(
     monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)
 
     return client_
+
+
+def delete(dataset: str) -> None:
+    try:
+        api_delete(dataset)
+    except Exception:
+        pass
 
 
 @pytest.fixture

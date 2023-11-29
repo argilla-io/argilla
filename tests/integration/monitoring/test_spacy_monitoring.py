@@ -16,8 +16,16 @@ import random
 from time import sleep
 
 import argilla as rg
-from argilla.client.api import delete, load
+from argilla.client.api import delete as delete_api
+from argilla.client.api import load
 from argilla.monitoring.model_monitor import monitor
+
+
+def delete(dataset: str) -> None:
+    try:
+        delete(dataset)
+    except Exception:
+        pass
 
 
 def test_spacy_ner_monitor(monkeypatch, mocked_client):

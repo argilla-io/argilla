@@ -16,7 +16,8 @@ import datetime
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
-from argilla.client.api import delete, log
+from argilla.client.api import delete as delete_api
+from argilla.client.api import log
 from argilla.client.datasets import read_datasets
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -63,6 +64,13 @@ if TYPE_CHECKING:
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,
     )
+
+
+def delete(dataset: str) -> None:
+    try:
+        delete_api(dataset)
+    except Exception:
+        pass
 
 
 @pytest.fixture
