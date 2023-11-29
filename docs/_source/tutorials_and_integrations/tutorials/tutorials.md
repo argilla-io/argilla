@@ -11,7 +11,7 @@ Whether you’re a beginner or an experienced user, these tutorials will walk yo
 
 Are you new to Argilla and do you want to walk through low-key notebooks to reproduce specific features, these tutorials are perfect for you. They can be followed step by step but you can also work through individual examples with an Argilla-compatible dataset we have already prepared for you and which can be downloaded from the Hugging Face hub.
 
-![workflow](/_static/tutorials/end2end/base/workflow.png)
+![workflow](/_static/tutorials/end2end/base/workflow.svg)
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2

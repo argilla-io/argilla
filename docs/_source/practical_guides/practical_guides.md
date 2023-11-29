@@ -2,6 +2,8 @@
 
 This guide will help you with all the practical aspects of setting up an annotation project for training and fine-tuning LLMs using Argilla's Feedback Task Datasets. It covers everything from defining your task to collecting, organizing, and using the feedback effectively.
 
+![workflow](/_static/tutorials/end2end/base/workflow.svg)
+
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
 ```{grid-item-card} 🧐 Choose a dataset type

@@ -7,8 +7,7 @@
 
 The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK. The image underneath provides a general step-by-step overview. For some end-to-end examples, you can have a look at our [tutorials page](/tutorials_and_integrations/tutorials/tutorials.md).
 
-![workflow](/_static/tutorials/end2end/base/workflow.png)
-
+![workflow](/_static/tutorials/end2end/base/workflow_create_dataset.svg)
 
 This guide will walk you through all the elements you will need to configure to create a `FeedbackDataset` and add records to it.
 
