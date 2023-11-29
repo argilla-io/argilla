@@ -24,11 +24,10 @@
       </p>
       <div class="progress" :style="backgroundStyles">
         <div class="progress-track" :style="styles"></div>
-        <div
-          v-if="multiple"
-          class="progress-track--secondary"
-          :style="stylesSecondary"
-        />
+        <template v-if="multiple">
+          <div class="progress-track--secondary" :style="stylesSecondary" />
+          <div class="progress-track--tertiary" :style="stylesTertiary" />
+        </template>
       </div>
     </div>
   </transition>
@@ -42,6 +41,10 @@ export default {
       default: 0,
     },
     progressSecondary: {
+      type: Number,
+      default: 0,
+    },
+    progressTertiary: {
       type: Number,
       default: 0,
     },
@@ -60,6 +63,10 @@ export default {
     colorSecondary: {
       type: String,
       default: "#a1a2cc",
+    },
+    colorTertiary: {
+      type: String,
+      default: "#22b2ae",
     },
     tooltip: {
       default: undefined,
@@ -94,6 +101,13 @@ export default {
         left: `${this.progress}%`,
         width: `${this.progressSecondary}%`,
         backgroundColor: this.colorSecondary,
+      };
+    },
+    stylesTertiary() {
+      return {
+        left: `${this.progress + this.progressSecondary}%`,
+        width: `${this.progressTertiary}%`,
+        backgroundColor: this.colorTertiary,
       };
     },
   },
@@ -193,6 +207,17 @@ export default {
     transition: width 1s linear, left 1s linear;
     .progress-enter-active & {
       animation: progress 1s 1.5s;
+      animation-fill-mode: backwards;
+    }
+  }
+  &--tertiary {
+    @extend .progress-track;
+    left: auto;
+    right: 0;
+    background: #22b2ae;
+    transition: width 1s linear, left 1s linear;
+    .progress-enter-active & {
+      animation: progress 1s 2.5s;
       animation-fill-mode: backwards;
     }
   }

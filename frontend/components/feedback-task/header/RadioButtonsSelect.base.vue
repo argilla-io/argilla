@@ -100,9 +100,11 @@ export default {
         case "discarded":
           return "#B7B7B7";
         case "pending":
-          return "#bb720a";
+          return "#BB720A";
         case "submitted":
           return "#3E5CC9";
+        case "draft":
+          return "#73BFBD";
       }
     },
   },
@@ -144,6 +146,12 @@ $selector-width: 140px;
       background: #fff2e0;
     }
   }
+  &.draft {
+    &:hover,
+    &:focus-within {
+      background: #e0fffe;
+    }
+  }
   &__radio {
     margin: 0;
     &:focus {
@@ -177,6 +185,13 @@ $selector-width: 140px;
     border: 1px solid palette(brown);
     &:before {
       background: palette(brown);
+    }
+  }
+  &.draft {
+    color: palette(turquoise);
+    border: 1px solid palette(turquoise);
+    &:before {
+      background: palette(turquoise);
     }
   }
   .svg-icon {

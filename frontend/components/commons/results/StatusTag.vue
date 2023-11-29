@@ -48,7 +48,7 @@ export default {
           return {
             name: "Draft",
             icon: null,
-            class: "--pending",
+            class: "--draft",
           };
 
         case "discarded":
@@ -98,6 +98,10 @@ export default {
   &.--edited {
     background: palette(brown);
     border: 1px solid palette(brown);
+  }
+  &.--draft {
+    background: palette(turquoise);
+    border: 1px solid palette(turquoise);
   }
 
   .svg-icon {
