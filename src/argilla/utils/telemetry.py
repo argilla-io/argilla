@@ -103,5 +103,39 @@ async def track_login(request: "Request", username: str):
     )
 
 
+def get_current_filename() -> Optional[str]:
+    """Returns the filename of the current file.
+
+    It will try to get the filename from the following sources:
+    - __file__ variable (only works when running from python)
+    - __vsc_ipynb_file__ variable (only works when running from vscode)
+    - ipynbname.name() (only works when running from a notebook/gooble colab)
+    - None if it can't be determined
+    """
+    from pathlib import Path
+
+    try:
+        try:
+            # Should work if we are running from python
+            return Path(__file__).stem
+        except NameError as e:
+            # This should work if we are running a notebook from vscode
+            globals_ = globals()
+            return Path(globals_["__vsc_ipynb_file__"]).stem
+    except KeyError as e:
+        # This should work for notebooks running locally or using google colab
+        import urllib.parse
+
+        import ipynbname
+
+        return Path(urllib.parse.unquote_plus(ipynbname.name())).stem
+
+
+def tutorial_running() -> None:
+    """Can be called when a tutorial is executed so that the tutorial_id is used to identify the tutorial and send an event."""
+    if tutorial_id := get_current_filename():
+        _CLIENT.track_data(action="TutorialRunning", data={"tutorial_id": tutorial_id})
+
+
 def get_telemetry_client() -> TelemetryClient:
     return _CLIENT

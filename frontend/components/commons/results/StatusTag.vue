@@ -87,17 +87,17 @@ export default {
   }
 
   &.--discarded {
-    background: #a7a7a7;
-    border: 1px solid #a7a7a7;
+    background: $discarded-color;
+    border: 1px solid $discarded-color;
   }
   &.--submitted {
-    background: $primary-color;
-    border: 1px solid $primary-color;
+    background: $submitted-color;
+    border: 1px solid $submitted-color;
   }
   &.--pending,
   &.--edited {
-    background: palette(brown);
-    border: 1px solid palette(brown);
+    background: $pending-color;
+    border: 1px solid $pending-color;
   }
   &.--draft {
     background: palette(turquoise);

@@ -18,7 +18,7 @@ This module configures the api routes under /api prefix, and
 set the required security dependencies if api security is enabled
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
 
 from argilla.server.apis.v0.handlers import (
     datasets,
@@ -76,3 +76,8 @@ api_router.include_router(suggestions_v1.router, prefix="/v1")
 api_router.include_router(users_v1.router, prefix="/v1")
 api_router.include_router(vectors_settings_v1.router, prefix="/v1")
 api_router.include_router(workspaces_v1.router, prefix="/v1")
+
+
+@api_router.route("/{_:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"], include_in_schema=False)
+def endpoint_not_found_controller(request: Request):
+    raise HTTPException(status_code=404, detail=f"Endpoint {request.url.path!r} not found")

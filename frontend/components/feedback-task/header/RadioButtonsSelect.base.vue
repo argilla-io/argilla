@@ -131,19 +131,19 @@ $selector-width: 140px;
   &.discarded {
     &:hover,
     &:focus-within {
-      background: #f2f2f2;
+      background: lighten($discarded-color, 30%);
     }
   }
   &.submitted {
     &:hover,
     &:focus-within {
-      background: #ebf3ff;
+      background: lighten($submitted-color, 44%);
     }
   }
   &.pending {
     &:hover,
     &:focus-within {
-      background: #fff2e0;
+      background: lighten($pending-color, 54%);
     }
   }
   &.draft {
@@ -167,24 +167,24 @@ $selector-width: 140px;
   background: palette(white);
   @include font-size(14px);
   &.discarded {
-    color: #656363;
-    border: 1px solid #b7b7b7;
+    color: $black-54;
+    border: 1px solid $discarded-color;
     &:before {
-      background: #b7b7b7;
+      background: $discarded-color;
     }
   }
   &.submitted {
-    color: #3e5cc9;
-    border: 1px solid #3e5cc9;
+    color: $submitted-color;
+    border: 1px solid $submitted-color;
     &:before {
-      background: #3e5cc9;
+      background: $submitted-color;
     }
   }
   &.pending {
-    color: palette(brown);
-    border: 1px solid palette(brown);
+    color: $pending-color;
+    border: 1px solid $pending-color;
     &:before {
-      background: palette(brown);
+      background: $pending-color;
     }
   }
   &.draft {

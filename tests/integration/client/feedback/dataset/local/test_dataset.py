@@ -31,7 +31,7 @@ from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.feedback.training.schemas import TrainingTask
+from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.models import Framework
 
 if TYPE_CHECKING:
