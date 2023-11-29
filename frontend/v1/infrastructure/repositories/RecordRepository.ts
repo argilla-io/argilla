@@ -251,9 +251,8 @@ export class RecordRepository {
       }
 
       if (isFilteringByResponse) {
-        response.value.forEach((r) => {
+        response.or.forEach((r) => {
           const value = r.value as RangeValue;
-
           if ("ge" in value && "le" in value) {
             body.filters.and.push({
               type: "range",
@@ -264,10 +263,8 @@ export class RecordRepository {
               ge: value.ge,
               le: value.le,
             });
-
             return;
           }
-
           body.filters.and.push({
             type: "terms",
             scope: {
@@ -275,6 +272,17 @@ export class RecordRepository {
               question: r.name,
             },
             values: r.value as string[],
+          });
+        });
+
+        response.and.forEach((r) => {
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "response",
+              question: r.name,
+            },
+            values: [r.value],
           });
         });
       }
