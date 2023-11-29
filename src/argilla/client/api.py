@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Un
 
 from argilla.client.client import Argilla
 from argilla.client.datasets import Dataset
+from argilla.client.enums import DatasetType
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
@@ -401,7 +402,9 @@ def list_workspaces() -> List[WorkspaceModel]:
     return ArgillaSingleton.get().list_workspaces()
 
 
-def list_datasets(workspace: Optional[str] = None) -> List[Union[DatasetModel, "RemoteFeedbackDataset"]]:
+def list_datasets(
+    workspace: Optional[str] = None, type: Optional[Union[str, DatasetType]] = None
+) -> List[Union[DatasetModel, "RemoteFeedbackDataset"]]:
     """Lists all the available datasets for the current user in Argilla.
 
     Args:
@@ -414,6 +417,14 @@ def list_datasets(workspace: Optional[str] = None) -> List[Union[DatasetModel, "
         attributes: tags, metadata, name, id, task, owner, workspace, created_at,
         and last_updated.
     """
-    old_datasets = ArgillaSingleton.get().list_datasets(workspace=workspace)
-    datasets = FeedbackDataset.list(workspace=workspace)
+    type = type if isinstance(type, DatasetType) else DatasetType(type)
+
+    old_datasets = []
+    if type is not None and type == DatasetType.other:
+        old_datasets = ArgillaSingleton.get().list_datasets(workspace=workspace)
+
+    datasets = []
+    if type is not None and type == DatasetType.feedback:
+        datasets = FeedbackDataset.list(workspace=workspace)
+
     return old_datasets + datasets
