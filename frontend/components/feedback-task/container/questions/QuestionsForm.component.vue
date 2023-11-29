@@ -102,7 +102,6 @@ export default {
       autofocusPosition: 0,
       interactionCount: 0,
       isSubmittedTouched: false,
-      isTouched: false,
       userComesFromOutside: false,
     };
   },
@@ -143,8 +142,8 @@ export default {
       handler() {
         if (this.record.isModified) this.saveDraft(this.record);
 
-        this.isTouched = this.record.isModified;
-        this.isSubmittedTouched = this.isTouched && this.record.isSubmitted;
+        this.isSubmittedTouched =
+          this.record.isModified && this.record.isSubmitted;
       },
     },
   },
@@ -155,9 +154,8 @@ export default {
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
-    async tryToSubmitWithKeyboard() {
-      if (!this.isTouched) return;
-      if (this.isSubmitButtonDisabled) return;
+    async autoSubmitWithKeyboard() {
+      if (!this.record.isModified) return;
       if (this.record.questions.length > 1) return;
 
       const question = this.record.questions[0];
@@ -215,7 +213,7 @@ export default {
           break;
         }
         default: {
-          this.tryToSubmitWithKeyboard();
+          this.autoSubmitWithKeyboard();
           break;
         }
       }
