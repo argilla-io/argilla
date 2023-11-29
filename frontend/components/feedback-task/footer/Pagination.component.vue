@@ -22,6 +22,7 @@
         class="pagination__button"
         ref="nextButton"
         @click="onClickNext"
+        :disabled="isLastPage"
         :title="
           $platform.isMac
             ? $t('shortcuts.pagination.go_to_next_record_mac')
@@ -52,10 +53,13 @@ export default {
     },
   },
   computed: {
+    // TODO: Move to PageCriteria to support those computed
     isFirstPage() {
       return this.currentPage === 1;
     },
-    // TODO: Do PageCriteria to support this
+    isLastPage() {
+      return this.currentPage === this.items;
+    },
     totalPages() {
       return Math.ceil(this.items / this.itemsPerPage);
     },
