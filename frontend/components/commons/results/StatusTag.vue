@@ -100,8 +100,8 @@ export default {
     border: 1px solid $pending-color;
   }
   &.--draft {
-    background: palette(turquoise);
-    border: 1px solid palette(turquoise);
+    background: $draft-color;
+    border: 1px solid $draft-color;
   }
 
   .svg-icon {

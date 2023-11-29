@@ -149,7 +149,7 @@ $selector-width: 140px;
   &.draft {
     &:hover,
     &:focus-within {
-      background: #e0fffe;
+      background: lighten($draft-color, 54%);
     }
   }
   &__radio {
@@ -188,10 +188,10 @@ $selector-width: 140px;
     }
   }
   &.draft {
-    color: palette(turquoise);
-    border: 1px solid palette(turquoise);
+    color: $draft-color;
+    border: 1px solid $draft-color;
     &:before {
-      background: palette(turquoise);
+      background: $draft-color;
     }
   }
   .svg-icon {
