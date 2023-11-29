@@ -12,31 +12,44 @@ import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 export const useQuestionFormViewModel = () => {
   const beforeUnload = useBeforeUnload();
   const queue = useQueue();
+  const debounceForSubmit = useDebounce(300);
   const debounceForAutoSave = useDebounce(2000);
   const debounceForSavingMessage = useDebounce(1000);
 
   const draftSaving = ref(false);
+  const isDiscarding = ref(false);
+  const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
   const clearUseCase = useResolve(ClearRecordUseCase);
   const saveDraftUseCase = useResolve(SaveDraftRecord);
 
-  const discard = (record: Record) => {
+  const discard = async (record: Record) => {
+    isDiscarding.value = true;
     debounceForAutoSave.stop();
     beforeUnload.destroy();
 
-    queue.enqueue(() => {
+    await queue.enqueue(() => {
       return discardUseCase.execute(record);
     });
+
+    await debounceForSubmit.wait();
+
+    isDiscarding.value = false;
   };
 
-  const submit = (record: Record) => {
+  const submit = async (record: Record) => {
+    isSubmitting.value = true;
     debounceForAutoSave.stop();
     beforeUnload.destroy();
 
-    queue.enqueue(() => {
+    await queue.enqueue(() => {
       return submitUseCase.execute(record);
     });
+
+    await debounceForSubmit.wait();
+
+    isSubmitting.value = false;
   };
 
   const clear = (record: Record) => {
@@ -83,11 +96,13 @@ export const useQuestionFormViewModel = () => {
   };
 
   return {
+    draftSaving,
+    isDiscarding,
+    isSubmitting,
     clear,
     submit,
     discard,
     saveDraft,
-    draftSaving,
     saveDraftImmediately,
   };
 };

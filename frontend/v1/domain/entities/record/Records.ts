@@ -1,5 +1,6 @@
 import { Pagination } from "../Pagination";
 import { Record } from "./Record";
+import { RecordStatus } from "./RecordAnswer";
 import { RecordCriteria } from "./RecordCriteria";
 
 const NEXT_RECORDS_TO_FETCH = 10;
@@ -66,7 +67,12 @@ export class Records {
     return this.records[0];
   }
 
-  private quantityOfRecordsAnnotated(status: string) {
+  private quantityOfRecordsAnnotated(status: RecordStatus) {
+    if (status === "pending")
+      return this.records.filter(
+        (record) => record.status !== "draft" && record.status !== status
+      ).length;
+
     return this.records.filter((record) => record.status !== status).length;
   }
 }

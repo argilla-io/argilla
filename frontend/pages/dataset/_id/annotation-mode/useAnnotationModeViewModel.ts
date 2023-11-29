@@ -29,9 +29,11 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<number>("_page"),
       routes.getQueryParams<RecordStatus>("_status"),
       routes.getQueryParams<RecordStatus>("_search"),
-      routes.getQueryParams<string>("_metadata")?.split("+"),
-      routes.getQueryParams<string>("_sort")?.split(","),
-      routes.getQueryParams<string>("_similarity", true)
+      routes.getQueryParams<string>("_metadata"),
+      routes.getQueryParams<string>("_sort"),
+      routes.getQueryParams<string>("_response"),
+      routes.getQueryParams<string>("_suggestion"),
+      routes.getQueryParams<string>("_similarity")
     )
   );
 
@@ -40,9 +42,11 @@ export const useAnnotationModeViewModel = () => {
       routes.getQueryParams<number>("_page"),
       routes.getQueryParams<RecordStatus>("_status"),
       routes.getQueryParams<RecordStatus>("_search"),
-      routes.getQueryParams<string>("_metadata")?.split("+"),
-      routes.getQueryParams<string>("_sort")?.split(","),
-      routes.getQueryParams<string>("_similarity", true)
+      routes.getQueryParams<string>("_metadata"),
+      routes.getQueryParams<string>("_sort"),
+      routes.getQueryParams<string>("_response"),
+      routes.getQueryParams<string>("_suggestion"),
+      routes.getQueryParams<string>("_similarity")
     );
   });
 
@@ -62,18 +66,23 @@ export const useAnnotationModeViewModel = () => {
       },
       {
         key: "_metadata",
-        value: recordCriteria.value.committed.metadata.join("+"),
+        value: recordCriteria.value.committed.metadata.urlParams,
       },
       {
         key: "_sort",
-        value: recordCriteria.value.committed.sortBy.join(","),
+        value: recordCriteria.value.committed.sortBy.urlParams,
+      },
+      {
+        key: "_response",
+        value: recordCriteria.value.committed.response.urlParams,
+      },
+      {
+        key: "_suggestion",
+        value: recordCriteria.value.committed.suggestion.urlParams,
       },
       {
         key: "_similarity",
-        value: recordCriteria.value.committed.similaritySearch.isCompleted
-          ? JSON.stringify(recordCriteria.value.committed.similaritySearch)
-          : undefined,
-        encode: true,
+        value: recordCriteria.value.committed.similaritySearch.urlParams,
       }
     );
   };

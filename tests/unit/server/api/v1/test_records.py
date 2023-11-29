@@ -14,6 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Type
+from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
@@ -188,7 +189,7 @@ class TestSuiteRecords:
                 "extra-metadata": "yes",
             },
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [
                 {
                     "question_id": str(question_0.id),
@@ -241,7 +242,7 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
@@ -1214,7 +1215,7 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
     async def test_create_record_suggestion_update(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1238,6 +1239,8 @@ class TestSuiteRecords:
             "agent": None,
         }
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
+        mock_search_engine.update_record_suggestion.assert_called_once_with(suggestion)
 
     @pytest.mark.parametrize(
         "payload",
@@ -1340,7 +1343,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(
-        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
     ) -> None:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1360,6 +1363,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
+
+        expected_calls = [call(suggestion) for suggestion in suggestions]
+        mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
 
     async def test_delete_record_suggestions_with_no_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict
