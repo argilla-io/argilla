@@ -52,12 +52,22 @@ class ExampleNotebook:
 
     def run(self):
         try:
-            papermill.execute_notebook(
+            nb = papermill.execute_notebook(
                 str(self.src_filename),
                 str(self.dst_filename),
                 parameters=self.parameters,
                 kernel_name="python3",
             )
+            for cell in nb["cells"]:
+                if cell["cell_type"] == "code":
+                    if not cell["metadata"]["papermill"]["status"] == "completed":
+                        raise Exception(
+                            f"Notebook {self.src_filename} failed:\n"
+                            "Code cell failed to execute:\n"
+                            f"{cell['source']}\n"
+                            "Output:\n"
+                            f"{cell['outputs']}"
+                        )
             print(f"✅  {self.src_filename}")
         except Exception as e:
             print(f"❌  {self.src_filename}")
