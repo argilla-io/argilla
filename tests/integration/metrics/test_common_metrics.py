@@ -48,7 +48,10 @@ def gutenberg_spacy_ner(mocked_client):
 def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
 
-    delete(dataset)
+    try:
+        delete(dataset)
+    except Exception:
+        pass
 
     log(
         [
@@ -78,7 +81,10 @@ def test_status_distribution(mocked_client):
 def test_text_length(mocked_client):
     dataset = "test_text_length"
 
-    delete(dataset)
+    try:
+        delete(dataset)
+    except Exception:
+        pass
 
     log(
         [
@@ -155,7 +161,11 @@ def test_failing_metrics(argilla_user: "User"):
     argilla.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     dataset_name = "test_failing_metrics"
 
-    argilla.delete(dataset_name)
+    try:
+        argilla.delete(dataset_name)
+    except Exception:
+        pass
+
     argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
 
     with pytest.raises(AssertionError, match="Metric missing-metric not found"):
