@@ -4,9 +4,9 @@ import {
   FilterWithScore,
   OptionForFilter,
   RangeValue,
+  ValuesOption,
 } from "../common/Filter";
 import { Question } from "../question/Question";
-import { ValuesOption } from "../suggestion/SuggestionCriteria";
 
 export interface ResponseSearch {
   name: string;

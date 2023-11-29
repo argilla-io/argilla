@@ -1,6 +1,5 @@
 import { Criteria } from "../common/Criteria";
-import { RangeValue } from "../common/Filter";
-import { ValuesOption } from "../suggestion/SuggestionCriteria";
+import { RangeValue, ValuesOption } from "../common/Filter";
 import { ResponseSearch } from "./ResponseFilter";
 
 export class ResponseCriteria extends Criteria {

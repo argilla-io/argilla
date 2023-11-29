@@ -1,10 +1,5 @@
 import { Criteria } from "../common/Criteria";
-import { RangeValue } from "../common/Filter";
-
-export type ValuesOption = {
-  values: string[];
-  operator?: "and" | "or";
-};
+import { RangeValue, ValuesOption } from "../common/Filter";
 
 export interface ConfigurationSearch {
   name: "score" | "value" | "agent";

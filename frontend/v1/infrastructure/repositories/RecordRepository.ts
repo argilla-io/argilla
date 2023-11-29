@@ -17,8 +17,7 @@ import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
-import { RangeValue } from "~/v1/domain/entities/common/Filter";
-import { ValuesOption } from "~/v1/domain/entities/suggestion/SuggestionCriteria";
+import { RangeValue, ValuesOption } from "~/v1/domain/entities/common/Filter";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
