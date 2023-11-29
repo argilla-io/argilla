@@ -45,6 +45,11 @@ Learn how to add vectors and vector settings to a `FeedbackDataset`.
 
 Learn how to add metadata properties to a `FeedbackDataset`.
 ```
+```{grid-item-card} Train Your Model with ArgillaTrainer
+:link: feedback/end2end_examples/train-model-006.html
+
+Learn how to train your model with `ArgillaTrainer`.
+```
 ````
 
 
