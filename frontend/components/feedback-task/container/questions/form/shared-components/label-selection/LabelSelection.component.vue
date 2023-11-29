@@ -202,6 +202,8 @@ export default {
 
       if (
         $event.key === "Tab" ||
+        $event.key === "Enter" ||
+        $event.key === "Backspace" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
@@ -225,6 +227,7 @@ export default {
 
       if (isNaN(this.keyCode)) {
         this.$refs.searchComponentRef?.focusInSearch();
+        this.reset();
 
         return;
       }

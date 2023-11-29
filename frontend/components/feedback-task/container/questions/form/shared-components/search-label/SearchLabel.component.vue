@@ -29,6 +29,7 @@
       @keydown.meta.arrow-left.exact.prevent=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
+      @keydown.backspace.exact.stop=""
     />
     <BaseIconWithBadge
       v-if="value"

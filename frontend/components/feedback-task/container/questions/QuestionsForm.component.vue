@@ -2,7 +2,7 @@
   <form
     class="questions-form"
     :class="questionFormClass"
-    @submit.prevent="onSubmit"
+    @submit.stop.prevent=""
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
   >
@@ -198,7 +198,7 @@ export default {
           break;
         }
         case "Enter": {
-          if (shiftKey) this.onSubmit();
+          this.onSubmit();
           break;
         }
         case "Space": {
@@ -209,7 +209,7 @@ export default {
           break;
         }
         case "Backspace": {
-          if (shiftKey) this.onDiscard();
+          this.onDiscard();
           break;
         }
         default: {
