@@ -89,7 +89,7 @@ def assign_records_to_groups(
 
     if len(records) < len(groups.keys()):
         warnings.warn(
-            f"The number of groups is higher than the number of records. Some users will not be assigned any records.",
+            "The number of groups is higher than the number of records. Some users will not be assigned any records.",
             UserWarning,
         )
 
@@ -147,7 +147,7 @@ def assign_records_to_individuals(
 
     if len(records) < len(users):
         warnings.warn(
-            f"The number of users is higher than the number of records. Some users will not be assigned any records.",
+            "The number of users is higher than the number of records. Some users will not be assigned any records.",
             UserWarning,
         )
 
