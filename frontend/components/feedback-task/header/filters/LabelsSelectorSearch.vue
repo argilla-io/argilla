@@ -4,8 +4,8 @@
       <FilterBadge
         class="search-area__badge"
         v-for="option in selectedOptions"
-        :key="option.label"
-        :text="option.label"
+        :key="option.value"
+        :text="option.text ?? option.value"
         @on-clear="removeSelectedOption(option)"
       ></FilterBadge>
     </span>
@@ -52,7 +52,9 @@ export default {
   },
   watch: {
     selectedOptions() {
-      this.$refs.search.focus();
+      this.$nextTick(() => {
+        this.$refs.search.focus();
+      });
     },
   },
   mounted() {
@@ -81,13 +83,12 @@ export default {
   flex-direction: column;
   padding: 0 $base-space;
   border: 1px solid $black-10;
-  border-radius: $border-radius-m;
+  border-radius: $border-radius;
   background: palette(white);
   overflow: hidden;
   transition: all 0.2s ease-out;
   &:focus-within {
     border-color: $primary-color;
-    box-shadow: $shadow-300;
   }
   &:hover {
     transition: all 0.2s ease-in;

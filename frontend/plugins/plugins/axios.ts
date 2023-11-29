@@ -24,7 +24,7 @@ import { currentWorkspace } from "@/models/Workspace";
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
 
-  $axios.interceptors.request.use(async (config) => {
+  $axios.interceptors.request.use((config) => {
     const currentUser = app.$auth.user;
 
     if (!currentUser) {
@@ -40,7 +40,7 @@ export default ({ $axios, app }) => {
 
   $axios.onError((error) => {
     const code = parseInt(error.response && error.response.status);
-    if (error instanceof ExpiredAuthSessionError || 401 === code) {
+    if (error instanceof ExpiredAuthSessionError || code === 401) {
       app.$auth.logout();
     }
 

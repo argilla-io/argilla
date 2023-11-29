@@ -20,7 +20,12 @@ from elasticsearch8 import AsyncElasticsearch, helpers
 
 from argilla.server.models import VectorSettings
 from argilla.server.search_engine import SearchEngine
-from argilla.server.search_engine.commons import BaseElasticAndOpenSearchEngine, field_name_for_vector_settings
+from argilla.server.search_engine.commons import (
+    BaseElasticAndOpenSearchEngine,
+    es_bool_query,
+    es_field_for_vector_settings,
+    es_ids_query,
+)
 from argilla.server.settings import settings
 
 
@@ -67,7 +72,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
-            field_name_for_vector_settings(vector_settings): {
+            es_field_for_vector_settings(vector_settings): {
                 "type": "dense_vector",
                 "dims": vector_settings.dimensions,
                 "index": True,
@@ -88,20 +93,26 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         query_filters: Optional[List[dict]] = None,
     ) -> dict:
         knn_query = {
-            "field": field_name_for_vector_settings(vector_settings),
+            "field": es_field_for_vector_settings(vector_settings),
             "query_vector": value,
             "k": k,
             "num_candidates": _compute_num_candidates_from_k(k=k),
         }
 
-        bool_filter_query = {}
-        if query_filters:
-            bool_filter_query = {"should": query_filters, "minimum_should_match": "100%"}
-        if excluded_id:
-            bool_filter_query["must_not"] = [{"ids": {"values": [str(excluded_id)]}}]
+        if bool(excluded_id) or bool(query_filters):
+            minimum_should_match = None
+            must_not_filters = None
 
-        if bool_filter_query:
-            knn_query["filter"] = {"bool": bool_filter_query}
+            if excluded_id:
+                must_not_filters = [es_ids_query([str(excluded_id)])]
+            if query_filters:
+                minimum_should_match = len(query_filters)
+
+            bool_filter_query = es_bool_query(
+                should=query_filters, minimum_should_match=minimum_should_match, must_not=must_not_filters
+            )
+
+            knn_query["filter"] = bool_filter_query
         return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True, size=k)
 
     async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:

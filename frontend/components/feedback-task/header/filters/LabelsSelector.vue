@@ -5,10 +5,16 @@
     @keyup.up="preselectPreviousOption"
     @keyup.down="preselectNextOption"
   >
-    <MetadataLabelsSelectorSearch
+    <LabelsSelectorSearch
       v-model="searchText"
       :placeholder="$t('filterBy')"
-      :selected-options="metadata.selectedOptions"
+      :selected-options="filter.selectedOptions"
+    />
+    <OptionsSelector
+      class="labels-selector__operator"
+      v-if="filter.hasOperator"
+      v-model="filter.operator"
+      :options="['and', 'or']"
     />
     <div class="labels-selector__items">
       <BaseCheckbox
@@ -19,12 +25,12 @@
             : null
         "
         v-for="(option, index) in labelsFilteredBySearchText"
-        :key="option.label"
+        :key="option.value"
         :value="option.selected"
         v-model="option.selected"
         @mouseover.native="preSelectionIndex = index"
       >
-        {{ option.label }}
+        {{ option.text ?? option.value }}
       </BaseCheckbox>
     </div>
   </div>
@@ -32,7 +38,7 @@
 <script>
 export default {
   props: {
-    metadata: {
+    filter: {
       type: Object,
       required: true,
     },
@@ -47,7 +53,7 @@ export default {
     searchText() {
       this.preSelectionIndex = 0;
     },
-    metadataOptions: {
+    filterOptions: {
       handler: function () {
         if (this.searchText.length) {
           this.searchText = "";
@@ -58,13 +64,13 @@ export default {
   },
   computed: {
     labelsFilteredBySearchText() {
-      return this.metadata.filterByText(this.searchText);
+      return this.filter.filterByText(this.searchText);
     },
     optionsLength() {
-      return this.metadata.options.length;
+      return this.filter.options.length;
     },
-    metadataOptions() {
-      return this.metadata.options;
+    filterOptions() {
+      return this.filter.options;
     },
   },
   methods: {
@@ -97,7 +103,6 @@ export default {
 .labels-selector {
   display: flex;
   flex-direction: column;
-  margin-bottom: $base-space;
   &__items {
     max-height: 200px;
     overflow: auto;
@@ -125,6 +130,9 @@ export default {
       fill: $primary-color;
       min-width: 16px;
     }
+  }
+  &__operator {
+    margin-top: $base-space;
   }
 }
 </style>

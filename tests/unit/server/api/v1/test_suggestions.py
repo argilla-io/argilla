@@ -18,6 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.models import Suggestion, UserRole
+from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select
 
 from tests.factories import SuggestionFactory, UserFactory
@@ -30,7 +31,9 @@ if TYPE_CHECKING:
 @pytest.mark.asyncio
 class TestSuiteSuggestions:
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-    async def test_delete_suggestion(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole) -> None:
+    async def test_delete_suggestion(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", role: UserRole
+    ) -> None:
         suggestion = await SuggestionFactory.create()
         user = await UserFactory.create(role=role, workspaces=[suggestion.record.dataset.workspace])
 
@@ -49,6 +52,8 @@ class TestSuiteSuggestions:
             "agent": None,
         }
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
+
+        mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
 
     async def test_delete_suggestion_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
         response = await async_client.delete(f"/api/v1/suggestions/{uuid4()}", headers=owner_auth_header)

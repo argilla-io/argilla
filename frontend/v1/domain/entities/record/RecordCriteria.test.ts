@@ -1,6 +1,208 @@
 import { RecordCriteria } from "./RecordCriteria";
 
 describe("RecordCriteria", () => {
+  describe("isFilteringByText", () => {
+    test("should return true if searchText is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "searchText",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(true);
+    });
+
+    test("should return false if searchText is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(false);
+    });
+
+    test("should return false if searchText is undefined", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        undefined,
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByText).toBe(false);
+    });
+  });
+
+  describe("isFilteringBySimilarity", () => {
+    test("should return true if similaritySearch is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
+      );
+
+      expect(criteria.isFilteringBySimilarity).toBe(true);
+    });
+
+    test("should return false if similaritySearch is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringBySimilarity).toBe(false);
+    });
+  });
+
+  describe("isFilteringByResponse", () => {
+    test("should return true if response is range", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.ge.1le.5",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(true);
+    });
+
+    test("should return true if response is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.option1~option2",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(true);
+    });
+
+    test("should return false if response is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringByResponse).toBe(false);
+    });
+  });
+
+  describe("isFilteringBySuggestion", () => {
+    test("should return true if suggestion is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "content_class.value.operator.and.values.hate.pii",
+        null
+      );
+
+      expect(criteria.isFilteringBySuggestion).toBe(true);
+    });
+
+    test("should return false if suggestion is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteringBySuggestion).toBe(false);
+    });
+  });
+
+  describe("isSortingBy", () => {
+    test("should return true if sortBy is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "suggestion.relevant.score.asc",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isSortingBy).toBe(true);
+    });
+
+    test("should return false if sortBy is empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isSortingBy).toBe(false);
+    });
+  });
+
   describe("isFilteredByText", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
@@ -8,8 +210,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "searchText",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -22,8 +226,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -36,8 +242,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         undefined,
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -46,14 +254,32 @@ describe("RecordCriteria", () => {
   });
 
   describe("isFilteredByMetadata should", () => {
-    test("return true if metadata is not empty", () => {
+    test("return true if metadata is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
         "pending",
         "",
-        ["metadata"],
-        [],
+        "metadata.ge.1le.5",
+        "",
+        "",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByMetadata).toBe(true);
+    });
+
+    test("return true if metadata is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "metadata.option1~option2",
+        "",
+        "",
+        "",
         null
       );
 
@@ -66,8 +292,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -81,11 +309,65 @@ describe("RecordCriteria", () => {
         "pending",
         "",
         undefined,
-        [],
+        "",
+        "",
+        "",
         null
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
+    });
+  });
+
+  describe("isFilteredByResponse", () => {
+    test("should return true if response is range", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.ge.1le.5",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByResponse).toBe(true);
+    });
+
+    test("should return true if response is terms", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "response.option1~option2",
+        "",
+        null
+      );
+
+      expect(criteria.isFilteredByResponse).toBe(true);
+    });
+  });
+
+  describe("isFilteredBySuggestion", () => {
+    test("should return true if suggestion is not empty", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "content_class.score.ge0.le0.24",
+        null
+      );
+
+      expect(criteria.isFilteredBySuggestion).toBe(true);
     });
   });
 
@@ -96,8 +378,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -112,8 +396,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -128,8 +414,10 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "Can AI help us?",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
@@ -144,12 +432,14 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        ["metadata"],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
-      criteria.metadata = ["metadata1", "metadata2"];
+      criteria.metadata.complete("your_feel.happy~sad");
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -160,12 +450,22 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        ["sortBy"],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
-      criteria.sortBy = ["sortBy1", "sortBy2"];
+      criteria.sortBy.complete(
+        JSON.stringify([
+          {
+            entity: "record",
+            name: "inserted_at",
+            order: "asc",
+          },
+        ])
+      );
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -176,10 +476,11 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
       );
 
       criteria.similaritySearch.order = "least";
@@ -193,16 +494,23 @@ describe("RecordCriteria", () => {
         1,
         "pending",
         "",
-        [],
-        [],
+        "",
+        "",
+        "",
+        "",
         null
       );
 
       criteria.page = 2;
       criteria.status = "submitted";
       criteria.searchText = "Love ML";
-      criteria.metadata = ["metadata1", "metadata2"];
-      criteria.sortBy = ["sortBy1", "sortBy2"];
+      criteria.metadata.value = [
+        { name: "metadata1", value: ["value1"] },
+        { name: "metadata2", value: ["value2"] },
+      ];
+      criteria.sortBy.value = [
+        { entity: "record", name: "inserted_at", order: "asc" },
+      ];
 
       criteria.similaritySearch.order = "least";
       criteria.similaritySearch.recordId = "1";
@@ -215,27 +523,28 @@ describe("RecordCriteria", () => {
     });
   });
 
-  describe("Reset should", () => {
+  describe("rollback should", () => {
     test("restore committed changes", () => {
       const criteria = new RecordCriteria(
         "datasetId",
         1,
         "pending",
         "Do you love ML?",
-        ["metadata.your_feel"],
-        ["inserted_at:asc"],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "your_feel.happy~sad",
+        "inserted_at:desc",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
       );
 
       criteria.page = 1;
       criteria.status = "discarded";
       criteria.searchText = "Do you love AI?";
-      criteria.metadata = ["metadata.my_feel"];
-      criteria.sortBy = ["inserted_at:desc"];
+      criteria.metadata.complete("your_feel.sad");
+      criteria.sortBy.complete("record.inserted_at.asc");
       criteria.similaritySearch.order = "least";
 
-      criteria.reset();
+      criteria.rollback();
 
       expect(criteria.page).toEqual(criteria.committed.page);
       expect(criteria.status).toEqual(criteria.committed.status);

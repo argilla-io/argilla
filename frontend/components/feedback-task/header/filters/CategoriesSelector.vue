@@ -3,19 +3,22 @@
     <SearchLabelComponent
       v-model="searchText"
       :placeholder="$t('filterBy')"
-      searchRef="metadataSearch"
+      :searchRef="name"
       class="category__search"
     />
     <ul class="category__list">
       <li
         v-for="category in categoriesFilteredBySearchText"
         :key="category.name"
+        :title="category.tooltip"
       >
         <BaseButton
           @on-click="selectCategory(category)"
           class="category__item"
           :disabled="!category.canFilter"
-          ><span>{{ category.title }}</span>
+        >
+          <span v-if="!!category.title" v-text="category.title" />
+          <span v-else>{{ $t(`${prefixTranslation}${category.name}`) }}</span>
           <svgicon name="chevron-right" width="10" height="10"
         /></BaseButton>
       </li>
@@ -30,6 +33,14 @@ export default {
       type: Array,
       required: true,
     },
+    name: {
+      type: String,
+      required: true,
+    },
+    prefixTranslation: {
+      type: String,
+      default: "",
+    },
   },
   data: () => {
     return {
@@ -38,9 +49,10 @@ export default {
   },
   computed: {
     categoriesFilteredBySearchText() {
-      return this.categories.filter((cat) =>
-        cat.title.toLowerCase().includes(this.searchText.toLowerCase())
-      );
+      return this.categories.filter((cat) => {
+        const filterProp = cat.title ?? cat.name;
+        return filterProp.toLowerCase().includes(this.searchText.toLowerCase());
+      });
     },
   },
   methods: {

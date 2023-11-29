@@ -13,16 +13,31 @@
 #  limitations under the License.
 import copy
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, func, select
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
+import argilla.server.errors.future as errors
 from argilla.server.contexts import accounts
-from argilla.server.enums import DatasetStatus, RecordInclude, ResponseStatusFilter, UserRole
+from argilla.server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla.server.models import (
     Dataset,
     Field,
@@ -230,18 +245,34 @@ async def get_question_by_id(db: "AsyncSession", question_id: UUID) -> Union[Que
 
 async def get_question_by_name_and_dataset_id(db: "AsyncSession", name: str, dataset_id: UUID) -> Union[Question, None]:
     result = await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))
+
     return result.scalar_one_or_none()
 
 
-async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Union[MetadataProperty, None]:
-    return await MetadataProperty.read(db, id=metadata_property_id)
+async def get_question_by_name_and_dataset_id_or_raise(db: "AsyncSession", name: str, dataset_id: UUID) -> Question:
+    question = await get_question_by_name_and_dataset_id(db, name, dataset_id)
+    if question is None:
+        raise errors.NotFoundError(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
+
+    return question
 
 
 async def get_metadata_property_by_name_and_dataset_id(
     db: "AsyncSession", name: str, dataset_id: UUID
 ) -> Union[MetadataProperty, None]:
     result = await db.execute(select(MetadataProperty).filter_by(name=name, dataset_id=dataset_id))
+
     return result.scalar_one_or_none()
+
+
+async def get_metadata_property_by_name_and_dataset_id_or_raise(
+    db: "AsyncSession", name: str, dataset_id: UUID
+) -> MetadataProperty:
+    metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name, dataset_id)
+    if metadata_property is None:
+        raise errors.NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
+
+    return metadata_property
 
 
 async def delete_metadata_property(db: "AsyncSession", metadata_property: MetadataProperty) -> MetadataProperty:
@@ -602,7 +633,7 @@ async def create_records(
     async with db.begin_nested():
         db.add_all(records)
         await db.flush(records)
-        await _load_users_from_record_responses(records)
+        await _preload_records_relationships_before_index(db, records)
         await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -771,6 +802,23 @@ async def _update_record(
     return params, suggestions, vectors, needs_search_engine_update, caches
 
 
+async def _preload_records_relationships_before_index(db: "AsyncSession", records: List[Record]) -> None:
+    for record in records:
+        await _preload_record_relationships_before_index(db, record)
+
+
+async def _preload_record_relationships_before_index(db: "AsyncSession", record: Record) -> None:
+    await db.execute(
+        select(Record)
+        .filter_by(id=record.id)
+        .options(
+            selectinload(Record.responses).selectinload(Response.user),
+            selectinload(Record.suggestions).selectinload(Suggestion.question),
+            selectinload(Record.vectors),
+        )
+    )
+
+
 async def update_records(
     db: "AsyncSession", search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
 ) -> None:
@@ -849,6 +897,7 @@ async def update_records(
                 include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
             )
             await dataset.awaitable_attrs.vectors_settings
+            await _preload_records_relationships_before_index(db, records)
             await search_engine.index_records(dataset, records)
 
     await db.commit()
@@ -888,6 +937,7 @@ async def update_record(
 
         if needs_search_engine_update:
             await record.dataset.awaitable_attrs.vectors_settings
+            await _preload_record_relationships_before_index(db, record)
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
@@ -1042,33 +1092,91 @@ async def get_suggestion_by_record_id_and_question_id(
     return result.scalar_one_or_none()
 
 
-async def upsert_suggestion(
-    db: "AsyncSession", record: Record, question: Question, suggestion_create: "SuggestionCreate"
-) -> Suggestion:
-    question.parsed_settings.check_response(suggestion_create)
-    return await Suggestion.upsert(
-        db,
-        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
-        constraints=[Suggestion.record_id, Suggestion.question_id],
+async def _preload_suggestion_relationships_before_index(db: "AsyncSession", suggestion: Suggestion) -> None:
+    await db.execute(
+        select(Suggestion)
+        .filter_by(id=suggestion.id)
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
     )
 
 
-async def delete_suggestions(db: "AsyncSession", record: Record, suggestions_ids: List[UUID]) -> None:
+async def upsert_suggestion(
+    db: "AsyncSession",
+    search_engine: SearchEngine,
+    record: Record,
+    question: Question,
+    suggestion_create: "SuggestionCreate",
+) -> Suggestion:
+    question.parsed_settings.check_response(suggestion_create)
+
+    async with db.begin_nested():
+        suggestion = await Suggestion.upsert(
+            db,
+            schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+            constraints=[Suggestion.record_id, Suggestion.question_id],
+            autocommit=False,
+        )
+        await _preload_suggestion_relationships_before_index(db, suggestion)
+        await search_engine.update_record_suggestion(suggestion)
+
+    await db.commit()
+
+    return suggestion
+
+
+async def delete_suggestions(
+    db: "AsyncSession", search_engine: SearchEngine, record: Record, suggestions_ids: List[UUID]
+) -> None:
     params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
-    await Suggestion.delete_many(db=db, params=params)
+    suggestions = await list_suggestions_by_id_and_record_id(db, suggestions_ids, record.id)
+
+    async with db.begin_nested():
+        await Suggestion.delete_many(db=db, params=params, autocommit=False)
+        for suggestion in suggestions:
+            await search_engine.delete_record_suggestion(suggestion)
+
+    await db.commit()
 
 
 async def get_suggestion_by_id(db: "AsyncSession", suggestion_id: "UUID") -> Union[Suggestion, None]:
     result = await db.execute(
         select(Suggestion)
         .filter_by(id=suggestion_id)
-        .options(selectinload(Suggestion.record).selectinload(Record.dataset))
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
     )
+
     return result.scalar_one_or_none()
 
 
-async def delete_suggestion(db: "AsyncSession", suggestion: Suggestion) -> Suggestion:
-    return await suggestion.delete(db)
+async def list_suggestions_by_id_and_record_id(
+    db: "AsyncSession", suggestion_ids: List[UUID], record_id: UUID
+) -> Sequence[Suggestion]:
+    result = await db.execute(
+        select(Suggestion)
+        .filter(Suggestion.record_id == record_id, Suggestion.id.in_(suggestion_ids))
+        .options(
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        )
+    )
+
+    return result.scalars().all()
+
+
+async def delete_suggestion(db: "AsyncSession", search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
+    async with db.begin_nested():
+        suggestion = await suggestion.delete(db, autocommit=False)
+        await search_engine.delete_record_suggestion(suggestion)
+
+    await db.commit()
+
+    return suggestion
 
 
 async def get_metadata_property_by_id(db: "AsyncSession", metadata_property_id: UUID) -> Optional[MetadataProperty]:
