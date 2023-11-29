@@ -3,7 +3,7 @@
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
 ```{warning}
-HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace. For more info check the ["Setting up persistent storage"](#setting-up-persistent-storage) section.
+Hugging Face Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the Hugging Face Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by Hugging Face. For more info check the ["Setting up persistent storage"](#setting-up-persistent-storage) section.
 ```
 
 In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
@@ -138,7 +138,7 @@ If you have improvement suggestions or need specific support, please join [Argil
 
 ## Setting up persistent storage
 
-HuggingFace Spaces recently introduced a feature for persistent storage, which must be enabled manually through the HuggingFace Spaces settings. Without this activation, and if you're not subscribed to a paid space upgrade, the space will automatically shut down after 48 hours of inactivity, resulting in data loss. To prevent this, we highly recommend using the persistent storage layer offered by HuggingFace.
+Hugging Face Spaces recently introduced a feature for persistent storage, which must be enabled manually through the Hugging Face Spaces settings. Without this activation, and if you're not subscribed to a paid space upgrade, the space will automatically shut down after 48 hours of inactivity, resulting in data loss. To prevent this, we highly recommend using the persistent storage layer offered by Hugging Face.
 
 To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section. This will enable persistent storage for your Space and you will be able to use it for data labeling and feedback collection.
 
