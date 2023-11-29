@@ -14,6 +14,7 @@
         <li
           v-for="category in getCategoriesByGroup(group)"
           :key="category.name"
+          :title="category.tooltip"
         >
           <BaseButton
             :disabled="!category.canSort"
