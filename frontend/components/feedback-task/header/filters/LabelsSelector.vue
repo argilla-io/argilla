@@ -11,6 +11,7 @@
       :selected-options="filter.selectedOptions"
     />
     <OptionsSelector
+      class="labels-selector__operator"
       v-if="filter.hasOperator"
       v-model="filter.operator"
       :options="['and', 'or']"
@@ -102,7 +103,6 @@ export default {
 .labels-selector {
   display: flex;
   flex-direction: column;
-  margin-bottom: $base-space;
   &__items {
     max-height: 200px;
     overflow: auto;
@@ -130,6 +130,9 @@ export default {
       fill: $primary-color;
       min-width: 16px;
     }
+  }
+  &__operator {
+    margin-top: $base-space;
   }
 }
 </style>
