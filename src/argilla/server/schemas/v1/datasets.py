@@ -491,8 +491,14 @@ class UserDiscardedResponseCreate(BaseModel):
     status: Literal[ResponseStatus.discarded]
 
 
+class UserDraftResponseCreate(BaseModel):
+    user_id: UUID
+    values: Dict[str, ResponseValueCreate]
+    status: Literal[ResponseStatus.draft]
+
+
 UserResponseCreate = Annotated[
-    Union[UserSubmittedResponseCreate, UserDiscardedResponseCreate],
+    Union[UserSubmittedResponseCreate, UserDraftResponseCreate, UserDiscardedResponseCreate],
     PydanticField(discriminator="status"),
 ]
 

@@ -4,14 +4,11 @@ import {
   FilterWithScore,
   OptionForFilter,
   RangeValue,
+  ValuesOption,
 } from "../common/Filter";
 import { Question } from "../question/Question";
 import { Agent } from "./Agent";
-import {
-  ConfigurationSearch,
-  SuggestionSearch,
-  ValuesOption,
-} from "./SuggestionCriteria";
+import { ConfigurationSearch, SuggestionSearch } from "./SuggestionCriteria";
 
 class ConfigurationValues extends Filter {
   public readonly rangeValue: FilterWithScore;

@@ -52,4 +52,6 @@ Fine-tune an LLM or other models with the feedback collected from Argilla.
 ```
 ````
 
+![workflow](/_static/tutorials/end2end/base/workflow.svg)
+
 ![Feedback Dataset snapshot](/_static/images/llms/snapshot-feedback-demo.png)

@@ -1,11 +1,66 @@
 # Tutorials
 
+Whether you’re a beginner or an experienced user, these tutorials will walk you through our features and functionalities making it easy for you to understand and implement them.
+
 **Feedback Dataset**
 
 ```{include} /_common/feedback_dataset.md
 ```
 
-Here you can find end-to-end examples to help you get started with curanting datasets and collecting feedback to fine-tune LLMs and other language models.
+*Beginner*
+
+Are you new to Argilla and do you want to walk through low-key notebooks to reproduce specific features, these tutorials are perfect for you. They can be followed step by step but you can also work through individual examples with an Argilla-compatible dataset we have already prepared for you and which can be downloaded from the Hugging Face hub.
+
+![workflow](/_static/tutorials/end2end/base/workflow.svg)
+
+````{grid}  1 1 3 3
+:class-container: tuto-section-2
+```{grid-item-card} Configuring Users and Workspaces
+:link: feedback/end2end_examples/configure-users-and-workspaces-000.html
+
+Learn how to configure `Users` and `Workspaces`.
+```
+```{grid-item-card} Creating a FeedbackDataset
+:link: feedback/end2end_examples/create-dataset-001.html
+
+Learn how to configure a `FeedbackDataset` and add `FeedbackRecords` to it.
+```
+```{grid-item-card} Assign records to your team
+:link: feedback/end2end_examples/assign-records-002.html
+
+Learn how to easily assign records to your team.
+```
+```{grid-item-card} Adding Metadata to a FeedbackDataset
+:link: feedback/end2end_examples/add-metadata-003.html
+
+Learn how to add metadata properties to a `FeedbackDataset`.
+```
+```{grid-item-card} Adding Vectors to a FeedbackDataset
+:link: feedback/end2end_examples/add-vectors-004.html
+
+Learn how to add vectors and vector settings to a `FeedbackDataset`.
+```
+```{grid-item-card} Adding Responses and Suggestions to a FeedbackDataset
+:link: feedback/end2end_examples/add-suggestions-and-responses-005.html
+
+Learn how to add suggestions and responses to a `FeedbackDataset`.
+```
+```{grid-item-card} Filter and Query your FeedbackDataset
+:link: feedback/end2end_examples/filter-and-query-008.html
+
+Learn how to filter and query your `FeedbackDataset`.
+```
+```{grid-item-card} Train Your Model with ArgillaTrainer
+:link: feedback/end2end_examples/train-model-006.html
+
+Learn how to train your model with `ArgillaTrainer`.
+```
+````
+
+
+*Advanced*
+
+Here you can find more advanced applied examples to help you get started with curating datasets and collecting feedback to fine-tune LLMs and other language models.
 
 ````{grid}  1 1 3 3
 :class-container: tuto-section-2
