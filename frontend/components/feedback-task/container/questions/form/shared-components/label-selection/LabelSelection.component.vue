@@ -422,7 +422,7 @@ input[type="checkbox"] {
   border-style: solid;
   box-sizing: content-box;
   color: $black-87;
-  background: palette(grey, 800);
+  background: palette(grey, 700);
   @include font-size(11px);
   font-family: monospace, monospace;
 }
