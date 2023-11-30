@@ -350,7 +350,7 @@ $label-dark-color: palette(purple, 200);
   min-width: 50px;
   max-width: 200px;
   text-align: center;
-  padding-inline: 12px;
+  padding-inline: $base-space;
   background: $label-color;
   color: $label-dark-color;
   font-weight: 500;
