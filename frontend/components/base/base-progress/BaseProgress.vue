@@ -205,6 +205,7 @@ export default {
     right: 0;
     background: #a1a2cc;
     transition: width 1s linear, left 1s linear;
+    border-radius: 0;
     .progress-enter-active & {
       animation: progress 1s 1.5s;
       animation-fill-mode: backwards;
@@ -216,6 +217,7 @@ export default {
     right: 0;
     background: #08a4bd;
     transition: width 1s linear, left 1s linear;
+    border-radius: 0;
     .progress-enter-active & {
       animation: progress 2s 2.5s;
       animation-fill-mode: backwards;

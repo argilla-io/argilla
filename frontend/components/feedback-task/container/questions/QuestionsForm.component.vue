@@ -279,7 +279,7 @@ export default {
     border-color: $submitted-color;
   }
   &.--focused-form {
-    border-color: palette(brown);
+    border-color: palette(turquoise);
   }
   &.--waiting .questions-form__content {
     opacity: 0.7;

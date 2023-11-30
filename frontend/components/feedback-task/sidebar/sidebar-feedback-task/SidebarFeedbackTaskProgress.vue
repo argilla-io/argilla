@@ -34,7 +34,7 @@
       :progress="metrics.submittedProgress"
       :progress-secondary="metrics.draftProgress"
       :progress-tertiary="metrics.discardedProgress"
-      progress-bg="#bb720a"
+      :progress-bg="itemColor(0)"
       :color="itemColor(2)"
       :color-secondary="itemColor(1)"
       :color-tertiary="itemColor(3)"
