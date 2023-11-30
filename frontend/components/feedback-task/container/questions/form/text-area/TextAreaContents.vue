@@ -122,6 +122,13 @@ export default {
   outline: none;
   &.--editing {
     border-color: $primary-color;
+    outline: 1px solid $primary-color;
+  }
+  &:focus {
+    outline: 1px solid $black-20;
+  }
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
   .content--exploration-mode & {
     border: none;
