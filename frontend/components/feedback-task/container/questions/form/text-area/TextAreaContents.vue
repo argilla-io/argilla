@@ -105,10 +105,6 @@ export default {
         return "--editing";
       }
 
-      if (this.isFocused && this.isExitedFromEditionModeWithKeyboard) {
-        return "--focus";
-      }
-
       return null;
     },
   },
@@ -123,11 +119,9 @@ export default {
   border-radius: $border-radius-s;
   min-height: 10em;
   background: palette(white);
+  outline: none;
   &.--editing {
     border-color: $primary-color;
-  }
-  &.--focus {
-    outline: 2px solid $primary-color;
   }
   .content--exploration-mode & {
     border: none;
