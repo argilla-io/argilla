@@ -69,8 +69,8 @@
               : option.text
           "
         >
-          <span v-if="showShortcutsHelper">⌨️ {{ index + 1 }}</span>
-          {{ option.text }}
+          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
+          <span>{{ option.text }}</span>
         </label>
       </div>
     </transition-group>
@@ -344,6 +344,7 @@ $label-dark-color: palette(purple, 200);
 .label-text {
   display: inline-flex;
   align-items: center;
+  gap: $base-space;
   width: 100%;
   height: 32px;
   min-width: 50px;
@@ -407,6 +408,23 @@ input[type="checkbox"] {
       }
     }
   }
+}
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: $base-space * 2;
+  aspect-ratio: 1;
+  border-radius: $border-radius;
+  border-width: 1px 1px 3px 1px;
+  border-color: $black-20;
+  border-style: solid;
+  box-sizing: content-box;
+  color: $black-87;
+  background: palette(grey, 800);
+  @include font-size(11px);
+  font-family: monospace, monospace;
 }
 .no-result {
   display: block;
