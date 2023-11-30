@@ -80,7 +80,7 @@ from argilla.server.commons.models import TaskStatus
 from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
-from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
+from tests.factories import UserFactory, WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors
 
 
@@ -442,7 +442,7 @@ def test_log_passing_empty_records_list(argilla_user: User):
 
 def test_log_deprecated_chunk_size(argilla_user: User):
     dataset_name = "test_log_deprecated_chunk_size"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
     record = TextClassificationRecord(text="My text")
     with pytest.warns(FutureWarning, match="`chunk_size`.*`batch_size`"):
         log(records=[record], name=dataset_name, chunk_size=100)
@@ -450,7 +450,7 @@ def test_log_deprecated_chunk_size(argilla_user: User):
 
 def test_large_batch_size_warning(argilla_user: User):
     dataset_name = "test_large_batch_size_warning"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
     record = TextClassificationRecord(text="My text")
 
     with pytest.warns(UserWarning, match="batch size is noticeably large"):
