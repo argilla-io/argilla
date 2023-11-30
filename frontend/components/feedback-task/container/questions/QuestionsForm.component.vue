@@ -23,9 +23,6 @@
             />
           </p>
         </div>
-        <p class="questions-form__title --heading5 --medium">
-          {{ $t("submit-your-feedback") }}
-        </p>
         <p class="questions-form__guidelines-link">
           Read the
           <NuxtLink
@@ -246,10 +243,6 @@ export default {
   margin-bottom: auto;
   &__header {
     align-items: baseline;
-  }
-  &__title {
-    margin: 0 0 calc($base-space / 2) 0;
-    color: $black-87;
   }
   &__guidelines-link {
     margin: 0;
