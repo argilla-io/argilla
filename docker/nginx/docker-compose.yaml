@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: "nginx_proxy"
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  argilla:
+    image: argilla/argilla-quickstart:v1.20.0
+    environment:
+      ARGILLA_ENABLE_TELEMETRY: 0
+      ARGILLA_BASE_URL: /argilla
+    ports:
+      - "6900:6900"

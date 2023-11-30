@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: "traefik:v2.10"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  argilla:
+    image: argilla/argilla-quickstart:v1.20.0
+    environment:
+      ARGILLA_ENABLE_TELEMETRY: 0
+      ARGILLA_BASE_URL: /argilla
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.argilla.rule=PathPrefix(`/argilla/`)"
+      - "traefik.http.routers.argilla.entrypoints=web"
+      - "traefik.http.services.argilla.loadbalancer.server.port=6900"
+      - "traefik.http.middlewares.argilla-stripprefix.stripprefix.prefixes=/argilla"
+      - "traefik.http.middlewares.argilla-stripprefix.stripprefix.forceSlash=false"
+      - "traefik.http.routers.argilla.middlewares=argilla-stripprefix"
