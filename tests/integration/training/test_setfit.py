@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 from argilla.client.models import TextClassificationRecord
 from argilla.training import ArgillaTrainer
 
@@ -25,9 +24,9 @@ MODEL = "all-MiniLM-L6-v2"
 def test_update_config(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(num_epochs=3)
-    assert trainer._trainer.setfit_trainer_kwargs["num_epochs"] == 3
+    assert trainer._trainer.trainer_kwargs["num_epochs"] == 3
     trainer.update_config(num_epochs=1)
-    assert trainer._trainer.setfit_trainer_kwargs["num_epochs"] == 1
+    assert trainer._trainer.trainer_kwargs["num_epochs"] == 1
 
 
 def test_setfit_train(dataset_text_classification):

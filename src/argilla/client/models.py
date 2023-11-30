@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import BaseModel, Field, PrivateAttr, conint, constr, root_validator, validator
+from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from argilla import _messages
 from argilla._constants import _JS_MAX_SAFE_INTEGER, DEFAULT_MAX_KEYWORD_LENGTH, PROTECTED_METADATA_FIELD_PREFIX
@@ -46,7 +46,6 @@ FRAMEWORK_TO_NAME_MAPPING = {
     "spark-nlp": "Spark NLP John Snow Labs library",
     "openai": "OpenAI LLMs",
     "trl": "Transformer Reinforcement Learning",
-    "trlx": "Transformer Reinforcement Learning X",
     "sentence-transformers": "Sentence Transformers library",
 }
 
@@ -64,7 +63,6 @@ class Framework(Enum):
         spark-nlp: Spark NLP John Snow Labs library
         openai: OpenAI LLMs
         trl: Transformer Reinforcement Learning
-        trlx: Transformer Reinforcement Learning X
         sentence-transformers: Sentence Transformers library
     """
 
@@ -77,7 +75,6 @@ class Framework(Enum):
     SPARK_NLP = "spark-nlp"
     OPENAI = "openai"
     TRL = "trl"
-    TRLX = "trlx"
     SENTENCE_TRANSFORMERS = "sentence-transformers"
     # AUTOTRAIN = "autotrain"
 
@@ -130,7 +127,7 @@ class _Validators(BaseModel):
             return str(uuid.uuid4())
         if isinstance(v, int):
             message = (
-                f"Integer ids won't be supported in future versions. We recommend to start using strings instead. "
+                "Integer ids won't be supported in future versions. We recommend to start using strings instead. "
                 "For datasets already containing integer values we recommend migrating them to avoid deprecation issues. "
                 "See https://docs.argilla.io/en/latest/getting_started/installation/configurations"
                 "/database_migrations.html#elasticsearch"

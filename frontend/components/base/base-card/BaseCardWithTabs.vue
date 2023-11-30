@@ -1,11 +1,11 @@
 <template>
-  <div class="card-with-tabs">
+  <div :class="['card-with-tabs', tabClass]">
     <ul class="card-with-tabs__tabs">
       <li
         class="card-with-tabs__tab"
-        :class="{ '--active': tab === currentTab }"
+        :class="[{ '--active': tab.id === currentTab.id }, tab?.class]"
         v-for="tab in tabs"
-        :key="tab.name"
+        :key="tab.id"
       >
         <base-button class="small" @on-click="changeTab(tab)">{{
           tab.name
@@ -36,6 +36,9 @@ export default {
     currentComponent() {
       return this.currentTab.component;
     },
+    tabClass() {
+      return this.tabs.find((tab) => tab.id === this.currentTab.id)?.class;
+    },
   },
   methods: {
     changeTab(tab) {
@@ -50,21 +53,28 @@ export default {
   &__tabs {
     display: flex;
     align-items: center;
-    margin: 0 0 -1px 0;
+    margin: 0;
     padding: 0;
   }
   &__tab {
     list-style: none;
     border-top-right-radius: $border-radius;
     border-top-left-radius: $border-radius;
-    background: palette(grey, 800);
+    background: palette(white);
     border-top: 1px solid palette(grey, 600);
     border-left: 1px solid palette(grey, 600);
     border-right: 1px solid palette(grey, 600);
     &:not(.--active) {
-      background: palette(grey, 600);
+      background: palette(grey, 800);
+      .button {
+        color: $black-37;
+      }
     }
-    &:last-child {
+    &.--active {
+      margin-bottom: -1px;
+      border-bottom: 1px solid palette(white);
+    }
+    &:last-child:not(:first-child) {
       margin-left: -1px;
     }
   }
@@ -73,7 +83,7 @@ export default {
     border-top-right-radius: $border-radius;
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
-    background: palette(grey, 800);
+    background: palette(white);
     border: 1px solid palette(grey, 600);
   }
 }

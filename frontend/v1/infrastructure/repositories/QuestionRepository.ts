@@ -13,7 +13,8 @@ export class QuestionRepository {
   async getQuestions(datasetId: string): Promise<BackendQuestion[]> {
     try {
       const { data } = await this.axios.get<Response<BackendQuestion[]>>(
-        `/v1/datasets/${datasetId}/questions`
+        `/v1/datasets/${datasetId}/questions`,
+        { headers: { "cache-control": "max-age=120" } }
       );
 
       return data.items;

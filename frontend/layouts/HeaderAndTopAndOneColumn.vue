@@ -9,9 +9,6 @@
     <div class="center-area">
       <slot name="center">here is the center content</slot>
     </div>
-    <div class="footer-area">
-      <slot name="footer">here is the footer</slot>
-    </div>
   </div>
 </template>
 
@@ -49,8 +46,7 @@ $gap-width: $base-space * 2;
   grid-row-gap: 0px;
   grid-template-areas:
     "header header"
-    "center sidebar"
-    "footer footer";
+    "center sidebar";
   height: 100vh;
   transition: 0.4s ease-in-out;
   &.--panel {
@@ -63,9 +59,6 @@ $gap-width: $base-space * 2;
 
 .header-area {
   grid-area: header;
-}
-.footer-area {
-  grid-area: footer;
 }
 .sidebar-area {
   grid-area: sidebar;

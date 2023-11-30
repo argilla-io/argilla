@@ -49,6 +49,9 @@ class DatasetConfig(BaseModel):
     allow_extra_metadata: bool = True
     vectors_settings: Optional[List[VectorSettings]] = None
 
+    class Config:
+        use_enum_values = True
+
     def to_yaml(self) -> str:
         # THIS DOUBLE SERIALIZATION IS DONE TO AVOID GENERATING YAMLs WITH CUSTOM ENUM TYPES.
         # SEE https://github.com/argilla-io/argilla/issues/4089

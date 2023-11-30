@@ -139,11 +139,7 @@ def configure_app_statics(app: FastAPI):
 
     app.mount(
         "/",
-        RewriteStaticFiles(
-            directory=temp_statics,
-            html=True,
-            check_dir=False,
-        ),
+        RewriteStaticFiles(directory=temp_statics, html=True, check_dir=False),
         name="static",
     )
 
@@ -241,7 +237,7 @@ def configure_database(app: FastAPI):
                 _log_default_user_warning()
 
 
-argilla_app = FastAPI(
+app = FastAPI(
     title="Argilla",
     description="Argilla API",
     # Disable default openapi configuration
@@ -252,30 +248,25 @@ argilla_app = FastAPI(
 )
 
 
-@argilla_app.get("/docs", include_in_schema=False)
+@app.get("/docs", include_in_schema=False)
 async def redirect_docs():
     return RedirectResponse(url=f"{settings.base_url}api/docs")
 
 
-@argilla_app.get("/api", include_in_schema=False)
+@app.get("/api", include_in_schema=False)
 async def redirect_api():
     return RedirectResponse(url=f"{settings.base_url}api/docs")
 
 
-app = FastAPI(docs_url=None)
-app.mount("/", argilla_app)
-
-configure_app_logging(app)
-configure_database(app)
-configure_storage(app)
-configure_telemetry(app)
-
 for app_configure in [
     configure_app_logging,
+    configure_database,
+    configure_storage,
+    configure_telemetry,
     configure_middleware,
     configure_api_exceptions,
     configure_app_security,
     configure_api_router,
     configure_app_statics,
 ]:
-    app_configure(argilla_app)
+    app_configure(app)
