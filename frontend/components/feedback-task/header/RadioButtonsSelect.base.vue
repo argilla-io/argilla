@@ -149,7 +149,7 @@ $selector-width: 140px;
   &.draft {
     &:hover,
     &:focus-within {
-      background: lighten($draft-color, 54%);
+      background: lighten($draft-color, 56%);
     }
   }
   &__radio {
