@@ -362,8 +362,8 @@ def test_log_something(argilla_user: User):
     assert results.records[0].inputs["text"] == "This is a test"
 
 
-def test_load_feedback_dataset(owner: User):
-    init(api_key=owner.api_key, workspace=owner.username)
+def test_load_feedback_dataset(argilla_user: User):
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
     dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
 
@@ -373,10 +373,10 @@ def test_load_feedback_dataset(owner: User):
         )
     )
 
-    dataset.push_to_argilla(name="unit-test", workspace=owner.username)
+    dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
 
     with pytest.warns(UserWarning):
-        remote = load(name="unit-test", workspace=owner.username)
+        remote = load(name="unit-test", workspace=argilla_user.username)
 
     assert isinstance(remote, RemoteFeedbackDataset)
 
@@ -646,8 +646,8 @@ def test_delete_dataset(argilla_user: User):
         load(name=dataset_name)
 
 
-def test_delete_feedback_dataset(owner: User):
-    init(api_key=owner.api_key, workspace=owner.username)
+def test_delete_feedback_dataset(argilla_user: User):
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
     dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
 
@@ -657,13 +657,13 @@ def test_delete_feedback_dataset(owner: User):
         )
     )
 
-    dataset.push_to_argilla(name="unit-test", workspace=owner.username)
+    dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
 
     with pytest.warns(UserWarning):
-        delete_ignoring_errors(name="unit-test", workspace=owner.username)
+        delete(name="unit-test", workspace=argilla_user.username)
 
     with pytest.raises(ValueError):
-        FeedbackDataset.from_argilla(name="unit-test", workspace=owner.username)
+        FeedbackDataset.from_argilla(name="unit-test", workspace=argilla_user.username)
 
 
 def test_log_with_wrong_name(argilla_user: User):
