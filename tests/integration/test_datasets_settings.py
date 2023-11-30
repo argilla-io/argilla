@@ -46,16 +46,16 @@ if TYPE_CHECKING:
     ("settings_", "wrong_settings"),
     [
         (
-            TextClassificationSettings(label_schema={"A", "B"}),
-            TokenClassificationSettings(label_schema={"PER", "ORG"}),
+            TextClassificationSettings(label_schema=["A", "B"]),
+            TokenClassificationSettings(label_schema=["PER", "ORG"]),
         ),
         (
-            TokenClassificationSettings(label_schema={"PER", "ORG"}),
-            TextClassificationSettings(label_schema={"A", "B"}),
+            TokenClassificationSettings(label_schema=["PER", "ORG"]),
+            TextClassificationSettings(label_schema=["A", "B"]),
         ),
         (
             TokenClassificationSettings(label_schema=[1, 2, 3]),
-            TextClassificationSettings(label_schema={"A", "B"}),
+            TextClassificationSettings(label_schema=["A", "B"]),
         ),
     ],
 )
@@ -76,7 +76,7 @@ def test_settings_workflow(
     found_settings = datasets_api.load_settings(dataset)
     assert {label for label in found_settings.label_schema} == {str(label) for label in settings_.label_schema}
 
-    settings_.label_schema = {"LALALA"}
+    settings_.label_schema = ["LALALA"]
     configure_dataset(dataset, settings_, workspace=workspace)
 
     found_settings = datasets_api.load_settings(dataset)

@@ -76,7 +76,7 @@ class LabelsSchemaSettings(_AbstractSettings):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LabelsSchemaSettings":
         label_schema = data.get("label_schema", {})
-        labels = label_schema.get("labels", [])
+        labels = [label["name"] for label in label_schema.get("labels", [])]
         return cls(label_schema=labels)
 
     @property
