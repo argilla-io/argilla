@@ -17,7 +17,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   argilla:
-    image: argilla/argilla-quickstart:v1.20.0
+    image: argilla/argilla-quickstart:latest
     environment:
       ARGILLA_ENABLE_TELEMETRY: 0
       ARGILLA_BASE_URL: /argilla
