@@ -18,7 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla import Workspace
 from argilla.client import singleton
-from argilla.client.api import delete, get_workspace
+from argilla.client.api import get_workspace
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
 from argilla.client.singleton import init
@@ -31,6 +31,8 @@ from argilla.datasets import (
 )
 from argilla.server.contexts import accounts
 from argilla.server.security.model import WorkspaceUserCreate
+
+from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
     from argilla.client.apis.datasets import LabelsSchemaSettings
@@ -65,7 +67,7 @@ def test_settings_workflow(
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     workspace = get_workspace()
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     configure_dataset(dataset, settings=settings_, workspace=workspace)
 
     current_api = singleton.active_api()
@@ -160,7 +162,7 @@ async def test_delete_dataset_by_non_creator(
 
     rg = Argilla()
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     rg.datasets.configure(
         dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}), workspace=get_workspace()
     )

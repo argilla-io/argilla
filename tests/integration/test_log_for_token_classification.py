@@ -21,12 +21,14 @@ from argilla.client.singleton import ArgillaSingleton
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
 
+from tests.integration.utils import delete_ignoring_errors
+
 
 def test_log_with_empty_text(api: Argilla):
     dataset = "test_log_with_empty_text"
     text = " "
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     with pytest.raises(Exception, match="The provided `text` contains only whitespaces."):
         api.log(
             TokenClassificationRecord(id=0, text=text, tokens=["a", "b", "c"]),
@@ -38,7 +40,7 @@ def test_log_with_empty_tokens_list(api: Argilla):
     dataset = "test_log_with_empty_text"
     text = "The text"
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     with pytest.raises(
         Exception,
         match="At least one token should be provided",
@@ -106,7 +108,7 @@ def test_log_record_that_makes_me_cry(api: Argilla):
         status="Default",
         event_timestamp=None,
     )
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(record, name=dataset)
 
     records = api.load(dataset)
@@ -165,7 +167,7 @@ def test_search_keywords(api: Argilla):
     )
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(name=dataset, records=dataset_rb)
 
     df = api.load(dataset, query="lis*")
@@ -185,7 +187,7 @@ def test_search_keywords(api: Argilla):
 def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
 
     records = [
         argilla.TokenClassificationRecord(
@@ -219,7 +221,7 @@ def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
     text = "This is a text"
     expected_n_records = 10
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
 
     # Logging records with vector info
 
@@ -268,7 +270,7 @@ def test_logging_data_with_concurrency(api: Argilla):
 
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(name=dataset, records=dataset_rb, batch_size=int(len(dataset_ds) / 4), num_threads=4)
 
     ds = api.load(name=dataset)

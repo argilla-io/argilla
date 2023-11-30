@@ -20,12 +20,7 @@ from argilla.client.api import log
 from argilla.client.models import TextClassificationRecord
 from argilla.metrics.commons import keywords, records_status, text_length
 
-
-def delete(dataset: str) -> None:
-    try:
-        argilla.delete(dataset)
-    except Exception:
-        pass
+from tests.integration.utils import delete_ignoring_errors
 
 
 @pytest.fixture
@@ -42,7 +37,7 @@ def gutenberg_spacy_ner(mocked_client):
 
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     argilla.log(name=dataset, records=dataset_rb)
 
@@ -52,10 +47,7 @@ def gutenberg_spacy_ner(mocked_client):
 def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
 
-    try:
-        delete(dataset)
-    except Exception:
-        pass
+    delete_ignoring_errors(dataset)
 
     log(
         [
@@ -85,10 +77,7 @@ def test_status_distribution(mocked_client):
 def test_text_length(mocked_client):
     dataset = "test_text_length"
 
-    try:
-        delete(dataset)
-    except Exception:
-        pass
+    delete_ignoring_errors(dataset)
 
     log(
         [
@@ -165,7 +154,7 @@ def test_failing_metrics(argilla_user: "User"):
     argilla.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     dataset_name = "test_failing_metrics"
 
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
 
     argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
 

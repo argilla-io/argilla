@@ -31,16 +31,11 @@ from argilla.metrics.token_classification import (
     top_k_mentions,
 )
 
-
-def delete(dataset: str) -> None:
-    try:
-        argilla.delete(dataset)
-    except Exception:
-        pass
+from tests.integration.utils import delete_ignoring_errors
 
 
 def log_some_data(dataset: str):
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     text = "My first great example \n"
     tokens = text.split(" ")
     log(
@@ -80,7 +75,7 @@ def log_some_data(dataset: str):
 
 def test_search_by_nested_metric(mocked_client):
     dataset = "test_search_by_nested_metric"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log_some_data(dataset)
 
     df = load(dataset, query="metrics.predicted.mentions.capitalness: LOWER")
@@ -181,7 +176,7 @@ def test_entity_labels(mocked_client):
 
 def test_entity_capitalness(mocked_client):
     dataset = "test_entity_capitalness"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log_some_data(dataset)
 
     results = entity_capitalness(dataset)
@@ -197,7 +192,7 @@ def test_entity_capitalness(mocked_client):
 
 def test_top_k_mentions_consistency(mocked_client):
     dataset = "test_top_k_mentions_consistency"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log_some_data(dataset)
 
     mentions = {
@@ -266,7 +261,7 @@ def validate_mentions(
 )
 def test_metrics_without_data(mocked_client, metric, expected_results, monkeypatch):
     dataset = "test_metrics_without_data"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     text = "M"
     tokens = text.split(" ")

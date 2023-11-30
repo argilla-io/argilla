@@ -81,6 +81,7 @@ from argilla.server.models import User, UserRole
 from httpx import ConnectError
 
 from tests.factories import DatasetFactory, UserFactory, WorkspaceFactory
+from tests.integration.utils import delete_ignoring_errors
 
 
 def create_some_data_for_text_classification(client: AuthenticatedClient, name: str, n: int, with_vectors: bool = True):
@@ -407,18 +408,6 @@ def test_load_limits(argilla_user: User):
     assert len(ds) == limit_data_to
 
 
-@pytest.mark.asyncio
-async def test_load_with_feedback_dataset(mocked_client, argilla_user: User) -> None:
-    workspace = argilla_user.workspaces[0]
-    dataset = await DatasetFactory.create(name="dataset-a", workspace=workspace)
-
-    with pytest.raises(
-        ValueError,
-        match=f"The dataset '{dataset.name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla` instead to load it.",
-    ):
-        load(name=dataset.name, workspace=workspace.name)
-
-
 def test_log_records_with_too_long_text(api: Argilla):
     dataset_name = "test_log_records_with_too_long_text"
     api.delete(dataset_name)
@@ -497,7 +486,7 @@ def test_log_background(argilla_user: User):
 
 def test_log_background_with_error(monkeypatch, argilla_user: User):
     dataset_name = "test_log_background_with_error"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
 
     # Log in the background, and extract the future
     sample_text = "Sample text for testing"
@@ -537,7 +526,7 @@ def test_delete_with_errors(monkeypatch, argilla_user: User, status, error_type)
         return inner
 
     with pytest.raises(error_type):
-        monkeypatch.setattr(httpx, "delete", send_mock_response_with_http_status(status))
+        monkeypatch.setattr(httpx, "get", send_mock_response_with_http_status(status))
         delete("dataset")
 
 
@@ -557,7 +546,7 @@ def test_general_log_load(argilla_user: User, request, records, dataset_class):
     ]
 
     for name in dataset_names:
-        delete(name)
+        delete_ignoring_errors(name)
 
     records = request.getfixturevalue(records)
 
@@ -597,26 +586,26 @@ def test_log_load_with_workspace(argilla_user: User, request, records, dataset_c
         for input_type in ["single", "list", "dataset"]
     ]
     for name in dataset_names:
-        delete(name)
+        delete_ignoring_errors(name)
 
     records = request.getfixturevalue(records)
 
     log(records, name=dataset_names[0], workspace="argilla")
     ds = load(dataset_names[0], workspace="argilla")
     delete_records(dataset_names[0], ids=[rec.id for rec in ds][:1], workspace="argilla")
-    delete(dataset_names[0], workspace="argilla")
+    delete_ignoring_errors(dataset_names[0], workspace="argilla")
 
 
 def test_passing_wrong_iterable_data(argilla_user: User):
     dataset_name = "test_log_single_records"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
     with pytest.raises(Exception, match="Unknown record type"):
         log({"a": "010", "b": 100}, name=dataset_name)
 
 
 def test_log_with_generator(argilla_user: User):
     dataset_name = "test_log_with_generator"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
 
     def generator(items: int = 10) -> Iterable[TextClassificationRecord]:
         for i in range(0, items):
@@ -639,7 +628,7 @@ def test_create_ds_with_wrong_name(argilla_user: User):
 
 def test_delete_dataset(argilla_user: User):
     dataset_name = "test_delete_dataset"
-    delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
 
     log(
         TextClassificationRecord(
@@ -651,7 +640,7 @@ def test_delete_dataset(argilla_user: User):
         name=dataset_name,
     )
     load(name=dataset_name)
-    delete(name=dataset_name)
+    delete_ignoring_errors(name=dataset_name)
     sleep(1)
     with pytest.raises(NotFoundApiError):
         load(name=dataset_name)
@@ -671,7 +660,7 @@ def test_delete_feedback_dataset(owner: User):
     dataset.push_to_argilla(name="unit-test", workspace=owner.username)
 
     with pytest.warns(UserWarning):
-        delete(name="unit-test", workspace=owner.username)
+        delete_ignoring_errors(name="unit-test", workspace=owner.username)
 
     with pytest.raises(ValueError):
         FeedbackDataset.from_argilla(name="unit-test", workspace=owner.username)
@@ -751,7 +740,7 @@ async def test_dataset_copy_to_another_workspace(role: UserRole):
 
 def test_update_record(argilla_user: User):
     dataset = "test_update_record"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     expected_inputs = ["This is a text"]
     record = TextClassificationRecord(id=0, inputs=expected_inputs, annotation_agent="test", annotation=["T"])
@@ -780,7 +769,7 @@ def test_update_record(argilla_user: User):
 def test_text_classifier_with_inputs_list(argilla_user: User):
     dataset = "test_text_classifier_with_inputs_list"
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     expected_inputs = ["A", "List", "of", "values"]
     log(

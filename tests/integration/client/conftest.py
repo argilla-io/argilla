@@ -16,7 +16,6 @@ import datetime
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
-from argilla.client.api import delete as delete_api
 from argilla.client.api import log
 from argilla.client.datasets import read_datasets
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
@@ -58,19 +57,14 @@ from argilla.client.singleton import init
 from argilla.server.models import User
 from datasets import Dataset
 
+from tests.integration.utils import delete_ignoring_errors
+
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,
     )
-
-
-def delete(dataset: str) -> None:
-    try:
-        delete_api(dataset)
-    except Exception:
-        pass
 
 
 @pytest.fixture
@@ -89,12 +83,12 @@ def gutenberg_spacy_ner(argilla_user: User) -> Generator[str, None, None]:
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     yield dataset
 
-    delete(dataset, workspace=argilla_user.username)
+    delete_ignoring_errors(dataset, workspace=argilla_user.username)
 
 
 @pytest.fixture(scope="session")

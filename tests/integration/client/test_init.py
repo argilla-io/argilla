@@ -19,12 +19,13 @@ from argilla.client.singleton import active_api, active_client
 from argilla.server.models import User
 
 from tests.factories import UserFactory, WorkspaceFactory
+from tests.integration.utils import delete_ignoring_errors
 
 
 def test_resource_leaking_with_several_init(argilla_user: User):
     dataset = "test_resource_leaking_with_several_init"
     argilla.client.singleton.init(api_key=argilla_user.api_key)
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
 
     # TODO: review performance in Windows. See https://github.com/recognai/argilla/pull/1702
     for i in range(0, 20):

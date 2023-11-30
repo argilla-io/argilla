@@ -236,14 +236,12 @@ def load(
             include_vectors=include_vectors,
             as_pandas=as_pandas,
         )
-    except errors.NotFoundApiError:
+    except errors.ArApiResponseError as e:
         workspace = workspace or argilla.get_workspace()
         try:
             dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
         except ValueError:
-            raise ValueError(
-                f"Could not load dataset with name '{name}' and workspace '{workspace}' because it was not found"
-            )
+            raise e
 
         warnings.warn(
             "Loaded dataset is a `FeedbackDataset`. It's recommended to use `rg.FeedbackDataset.from_argilla` class "
@@ -304,13 +302,11 @@ def delete(name: str, workspace: Optional[str] = None) -> None:
         # call to `get_dataset` to check if the dataset exists. If it doesn't exist, then we try to delete a `FeedbackDataset`.
         argilla.get_dataset(name=name, workspace=workspace)
         argilla.delete(name=name, workspace=workspace)
-    except errors.NotFoundApiError:
+    except errors.ArApiResponseError as e:
         try:
             dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
         except ValueError:
-            raise ValueError(
-                f"Could not delete dataset with name '{name}' and workspace '{workspace}' because it was not found"
-            )
+            raise e
 
         dataset.delete()
 

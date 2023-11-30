@@ -15,22 +15,15 @@
 import random
 from time import sleep
 
-import argilla as rg
-from argilla.client.api import delete as delete_api
 from argilla.client.api import load
 from argilla.monitoring.model_monitor import monitor
 
-
-def delete(dataset: str) -> None:
-    try:
-        delete(dataset)
-    except Exception:
-        pass
+from tests.integration.utils import delete_ignoring_errors
 
 
 def test_spacy_ner_monitor(monkeypatch, mocked_client):
     dataset = "spacy-dataset"
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     import spacy
 
@@ -54,7 +47,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     # assert 10 - std < len(df) < 10 + std
     assert df.text.unique().tolist() == ["Paris is my favourite city"]
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     list(nlp.pipe(["This is a text"] * 20))
 
     sleep(1)  # wait for the consumer time
@@ -63,7 +56,7 @@ def test_spacy_ner_monitor(monkeypatch, mocked_client):
     assert len(df) == 6
     assert df.text.unique().tolist() == ["This is a text"]
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     list(nlp.pipe([("This is a text", {"meta": "data"})] * 20, as_tuples=True))
 
     sleep(1)  # wait for the consumer time

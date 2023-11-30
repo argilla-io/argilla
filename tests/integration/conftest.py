@@ -21,7 +21,6 @@ import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.cli.server.database.migrate import migrate_db
-from argilla.client.api import delete as api_delete
 from argilla.client.api import log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
@@ -47,6 +46,7 @@ from tests.factories import (
     UserFactory,
     WorkspaceFactory,
 )
+from tests.integration.utils import delete_ignoring_errors
 
 from ..database import SyncTestSession, TestSession, set_task
 from .helpers import SecuredClient
@@ -262,13 +262,6 @@ def mocked_client(
     return client_
 
 
-def delete(dataset: str) -> None:
-    try:
-        api_delete(dataset)
-    except Exception:
-        pass
-
-
 @pytest.fixture
 def dataset_token_classification(mocked_client: SecuredClient) -> str:
     from datasets import load_dataset
@@ -291,7 +284,7 @@ def dataset_token_classification(mocked_client: SecuredClient) -> str:
         rec.prediction = []
         rec.prediction_agent = None
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -311,7 +304,7 @@ def dataset_text_classification(mocked_client: SecuredClient) -> str:
     labels = set([rec.annotation for rec in dataset_rb])
     configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -329,7 +322,7 @@ def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str
 
     dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -347,7 +340,7 @@ def dataset_text2text(mocked_client: SecuredClient) -> str:
     for entry in dataset_ds:
         records.append(Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=records)
 
     return dataset

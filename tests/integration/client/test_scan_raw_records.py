@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
 import pytest
 from argilla.client.api import load
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord
