@@ -24,6 +24,7 @@ from argilla import (
     Workspace,
 )
 from argilla.client.client import Argilla
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.sdk.v1.datasets.api import (
     add_field,
     add_metadata_property,
@@ -400,24 +401,34 @@ async def test_get_records(role: UserRole) -> None:
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_add_suggestion(role: UserRole) -> None:
-    dataset = await DatasetFactory.create(
-        status=DatasetStatus.ready,
-        fields=[await TextFieldFactory.create(required=True)],
-        questions=[await RatingQuestionFactory.create(required=True)],
-        records=await RecordFactory.create_batch(size=10),
+    workspace = await WorkspaceFactory.create()
+    user = await UserFactory.create(role=role, workspaces=[workspace])
+
+    argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text-field": "unit-test"},
+            )
+            for _ in range(10)
+        ]
     )
-    user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-    api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+    remote = dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
 
-    for record in dataset.records:
+    api = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+    for record in remote.records:
         response = set_suggestion(
-            client=api.http_client.httpx, record_id=record.id, question_id=dataset.questions[0].id, value=1
+            client=api.http_client.httpx, record_id=record.id, question_id=remote.questions[0].id, value="unit-test"
         )
         assert response.status_code == 201
         assert isinstance(response.parsed, FeedbackSuggestionModel)
-        assert response.parsed.value == 1
-        assert response.parsed.question_id == str(dataset.questions[0].id)
+        assert response.parsed.value == "unit-test"
+        assert response.parsed.question_id == str(remote.questions[0].id)
 
 
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner, UserRole.annotator])
