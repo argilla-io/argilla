@@ -46,7 +46,7 @@
       <div class="footer-form__content">
         <BaseButton
           type="button"
-          class="primary text"
+          class="primary text button--clear"
           @click.prevent="onClear"
           :title="$t('shortcuts.questions_form.clear')"
         >
@@ -314,7 +314,6 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    gap: $base-space * 2;
   }
 }
 
@@ -322,9 +321,17 @@ export default {
   &--submit,
   &--draft,
   &--discard {
+    width: 100%;
+    justify-content: space-around;
+    border-radius: 0;
+
     &:disabled {
       opacity: 0.3;
     }
+  }
+  &--clear {
+    flex-shrink: 0;
+    min-width: 50px;
   }
   &--submit {
     background: $submitted-color;
