@@ -24,6 +24,7 @@
       :record="record"
       @on-submit-responses="goToNext"
       @on-discard-responses="goToNext"
+      @on-save-draft-responses="goToNext"
     />
   </div>
 </template>

@@ -43,7 +43,7 @@
       />
     </div>
     <div class="footer-form">
-      <div class="footer-form__left-footer">
+      <div class="footer-form__content">
         <BaseButton
           type="button"
           class="primary text"
@@ -52,11 +52,10 @@
         >
           <span v-text="'Clear'" />
         </BaseButton>
-      </div>
-      <div class="footer-form__right-area">
+
         <BaseButton
           type="button"
-          class="primary outline"
+          class="button--discard"
           @on-click="onDiscard"
           :disabled="record.isDiscarded"
           :title="$t('shortcuts.questions_form.discard')"
@@ -64,8 +63,17 @@
           <span v-text="'Discard'" />
         </BaseButton>
         <BaseButton
+          type="button"
+          class="button--draft"
+          @on-click="onSaveDraft"
+          :disabled="isSaveDraftButtonDisabled"
+          :title="$t('shortcuts.questions_form.draft')"
+        >
+          <span v-text="'Save draft'" />
+        </BaseButton>
+        <BaseButton
           type="submit"
-          class="primary"
+          class="button--submit"
           :disabled="isSubmitButtonDisabled"
           :title="$t('shortcuts.questions_form.submit')"
         >
@@ -109,6 +117,7 @@ export default {
     questionFormClass() {
       if (this.isSubmitting) return "--submitted --waiting";
       if (this.isDiscarding) return "--discarded --waiting";
+      if (this.isSavingDraft) return "--draft --waiting";
 
       if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
         return "--focused-form";
@@ -127,6 +136,11 @@ export default {
         return !this.isTouched || !this.questionAreCompletedCorrectly;
 
       return !this.questionAreCompletedCorrectly;
+    },
+    isSaveDraftButtonDisabled() {
+      if (this.record.isPending || this.record.isDraft)
+        return !this.record.isModified;
+      return true;
     },
   },
   watch: {
@@ -205,6 +219,11 @@ export default {
 
       this.$emit("on-discard-responses");
     },
+    async onSaveDraft() {
+      await this.saveDraftAllQueues(this.record);
+
+      this.$emit("on-save-draft-responses");
+    },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
 
@@ -268,9 +287,11 @@ export default {
     scroll-behavior: smooth;
   }
 
-  &.--pending,
-  &.--draft {
+  &.--pending {
     border-color: $black-10;
+  }
+  &.--pending {
+    border-color: $draft-color;
   }
   &.--discarded {
     border-color: $discarded-color;
@@ -287,18 +308,35 @@ export default {
 }
 
 .footer-form {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: $base-space * 2 $base-space * 3;
-  border-top: 1px solid $black-10;
-  &__left-area {
-    display: inline-flex;
-  }
-  &__right-area {
-    display: inline-flex;
+  padding: 0 $base-space * 3 $base-space * 2 $base-space * 3;
+  &__content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     gap: $base-space * 2;
+  }
+}
+
+.button {
+  &--submit,
+  &--draft,
+  &--discard {
+    &:disabled {
+      opacity: 0.3;
+    }
+  }
+  &--submit {
+    background: $submitted-color;
+    color: palette(white);
+  }
+  &--draft {
+    background: $draft-color;
+    color: palette(white);
+  }
+  &--discard {
+    background: $discarded-color;
+    color: palette(white);
   }
 }
 

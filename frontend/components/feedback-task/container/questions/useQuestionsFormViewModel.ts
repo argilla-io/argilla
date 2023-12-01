@@ -18,6 +18,7 @@ export const useQuestionFormViewModel = () => {
 
   const draftSaving = ref(false);
   const isDiscarding = ref(false);
+  const isSavingDraft = ref(false);
   const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
@@ -50,6 +51,18 @@ export const useQuestionFormViewModel = () => {
     await debounceForSubmit.wait();
 
     isSubmitting.value = false;
+  };
+
+  const saveDraftAllQueues = async (record: Record) => {
+    isSavingDraft.value = true;
+    debounceForAutoSave.stop();
+
+    queue.enqueue(() => {
+      return onSaveDraft(record);
+    });
+    await debounceForSubmit.wait();
+
+    isSavingDraft.value = false;
   };
 
   const clear = (record: Record) => {
@@ -104,5 +117,6 @@ export const useQuestionFormViewModel = () => {
     discard,
     saveDraft,
     saveDraftImmediately,
+    saveDraftAllQueues,
   };
 };
