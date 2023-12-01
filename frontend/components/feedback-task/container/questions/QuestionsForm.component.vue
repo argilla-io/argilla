@@ -336,6 +336,8 @@ export default {
   &--submit {
     background: $submitted-color;
     color: palette(white);
+    border-bottom-right-radius: $border-radius;
+    border-top-right-radius: $border-radius;
   }
   &--draft {
     background: $draft-color;
@@ -344,6 +346,8 @@ export default {
   &--discard {
     background: $discarded-color;
     color: palette(white);
+    border-bottom-left-radius: $border-radius;
+    border-top-left-radius: $border-radius;
   }
 }
 
