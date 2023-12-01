@@ -140,7 +140,7 @@ export default {
     isSaveDraftButtonDisabled() {
       if (this.record.isPending || this.record.isDraft)
         return !this.record.isModified;
-      return true;
+      return !this.record.hasAnyQuestionAnswered;
     },
   },
   watch: {
