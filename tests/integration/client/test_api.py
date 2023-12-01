@@ -33,6 +33,7 @@ from argilla.client.api import (
     delete,
     delete_records,
     get_workspace,
+    list_datasets,
     load,
     log,
     set_workspace,
@@ -44,6 +45,7 @@ from argilla.client.datasets import (
     DatasetForTextClassification,
     DatasetForTokenClassification,
 )
+from argilla.client.enums import DatasetType
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -66,7 +68,7 @@ from argilla.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
-from argilla.client.sdk.datasets.models import TaskType
+from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
@@ -376,9 +378,9 @@ def test_load_feedback_dataset(argilla_user: User):
     dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
 
     with pytest.warns(UserWarning):
-        remote = load(name="unit-test", workspace=argilla_user.username)
+        dataset = load(name="unit-test", workspace=argilla_user.username)
 
-    assert isinstance(remote, RemoteFeedbackDataset)
+    assert isinstance(dataset, RemoteFeedbackDataset)
 
 
 def test_load_empty_string(argilla_user: User):
@@ -976,6 +978,77 @@ def test_not_aligned_argilla_versions(monkeypatch):
         match=rf"You're connecting to Argilla Server 1.0.0 using a different client version \({rg_version}\)",
     ):
         Argilla()
+
+
+def test_list_datasets(argilla_user: User):
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+
+    log(
+        TextClassificationRecord(id=0, inputs={"text": "The text data"}, annotation_agent="test", annotation=["T"]),
+        name="unit-test-dataset",
+    )
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        FeedbackRecord(
+            fields={"text-field": "unit-test"},
+        )
+    )
+
+    dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
+
+    datasets = list_datasets()
+
+    assert len(datasets) == 2
+
+
+def test_list_datasets_only_other_datasets(argilla_user: User):
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+
+    log(
+        TextClassificationRecord(id=0, inputs={"text": "The text data"}, annotation_agent="test", annotation=["T"]),
+        name="unit-test-dataset",
+    )
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        FeedbackRecord(
+            fields={"text-field": "unit-test"},
+        )
+    )
+
+    dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
+
+    datasets = list_datasets(type=DatasetType.other)
+
+    assert len(datasets) == 1
+    assert isinstance(datasets[0], Dataset)
+
+
+def test_list_datasets_only_feedback_datasets(argilla_user: User):
+    init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+
+    log(
+        TextClassificationRecord(id=0, inputs={"text": "The text data"}, annotation_agent="test", annotation=["T"]),
+        name="unit-test-dataset",
+    )
+
+    dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
+
+    dataset.add_records(
+        FeedbackRecord(
+            fields={"text-field": "unit-test"},
+        )
+    )
+
+    dataset.push_to_argilla(name="unit-test", workspace=argilla_user.username)
+
+    datasets = list_datasets(type=DatasetType.feedback)
+
+    assert len(datasets) == 1
+    assert isinstance(datasets[0], RemoteFeedbackDataset)
 
 
 def test_aligned_argilla_versions(mock_init_ok):

@@ -413,14 +413,15 @@ def list_datasets(
         attributes: tags, metadata, name, id, task, owner, workspace, created_at,
         and last_updated.
     """
-    type = type if isinstance(type, DatasetType) else DatasetType(type)
+    if type is not None:
+        type = type if isinstance(type, DatasetType) else DatasetType(type)
 
     old_datasets = []
-    if type is not None and type == DatasetType.other:
+    if type is None or type == DatasetType.other:
         old_datasets = ArgillaSingleton.get().list_datasets(workspace=workspace)
 
     datasets = []
-    if type is not None and type == DatasetType.feedback:
+    if type is None or type == DatasetType.feedback:
         datasets = FeedbackDataset.list(workspace=workspace)
 
     return old_datasets + datasets
