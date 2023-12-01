@@ -17,13 +17,19 @@ This may result in unexpected results when combining filtering with vector searc
 :::
 
 ## Launching
+
 ### Using a proxy
 
 If you run Argilla behind a proxy by adding some extra prefix to expose the service, you should set the `ARGILLA_BASE_URL`
 environment variable to properly route requests to the server application.
 
-For example, if your proxy exposes Argilla in the URL `https://my-proxy/custom-path-for-argilla`,  you should launch the
+For example, if your proxy exposes Argilla in the URL `https://my-proxy/custom-path-for-argilla`, you should launch the
 Argilla server with `ARGILLA_BASE_URL=/custom-path-for-argilla`.
+
+NGINX and Traefik have been tested and are known to work with Argilla:
+
+- [NGINX example](https://github.com/argilla-io/argilla/tree/main/docker/nginx)
+- [Traefik example](https://github.com/argilla-io/argilla/tree/main/docker/traefik)
 
 ### with `uvicorn`
 
