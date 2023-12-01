@@ -160,7 +160,7 @@ async def test_log_data_in_several_workspaces(owner: "User"):
 
     for ws in [workspace, other_workspace]:
         client.set_workspace(ws.name)
-        delete_ignoring_errors(dataset_name)
+        client.delete(dataset_name)
 
     client.set_workspace(workspace.name)
     client.log(rg.TextClassificationRecord(id=0, inputs=text), name=dataset_name)
