@@ -1,5 +1,8 @@
 <template>
-  <span :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]">
+  <span
+    :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]"
+    :title="getStatusInfo.name"
+  >
     <template v-if="!minimal">
       <svgicon
         v-if="getStatusInfo.icon"
