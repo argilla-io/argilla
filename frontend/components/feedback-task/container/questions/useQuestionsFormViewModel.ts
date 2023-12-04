@@ -53,18 +53,6 @@ export const useQuestionFormViewModel = () => {
     isSubmitting.value = false;
   };
 
-  const saveDraftAllQueues = async (record: Record) => {
-    isSavingDraft.value = true;
-    debounceForAutoSave.stop();
-
-    queue.enqueue(() => {
-      return onSaveDraft(record);
-    });
-    await debounceForSubmit.wait();
-
-    isSavingDraft.value = false;
-  };
-
   const clear = (record: Record) => {
     debounceForAutoSave.stop();
     beforeUnload.destroy();
@@ -117,6 +105,5 @@ export const useQuestionFormViewModel = () => {
     discard,
     saveDraft,
     saveDraftImmediately,
-    saveDraftAllQueues,
   };
 };

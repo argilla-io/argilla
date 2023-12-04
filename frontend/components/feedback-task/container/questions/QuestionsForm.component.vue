@@ -65,7 +65,7 @@
         <BaseButton
           type="button"
           class="button--draft"
-          @on-click="onSaveDraft"
+          @on-click="onSaveDraftImmediately"
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
@@ -218,11 +218,6 @@ export default {
       await this.discard(this.record);
 
       this.$emit("on-discard-responses");
-    },
-    async onSaveDraft() {
-      await this.saveDraftAllQueues(this.record);
-
-      this.$emit("on-save-draft-responses");
     },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
