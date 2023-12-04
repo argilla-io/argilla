@@ -136,7 +136,7 @@ export default {
     },
     isSaveDraftButtonDisabled() {
       if (this.record.isPending || this.record.isDraft)
-        return !this.record.isModified;
+        return !this.record.isModified || this.draftSaving;
       return !this.record.hasAnyQuestionAnswered;
     },
   },
