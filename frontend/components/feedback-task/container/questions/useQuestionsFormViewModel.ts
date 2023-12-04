@@ -18,7 +18,6 @@ export const useQuestionFormViewModel = () => {
 
   const draftSaving = ref(false);
   const isDiscarding = ref(false);
-  const isSavingDraft = ref(false);
   const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
