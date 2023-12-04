@@ -1,13 +1,15 @@
 <template>
-  <span :class="['status-tag', getStatusInfo.class]">
-    <svgicon
-      v-if="getStatusInfo.icon"
-      :name="getStatusInfo.icon"
-      width="14"
-      height="14"
-      color="#ffffff"
-    ></svgicon>
-    {{ getStatusInfo.name }}
+  <span :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]">
+    <template v-if="!minimal">
+      <svgicon
+        v-if="getStatusInfo.icon"
+        :name="getStatusInfo.icon"
+        width="14"
+        height="14"
+        color="#ffffff"
+      ></svgicon>
+      {{ getStatusInfo.name }}
+    </template>
   </span>
 </template>
 
@@ -19,6 +21,10 @@ export default {
   props: {
     recordStatus: {
       type: String,
+    },
+    minimal: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -80,6 +86,12 @@ export default {
   @include font-size(13px);
   border-radius: 50px;
   font-weight: 600;
+  &.--minimal {
+    height: $base-space;
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: 50%;
+  }
 
   &.--validated {
     background: palette(green);
