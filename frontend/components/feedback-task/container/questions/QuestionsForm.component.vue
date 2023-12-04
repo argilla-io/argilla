@@ -8,7 +8,7 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <div class="draft">
+        <!-- <div class="draft">
           <p v-if="draftSaving">
             <svgicon color="#0000005e" name="refresh" />
             {{ $t("saving") }}
@@ -22,16 +22,15 @@
               :updateEverySecond="10"
             />
           </p>
-        </div>
+        </div> -->
         <p class="questions-form__guidelines-link">
-          Read the
           <NuxtLink
             :to="{
               name: 'dataset-id-settings',
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12" />
+            >Annotation guidelines <svgicon name="external-link" width="12" />
           </NuxtLink>
         </p>
       </div>
@@ -52,7 +51,15 @@
         >
           <span v-text="'Clear'" />
         </BaseButton>
-
+        <BaseButton
+          type="button"
+          class="button--draft"
+          @on-click="onSaveDraftImmediately"
+          :disabled="isSaveDraftButtonDisabled"
+          :title="$t('shortcuts.questions_form.draft')"
+        >
+          <span v-text="draftSaving ? 'Saving...' : 'Save draft'" />
+        </BaseButton>
         <BaseButton
           type="button"
           class="button--discard"
@@ -61,15 +68,6 @@
           :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
-        </BaseButton>
-        <BaseButton
-          type="button"
-          class="button--draft"
-          @on-click="onSaveDraftImmediately"
-          :disabled="isSaveDraftButtonDisabled"
-          :title="$t('shortcuts.questions_form.draft')"
-        >
-          <span v-text="'Save draft'" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -255,7 +253,8 @@ export default {
   background: palette(white);
   margin-bottom: auto;
   &__header {
-    align-items: baseline;
+    display: flex;
+    justify-content: right;
   }
   &__guidelines-link {
     margin: 0;
@@ -275,8 +274,8 @@ export default {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 4;
-    padding: $base-space * 3;
+    gap: $base-space * 2;
+    padding: $base-space * 2;
     overflow: auto;
     scroll-behavior: smooth;
   }
@@ -336,12 +335,12 @@ export default {
   &--draft {
     background: $draft-color;
     color: palette(white);
+    border-bottom-left-radius: $border-radius;
+    border-top-left-radius: $border-radius;
   }
   &--discard {
     background: $discarded-color;
     color: palette(white);
-    border-bottom-left-radius: $border-radius;
-    border-top-left-radius: $border-radius;
   }
 }
 
