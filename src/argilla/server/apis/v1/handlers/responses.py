@@ -57,7 +57,6 @@ async def _get_record(db: AsyncSession, record_id: UUID) -> Record:
     return record
 
 
-# TODO: Discuss if we should move this endpoint to /me/datasets/{dataset_id}/responses/bulk
 @router.post("/me/responses/bulk", response_model=ResponsesBulk)
 async def create_current_user_responses_bulk(
     *,
