@@ -148,9 +148,11 @@ export class Question {
   }
 
   responseIfUnanswered(answer: Answer) {
-    if (!answer) return;
-
-    this.answer.responseIfUnanswered(answer);
+    if (this.suggestion) {
+      this.answer.responseIfUnanswered(this.suggestion);
+    } else if (answer) {
+      this.answer.responseIfUnanswered(answer);
+    }
   }
 
   response(answer: Answer) {
@@ -159,11 +161,10 @@ export class Question {
     this.answer.response(answer);
   }
 
-  suggests(suggestion: Suggestion) {
+  addSuggestion(suggestion: Suggestion) {
     if (!suggestion) return;
 
     this.suggestion = suggestion;
-    this.answer.responseIfUnanswered(suggestion);
   }
 
   private createEmptyAnswers(): QuestionAnswer {

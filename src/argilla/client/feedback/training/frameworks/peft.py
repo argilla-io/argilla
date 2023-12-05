@@ -57,11 +57,11 @@ class ArgillaPeftTrainer(ArgillaPeftTrainerV1, ArgillaTransformersTrainer):
                 The name of the repository you want to push your model and tokenizer to.
                 It should contain your organization name when pushing to a given organization.
         """
-        if not self._transformers_model:
+        if not self.trainer_model:
             raise ValueError(
                 "The model must be initialized prior to this point. You can either call `train` or `init_model`."
             )
-        model_url = self._transformers_model.push_to_hub(repo_id, **kwargs)
+        model_url = self.trainer_model.push_to_hub(repo_id, **kwargs)
         self._logger.info(f"Model pushed to: {model_url}")
-        tokenizer_url = self._transformers_tokenizer.push_to_hub(repo_id, **kwargs)
+        tokenizer_url = self.trainer_tokenizer.push_to_hub(repo_id, **kwargs)
         self._logger.info(f"Tokenizer pushed to: {tokenizer_url}")

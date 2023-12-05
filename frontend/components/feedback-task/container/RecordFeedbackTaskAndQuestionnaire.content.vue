@@ -3,6 +3,7 @@
   <div v-else class="wrapper">
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria" />
+      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
         :datasetVectors="datasetVectors"
         :records="records"
@@ -77,8 +78,6 @@ export default {
 
       await this.loadRecords(mode, this.recordCriteria);
 
-      this.onSearchFinished();
-
       this.fetching = false;
     },
     async paginate() {
@@ -100,7 +99,6 @@ export default {
         }, 100);
       }
 
-      this.onSearchFinished();
       this.fetching = false;
     },
     onChangeRecordPage(criteria) {
@@ -109,7 +107,7 @@ export default {
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
     },
     onChangeRecordFilter(criteria) {
@@ -118,11 +116,8 @@ export default {
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
-    },
-    onSearchFinished() {
-      return this.$root.$emit("on-changed-total-records", this.records.total);
     },
     goToNext() {
       this.recordCriteria.nextPage();

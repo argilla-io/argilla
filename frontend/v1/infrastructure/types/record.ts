@@ -10,6 +10,8 @@ interface BackendSuggestion {
   id: string;
   question_id: string;
   value: BackendAnswerCombinations;
+  score: number;
+  agent: string;
 }
 export type BackendRecordStatus = "submitted" | "discarded" | "draft";
 
@@ -39,7 +41,27 @@ export interface BackendSearchRecords {
   query_score: number;
 }
 
+type BackendFilterAndSortScope = {
+  entity: "suggestion" | "record" | "metadata" | "response";
+  question?: string;
+  property?: string;
+  metadata_property?: string;
+};
+
+interface AndFilterBackendSearchQuery {
+  type: "terms" | "range";
+  scope: BackendFilterAndSortScope;
+  values?: string[];
+  ge?: number;
+  le?: number;
+}
+
 export type BackendSimilaritySearchOrder = "most_similar" | "least_similar";
+
+export interface BackendSort {
+  scope: BackendFilterAndSortScope;
+  order: "asc" | "desc";
+}
 
 export interface BackendAdvanceSearchQuery {
   query: {
@@ -53,4 +75,8 @@ export interface BackendAdvanceSearchQuery {
       q: string;
     };
   };
+  filters?: {
+    and: AndFilterBackendSearchQuery[];
+  };
+  sort?: BackendSort[];
 }

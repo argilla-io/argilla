@@ -63,7 +63,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         return SetFitModelCardData(
             model_id=self._model,
             task=self._task,
-            update_config_kwargs={**self.setfit_model_kwargs, **self.setfit_trainer_kwargs},
+            update_config_kwargs={**self.model_kwargs, **self.trainer_kwargs},
             **card_data_kwargs,
         )
 
@@ -82,7 +82,7 @@ class ArgillaSetFitTrainer(ArgillaSetFitTrainerV1, ArgillaTransformersTrainer):
         Raises:
             NotImplementedError: If the model doesn't exist, meaning it hasn't been instantiated yet.
         """
-        if not self.__trainer:
+        if not self._trainer:
             raise ValueError("The `trainer` must be initialized prior to this point. You should call `train`.")
-        url = self.__trainer.push_to_hub(repo_id, **kwargs)
+        url = self._trainer.push_to_hub(repo_id, **kwargs)
         self._logger.info(f"Model pushed to: {url}")

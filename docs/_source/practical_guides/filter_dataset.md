@@ -56,9 +56,27 @@ filtered_records = dataset.filter_by(
 )
 ```
 
+#### By response
+
+Within the UI filters, you can filter records according to the value of responses given by **the current user**.
+
+```{note}
+This is available for responses to questions of the following types: `LabelQuestion`, `MultiLabelQuestion` and `RatingQuestion`.
+```
+
+#### By suggestion
+
+In the Argilla UI, you can filter your records based on suggestions. When these are available, it is possible to filter by suggestion score, value and agent.
+
+```{note}
+This is available for suggestions to questions of the following types: `LabelQuestion`, `MultiLabelQuestion` and `RatingQuestion`.
+```
+
 #### By status
 
-In the Python SDK, the `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the annotations of the records. The `response_status` of an annotation can be one of the following:
+In the UI, you can find a status selector that will let you choose a queue of records depending on the status of responses given by **the current user**. Here you can choose to see records with `Pending`, `Discarded` or `Submitted` responses.
+
+In the Python SDK, the `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the responses given by **all users**. The `response_status` of an annotation can be one of the following:
 
 - `missing`: The records with this status have no responses. In the UI, they will appear under the `Pending` queue.
 - `draft`: The records with this status have responses but have not been submitted or discarded. In the UI, they will appear under the `Pending` queue.
@@ -104,11 +122,11 @@ filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 
 ### Sort
 
-You may also order your records according to one or several attributes. In the UI, you can easily do this using the `Sort` menu. In the Python SDK, you can do this sorting with the `sort_by` method.
+You may also order your records according to one or several attributes, including insertion and last update time, suggestion scores and metadata properties. In the UI, you can easily do this using the `Sort` menu.
 
-These are the arguments of the `sort_by` function:
+In the Python SDK, you can do this sorting with the `sort_by` method using the following arguments:
 
-- `field`: This refers to the information that will be used for the sorting. This can be time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
+- `field`: This refers to the information that will be used for the sorting. This can be the time when a record was created (`created_at`), last updated (`updated_at`) or any metadata properties configured for your dataset (`metadata.my-metadata-name`).
 - `order`: Whether the order should be ascending (`asc`) or descending (`des`).
 
 ```python

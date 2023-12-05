@@ -5,7 +5,9 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
-The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK.
+The Feedback Task datasets allow you to combine multiple questions of different kinds, so the first step will be to define the aim of your project and the kind of data and feedback you will need to get there. With this information, you can start configuring a dataset and formatting records using the Python SDK. The image underneath provides a general step-by-step overview. For some end-to-end examples, you can have a look at our [tutorials page](/tutorials_and_integrations/tutorials/tutorials.md).
+
+![workflow](/_static/tutorials/end2end/base/workflow_create_dataset.svg)
 
 This guide will walk you through all the elements you will need to configure to create a `FeedbackDataset` and add records to it.
 
@@ -31,12 +33,12 @@ ds = rg.FeedbackDataset.from_huggingface("<huggingface_dataset_id>")
 
 #### Task Templates
 
-The `FeedbackDataset` has a set of predefined task templates that you can use to quickly set up your dataset. These templates include the `fields` and `questions` needed for the task, as well as the `guidelines` to provide to the annotators. Additionally, you can customize the `fields`, `questions`, and `guidelines` to fit your specific needs using a [custom configuration](#custom-configuration).
+The `FeedbackDataset` has a set of predefined task templates that you can use to quickly set up your dataset. These templates include the `fields` and `questions` needed for the task, as well as the `guidelines` to provide to the annotators. Additionally, you can customize the `fields`, `questions`, `guidelines`, `metadata` and `vectors` to fit your specific needs using a [custom configuration](#custom-configuration).
 
 ```{include} /_common/tabs/task_templates.md
 ```
 
-After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, and `guidelines` to fit our specific needs using approached to [update configuration](#update-configuration).
+After having initialized the `FeedbackDataset` templates, we can still alter the `fields`, `questions`, `guidelines`, `metadata` and `vectors` to fit our specific needs you can refer to the [update configuration](#update-configuration) section.
 
 #### Custom Configuration
 
@@ -51,7 +53,11 @@ You can define the fields using the Python SDK providing the following arguments
 - `name`: The name of the field, as it will be seen internally.
 - `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
 - `required` (optional): Whether the field is required or not. Defaults to `True`. Note that at least one field must be required.
-- `use_markdown`(optional): Specify whether you want markdown rendered in the UI. Defaults to `False`.
+- `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
+
+```{note}
+Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
+```
 
 ```python
 fields = [
@@ -86,7 +92,11 @@ The following arguments apply to specific question types:
 - `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value is the text to display in the UI.
 - `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
-- `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`.
+- `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
+
+```{note}
+Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
+```
 
 Check out the following tabs to learn how to set up questions according to their type:
 
