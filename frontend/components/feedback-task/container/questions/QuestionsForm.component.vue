@@ -8,21 +8,6 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <!-- <div class="draft">
-          <p v-if="draftSaving">
-            <svgicon color="#0000005e" name="refresh" />
-            {{ $t("saving") }}
-          </p>
-          <p v-else-if="record.isDraft">
-            {{ $t("saved") }}
-            <BaseDate
-              class="tooltip"
-              :date="record.updatedAt"
-              format="date-relative-now"
-              :updateEverySecond="10"
-            />
-          </p>
-        </div> -->
         <p class="questions-form__guidelines-link">
           <NuxtLink
             :to="{
