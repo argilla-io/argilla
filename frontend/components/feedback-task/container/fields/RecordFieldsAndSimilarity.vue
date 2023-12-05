@@ -14,7 +14,7 @@
     >
       <template v-if="fixedHeader" v-slot:fixed-header>
         <RecordFieldsHeader
-        class="fields__fixed-header"
+          class="fields__fixed-header"
           :selectableRecord="selectableRecord"
           :selected-record-id="selectedRecordId"
           :record="record"

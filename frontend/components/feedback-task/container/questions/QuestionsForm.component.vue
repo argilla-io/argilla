@@ -141,8 +141,8 @@ export default {
       immediate: true,
       handler() {
         if (this.record.isModified) {
-          this.$emit("on-save-draft", this.record)
-        };
+          this.$emit("on-save-draft", this.record);
+        }
 
         this.isTouched = this.record.isSubmitted && this.record.isModified;
       },

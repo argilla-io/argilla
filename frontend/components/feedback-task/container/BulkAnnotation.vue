@@ -11,17 +11,17 @@
       </DatasetFiltersComponent>
       <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       <div class="bulk__records">
-      <RecordFieldsAndSimilarity
-        v-for="(r, index) in 4"
-        :key="r.id"
-        :datasetVectors="datasetVectors"
-        :records="records"
-        :recordCriteria="recordCriteria"
-        :record="record"
-        :selectable-record="true"
-        v-model="selectedRecords[index]"
-        :fixed-header="true"
-      />
+        <RecordFieldsAndSimilarity
+          v-for="(r, index) in 4"
+          :key="r.id"
+          :datasetVectors="datasetVectors"
+          :records="records"
+          :recordCriteria="recordCriteria"
+          :record="record"
+          :selectable-record="true"
+          v-model="selectedRecords[index]"
+          :fixed-header="true"
+        />
       </div>
       <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
         <p class="wrapper__text --heading3" v-text="noRecordsMessage" />

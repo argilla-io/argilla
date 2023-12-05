@@ -1,6 +1,5 @@
 <template>
   <div class="record">
-
     <slot name="fixed-header"></slot>
     <div class="record__content">
       <slot name="content-header"></slot>

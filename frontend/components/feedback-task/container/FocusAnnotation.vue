@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <section class="wrapper__records">
-        FOCUS
+      FOCUS
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
           v-if="records.hasRecordsToAnnotate && record.status === 'pending'"
@@ -40,7 +40,7 @@
   </div>
 </template>
 <script>
-import { useQuestionFormViewModel } from './questions/useQuestionsFormViewModel';
+import { useQuestionFormViewModel } from "./questions/useQuestionsFormViewModel";
 export default {
   props: {
     recordCriteria: {
@@ -93,14 +93,14 @@ export default {
       this.$emit("on-discard-responses");
     },
     async onClear() {
-        await this.clear(this.record);
+      await this.clear(this.record);
     },
     async onSaveDraft() {
       await this.saveDraft(this.record);
     },
     async onSaveDraftImmediately() {
-       await this.saveDraftImmediately(this.record);
-    }
+      await this.saveDraftImmediately(this.record);
+    },
   },
   setup() {
     return useQuestionFormViewModel();

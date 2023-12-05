@@ -33,9 +33,9 @@ export default {
       type: Boolean,
       default: false,
     },
-	selectedRecordId: {
-	  type: String,
-	},
+    selectedRecordId: {
+      type: String,
+    },
     record: {
       type: Object,
       required: true,
@@ -50,8 +50,8 @@ export default {
     },
   },
   model: {
-	prop: 'selectedRecordId',
-	event: 'input',
+    prop: "selectedRecordId",
+    event: "input",
   },
 };
 </script>
@@ -92,4 +92,3 @@ export default {
   }
 }
 </style>
-
