@@ -17,14 +17,17 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Body
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from argilla.server.models import ResponseStatus
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import ResponseStatus
+RESPONSES_BULK_CREATE_MIN_ITEMS = 1
+RESPONSES_BULK_CREATE_MAX_ITEMS = 50
 
 
 class ResponseValue(BaseModel):
@@ -97,7 +100,11 @@ ResponseUpsert = Annotated[
 
 
 class ResponsesBulkCreate(BaseModel):
-    items: List[ResponseUpsert]
+    items: List[ResponseUpsert] = Field(
+        ...,
+        min_items=RESPONSES_BULK_CREATE_MIN_ITEMS,
+        max_items=RESPONSES_BULK_CREATE_MAX_ITEMS,
+    )
 
 
 class ResponseBulkError(BaseModel):

@@ -40,6 +40,9 @@ class TestCreateCurrentUserResponsesBulk:
     def url(self) -> str:
         return f"/api/v1/me/responses/bulk"
 
+    def bulk_max_items(self) -> int:
+        return 50
+
     async def test_multiple_responses(
         self, async_client: AsyncClient, db: AsyncSession, mock_search_engine: SearchEngine
     ):
@@ -334,3 +337,21 @@ class TestCreateCurrentUserResponsesBulk:
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert not mock_search_engine.update_record_response.called
+
+    async def test_no_responses(self, async_client: AsyncClient, owner_auth_header: dict):
+        resp = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"items": []},
+        )
+
+        assert resp.status_code == 422
+
+    async def test_too_many_responses(self, async_client: AsyncClient, owner_auth_header: dict):
+        resp = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"items": [{}] * (self.bulk_max_items() + 1)},
+        )
+
+        assert resp.status_code == 422
