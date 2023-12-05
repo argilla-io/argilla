@@ -12,28 +12,25 @@
       :key="`${record.id}_fields`"
       :fields="record.fields"
     >
-      <div class="fields__header">
-        <div class="fields__header--left">
-          <StatusTag class="fields__status" :recordStatus="record.status" />
-        </div>
-        <div class="fields__header--right">
-          <SimilarityScorePercentage
-            v-if="
-              recordCriteria.isFilteringBySimilarity && record.score.percentage
-            "
-            class="similarity__progress"
-            :value="record.score.percentage"
-            :data-title="$t('similarityScore')"
-          >
-          </SimilarityScorePercentage>
-          <SimilarityFilter
-            v-if="datasetVectors?.length"
-            :availableVectors="datasetVectors"
-            :recordCriteria="recordCriteria"
-            :recordId="record.id"
-          />
-        </div></div
-    ></RecordFields>
+      <template v-if="fixedHeader" v-slot:fixed-header>
+        <RecordFieldsHeader
+        class="fields__fixed-header"
+          :selectableRecord="selectableRecord"
+          :selected-record-id="selectedRecordId"
+          :record="record"
+          :recordCriteria="recordCriteria"
+          :datasetVectors="datasetVectors"
+          @input="$emit('input', $event)"
+        />
+      </template>
+      <template v-else v-slot:content-header>
+        <RecordFieldsHeader
+          :record="record"
+          :recordCriteria="recordCriteria"
+          :datasetVectors="datasetVectors"
+        />
+      </template>
+    </RecordFields>
   </div>
 </template>
 <script>
@@ -55,6 +52,21 @@ export default {
       type: Object,
       required: true,
     },
+    selectedRecordId: {
+      type: String,
+    },
+    selectableRecord: {
+      type: Boolean,
+      default: false,
+    },
+    fixedHeader: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  model: {
+    prop: "selectedRecordId",
+    event: "input",
   },
 };
 </script>
@@ -67,38 +79,11 @@ export default {
   min-width: 0;
   height: 100%;
   min-height: 0;
-
-  &__header {
-    $this: &;
-    border-radius: $border-radius-m;
-    background: palette(white);
-    display: flex;
-    justify-content: space-between;
-    #{$this}__header {
-      padding: $base-space $base-space * 2;
+  &__fixed-header {
+    padding: $base-space * 2;
+    & + :deep(.record__content) {
+      padding-top: 0;
     }
-
-    &--left {
-      display: flex;
-      align-items: center;
-      gap: $base-space;
-    }
-    &--right {
-      display: flex;
-      align-items: center;
-      gap: $base-space;
-    }
-  }
-  &__status {
-    display: inline-flex;
-    margin-right: auto;
-  }
-}
-
-.similarity__progress {
-  &[data-title] {
-    position: relative;
-    @extend %has-tooltip--left;
   }
 }
 </style>

@@ -1,7 +1,9 @@
 <template>
   <div class="record">
+
+    <slot name="fixed-header"></slot>
     <div class="record__content">
-      <slot></slot>
+      <slot name="content-header"></slot>
       <div
         v-for="{ id, title, content, isTextType, settings } in fields"
         :key="id"
@@ -35,6 +37,8 @@ export default {
 
 <style lang="scss" scoped>
 .record {
+  display: flex;
+  flex-direction: column;
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
