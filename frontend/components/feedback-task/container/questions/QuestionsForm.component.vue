@@ -248,8 +248,7 @@ export default {
   max-height: 100%;
   min-width: 0;
   justify-content: space-between;
-  border-radius: $border-radius-m;
-  border: 1px solid transparent;
+  border-left: 1px solid transparent;
   background: palette(white);
   margin-bottom: auto;
   &__header {
@@ -283,8 +282,11 @@ export default {
   &.--pending {
     border-color: $black-10;
   }
-  &.--pending {
+  &.--draft {
     border-color: $draft-color;
+  }
+  &.--pending {
+    border-color: $pending-color;
   }
   &.--discarded {
     border-color: $discarded-color;
