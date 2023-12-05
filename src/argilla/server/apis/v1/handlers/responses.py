@@ -17,9 +17,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import argilla.server.errors.future as errors
 from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
-from argilla.server.errors import ForbiddenOperationError
 from argilla.server.models import Record, Response, User
 from argilla.server.policies import RecordPolicyV1, ResponsePolicyV1, authorize
 from argilla.server.schemas.v1.responses import (
@@ -52,10 +52,7 @@ async def _get_response(db: AsyncSession, response_id: UUID) -> Response:
 async def _get_record(db: AsyncSession, record_id: UUID) -> Record:
     record = await datasets.get_record_by_id(db, record_id, with_dataset=True)
     if record is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Record with id `{record_id}` not found",
-        )
+        raise errors.NotFoundError(f"Record with id `{record_id}` not found")
 
     return record
 
@@ -74,12 +71,10 @@ async def create_current_user_responses_bulk(
         try:
             record = await _get_record(db, item.record_id)
 
-            # TODO: Discuss if create and use a new policy authorization in another model
             await authorize(current_user, RecordPolicyV1.create_response(record))
 
             response = await datasets.upsert_response(db, search_engine, record, current_user, item)
-        # TODO: Discuss the posibility of capture any type of exception here
-        except (ValueError, ForbiddenOperationError) as err:
+        except Exception as err:
             responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))
         else:
             responses_bulk_items.append(ResponseBulk(item=ResponseSchema.from_orm(response), error=None))

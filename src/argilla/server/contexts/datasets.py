@@ -643,6 +643,8 @@ async def _load_users_from_responses(responses: Union[Response, Iterable[Respons
     if isinstance(responses, Response):
         responses = [responses]
 
+    # TODO: We should do a single query retrieving all the users from all responses instead of using awaitable_attrs,
+    # something similar to what we are already doing in _preload_suggestion_relationships_before_index.
     for response in responses:
         await response.awaitable_attrs.user
 

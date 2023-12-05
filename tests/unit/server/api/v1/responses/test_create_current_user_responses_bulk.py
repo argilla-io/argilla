@@ -14,7 +14,7 @@
 
 from datetime import datetime
 from unittest.mock import call
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
@@ -208,6 +208,39 @@ class TestCreateCurrentUserResponsesBulk:
 
         response = (await db.execute(select(Response).filter_by(id=response_to_create_id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
+
+    async def test_response_to_create_with_non_existent_record(
+        self, async_client: AsyncClient, db: AsyncSession, mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        non_existent_record_id = uuid4()
+
+        resp = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "status": ResponseStatus.draft,
+                        "record_id": str(non_existent_record_id),
+                    },
+                ],
+            },
+        )
+
+        assert resp.status_code == 200
+        assert resp.json() == {
+            "items": [
+                {
+                    "item": None,
+                    "error": {
+                        "detail": f"Record with id `{non_existent_record_id}` not found",
+                    },
+                },
+            ],
+        }
+
+        assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+        assert not mock_search_engine.update_record_response.called
 
     async def test_response_to_update(
         self,
