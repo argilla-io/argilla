@@ -22,7 +22,7 @@ from argilla import (
     RatingQuestion,
     TextField,
 )
-from argilla.client.feedback.training.schemas import TrainingTask
+from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,

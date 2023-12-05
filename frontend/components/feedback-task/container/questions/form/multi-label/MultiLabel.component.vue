@@ -1,12 +1,10 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent
-      :question="question"
-      :showSuggestion="showSuggestion"
-    />
+    <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
       :componentId="question.id"
+      :suggestions="question.suggestion?.suggestedAnswer"
       v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"
@@ -23,10 +21,6 @@ export default {
     question: {
       type: Object,
       required: true,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     isFocused: {
       type: Boolean,

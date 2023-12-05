@@ -17,7 +17,7 @@ import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Literal, Optional, Tuple, Union
 
-from tqdm import trange
+from rich.progress import Progress
 
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset import helpers
@@ -34,7 +34,7 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     TrainingTaskTypes,
 )
 from argilla.client.feedback.unification import (
@@ -61,9 +61,7 @@ if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.schemas.metadata import MetadataFilters
     from argilla.client.feedback.schemas.types import (
-        AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
-        AllowedQuestionTypes,
         AllowedRemoteFieldTypes,
         AllowedRemoteMetadataPropertyTypes,
         AllowedRemoteQuestionTypes,
@@ -182,17 +180,17 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
         question_name_to_id = {question.name: question.id for question in self.dataset.questions}
 
-        for i in trange(
-            0, len(records), PUSHING_BATCH_SIZE, desc="Pushing records to Argilla...", disable=not show_progress
-        ):
-            datasets_api_v1.add_records(
-                client=self._client,
-                id=self.dataset.id,
-                records=[
-                    record.to_server_payload(question_name_to_id=question_name_to_id)
-                    for record in records[i : i + PUSHING_BATCH_SIZE]
-                ],
-            )
+        with Progress() as progress_bar:
+            task = progress_bar.add_task("Pushing records to Argilla...", total=len(records), visible=show_progress)
+
+            for i in range(0, len(records), PUSHING_BATCH_SIZE):
+                batch = records[i : i + PUSHING_BATCH_SIZE]
+                datasets_api_v1.add_records(
+                    client=self._client,
+                    id=self.dataset.id,
+                    records=[record.to_server_payload(question_name_to_id=question_name_to_id) for record in batch],
+                )
+                progress_bar.update(task, advance=len(batch))
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def update(
@@ -212,17 +210,20 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
 
         helpers.validate_dataset_records(self.dataset, records, attributes_to_validate=["metadata", "vectors"])
 
-        for i in trange(
-            0, len(records), PUSHING_BATCH_SIZE, desc="Updating records in Argilla...", disable=not show_progress
-        ):
-            datasets_api_v1.update_records(
-                client=self._client,
-                id=self.dataset.id,
-                records=[
-                    {"id": str(record.id), **record.to_server_payload(self._question_name_to_id)}
-                    for record in records[i : i + PUSHING_BATCH_SIZE]
-                ],
-            )
+        with Progress() as progress_bar:
+            task = progress_bar.add_task("Updating records in Argilla...", total=len(records), visible=show_progress)
+
+            for i in range(0, len(records), PUSHING_BATCH_SIZE):
+                batch = records[i : i + PUSHING_BATCH_SIZE]
+                datasets_api_v1.update_records(
+                    client=self._client,
+                    id=self.dataset.id,
+                    records=[
+                        {"id": str(record.id), **record.to_server_payload(self._question_name_to_id)}
+                        for record in batch
+                    ],
+                )
+                progress_bar.update(task, advance=len(batch))
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def delete(self, records: List[RemoteFeedbackRecord]) -> None:
@@ -538,7 +539,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             + textwrap.indent(f"\nfields={self.fields}", indent)
             + textwrap.indent(f"\nquestions={self.questions}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
-            + ")"
+            + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
+            + "\n)"
         )
 
     def __len__(self) -> int:

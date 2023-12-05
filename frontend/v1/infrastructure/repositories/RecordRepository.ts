@@ -9,6 +9,7 @@ import {
   BackedRecords,
   BackendRecordStatus,
   BackendSimilaritySearchOrder,
+  BackendSort,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
@@ -16,6 +17,7 @@ import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
 import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
+import { RangeValue, ValuesOption } from "~/v1/domain/entities/common/Filter";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_RECORDS: "ERROR_FETCHING_RECORDS",
@@ -39,7 +41,7 @@ export class RecordRepository {
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {
-    if (criteria.isFilteringByText || criteria.isFilteringBySimilarity)
+    if (criteria.isFilteringByAdvanceSearch)
       return this.getRecordsByAdvanceSearch(criteria, pagination);
 
     return this.getRecordsByDatasetId(criteria, pagination);
@@ -138,12 +140,12 @@ export class RecordRepository {
     criteria: RecordCriteria,
     pagination: Pagination
   ): Promise<BackedRecords> {
-    const { datasetId, status, metadata, sortBy } = criteria;
+    const { datasetId, status } = criteria;
     const { from, many } = pagination;
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
-      const params = this.createParams(from, many, status, metadata, sortBy);
+      const params = this.createParams(from, many, status);
 
       const { data } = await this.axios.get<ResponseWithTotal<BackedRecord[]>>(
         url,
@@ -171,12 +173,18 @@ export class RecordRepository {
     const {
       datasetId,
       status,
+      searchText,
       metadata,
       sortBy,
-      searchText,
       similaritySearch,
+      response,
+      suggestion,
       isFilteringByText,
+      isFilteringByMetadata,
       isFilteringBySimilarity,
+      isFilteringByResponse,
+      isFilteringBySuggestion,
+      isSortingBy,
     } = criteria;
     const { from, many } = pagination;
 
@@ -202,7 +210,184 @@ export class RecordRepository {
         };
       }
 
-      const params = this.createParams(from, many, status, metadata, sortBy);
+      if (
+        isFilteringByMetadata ||
+        isFilteringByResponse ||
+        isFilteringBySuggestion
+      ) {
+        body.filters = {
+          and: [],
+        };
+      }
+
+      if (isFilteringByMetadata) {
+        metadata.value.forEach((m) => {
+          const range = m.value as RangeValue;
+
+          if ("ge" in range && "le" in range) {
+            body.filters.and.push({
+              type: "range",
+              scope: {
+                entity: "metadata",
+                metadata_property: m.name,
+              },
+              ge: range.ge,
+              le: range.le,
+            });
+
+            return;
+          }
+
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "metadata",
+              metadata_property: m.name,
+            },
+            values: m.value as string[],
+          });
+        });
+      }
+
+      if (isFilteringByResponse) {
+        response.or.forEach((r) => {
+          const value = r.value as RangeValue;
+          if ("ge" in value && "le" in value) {
+            body.filters.and.push({
+              type: "range",
+              scope: {
+                entity: "response",
+                question: r.name,
+              },
+              ge: value.ge,
+              le: value.le,
+            });
+            return;
+          }
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "response",
+              question: r.name,
+            },
+            values: r.value as string[],
+          });
+        });
+
+        response.and.forEach((r) => {
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "response",
+              question: r.name,
+            },
+            values: [r.value],
+          });
+        });
+      }
+
+      if (isFilteringBySuggestion) {
+        suggestion.or.forEach((suggestion) => {
+          if (suggestion.configuration.name === "score") {
+            const value = suggestion.configuration.value as RangeValue;
+
+            body.filters.and.push({
+              type: "range",
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
+              ge: value.ge,
+              le: value.le,
+            });
+          }
+
+          if (suggestion.configuration.name === "value") {
+            const value = suggestion.configuration.value as RangeValue;
+
+            if ("ge" in value && "le" in value) {
+              body.filters.and.push({
+                type: "range",
+                scope: {
+                  entity: "suggestion",
+                  question: suggestion.question.name,
+                  property: suggestion.configuration.name,
+                },
+                ge: value.ge,
+                le: value.le,
+              });
+
+              return;
+            }
+
+            const valuesOptions = suggestion.configuration
+              .value as ValuesOption;
+
+            body.filters.and.push({
+              type: "terms",
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
+              values: valuesOptions.values,
+            });
+          }
+
+          if (suggestion.configuration.name === "agent") {
+            const values = suggestion.configuration.value as string[];
+
+            body.filters.and.push({
+              type: "terms",
+              scope: {
+                entity: "suggestion",
+                question: suggestion.question.name,
+                property: suggestion.configuration.name,
+              },
+              values,
+            });
+          }
+        });
+
+        suggestion.and.forEach((suggestion) => {
+          body.filters.and.push({
+            type: "terms",
+            scope: {
+              entity: "suggestion",
+              question: suggestion.question.name,
+              property: suggestion.configuration.name,
+            },
+            values: [suggestion.configuration.value],
+          });
+        });
+      }
+
+      if (isSortingBy) {
+        body.sort = [];
+
+        sortBy.value.forEach((sort) => {
+          const backendSort: BackendSort = {
+            scope: {
+              entity: sort.entity,
+            },
+            order: sort.order,
+          };
+
+          if (sort.entity === "suggestion") {
+            backendSort.scope.question = sort.name;
+            backendSort.scope.property = sort.property;
+          } else if (sort.entity === "metadata") {
+            backendSort.scope.metadata_property = sort.name;
+          } else if (sort.entity === "record") {
+            backendSort.scope.property = sort.name;
+          }
+
+          body.sort.push(backendSort);
+        });
+      }
+
+      const params = this.createParams(from, many, status);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -249,13 +434,7 @@ export class RecordRepository {
     };
   }
 
-  private createParams(
-    fromRecord: number,
-    howMany: number,
-    status: string,
-    metadata: string[],
-    sortBy: string[]
-  ) {
+  private createParams(fromRecord: number, howMany: number, status: string) {
     const offset = `${fromRecord - 1}`;
     const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
@@ -267,14 +446,6 @@ export class RecordRepository {
     params.append("response_status", backendStatus);
 
     if (backendStatus === "missing") params.append("response_status", "draft");
-
-    metadata.forEach((query) => {
-      params.append("metadata", query);
-    });
-
-    sortBy.forEach((sort) => {
-      params.append("sort_by", sort);
-    });
 
     return params;
   }

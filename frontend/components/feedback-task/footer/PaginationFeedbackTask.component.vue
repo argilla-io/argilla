@@ -2,6 +2,7 @@
   <PaginationComponent
     v-if="records.hasRecordsToAnnotate"
     :currentPage="recordCriteria.committed.page"
+    :items="records.total"
     @on-click-next="goToNextPage"
     @on-click-prev="goToPrevPage"
   />

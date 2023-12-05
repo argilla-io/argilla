@@ -148,9 +148,11 @@ export class Question {
   }
 
   complete(answer: RecordAnswer) {
-    if (!answer) return;
-
-    this.answer.complete(answer);
+    if (this.suggestion) {
+      this.answer.complete(this.suggestion);
+    } else if (answer) {
+      this.answer.complete(answer);
+    }
   }
 
   forceComplete(answer: RecordAnswer) {
@@ -159,11 +161,10 @@ export class Question {
     this.answer.forceComplete(answer);
   }
 
-  suggests(suggestion: Suggestion) {
+  addSuggestion(suggestion: Suggestion) {
     if (!suggestion) return;
 
     this.suggestion = suggestion;
-    this.answer.complete(suggestion);
   }
 
   private createEmptyAnswers(): QuestionAnswer {

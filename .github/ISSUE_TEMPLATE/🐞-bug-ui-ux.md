@@ -2,8 +2,9 @@
 name: "\U0001F41E Bug report: UI/UX "
 about: UI or UX bugs and unexpected behavior
 title: "[BUG-UI/UX]"
-labels: "bug \U0001FAB2, ui, ux"
+labels: ''
 assignees: ''
+
 ---
 
 <!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->
