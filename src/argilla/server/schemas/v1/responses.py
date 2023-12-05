@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Body
@@ -64,5 +64,50 @@ class DraftResponseUpdate(BaseModel):
 
 
 ResponseUpdate = Annotated[
-    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate], Body(..., discriminator="status")
+    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate],
+    Body(..., discriminator="status"),
 ]
+
+
+class SubmittedResponseUpsert(BaseModel):
+    id: Optional[UUID]
+    values: Dict[str, ResponseValueUpdate]
+    status: Literal[ResponseStatus.submitted]
+    record_id: UUID
+
+
+class DiscardedResponseUpsert(BaseModel):
+    id: Optional[UUID]
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.discarded]
+    record_id: UUID
+
+
+class DraftResponseUpsert(BaseModel):
+    id: Optional[UUID]
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.draft]
+    record_id: UUID
+
+
+ResponseUpsert = Annotated[
+    Union[SubmittedResponseUpsert, DiscardedResponseUpsert, DraftResponseUpsert],
+    Body(..., discriminator="status"),
+]
+
+
+class ResponsesBulkCreate(BaseModel):
+    items: List[ResponseUpsert]
+
+
+class ResponseBulkError(BaseModel):
+    detail: str
+
+
+class ResponseBulk(BaseModel):
+    item: Optional[Response]
+    error: Optional[ResponseBulkError]
+
+
+class ResponsesBulk(BaseModel):
+    items: List[ResponseBulk]

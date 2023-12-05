@@ -67,7 +67,7 @@ from argilla.server.schemas.v1.datasets import (
 )
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.records import ResponseCreate
-from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseValueUpdate
+from argilla.server.schemas.v1.responses import ResponseUpdate, ResponseUpsert, ResponseValueUpdate
 from argilla.server.schemas.v1.vectors import Vector as VectorSchema
 from argilla.server.search_engine import SearchEngine
 from argilla.server.security.model import User
@@ -1021,6 +1021,39 @@ async def update_response(
             replace_dict=True,
             autocommit=False,
         )
+
+        await _load_users_from_responses(response)
+        await _touch_dataset_last_activity_at(db, response.record.dataset)
+        await search_engine.update_record_response(response)
+
+    await db.commit()
+
+    return response
+
+
+async def upsert_response(
+    db: "AsyncSession", search_engine: SearchEngine, record: Record, user: User, response_upsert: ResponseUpsert
+) -> Response:
+    _validate_response_values(record.dataset, values=response_upsert.values, status=response_upsert.status)
+
+    schema = {
+        "values": jsonable_encoder(response_upsert.values),
+        "status": response_upsert.status,
+        "record_id": response_upsert.record_id,
+        "user_id": user.id,
+    }
+
+    if response_upsert.id is not None:
+        schema["id"] = response_upsert.id
+
+    async with db.begin_nested():
+        response = await Response.upsert(
+            db,
+            schema=schema,
+            constraints=[Response.record_id, Response.user_id],
+            autocommit=False,
+        )
+
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
