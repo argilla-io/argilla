@@ -83,10 +83,7 @@
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 
-import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
-
 export default {
-  name: "QuestionsFormComponent",
   props: {
     datasetId: {
       type: String,
@@ -96,6 +93,15 @@ export default {
       type: Object,
       required: true,
     },
+    draftSaving: {
+      type: Boolean,
+    },
+    isSubmitting: {
+      type: Boolean,
+    },
+    isDiscarding: {
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -104,9 +110,6 @@ export default {
       isTouched: false,
       userComesFromOutside: false,
     };
-  },
-  setup() {
-    return useQuestionFormViewModel();
   },
   computed: {
     questionFormClass() {
@@ -137,7 +140,9 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        if (this.record.isModified) this.saveDraft(this.record);
+        if (this.record.isModified) {
+          this.$emit("on-save-draft", this.record)
+        };
 
         this.isTouched = this.record.isSubmitted && this.record.isModified;
       },
@@ -201,25 +206,17 @@ export default {
         default:
       }
     },
-    async onDiscard() {
-      if (this.record.isDiscarded) return;
-
-      await this.discard(this.record);
-
+    onDiscard() {
       this.$emit("on-discard-responses");
     },
-    async onSubmit() {
-      if (this.isSubmitButtonDisabled) return;
-
-      await this.submit(this.record);
-
+    onSubmit() {
       this.$emit("on-submit-responses");
     },
-    async onClear() {
-      await this.clear(this.record);
+    onClear() {
+      this.$emit("on-clear-responses");
     },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
+    onSaveDraftImmediately() {
+      this.$emit("on-save-draft-immediately");
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;

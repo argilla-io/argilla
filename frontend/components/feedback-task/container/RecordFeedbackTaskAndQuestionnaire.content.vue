@@ -1,31 +1,31 @@
 <template>
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
-  <div v-else class="wrapper">
-    <section class="wrapper__records">
-      <DatasetFiltersComponent :recordCriteria="recordCriteria" />
-      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
-      <RecordFieldsAndSimilarity
-        :datasetVectors="datasetVectors"
-        :records="records"
-        :recordCriteria="recordCriteria"
-        :record="record"
-      />
-      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </section>
 
-    <QuestionsFormComponent
-      v-if="!!record"
-      :key="`${record.id}_questions`"
-      class="wrapper__form"
-      :class="statusClass"
-      :datasetId="recordCriteria.datasetId"
-      :record="record"
-      @on-submit-responses="goToNext"
-      @on-discard-responses="goToNext"
-    />
-  </div>
+  <BulkAnnotation
+    v-else-if="bulkAnnotation && record.status === 'pending'"
+    :record-criteria="recordCriteria"
+    :dataset-vectors="datasetVectors"
+    :records="records"
+    :record="record"
+    :no-records-message="noRecordsMessage"
+    :status-class="statusClass"
+    :annotation-type="bulkAnnotation"
+    @on-submit-responses="goToNext"
+    @on-discard-responses="goToNext"
+    v-model="bulkAnnotation"
+  />
+  <FocusAnnotation
+    v-else
+    :record-criteria="recordCriteria"
+    :dataset-vectors="datasetVectors"
+    :records="records"
+    :record="record"
+    :no-records-message="noRecordsMessage"
+    :status-class="statusClass"
+    @on-submit-responses="goToNext"
+    @on-discard-responses="goToNext"
+    v-model="bulkAnnotation"
+  />
 </template>
 
 <script>
@@ -43,6 +43,7 @@ export default {
   data() {
     return {
       fetching: false,
+      bulkAnnotation: false,
     };
   },
   computed: {
@@ -61,7 +62,7 @@ export default {
       return `You have no ${status} records`;
     },
     statusClass() {
-      return `--${this.record.status}`;
+      return `--${this.record?.status}`;
     },
     shouldShowNotification() {
       return this.record?.isSubmitted && this.record?.isModified;
@@ -168,42 +169,3 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  height: 100%;
-  gap: $base-space * 2;
-  padding: $base-space * 2;
-  @include media("<desktop") {
-    flex-flow: column;
-    overflow: auto;
-  }
-  &__records,
-  &__form {
-    @include media("<desktop") {
-      overflow: visible;
-      height: auto;
-      max-height: none !important;
-    }
-  }
-  &__records {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: $base-space;
-    height: 100%;
-    min-width: 0;
-  }
-  &__text {
-    color: $black-54;
-  }
-  &--empty {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-</style>

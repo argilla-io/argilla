@@ -27,6 +27,7 @@
         >{{ $t("reset") }}</BaseButton
       >
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
+      <slot></slot>
     </div>
     <div class="filters__list__wrapper" v-if="visibleFilters">
       <transition name="filterAppear" appear>
