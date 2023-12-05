@@ -1,4 +1,4 @@
-# Suggestions and responses
+# 🤔 Work with suggestions and responses
 
 ## Feedback Dataset
 
@@ -7,15 +7,15 @@
 
 ![workflow](../_static/tutorials/end2end/base/workflow_suggestions_and_responses.svg)
 
+Unlike metadata and vectors, `suggestions` and `responses` are not defined as part of the `FeedbackDataset` schema. Instead, they are added to the records as you create them.
 
-#### Format `suggestions`
+### Format `suggestions`
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
 ::::{tab-set}
 
 :::{tab-item} Label
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -23,31 +23,29 @@ record = rg.FeedbackRecord(
         {
             "question_name": "relevant",
             "value": "YES",
+            "agent": model_name,
         }
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Multi-label
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
     suggestions = [
         {
             "question_name": "content_class",
-            "value": ["hate", "violent"]
+            "value": ["hate", "violent"],
+            "agent": model_name,
         }
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Ranking
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -59,15 +57,14 @@ record = rg.FeedbackRecord(
                 {"rank": 2, "value": "reply-1"},
                 {"rank": 3, "value": "reply-3"},
             ],
+            "agent": model_name,
         }
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Rating
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -75,15 +72,14 @@ record = rg.FeedbackRecord(
         {
             "question_name": "quality",
             "value": 5,
+            "agent": model_name,
         }
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Text
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -91,23 +87,67 @@ record = rg.FeedbackRecord(
         {
             "question_name": "corrected-text",
             "value": "This is a *suggestion*.",
+            "agent": model_name,
         }
     ]
 )
 ```
-
 :::
 
 ::::
 
-#### Format `responses`
+#### Add `suggestions`
+
+To add suggestions to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding suggestions and responses](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-suggestions-and-responses-005.ipynb).
+
+```{note}
+The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
+```
+
+::::{tab-set}
+
+:::{tab-item} Local dataset
+```python
+for record in dataset.records:
+    record.suggestions = [
+        {
+            "question_name": "relevant",
+            "value": "YES",
+            "agent": model_name,
+        }
+    ]
+```
+:::
+
+:::{tab-item} Remote dataset
+```python
+modified_records = []
+for record in dataset.records:
+    record.suggestions = [
+        {
+            "question_name": "relevant",
+            "value": "YES",
+            "agent": model_name,
+        }
+    ]
+    modified_records.append(record)
+dataset.update_records(modified_records)
+```
+:::
+
+::::
+
+```{note}
+You can also follow the same strategy to modify existing suggestions.
+```
+
+### Format `responses`
 
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Also make sure to include the `user_id` in case you're planning to add more than one response for the same question. You can only specify one response with an empty `user_id`: the first occurrence of `user_id=None` will be set to the active `user_id`, while the rest of the responses with `user_id=None` will be discarded.
 
 ::::{tab-set}
 
 :::{tab-item} Label
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -122,11 +162,9 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Multi-label
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -141,11 +179,9 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Ranking
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -164,11 +200,9 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Rating
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -183,11 +217,9 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
-
 :::
 
 :::{tab-item} Text
-
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -202,17 +234,69 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
-
 :::
 
 ::::
+
+#### Add `responses`
+
+To add responses to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding suggestions and responses](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-suggestions-and-responses-005.ipynb).
+
+```{note}
+The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
+```
+
+::::{tab-set}
+
+:::{tab-item} Local dataset
+```python
+for record in dataset.records:
+    record.responses = [
+        {
+            "values":{
+                "label":{
+                    "value": "YES",
+                }
+            }
+        }
+    ]
+```
+:::
+
+:::{tab-item} Remote dataset
+```python
+from datetime import datetime
+
+modified_records = []
+for record in dataset.records:
+    record.responses = [
+        {
+            "values":{
+                "label":{
+                    "value": "YES",
+                }
+            },
+            "inserted_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+    ]
+    modified_records.append(record)
+dataset.update_records(modified_records)
+```
+:::
+
+::::
+
+```{note}
+You can also follow the same strategy to modify existing responses.
+```
 
 
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
 ```
-##### Add suggestions
+### Add `suggestions`
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. We allow for multiple suggestions per record.
 
@@ -286,7 +370,7 @@ rec = rg.Text2TextRecord(
 
 ::::
 
-##### Add annotations
+### Add `responses`
 
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla’s output and meet the schema requirements.
 

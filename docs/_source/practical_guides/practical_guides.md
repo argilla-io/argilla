@@ -9,10 +9,30 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 Find the dataset type needed for your project.
 ```
-```{grid-item-card} 🧑‍💻 Create a dataset
+```{grid-item-card} 🧑‍💻 Create and update a dataset
 :link: create_dataset.html
 
 Methods to configure a dataset and push it to Argilla.
+```
+```{grid-item-card} ⏺️ Add, update and delete records
+:link: records.html
+
+Learn how to add, update and delete records.
+```
+```{grid-item-card} 💾 Work with metadata
+:link: metadata.html
+
+Check how to add metadata.
+```
+```{grid-item-card} 🎫 Work with vectors
+:link: vectors.html
+
+Check how to add your vectors.
+```
+```{grid-item-card} 🤔 Work with suggestions and responses
+:link: suggestions_and_responses.html
+
+Check how to add suggestions and responses.
 ```
 ```{grid-item-card} 🗂️ Assign records to your team
 :link: assign_records.html
@@ -23,7 +43,6 @@ Workflows to organize your annotation team.
 :link: filter_dataset.html
 
 Obtain a filtered version of your dataset.
-
 ```
 ```{grid-item-card} ✍️ Annotate a dataset
 :link: annotate_dataset.html

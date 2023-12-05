@@ -9,7 +9,7 @@ The Feedback Task datasets allow you to combine multiple questions of different 
 
 ![workflow](/_static/tutorials/end2end/base/workflow_create_dataset.svg)
 
-This guide will walk you through all the elements you will need to configure a `FeedbackDataset`.
+This guide will walk you through all the elements you will need to configure a `FeedbackDataset`. For more information on how to add [records](/practical_guides/records), [metadata](/practical_guides/metadata), [vectors](/practical_guides/vectors) or [suggestions and responses](/practical_guides/suggestions_and_responses), please refer to the corresponding guides.
 
 ```{note}
 To follow the steps in this guide, you will first need to connect to Argilla. Check how to do so in our [cheatsheet](/getting_started/cheatsheet.md#connect-to-argilla).
@@ -23,7 +23,7 @@ All of this is fully configurable with [custom configuration](#custom-configurat
 
 #### Hugging Face hub datasets
 
-Argilla loves Hugging Face and is tightly integrated with their eco-system. To get started with a `FeedbackDataset`, we can directly retrieve a [Argilla-compatible dataset from the Hugging Face datasets hub](https://huggingface.co/datasets?other=argilla). These datasets already contain a complete configuration and data.
+Argilla loves Hugging Face and is tightly integrated with its eco-system. To get started with a `FeedbackDataset`, we can directly retrieve a [Argilla-compatible dataset from the Hugging Face datasets hub](https://huggingface.co/datasets?other=argilla). These datasets already contain a complete configuration and data.
 
 ```python
 import argilla as rg
@@ -90,7 +90,7 @@ You can define your questions using the Python SDK and set up the following conf
 The following arguments apply to specific question types:
 
 - `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value is the text to display in the UI.
-- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value the text to display in the UI.
+- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value of the text to display in the UI.
 - `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
 - `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials/notebooks/making-most-of-markdown.ipynb).
 
@@ -122,7 +122,7 @@ The following arguments apply to specific metadata types:
 ```
 
 ```{note}
-You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/create_dataset.md).
+You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/metadata.md).
 ```
 
 ##### Define `vectors`
@@ -145,6 +145,9 @@ vectors_settings = [
         dimensions=768
     )
 ]
+```
+```{note}
+You can also define vector settings after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_vector_settings` method as explained [here](/practical_guides/vectors.md).
 ```
 
 ##### Define `guidelines`
@@ -205,31 +208,37 @@ dataset = rg.FeedbackDataset(
     allow_extra_metadata = False,
     vectors_settings=[
         rg.VectorSettings(
-            name="my_vectors",
+            name="sentence_embeddings",
             dimensions=768,
-            tite="My Vectors" #optional
+            title="Sentence Embeddings" #optional
         )
     ],
     guidelines="Please, read the question carefully and try to answer it as accurately as possible."
 )
 ```
 
-After having defined the dataset, it is possible to get their dedicated properties via the `field_by_name`, `question_by_name` and `metadata_property_by_name` methods:
+After having defined the dataset, it is possible to get their dedicated properties via the `field_by_name`, `question_by_name`, `metadata_property_by_name` and `vector_settings_by_name` methods:
 
 ```python
-ds.field_by_name("question")
+dataset.field_by_name("question")
 # rg.TextField(name="question")
-ds.question_by_name("answer_quality")
+dataset.question_by_name("answer_quality")
 # rg.RatingQuestion(
 #     name="answer_quality",
 #     description="How would you rate the quality of the answer?",
 #     values=[1, 2, 3, 4, 5],
 # )
-ds.metadata_property_by_name("groups")
+dataset.metadata_property_by_name("groups")
 # rg.TermsMetadataProperty(
 #     name="groups",
 #     title="Annotation groups",
 #     values=["group-a", "group-b", "group-c"]
+# )
+dataset.vector_settings_property_by_name("sentence_embeddings")
+# rg.VectorSettings(
+#     name="sentence_embeddings",
+#     title="Sentence Embeddings",
+#     dimensions=768
 # )
 ```
 
@@ -273,89 +282,98 @@ dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 
 ::::
 
-#### Update Configuration
+### Update Configuration
 
-Configuration updates behavior differs slightly depending on whether you are working with a local or remote `FeedbackDataset` instance. We do not allow for changing the `fields` and `questions` of a remote `FeedbackDataset` from the Python SDK but do allow for changing their `description` and `title` from the Argilla UI. Additionally, changing the `guidelines` and `metadata_properties` can be changed from the Argilla UI and Python SDK. For local `FeedbackDataset` instances, we allow for changing all of these attributes. Updating configuraiton is limited because we want to avoid inconsistencies between the dataset and defined records and annotations.
+Configuration updates behavior differs slightly depending on whether you are working with a local or remote `FeedbackDataset` instance. We do not allow for changing the `fields` and `questions` of a remote `FeedbackDataset` from the Python SDK but do allow for changing their `description` and `title` from the Argilla UI. Additionally, changing the `guidelines`, `metadata_properties` and `vector_settings` can be changed from the Argilla UI and Python SDK. For local `FeedbackDataset` instances, we allow for changing all of these attributes. Updating configuration is limited because we want to avoid inconsistencies between the dataset and defined records and annotations.
 
 ::::{tab-set}
 
 :::{tab-item} Fields
 This works only for local `FeedbackDataset` instances.
+
 ```python
 # Add new fields
-ds = rg.FeedbackDataset(...)
+dataset = rg.FeedbackDataset(...)
 
 new_fields=[
     rg.Type_of_field(.,.,.),
     rg.Type_of_field(.,.,.),
 ]
 
-ds.fields.extend(new_fields)
+dataset.fields.extend(new_fields)
 
 # Remove a non-required field
-ds.fields.pop(0)
+dataset.fields.pop(0)
 ```
 :::
 
 :::{tab-item} Questions
 This works only for local `FeedbackDataset` instances.
+
 ```python
 # Add new questions
-ds = rg.FeedbackDataset(...)
+dataset = rg.FeedbackDataset(...)
 
 new_questions=[
     rg.Type_of_question(.,.,.),
     rg.Type_of_question(.,.,.),
 ]
 
-ds.questions.extend(new_questions)
+dataset.questions.extend(new_questions)
 
 # Remove a non-required question
-ds.questions.pop(0)
+dataset.questions.pop(0)
 ```
 :::
 
 :::{tab-item} Metadata
-This works for both local and remote `FeedbackDataset` instances.
+This works for both local and remote `FeedbackDataset` instances. `update_metadata_properties` is only supported for `RemoteFeedbackDataset` instances.
+
 ```python
-# Add metadata to the dataset
-ds = rg.FeedbackDataset(...)
+dataset = rg.FeedbackDataset(...)
 
-metadata = rg.TermsMetadataProperty(name="metadata", values=["like", "dislike"])
+# Add metadata properties
+metadata = rg.TermsMetadataProperty(name="my_metadata", values=["like", "dislike"])
+dataset.add_metadata_property(metadata)
 
-ds.add_metadata_property(metadata)
+# Change metadata properties title
+metadata_cfg = dataset.metadata_property_by_name("my_metadata")
+metadata_cfg.title = "Likes"
+dataset.update_metadata_properties(metadata_cfg)
 
 # Delete a metadata property
-ds.delete_metadata_properties(metadata_properties="metadata")
+dataset.delete_metadata_properties(metadata_properties="my_metadata")
 ```
 :::
 
 :::{tab-item} Vectors
-This works for both local and remote `FeedbackDataset` instances.
+This works for both local and remote `FeedbackDataset` instances. `update_vectors_settings` is only supported for `RemoteFeedbackDataset` instances.
+
 ```python
-ds = rg.FeedbackDataset(...)
+dataset = rg.FeedbackDataset(...)
 
 # Add vector settings to the dataset
-ds.add_vector_settings(rg.VectorSettings(name="my_new_vectors", dimensions=786))
+dataset.add_vector_settings(rg.VectorSettings(name="my_vectors", dimensions=786))
 
 # Change vector settings title
-vector_cfg = ds.vector_settings_by_name("my_vector")
+vector_cfg = ds.vector_settings_by_name("my_vectors")
 vector_cfg.title = "Old vectors"
-ds.update_vectors_settings(vector_cfg)
+dataset.update_vectors_settings(vector_cfg)
 
 # Delete vector settings
-ds.delete_vectors_settings("my_vectors")
+dataset.delete_vectors_settings("my_vectors")
 ```
 :::
 
 :::{tab-item} Guidelines
 This works for both local and remote `FeedbackDataset` instances.
+
 ```python
 # Define new guidelines from the template
-ds = rg.FeedbackDataset(...)
+dataset = rg.FeedbackDataset(...)
 
 # Define new guidelines for a question
-ds.questions[0].description = 'New description for the question.'
+dataset.questions[0].description = 'New description for the question.'
 ```
 :::
 
@@ -420,7 +438,7 @@ We can push records to Argilla using the `rg.log()` function. This function take
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
-    text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
+    text="beautiful accommodations stayed hotel santa... hotels higher ranked website.",
     prediction=[("price", 0.75), ("hygiene", 0.25)],
     annotation="price"
 )
