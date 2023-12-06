@@ -117,13 +117,13 @@ class MetricsMixin:
                 each annotator as a dict, where the key corresponds to the annotator id and the
                 values are a list with the metrics.
         """
-        from argilla.client.feedback.metrics.annotator_metrics import SuggestionMetric, UnifiedSuggestionsMetric
+        from argilla.client.feedback.metrics.annotator_metrics import SuggestionsMetric, UnifiedSuggestionsMetric
 
         if strategy:
             self.compute_unified_responses(question_name, strategy)
             return UnifiedSuggestionsMetric(self, question_name).compute(metric_names)
         else:
-            return SuggestionMetric(self, question_name).compute(metric_names)
+            return SuggestionsMetric(self, question_name).compute(metric_names)
 
     def compute_agreement_metrics(
         self,
