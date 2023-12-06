@@ -60,6 +60,11 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 ```
+```{grid-item-card} Use Metric to Evaluate Your Model
+:link: feedback/end2end_examples/use-metrics-007.html
+
+Learn how to use the metrics module to evaluate your model.
+```
 
 ````
 
