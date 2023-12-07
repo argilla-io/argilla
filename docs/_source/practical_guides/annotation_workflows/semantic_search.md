@@ -16,7 +16,7 @@ The next section gives a general overview of how semantic search works in Argill
 
 Semantic search in Argilla works as follows:
 
-1. One or several vectors can be included in the `vectors` field of Argilla Records. The `vectors` field accepts a dictionary where `keys` represent the names and `values` contain the actual vectors. This is the case because certain use cases might require using several vectors. Note that for a `FeedbackDataset` you will also need to [configure `VectorSettings`](/practical_guides/create_dataset.md#define-vectors) in your dataset.
+1. One or several vectors can be included in the `vectors` field of Argilla Records. The `vectors` field accepts a dictionary where `keys` represent the names and `values` contain the actual vectors. This is the case because certain use cases might require using several vectors. Note that for a `FeedbackDataset` you will also need to [configure `VectorSettings`](/practical_guides/create_update_dataset/create_dataset.md#define-vectors) in your dataset.
 2. The vectors are stored at indexing time, once the records are logged with `add_records` or `update_records` in a `FeedbackDataset`, or with `rg.log` in older datasets.
 3. If you have stored vectors in your dataset, you can use the semantic search feature in Argilla UI and the Python SDK.
 
