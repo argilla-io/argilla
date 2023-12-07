@@ -126,10 +126,10 @@ You can add metadata to a `TextClassificationRecord`, `TokenClassificationRecord
 
 ```python
 rg.TokenClassificationRecord(
-                    text=" ".join(tokens),
-                    tokens=tokens,
-                    metadata={"my_metadata": metadata},
-                )
+    text=" ".join(tokens),
+    tokens=tokens,
+    metadata={"my_metadata": metadata},
+)
 
 ```
 

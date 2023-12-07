@@ -136,11 +136,11 @@ You can add vectors to a `TextClassificationRecord`, `TokenClassificationRecord`
 
 ```python
 record = rg.TokenClassificationRecord(
-        text = "Michael is a professor at Harvard",
-        tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-        vectors = {
-                  "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
-                  }
-        )
+    text = "Michael is a professor at Harvard",
+    tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
+    vectors = {
+        "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
+        }
+)
 
 ```

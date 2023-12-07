@@ -12,10 +12,10 @@ After configuring a `FeedbackDataset`, as shown in the [previous guide](/practic
 
 - `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](/practical_guides/create_update_dataset/create_dataset.md#define-fields)).
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
-- `metadata` (optional): A dictionary with the metadata of the record. Read more about [including metadata](/practical_guides/metadata).
-- `vectors` (optional): A dictionary with the vector associated to the record. Read more about [including vectors](/practical_guides/vectors).
-- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Read more about [including suggestions](/practical_guides/suggestions_and_responses).
-- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Read more about [including responses](/practical_guides/suggestions_and_responses).
+- `metadata` (optional): A dictionary with the metadata of the record. Read more about [including metadata](/practical_guides/create_update_dataset/metadata).
+- `vectors` (optional): A dictionary with the vector associated to the record. Read more about [including vectors](/practical_guides/create_update_dataset/vectors).
+- `suggestions`(optional): A list of all suggested responses for a record e.g., model predictions or other helpful hints for the annotators. Read more about [including suggestions](/practical_guides/create_update_dataset/suggestions_and_responses).
+- `responses` (optional): A list of all responses to a record. You will only need to add them if your dataset already has some annotated records. Read more about [including responses](/practical_guides/create_update_dataset/suggestions_and_responses).
 
 ```python
 # Create a single Feedback Record

@@ -10,7 +10,7 @@ This guide will help you with all the practical aspects of setting up an annotat
 Find the dataset type needed for your project.
 ```
 ```{grid-item-card} 🧑‍💻 Create and update a dataset
-:link: create_update_dataset/create_update_dataset.html
+:link: create_update_dataset/create_dataset.html
 
 Methods to create and configure a dataset.
 ```

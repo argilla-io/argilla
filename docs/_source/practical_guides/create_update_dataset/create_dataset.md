@@ -1,4 +1,4 @@
-# 🛠️ Create and configure dataset
+# 🧑‍💻 Create and update a dataset
 
 ## Feedback Dataset
 
@@ -9,7 +9,7 @@ The Feedback Task datasets allow you to combine multiple questions of different 
 
 ![workflow](/_static/tutorials/end2end/base/workflow_create_dataset.svg)
 
-This guide will walk you through all the elements you will need to configure a `FeedbackDataset`. For more information on how to add [records](/practical_guides/records), [metadata](/practical_guides/metadata), [vectors](/practical_guides/vectors) or [suggestions and responses](/practical_guides/suggestions_and_responses), please refer to the corresponding guides.
+This guide will walk you through all the elements you will need to configure a `FeedbackDataset`. For more information on how to add [records](/practical_guides/create_update_dataset/records), [metadata](/practical_guides/create_update_dataset/metadata), [vectors](/practical_guides/create_update_dataset/vectors) or [suggestions and responses](/practical_guides/create_update_dataset/suggestions_and_responses), please refer to the corresponding guides.
 
 ```{note}
 To follow the steps in this guide, you will first need to connect to Argilla. Check how to do so in our [cheatsheet](/getting_started/cheatsheet.md#connect-to-argilla).
@@ -122,7 +122,7 @@ The following arguments apply to specific metadata types:
 ```
 
 ```{note}
-You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/metadata.md).
+You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/create_update_dataset/metadata.md).
 ```
 
 ##### Define `vectors`
@@ -147,7 +147,7 @@ vectors_settings = [
 ]
 ```
 ```{note}
-You can also define vector settings after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_vector_settings` method as explained [here](/practical_guides/vectors.md).
+You can also define vector settings after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_vector_settings` method as explained [here](/practical_guides/create_update_dataset/vectors.md).
 ```
 
 ##### Define `guidelines`
@@ -444,4 +444,13 @@ rec = rg.TextClassificationRecord(
 )
 
 rg.log(records=rec, name="my_dataset")
+```
+
+```{toctree}
+:hidden:
+
+records
+metadata
+vectors
+suggestions_and_responses
 ```
