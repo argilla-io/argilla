@@ -5,7 +5,7 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
-![workflow](../_static/tutorials/end2end/base/workflow_suggestions_and_responses.svg)
+![workflow](/_static/tutorials/end2end/base/workflow_suggestions_and_responses.svg)
 
 Unlike metadata and vectors, `suggestions` and `responses` are not defined as part of the `FeedbackDataset` schema. Instead, they are added to the records as you create them.
 

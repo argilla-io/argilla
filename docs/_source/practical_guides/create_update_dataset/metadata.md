@@ -4,7 +4,7 @@
 
 ```{include} /_common/feedback_dataset.md
 ```
-![workflow](../_static/tutorials/end2end/base/workflow_metadata.svg)
+![workflow](/_static/tutorials/end2end/base/workflow_metadata.svg)
 
 ### Define `metadata_properties`
 

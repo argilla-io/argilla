@@ -1,4 +1,4 @@
-# ⏺️ Add, update and delete records
+# ⏺️ Add and update records
 
 ## Feedback Dataset
 

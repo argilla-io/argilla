@@ -5,7 +5,7 @@
 ```{include} /_common/feedback_dataset.md
 ```
 
-![workflow](../_static/tutorials/end2end/base/workflow_vectors.svg)
+![workflow](/_static/tutorials/end2end/base/workflow_vectors.svg)
 
 
 ### Define `vectors_settings`

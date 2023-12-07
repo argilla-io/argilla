@@ -9,7 +9,7 @@ To create a dataset in Argilla is really easy. Below you'll find step-by-step gu
 
 Learn how to create and configure a dataset in Argilla.
 ```
-```{grid-item-card} ⏺️ Add, update and delete records
+```{grid-item-card} ⏺️ Add and update records
 :link: records.html
 
 This guide will show you how to add, update and delete records in your dataset.
@@ -23,7 +23,6 @@ Find out how to add metadata to your dataset.
 :link: vectors.html
 
 Find out how to add vectors to your dataset.
-```
 ```
 ```{grid-item-card} 🤔 Work with suggestions and responses
 :link: suggestions_and_responses.html
