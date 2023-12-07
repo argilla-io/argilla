@@ -114,10 +114,10 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
 ```
-```{grid-item-card} 📑 Making the Most of Markdown
+```{grid-item-card} 📑 Making the Most of Markdown: video, audio and image
 :link: feedback/making-most-of-markdown.html
 
-Learn how to apply multimodality to your FeedbackDataset using the Argilla TextFields.
+Learn how to apply multimodality (video, audio and images) to your FeedbackDataset using the Argilla TextFields.
 ```
 
 ````
