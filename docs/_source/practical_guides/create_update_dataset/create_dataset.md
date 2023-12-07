@@ -391,8 +391,7 @@ Argilla datasets have certain *settings* that you can configure via the `rg.*Set
 
 ### Configure the dataset
 
-You can define your Argilla dataset, which sets the allowed labels for your predictions and annotations. Once you set a labeling schema, each time you log into the corresponding dataset, Argilla will perform validations of the added predictions and annotations to make sure they comply with the schema.
-You can set your labels using the code below or from the [Dataset settings page](/reference/webapp/pages.md#dataset-settings) in the UI.
+You can define your Argilla dataset, which sets the allowed labels for your predictions and annotations. Once you set a labeling schema, each time you log into the corresponding dataset, Argilla will perform validations of the added predictions and annotations to make sure they comply with the schema. You can set your labels using the code below or from the [Dataset settings page](/reference/webapp/pages.md#dataset-settings) in the UI. For more information on how to add [records](/practical_guides/create_update_dataset/records), [metadata](/practical_guides/create_update_dataset/metadata), [vectors](/practical_guides/create_update_dataset/vectors) or [suggestions and responses](/practical_guides/create_update_dataset/suggestions_and_responses), please refer to the corresponding guides.
 
 If you forget to define a labeling schema, Argilla will aggregate the labels it finds in the dataset automatically, but you will need to validate it. To do this, go to your [Dataset settings page](/reference/webapp/pages.md#dataset-settings) and click _Save schema_.
 
