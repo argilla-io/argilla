@@ -70,31 +70,54 @@ There are different options to get started:
 
 3. Skip some steps with our [cheatsheet](##🎼-cheatsheet) 🎼
 
-<details>
-<summary><h2>🎼 Cheatsheet</h3></summary>
+## 🎼 Cheatsheet
 
-<h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/python.html"> Python package</a></h3>
+This cheatsheet is a quick reference to the most common commands and workflows. For more detailed information, please refer to our [documentation](https://docs.argilla.io/en/latest/getting_started/quickstart.html).
 
+First things first! You can <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
 
 ```bash
 pip install argilla
 ```
+Before being able to use Argilla from our Python library, you first need to deploy our FastAPI server, Elastic Search and the Argilla UI. You can do it in different ways:
 
-<h3><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/deployments.html">Deployment</a></h3>
-
-<h4><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html"> Deploy Locally</a></h4>
+<details>
+<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html"> Deploy Locally</a></summary>
+<p>
 
 ```bash
 docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 ```
 
-<h4><a href="https://argilla.io/blog/launching-argilla-huggingface-hub/">Deploy on Hugging Face Hub</a></h4>
-HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
-<a href="https://argilla.io/blog/launching-argilla-huggingface-hub/"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
-
+</p>
+</details>
 
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/practical_guides/create_dataset.html">Configure datasets</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
+
+HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
+
+<a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
+
+</p>
+</details>
+
+Once you have deployed Argilla, to get started with your data from our Python library, we first need to connect to our FastAPI server.
+
+```python
+import argilla as rg
+
+rg.init(
+    api_url="argilla-api-url", # e.g. http://localhost:6900 or https://[your-owner-name]-[your_space_name].hf.space
+    api_key="argilla-api-key" # e.g. "owner.apikey"
+    workspace="argilla-workspace" # e.g. "admin"
+)
+```
+
+After that, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
+
+<details>
+<summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
 <p>
 
 ```python
@@ -119,6 +142,7 @@ dataset = rg.FeedbackDataset(
         ),
     ]
 )
+remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
 <a href="https://docs.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
@@ -127,9 +151,8 @@ dataset = rg.FeedbackDataset(
 </details>
 
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/practical_guides/records.html">Create Records</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
 <p>
-
 
 ```python
 import argilla as rg
@@ -142,6 +165,7 @@ record = rg.FeedbackRecord(
     metadata={"source": "encyclopedia"},
     external_id='rec_1'
 )
+remote_dataset.add_records(record)
 ```
 
 <a href="https://docs.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
@@ -149,14 +173,16 @@ record = rg.FeedbackRecord(
 </p>
 </details>
 
+And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
+
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
 <p>
 
 ```python
 import argilla as rg
 
-rg.load(name="news", query="text:spor*")
+filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
 
 <a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
@@ -165,18 +191,25 @@ rg.load(name="news", query="text:spor*")
 </details>
 
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
 <p>
 
 ```python
 import argilla as rg
 
-record = rg.TextClassificationRecord(
-    text="Hello world, I am a vector record!",
-    vectors= {"my_vector_name": [0, 42, 1984]}
+# using text embeddings
+similar_records =  ds.find_similar_records(
+    vector_name="my_vector",
+    value=embedder_model.embeddings("My text is here")
+    # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
 )
-rg.log(name="dataset", records=record)
-rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
+
+# using another record
+similar_records =  ds.find_similar_records(
+    vector_name="my_vector",
+    record=ds.records[0],
+    max_results=5
+)
 ```
 
 <a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
@@ -185,7 +218,7 @@ rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 </details>
 
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
 <p>
 
 ```python
@@ -218,7 +251,7 @@ plugin.start()
 </details>
 
 <details>
-<summary><h3><a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></h3></summary>
+<summary><a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
 <p>
 
 ```python
@@ -244,44 +277,102 @@ records = trainer.predict(["my-text"], as_argilla_records=True)
 </p>
 </details>
 
-</details>
-
-<details>
-<summary><h2>🛠️ Project Architecture</h2></summary>
-<p>
+## 🛠️ Project Architecture
 
 Argilla is built on 5 core components:
 
-- **Python SDK**: A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration and annotation workflows.
-- **FastAPI Server**: The core of Argilla is a *Python FastAPI* server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
-- **Relational Database**: A relational database to store the metadata of the records and the annotations. *SQLite* is used as the default built-in option and is deployed separately with the Argilla Server but a separate *PostgreSQL* can be used too.
-- **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support *ElasticSearch* and *AWS OpenSearch* and they can be deployed as separate Docker images.
-- **Vue.js UI**: A web application to visualize and annotate your data, users and teams. It is built with *Vue.js* and is directly deployed alongside the Argilla Server within our Argilla Docker image.
+<details>
+<summary><strong>Python SDK</strong></summary>
+<p>
+
+A Python SDK which is installable with `pip install argilla`. To interact with the Argilla Server and the Argilla UI. It provides an API to manage the data, configuration and annotation workflows.
+
+</p>
+</details>
+
+<details>
+<summary><strong>FastAPI Server</strong></summary>
+<p>
+
+The core of Argilla is a <strong>Python FastAPI</strong> server that manages the data, by pre-processing it and storing it in the vector database. Also, it stores application information in the relational database. It provides a REST API to interact with the data from the Python SDK and the Argilla UI. It also provides a web interface to visualize the data.
+
+</p>
+</details>
+
+<details>
+<summary><strong>Relational Database</strong></summary>
+<p>
+
+A relational database to store the metadata of the records and the annotations. <strong>SQLite</strong> is used as the default built-in option and is deployed separately with the Argilla Server but a separate <strong>PostgreSQL</strong> can be used too.
+
+</p>
+</details>
+<details>
+<summary><strong>Vector Database</strong></summary>
+<p>
+
+A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support <strong>ElasticSearch</strong> and <strong>AWS OpenSearch</strong> and they can be deployed as separate Docker images.
+
+</p>
+</details>
+
+<details>
+<summary><strong>Vue.js UI</strong></summary>
+<p>
+
+A web application to visualize and annotate your data, users and teams. It is built with <strong>Vue.js</strong> and is directly deployed alongside the Argilla Server within our Argilla Docker image.
+
 </p>
 </details>
 
 
+## 📏 Principles
+
+Argilla is a tool that is in continuous development, with the aim of always offering better workflows and methods for various NLP tasks. To achieve this, it is based on several principles that define its functionality and scope.
+
 <details>
-<summary><h2>📏 Principles</h2></summary>
+<summary><strong>Open</strong></summary>
 <p>
 
--  **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
+Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can <strong>use and combine your preferred libraries</strong> without implementing any specific interface.
 
--  **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions and collect more data to improve your model over time. Argilla is designed to close this gap, enabling you to **iterate as much as you need**.
+</p>
+</details>
 
--  **User and Developer Experience**: The key to sustainable NLP solutions are to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Argilla optimizes the experience for these core users to **make your teams more productive**.
+<details>
+<summary><strong>End-to-end</strong></summary>
+<p>
 
--  **Beyond hand-labeling**: Classical hand-labeling workflows are costly and inefficient, but having humans in the loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision in **novel** data annotation workflows**.
+Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions and collect more data to improve your model over time. Argilla is designed to close this gap, enabling you to <strong>iterate as much as you need</strong>.
+
+</p>
+</details>
+
+<details>
+<summary><strong>User and Developer Experience</strong></summary>
+<p>
+
+The key to sustainable NLP solutions are to make it easier for everyone to contribute to projects. <em>Domain experts</em> should feel comfortable interpreting and annotating data. <em>Data scientists</em> should feel free to experiment and iterate. <em>Engineers</em> should feel in control of data pipelines. Argilla optimizes the experience for these core users to <strong>make your teams more productive</strong>.
+
+</p>
+</details>
+
+<details>
+<summary><strong>Beyond hand-labeling</strong></summary>
+<p>
+
+Classical hand-labeling workflows are costly and inefficient, but having humans in the loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision in <strong>novel data annotation workflows</strong>.
+
 </p>
 </details>
 
 
-<details>
-<summary><h2>❔ FAQ</h2></summary>
-<p>
+## ❔ Frequently Asked Questions
+
+Below, you can find answers to some of the most common questions about Argilla. For more information, refer to our [documentation](https://docs.argilla.io/en/develop/index.html).
 
 <details>
-<summary>What is Argilla?</summary>
+<summary><strong>What is Argilla?</strong></summary>
 <p>
 
 Argilla is an open-source data curation platform, designed to enhance the development of both small and large language models (LLMs). Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring. In fact, the inspiration behind the name "Argilla" comes from the word for "clay", in Latin, Italian and even in Catalan. And just as clay has been a fundamental medium for human creativity and tool-making throughout history, we view data as the essential material for sculpting and refining models.
@@ -290,7 +381,7 @@ Argilla is an open-source data curation platform, designed to enhance the develo
 </details>
 
 <details>
-<summary>Does Argilla train models?</summary>
+<summary><strong>Does Argilla train models?</strong></summary>
 <p>
 
 Argilla does not train models but offers tools and integrations to help you do so. With Argilla, you can easily load data and train models straightforward using a feature we call the `ArgillaTrainer`. The `ArgillaTrainer` acts as a bridge to various popular NLP libraries. It simplifies the training process by offering an easy-to-understand interface for many NLP tasks using default pre-set settings without the need of converting data from Argilla's format. You can find more information about training models with Argilla <a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">here</a>.
@@ -299,7 +390,7 @@ Argilla does not train models but offers tools and integrations to help you do s
 </details>
 
 <details>
-<summary>What is the difference between old datasets and the FeedbackDataset?</summary>
+<summary><strong>What is the difference between old datasets and the FeedbackDataset?</strong></summary>
 <p>
 
 The FeedbackDataset stands out for its versatility and adaptability, designed to support a wider range of NLP tasks including those centered on large language models. In contrast, older datasets, while more feature-rich in specific areas, are tailored to singular NLP tasks. However, in Argilla 2.0, the intention is to phase out the older datasets in favor of the FeedbackDataset. For a more detailed explanation, please refer to <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">this guide</a>.
@@ -308,7 +399,7 @@ The FeedbackDataset stands out for its versatility and adaptability, designed to
 </details>
 
 <details>
-<summary>Can Argilla only be used for LLMs?</summary>
+<summary><strong>Can Argilla only be used for LLMs?</strong></summary>
 <p>
 
 No, Argilla is a versatile tool suitable for a wide range of NLP tasks. However, we emphasize the integration with small and large language models (LLMs), reflecting confidence in the significant role that they will play in the future of NLP. In this page, you can find a list of <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">supported tasks</a>.
@@ -317,7 +408,7 @@ No, Argilla is a versatile tool suitable for a wide range of NLP tasks. However,
 </details>
 
 <details>
-<summary>Does Argilla provide annotation workforces?</summary>
+<summary><strong>Does Argilla provide annotation workforces?</strong></summary>
 <p>
 
 Currently, we already have partnerships with annotation providers that ensure ethical practices and secure work environments. Feel free to schedule a meeting <a href="https://calendly.com/argilla-office-hours/30min">here</a> or contact us via <a href="mailto:david@argilla.io">email</a>.
@@ -326,7 +417,7 @@ Currently, we already have partnerships with annotation providers that ensure et
 </details>
 
 <details>
-<summary>Does Argilla cost money?</summary>
+<summary><strong>Does Argilla cost money?</strong></summary>
 <p>
 
 No, Argilla is an open-source platform. And we plan to keep Argilla free forever. However, we do offer a commercial version of Argilla called Argilla Cloud.
@@ -335,7 +426,7 @@ No, Argilla is an open-source platform. And we plan to keep Argilla free forever
 </details>
 
 <details>
-<summary>What is the difference between Argilla open source and Argilla Cloud?</summary>
+<summary><strong>What is the difference between Argilla open source and Argilla Cloud?</strong></summary>
 <p>
 
 Argilla Cloud is the counterpart to our open-source platform, offering a Software as a Service (SaaS) model, and doesn't add extra features beyond what is available in the open-source version. The main difference is its cloud-hosting, which caters especially to large teams requiring features that aren't typically necessary for individual practitioners or small businesses. So, Argilla Cloud is a SAS plus virtual private cloud deployment, with added features specifically related to the cloud. For those interested in the different plans available under Argilla Cloud, you can find detailed information on our <a href="https://argilla.io/pricing">website</a>.
@@ -344,7 +435,7 @@ Argilla Cloud is the counterpart to our open-source platform, offering a Softwar
 </details>
 
 <details>
-<summary>How does Argilla differ from competitors like Snorkel, Prodigy and Scale?</summary>
+<summary><strong>How does Argilla differ from competitors like Snorkel, Prodigy and Scale?</strong></summary>
 <p>
 
 Argilla distinguishes itself for its focus on specific use cases and human-in-the-loop approaches. While it does offer programmatic features, Argilla's core value lies in actively involving human experts in the tool-building process, setting it apart from other competitors.
@@ -357,13 +448,12 @@ Finally, platforms like Snorkel, Prodigy or Scale, while more comprehensive, oft
 </details>
 
 <details>
-<summary>What is Argilla currently working on?</summary>
+<summary><strong>What is Argilla currently working on?</strong></summary>
 <p>
 
 We are continuously working on improving Argilla's features and usability, focusing now concentrating on a three-pronged vision: the development of Argilla Core (open-source), Distilabel, and Argilla JS/TS. You can find a list of our current projects <a href="https://github.com/orgs/argilla-io/projects/10/views/1">here</a>.
 
 </p>
-</details>
 </details>
 
 ## 🤝 Contribute

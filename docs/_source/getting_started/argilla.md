@@ -52,6 +52,8 @@ Argilla is built on 5 core components:
 - **Beyond hand-labeling**: Classical hand-labeling workflows are costly and inefficient, but having humans in the loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision in **novel** data annotation workflows\*\*.
 
 
+## ❔ FAQ
+
 <details>
 <summary>What is Argilla?</summary>
 <p>
