@@ -2,7 +2,7 @@
 
 ## Feedback Datasets
 
-You can render your images in the Argilla UI using TextField or TextQuestion. Remember to set in both cases `use_markdown` to `True`. For additional guidance, refer to the [Making Most of Markdown tutorial](/tutorials_and_integrations/tutorials/feedback\making-most-of-markdown.ipynb).
+You can render your images in the Argilla UI using TextField or TextQuestion. Remember to set in both cases `use_markdown` to `True`. For additional guidance, refer to the [Making Most of Markdown tutorial](/tutorials_and_integrations/tutorials/feedback/making-most-of-markdown.ipynb).
 
 ```{note}
 Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
