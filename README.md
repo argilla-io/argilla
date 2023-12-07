@@ -79,7 +79,7 @@ First things first! You can <a href="https://docs.argilla.io/en/develop/getting_
 ```bash
 pip install argilla
 ```
-Before being able to use Argilla from our Python library, you first need to deploy our FastAPI server, Elastic Search and the Argilla UI. You can do it in different ways:
+Then, you'll need to deploy our FastAPI server, Elastic Search and the Argilla UI. You can do it in different ways:
 
 <details>
 <summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html"> Deploy Locally</a></summary>
@@ -102,7 +102,7 @@ HuggingFace Spaces now have persistent storage and this is supported from Argill
 </p>
 </details>
 
-Once you have deployed Argilla, to get started with your data from our Python library, we first need to connect to our FastAPI server.
+Once you have deployed Argilla, we will connect to the server.
 
 ```python
 import argilla as rg
