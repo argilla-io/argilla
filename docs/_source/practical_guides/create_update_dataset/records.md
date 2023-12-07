@@ -8,9 +8,9 @@
 
 ### Define a `FeedbackRecord`
 
-After configuring a `FeedbackDataset`, as shown in the [previous guide](/practical_guides/create_dataset). The next step is to create records following Argilla's `FeedbackRecord` format. You can check an example [here](/tutorials_and_integrations/tutorials/feedback/end2end_examples/create-dataset-001.ipynb). These are the attributes of a `FeedbackRecord`:
+After configuring a `FeedbackDataset`, as shown in the [previous guide](/practical_guides/create_update_dataset/create_dataset). The next step is to create records following Argilla's `FeedbackRecord` format. You can check an example [here](/tutorials_and_integrations/tutorials/feedback/end2end_examples/create-dataset-001.ipynb). These are the attributes of a `FeedbackRecord`:
 
-- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](/practical_guides/create_dataset.md#define-fields)).
+- `fields`: A dictionary with the name (key) and content (value) of each of the fields in the record. These will need to match the fields set up in the dataset configuration (see [Define record fields](/practical_guides/create_update_dataset/create_dataset.md#define-fields)).
 - `external_id` (optional): An ID of the record defined by the user. If there is no external ID, this will be `None`.
 - `metadata` (optional): A dictionary with the metadata of the record. Read more about [including metadata](/practical_guides/metadata).
 - `vectors` (optional): A dictionary with the vector associated to the record. Read more about [including vectors](/practical_guides/vectors).

@@ -10,7 +10,7 @@
 
 ### Define `vectors_settings`
 
-To use the similarity search in the UI and the Python SDK, you will need to configure vector settings. These are defined using the SDK as a list of up to 5 vectors when [creating a FeedbackDataset](/practical_guides/create_dataset) or adding them to an already existing FeedbackDataset. They have the following arguments:
+To use the similarity search in the UI and the Python SDK, you will need to configure vector settings. These are defined using the SDK as a list of up to 5 vectors when [creating a FeedbackDataset](/practical_guides/create_update_dataset/create_dataset) or adding them to an already existing FeedbackDataset. They have the following arguments:
 
 - `name`: The name of the vector, as it will appear in the records.
 - `dimensions`: The dimensions of the vectors used in this setting.
@@ -32,7 +32,7 @@ vectors_settings = [
 
 #### Add `vectors_settings`
 
-If you want to add vector settings when creating a dataset, you can pass them as a list of `VectorSettings` instances to the `vector_settings` argument of the `FeedbackDataset` constructor as shown [here](/practical_guides/create_dataset.md#create-the-dataset).
+If you want to add vector settings when creating a dataset, you can pass them as a list of `VectorSettings` instances to the `vector_settings` argument of the `FeedbackDataset` constructor as shown [here](/practical_guides/create_update_dataset/create_dataset.md#create-the-dataset).
 For an end-to-end example, check our [tutorial on adding vectors](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-vectors-004.ipynb).
 
 ```python

@@ -10,7 +10,7 @@
 
 Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK.
 
-You can define metadata properties using the Python SDK when [creating a FeedbackDataset](/practical_guides/create_dataset) or adding them to an already existing FeedbackDataset. They have the following arguments:
+You can define metadata properties using the Python SDK when [creating a FeedbackDataset](/practical_guides/create_update_dataset/create_dataset) or adding them to an already existing FeedbackDataset. They have the following arguments:
 
 - `name`: The name of the metadata property, as it will be used internally.
 - `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
@@ -26,7 +26,7 @@ The following arguments apply to specific metadata types:
 
 #### Add `metadata_properties`
 
-If you want to add metadata properties when creating a dataset, you can pass them as a list of `MetadataProperty` instances to the `metadata_properties` argument of the `FeedbackDataset` constructor as shown [here](/practical_guides/create_dataset.md#create-the-dataset). If you want to add metadata properties to an existing dataset, you can use the `add_metadata_properties` method. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb).
+If you want to add metadata properties when creating a dataset, you can pass them as a list of `MetadataProperty` instances to the `metadata_properties` argument of the `FeedbackDataset` constructor as shown [here](/practical_guides/create_update_dataset/create_dataset.md#create-the-dataset). If you want to add metadata properties to an existing dataset, you can use the `add_metadata_properties` method. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb).
 
 ```python
 metadata_property = rg.TermsMetadataProperty(
