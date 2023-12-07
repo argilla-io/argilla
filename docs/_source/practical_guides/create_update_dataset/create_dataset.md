@@ -1,4 +1,4 @@
-# 🧑‍💻 Create and update a dataset
+# 🛠️ Create and configure dataset
 
 ## Feedback Dataset
 

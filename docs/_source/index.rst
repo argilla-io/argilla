@@ -27,11 +27,7 @@
 
    practical_guides/practical_guides
    practical_guides/choose_dataset
-   practical_guides/create_dataset
-   practical_guides/records
-   practical_guides/metadata
-   practical_guides/vectors
-   practical_guides/suggestions_and_responses
+   practical_guides/create_update_dataset/create_update_dataset.md
    practical_guides/assign_records
    practical_guides/filter_dataset
    practical_guides/annotate_dataset
