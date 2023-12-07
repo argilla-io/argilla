@@ -116,7 +116,7 @@ hf_dataset.to_parquet()  # Save as Parquet
 ```
 
 ```{note}
-This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to create a `FeedbackDataset` and add the records as explained [here](/practical_guides/create_dataset.md).
+This workaround will just export the records into the desired format, not the dataset configuration. If you want to load the records back into Argilla, you will need to [create a FeedbackDataset](/practical_guides/create_dataset.md) and [add the records](/practical_guides/records) as explained in the corresponding guides.
 ```
 
 ## Other datasets
