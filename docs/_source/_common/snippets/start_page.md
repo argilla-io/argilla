@@ -1,36 +1,16 @@
-::::{tab-set}
+Welcome to Argilla! 👋😁 We're thrilled to have you on board. Starting with Argilla is as simple as it gets, and you've successfully taken the first step! Let's set things in motion. 🚀
 
-:::{tab-item} Feedback datasets
+Argilla, as a data curation platform, supports offers various datasets including `FeedbackDataset`, `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`. So, you should [select the one that best fits your needs](https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html). Note that the FeedbackDataset, adaptable for various NLP tasks, will replace the other more specialized but less versatile datasets in version 2.0.
 
-```python
-# install datasets library with pip install datasets
-import argilla as rg
-from datasets import load_dataset
+Once you've selected a dataset, you can open one of our introductory tutorials to create a [FeedbackDataset](https://colab.research.google.com/github/argilla-io/argilla/blob/develop/docs/_source/getting_started/quickstart_workflow_feedback.ipynb) or [Other datasets](https://colab.research.google.com/github/argilla-io/argilla/blob/develop/docs/_source/getting_started/quickstart_workflow.ipynb). First, you'll need to connect to Argilla following the instructions and then simply follow the guided process. You'll be able to create a dataset in a few minutes. 🤩
 
-# load an Argilla Feedback Dataset from the Hugging Face Hub
-# look for other datasets at https://huggingface.co/datasets?other=argilla
-dataset = rg.FeedbackDataset.from_huggingface("argilla/oasst_response_quality", split="train")
+For a more in-depth understanding of Argilla, you can check our documentation 📖:
 
-# push the dataset to Argilla
-dataset.push_to_argilla("oasst_response_quality")
-```
-:::
+* Set up the 🔧[Installation](https://docs.argilla.io/en/latest/getting_started/installation/deployments/deployments.html) and ⚙️[Configuration](https://docs.argilla.io/en/latest/getting_started/installation/configurations/configurations.html)
+* 🗺️[Practical guides](https://docs.argilla.io/en/latest/practical_guides/index.html) with the complete workflows
+* ✏️ [Tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html) for beginner and advanced users
+* 🖥️ How to use the [Argilla UI](https://docs.argilla.io/en/latest/reference/webapp/index.html)
 
-:::{tab-item} Other datasets
+Of course, we welcome any ideas or suggestions you may have. And, your contributions will be included in the latest version of Argilla. For more details, refer to the [contribution guide](https://docs.argilla.io/en/latest/contributing/contributing.html).
 
-```python
-# install datasets library with pip install datasets
-import argilla as rg
-from datasets import load_dataset
-
-# load dataset from the hub
-dataset = load_dataset("argilla/gutenberg_spacy-ner", split="train")
-
-# read in dataset, assuming its a dataset for token classification
-dataset_rg = rg.read_datasets(dataset, task="TokenClassification")
-
-# log the dataset
-rg.log(dataset_rg, "gutenberg_spacy-ner")
-```
-:::
-::::
+We hope you enjoy using Argilla as much as we enjoyed building it. If you have any questions, don't hesitate to contact us at the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g). We'd love to hear from you! 🙌
