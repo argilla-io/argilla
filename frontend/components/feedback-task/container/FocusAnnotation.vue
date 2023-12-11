@@ -3,7 +3,7 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
-          v-if="records.hasRecordsToAnnotate && record.status === 'pending'"
+          v-if="records.hasRecordsToAnnotate && record?.status === 'pending'"
           :value="bulkAnnotation"
           @change="changeAnnotationType"
       /></DatasetFiltersComponent>
