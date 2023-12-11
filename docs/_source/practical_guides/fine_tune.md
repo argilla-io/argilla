@@ -1471,7 +1471,7 @@ trainer = ArgillaTrainer(
     framework="spacy",
     train_size=0.8
 )
-trainer.update_config(max_epochs=2)
+trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_spacy_model")
 records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=True)
 rg.log(records=records, name="conll2003", workspace="admin")
