@@ -71,10 +71,9 @@ class TestCreateCurrentUserResponsesBulk:
         )
 
         response_to_update_json = {
-            "id": str(response_to_update.id),
             "values": {"prompt-quality": {"value": 10}},
             "status": ResponseStatus.submitted,
-            "record_id": str(records[1].id),
+            "record_id": str(response_to_update.record_id),
         }
 
         invalid_response_json = {
@@ -186,12 +185,12 @@ class TestCreateCurrentUserResponsesBulk:
         assert resp.status_code == 200
 
         resp_json = resp.json()
-        response_to_create_id = UUID(resp_json["items"][0]["item"]["id"])
+        response_id = UUID(resp_json["items"][0]["item"]["id"])
         assert resp_json == {
             "items": [
                 {
                     "item": {
-                        "id": str(response_to_create_id),
+                        "id": str(response_id),
                         "values": {"prompt-quality": {"value": 10}},
                         "status": ResponseStatus.submitted.value,
                         "record_id": str(record.id),
@@ -206,7 +205,7 @@ class TestCreateCurrentUserResponsesBulk:
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
-        response = (await db.execute(select(Response).filter_by(id=response_to_create_id))).scalar_one()
+        response = (await db.execute(select(Response).filter_by(id=response_id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
     async def test_response_to_create_with_non_existent_record(
@@ -267,7 +266,6 @@ class TestCreateCurrentUserResponsesBulk:
             json={
                 "items": [
                     {
-                        "id": str(response.id),
                         "values": {"prompt-quality": {"value": 10}},
                         "status": ResponseStatus.submitted,
                         "record_id": str(record.id),

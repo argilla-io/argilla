@@ -1045,9 +1045,6 @@ async def upsert_response(
         "user_id": user.id,
     }
 
-    if response_upsert.id is not None:
-        schema["id"] = response_upsert.id
-
     async with db.begin_nested():
         response = await Response.upsert(
             db,

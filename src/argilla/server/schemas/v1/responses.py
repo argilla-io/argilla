@@ -73,21 +73,18 @@ ResponseUpdate = Annotated[
 
 
 class SubmittedResponseUpsert(BaseModel):
-    id: Optional[UUID]
     values: Dict[str, ResponseValueUpdate]
     status: Literal[ResponseStatus.submitted]
     record_id: UUID
 
 
 class DiscardedResponseUpsert(BaseModel):
-    id: Optional[UUID]
     values: Optional[Dict[str, ResponseValueUpdate]]
     status: Literal[ResponseStatus.discarded]
     record_id: UUID
 
 
 class DraftResponseUpsert(BaseModel):
-    id: Optional[UUID]
     values: Optional[Dict[str, ResponseValueUpdate]]
     status: Literal[ResponseStatus.draft]
     record_id: UUID
