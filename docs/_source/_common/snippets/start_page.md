@@ -11,6 +11,6 @@ For a more in-depth understanding of Argilla, you can check our documentation �
 * ✏️ [Tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html) for beginner and advanced users
 * How to use the 🖥️ [Argilla UI](https://docs.argilla.io/en/latest/reference/webapp/index.html)
 
-Of course, we welcome any ideas or suggestions you may have. And, your contributions will be included in the latest version of Argilla. For more details, refer to the [contribution guide](https://docs.argilla.io/en/latest/contributing/contributing.html).
+Of course, we welcome any ideas or suggestions you may have. And, your contributions will be included in the latest version of Argilla. For more details, refer to the [contributor guide](https://docs.argilla.io/en/latest/contributing/contributing.html) and the [developer guide](https://docs.argilla.io/en/latest/community/developer_docs.html).
 
 We hope you enjoy using Argilla as much as we enjoyed building it. If you have any questions, don't hesitate to contact us at the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g). We'd love to hear from you! 🙌
