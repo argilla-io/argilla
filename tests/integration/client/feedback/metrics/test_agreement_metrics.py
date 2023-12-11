@@ -114,7 +114,7 @@ def test_prepare_dataset_for_annotation_task(
         assert isinstance(item[0], str)
         assert item[0].startswith("00000000-")  # beginning of our uuid for tests
         assert isinstance(item[1], str)
-        assert item[1].startswith("question-")
+        assert item[1] == feedback_dataset_records_with_paired_suggestions[0].fields["text"]
         assert isinstance(item[2], type_of_data)
 
 

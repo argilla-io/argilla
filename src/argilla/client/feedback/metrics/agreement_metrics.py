@@ -94,10 +94,9 @@ def prepare_dataset_for_annotation_task(
 
     formatted_responses: FormattedResponses = []
 
-    len_dataset = iter(range(len(hf_dataset[question_name])))
-
-    for responses_ in hf_dataset[question_name]:
-        question_text = hf_dataset[next(len_dataset)]["text"]
+    for row in hf_dataset:
+        responses_ = row[question_name]
+        question_text = row["text"]
         for response in responses_:
             user_id = response["user_id"]
             if user_id is None:
