@@ -94,6 +94,7 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 <details>
 <summary><a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
+<p>
 
 HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 
@@ -104,6 +105,10 @@ HuggingFace Spaces now have persistent storage and this is supported from Argill
 
 Once you have deployed Argilla, we will connect to the server.
 
+<details>
+<summary><a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
+<p>
+
 ```python
 import argilla as rg
 
@@ -113,6 +118,9 @@ rg.init(
     workspace="argilla-workspace" # e.g. "admin"
 )
 ```
+
+</p>
+</details>
 
 After that, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
 
