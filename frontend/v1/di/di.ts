@@ -26,9 +26,11 @@ import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-us
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
 import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
+import { SubmitBulkAnnotationUseCase } from "@/v1/domain/usecases/submit-bulk-annotation-use-case";
 import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
 import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
+import { DiscardBulkAnnotationUseCase } from "@/v1/domain/usecases/discard-bulk-annotation-use-case";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 import { GetDatasetSettingsUseCase } from "@/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { UpdateQuestionSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-question-setting-use-case";
@@ -78,7 +80,15 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
+    register(DiscardBulkAnnotationUseCase)
+      .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
+
     register(SubmitRecordUseCase)
+      .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
+
+    register(SubmitBulkAnnotationUseCase)
       .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 

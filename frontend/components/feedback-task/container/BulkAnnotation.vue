@@ -54,7 +54,7 @@
   </div>
 </template>
 <script>
-import { useQuestionFormViewModel } from "./questions/useQuestionsFormViewModel";
+import { useBulkAnnotationQuestionFormViewModel } from "./questions/useBulkAnnotationQuestionsFormViewModel";
 export default {
   props: {
     recordCriteria: {
@@ -107,23 +107,23 @@ export default {
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
 
-      await this.submit(this.record);
+      await this.submit(this.filteredSelectedRecords, this.record);
       this.$emit("on-submit-responses");
     },
     async onDiscard() {
       if (this.record.isDiscarded) return;
 
-      await this.discard(this.record);
+      await this.discard(this.filteredSelectedRecords, this.record);
       this.$emit("on-discard-responses");
     },
     async onClear() {
-      await this.clear(this.record);
+      // await this.clear(this.record);
     },
     async onSaveDraft() {
-      await this.saveDraft(this.record);
+      // await this.saveDraft(this.record);
     },
     async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
+      // await this.saveDraftImmediately(this.record);
     },
     toggleAllRecords() {
       if (this.filteredSelectedRecords.length === this.records.records.length) {
@@ -134,7 +134,7 @@ export default {
     },
   },
   setup() {
-    return useQuestionFormViewModel();
+    return useBulkAnnotationQuestionFormViewModel();
   },
 };
 </script>
