@@ -83,7 +83,6 @@ Learn how to use the ArgillaTrainer to fine-tune your Feedback Dataset using Set
 :link: feedback/train-reward-model-rlhf.html
 
 Learn how to collect comparison or human preference data and train a reward model with the trl library.
-
 ```
 ```{grid-item-card} ❓ Train a QnA model with transformers and Argilla
 :link: feedback/training-qa-transformers.html
@@ -114,6 +113,11 @@ Learn how to create synthetic data and annotations with OpenAI, LangChain, Trans
 :link: feedback/curating-feedback-instructiondataset.html
 
 Learn how to set up a project to curate a public dataset that can be used to fine-tune an instruction-following model.
+```
+```{grid-item-card} 📑 Making the Most of Markdown: video, audio and image
+:link: feedback/making-most-of-markdown.html
+
+Learn how to apply multimodality (video, audio and images) to your FeedbackDataset using the Argilla TextFields.
 ```
 
 ````
