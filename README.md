@@ -74,15 +74,21 @@ There are different options to get started:
 
 This cheatsheet is a quick reference to the most common commands and workflows. For more detailed information, please refer to our [documentation](https://docs.argilla.io/en/latest/getting_started/quickstart.html).
 
+<details>
+<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
+<p>
+
 First things first! You can <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
 
 ```bash
 pip install argilla
 ```
-Then, you'll need to deploy our FastAPI server, Elastic Search and the Argilla UI. You can do it in different ways:
+
+</p>
+</details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html"> Deploy Locally</a></summary>
+<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
 <p>
 
 ```bash
@@ -98,16 +104,17 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 
 HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 
+After this, we can connect to our server.
+
 <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
 </p>
 </details>
 
-Once you have deployed Argilla, we will connect to the server.
-
 <details>
 <summary><a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
 <p>
+Once you have deployed Argilla, we will connect to the server.
 
 ```python
 import argilla as rg
@@ -119,10 +126,10 @@ rg.init(
 )
 ```
 
+After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
+
 </p>
 </details>
-
-After that, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
 
 <details>
 <summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
@@ -176,12 +183,13 @@ record = rg.FeedbackRecord(
 remote_dataset.add_records(record)
 ```
 
+And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
+
 <a href="https://docs.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
 
 </p>
 </details>
 
-And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
 
 <details>
 <summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
