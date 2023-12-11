@@ -233,7 +233,8 @@ export default {
   max-height: 100%;
   min-width: 0;
   justify-content: space-between;
-  border-left: 1px solid transparent;
+  border-radius: $border-radius-m;
+  border: 1px solid transparent;
   background: palette(white);
   margin-bottom: auto;
   &__header {
@@ -263,15 +264,11 @@ export default {
     overflow: auto;
     scroll-behavior: smooth;
   }
-
   &.--pending {
     border-color: $black-10;
   }
   &.--draft {
     border-color: $draft-color;
-  }
-  &.--pending {
-    border-color: $pending-color;
   }
   &.--discarded {
     border-color: $discarded-color;
@@ -288,7 +285,7 @@ export default {
 }
 
 .footer-form {
-  padding: 0 $base-space * 3 $base-space * 2 $base-space * 3;
+  padding: 0 $base-space * 2 $base-space * 2 $base-space * 2;
   &__content {
     display: flex;
     flex-direction: row;
