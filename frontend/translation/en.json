@@ -54,5 +54,6 @@
   "reset": "Reset",
   "with": "with",
   "find": "Find",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "records-per-page": "Records per page"
 }

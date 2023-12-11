@@ -20,7 +20,7 @@
           :record="record"
           :recordCriteria="recordCriteria"
           :datasetVectors="datasetVectors"
-          @input="$emit('input', $event)"
+          @input="onInput"
         />
       </template>
       <template v-else v-slot:content-header>
@@ -53,7 +53,7 @@ export default {
       required: true,
     },
     selectedRecordId: {
-      type: String,
+      type: [String, null],
     },
     selectableRecord: {
       type: Boolean,
@@ -67,6 +67,12 @@ export default {
   model: {
     prop: "selectedRecordId",
     event: "input",
+  },
+  methods: {
+    onInput(isSelected) {
+      const input = isSelected ? this.record.id : null;
+      this.$emit("input", input);
+    },
   },
 };
 </script>

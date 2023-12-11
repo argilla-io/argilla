@@ -4,7 +4,8 @@
       <BaseCheckbox
         v-if="selectableRecord"
         class="fields__checkbox"
-        @input="$emit('input', record.id)"
+        :value="selectedRecordId"
+        @input="$emit('input', $event)"
       />
       <StatusTag class="fields__status" :recordStatus="record.status" />
     </div>

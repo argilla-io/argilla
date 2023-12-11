@@ -1,15 +1,15 @@
 <template>
   <div class="wrapper">
     <section class="wrapper__records">
-      FOCUS
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
           v-if="records.hasRecordsToAnnotate && record.status === 'pending'"
           :value="bulkAnnotation"
           @change="changeAnnotationType"
-        />
-      </DatasetFiltersComponent>
-      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+      /></DatasetFiltersComponent>
+      <div class="wrapper__records__header">
+        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+      </div>
       <RecordFieldsAndSimilarity
         :datasetVectors="datasetVectors"
         :records="records"
@@ -78,7 +78,6 @@ export default {
   methods: {
     changeAnnotationType(value) {
       this.$emit("change", value);
-      console.log(value);
     },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
@@ -134,6 +133,12 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
+    &__header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: $base-space;
+    }
   }
   &__text {
     color: $black-54;

@@ -1,18 +1,25 @@
 <template>
   <div class="wrapper">
     <section class="wrapper__records">
-      BULK
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
           v-if="records.hasRecordsToAnnotate && record.status === 'pending'"
           :value="bulkAnnotation"
           @change="changeAnnotationType"
+      /></DatasetFiltersComponent>
+      <div class="wrapper__records__header">
+        <BaseCheckbox
+          v-if="records.hasRecordsToAnnotate"
+          class="wrapper__records__header__checkbox"
+          :value="filteredSelectedRecords.length === records.records.length"
+          @input="toggleAllRecords"
         />
-      </DatasetFiltersComponent>
-      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+        <PageSizeSelector :options="[10, 25, 50, 100]" v-model="pageSize" />
+        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+      </div>
       <div class="bulk__records">
         <RecordFieldsAndSimilarity
-          v-for="(r, index) in 4"
+          v-for="(r, index) in records.records"
           :key="r.id"
           :datasetVectors="datasetVectors"
           :records="records"
@@ -81,11 +88,17 @@ export default {
   data() {
     return {
       selectedRecords: [],
+      pageSize: 10,
     };
   },
   model: {
     prop: "bulkAnnotation",
     event: "change",
+  },
+  computed: {
+    filteredSelectedRecords() {
+      return this.selectedRecords.filter((r) => r);
+    },
   },
   methods: {
     changeAnnotationType(value) {
@@ -111,6 +124,13 @@ export default {
     },
     async onSaveDraftImmediately() {
       await this.saveDraftImmediately(this.record);
+    },
+    toggleAllRecords() {
+      if (this.filteredSelectedRecords.length === this.records.records.length) {
+        this.selectedRecords = [];
+      } else {
+        this.selectedRecords = this.records.records.map((r) => r.id);
+      }
     },
   },
   setup() {
@@ -145,6 +165,20 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
+    &__header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: $base-space;
+      padding: $base-space $base-space * 2;
+      border: 1px solid $black-10;
+      background: palette(white);
+      border-radius: $border-radius-m;
+      &__checkbox {
+        margin-left: 0;
+        margin-right: auto;
+      }
+    }
   }
   &__text {
     color: $black-54;
