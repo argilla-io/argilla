@@ -73,6 +73,13 @@ export default {
 .page-size {
   user-select: none;
   font-weight: 500;
+  cursor: pointer;
+  @include font-size(14px);
+  &:hover {
+    .page-size__text {
+      color: $black-54;
+    }
+  }
   &__wrapper {
     display: flex;
     align-items: center;
