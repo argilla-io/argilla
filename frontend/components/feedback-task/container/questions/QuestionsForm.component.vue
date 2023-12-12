@@ -29,11 +29,10 @@
     <div class="footer-form">
       <div class="footer-form__content">
         <BaseButton
-          v-if="!record.isDiscarded"
+          v-if="!record.isDiscarded || isDiscarding"
           type="button"
           class="button--discard"
           @on-click="onDiscard"
-          :disabled="record.isDiscarded"
           :title="$t('shortcuts.questions_form.discard')"
         >
           <span v-text="'Discard'" />
@@ -41,14 +40,14 @@
         <BaseButton
           type="button"
           class="button--draft"
-          @on-click="onSaveDraftImmediately"
+          @on-click="onSaveDraft"
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
           <span v-text="'Save as draft'" />
         </BaseButton>
         <BaseButton
-          v-if="!record.isDiscarded"
+          v-if="!record.isDiscarded || isDiscarding"
           type="submit"
           class="button--submit"
           :disabled="isSubmitButtonDisabled"
@@ -94,6 +93,7 @@ export default {
     questionFormClass() {
       if (this.isSubmitting) return "--submitted --waiting";
       if (this.isDiscarding) return "--discarded --waiting";
+      if (this.isDraftSaving) return "--draft --waiting";
 
       if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
         return "--focused-form";
@@ -159,7 +159,7 @@ export default {
           if (ctrlKey || metaKey) {
             event.preventDefault();
             event.stopPropagation();
-            this.onSaveDraftImmediately();
+            this.onSaveDraft();
           }
           break;
         }
@@ -188,8 +188,8 @@ export default {
 
       this.$emit("on-submit-responses");
     },
-    onSaveDraftImmediately() {
-      this.saveDraftImmediately(this.record);
+    onSaveDraft() {
+      this.saveAsDraft(this.record);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -252,9 +252,6 @@ export default {
   }
   &.--submitted {
     border-color: $submitted-color;
-  }
-  &.--focused-form {
-    border-color: palette(turquoise);
   }
   &.--waiting .questions-form__content {
     opacity: 0.7;
