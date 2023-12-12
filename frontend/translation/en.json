@@ -55,5 +55,10 @@
   "with": "with",
   "find": "Find",
   "cancel": "Cancel",
-  "records-per-page": "Records per page"
+  "records-per-page": "Records per page",
+  "argilla": {
+    "api": {
+      "errors::UnauthorizedError": "Could not validate credentials"
+    }
+  }
 }

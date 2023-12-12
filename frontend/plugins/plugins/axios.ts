@@ -49,6 +49,8 @@ export default ({ $axios, app }) => {
       params: {},
     };
 
+    Notification.dispatch("clear");
+
     switch (code) {
       case 400:
         Notification.dispatch("notify", {
@@ -81,11 +83,19 @@ export default ({ $axios, app }) => {
           type: "warning",
         });
         break;
-      default:
+      case 401: {
+        Notification.dispatch("notify", {
+          message: app.i18n.t(detail.code),
+          type: "error",
+        });
+        break;
+      }
+      default: {
         Notification.dispatch("notify", {
           message: `Error: ${detail.params.details ?? detail.params.message}`,
           type: "error",
         });
+      }
     }
 
     throw error;
