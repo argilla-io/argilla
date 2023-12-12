@@ -62,7 +62,6 @@ export const useQuestionFormViewModel = () => {
   };
 
   const onSaveDraft = async (record: Record) => {
-    if (!record.hasAnyQuestionAnswered) return;
     draftSaving.value = true;
 
     try {

@@ -29,6 +29,7 @@
     <div class="footer-form">
       <div class="footer-form__content">
         <BaseButton
+          v-if="!record.isDiscarded"
           type="button"
           class="button--discard"
           @on-click="onDiscard"
@@ -47,6 +48,7 @@
           <span v-text="'Save as draft'" />
         </BaseButton>
         <BaseButton
+          v-if="!record.isDiscarded"
           type="submit"
           class="button--submit"
           :disabled="isSubmitButtonDisabled"
@@ -106,16 +108,10 @@ export default {
       return this.record.questionAreCompletedCorrectly();
     },
     isSubmitButtonDisabled() {
-      if (this.record.isSubmitted)
-        return !this.isTouched || !this.questionAreCompletedCorrectly;
-
       return !this.questionAreCompletedCorrectly;
     },
     isSaveDraftButtonDisabled() {
-      if (this.record.isDraft) {
-        return !this.record.isModified || !this.record.hasAnyQuestionAnswered;
-      }
-      return !this.record.hasAnyQuestionAnswered;
+      return false;
     },
   },
   watch: {
@@ -272,6 +268,16 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    button {
+      &:first-of-type {
+        border-bottom-left-radius: $border-radius;
+        border-top-left-radius: $border-radius;
+      }
+      &:last-of-type {
+        border-bottom-right-radius: $border-radius;
+        border-top-right-radius: $border-radius;
+      }
+    }
   }
 }
 
@@ -291,8 +297,6 @@ export default {
   &--submit {
     background: $submitted-color;
     color: palette(white);
-    border-bottom-right-radius: $border-radius;
-    border-top-right-radius: $border-radius;
   }
   &--draft {
     background: $draft-color;
@@ -301,8 +305,6 @@ export default {
   &--discard {
     background: $discarded-color;
     color: palette(white);
-    border-bottom-left-radius: $border-radius;
-    border-top-left-radius: $border-radius;
   }
 }
 
