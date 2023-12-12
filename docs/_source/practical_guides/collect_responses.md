@@ -122,7 +122,7 @@ Once you have unified your responses, you will have a dataset that's ready for [
 
 ### Annotation metrics
 
-There are multiple ways to analyse the annotations on a dataset. In this section we present two different approaches, from the point of view of the the annotators, to see how reliable their responses are, or from the point of view of a single annotator, to see whether the suggestions are simplify their annotation task.
+There are multiple ways to analyse the annotations on a dataset. In this section we present two different approaches, from the point of view of the annotators, to see how reliable their responses are, or from the point of view of a single annotator, to see whether the suggestions simplify their annotation task.
 
 ```{note}
 The following metrics only apply to the `FeedbackDataset`.
@@ -130,7 +130,7 @@ The following metrics only apply to the `FeedbackDataset`.
 
 #### Annotator Agreement metrics
 
-After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable are the final responses after the unification (these module covers what it's also named inter-coder reliability measures).
+After we gather responses for a dataset from a team of annotators, we may want to analyse their agreement level to see how reliable are the final responses after the unification (this module covers what it's also named inter-coder reliability measures).
 
 ```python
 import argilla as rg
@@ -157,8 +157,8 @@ agreement_metrics
 # AgreementMetricResult(metric_name='alpha', count=191792, result=0.0)
 ```
 
-Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all the questions types except the `TextQuestion`. This metric can be computed for any number of annotators, even if some of the responses are not submitted.
-The value from this measure is in the range [0,1] and is usually interpreted in the following way: alpha >= 0.8 indicates a reliable annotation, alpha >= 0.667 allows making tentative conclusions, while the lower values suggest the unreliable annotation.
+Currently only [Krippendorf's alpha](https://en.wikipedia.org/wiki/Krippendorff%27s_alpha) is defined, for all question types except the `TextQuestion`. This metric can be computed for any number of annotators, even if some of the responses are not submitted.
+The value from this measure is in the range [0,1] and is usually interpreted in the following way: alpha >= 0.8 indicates a reliable annotation, alpha >= 0.667 allows making tentative conclusions, while the lower values suggest unreliable annotation.
 
 ```{note}
 In case you want to dig deeper into the measurement of the agreement between different annotators, take a look at [*Implementations of inter-annotator agreement coefficients surveyed by Artstein
@@ -180,7 +180,7 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 
 #### Annotator metrics
 
-This section covers the per-annotator metrics. The `FeedbackDataset` allows adding suggestions to simplify the annotation process. In order to analyse how useful those suggestions are, we can compute a number of metrics per user, (the metrics available will depend on the type of question), and take actions regarding the suggestion model we are using.
+In contrast to the agreement metrics, annotator metrics are the metrics computed by comparing the responses given by an annotator, against model predictions. As `FeedbackDataset` already offers the possibility to add `suggestions` to the responses, we can use the annotator metrics to compare the responses against the suggestions. This will give us two important insights: how reliable are the responses of a given annotator, and how good are the suggestions we are giving to the annotators. This way, we can take actions to improve the quality of the responses by making changes to the guidelines or the structure, and the suggestions given to the annotators by changing or updating the model we use. Note that each question type has a different set of metrics available.
 
 The following snippet shows an example of use:
 
@@ -195,7 +195,7 @@ annotator_metrics = metric.compute("accuracy")
 # {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
 ```
 
-We would obtain a `dict` where the keys contain the `user_id` of a given annotator, and a list with the metrics requested. For the interpretation of these metrics we assume here that the *true* labels or responses corresponds to the points given by an annotator, and the *predictions* correspond to the suggestions given to a user. This way we can analyse whether we are offering good suggestions to a given annotator, and therefore simplifying it's work (shortening the annotation task), or otherwise we should change the suggestions given (or fine-tune our model if we can do it).
+We would obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. For the interpretation of these metrics, we assume here that the *true* labels or responses correspond to the points given by an annotator, and the *predictions* correspond to the suggestions given to a user. This way we can analyse whether we are offering good suggestions to a given annotator, and therefore simplifying their work (shortening the annotation task), or otherwise we should change the suggestions given (or fine-tune our model if we can do it).
 
 If instead of taking the `responses` as the reference for the true labels, we want to assume the suggestions are our reference labels, we can use the equivalent corresponding class, that works just the same way:
 
@@ -244,7 +244,7 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 |:----------------------|:---------------|:-------------------|:---------------|:----------------|:-------------|
 | accuracy              | ✔️              | ✔️                  | ✔️              |                 |              |
 | precision             | ✔️              | ✔️                  | ✔️              |                 |              |
-| recalll               | ✔️              | ✔️                  | ✔️              |                 |              |
+| recall                | ✔️              | ✔️                  | ✔️              |                 |              |
 | f1-score              | ✔️              | ✔️                  | ✔️              |                 |              |
 | confusion-matrix      | ✔️              | ✔️                  | ✔️              |                 |              |
 | pearson-r             | ✔️              |                    |                |                 |              |
@@ -288,7 +288,7 @@ unified_metrics = metric.compute("accuracy")
 # AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
-We obtain the same container for the metrics result, but in this case it's not associated to any annotator. The same interpretation that we saw for the Annotator metrics holds here regarding the labels and suggestions.
+We obtain the same container for the metrics result, but in this case, it's not associated with any annotator. The same interpretation that we saw for the Annotator metrics holds here regarding the labels and suggestions.
 
 Once again we can make use of the same methods we saw for the annotator metrics directly from the `FeedbackDataset`, but note the use of the strategy argument used here:
 
@@ -318,7 +318,7 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 |:----------------------|:---------------|:-------------------|:---------------|:----------------|:-------------|
 | accuracy              | ✔️              | ✔️                  | ✔️              |                 |              |
 | precision             | ✔️              | ✔️                  | ✔️              |                 |              |
-| recalll               | ✔️              | ✔️                  | ✔️              |                 |              |
+| recall                | ✔️              | ✔️                  | ✔️              |                 |              |
 | f1-score              | ✔️              | ✔️                  | ✔️              |                 |              |
 | confusion-matrix      | ✔️              | ✔️                  | ✔️              |                 |              |
 | pearson-r             | ✔️              |                    |                |                 |              |
@@ -333,7 +333,7 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 ```{include} /_common/other_datasets.md
 ```
 
-This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enable you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a a number of seminal works such as [Explainaboard](https://explainaboard.inspiredco.ai/).
+This guide gives you a brief introduction to Argilla Metrics. Argilla Metrics enables you to perform fine-grained analyses of your models and training datasets. Argilla Metrics are inspired by a number of seminal works such as [Explainaboard](https://explainaboard.inspiredco.ai/).
 
 The main goal is to make it easier to build more robust models and training data, going beyond single-number metrics (e.g., F1).
 
