@@ -72,6 +72,6 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | Text query 	            | ✔️               	| ✔️                   |
 | Metadata filters       	| ✔️               	| ✔️                   |
 | Sorting 	                | ✔️             	| ✔️                   |
-| Prediction filters 	            |                	| ✔️                   |
-| Annotation filters 	            |                	| ✔️                   |
+| Prediction filters 	            |✔️                	| ✔️                   |
+| Annotation filters 	            |✔️               	| ✔️                   |
 | Similarity search 	            |✔️                	| ✔️                   |

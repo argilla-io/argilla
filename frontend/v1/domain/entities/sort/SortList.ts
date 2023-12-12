@@ -34,6 +34,10 @@ abstract class Sort {
   get canSort(): boolean {
     return true;
   }
+
+  get tooltip() {
+    return this.title;
+  }
 }
 
 class MetadataSort extends Sort {
@@ -65,6 +69,10 @@ class SuggestionScoreSort extends Sort {
 
   get title() {
     return this.question.name;
+  }
+
+  get tooltip() {
+    return this.question.title;
   }
 }
 

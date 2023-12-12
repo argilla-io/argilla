@@ -88,4 +88,34 @@ describe("ResponseCriteria", () => {
       },
     ]);
   });
+
+  test("should be able to parse url params for options with operator", () => {
+    const criteria = new ResponseCriteria();
+    criteria.complete("multi-label.operator.or.values.label2.label3.label4");
+
+    expect(criteria.value).toEqual([
+      {
+        name: "multi-label",
+        value: {
+          operator: "or",
+          values: ["label2", "label3", "label4"],
+        },
+      },
+    ]);
+  });
+
+  test("should be able to parse url params for options with operator", () => {
+    const criteria = new ResponseCriteria();
+    criteria.complete("multi-label.operator.and.values.label2.label3.label4");
+
+    expect(criteria.value).toEqual([
+      {
+        name: "multi-label",
+        value: {
+          operator: "and",
+          values: ["label2", "label3", "label4"],
+        },
+      },
+    ]);
+  });
 });

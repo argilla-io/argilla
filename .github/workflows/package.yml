@@ -74,6 +74,28 @@ jobs:
       pytestArgs: tests/unit
     secrets: inherit
 
+  run_end2end_tests:
+    strategy:
+      matrix:
+        include:
+          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+            coverageReport: coverage-elasticsearch-8.8.2
+            runsOn: extended-runner
+          - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
+            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
+            coverageReport: coverage-opensearch-2.4.1
+            runsOn: ubuntu-latest
+    name: Run end2end tests
+    uses: ./.github/workflows/end2end-examples.yml
+    needs: check_repo_files
+    if: needs.check_repo_files.outputs.end2endChanges == 'true'
+    with:
+      runsOn: ${{ matrix.runsOn }}
+      searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
+      searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
+    secrets: inherit
+
   run_unit_test_with_extra_engines:
     strategy:
       matrix:

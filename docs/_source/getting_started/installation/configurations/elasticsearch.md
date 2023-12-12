@@ -45,7 +45,7 @@ and then provide the analyzer name using the specific environment variable.
 
 ## Reindex data
 
-Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](/practical_guides/create_dataset) to show you how to do this from our Python client.
+Sometimes updates require reindexing our dataset metrics and Elasticsearch, therefore we devised some [short documentation](/practical_guides/create_update_dataset/create_dataset) to show you how to do this from our Python client.
 
 ## Backups using snapshots
 

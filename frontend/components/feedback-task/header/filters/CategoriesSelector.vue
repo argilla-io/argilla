@@ -15,6 +15,7 @@
         <BaseButton
           @on-click="selectCategory(category)"
           class="category__item"
+          :class="category.isAnswered ? 'category__item--selected' : null"
           :disabled="!category.canFilter"
         >
           <span v-if="!!category.title" v-text="category.title" />
@@ -77,6 +78,9 @@ export default {
     justify-content: space-between;
     border-radius: $border-radius;
     font-weight: 400;
+    &--selected {
+      font-weight: 600;
+    }
     span {
       overflow: hidden;
       text-overflow: ellipsis;
