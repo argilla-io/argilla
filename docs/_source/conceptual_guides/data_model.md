@@ -84,7 +84,7 @@ Records are defined by the type of **task** they are related to. Let's see three
 #### Examples
 
 ```{note}
-For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_dataset.md) instead.
+For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_update_dataset/create_dataset.md) instead.
 ```
 
 ##### Text Classification
