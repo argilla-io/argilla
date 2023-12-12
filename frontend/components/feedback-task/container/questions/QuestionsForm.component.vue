@@ -180,7 +180,7 @@ export default {
       this.userComesFromOutside = true;
     },
     handleGlobalKeys(event) {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
+      const { code, ctrlKey, metaKey } = event;
 
       if (code == "Tab" && this.userComesFromOutside) {
         this.focusOnFirstQuestion(event);
@@ -199,13 +199,6 @@ export default {
         }
         case "Enter": {
           this.onSubmit();
-          break;
-        }
-        case "Space": {
-          if (shiftKey) {
-            event.preventDefault(); // TODO: Review this line
-            this.onClear();
-          }
           break;
         }
         case "Backspace": {

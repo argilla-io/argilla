@@ -1,32 +1,57 @@
-import { ref } from "vue-demi";
+import { onBeforeMount, onBeforeUnmount, ref } from "vue-demi";
 import { usePlatform } from "~/v1/infrastructure/services";
+import { useLocalStorage } from "~/v1/infrastructure/services/useLocalStorage";
 
-declare global {
-  interface Window {
-    showShortcutsHelper: boolean;
-  }
-}
+const KEY_PRESSED_TIMEOUT_IN_MS = 350;
 
 export const useQuestionsViewModel = () => {
-  const showShortcutsHelper = ref(window.showShortcutsHelper);
+  const { get, set } = useLocalStorage();
+  const showShortcutsHelper = ref(get("showShortcutsHelper") ?? true);
   const platform = usePlatform();
+  let timeout = null;
 
   const toggleShortcutsHelper = () => {
-    window.showShortcutsHelper = showShortcutsHelper.value =
-      !showShortcutsHelper.value;
+    showShortcutsHelper.value = !showShortcutsHelper.value;
+
+    set("showShortcutsHelper", showShortcutsHelper.value);
   };
 
-  const showKeyboardHelper = (event: KeyboardEvent) => {
-    const { ctrlKey, metaKey } = event;
+  const longPressToggleShortcutsHelper = () => {
+    timeout = setTimeout(() => {
+      toggleShortcutsHelper();
+    }, KEY_PRESSED_TIMEOUT_IN_MS);
+  };
+
+  const trackOnKeyDown = (event: KeyboardEvent) => {
+    const { code } = event;
+
+    const isCtrlKeyPressed = code === "ControlLeft" || code === "ControlRight";
+    const isMetaKeyPressed = code === "MetaLeft" || code === "MetaRight";
+
+    if (!isCtrlKeyPressed && !isMetaKeyPressed) return;
 
     if (platform.isMac) {
-      if (metaKey) {
-        toggleShortcutsHelper();
+      if (isMetaKeyPressed) {
+        longPressToggleShortcutsHelper();
       }
-    } else if (ctrlKey) {
-      toggleShortcutsHelper();
+    } else if (isCtrlKeyPressed) {
+      longPressToggleShortcutsHelper();
     }
   };
 
-  return { showKeyboardHelper, showShortcutsHelper };
+  const trackOnKeyUp = () => {
+    clearTimeout(timeout);
+  };
+
+  onBeforeMount(() => {
+    document.addEventListener("keydown", trackOnKeyDown);
+    document.addEventListener("keyup", trackOnKeyUp);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener("keydown", trackOnKeyDown);
+    document.removeEventListener("keyup", trackOnKeyUp);
+  });
+
+  return { showShortcutsHelper };
 };

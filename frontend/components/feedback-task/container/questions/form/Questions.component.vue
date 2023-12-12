@@ -1,14 +1,14 @@
 <template>
-  <div @keydown="showKeyboardHelper">
+  <div>
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
         v-for="(question, index) in questions"
         :key="question.id"
-        @keydown.shift.arrow-up.prevent="
+        @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)
         "
-        @keydown.shift.arrow-down.prevent="
+        @keydown.arrow-down.prevent="
           updateQuestionAutofocus(autofocusPosition + 1)
         "
       >
