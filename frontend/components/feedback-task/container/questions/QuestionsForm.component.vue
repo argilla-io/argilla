@@ -282,7 +282,6 @@ export default {
     width: 100%;
     justify-content: space-around;
     border-radius: 0;
-
     &:disabled {
       opacity: 0.3;
       pointer-events: visible;
