@@ -24,9 +24,8 @@ These are the section headers that we use:
 
 ### Added
 
-- Added strategy to handle and translate errors from server for `401 http status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
-- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
 - Added `GET /api/v1/datasets/:dataset_id/records/search/suggestions/options` endpoint to return suggestion available options for searching. ([#4260](https://github.com/argilla-io/argilla/pull/4260))
+- Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
 - Added `get_model_kwargs`, `get_trainer_kwargs`, `get_trainer_model`, `get_trainer_tokenizer` and `get_trainer` -methods to the `ArgillaTrainer` to improve interoperability across frameworks. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
 - Added additional formatting checks to the `ArgillaTrainer` to allow for better interoperability of `defaults` and `formatting_func` usage. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
 - Added a warning to the `update_config`-method of `ArgillaTrainer` to emphasize if the `kwargs` were updated correctly. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
