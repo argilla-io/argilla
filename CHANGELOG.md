@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
+
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 
 ### Added
