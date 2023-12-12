@@ -30,11 +30,12 @@
       <div class="footer-form__content">
         <BaseButton
           type="button"
-          class="primary text button--clear"
-          @click.prevent="onClear"
-          :title="$t('shortcuts.questions_form.clear')"
+          class="button--discard"
+          @on-click="onDiscard"
+          :disabled="record.isDiscarded"
+          :title="$t('shortcuts.questions_form.discard')"
         >
-          <span v-text="'Clear'" />
+          <span v-text="'Discard'" />
         </BaseButton>
         <BaseButton
           type="button"
@@ -43,16 +44,7 @@
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
-          <span v-text="draftSaving ? 'Saving...' : 'Save draft'" />
-        </BaseButton>
-        <BaseButton
-          type="button"
-          class="button--discard"
-          @on-click="onDiscard"
-          :disabled="record.isDiscarded"
-          :title="$t('shortcuts.questions_form.discard')"
-        >
-          <span v-text="'Discard'" />
+          <span v-text="'Save as draft'" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -120,8 +112,9 @@ export default {
       return !this.questionAreCompletedCorrectly;
     },
     isSaveDraftButtonDisabled() {
-      if (this.record.isPending || this.record.isDraft)
-        return !this.record.isModified || this.draftSaving;
+      if (this.record.isDraft) {
+        return !this.record.isModified || !this.record.hasAnyQuestionAnswered;
+      }
       return !this.record.hasAnyQuestionAnswered;
     },
   },
@@ -130,8 +123,6 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        if (this.record.isModified) this.saveDraft(this.record);
-
         this.isTouched = this.record.isSubmitted && this.record.isModified;
       },
     },
@@ -180,13 +171,6 @@ export default {
           if (shiftKey) this.onSubmit();
           break;
         }
-        case "Space": {
-          if (shiftKey) {
-            event.preventDefault(); // TODO: Review this line
-            this.onClear();
-          }
-          break;
-        }
         case "Backspace": {
           if (shiftKey) this.onDiscard();
           break;
@@ -208,11 +192,8 @@ export default {
 
       this.$emit("on-submit-responses");
     },
-    async onClear() {
-      await this.clear(this.record);
-    },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
+    onSaveDraftImmediately() {
+      this.saveDraftImmediately(this.record);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -304,11 +285,9 @@ export default {
 
     &:disabled {
       opacity: 0.3;
+      pointer-events: visible;
+      cursor: not-allowed;
     }
-  }
-  &--clear {
-    flex-shrink: 0;
-    min-width: 50px;
   }
   &--submit {
     background: $submitted-color;
@@ -319,12 +298,12 @@ export default {
   &--draft {
     background: $draft-color;
     color: palette(white);
-    border-bottom-left-radius: $border-radius;
-    border-top-left-radius: $border-radius;
   }
   &--discard {
     background: $discarded-color;
     color: palette(white);
+    border-bottom-left-radius: $border-radius;
+    border-top-left-radius: $border-radius;
   }
 }
 

@@ -87,7 +87,6 @@ export const useQuestionFormViewModel = () => {
   };
 
   const saveDraftImmediately = (record: Record) => {
-    if (record.isSubmitted) return;
     debounceForAutoSave.stop();
 
     queue.enqueue(() => {
