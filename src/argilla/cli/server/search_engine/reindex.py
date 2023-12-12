@@ -26,7 +26,7 @@ from argilla.server.search_engine import SearchEngine, get_search_engine
 
 
 class Reindexer:
-    BATCH_SIZE = 100
+    YIELD_PER = 100
 
     @classmethod
     async def reindex_datasets(cls, db: AsyncSession, search_engine: SearchEngine) -> AsyncGenerator[Dataset, None]:
@@ -39,7 +39,7 @@ class Reindexer:
                 selectinload(Dataset.metadata_properties),
                 selectinload(Dataset.vectors_settings),
             )
-            .execution_options(yield_per=cls.BATCH_SIZE)
+            .execution_options(yield_per=cls.YIELD_PER)
         )
 
         async for dataset in stream.scalars():
@@ -61,7 +61,7 @@ class Reindexer:
                 selectinload(Record.suggestions).selectinload(Suggestion.question),
                 selectinload(Record.vectors),
             )
-            .execution_options(yield_per=cls.BATCH_SIZE)
+            .execution_options(yield_per=cls.YIELD_PER)
         )
 
         async for record in stream.scalars():
