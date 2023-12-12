@@ -12,19 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+from argilla.cli.typer_ext import ArgillaTyper
 
-from .database import app as database_app
-from .search_engine import app as search_engine_app
-from .start import start
+from .reindex import reindex
 
-app = typer.Typer(help="Commands for Argilla server management", no_args_is_help=True)
+app = ArgillaTyper(help="Commands for Argilla server search engine management", no_args_is_help=True)
 
-
-app.add_typer(database_app, name="database")
-app.add_typer(search_engine_app, name="search_engine")
-app.command(name="start", help="Starts the Argilla server")(start)
-
+app.command(name="reindex", help="Reindex all Argilla entities into search engine.")(reindex)
 
 if __name__ == "__main__":
     app()
