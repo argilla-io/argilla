@@ -93,7 +93,7 @@ export default {
     questionFormClass() {
       if (this.isSubmitting) return "--submitted --waiting";
       if (this.isDiscarding) return "--discarded --waiting";
-      if (this.isDraftSaving) return "--draft --waiting";
+      if (this.isDraftSaving) return "--draft";
 
       if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
         return "--focused-form";

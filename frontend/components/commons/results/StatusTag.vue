@@ -1,5 +1,6 @@
 <template>
   <span
+    :key="recordStatus"
     :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"
   >

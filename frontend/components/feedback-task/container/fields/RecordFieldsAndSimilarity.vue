@@ -14,11 +14,7 @@
     >
       <div class="fields__header">
         <div class="fields__header--left">
-          <StatusTag
-            minimal
-            class="fields__status"
-            :recordStatus="record.status"
-          />
+          <StatusTag class="fields__status" :recordStatus="record.status" />
         </div>
         <div class="fields__header--right">
           <SimilarityScorePercentage
