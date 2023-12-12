@@ -10,18 +10,23 @@ export class DiscardBulkAnnotationUseCase {
   ) {}
 
   async execute(records: Record[], recordReference: Record): Promise<void> {
-    for (const record of records) {
-      try {
-        record.answerWith(recordReference);
+    records.forEach((record) => record.answerWith(recordReference));
 
-        const answerDiscarded =
-          await this.recordRepository.discardRecordResponse(record);
+    const responses = await this.recordRepository.discardBulkRecordResponse(
+      records
+    );
 
-        record.discard(answerDiscarded);
-      } catch (error) {
-        // TODO: Handle error
-      }
-    }
+    responses
+      .filter((r) => r.success)
+      .forEach(({ recordId, response }) => {
+        const record = records.find((r) => r.id === recordId);
+
+        record.discard(response);
+      });
+
+    // TODO: Handle error
+    // responses[0].success
+    // responses[0].error
 
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
