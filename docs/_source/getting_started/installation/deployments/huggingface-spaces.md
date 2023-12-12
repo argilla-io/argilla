@@ -3,7 +3,7 @@
 Argilla nicely integrates with the Hugging Face stack (`datasets`, `transformers`, `hub`, and `setfit`), and now it can also be deployed using the Hub's Spaces.
 
 ```{warning}
-HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
+Hugging Face Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the Hugging Face Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by Hugging Face. For more info check the ["Setting up persistent storage"](#setting-up-persistent-storage) section.
 ```
 
 In this guide, you'll learn to deploy your own Argilla app and use it for data labeling workflows right from the Hub.
@@ -20,11 +20,9 @@ You can deploy Argilla on Spaces with just a few clicks:
     <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
 </a>
 
-You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility**. To interact with the Argilla app with Python, you need to set up the visibility to `Public`. If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
+You need to define the **Owner** (your personal account or an organization), a **Space name**, and the **Visibility** (`Public` or `Private`, in which case you will need to [set a `HF_TOKEN`](https://huggingface.co/settings/tokens)). If you plan to use the Space frequently or handle large datasets for data labeling and feedback collection, upgrading the hardware with a more powerful CPU and increased RAM can enhance performance.
 
-<div class="flex justify-center">
-<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-new-space.png"/>
-</div>
+![HF_Spaces](../../../_static/images/installation/huggingface-spaces/hf-no-persistent-storage.PNG)
 
 :::{tip}
 If you want to customize the title, emojis, and colors of your space, go to "Files and Versions" and edit the metadata of your README.md file.
@@ -42,18 +40,18 @@ You'll see the login screen where you need to use either `admin` or `argilla` wi
 </div>
 
 :::{tip}
-For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the "Setting up secret environment variables" at the end of this document. Setting up secret variables is recommended for longer-term usage.
+For quick experimentation, you can jump directly into the next section. If you want to add access restrictions, go to the ["Setting up secret environment variables"](#setting-up-secret-environment-variables) at the end of this document. In addition, if you prefer to enable persistent storage, go to the following [section](#setting-up-persistent-storage). Setting up secret variables and persistent storage is recommended for longer-term usage.
 :::
 
 ### Your Argilla Space URL
 
-Once Argilla is running, you can use the UI with the Direct URL you'll find in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
+Once Argilla is running, you can use the UI with the Direct URL. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
 
-:::{warning}
-In order to obtain an HF Space direct URL, the space must be set the space to "public" and you can find the direct URL in the "Embed this Space" menu.
-:::
+* If you have a public space, you'll find the Direct URL in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`
 
 ![HF_Space_Direct_URL](/_static/reference/webapp/HF_Space_Direct_URL.png)
+
+* If you are using a private space, the Direct URL should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`. For instance, if the owner of the space is `dvilasuero` and your space name is `argilla-setfit`, your Direct URL will be `https://dvilasuero-argilla-setfit.hf.space`.
 
 ### Create your first dataset
 
@@ -80,8 +78,11 @@ You can create your first dataset by logging it into Argilla using your endpoint
 ```python
 import argilla as rg
 
-# connect to your app endpoint (uses default team API key)
+# if you connect to your public app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey")
+
+# if you connect to your private app endpoint (uses default API key)
+rg.init(api_url="[your_space_url]", api_key="admin.apikey", extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"})
 
 # transform dataset into Argilla's format and log it
 rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
@@ -138,6 +139,14 @@ As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en
 ## Feedback and support
 
 If you have improvement suggestions or need specific support, please join [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
+
+## Setting up persistent storage
+
+Hugging Face Spaces recently introduced a feature for persistent storage, which must be enabled manually through the Hugging Face Spaces settings. Without this activation, and if you're not subscribed to a paid space upgrade, the space will automatically shut down after 48 hours of inactivity, resulting in data loss. To prevent this, we highly recommend using the persistent storage layer offered by Hugging Face.
+
+To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section. This will enable persistent storage for your Space and you will be able to use it for data labeling and feedback collection.
+
+![Alt text](../../../_static/images/installation/huggingface-spaces/persistent-storage.PNG)
 
 ## Setting up secret environment variables
 

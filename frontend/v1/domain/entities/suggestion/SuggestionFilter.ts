@@ -4,14 +4,11 @@ import {
   FilterWithScore,
   OptionForFilter,
   RangeValue,
+  ValuesOption,
 } from "../common/Filter";
 import { Question } from "../question/Question";
 import { Agent } from "./Agent";
-import {
-  ConfigurationSearch,
-  SuggestionSearch,
-  ValuesOption,
-} from "./SuggestionCriteria";
+import { ConfigurationSearch, SuggestionSearch } from "./SuggestionCriteria";
 
 class ConfigurationValues extends Filter {
   public readonly rangeValue: FilterWithScore;
@@ -214,6 +211,8 @@ export class SuggestionFilterList {
     this.questions.forEach((q) => {
       q.addAgents(agents.find((a) => a.question.name === q.name)?.agents);
     });
+
+    this.onComplete(this.latestCommit);
   }
 
   hasChangesSinceLatestCommitWith(compare: SuggestionSearch[]) {
@@ -221,7 +220,7 @@ export class SuggestionFilterList {
   }
 
   commit(): SuggestionSearch[] {
-    this.synchronizeFilteredMetadata();
+    this.synchronizeFiltered();
 
     this.latestCommit = this.createCommit();
 
@@ -235,6 +234,12 @@ export class SuggestionFilterList {
 
     if (!params.length) return;
 
+    this.onComplete(params);
+
+    this.latestCommit = params;
+  }
+
+  private onComplete(params: SuggestionSearch[]) {
     params.forEach(({ name, value }) => {
       const category = this.findByCategory(name);
       if (category) {
@@ -245,15 +250,13 @@ export class SuggestionFilterList {
         this.filteredSuggestions.push(category);
       }
     });
-
-    this.commit();
   }
 
   private findByCategory(category: string) {
     return this.questions.find((cat) => cat.name === category);
   }
 
-  private synchronizeFilteredMetadata() {
+  private synchronizeFiltered() {
     const newFiltered = this.filtered.filter(
       (category) => !this.filteredSuggestions.includes(category)
     );

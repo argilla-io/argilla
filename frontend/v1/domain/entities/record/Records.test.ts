@@ -264,5 +264,105 @@ describe("Records", () => {
 
       expect(pageToFind).toEqual({ from: 1, many: 50 });
     });
+
+    test("the current page should be from 9 and many 10 when the user is paginating fordward from page 8 and the queue has 8 records in draft but status is pending", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        9,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "1", updatedAt: "", value: "" },
+          [],
+          1,
+          1
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "2", updatedAt: "", value: "" },
+          [],
+          1,
+          2
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "3", updatedAt: "", value: "" },
+          [],
+          1,
+          3
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "4", updatedAt: "", value: "" },
+          [],
+          1,
+          4
+        ),
+        new Record(
+          "5",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "5", updatedAt: "", value: "" },
+          [],
+          1,
+          5
+        ),
+        new Record(
+          "6",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "6", updatedAt: "", value: "" },
+          [],
+          1,
+          6
+        ),
+        new Record(
+          "7",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "7", updatedAt: "", value: "" },
+          [],
+          1,
+          7
+        ),
+        new Record(
+          "8",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "8", updatedAt: "", value: "" },
+          [],
+          1,
+          8
+        ),
+      ]);
+
+      const pageToFind = records.getPageToFind(criteria);
+
+      expect(pageToFind).toEqual({ from: 9, many: 10 });
+    });
   });
 });

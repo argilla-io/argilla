@@ -223,7 +223,6 @@ $card-secondary-color: palette(white);
 $card-ghost-color: palette(purple, 300);
 $card-empty-color: palette(purple, 400);
 $suggestion-color: palette(yellow, 400);
-$suggestion-color-secondary: palette(orange, 400);
 $cards-separation: $base-space;
 $background-slot-color: $black-4;
 $slot-height: 50px;
@@ -370,13 +369,10 @@ $max-visible-card-items: 12;
     margin-left: auto;
     border-radius: $border-radius-rounded;
     border: 1px solid $suggestion-color;
-    color: $suggestion-color;
+    color: $card-primary-color;
+    background: $suggestion-color;
     @include font-size(12px);
     cursor: default;
-    .draggable__rank-card--unranked & {
-      color: $suggestion-color-secondary;
-      border-color: $suggestion-color-secondary;
-    }
   }
 
   .svg-icon {

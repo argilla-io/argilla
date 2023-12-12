@@ -1,10 +1,5 @@
 import { Criteria } from "../common/Criteria";
-import { RangeValue } from "../common/Filter";
-
-export type ValuesOption = {
-  values: string[];
-  operator?: "and" | "or";
-};
+import { RangeValue, ValuesOption } from "../common/Filter";
 
 export interface ConfigurationSearch {
   name: "score" | "value" | "agent";
@@ -112,7 +107,8 @@ export class SuggestionCriteria extends Criteria {
             }.values.${valuesOption.values.join(".")}`;
           }
 
-          if ("values" in valuesOption && valuesOption.values) {
+          // eslint-disable-next-line no-prototype-builtins
+          if (valuesOption.hasOwnProperty("values") && valuesOption.values) {
             return `${suggestion.name}.${
               v.name
             }.values.${valuesOption.values.join(".")}`;
@@ -120,7 +116,7 @@ export class SuggestionCriteria extends Criteria {
 
           const values = v.value as string[];
 
-          return `${suggestion.name}.${values.join(".")}`;
+          return `${suggestion.name}.${v.name}.${values.join(".")}`;
         });
       })
       .join("~");

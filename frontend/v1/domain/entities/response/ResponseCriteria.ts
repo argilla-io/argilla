@@ -1,5 +1,5 @@
 import { Criteria } from "../common/Criteria";
-import { RangeValue } from "../common/Filter";
+import { RangeValue, ValuesOption } from "../common/Filter";
 import { ResponseSearch } from "./ResponseFilter";
 
 export class ResponseCriteria extends Criteria {
@@ -9,7 +9,7 @@ export class ResponseCriteria extends Criteria {
     if (!urlParams) return;
 
     urlParams.split("~").forEach((response) => {
-      const [name] = response.split(".");
+      const [name, ...rest] = response.split(".");
 
       const score = this.getRangeValue(response);
 
@@ -21,14 +21,31 @@ export class ResponseCriteria extends Criteria {
             le: score.le,
           },
         });
-      } else {
-        const values = response.split(".").slice(1);
+
+        return;
+      }
+
+      if (rest[0] === "operator" && rest[2] === "values") {
+        const operator = rest[1];
+        const values = rest.slice(3);
 
         this.value.push({
           name,
-          value: values,
+          value: {
+            operator: operator as ValuesOption["operator"],
+            values,
+          },
         });
+
+        return;
       }
+
+      const values = response.split(".").slice(1);
+
+      this.value.push({
+        name,
+        value: values,
+      });
     });
   }
 
@@ -60,10 +77,65 @@ export class ResponseCriteria extends Criteria {
           return `${response.name}.ge${rangeValue.ge}.le${rangeValue.le}`;
         }
 
+        const valuesOption = response.value as ValuesOption;
+
+        if ("operator" in valuesOption && valuesOption) {
+          return `${response.name}.operator.${
+            valuesOption.operator
+          }.values.${valuesOption.values.join(".")}`;
+        }
+
         const values = response.value as string[];
 
-        return `${response.name}.${values.map((v) => v).join(".")}`;
+        return `${response.name}.${values.join(".")}`;
       })
       .join("~");
+  }
+
+  get or() {
+    if (!this.isCompleted) return [];
+
+    const orResponses = this.value.filter((s) => {
+      const { operator } = s.value as ValuesOption;
+
+      return operator !== "and";
+    });
+
+    return orResponses.map((r) => {
+      const { operator, values } = r.value as ValuesOption;
+
+      if (operator) {
+        return {
+          name: r.name,
+          value: values,
+        };
+      }
+
+      return {
+        name: r.name,
+        value: r.value,
+      };
+    });
+  }
+
+  get and() {
+    if (!this.isCompleted) return [];
+
+    const andResponses = this.value.filter((s) => {
+      const { operator } = s.value as ValuesOption;
+
+      return operator === "and";
+    });
+
+    return andResponses.flatMap((s) => {
+      const value = s.value as ValuesOption;
+
+      return value.values.map((value) => {
+        return {
+          name: s.name,
+          value,
+        };
+      });
+    });
   }
 }

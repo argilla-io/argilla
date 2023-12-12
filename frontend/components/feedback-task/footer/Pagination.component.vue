@@ -18,6 +18,7 @@
         class="pagination__button"
         ref="nextButton"
         @click="onClickNext"
+        :disabled="isLastPage"
         :title="$t('shortcuts.pagination.go_to_next_record')"
       >
         <svgicon name="chevron-right" width="12" height="12" />
@@ -44,10 +45,13 @@ export default {
     },
   },
   computed: {
+    // TODO: Move to PageCriteria to support those computed
     isFirstPage() {
       return this.currentPage === 1;
     },
-    // TODO: Do PageCriteria to support this
+    isLastPage() {
+      return this.currentPage === this.items;
+    },
     totalPages() {
       return Math.ceil(this.items / this.itemsPerPage);
     },

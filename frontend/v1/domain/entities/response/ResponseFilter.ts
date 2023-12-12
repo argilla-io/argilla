@@ -4,31 +4,80 @@ import {
   FilterWithScore,
   OptionForFilter,
   RangeValue,
+  ValuesOption,
 } from "../common/Filter";
 import { Question } from "../question/Question";
 
 export interface ResponseSearch {
   name: string;
-  value: string[] | RangeValue;
+  value: string[] | RangeValue | ValuesOption;
+}
+
+class FilterWithOptionAndOperator {
+  public operator: "and" | "or" = "and";
+  public readonly options: FilterWithOption;
+
+  constructor(private readonly question: Question) {
+    this.options = new FilterWithOption(
+      question.name,
+      question.settings.options.map(({ value, text }) => {
+        return {
+          selected: false,
+          value: value.toString(),
+          text,
+        } as OptionForFilter;
+      })
+    );
+  }
+
+  get value(): string[] | ValuesOption {
+    if (this.question.isMultiLabelType)
+      return {
+        operator: this.operator,
+        values: this.options.value,
+      };
+
+    return this.options.value;
+  }
+
+  filterByText(text: string) {
+    return this.options.filterByText(text);
+  }
+
+  get selectedOptions(): OptionForFilter[] {
+    return this.options.selectedOptions;
+  }
+
+  complete(value: string[] | ValuesOption) {
+    if ("operator" in value) {
+      this.operator = value.operator;
+      this.options.complete(value.values);
+    } else {
+      this.options.complete(value as string[]);
+    }
+  }
+
+  clear() {
+    this.options.clear();
+  }
+
+  get hasOperator() {
+    return this.question.isMultiLabelType;
+  }
+
+  get isAnswered(): boolean {
+    return this.options.isAnswered;
+  }
 }
 
 class ResponseFilter extends Filter {
   public readonly rangeValue: FilterWithScore;
-  public readonly options: FilterWithOption;
+  public readonly options: FilterWithOptionAndOperator;
   constructor(private readonly question: Question) {
     super();
 
     if (this.isTerms) {
-      this.options = new FilterWithOption(
-        question.name,
-        question.settings.options.map(({ value, text }) => {
-          return {
-            selected: false,
-            value: value.toString(),
-            text,
-          } as OptionForFilter;
-        })
-      );
+      this.options = new FilterWithOptionAndOperator(question);
     } else {
       this.rangeValue = new FilterWithScore(
         question.name,
@@ -51,7 +100,7 @@ class ResponseFilter extends Filter {
     return this.question.name;
   }
 
-  get value(): unknown {
+  get value(): string[] | RangeValue | ValuesOption {
     if (this.isTerms) {
       return this.options.value;
     }
@@ -59,9 +108,9 @@ class ResponseFilter extends Filter {
     return this.rangeValue.value;
   }
 
-  complete(value: unknown): void {
+  complete(value: string[] | RangeValue | ValuesOption): void {
     if (this.isTerms) {
-      this.options.complete(value as string[]);
+      this.options.complete(value as string[] | ValuesOption);
     } else {
       this.rangeValue.complete(value as RangeValue);
     }
@@ -117,7 +166,7 @@ export class ResponseFilterList {
   }
 
   commit(): ResponseSearch[] {
-    this.synchronizeFilteredMetadata();
+    this.synchronizeFiltered();
 
     this.latestCommit = this.createCommit();
 
@@ -149,7 +198,7 @@ export class ResponseFilterList {
     return this.responses.find((cat) => cat.name === category);
   }
 
-  private synchronizeFilteredMetadata() {
+  private synchronizeFiltered() {
     const newFiltered = this.filtered.filter(
       (category) => !this.filteredResponses.includes(category)
     );

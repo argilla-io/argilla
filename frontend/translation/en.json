@@ -52,5 +52,10 @@
   "reset": "Reset",
   "with": "with",
   "find": "Find",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "argilla": {
+    "api": {
+      "errors::UnauthorizedError": "Could not validate credentials"
+    }
+  }
 }
