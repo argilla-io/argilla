@@ -24,10 +24,6 @@ export default {
     recordStatus: {
       type: String,
     },
-    minimal: {
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
     getStatusInfo() {
