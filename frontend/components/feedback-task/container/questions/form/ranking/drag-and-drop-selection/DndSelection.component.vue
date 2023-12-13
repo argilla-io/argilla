@@ -146,12 +146,6 @@ export default {
 
       this.keyCode += event.key;
 
-      if (this.onUnRankFor(event.key, questionToMove)) {
-        this.focusOnFirstQuestionOrItem();
-        this.reset();
-        return;
-      }
-
       if (isNaN(this.keyCode)) {
         this.reset();
         return;
@@ -181,17 +175,6 @@ export default {
           this.reset();
         });
       }, 300);
-    },
-    onUnRankFor(key, question) {
-      const isRanked = !isNil(question.rank);
-
-      if (key == "Backspace" && isRanked) {
-        question.rank = null;
-
-        return true;
-      }
-
-      return false;
     },
     focusOnFirstQuestionOrItem() {
       this.$nextTick(() => {
