@@ -12,12 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
 from typer import Typer
 from typer.testing import CliRunner
 
 
-@pytest.mark.asyncio
 class TestCliServerSearchEngineReindex:
     # TODO: This test should create multiple datasets and records so they are reindexed.
     # In order to do that right now we need to duplicate all async test factories to be synchronous.

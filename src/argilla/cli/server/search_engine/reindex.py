@@ -82,7 +82,7 @@ class Reindexer:
 
 async def _reindex_datasets(db: AsyncSession, search_engine: SearchEngine, progress: Progress) -> None:
     task = progress.add_task(
-        f"reindexing datasets...",
+        f"reindexing feedback datasets...",
         total=await Reindexer.count_datasets(db),
     )
 
@@ -96,7 +96,7 @@ async def _reindex_dataset_records(
     db: AsyncSession, search_engine: SearchEngine, progress: Progress, dataset: Dataset
 ) -> None:
     task = progress.add_task(
-        f"reindexing dataset `{dataset.name}` records...",
+        f"reindexing feedback dataset `{dataset.name}` records...",
         total=await Reindexer.count_dataset_records(db, dataset),
     )
 
