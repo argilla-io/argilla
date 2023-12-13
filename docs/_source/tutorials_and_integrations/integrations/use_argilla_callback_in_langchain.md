@@ -52,7 +52,7 @@ Then you'll need to push that `FeedbackDataset` to Argilla as follows, otherwise
 dataset.push_to_argilla("langchain-dataset")
 ```
 
-For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](/practical_guides/create_dataset) guide.
+For more information on how to create a `FeedbackDataset`, please refer to the [Create a Feedback Dataset](/practical_guides/create_update_dataset/create_dataset) guide.
 
 ## Monitoring
 
