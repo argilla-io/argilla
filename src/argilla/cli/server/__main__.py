@@ -22,7 +22,7 @@ app = typer.Typer(help="Commands for Argilla server management", no_args_is_help
 
 
 app.add_typer(database_app, name="database")
-app.add_typer(search_engine_app, name="search_engine")
+app.add_typer(search_engine_app, name="search-engine")
 app.command(name="start", help="Starts the Argilla server")(start)
 
 
