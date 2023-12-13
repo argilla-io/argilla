@@ -3,8 +3,8 @@
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
-          ref="searchComponentRef"
           v-if="showSearch"
+          ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
@@ -143,7 +143,12 @@ export default {
             if (options.some((o) => o.contains(document.activeElement))) {
               return;
             }
-            options[0].focus();
+
+            if (options.length > 0) {
+              options[0].focus();
+            } else {
+              this.$refs.searchComponentRef?.searchInputRef.focus();
+            }
           });
         }
       },
