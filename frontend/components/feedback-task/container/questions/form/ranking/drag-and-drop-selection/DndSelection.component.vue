@@ -129,7 +129,13 @@ export default {
     },
     isGlobalShortcut(event) {
       return (
-        event.shiftKey || event.key == "Tab" || event.ctrlKey || event.metaKey
+        event.key == "Tab" ||
+        event.code === "Enter" ||
+        event.code === "Backspace" ||
+        event.code === "ArrowLeft" ||
+        event.code === "ArrowRight" ||
+        event.code === "ArrowUp" ||
+        event.code === "ArrowDown"
       );
     },
     rankWithKeyboard(event, questionToMove) {
