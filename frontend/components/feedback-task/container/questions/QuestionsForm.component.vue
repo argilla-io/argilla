@@ -52,7 +52,6 @@
           /></span>
         </BaseButton>
         <BaseButton
-          v-if="!record.isDiscarded || isDiscarding"
           type="submit"
           class="button--submit"
           :disabled="isSubmitButtonDisabled"
