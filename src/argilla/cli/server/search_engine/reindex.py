@@ -12,14 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
+from uuid import UUID
 
+import typer
 from rich.progress import Progress
 from sqlalchemy import func, select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla.cli import typer_ext
+from argilla.cli.rich import echo_in_panel
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import Dataset, Record, Response, Suggestion
 from argilla.server.search_engine import SearchEngine, get_search_engine
@@ -27,6 +31,26 @@ from argilla.server.search_engine import SearchEngine, get_search_engine
 
 class Reindexer:
     YIELD_PER = 100
+
+    @classmethod
+    async def reindex_dataset(cls, db: AsyncSession, search_engine: SearchEngine, dataset_id: UUID) -> Dataset:
+        dataset = (
+            await db.execute(
+                select(Dataset)
+                .filter_by(id=dataset_id)
+                .options(
+                    selectinload(Dataset.fields),
+                    selectinload(Dataset.questions),
+                    selectinload(Dataset.metadata_properties),
+                    selectinload(Dataset.vectors_settings),
+                )
+            )
+        ).scalar_one()
+
+        await search_engine.delete_index(dataset)
+        await search_engine.create_index(dataset)
+
+        return dataset
 
     @classmethod
     async def reindex_datasets(cls, db: AsyncSession, search_engine: SearchEngine) -> AsyncGenerator[Dataset, None]:
@@ -80,11 +104,28 @@ class Reindexer:
         return (await db.execute(select(func.count(Record.id)).filter_by(dataset_id=dataset.id))).scalar()
 
 
+async def _reindex_dataset(db: AsyncSession, search_engine: SearchEngine, progress: Progress, dataset_id: UUID) -> None:
+    try:
+        dataset = await Reindexer.reindex_dataset(db, search_engine, dataset_id)
+    except NoResultFound:
+        echo_in_panel(
+            f"Feedback dataset with id={dataset_id} not found.",
+            title="Feedback dataset not found",
+            title_align="left",
+            success=False,
+        )
+
+        return
+
+    task = progress.add_task(f"reindexing feedback dataset `{dataset.name}`...", total=1)
+
+    await _reindex_dataset_records(db, search_engine, progress, dataset)
+
+    progress.advance(task)
+
+
 async def _reindex_datasets(db: AsyncSession, search_engine: SearchEngine, progress: Progress) -> None:
-    task = progress.add_task(
-        f"reindexing feedback datasets...",
-        total=await Reindexer.count_datasets(db),
-    )
+    task = progress.add_task(f"reindexing feedback datasets...", total=await Reindexer.count_datasets(db))
 
     async for dataset in Reindexer.reindex_datasets(db, search_engine):
         await _reindex_dataset_records(db, search_engine, progress, dataset)
@@ -104,11 +145,16 @@ async def _reindex_dataset_records(
         progress.advance(task, advance=len(records))
 
 
-async def reindex() -> None:
+async def reindex(
+    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed")
+) -> None:
     async with AsyncSessionLocal() as db:
         async for search_engine in get_search_engine():
             with Progress() as progress:
-                await _reindex_datasets(db, search_engine, progress)
+                if feedback_dataset_id is not None:
+                    await _reindex_dataset(db, search_engine, progress, feedback_dataset_id)
+                else:
+                    await _reindex_datasets(db, search_engine, progress)
 
 
 if __name__ == "__main__":
