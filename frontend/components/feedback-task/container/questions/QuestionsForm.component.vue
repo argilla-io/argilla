@@ -35,7 +35,7 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span v-text="'⌫ Discard'" />
+          <span>Discard <span class="button__shortcuts" v-text="'⌫'" /></span>
         </BaseButton>
         <BaseButton
           type="button"
@@ -44,7 +44,12 @@
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
-          <span v-text="'ctrl + S Save as draft'" />
+          <span
+            >Save as draft
+            <span class="button__shortcuts" v-text="'ctrl'" />+<span
+              class="button__shortcuts"
+              v-text="'S'"
+          /></span>
         </BaseButton>
         <BaseButton
           v-if="!record.isDiscarded || isDiscarding"
@@ -57,7 +62,7 @@
               : $t('shortcuts.questions_form.submit')
           "
         >
-          <span v-text="'↵ Submit'" />
+          <span>Submit <span class="button__shortcuts" v-text="'↵'" /></span>
         </BaseButton>
       </div>
     </div>
@@ -282,16 +287,24 @@ export default {
     align-items: center;
     button {
       &:first-of-type {
-        border-bottom-left-radius: $border-radius-m;
+        border-bottom-left-radius: 8px;
       }
       &:last-of-type {
-        border-bottom-right-radius: $border-radius-m;
+        border-bottom-right-radius: 8px;
       }
     }
   }
 }
 
 .button {
+  &__shortcuts {
+    @include font-size(12px);
+    color: rgb(255 255 255);
+    background: #ffffff33;
+    border-radius: 5px;
+    padding: 0 3px;
+    margin-right: 3px;
+  }
   &--submit,
   &--draft,
   &--discard {
