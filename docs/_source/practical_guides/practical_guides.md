@@ -9,10 +9,10 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 Find the dataset type needed for your project.
 ```
-```{grid-item-card} 🧑‍💻 Create a dataset
-:link: create_dataset.html
+```{grid-item-card} 🧑‍💻 Create and update a dataset
+:link: create_update_dataset/create_dataset.html
 
-Methods to configure a dataset and push it to Argilla.
+Methods to create and configure a dataset.
 ```
 ```{grid-item-card} 🗂️ Assign records to your team
 :link: assign_records.html
@@ -23,7 +23,6 @@ Workflows to organize your annotation team.
 :link: filter_dataset.html
 
 Obtain a filtered version of your dataset.
-
 ```
 ```{grid-item-card} ✍️ Annotate a dataset
 :link: annotate_dataset.html
