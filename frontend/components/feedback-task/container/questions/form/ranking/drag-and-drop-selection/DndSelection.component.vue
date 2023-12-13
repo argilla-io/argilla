@@ -80,7 +80,6 @@
 
 <script>
 import "assets/icons/draggable";
-import { isNil } from "lodash";
 
 export default {
   name: "DndSelectionComponent",
