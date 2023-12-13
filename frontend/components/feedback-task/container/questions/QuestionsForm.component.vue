@@ -311,6 +311,7 @@ export default {
     justify-content: space-around;
     border-radius: 0;
     &:disabled {
+      opacity: 0.7;
       pointer-events: visible;
       cursor: not-allowed;
     }
