@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import uuid4
+
 from typer import Typer
 from typer.testing import CliRunner
 
@@ -25,3 +27,8 @@ class TestCliServerSearchEngineReindex:
         result = cli_runner.invoke(cli, "server search-engine reindex")
 
         assert result.exit_code == 0
+
+    def test_reindex_with_nonexistent_dataset_id(self, cli_runner: CliRunner, cli: Typer):
+        result = cli_runner.invoke(cli, f"server search-engine reindex --feedback-dataset-id {uuid4()}")
+
+        assert result.exit_code == 1

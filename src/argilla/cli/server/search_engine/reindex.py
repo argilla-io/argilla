@@ -107,7 +107,7 @@ class Reindexer:
 async def _reindex_dataset(db: AsyncSession, search_engine: SearchEngine, progress: Progress, dataset_id: UUID) -> None:
     try:
         dataset = await Reindexer.reindex_dataset(db, search_engine, dataset_id)
-    except NoResultFound:
+    except NoResultFound as e:
         echo_in_panel(
             f"Feedback dataset with id={dataset_id} not found.",
             title="Feedback dataset not found",
@@ -115,7 +115,7 @@ async def _reindex_dataset(db: AsyncSession, search_engine: SearchEngine, progre
             success=False,
         )
 
-        return
+        raise typer.Exit(code=1) from e
 
     task = progress.add_task(f"reindexing feedback dataset `{dataset.name}`...", total=1)
 
