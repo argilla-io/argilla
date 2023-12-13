@@ -51,7 +51,7 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        if (this.question.isRequired) {
+        if (this.question.isRequired && !this.question.isAnswered) {
           this.onChangeFocus(newValue);
 
           return;
@@ -72,7 +72,9 @@ export default {
       }
     },
     onExitEditionMode() {
-      this.$refs.container.focus();
+      this.$refs.container.focus({
+        preventScroll: true,
+      });
       this.isEditionModeActive = false;
       this.isExitedFromEditionModeWithKeyboard = true;
     },

@@ -180,9 +180,11 @@ export default {
       this.userComesFromOutside = true;
     },
     handleGlobalKeys(event) {
-      const { code, ctrlKey, metaKey } = event;
+      const { code, ctrlKey, metaKey, shiftKey } = event;
 
-      if (code == "Tab" && this.userComesFromOutside) {
+      if (shiftKey) return;
+
+      if (code === "Tab" && this.userComesFromOutside) {
         this.focusOnFirstQuestion(event);
 
         return;
