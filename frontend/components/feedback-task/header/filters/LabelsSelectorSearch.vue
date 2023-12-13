@@ -18,6 +18,13 @@
       :value="value"
       :placeholder="selectedOptions.length ? '' : placeholder"
       @input="onInput($event)"
+      @keydown.arrow-up.stop=""
+      @keydown.arrow-down.stop=""
+      @keydown.arrow-right.stop=""
+      @keydown.arrow-left.stop=""
+      @keydown.delete.exact.stop=""
+      @keydown.enter.exact.stop=""
+      @keydown.backspace.exact.stop=""
     />
     <BaseButton
       v-if="selectedOptions.length"
