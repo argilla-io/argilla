@@ -11,6 +11,7 @@
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
+  "to_submit_complete_required": "To submit complete required responses",
   "changes_no_submit": "You didn't submit your changes",
   "shortcuts": {
     "label": "Shortcuts",
@@ -22,6 +23,7 @@
     },
     "questions_form": {
       "clear": "Clear (⇧ shift + ␣ space)",
+      "draft": "Save as draft (ctrl + s)",
       "discard": "Discard (⇧ shift + ⌫ backspace)",
       "submit": "Submit (⇧ shift + ↵ enter)"
     }

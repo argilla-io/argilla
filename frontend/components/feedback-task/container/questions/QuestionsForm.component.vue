@@ -35,7 +35,7 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span v-text="'Discard'" />
+          <span v-text="'⌫ Discard'" />
         </BaseButton>
         <BaseButton
           type="button"
@@ -44,16 +44,20 @@
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
-          <span v-text="'Save as draft'" />
+          <span v-text="'ctrl + S Save as draft'" />
         </BaseButton>
         <BaseButton
           v-if="!record.isDiscarded || isDiscarding"
           type="submit"
           class="button--submit"
           :disabled="isSubmitButtonDisabled"
-          :title="$t('shortcuts.questions_form.submit')"
+          :title="
+            isSubmitButtonDisabled
+              ? $t('to_submit_complete_required')
+              : $t('shortcuts.questions_form.submit')
+          "
         >
-          <span v-text="'Submit'" />
+          <span v-text="'↵ Submit'" />
         </BaseButton>
       </div>
     </div>
@@ -271,7 +275,6 @@ export default {
 }
 
 .footer-form {
-  padding: 0 $base-space * 2 $base-space * 2 $base-space * 2;
   &__content {
     display: flex;
     flex-direction: row;
@@ -279,12 +282,10 @@ export default {
     align-items: center;
     button {
       &:first-of-type {
-        border-bottom-left-radius: $border-radius;
-        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius-m;
       }
       &:last-of-type {
-        border-bottom-right-radius: $border-radius;
-        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius-m;
       }
     }
   }
