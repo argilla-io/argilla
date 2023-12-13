@@ -91,9 +91,9 @@ export default {
   },
   computed: {
     questionFormClass() {
-      if (this.isSubmitting) return "--submitted --waiting";
-      if (this.isDiscarding) return "--discarded --waiting";
-      if (this.isDraftSaving) return "--draft";
+      if (this.isSubmitting) return "--submitting --waiting";
+      if (this.isDiscarding) return "--discarding --waiting";
+      if (this.isDraftSaving) return "--saving-draft";
 
       if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
         return "--focused-form";
@@ -244,14 +244,26 @@ export default {
   &.--pending {
     border-color: $black-10;
   }
-  &.--draft {
+  &.--draft,
+  &.--saving-draft {
     border-color: $draft-color;
   }
-  &.--discarded {
+  &.--discarded,
+  &.--discarding {
     border-color: $discarded-color;
   }
-  &.--submitted {
+  &.--submitted,
+  &.--submitting {
     border-color: $submitted-color;
+  }
+  &.--saving-draft {
+    box-shadow: 0 0 0 1px $draft-color;
+  }
+  &.--discarding {
+    box-shadow: 0 0 0 1px $discarded-color;
+  }
+  &.--submitting {
+    box-shadow: 0 0 0 1px $submitted-color;
   }
   &.--waiting .questions-form__content {
     opacity: 0.7;
