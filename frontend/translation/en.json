@@ -55,6 +55,8 @@
   "with": "with",
   "find": "Find",
   "cancel": "Cancel",
+  "youAreOnlineAgain": "You are online again",
+  "youAreOffline": "You are offline",
   "argilla": {
     "api": {
       "errors::UnauthorizedError": "Could not validate credentials"
