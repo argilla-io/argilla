@@ -51,7 +51,7 @@ class Reindexer:
     @classmethod
     async def reindex_dataset_records(
         cls, db: AsyncSession, search_engine: SearchEngine, dataset: Dataset
-    ) -> AsyncGenerator[Record, None]:
+    ) -> AsyncGenerator[list[Record], None]:
         stream = await db.stream(
             select(Record)
             .filter_by(dataset_id=dataset.id)
@@ -64,10 +64,12 @@ class Reindexer:
             .execution_options(yield_per=cls.YIELD_PER)
         )
 
-        async for record in stream.scalars():
-            await search_engine.index_records(record.dataset, [record])
+        async for records_partition in stream.partitions():
+            records = [record for (record,) in records_partition]
 
-            yield record
+            await search_engine.index_records(dataset, records)
+
+            yield records
 
     @classmethod
     async def count_datasets(cls, db: AsyncSession) -> int:
@@ -98,8 +100,8 @@ async def _reindex_dataset_records(
         total=await Reindexer.count_dataset_records(db, dataset),
     )
 
-    async for record in Reindexer.reindex_dataset_records(db, search_engine, dataset):
-        progress.advance(task)
+    async for records in Reindexer.reindex_dataset_records(db, search_engine, dataset):
+        progress.advance(task, advance=len(records))
 
 
 async def reindex() -> None:
