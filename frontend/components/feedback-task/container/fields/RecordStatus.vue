@@ -1,7 +1,7 @@
 <template>
   <span
     :key="recordStatus"
-    :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]"
+    :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"
     ><span class="bullet"></span>
     <span>{{ getStatusInfo.name }}</span>
