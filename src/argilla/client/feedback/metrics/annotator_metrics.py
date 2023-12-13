@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""This module contains metrics to compare Annotator's suggestions vs responses. """
+"""This module contains metrics for Suggestions Metric and Responses Metric."""
 
 import random
 import warnings
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
 
 class AnnotatorMetric(MetricBase):
-    """Main class to compute annotator metrics.
+    """Main class to compute annotator metrics. Annotator metrics refers to the combination of Suggestions Metric and Responses Metric. They are both different from the Agreement Metric (i.e. Inter-Annotator Agreement) and they are utilized to compute metrics contrasting suggestions vs responses.
 
     Example:
         >>> import argilla as rg
@@ -68,7 +68,7 @@ class AnnotatorMetric(MetricBase):
         max_records: Optional[int] = None,
         responses_vs_suggestions: bool = True,
     ) -> None:
-        """Initialize a `AnnotatorMetric` object to compute agreement metrics.
+        """Initialize an `AnnotatorMetric` object to compute agreement metrics for both Suggestions Metric and Responses Metric.
 
         Args:
             dataset: FeedbackDataset to compute the metrics.
@@ -79,9 +79,7 @@ class AnnotatorMetric(MetricBase):
             sort_by: A list of `SortBy` objects to sort your dataset by.
                 Defaults to None (no filter is applied).
             max_records: The maximum number of records to use for training. Defaults to None.
-            responses_vs_suggestions: Whether to compare the responses vs the suggestions, or the
-                other way around. Defaults to True (the metrics will be compared assuming the
-                responses are the ground truth and the suggestions are the predictions).
+            responses_vs_suggestions: Whether to utilize Suggestions Metric (where the suggestions are the ground truths and the responses are compared against them) or Responses Metric (where the responses are the ground truths and the suggestions are compared against them). Defaults to True, i.e. Responses Metric.
         """
         self._metrics_per_question = METRICS_PER_QUESTION
         super().__init__(dataset, question_name, responses_vs_suggestions=responses_vs_suggestions)
@@ -150,6 +148,8 @@ class AnnotatorMetric(MetricBase):
 
 
 class ResponsesMetric(AnnotatorMetric):
+    """Where responses are the ground truths and the suggestions are compared against them."""
+
     def __init__(
         self,
         dataset: FeedbackDataset,
@@ -169,6 +169,8 @@ class ResponsesMetric(AnnotatorMetric):
 
 
 class SuggestionsMetric(AnnotatorMetric):
+    """Where suggestions are the ground truths and the responses are compared against them."""
+
     def __init__(
         self,
         dataset: FeedbackDataset,
