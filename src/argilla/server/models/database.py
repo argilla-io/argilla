@@ -92,6 +92,7 @@ class Response(DatabaseModel):
     user: Mapped["User"] = relationship(back_populates="responses")
 
     __table_args__ = (UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),)
+    __upsertable_columns__ = {"values", "status"}
 
     @property
     def is_submitted(self):
