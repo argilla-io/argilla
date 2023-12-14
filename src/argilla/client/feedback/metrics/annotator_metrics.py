@@ -194,8 +194,8 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
 
     Example:
         >>> import argilla as rg
-        >>> from argilla.client.feedback.metrics import UnifiedAnnotatorMetric
-        >>> metric = UnifiedAnnotatorMetric(dataset=dataset, question_name=question)
+        >>> from argilla.client.feedback.metrics import UnifiedAnnotationMetric
+        >>> metric = UnifiedAnnotationMetric(dataset=dataset, question_name=question)
         >>> metrics_report = metric.compute("accuracy")
     """
 

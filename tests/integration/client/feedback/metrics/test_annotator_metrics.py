@@ -298,6 +298,9 @@ def test_annotator_metrics_unified(
             assert isinstance(metrics_report, list)
         else:
             assert isinstance(metrics_report, AnnotatorMetricResult)
+            assert str(list(unified_dataset.records[0].unified_responses.values())[0][0].value) in str(
+                dataset.records[0].responses
+            )
             metrics_report = [metrics_report]
             metric_names = [metric_names]
 
@@ -359,6 +362,9 @@ def test_annotator_metrics_unified_from_feedback_dataset(
         assert isinstance(metrics_report, list)
     else:
         assert isinstance(metrics_report, AnnotatorMetricResult)
+        assert str(list(unified_dataset.records[0].unified_responses.values())[0][0].value) in str(
+            dataset.records[0].responses
+        )
         metrics_report = [metrics_report]
         metric_names = [metric_names]
 

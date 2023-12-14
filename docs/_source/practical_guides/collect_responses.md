@@ -94,6 +94,10 @@ You can unify responses by using a `FeedbackDataset` in combination with a `Ques
 ```{include} /_common/tabs/unfication_strategies.md
 ```
 
+```{warning}
+Starting from Argilla 1.21.0, `unify_responses` is deprecated. Please use `compute_unified_responses` instead.
+```
+
 Once you have unified your responses, you will have a dataset that's ready for [fine-tuning](fine_tune.md). Remember to save your unified dataset following one of the methods explained in [Export a Feedback Dataset](export_dataset.md).
 
 #### Strategies
