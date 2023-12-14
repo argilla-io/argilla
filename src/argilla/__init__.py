@@ -58,6 +58,7 @@ if _TYPE_CHECKING:
         read_datasets,
         read_pandas,
     )
+    from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
     from argilla.client.models import (
         Text2TextRecord,
         TextClassificationRecord,
@@ -178,6 +179,7 @@ _import_structure = {
         "TokenClassificationSettings",
     ],
     "server.app": ["app"],
+    "client.feedback.integrations.textdescriptives_": ["TextDescriptivesExtractor"],
 }
 
 _sys.modules[__name__] = _LazyargillaModule(
