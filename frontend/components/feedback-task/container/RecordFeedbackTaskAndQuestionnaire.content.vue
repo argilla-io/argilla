@@ -2,17 +2,15 @@
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
 
   <BulkAnnotation
-    v-else-if="bulkAnnotation && record.status === 'pending'"
+    v-else-if="recordCriteria.committed.page.isBulkMode && record?.isPending"
     :record-criteria="recordCriteria"
     :dataset-vectors="datasetVectors"
     :records="records"
     :record="record"
     :no-records-message="noRecordsMessage"
     :status-class="statusClass"
-    :annotation-type="bulkAnnotation"
     @on-submit-responses="goToNext"
     @on-discard-responses="goToNext"
-    v-model="bulkAnnotation"
   />
   <FocusAnnotation
     v-else
@@ -24,7 +22,6 @@
     :status-class="statusClass"
     @on-submit-responses="goToNext"
     @on-discard-responses="goToNext"
-    v-model="bulkAnnotation"
   />
 </template>
 
@@ -43,7 +40,6 @@ export default {
   data() {
     return {
       fetching: false,
-      bulkAnnotation: false,
     };
   },
   computed: {
@@ -69,15 +65,15 @@ export default {
     },
   },
   async fetch() {
-    await this.onLoadRecords("replace");
+    await this.onLoadRecords();
   },
   methods: {
-    async onLoadRecords(mode) {
+    async onLoadRecords() {
       if (this.fetching) return Promise.resolve();
 
       this.fetching = true;
 
-      await this.loadRecords(mode, this.recordCriteria);
+      await this.loadRecords(this.recordCriteria);
 
       this.fetching = false;
     },
@@ -113,7 +109,7 @@ export default {
     },
     onChangeRecordFilter(criteria) {
       const filter = async () => {
-        await this.onLoadRecords("replace");
+        await this.onLoadRecords();
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>

@@ -20,17 +20,18 @@
     <p class="metrics__title">Progress</p>
     <div class="metrics__info">
       <p class="metrics__info__name">Total</p>
-      <span class="metrics__info__counter">{{ progress | percent }}</span>
+      <span class="metrics__info__counter">{{
+        metrics.progress | percent
+      }}</span>
     </div>
     <div class="metrics__numbers">
-      <span>{{ totalResponded | formatNumber }}</span
-      >/{{ progressTotal | formatNumber }}
+      <span v-text="metrics.responded" />/{{ metrics.total }}
     </div>
     <BaseProgress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalSubmitted * 100) / progressTotal"
-      :progress-secondary="(totalDiscarded * 100) / progressTotal"
+      :progress="metrics.percentage.submitted"
+      :progress-secondary="metrics.percentage.discarded"
       progress-bg="#bb720a"
       :color="itemColor(1)"
       :color-secondary="itemColor(2)"
@@ -65,16 +66,8 @@ import {
 } from "@/models/feedback-task-model/record/record.queries";
 export default {
   props: {
-    progressTotal: {
-      type: Number,
-      required: true,
-    },
-    totalSubmitted: {
-      type: Number,
-      required: true,
-    },
-    totalDiscarded: {
-      type: Number,
+    metrics: {
+      type: Object,
       required: true,
     },
   },
@@ -84,28 +77,19 @@ export default {
         {
           name: RECORD_STATUS.PENDING,
           color: RECORD_STATUS_COLOR.PENDING,
-          progress: this.totalPending,
+          progress: this.metrics.pending,
         },
         {
           name: RECORD_STATUS.SUBMITTED,
           color: RECORD_STATUS_COLOR.SUBMITTED,
-          progress: this.totalSubmitted,
+          progress: this.metrics.submitted,
         },
         {
           name: RECORD_STATUS.DISCARDED,
           color: RECORD_STATUS_COLOR.DISCARDED,
-          progress: this.totalDiscarded,
+          progress: this.metrics.discarded,
         },
       ];
-    },
-    totalResponded() {
-      return this.totalSubmitted + this.totalDiscarded;
-    },
-    totalPending() {
-      return this.progressTotal - this.totalResponded;
-    },
-    progress() {
-      return this.totalResponded / this.progressTotal;
     },
   },
   methods: {

@@ -12,7 +12,7 @@ import {
   FieldRepository,
 } from "@/v1/infrastructure/repositories";
 
-export type LoadRecordsMode = "append" | "replace";
+type LoadRecordsMode = "append" | "replace";
 
 export class LoadRecordsToAnnotateUseCase {
   constructor(
@@ -22,17 +22,17 @@ export class LoadRecordsToAnnotateUseCase {
     private readonly recordsStorage: IRecordStorage
   ) {}
 
-  async load(mode: LoadRecordsMode, criteria: RecordCriteria): Promise<void> {
+  async load(criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
 
-    let newRecords = await this.loadRecords(mode, criteria);
+    let newRecords = await this.loadRecords("replace", criteria);
 
     let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
-    if (!isRecordExistForCurrentPage && page !== 1) {
-      criteria.page = 1;
+    if (!isRecordExistForCurrentPage && !page.isFirstPage()) {
+      criteria.page.goToFirst();
 
-      newRecords = await this.loadRecords(mode, criteria);
+      newRecords = await this.loadRecords("replace", criteria);
 
       isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
     }
@@ -71,11 +71,11 @@ export class LoadRecordsToAnnotateUseCase {
   }
 
   private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
-    const { datasetId, page } = criteria;
+    const { datasetId } = criteria;
     const savedRecords = this.recordsStorage.get();
-    const pagination = savedRecords.getPageToFind(criteria);
+    savedRecords.synchronizeQueuePagination(criteria);
 
-    const getRecords = this.recordRepository.getRecords(criteria, pagination);
+    const getRecords = this.recordRepository.getRecords(criteria);
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
@@ -84,9 +84,7 @@ export class LoadRecordsToAnnotateUseCase {
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const recordPage = criteria.isFilteringBySimilarity
-          ? index + pagination.from
-          : index + page;
+        const recordPage = index + criteria.queuePage;
 
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])

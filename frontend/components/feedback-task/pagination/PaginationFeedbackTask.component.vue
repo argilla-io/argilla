@@ -1,7 +1,7 @@
 <template>
   <PaginationComponent
     v-if="records.hasRecordsToAnnotate"
-    :currentPage="recordCriteria.committed.page"
+    :currentPage="recordCriteria.committed.page.client.page"
     :items="records.total"
     @on-click-next="goToNextPage"
     @on-click-prev="goToPrevPage"

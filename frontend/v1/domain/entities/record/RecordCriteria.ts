@@ -3,10 +3,11 @@ import { SortCriteria } from "../sort/SortCriteria";
 import { MetadataCriteria } from "../metadata/MetadataCriteria";
 import { ResponseCriteria } from "../response/ResponseCriteria";
 import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";
+import { PageCriteria } from "../page/PageCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
 interface CommittedRecordCriteria {
-  page: number;
+  page: PageCriteria;
   status: RecordStatus;
   searchText: string;
   metadata: MetadataCriteria;
@@ -20,6 +21,7 @@ export class RecordCriteria {
   public isChangingAutomatically = false;
   public committed: CommittedRecordCriteria;
 
+  public page: PageCriteria;
   public metadata: MetadataCriteria;
   public sortBy: SortCriteria;
   public response: ResponseCriteria;
@@ -28,7 +30,7 @@ export class RecordCriteria {
 
   constructor(
     public readonly datasetId: string,
-    public page: number,
+    page: string,
     public status: RecordStatus,
     public searchText: string,
     metadata: string,
@@ -37,6 +39,7 @@ export class RecordCriteria {
     suggestion: string,
     similaritySearch: string
   ) {
+    this.page = new PageCriteria();
     this.metadata = new MetadataCriteria();
     this.sortBy = new SortCriteria();
     this.response = new ResponseCriteria();
@@ -117,11 +120,10 @@ export class RecordCriteria {
   }
 
   get hasChanges(): boolean {
-    if (this.committed.page !== this.page) return true;
     if (this.committed.status !== this.status) return true;
-
     if (this.committed.searchText !== this.searchText) return true;
 
+    if (!this.page.isEqual(this.committed.page)) return true;
     if (!this.metadata.isEqual(this.committed.metadata)) return true;
     if (!this.sortBy.isEqual(this.committed.sortBy)) return true;
     if (!this.response.isEqual(this.committed.response)) return true;
@@ -133,7 +135,7 @@ export class RecordCriteria {
   }
 
   complete(
-    page: number,
+    page: string,
     status: RecordStatus,
     searchText: string,
     metadata: string,
@@ -144,10 +146,10 @@ export class RecordCriteria {
   ) {
     this.isChangingAutomatically = true;
 
-    this.page = Number(page ?? 1);
     this.status = status ?? "pending";
     this.searchText = searchText ?? "";
 
+    this.page.complete(page);
     this.metadata.complete(metadata);
     this.sortBy.complete(sortBy);
     this.response.complete(response);
@@ -157,12 +159,14 @@ export class RecordCriteria {
 
   commit() {
     // TODO: Move to instance of commit
+    const pageCommitted = new PageCriteria();
     const similaritySearchCommitted = new SimilarityCriteria();
     const metadataCommitted = new MetadataCriteria();
     const sortByCommitted = new SortCriteria();
     const responseCommitted = new ResponseCriteria();
     const suggestionCommitted = new SuggestionCriteria();
 
+    pageCommitted.withValue(this.page.client, this.page.mode);
     similaritySearchCommitted.withValue(
       this.similaritySearch.recordId,
       this.similaritySearch.vectorName,
@@ -175,10 +179,10 @@ export class RecordCriteria {
     suggestionCommitted.withValue(this.suggestion.value);
 
     this.committed = {
-      page: this.page,
       status: this.status,
       searchText: this.searchText,
 
+      page: pageCommitted,
       metadata: metadataCommitted,
       sortBy: sortByCommitted,
       response: responseCommitted,
@@ -190,11 +194,11 @@ export class RecordCriteria {
   }
 
   rollback() {
-    this.page = this.committed.page;
     this.status = this.committed.status;
     this.searchText = this.committed.searchText;
     this.metadata = this.committed.metadata;
 
+    this.page.withValue(this.committed.page.client, this.committed.page.mode);
     this.metadata.withValue(this.committed.metadata.value);
     this.sortBy.witValue(this.committed.sortBy.value);
     this.response.withValue(this.committed.response.value);
@@ -208,17 +212,24 @@ export class RecordCriteria {
   }
 
   reset() {
+    this.page.reset();
     this.metadata.reset();
     this.sortBy.reset();
     this.response.reset();
     this.suggestion.reset();
   }
 
+  get queuePage(): number {
+    return this.isFilteringBySimilarity
+      ? this.page.server.from
+      : this.page.client.page;
+  }
+
   nextPage() {
-    this.page = this.committed.page + 1;
+    this.page.goTo(this.committed.page.next);
   }
 
   previousPage() {
-    this.page = this.committed.page - 1;
+    this.page.goTo(this.committed.page.previous);
   }
 }

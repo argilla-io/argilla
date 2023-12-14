@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
 - Added strategy to handle and translate errors from server for `401 http status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)

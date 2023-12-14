@@ -3,9 +3,8 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
-          v-if="records.hasRecordsToAnnotate && record.status === 'pending'"
-          :value="bulkAnnotation"
-          @change="changeAnnotationType"
+          v-if="records.hasRecordsToAnnotate && record?.isPending"
+          :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
       <div class="wrapper__records__header">
         <BaseCheckbox
@@ -14,13 +13,18 @@
           :value="filteredSelectedRecords.length === records.records.length"
           @input="toggleAllRecords"
         />
-        <PageSizeSelector :options="[10, 25, 50, 100]" v-model="pageSize" />
+        <PageSizeSelector
+          :options="recordCriteria.page.options"
+          v-model="recordCriteria.page.client.many"
+        />
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
       <div class="bulk__records">
         <RecordFieldsAndSimilarity
-          v-for="(r, index) in records.records"
-          :key="r.id"
+          v-for="(record, index) in records.records
+            .slice(recordCriteria.page.client.page - 1)
+            .splice(0, recordCriteria.page.client.many)"
+          :key="record.id"
           :datasetVectors="datasetVectors"
           :records="records"
           :recordCriteria="recordCriteria"
@@ -80,20 +84,11 @@ export default {
       type: String,
       required: true,
     },
-    bulkAnnotation: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
       selectedRecords: [],
-      pageSize: 10,
     };
-  },
-  model: {
-    prop: "bulkAnnotation",
-    event: "change",
   },
   computed: {
     filteredSelectedRecords() {
@@ -101,9 +96,6 @@ export default {
     },
   },
   methods: {
-    changeAnnotationType(value) {
-      this.$emit("change", value);
-    },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
 
@@ -131,6 +123,13 @@ export default {
       } else {
         this.selectedRecords = this.records.records.map((r) => r.id);
       }
+    },
+  },
+  watch: {
+    "recordCriteria.page.client.many"() {
+      this.recordCriteria.page.goToFirst();
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
   setup() {

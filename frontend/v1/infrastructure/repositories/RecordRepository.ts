@@ -18,7 +18,6 @@ import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
-import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { RangeValue, ValuesOption } from "~/v1/domain/entities/common/Filter";
 
@@ -41,14 +40,11 @@ const BACKEND_ORDER: {
 export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  getRecords(
-    criteria: RecordCriteria,
-    pagination: Pagination
-  ): Promise<BackedRecords> {
+  getRecords(criteria: RecordCriteria): Promise<BackedRecords> {
     if (criteria.isFilteringByAdvanceSearch)
-      return this.getRecordsByAdvanceSearch(criteria, pagination);
+      return this.getRecordsByAdvanceSearch(criteria);
 
-    return this.getRecordsByDatasetId(criteria, pagination);
+    return this.getRecordsByDatasetId(criteria);
   }
 
   async getRecord(recordId: string): Promise<BackedRecord> {
@@ -186,11 +182,10 @@ export class RecordRepository {
   }
 
   private async getRecordsByDatasetId(
-    criteria: RecordCriteria,
-    pagination: Pagination
+    criteria: RecordCriteria
   ): Promise<BackedRecords> {
-    const { datasetId, status } = criteria;
-    const { from, many } = pagination;
+    const { datasetId, status, page } = criteria;
+    const { from, many } = page.server;
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
@@ -216,11 +211,11 @@ export class RecordRepository {
   }
 
   private async getRecordsByAdvanceSearch(
-    criteria: RecordCriteria,
-    pagination: Pagination
+    criteria: RecordCriteria
   ): Promise<BackedRecords> {
     const {
       datasetId,
+      page,
       status,
       searchText,
       metadata,
@@ -235,7 +230,7 @@ export class RecordRepository {
       isFilteringBySuggestion,
       isSortingBy,
     } = criteria;
-    const { from, many } = pagination;
+    const { from, many } = page.server;
 
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;

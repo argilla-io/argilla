@@ -2,14 +2,14 @@ import { useRoute, useRouter } from "@nuxtjs/composition-api";
 import { Dataset } from "@/v1/domain/entities/Dataset";
 
 type KindOfParam =
-  | "_status"
-  | "_page"
-  | "_search"
-  | "_metadata"
-  | "_sort"
-  | "_response"
-  | "_suggestion"
-  | "_similarity";
+  | "status"
+  | "page"
+  | "search"
+  | "metadata"
+  | "sort"
+  | "response"
+  | "suggestion"
+  | "similarity";
 
 export const ROUTES = {
   datasets: "datasets",

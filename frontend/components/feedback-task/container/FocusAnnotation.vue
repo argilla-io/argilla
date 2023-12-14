@@ -3,9 +3,8 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
-          v-if="records.hasRecordsToAnnotate && record?.status === 'pending'"
-          :value="bulkAnnotation"
-          @change="changeAnnotationType"
+          v-if="records.hasRecordsToAnnotate && record?.isPending"
+          :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
       <div class="wrapper__records__header">
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
@@ -66,19 +65,8 @@ export default {
       type: String,
       required: true,
     },
-    bulkAnnotation: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  model: {
-    prop: "bulkAnnotation",
-    event: "change",
   },
   methods: {
-    changeAnnotationType(value) {
-      this.$emit("change", value);
-    },
     async onSubmit() {
       if (this.isSubmitButtonDisabled) return;
 

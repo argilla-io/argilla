@@ -5,7 +5,9 @@ export abstract class Criteria {
     this.reset();
   }
 
-  abstract get isCompleted(): boolean;
+  get isCompleted(): boolean {
+    return true;
+  }
 
   abstract get urlParams(): string;
 

@@ -2,15 +2,15 @@
   <div class="annotation-type-switch">
     <button
       class="switch"
-      :class="{ active: !value }"
-      @click="handleChange(false)"
+      :class="{ active: recordCriteria.page.isFocusMode }"
+      @click="switchFocusMode()"
     >
       Focus
     </button>
     <button
       class="switch"
-      :class="{ active: value }"
-      @click="handleChange(true)"
+      :class="{ active: recordCriteria.page.isBulkMode }"
+      @click="switchFocusMode()"
     >
       Bulk
     </button>
@@ -20,18 +20,20 @@
 <script>
 export default {
   props: {
-    value: {
-      type: Boolean,
+    recordCriteria: {
+      type: Object,
       required: true,
     },
   },
-  model: {
-    prop: "value",
-    event: "change",
-  },
   methods: {
-    handleChange(option) {
-      this.$emit("change", option);
+    switchFocusMode() {
+      if (this.recordCriteria.page.isFocusMode) {
+        this.recordCriteria.page.bulkMode();
+      } else {
+        this.recordCriteria.page.focusMode();
+      }
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
 };
