@@ -36,7 +36,9 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span><span class="button__shortcuts" v-text="'⌫'" /> Discard</span>
+          <span class="button__shortcuts" v-text="'⌫'" /><span
+            v-text="'Discard'"
+          />
         </BaseButton>
         <BaseButton
           type="button"
@@ -50,9 +52,8 @@
             ><span class="button__shortcuts" v-text="'ctrl'" /><span
               class="button__shortcuts"
               v-text="'S'"
-            />
-            Save as draft</span
-          >
+          /></span>
+          <span v-text="'Save as draft'" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -65,7 +66,8 @@
               : $t('shortcuts.questions_form.submit')
           "
         >
-          <span><span class="button__shortcuts" v-text="'↵'" /> Submit</span>
+          <span class="button__shortcuts" v-text="'↵'" />
+          <span v-text="'Submit'" />
         </BaseButton>
       </div>
     </div>
@@ -283,21 +285,17 @@ export default {
 }
 
 .footer-form {
-  padding: 0 4px 4px 4px;
   &__content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 8px;
+    border-radius: $border-radius-m;
     background: #f5f7ff;
-    box-shadow: 0 1px 2px 0px #c0c5d7;
   }
 }
 
 .button {
-  min-height: $base-space * 6;
-  border-radius: 8px;
   &__shortcuts {
     @include font-size(12px);
     background: rgba(255, 255, 255, 0.742);
@@ -313,7 +311,15 @@ export default {
   &--draft,
   &--discard {
     width: 100%;
+    flex-direction: column;
     justify-content: space-around;
+    color: $black-54;
+    min-height: $base-space * 6;
+    border-radius: $border-radius-m;
+    &:hover,
+    &.--button--discarding {
+      color: $black-87;
+    }
     &:disabled {
       opacity: 0.7;
       pointer-events: visible;
@@ -321,27 +327,30 @@ export default {
     }
   }
   &--submit {
-    color: $submitted-color;
     &:hover,
     &.--button--submitting {
       background: #b3c4ff;
-      color: darken($submitted-color, 20%);
+    }
+    &:active {
+      background: $submitted-color;
     }
   }
   &--draft {
-    color: $draft-color;
     &:hover,
     &.--button--saving-draft {
       background: #b2e6ee;
-      color: darken($draft-color, 10%);
+    }
+    &:active {
+      background: $draft-color;
     }
   }
   &--discard {
-    color: $discarded-color;
     &:hover,
     &.--button--discarding {
       background: #e0dddd;
-      color: darken($discarded-color, 30%);
+    }
+    &:active {
+      background: $discarded-color;
     }
   }
 }
