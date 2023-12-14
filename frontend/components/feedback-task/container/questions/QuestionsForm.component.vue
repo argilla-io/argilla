@@ -46,7 +46,7 @@
         >
           <span
             >Save as draft
-            <span class="button__shortcuts" v-text="'ctrl'" />+<span
+            <span class="button__shortcuts" v-text="'ctrl'" /><span
               class="button__shortcuts"
               v-text="'S'"
           /></span>
@@ -279,37 +279,37 @@ export default {
 }
 
 .footer-form {
+  padding: 0 4px 4px 4px;
   &__content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    button {
-      &:first-of-type {
-        border-bottom-left-radius: 8px;
-      }
-      &:last-of-type {
-        border-bottom-right-radius: 8px;
-      }
-    }
+    border-radius: 8px;
+    background: #f5f7ff;
+    box-shadow: 0 1px 2px 0px #c0c5d7;
   }
 }
 
 .button {
+  min-height: $base-space * 6;
+  border-radius: 8px;
   &__shortcuts {
     @include font-size(12px);
-    color: rgb(255 255 255);
-    background: #ffffff33;
+    background: rgba(255, 255, 255, 0.742);
     border-radius: 5px;
     padding: 0 3px;
     margin-right: 3px;
+    border: 1px solid $black-10;
+    color: $black-37;
+    height: 16px;
+    display: inline-block;
   }
   &--submit,
   &--draft,
   &--discard {
     width: 100%;
     justify-content: space-around;
-    border-radius: 0;
     &:disabled {
       opacity: 0.7;
       pointer-events: visible;
@@ -317,16 +317,25 @@ export default {
     }
   }
   &--submit {
-    background: $submitted-color;
-    color: palette(white);
+    color: $submitted-color;
+    &:hover {
+      background: #b3c4ff;
+      color: darken($submitted-color, 20%);
+    }
   }
   &--draft {
-    background: $draft-color;
-    color: palette(white);
+    color: $draft-color;
+    &:hover {
+      background: #b2e6ee;
+      color: darken($draft-color, 10%);
+    }
   }
   &--discard {
-    background: $discarded-color;
-    color: palette(white);
+    color: $discarded-color;
+    &:hover {
+      background: #e0dddd;
+      color: darken($discarded-color, 30%);
+    }
   }
 }
 
