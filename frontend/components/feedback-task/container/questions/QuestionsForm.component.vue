@@ -315,7 +315,7 @@ export default {
     justify-content: space-around;
     color: $black-54;
     min-height: $base-space * 6;
-    border-radius: $border-radius-m;
+    border-radius: $border-radius-m - 1;
     &:hover,
     &.--button--discarding {
       color: $black-87;
