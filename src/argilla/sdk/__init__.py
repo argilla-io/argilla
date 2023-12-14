@@ -6,6 +6,7 @@ from ._api import HTTPClientConfig
 from ._datasets import Dataset
 from ._models import *
 
+from argilla.client.workspaces import Workspace # noqa
 
 default_http_client: Optional[httpx.Client] = None
 
