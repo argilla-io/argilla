@@ -15,7 +15,12 @@ export interface SortSearch {
   order: SortOrderOptions;
 }
 
-abstract class Sort {
+interface ISort {
+  key: SortOptions;
+  name: string;
+}
+
+abstract class Sort implements ISort {
   public sort: SortOrderOptions = SORT_ASC;
 
   constructor(
@@ -110,17 +115,18 @@ export class SortList {
     );
   }
 
-  select(category: string) {
-    const found = this.findByCategory(category);
+  select({ key, name }: ISort) {
+    const found = this.findByCategory(key, name);
 
     if (found) {
       this.selectedCategories.push(found);
     }
   }
 
-  unselect(category: string) {
+  unselect({ key, name }: ISort) {
     const indexOf = this.selectedCategories.findIndex(
-      (categoriesSort) => categoriesSort.name === category
+      (categoriesSort) =>
+        categoriesSort.key === key && categoriesSort.name === name
     );
 
     if (indexOf > -1) {
@@ -128,11 +134,16 @@ export class SortList {
     }
   }
 
-  replace(category: string, newCategory: string) {
-    const newCategoryFound = this.findByCategory(newCategory);
+  replace(category: ISort, newCategory: ISort) {
+    const newCategoryFound = this.findByCategory(
+      newCategory.key,
+      newCategory.name
+    );
 
     const indexOf = this.selectedCategories.findIndex(
-      (categoriesSort) => categoriesSort.name === category
+      (categoriesSort) =>
+        categoriesSort.key === category.key &&
+        categoriesSort.name === category.name
     );
 
     if (indexOf > -1) {
@@ -144,8 +155,8 @@ export class SortList {
     this.selectedCategories = [];
   }
 
-  toggleSort(category: string) {
-    const found = this.findByCategory(category);
+  toggleSort({ key, name }: ISort) {
+    const found = this.findByCategory(key, name);
     if (found) found.toggleSort();
   }
 
@@ -188,8 +199,8 @@ export class SortList {
 
     if (!sort.length) return;
 
-    sort.forEach(({ name, order }) => {
-      const found = this.findByCategory(name);
+    sort.forEach(({ entity, name, order }) => {
+      const found = this.findByCategory(entity, name);
 
       if (found) {
         found.sort = order;
@@ -201,7 +212,9 @@ export class SortList {
     this.commit();
   }
 
-  private findByCategory(category: string) {
-    return this.categoriesSorts.find((m) => m.name === category);
+  private findByCategory(key: string, category: string) {
+    return this.categoriesSorts.find(
+      (m) => m.key === key && m.name === category
+    );
   }
 }
