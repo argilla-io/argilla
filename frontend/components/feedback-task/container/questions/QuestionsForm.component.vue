@@ -36,7 +36,7 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span>Discard <span class="button__shortcuts" v-text="'⌫'" /></span>
+          <span><span class="button__shortcuts" v-text="'⌫'" /> Discard</span>
         </BaseButton>
         <BaseButton
           type="button"
@@ -47,11 +47,12 @@
           :title="$t('shortcuts.questions_form.draft')"
         >
           <span
-            >Save as draft
-            <span class="button__shortcuts" v-text="'ctrl'" /><span
+            ><span class="button__shortcuts" v-text="'ctrl'" /><span
               class="button__shortcuts"
               v-text="'S'"
-          /></span>
+            />
+            Save as draft</span
+          >
         </BaseButton>
         <BaseButton
           type="submit"
@@ -64,7 +65,7 @@
               : $t('shortcuts.questions_form.submit')
           "
         >
-          <span>Submit <span class="button__shortcuts" v-text="'↵'" /></span>
+          <span><span class="button__shortcuts" v-text="'↵'" /> Submit</span>
         </BaseButton>
       </div>
     </div>
