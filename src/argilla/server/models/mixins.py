@@ -112,19 +112,21 @@ class CRUDMixin:
     async def upsert_many(
         cls,
         db: "AsyncSession",
-        objects: List[Schema],
+        objects: List[Union[Schema, dict]],
         constraints: List["InstrumentedAttribute[Any]"],
         autocommit: bool = True,
     ) -> List[Self]:
         if len(objects) == 0:
             raise ValueError("Cannot upsert empty list of objects")
-        values = [obj.dict() for obj in objects]
+
+        values = [obj if isinstance(obj, dict) else obj.dict() for obj in objects]
 
         # Try to insert all objects
         insert_stmt = _INSERT_FUNC[db.bind.dialect.name](cls).values(values)
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
-        columns_to_update = {column: getattr(insert_stmt.excluded, column) for column in cls.__upsertable_columns__}
+        columns_to_update = {column: insert_stmt.excluded[column] for column in cls.__upsertable_columns__}
+
         # onupdate for `updated_at` is not working. We need to force a new value on update
         if hasattr(cls, "updated_at"):
             columns_to_update["updated_at"] = datetime.utcnow()
@@ -144,11 +146,12 @@ class CRUDMixin:
     async def upsert(
         cls,
         db: "AsyncSession",
-        schema: Schema,
+        schema: Union[Schema, dict],
         constraints: List["InstrumentedAttribute[Any]"],
         autocommit: bool = True,
     ) -> Self:
         upserted = await cls.upsert_many(db, [schema], constraints, autocommit)
+
         return upserted[0]
 
     async def delete(self, db: "AsyncSession", autocommit: bool = True) -> Self:
