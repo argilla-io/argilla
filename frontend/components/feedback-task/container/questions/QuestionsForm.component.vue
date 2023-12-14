@@ -285,12 +285,13 @@ export default {
 }
 
 .footer-form {
+  padding: 0 4px 4px 4px;
   &__content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: $border-radius-m;
+    border-radius: $border-radius;
     background: #f5f7ff;
   }
 }
@@ -315,7 +316,7 @@ export default {
     justify-content: space-around;
     color: $black-54;
     min-height: $base-space * 6;
-    border-radius: $border-radius-m - 1;
+    border-radius: $border-radius;
     &:hover,
     &.--button--discarding {
       color: $black-87;
@@ -327,30 +328,33 @@ export default {
     }
   }
   &--submit {
-    &:hover,
-    &.--button--submitting {
+    &:hover {
       background: #b3c4ff;
     }
-    &:active {
+    &:active,
+    &.--button--submitting {
       background: $submitted-color;
+      color: palette(white);
     }
   }
   &--draft {
-    &:hover,
-    &.--button--saving-draft {
+    &:hover {
       background: #b2e6ee;
     }
-    &:active {
+    &:active,
+    &.--button--saving-draft {
       background: $draft-color;
+      color: palette(white);
     }
   }
   &--discard {
-    &:hover,
-    &.--button--discarding {
+    &:hover {
       background: #e0dddd;
     }
-    &:active {
+    &:active,
+    &.--button--discarding {
       background: $discarded-color;
+      color: palette(white);
     }
   }
 }
