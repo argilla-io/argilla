@@ -6,10 +6,10 @@ Once you've selected a dataset, you can open one of our introductory tutorials t
 
 For a more in-depth understanding of Argilla, you can check our documentation 📖:
 
-* Set up the 🔧 [Installation](https://docs.argilla.io/en/latest/getting_started/installation/deployments/deployments.html) and ⚙️ [Configuration](https://docs.argilla.io/en/latest/getting_started/installation/configurations/configurations.html)
-* 🗺️ [Practical guides](https://docs.argilla.io/en/latest/practical_guides/index.html) with the complete workflows
-* ✏️ [Tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html) for beginner and advanced users
-* How to use the 🖥️ [Argilla UI](https://docs.argilla.io/en/latest/reference/webapp/index.html)
+* ⚙️ Tweak [server configuration and user management](https://docs.argilla.io/en/latest/getting_started/installation/configurations/configurations.html)
+* 🗺️ Understand usage workflows using [practical guides](https://docs.argilla.io/en/latest/practical_guides/index.html)
+* ✏️ Applied end2end examples using [tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html)
+* 🖥️ Get familiar with the [Argilla UI](https://docs.argilla.io/en/latest/reference/webapp/index.html)
 
 Of course, we welcome any ideas or suggestions you may have. And, your contributions will be included in the latest version of Argilla. For more details, take a look at the [contributor guide](https://docs.argilla.io/en/latest/contributing/contributing.html) and the [developer guide](https://docs.argilla.io/en/latest/community/developer_docs.html).
 
