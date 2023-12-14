@@ -395,8 +395,8 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         workspace: "Workspace",
         created_at: datetime,
         updated_at: datetime,
-        fields: List["AllowedRemoteFieldTypes"],
-        questions: List["AllowedRemoteQuestionTypes"],
+        fields: List["AllowedRemoteFieldTypes"] = None,
+        questions: List["AllowedRemoteQuestionTypes"] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = True,
         with_vectors: Union[Literal[INCLUDE_ALL_VECTORS_PARAM], List[str], None] = None,
@@ -428,8 +428,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
             ValueError: if `guidelines` is an empty string.
         """
 
-        self._fields = fields
-        self._questions = questions
         self._guidelines = guidelines
         self._allow_extra_metadata = allow_extra_metadata
 
@@ -451,12 +449,16 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         return self._allow_extra_metadata
 
     @property
-    def fields(self) -> Union[List["AllowedRemoteFieldTypes"]]:
-        return self._fields
+    def fields(self) -> List["AllowedRemoteFieldTypes"]:
+        from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
+
+        return ArgillaMixin.get_fields(client=self._client, id=self.id)
 
     @property
-    def questions(self) -> Union[List["AllowedRemoteQuestionTypes"]]:
-        return self._questions
+    def questions(self) -> List["AllowedRemoteQuestionTypes"]:
+        from argilla.client.feedback.dataset.local.mixins import ArgillaMixin
+
+        return ArgillaMixin.get_questions(client=self._client, id=self.id)
 
     @property
     def records(self) -> RemoteFeedbackRecords:
@@ -499,11 +501,11 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
 
     @property
     def _question_id_to_name(self) -> Dict["UUID", str]:
-        return {question.id: question.name for question in self._questions}
+        return {question.id: question.name for question in self.questions}
 
     @property
     def _question_name_to_id(self) -> Dict[str, "UUID"]:
-        return {question.name: question.id for question in self._questions}
+        return {question.name: question.id for question in self.questions}
 
     @property
     def metadata_properties(self) -> List["AllowedRemoteMetadataPropertyTypes"]:
