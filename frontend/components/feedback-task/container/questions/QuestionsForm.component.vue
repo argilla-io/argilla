@@ -32,6 +32,7 @@
           v-if="!record.isDiscarded || isDiscarding"
           type="button"
           class="button--discard"
+          :class="isDiscarding ? '--button--discarding' : null"
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
@@ -40,6 +41,7 @@
         <BaseButton
           type="button"
           class="button--draft"
+          :class="isDraftSaving ? '--button--saving-draft' : null"
           @on-click="onSaveDraft"
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
@@ -54,6 +56,7 @@
         <BaseButton
           type="submit"
           class="button--submit"
+          :class="isSubmitting ? '--button--submitting' : null"
           :disabled="isSubmitButtonDisabled"
           :title="
             isSubmitButtonDisabled
@@ -318,21 +321,24 @@ export default {
   }
   &--submit {
     color: $submitted-color;
-    &:hover {
+    &:hover,
+    &.--button--submitting {
       background: #b3c4ff;
       color: darken($submitted-color, 20%);
     }
   }
   &--draft {
     color: $draft-color;
-    &:hover {
+    &:hover,
+    &.--button--saving-draft {
       background: #b2e6ee;
       color: darken($draft-color, 10%);
     }
   }
   &--discard {
     color: $discarded-color;
-    &:hover {
+    &:hover,
+    &.--button--discarding {
       background: #e0dddd;
       color: darken($discarded-color, 30%);
     }
