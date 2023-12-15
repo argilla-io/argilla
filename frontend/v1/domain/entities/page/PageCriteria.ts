@@ -56,13 +56,10 @@ export class PageCriteria extends Criteria {
     return `${this.client.page}~${this.client.many}`;
   }
 
-  withValue(
-    { page, many }: BrowserPagination,
-    mode: "focus" | "bulk" = "focus"
-  ) {
+  withValue({ client, mode }: PageCriteria) {
     this.client = {
-      page,
-      many,
+      page: client.page,
+      many: client.many,
     };
 
     this.mode = mode;

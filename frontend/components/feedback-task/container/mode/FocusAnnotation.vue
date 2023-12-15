@@ -3,7 +3,9 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
-          v-if="records.hasRecordsToAnnotate && record?.isPending"
+          v-if="
+            records.hasRecordsToAnnotate && recordCriteria.committed.isPending
+          "
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
       <div class="wrapper__records__header">

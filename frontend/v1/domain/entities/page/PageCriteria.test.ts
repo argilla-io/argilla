@@ -4,10 +4,11 @@ describe("PageCriteria", () => {
   describe("next", () => {
     it("should return the next page", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+
+      pageCriteria.client = {
         page: 1,
         many: 10,
-      });
+      };
 
       expect(pageCriteria.next).toEqual(2);
     });
@@ -16,10 +17,10 @@ describe("PageCriteria", () => {
   describe("previous", () => {
     test("should return the previous page", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 2,
         many: 10,
-      });
+      };
 
       expect(pageCriteria.previous).toEqual(1);
     });
@@ -75,10 +76,10 @@ describe("PageCriteria", () => {
   describe("reset", () => {
     test("should reset the client page criteria", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 1,
         many: 25,
-      });
+      };
 
       pageCriteria.reset();
 
@@ -90,10 +91,10 @@ describe("PageCriteria", () => {
 
     test("should reset the server page criteria", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 10,
         many: 25,
-      });
+      };
 
       pageCriteria.synchronizePagination({
         from: 9,
@@ -112,10 +113,11 @@ describe("PageCriteria", () => {
   describe("goToFirst", () => {
     test("should set the client page to 1", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 10,
         many: 10,
-      });
+      };
+
       pageCriteria.goToFirst();
 
       expect(pageCriteria.client).toEqual({
@@ -128,19 +130,20 @@ describe("PageCriteria", () => {
   describe("isFirstPage", () => {
     test("should return true when the client page is 1", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 1,
         many: 25,
-      });
+      };
+
       expect(pageCriteria.isFirstPage()).toBeTruthy();
     });
 
     test("should return false when the client page is not 1", () => {
       const pageCriteria = new PageCriteria();
-      pageCriteria.withValue({
+      pageCriteria.client = {
         page: 2,
         many: 25,
-      });
+      };
 
       expect(pageCriteria.isFirstPage()).toBeFalsy();
     });

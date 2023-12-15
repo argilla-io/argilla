@@ -4,7 +4,7 @@
   <BulkAnnotation
     v-else-if="
       recordCriteria.committed.page.isBulkMode &&
-      recordCriteria.committed.status === 'pending'
+      recordCriteria.committed.isPending
     "
     :record-criteria="recordCriteria"
     :dataset-vectors="datasetVectors"

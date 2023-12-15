@@ -39,10 +39,10 @@ describe("Records", () => {
   describe("existsRecordOn", () => {
     test("should return true when the record exists", () => {
       const page = new PageCriteria();
-      page.withValue({
+      page.client = {
         page: 1,
         many: 10,
-      });
+      };
 
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
@@ -55,10 +55,10 @@ describe("Records", () => {
 
     test("should return false when the record not exists in this page", () => {
       const page = new PageCriteria();
-      page.withValue({
+      page.client = {
         page: 1,
         many: 10,
-      });
+      };
 
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 2),
@@ -73,10 +73,10 @@ describe("Records", () => {
   describe("getRecordOn", () => {
     test("should return the record when the record exists", () => {
       const page = new PageCriteria();
-      page.withValue({
+      page.client = {
         page: 1,
         many: 10,
-      });
+      };
 
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
@@ -89,10 +89,10 @@ describe("Records", () => {
 
     test("should return undefined when the record not exists in this page", () => {
       const page = new PageCriteria();
-      page.withValue({
+      page.client = {
         page: 1,
         many: 10,
-      });
+      };
 
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 2),

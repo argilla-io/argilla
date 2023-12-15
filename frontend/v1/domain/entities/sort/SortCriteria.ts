@@ -14,8 +14,8 @@ export class SortCriteria extends Criteria {
     });
   }
 
-  witValue(value: SortSearch[]) {
-    this.value = value.map((v) => ({ ...v }));
+  withValue(sortCriteria: SortCriteria) {
+    this.value = sortCriteria.value.map((v) => ({ ...v }));
   }
 
   reset() {

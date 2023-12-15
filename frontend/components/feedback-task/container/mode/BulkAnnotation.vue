@@ -4,8 +4,7 @@
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
           v-if="
-            records.hasRecordsToAnnotate &&
-            recordCriteria.committed.status === 'pending'
+            records.hasRecordsToAnnotate && recordCriteria.committed.isPending
           "
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>

@@ -6,15 +6,44 @@ import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";
 import { PageCriteria } from "../page/PageCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
-interface CommittedRecordCriteria {
-  page: PageCriteria;
-  status: RecordStatus;
-  searchText: string;
-  metadata: MetadataCriteria;
-  sortBy: SortCriteria;
-  response: ResponseCriteria;
-  suggestion: SuggestionCriteria;
-  similaritySearch: SimilarityCriteria;
+class CommittedRecordCriteria {
+  public readonly page: PageCriteria;
+  public readonly status: RecordStatus;
+  public readonly searchText: string;
+  public readonly metadata: MetadataCriteria;
+  public readonly sortBy: SortCriteria;
+  public readonly response: ResponseCriteria;
+  public readonly suggestion: SuggestionCriteria;
+  public readonly similaritySearch: SimilarityCriteria;
+
+  constructor(private readonly recordCriteria: RecordCriteria) {
+    const pageCommitted = new PageCriteria();
+    const similaritySearchCommitted = new SimilarityCriteria();
+    const metadataCommitted = new MetadataCriteria();
+    const sortByCommitted = new SortCriteria();
+    const responseCommitted = new ResponseCriteria();
+    const suggestionCommitted = new SuggestionCriteria();
+
+    pageCommitted.withValue(this.recordCriteria.page);
+    metadataCommitted.withValue(this.recordCriteria.metadata);
+    sortByCommitted.withValue(this.recordCriteria.sortBy);
+    suggestionCommitted.withValue(this.recordCriteria.suggestion);
+    responseCommitted.withValue(this.recordCriteria.response);
+    similaritySearchCommitted.withValue(this.recordCriteria.similaritySearch);
+
+    this.status = this.recordCriteria.status;
+    this.searchText = this.recordCriteria.searchText;
+    this.page = pageCommitted;
+    this.metadata = metadataCommitted;
+    this.sortBy = sortByCommitted;
+    this.response = responseCommitted;
+    this.suggestion = suggestionCommitted;
+    this.similaritySearch = similaritySearchCommitted;
+  }
+
+  get isPending() {
+    return this.status === "pending";
+  }
 }
 
 export class RecordCriteria {
@@ -158,37 +187,7 @@ export class RecordCriteria {
   }
 
   commit() {
-    // TODO: Move to instance of commit
-    const pageCommitted = new PageCriteria();
-    const similaritySearchCommitted = new SimilarityCriteria();
-    const metadataCommitted = new MetadataCriteria();
-    const sortByCommitted = new SortCriteria();
-    const responseCommitted = new ResponseCriteria();
-    const suggestionCommitted = new SuggestionCriteria();
-
-    pageCommitted.withValue(this.page.client, this.page.mode);
-    similaritySearchCommitted.withValue(
-      this.similaritySearch.recordId,
-      this.similaritySearch.vectorName,
-      this.similaritySearch.limit,
-      this.similaritySearch.order
-    );
-    metadataCommitted.withValue(this.metadata.value);
-    sortByCommitted.witValue(this.sortBy.value);
-    responseCommitted.withValue(this.response.value);
-    suggestionCommitted.withValue(this.suggestion.value);
-
-    this.committed = {
-      status: this.status,
-      searchText: this.searchText,
-
-      page: pageCommitted,
-      metadata: metadataCommitted,
-      sortBy: sortByCommitted,
-      response: responseCommitted,
-      suggestion: suggestionCommitted,
-      similaritySearch: similaritySearchCommitted,
-    };
+    this.committed = new CommittedRecordCriteria(this);
 
     this.isChangingAutomatically = false;
   }
@@ -196,22 +195,18 @@ export class RecordCriteria {
   rollback() {
     this.status = this.committed.status;
     this.searchText = this.committed.searchText;
-    this.metadata = this.committed.metadata;
 
-    this.page.withValue(this.committed.page.client, this.committed.page.mode);
-    this.metadata.withValue(this.committed.metadata.value);
-    this.sortBy.witValue(this.committed.sortBy.value);
-    this.response.withValue(this.committed.response.value);
-    this.suggestion.withValue(this.committed.suggestion.value);
-    this.similaritySearch.withValue(
-      this.committed.similaritySearch.recordId,
-      this.committed.similaritySearch.vectorName,
-      this.committed.similaritySearch.limit,
-      this.committed.similaritySearch.order
-    );
+    this.page.withValue(this.committed.page);
+    this.metadata.withValue(this.committed.metadata);
+    this.sortBy.withValue(this.committed.sortBy);
+    this.response.withValue(this.committed.response);
+    this.suggestion.withValue(this.committed.suggestion);
+    this.similaritySearch.withValue(this.committed.similaritySearch);
   }
 
   reset() {
+    // TODO: Review why the similarity is not calling here...
+
     this.page.reset();
     this.metadata.reset();
     this.sortBy.reset();

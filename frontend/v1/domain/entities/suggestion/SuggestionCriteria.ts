@@ -70,8 +70,8 @@ export class SuggestionCriteria extends Criteria {
     });
   }
 
-  withValue(value: SuggestionSearch[]) {
-    this.value = value.map((v) => {
+  withValue(suggestionCriteria: SuggestionCriteria) {
+    this.value = suggestionCriteria.value.map((v) => {
       return {
         name: v.name,
         value: v.value,

@@ -13,6 +13,8 @@ export abstract class Criteria {
 
   abstract complete(urlParams: string);
 
+  abstract withValue(criteria: Criteria);
+
   abstract reset();
 
   protected getRangeValue(value: string): RangeValue {
