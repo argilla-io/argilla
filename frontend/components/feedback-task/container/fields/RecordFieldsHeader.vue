@@ -48,7 +48,7 @@ export default {
     },
     selectedRecords: {
       type: Array,
-      default: [],
+      default: () => [],
     },
   },
   methods: {

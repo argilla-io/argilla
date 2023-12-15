@@ -87,7 +87,7 @@ export default {
     newFiltersChanged() {
       if (!this.recordCriteria.hasChanges) return;
       if (!this.recordCriteria.isChangingAutomatically) {
-        this.recordCriteria.page = 1;
+        this.recordCriteria.page.goToFirst();
       }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);

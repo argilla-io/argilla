@@ -89,7 +89,7 @@ export default {
     },
     filterChanged() {
       if (!this.recordCriteria.hasChanges) return;
-      this.recordCriteria.page = 1;
+      this.recordCriteria.page.goToFirst();
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },

@@ -58,7 +58,7 @@ export default {
     },
     selectedRecords: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     fixedHeader: {
       type: Boolean,

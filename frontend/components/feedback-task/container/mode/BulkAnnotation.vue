@@ -129,7 +129,7 @@ export default {
     },
   },
   watch: {
-    "recordCriteria.committed.status"() {
+    "recordCriteria.status"() {
       this.recordCriteria.page.focusMode();
     },
     "recordCriteria.committed.page"() {
