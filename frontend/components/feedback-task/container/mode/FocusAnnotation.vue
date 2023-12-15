@@ -66,8 +66,6 @@ export default {
   },
   methods: {
     async onSubmit() {
-      if (this.isSubmitButtonDisabled) return;
-
       await this.submit(this.record);
       this.$emit("on-submit-responses");
     },

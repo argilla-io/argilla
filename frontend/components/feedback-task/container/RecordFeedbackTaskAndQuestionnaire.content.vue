@@ -2,7 +2,10 @@
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
 
   <BulkAnnotation
-    v-else-if="recordCriteria.committed.page.isBulkMode && record?.isPending"
+    v-else-if="
+      recordCriteria.committed.page.isBulkMode &&
+      recordCriteria.committed.status === 'pending'
+    "
     :record-criteria="recordCriteria"
     :dataset-vectors="datasetVectors"
     :records="records"

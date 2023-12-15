@@ -24,10 +24,6 @@ export class SubmitBulkAnnotationUseCase {
         record.submit(response);
       });
 
-    // TODO: Handle error
-    // responses[0].success
-    // responses[0].error
-
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
     );

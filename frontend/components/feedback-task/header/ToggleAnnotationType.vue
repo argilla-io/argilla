@@ -2,14 +2,14 @@
   <div class="annotation-type-switch">
     <button
       class="switch"
-      :class="{ active: recordCriteria.page.isFocusMode }"
+      :class="{ active: recordCriteria.committed.page.isFocusMode }"
       @click="switchFocusMode()"
     >
       Focus
     </button>
     <button
       class="switch"
-      :class="{ active: recordCriteria.page.isBulkMode }"
+      :class="{ active: recordCriteria.committed.page.isBulkMode }"
       @click="switchFocusMode()"
     >
       Bulk

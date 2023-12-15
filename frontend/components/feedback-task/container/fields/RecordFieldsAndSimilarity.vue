@@ -16,11 +16,10 @@
         <RecordFieldsHeader
           class="fields__fixed-header"
           :selectableRecord="selectableRecord"
-          :selected-record-id="selectedRecordId"
           :record="record"
           :recordCriteria="recordCriteria"
           :datasetVectors="datasetVectors"
-          @input="onInput"
+          @on-select-record="onSelectedRecord"
         />
       </template>
       <template v-else v-slot:content-header>
@@ -52,9 +51,6 @@ export default {
       type: Object,
       required: true,
     },
-    selectedRecordId: {
-      type: [String, null],
-    },
     selectableRecord: {
       type: Boolean,
       default: false,
@@ -64,14 +60,9 @@ export default {
       default: false,
     },
   },
-  model: {
-    prop: "selectedRecordId",
-    event: "input",
-  },
   methods: {
-    onInput(isSelected) {
-      const input = isSelected ? this.record.id : null;
-      this.$emit("input", input);
+    onSelectedRecord(isSelected) {
+      this.$emit("on-select-record", isSelected, this.record);
     },
   },
 };

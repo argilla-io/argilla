@@ -34,7 +34,12 @@
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
           @on-click="onDiscard"
-          :title="$t('shortcuts.questions_form.discard')"
+          :disabled="!areActionsEnabled"
+          :title="
+            !areActionsEnabled
+              ? $t('to_annotate_record_bulk_required')
+              : $t('shortcuts.questions_form.discard')
+          "
         >
           <span class="button__shortcuts" v-text="'⌫'" /><span
             v-text="$t('questions_form.discard')"
@@ -45,9 +50,11 @@
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
           @on-click="onSaveDraft"
-          :disabled="isSaveDraftButtonDisabled"
+          :disabled="!areActionsEnabled"
           :title="
-            $platform.isMac
+            !areActionsEnabled
+              ? $t('to_annotate_record_bulk_required')
+              : $platform.isMac
               ? $t('shortcuts.questions_form.draft_mac')
               : $t('shortcuts.questions_form.draft')
           "
@@ -65,9 +72,11 @@
           type="submit"
           class="button--submit"
           :class="isSubmitting ? '--button--submitting' : null"
-          :disabled="isSubmitButtonDisabled"
+          :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
           :title="
-            isSubmitButtonDisabled
+            !areActionsEnabled
+              ? $t('to_annotate_record_bulk_required')
+              : areQuestionsCompletedCorrectly
               ? $t('to_submit_complete_required')
               : $t('shortcuts.questions_form.submit')
           "
@@ -93,6 +102,10 @@ export default {
     record: {
       type: Object,
       required: true,
+    },
+    areActionsEnabled: {
+      type: Boolean,
+      default: true,
     },
     isSubmitting: {
       type: Boolean,
@@ -133,11 +146,8 @@ export default {
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
-    isSubmitButtonDisabled() {
+    areQuestionsCompletedCorrectly() {
       return !this.questionAreCompletedCorrectly;
-    },
-    isSaveDraftButtonDisabled() {
-      return false;
     },
   },
   watch: {
@@ -180,6 +190,8 @@ export default {
         return;
       }
 
+      if (!this.areActionsEnabled) return;
+
       switch (code) {
         case "KeyS": {
           if (this.$platform.isMac) {
@@ -204,12 +216,19 @@ export default {
       }
     },
     onDiscard() {
+      if (!this.areActionsEnabled) return;
+
       this.$emit("on-discard-responses");
     },
     onSubmit() {
+      if (!this.areActionsEnabled || this.areQuestionsCompletedCorrectly)
+        return;
+
       this.$emit("on-submit-responses");
     },
     onSaveDraft() {
+      if (!this.areActionsEnabled) return;
+
       this.$emit("on-save-draft");
     },
     updateQuestionAutofocus(index) {

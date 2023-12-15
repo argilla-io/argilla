@@ -4,8 +4,7 @@
       <BaseCheckbox
         v-if="selectableRecord"
         class="fields__checkbox"
-        :value="selectedRecordId"
-        @input="$emit('input', $event)"
+        @input="onSelectedRecord"
       />
     </div>
     <div class="fields__header--right">
@@ -34,9 +33,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    selectedRecordId: {
-      type: String,
-    },
     record: {
       type: Object,
       required: true,
@@ -50,9 +46,10 @@ export default {
       default: () => [],
     },
   },
-  model: {
-    prop: "selectedRecordId",
-    event: "input",
+  methods: {
+    onSelectedRecord(isSelected) {
+      this.$emit("on-select-record", isSelected, this.record);
+    },
   },
 };
 </script>

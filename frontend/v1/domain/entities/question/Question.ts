@@ -147,6 +147,10 @@ export class Question {
     this.initializeOriginal();
   }
 
+  clone(questionReference: Question) {
+    this.answer = questionReference.answer;
+  }
+
   responseIfUnanswered(answer: Answer) {
     if (this.suggestion) {
       this.answer.responseIfUnanswered(this.suggestion);

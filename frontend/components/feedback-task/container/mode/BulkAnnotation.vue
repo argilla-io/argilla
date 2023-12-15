@@ -3,14 +3,17 @@
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria">
         <ToggleAnnotationType
-          v-if="records.hasRecordsToAnnotate && record?.isPending"
+          v-if="
+            records.hasRecordsToAnnotate &&
+            recordCriteria.committed.status === 'pending'
+          "
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
       <div class="wrapper__records__header">
         <BaseCheckbox
           v-if="records.hasRecordsToAnnotate"
           class="wrapper__records__header__checkbox"
-          :value="filteredSelectedRecords.length === records.records.length"
+          :value="selectedRecords.length === recordsOnPage.length"
           @input="toggleAllRecords"
         />
         <PageSizeSelector
@@ -21,17 +24,15 @@
       </div>
       <div class="bulk__records">
         <RecordFieldsAndSimilarity
-          v-for="(record, index) in records.getRecordsOn(
-            recordCriteria.committed.page
-          )"
+          v-for="record in recordsOnPage"
           :key="record.id"
           :datasetVectors="datasetVectors"
           :records="records"
           :recordCriteria="recordCriteria"
           :record="record"
-          :selectable-record="true"
-          v-model="selectedRecords[index]"
           :fixed-header="true"
+          :selectable-record="true"
+          @on-select-record="onSelectRecord"
         />
       </div>
       <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
@@ -49,6 +50,7 @@
       :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
+      :are-actions-enabled="hasSelectedAtLeastOneRecord"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
       @on-save-draft="onSaveDraft"
@@ -89,35 +91,49 @@ export default {
     };
   },
   computed: {
-    filteredSelectedRecords() {
-      return this.selectedRecords.filter((r) => r);
+    recordsOnPage() {
+      return this.records.getRecordsOn(this.recordCriteria.committed.page);
+    },
+    hasSelectedAtLeastOneRecord() {
+      return this.selectedRecords.length > 0;
     },
   },
   methods: {
-    async onSubmit() {
-      if (this.isSubmitButtonDisabled) return;
+    onSelectRecord(isSelected, record) {
+      if (isSelected) {
+        return this.selectedRecords.push(record);
+      }
 
-      await this.submit(this.filteredSelectedRecords, this.record);
+      this.selectedRecords = this.selectedRecords.filter(
+        (r) => r.id !== record.id
+      );
+    },
+    async onSubmit() {
+      await this.submit(this.selectedRecords, this.record);
       this.$emit("on-submit-responses");
     },
     async onDiscard() {
-      if (this.record.isDiscarded) return;
-
-      await this.discard(this.filteredSelectedRecords, this.record);
+      await this.discard(this.selectedRecords, this.record);
       this.$emit("on-discard-responses");
     },
     async onSaveDraft() {
       // await this.saveDraft(this.record);
     },
     toggleAllRecords() {
-      if (this.filteredSelectedRecords.length === this.records.records.length) {
+      if (this.selectedRecords.length === this.records.records.length) {
         this.selectedRecords = [];
       } else {
-        this.selectedRecords = this.records.records.map((r) => r.id);
+        this.selectedRecords = this.recordsOnPage.map((r) => r.id);
       }
     },
   },
   watch: {
+    "recordCriteria.committed.status"() {
+      this.recordCriteria.page.focusMode();
+    },
+    "recordCriteria.committed.page"() {
+      this.selectedRecords = [];
+    },
     "recordCriteria.page.client.many"() {
       this.recordCriteria.page.goToFirst();
 
