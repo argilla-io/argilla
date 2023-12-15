@@ -20,6 +20,7 @@ These are the section headers that we use:
 
 - Added strategy to handle and translate errors from server for `401 http status code`. ([#4362](https://github.com/argilla-io/argilla/pull/4362))
 - Added `POST /api/v1/me/responses/bulk` endpoint to create responses in bulk for current user. ([#4380](https://github.com/argilla-io/argilla/pull/4380))
+- Added list support for term metadata properties. (Closes [#4359](https://github.com/argilla-io/argilla/issues/4359))
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 
