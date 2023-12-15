@@ -83,7 +83,7 @@ export class Record {
 
       if (!questionReference) return;
 
-      question.response(questionReference.answer.answer);
+      question.clone(questionReference);
     });
   }
 
