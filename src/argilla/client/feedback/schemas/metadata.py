@@ -145,11 +145,21 @@ class TermsMetadataProperty(MetadataPropertySchema):
             settings["values"] = self.values
         return settings
 
-    def _all_values_exist(self, introduced_value: Optional[str] = None) -> Optional[str]:
-        if introduced_value is not None and self.values is not None and introduced_value not in self.values:
-            raise ValueError(
-                f"Provided '{self.name}={introduced_value}' is not valid, only values in {self.values} are allowed."
-            )
+    def _all_values_exist(self, introduced_value: Optional[Union[str, List[str]]] = None) -> Optional[str]:
+        if introduced_value is None or self.values is None:
+            return introduced_value
+
+        if isinstance(introduced_value, str):
+            values = [introduced_value]
+        else:
+            values = introduced_value
+
+        for value in values:
+            if value not in self.values:
+                raise ValueError(
+                    f"Provided '{self.name}={value}' is not valid, only values in {self.values} are allowed."
+                )
+
         return introduced_value
 
     def _validator(self, value: Any) -> Any:
