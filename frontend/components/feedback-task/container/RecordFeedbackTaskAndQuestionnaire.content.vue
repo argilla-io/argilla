@@ -164,3 +164,44 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+  gap: $base-space * 2;
+  padding: $base-space * 2;
+
+  @include media("<desktop") {
+    flex-flow: column;
+    overflow: auto;
+  }
+  &__records,
+  &__form {
+    @include media("<desktop") {
+      overflow: visible;
+      height: auto;
+      max-height: none !important;
+    }
+  }
+  &__records {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
+    height: 100%;
+    min-width: 0;
+  }
+  &__text {
+    color: $black-54;
+  }
+  &--empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+</style>

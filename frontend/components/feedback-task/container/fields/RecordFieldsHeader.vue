@@ -7,9 +7,9 @@
         :value="selectedRecordId"
         @input="$emit('input', $event)"
       />
-      <StatusTag class="fields__status" :recordStatus="record.status" />
     </div>
     <div class="fields__header--right">
+      <RecordStatus class="fields__status" :recordStatus="record.status" />
       <SimilarityScorePercentage
         v-if="recordCriteria.isFilteringBySimilarity && record.score.percentage"
         class="similarity__progress"

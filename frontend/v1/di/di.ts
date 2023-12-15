@@ -28,7 +28,6 @@ import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { SubmitBulkAnnotationUseCase } from "@/v1/domain/usecases/submit-bulk-annotation-use-case";
 import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
-import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
 import { DiscardBulkAnnotationUseCase } from "@/v1/domain/usecases/discard-bulk-annotation-use-case";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
@@ -92,15 +91,13 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
-    register(ClearRecordUseCase)
-      .withDependencies(RecordRepository, useEventDispatcher)
-      .build(),
-
     register(GetUserMetricsUseCase)
       .withDependencies(MetricsRepository, useMetrics)
       .build(),
 
-    register(SaveDraftRecord).withDependency(RecordRepository).build(),
+    register(SaveDraftRecord)
+      .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
 
     register(GetDatasetSettingsUseCase)
       .withDependencies(

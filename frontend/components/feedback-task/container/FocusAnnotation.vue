@@ -27,14 +27,12 @@
       :class="statusClass"
       :datasetId="recordCriteria.datasetId"
       :record="record"
-      :draft-saving="draftSaving"
+      :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
-      @on-clear-responses="onClear"
       @on-save-draft="onSaveDraft"
-      @on-save-draft-immediately="onSaveDraftImmediately"
     />
   </div>
 </template>
@@ -79,14 +77,8 @@ export default {
       await this.discard(this.record);
       this.$emit("on-discard-responses");
     },
-    async onClear() {
-      await this.clear(this.record);
-    },
     async onSaveDraft() {
-      await this.saveDraft(this.record);
-    },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
+      await this.saveAsDraft(this.record);
     },
   },
   setup() {

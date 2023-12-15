@@ -1,24 +1,14 @@
 <template>
   <span
     :key="recordStatus"
-    :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]"
+    :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"
-  >
-    <svgicon
-      v-if="getStatusInfo.icon && !minimal"
-      :name="getStatusInfo.icon"
-      width="14"
-      height="14"
-      color="#ffffff"
-    ></svgicon>
-    {{ getStatusInfo.name }}
+    ><span class="bullet"></span>
+    <span>{{ getStatusInfo.name }}</span>
   </span>
 </template>
 
 <script>
-import "assets/icons/validate";
-import "assets/icons/time";
-import "assets/icons/discard";
 export default {
   props: {
     recordStatus: {
@@ -28,13 +18,6 @@ export default {
   computed: {
     getStatusInfo() {
       switch (this.recordStatus) {
-        case "validated":
-          return {
-            name: "Validate",
-            icon: "validate",
-            class: "--validated",
-          };
-
         case "edited":
           return {
             name: "Pending",
@@ -75,41 +58,48 @@ export default {
 </script>
 
 <style scoped lang="scss">
+%bullet {
+  content: "";
+  display: inline-block;
+  width: $base-space;
+  height: $base-space;
+  border-radius: $border-radius-rounded;
+}
 .status-tag {
-  display: inline-flex;
-  z-index: 0;
+  display: flex;
   align-items: center;
-  padding: 0.1em $base-space;
-  color: palette(white);
-  @include font-size(13px);
-  border-radius: 50px;
+  gap: $base-space;
+  @include font-size(14px);
   font-weight: 500;
 
-  &.--validated {
-    background: palette(green);
-    border: 1px solid palette(green);
-  }
-
   &.--discarded {
-    background: $discarded-color;
-    border: 1px solid $discarded-color;
+    color: $discarded-color;
+    .bullet:before {
+      @extend %bullet;
+      background: $discarded-color;
+    }
   }
   &.--submitted {
-    background: $submitted-color;
-    border: 1px solid $submitted-color;
+    color: $submitted-color;
+    .bullet:before {
+      @extend %bullet;
+      background: $submitted-color;
+    }
   }
   &.--pending,
   &.--edited {
-    background: $pending-color;
-    border: 1px solid $pending-color;
+    color: $pending-color;
+    .bullet:before {
+      @extend %bullet;
+      background: $pending-color;
+    }
   }
   &.--draft {
-    background: $draft-color;
-    border: 1px solid $draft-color;
-  }
-
-  .svg-icon {
-    margin-right: 0.5em;
+    color: $draft-color;
+    .bullet:before {
+      @extend %bullet;
+      background: $draft-color;
+    }
   }
 }
 </style>

@@ -32,14 +32,20 @@
       :multiple="true"
       :progress="metrics.percentage.submitted"
       :progress-secondary="metrics.percentage.discarded"
-      progress-bg="#bb720a"
-      :color="itemColor(1)"
-      :color-secondary="itemColor(2)"
+      :progress-tertiary="metrics.percentage.draft"
+      :progress-bg="itemColor(0)"
+      :color="itemColor(2)"
+      :color-secondary="itemColor(1)"
+      :color-tertiary="itemColor(3)"
     >
     </BaseProgress>
     <div class="scroll">
       <ul class="metrics__list">
-        <li v-for="(status, index) in progressItems" :key="index">
+        <li
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="metrics__list__item"
+        >
           <span
             class="color-bullet"
             :style="{ backgroundColor: status.color }"
@@ -78,6 +84,11 @@ export default {
           name: RECORD_STATUS.PENDING,
           color: RECORD_STATUS_COLOR.PENDING,
           progress: this.metrics.pending,
+        },
+        {
+          name: RECORD_STATUS.DRAFT,
+          color: RECORD_STATUS_COLOR.DRAFT,
+          progress: this.metrics.draft,
         },
         {
           name: RECORD_STATUS.SUBMITTED,
@@ -125,11 +136,10 @@ export default {
   }
 }
 .color-bullet {
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
+  height: $base-space;
+  width: $base-space;
+  border-radius: $border-radius-rounded;
   display: inline-block;
-  margin: 0.3em 0.3em 0.3em 0;
 }
 :deep() {
   .metrics__title {
@@ -160,9 +170,10 @@ export default {
     list-style: none;
     padding-left: 0;
     margin-bottom: $base-space * 3;
-    li {
+    &__item {
       display: flex;
       align-items: center;
+      gap: $base-space;
       margin-bottom: $base-space;
       @include font-size(13px);
     }
