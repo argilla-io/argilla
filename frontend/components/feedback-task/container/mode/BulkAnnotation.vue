@@ -106,14 +106,8 @@ export default {
       await this.discard(this.filteredSelectedRecords, this.record);
       this.$emit("on-discard-responses");
     },
-    async onClear() {
-      // await this.clear(this.record);
-    },
     async onSaveDraft() {
       // await this.saveDraft(this.record);
-    },
-    async onSaveDraftImmediately() {
-      // await this.saveDraftImmediately(this.record);
     },
     toggleAllRecords() {
       if (this.filteredSelectedRecords.length === this.records.records.length) {
