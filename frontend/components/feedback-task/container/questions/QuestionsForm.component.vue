@@ -352,7 +352,7 @@ export default {
     &:hover {
       background: #b3c4ff;
     }
-    &:active,
+    &:active:not([disabled]),
     &.--button--submitting {
       background: $submitted-color;
       color: palette(white);
@@ -362,7 +362,7 @@ export default {
     &:hover {
       background: #b2e6ee;
     }
-    &:active,
+    &:active:not([disabled]),
     &.--button--saving-draft {
       background: $draft-color;
       color: palette(white);
@@ -372,7 +372,7 @@ export default {
     &:hover {
       background: #e0dddd;
     }
-    &:active,
+    &:active:not([disabled]),
     &.--button--discarding {
       background: $discarded-color;
       color: palette(white);
