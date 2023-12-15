@@ -24,13 +24,14 @@
       </div>
       <div class="bulk__records">
         <RecordFieldsAndSimilarity
-          v-for="record in recordsOnPage"
+          v-for="(record, i) in recordsOnPage"
           :key="record.id"
           :datasetVectors="datasetVectors"
           :records="records"
           :recordCriteria="recordCriteria"
           :record="record"
           :fixed-header="true"
+          :show-record-similar="i === 0"
           :selectable-record="true"
           :selectedRecords="selectedRecords"
           @on-select-record="onSelectRecord"

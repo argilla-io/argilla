@@ -2,7 +2,7 @@
   <div class="fields">
     <SimilarityRecordReference
       v-show="recordCriteria.isFilteringBySimilarity"
-      v-if="!!records.reference"
+      v-if="showRecordSimilar && !!records.reference"
       :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
@@ -63,6 +63,10 @@ export default {
     fixedHeader: {
       type: Boolean,
       default: false,
+    },
+    showRecordSimilar: {
+      type: Boolean,
+      default: true,
     },
   },
   methods: {
