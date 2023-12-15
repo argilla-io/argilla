@@ -276,6 +276,39 @@ class TestSuiteRecords:
         }
         mock_search_engine.index_records.assert_not_called()
 
+    async def test_update_record_with_list_terms_metadata(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "metadata": {
+                    "terms-metadata-property": ["a", "b", "c"],
+                },
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": {
+                "terms-metadata-property": ["a", "b", "c"],
+            },
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
     async def test_update_record_with_no_suggestions(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
