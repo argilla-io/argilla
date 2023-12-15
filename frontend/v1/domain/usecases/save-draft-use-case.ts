@@ -12,9 +12,8 @@ export class SaveDraftRecord {
   async execute(record: Record) {
     const response = await this.recordRepository.saveDraft(record);
 
-    if (record.answer) {
-      this.eventDispatcher.dispatch(new RecordResponseUpdatedEvent(record));
-    }
     record.submit(response);
+
+    this.eventDispatcher.dispatch(new RecordResponseUpdatedEvent(record));
   }
 }
