@@ -292,7 +292,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     border-radius: $border-radius-m;
-    border: 1px solid #cbd1ea;
+    border: 1px solid #c6d1ff;
     background: #f5f7ff;
     container-type: inline-size;
   }
