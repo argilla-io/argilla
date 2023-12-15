@@ -21,6 +21,12 @@ export class Records {
     return this.records.find((record) => record.page === criteria.client.page);
   }
 
+  getRecordsOn(criteria: PageCriteria): Record[] {
+    return this.records
+      .filter((record) => record.page >= criteria.client.page)
+      .splice(0, criteria.client.many);
+  }
+
   getById(recordId: string): Record {
     return this.records.find((record) => record.id === recordId);
   }

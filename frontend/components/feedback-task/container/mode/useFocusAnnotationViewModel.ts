@@ -7,7 +7,7 @@ import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
 
-export const useQuestionFormViewModel = () => {
+export const useFocusAnnotationViewModel = () => {
   const queue = useQueue();
   const debounceForSubmit = useDebounce(300);
 

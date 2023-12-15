@@ -5,14 +5,12 @@ import { DiscardBulkAnnotationUseCase } from "~/v1/domain/usecases/discard-bulk-
 import { SubmitBulkAnnotationUseCase } from "~/v1/domain/usecases/submit-bulk-annotation-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useQueue } from "~/v1/infrastructure/services/useQueue";
-import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 
-export const useBulkAnnotationQuestionFormViewModel = () => {
-  const beforeUnload = useBeforeUnload();
+export const useBulkAnnotationViewModel = () => {
   const queue = useQueue();
   const debounceForSubmit = useDebounce(300);
 
-  const draftSaving = ref(false);
+  const isDraftSaving = ref(false);
   const isDiscarding = ref(false);
   const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardBulkAnnotationUseCase);
@@ -20,7 +18,6 @@ export const useBulkAnnotationQuestionFormViewModel = () => {
 
   const discard = async (records: Record[], recordReference: Record) => {
     isDiscarding.value = true;
-    beforeUnload.destroy();
 
     await queue.enqueue(() => {
       return discardUseCase.execute(records, recordReference);
@@ -33,7 +30,6 @@ export const useBulkAnnotationQuestionFormViewModel = () => {
 
   const submit = async (records: Record[], recordReference: Record) => {
     isSubmitting.value = true;
-    beforeUnload.destroy();
 
     await queue.enqueue(() => {
       return submitUseCase.execute(records, recordReference);
@@ -45,7 +41,7 @@ export const useBulkAnnotationQuestionFormViewModel = () => {
   };
 
   return {
-    draftSaving,
+    isDraftSaving,
     isDiscarding,
     isSubmitting,
     submit,
