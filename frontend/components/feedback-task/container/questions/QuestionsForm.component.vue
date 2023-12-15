@@ -295,6 +295,9 @@ export default {
     border: 1px solid #c6d1ff;
     background: #f5f7ff;
     container-type: inline-size;
+    &:hover {
+      border-color: transparent;
+    }
   }
 }
 
