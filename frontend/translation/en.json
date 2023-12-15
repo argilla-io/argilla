@@ -23,7 +23,7 @@
     },
     "questions_form": {
       "clear": "Clear (⇧ shift + ␣ space)",
-      "draft": "Save as draft (ctrl + s)",
+      "draft": "Save draft (ctrl + s)",
       "discard": "Discard (⇧ shift + ⌫ backspace)",
       "submit": "Submit (⇧ shift + ↵ enter)"
     }

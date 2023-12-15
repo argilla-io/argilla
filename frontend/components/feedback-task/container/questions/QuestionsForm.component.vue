@@ -36,7 +36,7 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span class="button__shortcuts" v-text="'⌫'" /><span
+          <span class="button__shortcuts --extra-large" v-text="'⌫'" /><span
             v-text="'Discard'"
           />
         </BaseButton>
@@ -48,12 +48,12 @@
           :disabled="isSaveDraftButtonDisabled"
           :title="$t('shortcuts.questions_form.draft')"
         >
-          <span
+          <span class="button__shortcuts-group"
             ><span class="button__shortcuts" v-text="'ctrl'" /><span
               class="button__shortcuts"
               v-text="'S'"
           /></span>
-          <span v-text="'Save as draft'" />
+          <span v-text="'Save draft'" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -66,7 +66,7 @@
               : $t('shortcuts.questions_form.submit')
           "
         >
-          <span class="button__shortcuts" v-text="'↵'" />
+          <span class="button__shortcuts --large" v-text="'↵'" />
           <span v-text="'Submit'" />
         </BaseButton>
       </div>
@@ -221,12 +221,10 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: clamp(33%, 520px, 40%);
+  gap: $base-space;
   max-height: 100%;
   min-width: 0;
   justify-content: space-between;
-  border-radius: $border-radius-m;
-  border: 1px solid transparent;
-  background: palette(white);
   margin-bottom: auto;
   &__header {
     display: flex;
@@ -254,69 +252,92 @@ export default {
     padding: $base-space * 2;
     overflow: auto;
     scroll-behavior: smooth;
-  }
-  &.--pending {
-    border-color: $black-10;
-  }
-  &.--draft,
-  &.--saving-draft {
-    border-color: $draft-color;
-  }
-  &.--discarded,
-  &.--discarding {
-    border-color: $discarded-color;
-  }
-  &.--submitted,
-  &.--submitting {
-    border-color: $submitted-color;
-  }
-  &.--saving-draft {
-    box-shadow: 0 0 0 1px $draft-color;
-  }
-  &.--discarding {
-    box-shadow: 0 0 0 1px $discarded-color;
-  }
-  &.--submitting {
-    box-shadow: 0 0 0 1px $submitted-color;
-  }
-  &.--waiting .questions-form__content {
-    opacity: 0.7;
+    border-radius: $border-radius-m;
+    border: 1px solid transparent;
+    background: palette(white);
+    .--pending & {
+      border-color: $black-10;
+    }
+    .--draft &,
+    .--saving-draft & {
+      border-color: $draft-color;
+    }
+    .--discarded &,
+    .--discarding & {
+      border-color: $discarded-color;
+    }
+    .--submitted &,
+    .--submitting & {
+      border-color: $submitted-color;
+    }
+    .--saving-draft & {
+      box-shadow: 0 0 0 1px $draft-color;
+    }
+    .--discarding & {
+      box-shadow: 0 0 0 1px $discarded-color;
+    }
+    .--submitting & {
+      box-shadow: 0 0 0 1px $submitted-color;
+    }
+    .--waiting & {
+      opacity: 0.7;
+    }
   }
 }
 
 .footer-form {
-  padding: 0 4px 4px 4px;
   &__content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: $border-radius;
+    border-radius: $border-radius-m;
+    border: 1px solid #cbd1ea;
     background: #f5f7ff;
+    container-type: inline-size;
   }
 }
 
 .button {
   &__shortcuts {
-    @include font-size(12px);
-    background: rgba(255, 255, 255, 0.742);
-    border-radius: 5px;
-    padding: 0 3px;
-    margin-right: 3px;
-    border: 1px solid $black-10;
-    color: $black-37;
-    height: 16px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 4px;
+    height: $base-space * 2;
+    border-radius: $border-radius;
+    border-width: 1px 1px 3px 1px;
+    border-color: $black-20;
+    border-style: solid;
+    box-sizing: content-box;
+    color: $black-87;
+    background: palette(white);
+    @include font-size(11px);
+    font-family: monospace, monospace;
+    padding: 0 4px;
+    &.--large {
+      @include font-size(16px);
+    }
+    &.--extra-large {
+      @include font-size(18px);
+    }
+  }
+  &__shortcuts-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
   }
   &--submit,
   &--draft,
   &--discard {
     width: 100%;
-    flex-direction: column;
-    justify-content: space-around;
-    color: $black-54;
+    justify-content: center;
+    color: $black-87;
     min-height: $base-space * 6;
-    border-radius: $border-radius;
+    border-radius: $border-radius-m;
+    padding: $base-space * 2 $base-space;
     &:hover,
     &.--button--discarding {
       color: $black-87;
@@ -396,6 +417,16 @@ export default {
       position: absolute;
       @extend %triangle-right;
       left: 100%;
+    }
+  }
+}
+
+@container (max-width: 500px) {
+  .button {
+    &--submit,
+    &--draft,
+    &--discard {
+      flex-direction: column;
     }
   }
 }
