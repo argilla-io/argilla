@@ -339,7 +339,7 @@ export default {
     justify-content: center;
     color: $black-87;
     min-height: $base-space * 6;
-    border-radius: $border-radius-m;
+    border-radius: $border-radius-m - 1;
     padding: $base-space * 2 $base-space;
     &:hover,
     &.--button--discarding {
@@ -358,7 +358,6 @@ export default {
     &:active:not([disabled]),
     &.--button--submitting {
       background: $submitted-color;
-      color: palette(white);
     }
   }
   &--draft {
@@ -368,7 +367,6 @@ export default {
     &:active:not([disabled]),
     &.--button--saving-draft {
       background: $draft-color;
-      color: palette(white);
     }
   }
   &--discard {
@@ -378,7 +376,6 @@ export default {
     &:active:not([disabled]),
     &.--button--discarding {
       background: $discarded-color;
-      color: palette(white);
     }
   }
 }
