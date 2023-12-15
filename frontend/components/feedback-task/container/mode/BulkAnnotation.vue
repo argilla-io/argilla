@@ -32,6 +32,7 @@
           :record="record"
           :fixed-header="true"
           :selectable-record="true"
+          :selectedRecords="selectedRecords"
           @on-select-record="onSelectRecord"
         />
       </div>
@@ -120,10 +121,10 @@ export default {
       // await this.saveDraft(this.record);
     },
     toggleAllRecords() {
-      if (this.selectedRecords.length === this.records.records.length) {
+      if (this.selectedRecords.length === this.recordsOnPage.length) {
         this.selectedRecords = [];
       } else {
-        this.selectedRecords = this.recordsOnPage.map((r) => r.id);
+        this.selectedRecords = [...this.recordsOnPage];
       }
     },
   },

@@ -15,10 +15,11 @@
       <template v-if="fixedHeader" v-slot:fixed-header>
         <RecordFieldsHeader
           class="fields__fixed-header"
-          :selectableRecord="selectableRecord"
           :record="record"
           :recordCriteria="recordCriteria"
           :datasetVectors="datasetVectors"
+          :selectableRecord="selectableRecord"
+          :selectedRecords="selectedRecords"
           @on-select-record="onSelectedRecord"
         />
       </template>
@@ -54,6 +55,10 @@ export default {
     selectableRecord: {
       type: Boolean,
       default: false,
+    },
+    selectedRecords: {
+      type: Array,
+      default: [],
     },
     fixedHeader: {
       type: Boolean,

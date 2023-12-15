@@ -4,6 +4,7 @@
       <BaseCheckbox
         v-if="selectableRecord"
         class="fields__checkbox"
+        :value="selectedRecords.includes(record)"
         @input="onSelectedRecord"
       />
     </div>
@@ -44,6 +45,10 @@ export default {
     datasetVectors: {
       type: Array,
       default: () => [],
+    },
+    selectedRecords: {
+      type: Array,
+      default: [],
     },
   },
   methods: {
