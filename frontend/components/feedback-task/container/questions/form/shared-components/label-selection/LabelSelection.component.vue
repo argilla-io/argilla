@@ -349,6 +349,7 @@ $label-dark-color: palette(purple, 200);
 .label-text {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: $base-space;
   width: 100%;
   height: 32px;
