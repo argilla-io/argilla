@@ -12,5 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from .auth_provider import DBAuthProvider
+from .auth_provider.base import AuthProvider, api_key_header
+from .model import User
 
-from .factory import auth
+auth = DBAuthProvider.new_instance()
