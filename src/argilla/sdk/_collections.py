@@ -60,5 +60,3 @@ class QuestionsCollection:
 
     def __getitem__(self, key: str) -> api.Question:
         return api.Question.by_name(self.dataset.id, name=key)
-
-

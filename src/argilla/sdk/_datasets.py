@@ -17,7 +17,8 @@ from uuid import UUID
 
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.workspaces import Workspace
-from argilla.sdk import _api as api, _models as models
+from argilla.sdk import _api as api
+from argilla.sdk import _models as models
 from argilla.sdk._collections import FieldsCollection, QuestionsCollection
 from argilla.sdk._models import DatasetConfiguration
 
