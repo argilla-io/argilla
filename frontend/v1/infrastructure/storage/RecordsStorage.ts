@@ -1,13 +1,14 @@
 import { IRecordStorage } from "@/v1/domain/services/IRecordStorage";
 import { useStoreFor } from "@/v1/store/create";
 import { Records } from "@/v1/domain/entities/record/Records";
+import { RecordStatus } from "~/v1/domain/entities/record/RecordAnswer";
 
 const useStoreForRecords = useStoreFor<Records, IRecordStorage>(Records);
 
 export const useRecords = () => {
   const state = useStoreForRecords();
 
-  const append = (newRecords: Records) => {
+  const append = (newRecords: Records, onQueue: RecordStatus) => {
     const oldRecords = state.get();
 
     const allRecords = [...oldRecords.records];
@@ -24,7 +25,12 @@ export const useRecords = () => {
       }
     });
 
-    state.save(new Records(allRecords, allRecords.length));
+    state.save(
+      new Records(
+        allRecords,
+        newRecords.total + oldRecords.recordsAlreadyAnnotatedOnQueueFor(onQueue)
+      )
+    );
   };
 
   const replace = (newRecords: Records) => {

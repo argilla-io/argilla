@@ -44,7 +44,7 @@ export class Records {
     const isMovingToNext = page > this.lastRecord.page;
 
     if (isMovingToNext) {
-      const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+      const recordsAnnotated = this.recordsAlreadyAnnotatedOnQueueFor(status);
 
       return {
         from: this.lastRecord.page + 1 - recordsAnnotated,
@@ -67,7 +67,7 @@ export class Records {
     return this.records[0];
   }
 
-  private quantityOfRecordsAnnotated(status: RecordStatus) {
+  public recordsAlreadyAnnotatedOnQueueFor(status: RecordStatus) {
     if (status === "pending")
       return this.records.filter(
         (record) => record.status !== "draft" && record.status !== status

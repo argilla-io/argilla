@@ -71,7 +71,7 @@ export class LoadRecordsToAnnotateUseCase {
   }
 
   private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
-    const { datasetId, page } = criteria;
+    const { datasetId, page, status } = criteria;
     const savedRecords = this.recordsStorage.get();
     const pagination = savedRecords.getPageToFind(criteria);
 
@@ -198,7 +198,7 @@ export class LoadRecordsToAnnotateUseCase {
     const records = new Records(recordsToAnnotate, recordsFromBackend.total);
 
     if (mode === "append") {
-      this.recordsStorage.append(records);
+      this.recordsStorage.append(records, status);
     } else {
       this.recordsStorage.replace(records);
     }
