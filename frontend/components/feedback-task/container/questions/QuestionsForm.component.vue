@@ -36,7 +36,7 @@
           @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
         >
-          <span class="button__shortcuts --extra-large" v-text="'⌫'" /><span
+          <span class="button__shortcuts" v-text="'⌫'" /><span
             v-text="$t('questions_form.discard')"
           />
         </BaseButton>
@@ -72,7 +72,7 @@
               : $t('shortcuts.questions_form.submit')
           "
         >
-          <span class="button__shortcuts --large" v-text="'↵'" />
+          <span class="button__shortcuts" v-text="'↵'" />
           <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
@@ -326,14 +326,9 @@ export default {
     color: $black-87;
     background: palette(white);
     @include font-size(11px);
-    font-family: monospace, monospace;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Open Sans", "Helvetica Neue", sans-serif;
     padding: 0 4px;
-    &.--large {
-      @include font-size(16px);
-    }
-    &.--extra-large {
-      @include font-size(18px);
-    }
   }
   &__shortcuts-group {
     display: flex;
