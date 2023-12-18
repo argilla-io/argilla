@@ -58,9 +58,7 @@ class TextDescriptivesExtractor:
         """
         self.model = model
         self.metrics = metrics
-        print("self.metrics", self.metrics)
         self.fields = fields
-        print("self.fields", self.fields)
         self.visible_for_annotators = visible_for_annotators
         self.show_progress = show_progress
         self.__basic_metrics = [
@@ -96,24 +94,19 @@ class TextDescriptivesExtractor:
             return None
         # If language is english, the default spacy model is used (to avoid warning message)
         if self.model == "en":
-            print("forsinglefield:self.metrics", self.metrics)
             field_metrics = td.extract_metrics(text=field_text, spacy_model="en_core_web_sm", metrics=self.metrics)
-            print("forsinglefield:field_metrics", field_metrics)
         else:
             field_metrics = td.extract_metrics(text=field_text, lang=self.model, metrics=self.metrics)
         # Drop text column
         field_metrics = field_metrics.drop("text", axis=1)
-        # Select all column names that contain ONLY NaNs
-        nan_columns = field_metrics.columns[field_metrics.isnull().all()].tolist()
-        print("forsinglefield:nan_columns", nan_columns)
-        if nan_columns:
-            _LOGGER.warning(f"The following columns contain only NaN values: {nan_columns}")
         # If basic metrics is None, use all basic metrics
         if basic_metrics is None and self.metrics is None:
-            print("forsinglefield:basic_metrics", basic_metrics)
-            print("forsinglefield:self.metrics", self.metrics)
             basic_metrics = self.__basic_metrics
             field_metrics = field_metrics.loc[:, basic_metrics]
+        # Select all column names that contain ONLY NaNs
+        nan_columns = field_metrics.columns[field_metrics.isnull().all()].tolist()
+        if nan_columns:
+            _LOGGER.warning(f"The following columns for {field} contain only NaN values: {nan_columns}")
         # Concatenate field name with the metric name
         field_metrics.columns = [f"{field}_{metric}" for metric in field_metrics.columns]
         return field_metrics
@@ -131,22 +124,16 @@ class TextDescriptivesExtractor:
             pd.DataFrame: A dataframe containing the text descriptives metrics for each record and field.
         """
         # If fields is None, use all fields
-        print("forallfields:before:fields", fields)
         if self.fields:
             fields = self.fields
         else:
             fields = list({key for record in records for key in record.fields.keys()})
-        print("forallfields: after:fields", fields)
         # Extract all metrics for each field
         field_metrics = {
             field: self._extract_metrics_for_single_field(records=records, field=field) for field in fields
         }
-        print("forallfields:field_metrics.items")
-        for field, metrics in field_metrics.items():
-            print(f"Field: {field}, Metrics: {metrics}")
         field_metrics = {field: metrics for field, metrics in field_metrics.items() if metrics is not None}
         # If there is only one field, return the metrics for that field directly
-        print(len(field_metrics))
         if len(field_metrics) == 1:
             return list(field_metrics.values())[0]
         else:
@@ -204,7 +191,6 @@ class TextDescriptivesExtractor:
         for col, dtype in df.dtypes.items():
             name = col
             title = name.replace("_", " ").title()
-            print("dtype", dtype)
             if dtype in ["object", "bool"]:
                 prop = TermsMetadataProperty(
                     name=name,
@@ -223,7 +209,6 @@ class TextDescriptivesExtractor:
                 prop = None
             if prop is not None:
                 properties.append(prop)
-            print(properties)
         return properties
 
     def _add_text_descriptives_to_metadata(
@@ -272,7 +257,6 @@ class TextDescriptivesExtractor:
         """
         # Extract text descriptives metrics from records
         extracted_metrics = self._extract_metrics_for_all_fields(records)
-        print("extracted_metrics:type", type(extracted_metrics))
         # If the dataframe doesn't contain any columns, return the original records and log a warning
         if extracted_metrics.shape[1] == 0:
             _LOGGER.warning(
