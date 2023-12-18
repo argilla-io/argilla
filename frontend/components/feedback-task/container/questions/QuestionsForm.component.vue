@@ -176,11 +176,12 @@ export default {
 
       switch (code) {
         case "KeyS": {
-          if (ctrlKey || metaKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.onSaveDraft();
-          }
+          if (this.$platform.isMac) {
+            if (!metaKey) return;
+          } else if (!ctrlKey) return;
+          event.preventDefault();
+          event.stopPropagation();
+          this.onSaveDraft();
           break;
         }
         case "Enter": {
