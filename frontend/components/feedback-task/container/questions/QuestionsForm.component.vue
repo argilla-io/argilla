@@ -360,7 +360,8 @@ export default {
       background: #b3c4ff;
     }
     &:active:not([disabled]),
-    &.--button--submitting {
+    &.--button--submitting,
+    &.--button--submitting:hover {
       background: $submitted-color;
     }
   }
@@ -369,7 +370,8 @@ export default {
       background: #b2e6ee;
     }
     &:active:not([disabled]),
-    &.--button--saving-draft {
+    &.--button--saving-draft,
+    &.--button--saving-draft:hover {
       background: $draft-color;
     }
   }
@@ -378,7 +380,8 @@ export default {
       background: #e0dddd;
     }
     &:active:not([disabled]),
-    &.--button--discarding {
+    &.--button--discarding,
+    &.--button--discarding:hover {
       background: $discarded-color;
     }
   }
