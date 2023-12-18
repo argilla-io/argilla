@@ -22,7 +22,7 @@ from argilla.cli import typer_ext
 from argilla.cli.server.database.users.utils import get_or_new_workspace
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
-from argilla.server.security.auth_provider.local.settings import settings
+from argilla.server.security.auth_provider.db.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
 
 if TYPE_CHECKING:
