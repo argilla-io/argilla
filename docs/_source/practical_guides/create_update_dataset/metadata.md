@@ -130,7 +130,7 @@ For a practical example, check our [tutorial on adding text descriptives as meta
 
 :::{tab-item} Records
 ```python
-from argilla.client.feedback.integrations import TextDescriptivesExtractor
+from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
 
 records = [...] # FeedbackRecords or RemoteFeedbackRecords
 
@@ -148,7 +148,7 @@ tde.update_records(records)
 
 :::{tab-item} Dataset
 ```python
-from argilla.client.feedback.integrations import TextDescriptivesExtractor
+from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
 
 dataset = dataset # FeedbackDataset or RemoteFeedbackDataset
 
