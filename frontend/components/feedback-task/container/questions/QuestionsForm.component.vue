@@ -37,7 +37,7 @@
           :title="$t('shortcuts.questions_form.discard')"
         >
           <span class="button__shortcuts --extra-large" v-text="'⌫'" /><span
-            v-text="'Discard'"
+            v-text="$t('questions_form.discard')"
           />
         </BaseButton>
         <BaseButton
@@ -46,14 +46,20 @@
           :class="isDraftSaving ? '--button--saving-draft' : null"
           @on-click="onSaveDraft"
           :disabled="isSaveDraftButtonDisabled"
-          :title="$t('shortcuts.questions_form.draft')"
+          :title="
+            $platform.isMac
+              ? $t('shortcuts.questions_form.draft_mac')
+              : $t('shortcuts.questions_form.draft')
+          "
         >
           <span class="button__shortcuts-group"
-            ><span class="button__shortcuts" v-text="'ctrl'" /><span
+            ><span
+              class="button__shortcuts"
+              v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
               class="button__shortcuts"
               v-text="'S'"
           /></span>
-          <span v-text="'Save draft'" />
+          <span v-text="$t('questions_form.draft')" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -67,7 +73,7 @@
           "
         >
           <span class="button__shortcuts --large" v-text="'↵'" />
-          <span v-text="'Submit'" />
+          <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
     </div>
@@ -294,9 +300,11 @@ export default {
     border-radius: $border-radius-m;
     border: 1px solid #c6d1ff;
     background: #f5f7ff;
+    transition: border-color 0.35s ease;
     container-type: inline-size;
     &:hover {
       border-color: transparent;
+      transition: border-color 0.35s ease;
     }
   }
 }
@@ -352,7 +360,7 @@ export default {
     }
   }
   &--submit {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #b3c4ff;
     }
     &:active:not([disabled]),
@@ -361,7 +369,7 @@ export default {
     }
   }
   &--draft {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #b2e6ee;
     }
     &:active:not([disabled]),
@@ -370,7 +378,7 @@ export default {
     }
   }
   &--discard {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #e0dddd;
     }
     &:active:not([disabled]),

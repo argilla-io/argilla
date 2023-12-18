@@ -22,11 +22,16 @@
       "go_to_next_record_mac": "Next (⌘ cmd + →)"
     },
     "questions_form": {
-      "clear": "Clear (⇧ shift + ␣ space)",
-      "draft": "Save draft (ctrl + s)",
-      "discard": "Discard (⇧ shift + ⌫ backspace)",
-      "submit": "Submit (⇧ shift + ↵ enter)"
+      "draft_mac": "Save as draft (⌘ cmd + s)",
+      "draft": "Save as draft (ctrl + s)",
+      "discard": "Discard (⌫ backspace)",
+      "submit": "Submit (↵ enter)"
     }
+  },
+  "questions_form": {
+    "discard": "Discard",
+    "submit": "Submit",
+    "draft": "Save as draft"
   },
   "sorting": {
     "score": "suggestion score",
