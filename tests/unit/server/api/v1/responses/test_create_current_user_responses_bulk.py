@@ -41,7 +41,7 @@ class TestCreateCurrentUserResponsesBulk:
         return f"/api/v1/me/responses/bulk"
 
     def bulk_max_items(self) -> int:
-        return 50
+        return 100
 
     async def test_multiple_responses(
         self, async_client: AsyncClient, db: AsyncSession, mock_search_engine: SearchEngine
