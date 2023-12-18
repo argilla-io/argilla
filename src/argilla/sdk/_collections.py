@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import dataclasses
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from argilla.sdk import _api as api
 from argilla.sdk import _models as models
@@ -63,56 +62,3 @@ class QuestionsCollection:
         return api.Question.by_name(self.dataset.id, name=key)
 
 
-class ConfigurationCollection:
-    def __init__(self, dataset: "Dataset"):
-        self.dataset = dataset
-        self.fields = FieldsCollection(dataset)
-        self.questions = QuestionsCollection(dataset)
-
-    @property
-    def guidelines(self) -> str:
-        return self.dataset.guidelines
-
-    @property
-    def allow_extra_metadata(self) -> bool:
-        return self.dataset.allow_extra_metadata
-
-    def to_dict(self) -> dict:
-        return {
-            "guidelines": self.guidelines,
-            "allow_extra_metadata": self.allow_extra_metadata,
-            "fields": [f.to_dict() for f in self.fields.list()],
-            "questions": [q.to_dict() for q in self.questions.list()],
-        }
-
-    def create(self, config: models.DatasetConfiguration) -> "ConfigurationCollection":
-        self.update(config.guidelines, config.allow_extra_metadata)
-
-        for field in config.fields:
-            self.fields.create(field)
-
-        for question in config.questions:
-            self.questions.create(question)
-
-        return self
-
-    def update(
-        self, guidelines: Optional[str] = None, allow_extra_metadata: Optional[bool] = None
-    ) -> "ConfigurationCollection":
-        kwargs = {}
-
-        if guidelines is not None:
-            kwargs["guidelines"] = guidelines
-        if allow_extra_metadata is not None:
-            kwargs["allow_extra_metadata"] = allow_extra_metadata
-        if len(kwargs) == 0:
-            raise ValueError("At least one of the parameters must be specified")
-
-        api.Dataset.update(self.dataset.id, **kwargs)
-
-        if guidelines is not None:
-            self.dataset._guidelines = guidelines
-        if allow_extra_metadata is not None:
-            self.dataset._allow_extra_metadata = allow_extra_metadata
-
-        return self

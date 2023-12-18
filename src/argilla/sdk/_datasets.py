@@ -17,9 +17,62 @@ from uuid import UUID
 
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.workspaces import Workspace
-from argilla.sdk import _api as api
-from argilla.sdk._collections import ConfigurationCollection
+from argilla.sdk import _api as api, _models as models
+from argilla.sdk._collections import FieldsCollection, QuestionsCollection
 from argilla.sdk._models import DatasetConfiguration
+
+
+class _Configuration:
+    def __init__(self, dataset: "Dataset"):
+        self.dataset = dataset
+        self.fields = FieldsCollection(dataset)
+        self.questions = QuestionsCollection(dataset)
+
+    @property
+    def guidelines(self) -> str:
+        return self.dataset.guidelines
+
+    @property
+    def allow_extra_metadata(self) -> bool:
+        return self.dataset.allow_extra_metadata
+
+    def to_dict(self) -> dict:
+        return {
+            "guidelines": self.guidelines,
+            "allow_extra_metadata": self.allow_extra_metadata,
+            "fields": [f.to_dict() for f in self.fields.list()],
+            "questions": [q.to_dict() for q in self.questions.list()],
+        }
+
+    def create(self, config: models.DatasetConfiguration) -> "_Configuration":
+        self.update(config.guidelines, config.allow_extra_metadata)
+
+        for field in config.fields:
+            self.fields.create(field)
+
+        for question in config.questions:
+            self.questions.create(question)
+
+        return self
+
+    def update(self, guidelines: Optional[str] = None, allow_extra_metadata: Optional[bool] = None) -> "_Configuration":
+        kwargs = {}
+
+        if guidelines is not None:
+            kwargs["guidelines"] = guidelines
+        if allow_extra_metadata is not None:
+            kwargs["allow_extra_metadata"] = allow_extra_metadata
+        if len(kwargs) == 0:
+            raise ValueError("At least one of the parameters must be specified")
+
+        api.Dataset.update(self.dataset.id, **kwargs)
+
+        if guidelines is not None:
+            self.dataset._guidelines = guidelines
+        if allow_extra_metadata is not None:
+            self.dataset._allow_extra_metadata = allow_extra_metadata
+
+        return self
 
 
 class Dataset(RemoteFeedbackDataset):
@@ -27,8 +80,8 @@ class Dataset(RemoteFeedbackDataset):
     status: Literal["draft", "ready"]
 
     @property
-    def config(self) -> ConfigurationCollection:
-        return ConfigurationCollection(self)
+    def config(self) -> _Configuration:
+        return _Configuration(self)
 
     @classmethod
     def list(cls) -> List["Dataset"]:
