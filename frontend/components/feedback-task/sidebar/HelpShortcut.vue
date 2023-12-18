@@ -125,14 +125,18 @@ export default {
     border-left: none;
     border-bottom: none;
   }
-  th:last-child {
+  th:last-child,
+  th:first-child {
     display: none;
   }
   code {
     padding: calc($base-space / 2);
     border: 1px solid $black-10;
     border-radius: $border-radius;
-    background: $black-4;
+    background: palette(white) !important;
+    color: $black-54 !important;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Open Sans", "Helvetica Neue", sans-serif;
   }
 }
 </style>
