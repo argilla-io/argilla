@@ -3,8 +3,8 @@
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
-          ref="searchComponentRef"
           v-if="showSearch"
+          ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
@@ -48,6 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
+          :data-keyboard="index + 1"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -67,8 +68,10 @@
               ? `${$t('suggestion.name')}: ${option.text}`
               : option.text
           "
-          ><span v-text="option.text"
-        /></label>
+        >
+          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
+          <span>{{ option.text }}</span>
+        </label>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -110,6 +113,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -119,6 +126,8 @@ export default {
     return {
       searchInput: "",
       isExpanded: false,
+      timer: null,
+      keyCode: "",
     };
   },
   created() {
@@ -134,7 +143,12 @@ export default {
             if (options.some((o) => o.contains(document.activeElement))) {
               return;
             }
-            options[0].focus();
+
+            if (options.length > 0) {
+              options[0].focus();
+            } else {
+              this.$refs.searchComponentRef?.searchInputRef.focus();
+            }
           });
         }
       },
@@ -189,27 +203,65 @@ export default {
   },
   methods: {
     keyboardHandler($event) {
+      if (this.timer) clearTimeout(this.timer);
+
       if (
         $event.key === "Tab" ||
+        $event.key === "Enter" ||
+        $event.key === "Backspace" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
       )
         return;
 
-      if (!this.$refs.searchComponentRef) return;
-
       const isSearchActive =
-        document.activeElement === this.$refs.searchComponentRef.searchInputRef;
+        document.activeElement ===
+        this.$refs.searchComponentRef?.searchInputRef;
+
       if (isSearchActive) return;
 
       if ($event.code == "Space") {
         $event.preventDefault();
         document.activeElement.click();
+
         return;
       }
 
-      this.$refs.searchComponentRef.focusInSearch();
+      this.keyCode += $event.key;
+
+      if (isNaN(this.keyCode)) {
+        this.$refs.searchComponentRef?.focusInSearch();
+        this.reset();
+
+        return;
+      }
+
+      if (this.options.length < 10) {
+        this.selectByKeyCode($event, this.keyCode);
+
+        this.reset();
+        return;
+      }
+
+      this.timer = setTimeout(() => {
+        this.selectByKeyCode($event, this.keyCode);
+        this.reset();
+      }, 300);
+    },
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
+    selectByKeyCode($event, keyCode) {
+      const match = this.$refs.options.find(
+        (option) => option.dataset.keyboard === keyCode
+      );
+
+      if (match) {
+        $event.preventDefault();
+        match.click();
+      }
     },
     onSelect({ id, isSelected }) {
       if (this.multiple) return;
@@ -297,12 +349,14 @@ $label-dark-color: palette(purple, 200);
 .label-text {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: $base-space;
   width: 100%;
   height: 32px;
   min-width: 50px;
   max-width: 200px;
   text-align: center;
-  padding-inline: 12px;
+  padding-inline: $base-space;
   background: $label-color;
   color: $label-dark-color;
   font-weight: 500;
@@ -360,6 +414,23 @@ input[type="checkbox"] {
       }
     }
   }
+}
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: $base-space * 2;
+  aspect-ratio: 1;
+  border-radius: $border-radius;
+  border-width: 1px 1px 3px 1px;
+  border-color: $black-20;
+  border-style: solid;
+  box-sizing: content-box;
+  color: $black-87;
+  background: palette(grey, 700);
+  @include font-size(11px);
+  font-family: monospace, monospace;
 }
 .no-result {
   display: block;
