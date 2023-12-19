@@ -10,7 +10,7 @@ If you need support join the [Argilla Slack community](https://join.slack.com/t/
 
 <div class="start-page__content" markdown="1">
 
-Get started by publishing your first dataset. 
+Get started by publishing your first dataset.
 
 ### 1. Open an IDE, Jupyter or Collab
 
