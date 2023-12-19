@@ -1,14 +1,20 @@
-Welcome to Argilla! Argilla is a platform to build high-quality datasets.
+<div class="start-page__intro" markdown="1">
+
+# Welcome to Argilla!
+
+## Argilla is a platform to build high-quality datasets.
 
 To get started, you can create your first dataset as follows.
+For in-depth user guides, check the [documentation](https://docs.argilla.io/en/latest/) 📖.
 
-[For in-depth user guides, check the documentation 📖.](https://docs.argilla.io/en/latest/)
+</div>
 
-**1. Open an IDE, Jupyter or Collab**
+<div class="start-page__content" markdown="1">
+### 1. Open an IDE, Jupyter or Collab
 
 If you're a Collab user, you can directly use our [introductory tutorial](https://colab.research.google.com/github/argilla-io/argilla/blob/develop/docs/_source/getting_started/quickstart_workflow_feedback.ipynb).
 
-**2. Install the SDK with pip**
+### 2. Install the SDK with pip
 
 To work with Argilla datasets, you need to use the Argilla SDK. You can install the SDK with pip as follows:
 
@@ -16,12 +22,12 @@ To work with Argilla datasets, you need to use the Argilla SDK. You can install 
 pip install argilla -U
 ```
 
-**3. Connect to your Argilla server**
+### 3. Connect to your Argilla server
 
 Get your `ARGILLA_API_URL`:
 
-   * If you are using Docker, it is the URL shown in your browser (by default `http://localhost:6900`)
-   * If you are using HF Spaces, it should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`
+- If you are using Docker, it is the URL shown in your browser (by default `http://localhost:6900`)
+- If you are using HF Spaces, it should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`
 
 Get your `ARGILLA_API_KEY` you find in ["My settings"](/user-settings) and copy the API key.
 
@@ -37,7 +43,7 @@ rg.init(
 )
 ```
 
-**4. Create your first dataset**
+### 4. Create your first dataset
 
 Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user_settings). To create a new workspace, check the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
 
@@ -55,7 +61,7 @@ dataset = rg.FeedbackDataset.for_text_classification(
 dataset.push_to_argilla(name="my-first-dataset", workspace="<your-workspace>")
 ```
 
-**5. Add records**
+### 5. Add records
 
 Create a list with the records you want to add. Ensure that you match the fields with the ones specified in the previous step.
 
@@ -78,3 +84,5 @@ dataset.add_records(records)
 ```
 
 > If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+
+</div>
