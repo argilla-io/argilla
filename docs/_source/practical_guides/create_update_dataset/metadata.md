@@ -134,7 +134,7 @@ from argilla.client.feedback.integrations.textdescriptives_ import TextDescripti
 
 records = [...] # FeedbackRecords or RemoteFeedbackRecords
 
-tde = rg.TextDescriptivesExtractor(
+tde = TextDescriptivesExtractor(
     model="en",
     metrics=None,
     fields=None,
@@ -152,7 +152,7 @@ from argilla.client.feedback.integrations.textdescriptives_ import TextDescripti
 
 dataset = dataset # FeedbackDataset or RemoteFeedbackDataset
 
-tde = rg.TextDescriptivesExtractor(
+tde = TextDescriptivesExtractor(
     model="en",
     metrics=None,
     fields=None,

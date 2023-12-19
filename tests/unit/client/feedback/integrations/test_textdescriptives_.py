@@ -11,19 +11,30 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+import pandas as pd
 from unittest.mock import MagicMock
 
-import numpy as np
-import pandas as pd
 import pytest
+
+from argilla import FeedbackDataset
+from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
+from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla.client.feedback.schemas.questions import TextQuestion
 
+@pytest.fixture
+def records():
+    return [
+        FeedbackRecord(fields={"text": "This is a test."}),
+        FeedbackRecord(fields={"text": "This is another test."})
+    ]
 
 @pytest.mark.parametrize(
     "records",
@@ -132,7 +143,7 @@ def test_cast_to_python_types() -> None:
         }
     )
     df_result = tde._cast_to_python_types(df)
-    assert df_result["col_int"].dtype == "int64"
+    assert df_result["col_int"].dtype == "int32"
     assert df_result["col_bool"].dtype == "object"
     assert df_result["col_float"].dtype == "float64"
     assert df_result["col_float"].values[0] == 1.23
@@ -160,13 +171,12 @@ def test_create_metadata_properties(
     column_name, expected_prop_type, expected_title, expected_visible, expected_type, expected_values
 ) -> None:
     tde = TextDescriptivesExtractor()
-    df = pd.DataFrame(
-        {
-            "col_int": [1, 2, 3],
-            "col_bool": [True, False, True],
-            "col_float": [1.234, 2.345, 3.456],
-            "col_obj": ["value_1", "value_2", "value_3"],
-        }
+    df = pd.DataFrame({
+        "col_int": pd.Series([1, 2, 3], dtype="int32"),
+        "col_bool": pd.Series([True, False, True], dtype="bool"),
+        "col_float": pd.Series([1.234, 2.345, 3.456], dtype="float64"),
+        "col_obj": pd.Series(["value_1", "value_2", "value_3"], dtype="object"),
+    }
     )
     properties = tde._create_metadata_properties(df)
     prop = next((prop for prop in properties if prop.name == column_name), None)
@@ -212,12 +222,56 @@ def test_create_metadata_properties(
 )
 def test_update_records_metrics_extracted(records) -> None:
     tde = TextDescriptivesExtractor()
-    extracted_metrics = MagicMock()
+    extracted_metrics = pd.DataFrame({"text_n_tokens": [4, 5]})
     tde._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
     tde._cast_to_python_types = MagicMock(return_value=extracted_metrics)
+    tde._clean_column_name = MagicMock(side_effect=lambda col: col)
     tde._add_text_descriptives_to_metadata = MagicMock(return_value=records)
     updated_records = tde.update_records(records)
     tde._extract_metrics_for_all_fields.assert_called_once_with(records)
     tde._cast_to_python_types.assert_called_once_with(extracted_metrics)
+    tde._clean_column_name.assert_called_with("text_n_tokens")
     tde._add_text_descriptives_to_metadata.assert_called_once_with(records, extracted_metrics)
     assert updated_records == records
+	
+def test_update_records_no_metrics_extracted(records):
+    tde = TextDescriptivesExtractor()
+    tde._extract_metrics_for_all_fields = MagicMock(return_value=pd.DataFrame())
+    updated_records = tde.update_records(records)
+    assert updated_records == records
+	
+def test_update_feedback_dataset():
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="question")],
+    )
+    records = [
+        FeedbackRecord(fields={"text": "This is a test."}),
+        FeedbackRecord(fields={"text": "This is another test."})
+    ]
+    dataset.add_records(records)
+
+    tde = TextDescriptivesExtractor()
+
+    extracted_metrics = pd.DataFrame({"text_n_tokens": [4, 5]})
+    tde._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
+    tde._cast_to_python_types = MagicMock(return_value=extracted_metrics)
+    tde._clean_column_name = MagicMock(side_effect=lambda col: col)
+    tde._create_metadata_properties = MagicMock(return_value=[IntegerMetadataProperty(name="text_n_tokens")])
+    
+    updated_dataset = tde.update_dataset(dataset)
+
+    tde._extract_metrics_for_all_fields.assert_called_once_with(records)
+    tde._cast_to_python_types.assert_called_once_with(extracted_metrics)
+    tde._clean_column_name.assert_called_with("text_n_tokens")
+    tde._create_metadata_properties.assert_called_once_with(extracted_metrics)
+    assert updated_dataset == dataset
+    assert isinstance(updated_dataset, FeedbackDataset)
+    assert updated_dataset.metadata_properties == [IntegerMetadataProperty(name='text_n_tokens', title='text_n_tokens', visible_for_annotators=True, type='integer', min=None, max=None)]
+	
+def test_update_dataset_with_invalid_dataset():
+    tde = TextDescriptivesExtractor()
+    dataset = "invalid_dataset"
+
+    with pytest.raises(ValueError):
+        tde.update_dataset(dataset)

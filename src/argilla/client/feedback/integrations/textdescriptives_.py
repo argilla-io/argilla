@@ -50,8 +50,10 @@ class TextDescriptivesExtractor:
         Initialize a new TextDescriptivesExtractor object.
 
         Args:
-            model (str): The language model to use for text descriptives.
-            metrics (Optional[List[str]]): A list of metrics to extract. If None, all metrics will be extracted.
+            model (str): The language of the model to use for text descriptives.
+            metrics (Optional[List[str]]): A list of metrics to extract 
+                [“descriptive_stats”, “readability”, “dependency_distance”, “pos_proportions”, “coherence”, “quality”, “information_theory”].
+                If None, all metrics will be extracted.
             fields (Optional[List[str]]): A list of field names to extract metrics from. If None, all fields will be used.
             visible_for_annotators (bool): Whether the extracted metrics should be visible to annotators.
             show_progress (bool): Whether to show a progress bar when extracting metrics.
@@ -250,9 +252,9 @@ class TextDescriptivesExtractor:
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with text descriptives metrics added as metadata.
 
-        >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
         >>> records = [rg.FeedbackRecord(fields={"text": "This is a test."})]
-        >>> tde = rg.TextDescriptivesExtractor()
+        >>> tde = TextDescriptivesExtractor()
         >>> updated_records = tde.update_records(records)
         """
         # Extract text descriptives metrics from records
@@ -287,9 +289,10 @@ class TextDescriptivesExtractor:
             Union[FeedbackDataset, RemoteFeedbackDataset]: A FeedbackDataset or RemoteFeedbackDataset with text descriptives metrics added as metadata.
 
         >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
         >>> rg.init(...)
         >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
-        >>> tde = rg.TextDescriptivesExtractor()
+        >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
 
         """
