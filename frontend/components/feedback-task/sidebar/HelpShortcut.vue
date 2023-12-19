@@ -133,13 +133,15 @@ export default {
   }
   code {
     display: inline-block;
-    padding: calc($base-space / 2);
+    padding: 2px 4px;
     border: 1px solid $black-10;
     border-radius: $border-radius;
     background: palette(white) !important;
     color: $black-87 !important;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Open Sans", "Helvetica Neue", sans-serif;
+    min-width: 24px;
+    text-align: center;
   }
 }
 </style>
