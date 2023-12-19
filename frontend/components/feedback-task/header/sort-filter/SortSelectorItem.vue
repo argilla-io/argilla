@@ -67,8 +67,8 @@ export default {
     onToggleVisibility(value) {
       this.visibleDropdown = value;
     },
-    replaceCategory(newCategoryName) {
-      this.$emit("replace-sort-category", newCategoryName);
+    replaceCategory(category) {
+      this.$emit("replace-sort-category", category);
       this.visibleDropdown = false;
     },
   },

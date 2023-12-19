@@ -932,8 +932,8 @@ class TaskTemplateMixin:
 
         rating_questions = [
             RatingQuestion(
-                name="question_rating_" + str(doc + 1),
-                title="Rate the relevance of the user question" + str(doc + 1),
+                name="rating_retrieved_document_" + str(doc + 1),
+                title="Rate the relevance of the Retrieved Document " + str(doc + 1) + " for the query",
                 values=list(range(1, rating_scale + 1)),
                 description="Rate the relevance of the retrieved document.",
                 required=True if doc == 0 else False,

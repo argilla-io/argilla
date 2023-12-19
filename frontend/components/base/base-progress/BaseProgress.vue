@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <transition name="progress" :duration="2500" appear>
+  <transition name="progress" :duration="3500" appear>
     <div class="progress__container">
       <p v-if="tooltip" class="progress__tooltip" :style="tooltipStyles">
         <span class="triangle" :style="tooltipTriangleStyles"></span
@@ -24,11 +24,10 @@
       </p>
       <div class="progress" :style="backgroundStyles">
         <div class="progress-track" :style="styles"></div>
-        <div
-          v-if="multiple"
-          class="progress-track--secondary"
-          :style="stylesSecondary"
-        />
+        <template v-if="multiple">
+          <div class="progress-track--secondary" :style="stylesSecondary" />
+          <div class="progress-track--tertiary" :style="stylesTertiary" />
+        </template>
       </div>
     </div>
   </transition>
@@ -42,6 +41,10 @@ export default {
       default: 0,
     },
     progressSecondary: {
+      type: Number,
+      default: 0,
+    },
+    progressTertiary: {
       type: Number,
       default: 0,
     },
@@ -60,6 +63,10 @@ export default {
     colorSecondary: {
       type: String,
       default: "#a1a2cc",
+    },
+    colorTertiary: {
+      type: String,
+      default: "#08a4bd",
     },
     tooltip: {
       default: undefined,
@@ -94,6 +101,13 @@ export default {
         left: `${this.progress}%`,
         width: `${this.progressSecondary}%`,
         backgroundColor: this.colorSecondary,
+      };
+    },
+    stylesTertiary() {
+      return {
+        left: `${this.progress + this.progressSecondary}%`,
+        width: `${this.progressTertiary}%`,
+        backgroundColor: this.colorTertiary,
       };
     },
   },
@@ -191,8 +205,21 @@ export default {
     right: 0;
     background: #a1a2cc;
     transition: width 1s linear, left 1s linear;
+    border-radius: 0;
     .progress-enter-active & {
       animation: progress 1s 1.5s;
+      animation-fill-mode: backwards;
+    }
+  }
+  &--tertiary {
+    @extend .progress-track;
+    left: auto;
+    right: 0;
+    background: #08a4bd;
+    transition: width 1s linear, left 1s linear;
+    border-radius: 0;
+    .progress-enter-active & {
+      animation: progress 2s 2.5s;
       animation-fill-mode: backwards;
     }
   }
