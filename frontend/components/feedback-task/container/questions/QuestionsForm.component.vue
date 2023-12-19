@@ -15,7 +15,7 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12" />
+            >Annotation guidelines <svgicon name="external-link" width="12" />
           </NuxtLink>
         </p>
       </div>
