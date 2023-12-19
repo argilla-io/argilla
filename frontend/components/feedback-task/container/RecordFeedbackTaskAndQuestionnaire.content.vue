@@ -175,6 +175,7 @@ export default {
   height: 100%;
   gap: $base-space * 2;
   padding: $base-space * 2;
+
   @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
