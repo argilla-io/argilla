@@ -23,7 +23,7 @@ Get your `ARGILLA_API_URL`:
    * If you are using Docker, it is the URL shown in your browser (by default `http://localhost:6900`)
    * If you are using HF Spaces, it should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`
 
-Get your `ARGILLA_API_KEY` you find in ["My settings"](/user_settings) and copy the API key.
+Get your `ARGILLA_API_KEY` you find in ["My settings"](/user-settings) and copy the API key.
 
 Make sure to replace `ARGILLA_API_URL` and `ARGILLA_API_KEY` in the code below. If you are using a private HF Space, you need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
 
