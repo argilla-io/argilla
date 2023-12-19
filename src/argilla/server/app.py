@@ -13,7 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 try:
-    from argilla.server.server import app
+    from argilla.server.server import create_server_app
+
+    app = create_server_app()
 except ModuleNotFoundError as ex:
     _module_name = ex.name
 

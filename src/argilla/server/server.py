@@ -26,13 +26,6 @@ import tempfile
 from pathlib import Path
 
 import backoff
-from brotli_asgi import BrotliMiddleware
-from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
-from pydantic import ConfigError, ValidationError
-
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.logging import configure_logging
@@ -60,6 +53,12 @@ from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
+from brotli_asgi import BrotliMiddleware
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
+from pydantic import ConfigError, ValidationError
 
 _LOGGER = logging.getLogger("argilla")
 
@@ -237,36 +236,38 @@ def configure_database(app: FastAPI):
                 _log_default_user_warning()
 
 
-app = FastAPI(
-    title="Argilla",
-    description="Argilla API",
-    # Disable default openapi configuration
-    openapi_url="/api/docs/spec.json",
-    docs_url="/api/docs" if settings.docs_enabled else None,
-    redoc_url=None,
-    version=str(argilla_version),
-)
+def create_server_app() -> FastAPI:
+    """Configure the argilla server"""
 
+    app = FastAPI(
+        title="Argilla",
+        description="Argilla API",
+        # Disable default openapi configuration
+        openapi_url="/api/docs/spec.json",
+        docs_url="/api/docs" if settings.docs_enabled else None,
+        redoc_url=None,
+        version=str(argilla_version),
+    )
 
-@app.get("/docs", include_in_schema=False)
-async def redirect_docs():
-    return RedirectResponse(url=f"{settings.base_url}api/docs")
+    @app.get("/docs", include_in_schema=False)
+    async def redirect_docs():
+        return RedirectResponse(url=f"{settings.base_url}api/docs")
 
+    @app.get("/api", include_in_schema=False)
+    async def redirect_api():
+        return RedirectResponse(url=f"{settings.base_url}api/docs")
 
-@app.get("/api", include_in_schema=False)
-async def redirect_api():
-    return RedirectResponse(url=f"{settings.base_url}api/docs")
+    for app_configure in [
+        configure_app_logging,
+        configure_database,
+        configure_storage,
+        configure_telemetry,
+        configure_middleware,
+        configure_api_exceptions,
+        configure_app_security,
+        configure_api_router,
+        configure_app_statics,
+    ]:
+        app_configure(app)
 
-
-for app_configure in [
-    configure_app_logging,
-    configure_database,
-    configure_storage,
-    configure_telemetry,
-    configure_middleware,
-    configure_api_exceptions,
-    configure_app_security,
-    configure_api_router,
-    configure_app_statics,
-]:
-    app_configure(app)
+    return app
