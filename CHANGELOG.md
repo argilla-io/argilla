@@ -22,9 +22,13 @@ These are the section headers that we use:
 - Added `POST /api/v1/me/responses/bulk` endpoint to create responses in bulk for current user. ([#4380](https://github.com/argilla-io/argilla/pull/4380))
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 
-### Fixed
+###Fixed
 
 - Fixed total records on pagination component ([#4424](https://github.com/argilla-io/argilla/pull/4424))
+
+### Deprecated
+
+- The `missing` response status for filtering records is deprecated and will be removed in the release 1.23.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 
