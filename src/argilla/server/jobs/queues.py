@@ -12,20 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla.server.settings import settings
 from redis import Redis
 from rq import Queue
 
-# TODO: We should set the Redis connection using environment variables
-redis_connection = Redis()
+redis_connection = Redis(host=settings.redis_host, port=settings.redis_port)
 
-# NOTE: Regular default queue using Redis
 default_queue = Queue(connection=redis_connection)
-
-# NOTE: Synchronous default queue without using Redis (using fakeredis)
-# from fakeredis import FakeStrictRedis
-# default_queue = Queue(name="default", connection=FakeStrictRedis(), is_async=False)
-
-# NOTE: To execute worker consuming default queue:
-# $ rq worker --with-scheduler
-# To execute worker consuming default and other-queue
-# $ rq worker --with-scheduler default other-queue
