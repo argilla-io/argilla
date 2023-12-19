@@ -18,13 +18,13 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import numpy as np
 from tqdm import tqdm
 
+from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas import RankingQuestion, TextQuestion
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.remote.questions import RemoteRankingQuestion
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from argilla.client.feedback.metrics.base import Responses, Suggestions
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import SortBy
@@ -119,6 +119,7 @@ def get_responses_and_suggestions_per_user(
 def get_unified_responses_and_suggestions(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
+    strategy_name: str = "majority",
     filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
     sort_by: Optional[List["SortBy"]] = None,
     max_records: Optional[int] = None,
@@ -131,6 +132,7 @@ def get_unified_responses_and_suggestions(
     Args:
         dataset: FeedbackDataset or RemoteFeedbackDataset.
         question_name: The name of the question to filter from the dataset.
+        strategy_name: The name of the strategy to use to unify the responses.
         filter_by: A dict with key the field to filter by, and values the filters to apply.
             Can be one of: draft, pending, submitted, and discarded. If set to None,
             no filter will be applied. Defaults to None (no filter is applied).
@@ -157,6 +159,11 @@ def get_unified_responses_and_suggestions(
     question_type = type(dataset.question_by_name(question_name))
     if question_type == TextQuestion:
         raise NotImplementedError("This function is not available for `TextQuestion`.")
+
+    if isinstance(dataset, RemoteFeedbackDataset):
+        dataset = dataset.pull()
+
+    dataset.compute_unified_responses(question_name, strategy=strategy_name)
 
     unified_responses = []
     suggestions = []

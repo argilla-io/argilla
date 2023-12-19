@@ -285,20 +285,20 @@ def test_annotator_metrics_unified(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    unified_dataset = dataset.compute_unified_responses(question, strategy_name)
-
     if question in ("question-1",):
         with pytest.raises(NotImplementedError):
-            UnifiedAnnotationMetric(unified_dataset, question)
+            UnifiedAnnotationMetric(dataset, question)
     else:
-        metric = UnifiedAnnotationMetric(unified_dataset, question, responses_vs_suggestions=responses_vs_suggestions)
+        metric = UnifiedAnnotationMetric(
+            dataset, question, strategy_name=strategy_name, responses_vs_suggestions=responses_vs_suggestions
+        )
         metrics_report = metric.compute(metric_names)
 
         if isinstance(metric_names, list):
             assert isinstance(metrics_report, list)
         else:
             assert isinstance(metrics_report, AnnotatorMetricResult)
-            assert str(list(unified_dataset.records[0].unified_responses.values())[0][0].value) in str(
+            assert str(list(dataset.records[0].unified_responses.values())[0][0].value) in str(
                 dataset.records[0].responses
             )
             metrics_report = [metrics_report]
