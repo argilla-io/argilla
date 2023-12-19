@@ -5,7 +5,7 @@
     :class="classes"
     @focus="onFocus"
     :tabindex="isEditionModeActive ? '-1' : '0'"
-    @keydown.enter.exact.prevent="onEditMode"
+    @keydown.shift.enter.exact.prevent="onEditMode"
   >
     <RenderMarkdownBaseComponent
       v-if="question.settings.use_markdown && !isEditionModeActive"
@@ -19,8 +19,7 @@
       :value="question.answer.value"
       :originalValue="question.answer.originalValue"
       :placeholder="question.settings.placeholder"
-      :isFocused="isFocused"
-      :isEditionModeActive="isEditionModeActive"
+      :isFocused="isEditionModeActive"
       @change-text="onChangeTextArea"
       @on-change-focus="onChangeFocus"
       @on-exit-edition-mode="onExitEditionMode"
@@ -51,7 +50,17 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
-        this.isEditionModeActive = newValue;
+        if (this.question.isRequired && !this.question.isAnswered) {
+          this.onChangeFocus(newValue);
+
+          return;
+        }
+
+        if (newValue) {
+          this.$nextTick(() => {
+            this.onExitEditionMode();
+          });
+        }
       },
     },
   },
@@ -62,7 +71,9 @@ export default {
       }
     },
     onExitEditionMode() {
-      this.$refs.container.focus();
+      this.$refs.container.focus({
+        preventScroll: true,
+      });
       this.isEditionModeActive = false;
       this.isExitedFromEditionModeWithKeyboard = true;
     },
@@ -95,10 +106,6 @@ export default {
         return "--editing";
       }
 
-      if (this.isFocused && this.isExitedFromEditionModeWithKeyboard) {
-        return "--focus";
-      }
-
       return null;
     },
   },
@@ -113,11 +120,16 @@ export default {
   border-radius: $border-radius-s;
   min-height: 10em;
   background: palette(white);
+  outline: none;
   &.--editing {
     border-color: $primary-color;
+    outline: 1px solid $primary-color;
   }
-  &.--focus {
-    outline: 2px solid $primary-color;
+  &:focus {
+    outline: 1px solid $black-20;
+  }
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
   .content--exploration-mode & {
     border: none;

@@ -9,7 +9,7 @@ describe("SortList ", () => {
     test("should be able to select a category", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
 
-      categoriesSort.select("split");
+      categoriesSort.select({ key: "metadata", name: "split" });
 
       expect(
         categoriesSort.selected.map((m) => m.name).includes("split")
@@ -23,9 +23,9 @@ describe("SortList ", () => {
   describe("Unselect", () => {
     test("should be able to unselect a category", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
-      categoriesSort.select("split");
+      categoriesSort.select({ key: "metadata", name: "split" });
 
-      categoriesSort.unselect("split");
+      categoriesSort.unselect({ key: "metadata", name: "split" });
 
       expect(categoriesSort.selected).toHaveLength(0);
       expect(
@@ -37,10 +37,13 @@ describe("SortList ", () => {
   describe("Replace", () => {
     test("should be able to replace a category", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
-      categoriesSort.select("loss");
+      categoriesSort.select({ key: "metadata", name: "loss" });
       expect(categoriesSort.selected[0].name).toEqual("loss");
 
-      categoriesSort.replace("loss", "split");
+      categoriesSort.replace(
+        { key: "metadata", name: "loss" },
+        { key: "metadata", name: "split" }
+      );
 
       expect(
         categoriesSort.noSelected.map((m) => m.name).includes("loss")
@@ -54,7 +57,7 @@ describe("SortList ", () => {
   describe("Clear", () => {
     test("should be able to clear all selected categories", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
-      categoriesSort.select("loss");
+      categoriesSort.select({ key: "metadata", name: "loss" });
       expect(
         categoriesSort.selected.map((m) => m.name).includes("loss")
       ).toBeTruthy();
@@ -74,10 +77,10 @@ describe("SortList ", () => {
   describe("toggleSort", () => {
     test("should be able to toggle sort", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
-      categoriesSort.select("loss");
+      categoriesSort.select({ key: "metadata", name: "loss" });
       expect(categoriesSort.selected[0].sort).toEqual("asc");
 
-      categoriesSort.toggleSort("loss");
+      categoriesSort.toggleSort({ key: "metadata", name: "loss" });
 
       expect(categoriesSort.selected[0].sort).toEqual("desc");
     });
@@ -86,9 +89,9 @@ describe("SortList ", () => {
   describe("commit should", () => {
     test("be able to convert to router params", () => {
       const categoriesSort = new SortList(createMetadataMock(), []);
-      categoriesSort.select("loss");
-      categoriesSort.select("split");
-      categoriesSort.toggleSort("loss");
+      categoriesSort.select({ key: "metadata", name: "loss" });
+      categoriesSort.select({ key: "metadata", name: "split" });
+      categoriesSort.toggleSort({ key: "metadata", name: "loss" });
 
       const param = categoriesSort.commit();
 
@@ -145,8 +148,11 @@ describe("SortList ", () => {
       const metadataForSortingWithoutValues = createMetadataWithNoValuesMock();
       const categoriesSort = new SortList(metadataForSortingWithoutValues, []);
 
-      categoriesSort.select("inserted_at");
-      categoriesSort.select("updated_at");
+      categoriesSort.select({
+        key: "record",
+        name: "inserted_at",
+      });
+      categoriesSort.select({ key: "record", name: "updated_at" });
 
       categoriesSort.selected.forEach((categoriesSort) => {
         expect(categoriesSort.canSort).toBeTruthy();

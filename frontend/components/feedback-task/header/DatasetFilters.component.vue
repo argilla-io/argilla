@@ -5,6 +5,7 @@
         v-model="recordCriteria.searchText"
         :placeholder="'Introduce a query'"
       />
+      <StatusFilter class="filters__status" v-model="recordCriteria.status" />
       <FilterButton
         v-if="isAnyAvailableFilter"
         class="filters__filter-button"
@@ -26,7 +27,6 @@
         @on-click="resetFilters()"
         >{{ $t("reset") }}</BaseButton
       >
-      <StatusFilter class="filters__status" v-model="recordCriteria.status" />
       <slot></slot>
     </div>
     <div class="filters__list__wrapper" v-if="visibleFilters">
@@ -164,9 +164,6 @@ export default {
         }
       }
     }
-  }
-  &__status {
-    margin-left: auto;
   }
   &__reset-button {
     @include font-size(13px);

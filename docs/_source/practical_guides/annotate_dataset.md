@@ -68,11 +68,11 @@ Some questions may include a suggested response as well. Those questions will be
 
 Additionally, you may find questions that are marked as required. Those questions will be marked with a red asterisk (<span style="color:red; font-weight:bold;">*</span>) and you will not be able to submit the response until you provide a response for those questions.
 
-Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. If you decide not to provide responses for a record, you can either move to the next record or you discard it instead using the `Discard` button.
+Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. In case you prefer to save a partial or complete response for review before submission, you can save it by clicking the `Save as draft` button. If you decide not to provide responses for a record, you can either move to the next record or discard it instead using the `Discard` button.
 
-If you need to review your submitted or discarded responses, you can select the queue you need. From there, you can modify, submit or discard responses. You can also use the `Clear` button to remove the response and send the record back to the `Pending` queue.
+If you need to review your drafts, submitted or discarded responses, you can select the queue you need. From there, you can modify, save drafts, submit or discard responses.
 
-You can track your progress and the number of `Pending`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
+You can track your progress and the number of `Pending`, `Draft`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
 
 ### Shortcuts
 

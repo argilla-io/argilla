@@ -12,8 +12,6 @@ import {
   FieldRepository,
 } from "@/v1/infrastructure/repositories";
 
-type LoadRecordsMode = "append" | "replace";
-
 export class LoadRecordsToAnnotateUseCase {
   constructor(
     private readonly recordRepository: RecordRepository,
@@ -25,14 +23,13 @@ export class LoadRecordsToAnnotateUseCase {
   async load(criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
 
-    let newRecords = await this.loadRecords("replace", criteria);
-
+    let newRecords = await this.loadRecords(criteria);
     let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && !page.isFirstPage()) {
       criteria.page.goToFirst();
 
-      newRecords = await this.loadRecords("replace", criteria);
+      newRecords = await this.loadRecords(criteria);
 
       isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
     }
@@ -44,16 +41,20 @@ export class LoadRecordsToAnnotateUseCase {
     }
 
     criteria.commit();
+
+    this.recordsStorage.save(newRecords);
   }
 
   async paginate(criteria: RecordCriteria): Promise<boolean> {
     const { page } = criteria;
-    let records = this.recordsStorage.get();
+    const records = this.recordsStorage.get();
     let isNextRecordExist = records.existsRecordOn(page);
 
     if (!criteria.isFilteringBySimilarity) {
       if (!isNextRecordExist) {
-        records = await this.loadRecords("append", criteria);
+        const newRecords = await this.loadRecords(criteria);
+
+        records.append(newRecords);
 
         isNextRecordExist = records.existsRecordOn(page);
       }
@@ -67,10 +68,12 @@ export class LoadRecordsToAnnotateUseCase {
       criteria.commit();
     }
 
+    this.recordsStorage.save(records);
+
     return isNextRecordExist;
   }
 
-  private async loadRecords(mode: LoadRecordsMode, criteria: RecordCriteria) {
+  private async loadRecords(criteria: RecordCriteria) {
     const { datasetId } = criteria;
     const savedRecords = this.recordsStorage.get();
     savedRecords.synchronizeQueuePagination(criteria);
@@ -188,19 +191,9 @@ export class LoadRecordsToAnnotateUseCase {
         referenceRecord
       );
 
-      this.recordsStorage.replace(recordsWithReference);
-
       return recordsWithReference;
     }
 
-    const records = new Records(recordsToAnnotate, recordsFromBackend.total);
-
-    if (mode === "append") {
-      this.recordsStorage.append(records);
-    } else {
-      this.recordsStorage.replace(records);
-    }
-
-    return records;
+    return new Records(recordsToAnnotate, recordsFromBackend.total);
   }
 }

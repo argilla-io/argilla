@@ -290,7 +290,7 @@ describe("Records", () => {
       expect(criteria.page.server).toEqual({ from: 1, many: 50 });
     });
 
-    test("the current page should be from 9 and many 10 when the user is paginating forward from page 8 and the queue has 8 records in draft but status is pending", () => {
+    test("the current page should be from 1 and many 10 when the user is paginating forward from page 8 and the queue has 8 records in draft but status is pending", () => {
       const criteria = new RecordCriteria(
         "1",
         "9",
@@ -387,7 +387,7 @@ describe("Records", () => {
 
       records.synchronizeQueuePagination(criteria);
 
-      expect(criteria.page.server).toEqual({ from: 9, many: 10 });
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
     });
 
     test("when the user is in bulk mode but was in focus mode the page should be from 1 and many 10", () => {
@@ -437,6 +437,44 @@ describe("Records", () => {
       records.synchronizeQueuePagination(criteria);
 
       expect(criteria.page.server).toEqual({ from: 1, many: 10 });
+    });
+  });
+
+  describe("append", () => {
+    test("should append the new records to the current records when not exists", () => {
+      const records = new Records([
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+    });
+
+    test("should replace the new records to the current records when exists and never change the total", () => {
+      const records = new Records(
+        [new Record("2", "1", [], [], null, [], 1, 4)],
+        200
+      );
+
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+      expect(records.total).toBe(200);
     });
   });
 });

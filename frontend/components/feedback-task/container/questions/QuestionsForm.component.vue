@@ -2,7 +2,7 @@
   <form
     class="questions-form"
     :class="questionFormClass"
-    @submit.prevent="onSubmit"
+    @submit.stop.prevent=""
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
   >
@@ -15,7 +15,7 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >Annotation guidelines <svgicon name="external-link" width="12" />
+            >annotation guidelines <svgicon name="external-link" width="12" />
           </NuxtLink>
         </p>
       </div>
@@ -33,13 +33,13 @@
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
-          @on-click="onDiscard"
           :disabled="!areActionsEnabled"
           :title="
             !areActionsEnabled
               ? $t('to_annotate_record_bulk_required')
               : $t('shortcuts.questions_form.discard')
           "
+          @on-click="onDiscard"
         >
           <span class="button__shortcuts" v-text="'⌫'" /><span
             v-text="$t('questions_form.discard')"
@@ -49,7 +49,6 @@
           type="button"
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
-          @on-click="onSaveDraft"
           :disabled="!areActionsEnabled"
           :title="
             !areActionsEnabled
@@ -58,6 +57,7 @@
               ? $t('shortcuts.questions_form.draft_mac')
               : $t('shortcuts.questions_form.draft')
           "
+          @on-click="onSaveDraft"
         >
           <span
             ><span
@@ -80,6 +80,7 @@
               ? $t('to_submit_complete_required')
               : $t('shortcuts.questions_form.submit')
           "
+          @on-click="onSubmit"
         >
           <span class="button__shortcuts" v-text="'↵'" />
           <span v-text="$t('questions_form.submit')" />
@@ -124,7 +125,7 @@ export default {
     return {
       autofocusPosition: 0,
       interactionCount: 0,
-      isTouched: false,
+      isSubmittedTouched: false,
       userComesFromOutside: false,
     };
   },
@@ -134,7 +135,10 @@ export default {
       if (this.isDiscarding) return "--discarding --waiting";
       if (this.isDraftSaving) return "--saving-draft";
 
-      if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
+      if (
+        this.isSubmittedTouched ||
+        (this.formHasFocus && this.interactionCount > 1)
+      )
         return "--focused-form";
     },
     formHasFocus() {
@@ -155,7 +159,8 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        this.isTouched = this.record.isSubmitted && this.record.isModified;
+        this.isSubmittedTouched =
+          this.record.isSubmitted && this.record.isModified;
       },
     },
   },
@@ -166,6 +171,16 @@ export default {
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
+    async autoSubmitWithKeyboard() {
+      if (!this.record.isModified) return;
+      if (this.record.questions.length > 1) return;
+
+      const question = this.record.questions[0];
+
+      if (question.isSingleLabelType || question.isRatingType) {
+        await this.onSubmit();
+      }
+    },
     focusOnFirstQuestionFromOutside(event) {
       if (!this.userComesFromOutside) return;
       if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
@@ -182,9 +197,11 @@ export default {
       this.userComesFromOutside = true;
     },
     handleGlobalKeys(event) {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
+      const { code, ctrlKey, metaKey, shiftKey } = event;
 
-      if (code == "Tab" && this.userComesFromOutside) {
+      if (shiftKey) return;
+
+      if (code === "Tab" && this.userComesFromOutside) {
         this.focusOnFirstQuestion(event);
 
         return;
@@ -205,14 +222,17 @@ export default {
           break;
         }
         case "Enter": {
-          if (shiftKey) this.onSubmit();
+          this.onSubmit();
           break;
         }
         case "Backspace": {
-          if (shiftKey) this.onDiscard();
+          this.onDiscard();
           break;
         }
-        default:
+        default: {
+          this.autoSubmitWithKeyboard();
+          break;
+        }
       }
     },
     onDiscard() {
@@ -247,12 +267,10 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: clamp(33%, 520px, 40%);
+  gap: $base-space;
   max-height: 100%;
   min-width: 0;
   justify-content: space-between;
-  border-radius: $border-radius-m;
-  border: 1px solid transparent;
-  background: palette(white);
   margin-bottom: auto;
   &__header {
     display: flex;
@@ -280,69 +298,92 @@ export default {
     padding: $base-space * 2;
     overflow: auto;
     scroll-behavior: smooth;
-  }
-  &.--pending {
-    border-color: $black-10;
-  }
-  &.--draft,
-  &.--saving-draft {
-    border-color: $draft-color;
-  }
-  &.--discarded,
-  &.--discarding {
-    border-color: $discarded-color;
-  }
-  &.--submitted,
-  &.--submitting {
-    border-color: $submitted-color;
-  }
-  &.--saving-draft {
-    box-shadow: 0 0 0 1px $draft-color;
-  }
-  &.--discarding {
-    box-shadow: 0 0 0 1px $discarded-color;
-  }
-  &.--submitting {
-    box-shadow: 0 0 0 1px $submitted-color;
-  }
-  &.--waiting .questions-form__content {
-    opacity: 0.7;
+    border-radius: $border-radius-m;
+    border: 1px solid transparent;
+    background: palette(white);
+    .--pending & {
+      border-color: $black-10;
+    }
+    .--draft &,
+    .--saving-draft & {
+      border-color: $draft-color;
+    }
+    .--discarded &,
+    .--discarding & {
+      border-color: $discarded-color;
+    }
+    .--submitted &,
+    .--submitting & {
+      border-color: $submitted-color;
+    }
+    .--saving-draft & {
+      box-shadow: 0 0 0 1px $draft-color;
+    }
+    .--discarding & {
+      box-shadow: 0 0 0 1px $discarded-color;
+    }
+    .--submitting & {
+      box-shadow: 0 0 0 1px $submitted-color;
+    }
+    .--waiting & {
+      opacity: 0.7;
+    }
   }
 }
 
 .footer-form {
-  padding: 0 4px 4px 4px;
   &__content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: $border-radius;
+    border-radius: $border-radius-m;
+    border: 1px solid #c6d1ff;
     background: #f5f7ff;
+    transition: border-color 0.35s ease;
+    container-type: inline-size;
+    &:hover {
+      border-color: transparent;
+      transition: border-color 0.35s ease;
+    }
   }
 }
 
 .button {
   &__shortcuts {
-    @include font-size(12px);
-    background: rgba(255, 255, 255, 0.742);
-    border-radius: 5px;
-    padding: 0 3px;
-    margin-right: 3px;
-    border: 1px solid $black-10;
-    color: $black-37;
-    height: 16px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 4px;
+    height: $base-space * 2;
+    border-radius: $border-radius;
+    border-width: 1px 1px 3px 1px;
+    border-color: $black-20;
+    border-style: solid;
+    box-sizing: content-box;
+    color: $black-87;
+    background: palette(white);
+    @include font-size(11px);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Open Sans", "Helvetica Neue", sans-serif;
+    padding: 0 4px;
+  }
+  &__shortcuts-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
   }
   &--submit,
   &--draft,
   &--discard {
     width: 100%;
-    flex-direction: column;
-    justify-content: space-around;
-    color: $black-54;
+    justify-content: center;
+    color: $black-87;
     min-height: $base-space * 6;
-    border-radius: $border-radius;
+    border-radius: $border-radius-m - 1;
+    padding: $base-space * 2 $base-space;
     &:hover,
     &.--button--discarding {
       color: $black-87;
@@ -354,33 +395,33 @@ export default {
     }
   }
   &--submit {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #b3c4ff;
     }
-    &:active,
-    &.--button--submitting {
+    &:active:not([disabled]),
+    &.--button--submitting,
+    &.--button--submitting:hover {
       background: $submitted-color;
-      color: palette(white);
     }
   }
   &--draft {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #b2e6ee;
     }
-    &:active,
-    &.--button--saving-draft {
+    &:active:not([disabled]),
+    &.--button--saving-draft,
+    &.--button--saving-draft:hover {
       background: $draft-color;
-      color: palette(white);
     }
   }
   &--discard {
-    &:hover {
+    &:hover:not([disabled]) {
       background: #e0dddd;
     }
-    &:active,
-    &.--button--discarding {
+    &:active:not([disabled]),
+    &.--button--discarding,
+    &.--button--discarding:hover {
       background: $discarded-color;
-      color: palette(white);
     }
   }
 }
@@ -422,6 +463,16 @@ export default {
       position: absolute;
       @extend %triangle-right;
       left: 100%;
+    }
+  }
+}
+
+@container (max-width: 500px) {
+  .button {
+    &--submit,
+    &--draft,
+    &--discard {
+      flex-direction: column;
     }
   }
 }
