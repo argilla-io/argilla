@@ -20,25 +20,33 @@
     <p class="metrics__title">Progress</p>
     <div class="metrics__info">
       <p class="metrics__info__name">Total</p>
-      <span class="metrics__info__counter">{{ progress | percent }}</span>
+      <span class="metrics__info__counter"
+        >{{ metrics.respondedProgress }}%</span
+      >
     </div>
     <div class="metrics__numbers">
-      <span>{{ totalResponded | formatNumber }}</span
-      >/{{ progressTotal | formatNumber }}
+      <span>{{ metrics.responded | formatNumber }}</span
+      >/{{ metrics.total | formatNumber }}
     </div>
     <BaseProgress
       re-mode="determinate"
       :multiple="true"
-      :progress="(totalSubmitted * 100) / progressTotal"
-      :progress-secondary="(totalDiscarded * 100) / progressTotal"
-      progress-bg="#bb720a"
-      :color="itemColor(1)"
-      :color-secondary="itemColor(2)"
+      :progress="metrics.submittedProgress"
+      :progress-secondary="metrics.draftProgress"
+      :progress-tertiary="metrics.discardedProgress"
+      :progress-bg="itemColor(0)"
+      :color="itemColor(2)"
+      :color-secondary="itemColor(1)"
+      :color-tertiary="itemColor(3)"
     >
     </BaseProgress>
     <div class="scroll">
       <ul class="metrics__list">
-        <li v-for="(status, index) in progressItems" :key="index">
+        <li
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="metrics__list__item"
+        >
           <span
             class="color-bullet"
             :style="{ backgroundColor: status.color }"
@@ -65,16 +73,8 @@ import {
 } from "@/models/feedback-task-model/record/record.queries";
 export default {
   props: {
-    progressTotal: {
-      type: Number,
-      required: true,
-    },
-    totalSubmitted: {
-      type: Number,
-      required: true,
-    },
-    totalDiscarded: {
-      type: Number,
+    metrics: {
+      type: Object,
       required: true,
     },
   },
@@ -84,28 +84,24 @@ export default {
         {
           name: RECORD_STATUS.PENDING,
           color: RECORD_STATUS_COLOR.PENDING,
-          progress: this.totalPending,
+          progress: this.metrics.pending,
+        },
+        {
+          name: RECORD_STATUS.DRAFT,
+          color: RECORD_STATUS_COLOR.DRAFT,
+          progress: this.metrics.draft,
         },
         {
           name: RECORD_STATUS.SUBMITTED,
           color: RECORD_STATUS_COLOR.SUBMITTED,
-          progress: this.totalSubmitted,
+          progress: this.metrics.submitted,
         },
         {
           name: RECORD_STATUS.DISCARDED,
           color: RECORD_STATUS_COLOR.DISCARDED,
-          progress: this.totalDiscarded,
+          progress: this.metrics.discarded,
         },
       ];
-    },
-    totalResponded() {
-      return this.totalSubmitted + this.totalDiscarded;
-    },
-    totalPending() {
-      return this.progressTotal - this.totalResponded;
-    },
-    progress() {
-      return this.totalResponded / this.progressTotal;
     },
   },
   methods: {
@@ -141,11 +137,10 @@ export default {
   }
 }
 .color-bullet {
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
+  height: $base-space;
+  width: $base-space;
+  border-radius: $border-radius-rounded;
   display: inline-block;
-  margin: 0.3em 0.3em 0.3em 0;
 }
 :deep() {
   .metrics__title {
@@ -176,9 +171,10 @@ export default {
     list-style: none;
     padding-left: 0;
     margin-bottom: $base-space * 3;
-    li {
+    &__item {
       display: flex;
       align-items: center;
+      gap: $base-space;
       margin-bottom: $base-space;
       @include font-size(13px);
     }

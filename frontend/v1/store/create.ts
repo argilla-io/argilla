@@ -5,7 +5,7 @@ interface Class<T> extends Function {
   new (...args: any[]): T;
 }
 
-interface ImplicitStorage<T> {
+export interface ImplicitStorage<T> {
   save(state: T);
   get(): T;
 }

@@ -13,6 +13,7 @@ Vue.directive("required-field", {
 
       const text = document.createTextNode(" *");
       const textWrapper = document.createElement("span");
+      textWrapper.setAttribute("title", "Required response");
       textWrapper.style.color = color;
       textWrapper.appendChild(text);
 

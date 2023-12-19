@@ -13,18 +13,21 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Body
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from argilla.server.models import ResponseStatus
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
 
-from argilla.server.models import ResponseStatus
+RESPONSES_BULK_CREATE_MIN_ITEMS = 1
+RESPONSES_BULK_CREATE_MAX_ITEMS = 100
 
 
 class ResponseValue(BaseModel):
@@ -64,5 +67,51 @@ class DraftResponseUpdate(BaseModel):
 
 
 ResponseUpdate = Annotated[
-    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate], Body(..., discriminator="status")
+    Union[SubmittedResponseUpdate, DiscardedResponseUpdate, DraftResponseUpdate],
+    Body(..., discriminator="status"),
 ]
+
+
+class SubmittedResponseUpsert(BaseModel):
+    values: Dict[str, ResponseValueUpdate]
+    status: Literal[ResponseStatus.submitted]
+    record_id: UUID
+
+
+class DiscardedResponseUpsert(BaseModel):
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.discarded]
+    record_id: UUID
+
+
+class DraftResponseUpsert(BaseModel):
+    values: Optional[Dict[str, ResponseValueUpdate]]
+    status: Literal[ResponseStatus.draft]
+    record_id: UUID
+
+
+ResponseUpsert = Annotated[
+    Union[SubmittedResponseUpsert, DiscardedResponseUpsert, DraftResponseUpsert],
+    Body(..., discriminator="status"),
+]
+
+
+class ResponsesBulkCreate(BaseModel):
+    items: List[ResponseUpsert] = Field(
+        ...,
+        min_items=RESPONSES_BULK_CREATE_MIN_ITEMS,
+        max_items=RESPONSES_BULK_CREATE_MAX_ITEMS,
+    )
+
+
+class ResponseBulkError(BaseModel):
+    detail: str
+
+
+class ResponseBulk(BaseModel):
+    item: Optional[Response]
+    error: Optional[ResponseBulkError]
+
+
+class ResponsesBulk(BaseModel):
+    items: List[ResponseBulk]

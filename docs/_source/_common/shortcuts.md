@@ -1,22 +1,18 @@
 You can speed up your annotation by using these keyboard shortcuts:
 
-| Action                       | Keys                          |
-| ---------------------------- | ----------------------------- |
-| Activate feedback form       | `⇥ tab`                       |
-| Next question                | `⇧ shift` + `↓ down arrow`    |
-| Previous question            | `⇧ shift` + `↑ up arrow`      |
-| Next label/ranking option    | `⇥ tab`                       |
-| Previous label/ranking option| `⇧ shift` + `⇥ tab`           |
-| Select/unselect label        | `␣ space`                     |
-| Filter labels                | `qwerty`                      |
-| Select rating/rank           | `123`                         |
-| Unrank option                | `⌫ backspace`                 |
-| Exit text area               | `esc`                         |
-| Reactivate text area         | `↵ enter`                     |
-| Clear                        | `⇧ shift` + `␣ space`         |
-| Discard                      | `⇧ shift` + `⌫ backspace`     |
-| Submit                       | `⇧ shift` + `↵ enter`         |
-| Next page (Mac os)           | `⌘ cmd` + `→ right arrow`     |
-| Previous page (Mac os)       | `⌘ cmd` + `← left arrow`      |
-| Next page (Other)            | `ctrl` + `→ right arrow`      |
-| Previous page (Other)        | `ctrl` + `← left arrow`       |
+| Action                                 | Keys                              |
+| -------------------------------------- | --------------------------------- |
+| Activate form                          | `⇥ Tab`                           |
+| Show and hide keys in labels (Mac os)  | `⌘ Cmd` (long press)              |
+| Show and hide keys in labels (Other)   | `Ctrl` (long press)               |
+| Move between questions                 | `↓ Down arrow` or `↑ Up arrow`    |
+| Select and unselect label              | `1`, `2`, `3`                     |
+| Move between labels or ranking options | `⇥ Tab` or `⇧ Shift` `⇥ Tab`      |
+| Select rating and rank                 | `1`, `2`, `3`                     |
+| Activate text area                     | `⇧ Shift` `↵ Enter`               |
+| Exit text area                         | `Esc`                             |
+| Discard                                | `⌫ Backspace`                     |
+| Save draft (Mac os)                    | `⌘ Cmd` `S`                       |
+| Save draft (Other)                     | `Ctrl` `S`                        |
+| Submit                                 | `↵ Enter`                         |
+| Move between pages                     | `→ Right arrow` or `← Left arrow` |
