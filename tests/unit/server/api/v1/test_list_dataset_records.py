@@ -501,7 +501,7 @@ class TestSuiteListDatasetRecords:
 
     @pytest.mark.skip(reason="Factory integration with search engine")
     @pytest.mark.parametrize(
-        "response_status_filter", ["missing", "discarded", "submitted", "draft", ["submitted", "draft"]]
+        "response_status_filter", ["missing", "pending", "discarded", "submitted", "draft", ["submitted", "draft"]]
     )
     async def test_list_dataset_records_with_response_status_filter(
         self,
@@ -1235,7 +1235,7 @@ class TestSuiteListDatasetRecords:
         )
 
     @pytest.mark.skip(reason="Factory integration with search engine")
-    @pytest.mark.parametrize("response_status_filter", ["missing", "discarded", "submitted", "draft"])
+    @pytest.mark.parametrize("response_status_filter", ["missing", "pending", "discarded", "submitted", "draft"])
     async def test_list_current_user_dataset_records_with_response_status_filter(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict, response_status_filter: str
     ):
@@ -1269,7 +1269,7 @@ class TestSuiteListDatasetRecords:
 
         assert len(response_json["items"]) == num_responses_per_status
 
-        if response_status_filter == "missing":
+        if response_status_filter in ["missing", "pending"]:
             assert all([len(record["responses"]) == 0 for record in response_json["items"]])
         else:
             assert all(
