@@ -8,10 +8,10 @@
   "saved": "Saved",
   "minimize": "Minimize",
   "expand": "Expand",
-  "submit-your-feedback": "Submit your feedback",
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
+  "to_submit_complete_required": "To submit complete required responses",
   "changes_no_submit": "You didn't submit your changes",
   "shortcuts": {
     "label": "Shortcuts",
@@ -22,10 +22,16 @@
       "go_to_next_record_mac": "Next (⌘ cmd + →)"
     },
     "questions_form": {
-      "clear": "Clear (⇧ shift + ␣ space)",
-      "discard": "Discard (⇧ shift + ⌫ backspace)",
-      "submit": "Submit (⇧ shift + ↵ enter)"
+      "draft_mac": "Save as draft (⌘ cmd + s)",
+      "draft": "Save as draft (ctrl + s)",
+      "discard": "Discard (⌫ backspace)",
+      "submit": "Submit (↵ enter)"
     }
+  },
+  "questions_form": {
+    "discard": "Discard",
+    "submit": "Submit",
+    "draft": "Save as draft"
   },
   "sorting": {
     "score": "suggestion score",

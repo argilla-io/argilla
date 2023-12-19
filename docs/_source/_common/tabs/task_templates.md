@@ -291,7 +291,7 @@ ds
 #         TextField(name="retrieved_document_1", use_markdown=False),
 #     ],
 #     questions=[
-#         RatingQuestion(name="question_rating_1", values=[1, 2, 3, 4, 5, 6, 7]),
+#         RatingQuestion(name="rating_retrieved_document_1", values=[1, 2, 3, 4, 5, 6, 7]),
 #         TextQuestion(name="response", use_markdown=False),
 #     ],
 #     guidelines="<Guidelines for the task>",
