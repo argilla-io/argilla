@@ -68,11 +68,6 @@ export class Records {
   }
 
   private quantityOfRecordsAnnotated(status: RecordStatus) {
-    if (status === "pending")
-      return this.records.filter(
-        (record) => record.status !== "draft" && record.status !== status
-      ).length;
-
     return this.records.filter((record) => record.status !== status).length;
   }
 }

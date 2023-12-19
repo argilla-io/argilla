@@ -90,7 +90,9 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(MetricsRepository, useMetrics)
       .build(),
 
-    register(SaveDraftRecord).withDependency(RecordRepository).build(),
+    register(SaveDraftRecord)
+      .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
 
     register(GetDatasetSettingsUseCase)
       .withDependencies(

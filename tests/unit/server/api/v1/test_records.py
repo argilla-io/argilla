@@ -956,7 +956,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize(
         "status, expected_status_code, expected_response_count",
-        [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 422, 0)],
+        [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 201, 0)],
     )
     async def test_create_record_response_without_values(
         self,

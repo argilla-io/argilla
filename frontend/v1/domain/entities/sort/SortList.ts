@@ -39,6 +39,7 @@ abstract class Sort {
     return this.title;
   }
 }
+type SortIdentifier = Pick<Sort, "key" | "name">;
 
 class MetadataSort extends Sort {
   constructor(private readonly metadata: Metadata) {
@@ -110,17 +111,17 @@ export class SortList {
     );
   }
 
-  select(category: string) {
-    const found = this.findByCategory(category);
+  select(sort: SortIdentifier) {
+    const found = this.findByCategory(sort);
 
     if (found) {
       this.selectedCategories.push(found);
     }
   }
 
-  unselect(category: string) {
+  unselect(sort: SortIdentifier) {
     const indexOf = this.selectedCategories.findIndex(
-      (categoriesSort) => categoriesSort.name === category
+      (s) => s.key === sort.key && s.name === sort.name
     );
 
     if (indexOf > -1) {
@@ -128,11 +129,11 @@ export class SortList {
     }
   }
 
-  replace(category: string, newCategory: string) {
-    const newCategoryFound = this.findByCategory(newCategory);
+  replace(actualSort: SortIdentifier, newSort: SortIdentifier) {
+    const newCategoryFound = this.findByCategory(newSort);
 
     const indexOf = this.selectedCategories.findIndex(
-      (categoriesSort) => categoriesSort.name === category
+      (s) => s.key === actualSort.key && s.name === actualSort.name
     );
 
     if (indexOf > -1) {
@@ -144,8 +145,9 @@ export class SortList {
     this.selectedCategories = [];
   }
 
-  toggleSort(category: string) {
-    const found = this.findByCategory(category);
+  toggleSort(identifier: SortIdentifier) {
+    const found = this.findByCategory(identifier);
+
     if (found) found.toggleSort();
   }
 
@@ -188,8 +190,8 @@ export class SortList {
 
     if (!sort.length) return;
 
-    sort.forEach(({ name, order }) => {
-      const found = this.findByCategory(name);
+    sort.forEach(({ entity, name, order }) => {
+      const found = this.findByCategory({ key: entity, name });
 
       if (found) {
         found.sort = order;
@@ -201,7 +203,9 @@ export class SortList {
     this.commit();
   }
 
-  private findByCategory(category: string) {
-    return this.categoriesSorts.find((m) => m.name === category);
+  private findByCategory(sort: SortIdentifier) {
+    return this.categoriesSorts.find(
+      (s) => s.key === sort.key && s.name === sort.name
+    );
   }
 }
