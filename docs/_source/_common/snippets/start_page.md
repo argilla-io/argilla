@@ -2,14 +2,17 @@
 
 # Welcome to Argilla!
 
-## Argilla is a platform to build high-quality datasets.
+<span class="start-page__logo"></span>
 
-To get started, you can create your first dataset as follows.
-For in-depth user guides, check the [documentation](https://docs.argilla.io/en/latest/) 📖.
+## Argilla is a platform to build high-quality datasets
 
 </div>
 
 <div class="start-page__content" markdown="1">
+
+To get started, you can create your first dataset as follows.
+For in-depth user guides, check the [documentation](https://docs.argilla.io/en/latest/) 📖.
+
 ### 1. Open an IDE, Jupyter or Collab
 
 If you're a Collab user, you can directly use our [introductory tutorial](https://colab.research.google.com/github/argilla-io/argilla/blob/develop/docs/_source/getting_started/quickstart_workflow_feedback.ipynb).
