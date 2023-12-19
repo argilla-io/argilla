@@ -51,7 +51,7 @@ class TextDescriptivesExtractor:
 
         Args:
             model (str): The language of the model to use for text descriptives.
-            metrics (Optional[List[str]]): A list of metrics to extract 
+            metrics (Optional[List[str]]): A list of metrics to extract
                 [“descriptive_stats”, “readability”, “dependency_distance”, “pos_proportions”, “coherence”, “quality”, “information_theory”].
                 If None, all metrics will be extracted.
             fields (Optional[List[str]]): A list of field names to extract metrics from. If None, all fields will be used.
