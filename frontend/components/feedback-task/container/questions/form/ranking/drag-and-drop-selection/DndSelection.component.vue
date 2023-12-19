@@ -23,6 +23,12 @@
           v-text="item.text"
           :id="`${item.value}-span`"
         />
+        <span
+          :title="$t('suggestion.suggested-rank')"
+          class="draggable__suggestion"
+          v-if="findRankSuggestion(item.value)"
+          >{{ findRankSuggestion(item.value).rank }}</span
+        >
       </div>
     </draggable>
 
@@ -59,6 +65,12 @@
               v-text="item.text"
               :id="`${item.value}-span`"
             />
+            <span
+              :title="$t('suggestion.suggested-rank')"
+              class="draggable__suggestion"
+              v-if="findRankSuggestion(item.value)"
+              >{{ findRankSuggestion(item.value).rank }}</span
+            >
           </div>
         </draggable>
       </div>
@@ -76,6 +88,9 @@ export default {
     ranking: {
       type: Object,
       required: true,
+    },
+    suggestions: {
+      type: Array,
     },
     isFocused: {
       type: Boolean,
@@ -195,6 +210,9 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
+    findRankSuggestion(value) {
+      return this.suggestions?.find((suggestion) => suggestion.value == value);
+    },
   },
 };
 </script>
@@ -204,6 +222,7 @@ $card-primary-color: palette(purple, 200);
 $card-secondary-color: palette(white);
 $card-ghost-color: palette(purple, 300);
 $card-empty-color: palette(purple, 400);
+$suggestion-color: palette(yellow, 400);
 $cards-separation: $base-space;
 $background-slot-color: $black-4;
 $slot-height: 50px;
@@ -327,6 +346,7 @@ $max-visible-card-items: 12;
     }
     &--ranking {
       @extend .draggable__slot-box;
+      flex-shrink: 0;
       max-width: $slot-height;
       align-items: center;
       justify-content: space-around;
@@ -337,6 +357,22 @@ $max-visible-card-items: 12;
         border-color: #cdcdff;
       }
     }
+  }
+
+  &__suggestion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: $base-space * 2;
+    width: $base-space * 2;
+    margin-left: auto;
+    border-radius: $border-radius-rounded;
+    border: 1px solid $suggestion-color;
+    color: $card-primary-color;
+    background: $suggestion-color;
+    @include font-size(12px);
+    cursor: default;
   }
 
   .svg-icon {

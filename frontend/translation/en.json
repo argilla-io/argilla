@@ -27,6 +27,21 @@
       "submit": "Submit (⇧ shift + ↵ enter)"
     }
   },
+  "sorting": {
+    "score": "suggestion score",
+    "general": "general",
+    "metadata": "metadata"
+  },
+  "suggestion": {
+    "filter": {
+      "value": "Suggestion values",
+      "score": "Score",
+      "agent": "Agent"
+    },
+    "plural": "Suggestions",
+    "suggested-rank": "✨ Suggested rank",
+    "name": "✨ Suggestion"
+  },
   "filters": "Filters",
   "filterBy": "Filter by...",
   "findSimilar": "Find similar",
@@ -34,8 +49,17 @@
   "similarityScore": "Similarity Score",
   "similarUsing": "similar using",
   "metadata": "Metadata",
+  "responses": "Responses",
+  "reset-all": "Reset all",
   "reset": "Reset",
   "with": "with",
   "find": "Find",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "youAreOnlineAgain": "You are online again",
+  "youAreOffline": "You are offline",
+  "argilla": {
+    "api": {
+      "errors::UnauthorizedError": "Could not validate credentials"
+    }
+  }
 }

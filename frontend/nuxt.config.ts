@@ -62,7 +62,8 @@ const config: NuxtConfig = {
 
     { src: "~/plugins/di" },
 
-    { src: "~/plugins/plugins/vuex-orm-axios.js" },
+    { src: "~/plugins/plugins/axios.ts" },
+    { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
     { src: "~/plugins/plugins/vue-vega.js" },
     { src: "~/plugins/plugins/click-outside.js" },

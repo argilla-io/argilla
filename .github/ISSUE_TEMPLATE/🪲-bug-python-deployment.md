@@ -2,8 +2,9 @@
 name: "\U0001FAB2 Bug report: Python/Deployment "
 about: Python or Deployment bugs and unexpected behavior
 title: "[BUG-python/deployment]"
-labels: "api, bug \U0001FAB2"
+labels: ''
 assignees: ''
+
 ---
 
 <!--  Ask David for help you to contribute https://calendly.com/argilla-office-hours/30min or feel free to submit a pull request straight away: https://github.com/argilla-io/argilla/pulls or  -->

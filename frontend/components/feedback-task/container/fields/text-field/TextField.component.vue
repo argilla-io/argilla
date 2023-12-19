@@ -87,7 +87,6 @@ export default {
   &__copy-button {
     flex-shrink: 0;
     padding: 0;
-    z-index: 2;
     opacity: 0;
   }
 }

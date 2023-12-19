@@ -7,17 +7,23 @@
       searchRef="sortFilter"
     />
     <ul class="sort-categories__list">
-      <li
-        v-for="category in categoriesFilteredBySearchText"
-        :key="category.name"
-      >
-        <BaseButton
-          :disabled="!category.canSort"
-          @on-click="includeCategory(category)"
-          class="sort-categories__item"
-          ><span>{{ category.title }}</span></BaseButton
+      <template v-for="group in filteredGroups">
+        <span class="sort-categories__group" :key="group">{{
+          $t(`sorting.${group}`)
+        }}</span>
+        <li
+          v-for="category in getCategoriesByGroup(group)"
+          :key="`${group}${category.name}`"
+          :title="category.tooltip"
         >
-      </li>
+          <BaseButton
+            :disabled="!category.canSort"
+            @on-click="includeCategory(category)"
+            class="sort-categories__item"
+            ><span>{{ category.title }}</span></BaseButton
+          >
+        </li>
+      </template>
     </ul>
   </div>
 </template>
@@ -35,15 +41,29 @@ export default {
     };
   },
   computed: {
+    groups() {
+      return [...new Set(this.categories.map((cat) => cat.group))];
+    },
     categoriesFilteredBySearchText() {
       return this.categories.filter((cat) =>
         cat.title.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
+    filteredGroups() {
+      const groups = this.categoriesFilteredBySearchText.map(
+        (cat) => cat.group
+      );
+      return this.groups.filter((group) => groups.includes(group));
+    },
   },
   methods: {
     includeCategory(category) {
-      this.$emit("include-category", category.name);
+      this.$emit("include-category", category);
+    },
+    getCategoriesByGroup(group) {
+      return this.categoriesFilteredBySearchText.filter(
+        (cat) => cat.group === group
+      );
     },
   },
 };
@@ -57,6 +77,17 @@ export default {
     margin: $base-space 0 0 0;
     overflow: auto;
     max-height: 200px;
+  }
+  &__group {
+    display: inline-block;
+    padding: $base-space * 2 $base-space 0 $base-space;
+    color: $black-37;
+    @include font-size(12px);
+    text-transform: capitalize;
+    font-weight: 400;
+    &:first-of-type {
+      padding-top: 0;
+    }
   }
   &__item {
     width: 100%;

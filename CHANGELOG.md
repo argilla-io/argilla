@@ -19,10 +19,20 @@ These are the section headers that we use:
 ### Added
 
 - Added annotation metrics module for the `FeedbackDataset` (`argilla.client.feedback.metrics`). ([#4175](https://github.com/argilla-io/argilla/pull/4175)).
+- Added strategy to handle and translate errors from server for `401 http status code`. ([#4362](https://github.com/argilla-io/argilla/pull/4362))
+- Added `POST /api/v1/me/responses/bulk` endpoint to create responses in bulk for current user. ([#4380](https://github.com/argilla-io/argilla/pull/4380))
+- Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
+
+## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
+
+### Added
+
+- Added `GET /api/v1/datasets/:dataset_id/records/search/suggestions/options` endpoint to return suggestion available options for searching. ([#4260](https://github.com/argilla-io/argilla/pull/4260))
 - Added `metadata_properties` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`.([#4192](https://github.com/argilla-io/argilla/pull/4192)).
 - Added `get_model_kwargs`, `get_trainer_kwargs`, `get_trainer_model`, `get_trainer_tokenizer` and `get_trainer` -methods to the `ArgillaTrainer` to improve interoperability across frameworks. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
 - Added additional formatting checks to the `ArgillaTrainer` to allow for better interoperability of `defaults` and `formatting_func` usage. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
 - Added a warning to the `update_config`-method of `ArgillaTrainer` to emphasize if the `kwargs` were updated correctly. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
+- Added `argilla.client.feedback.utils` module with `html_utils` (this mainly includes `video/audio/image_to_html` that convert media to dataURL to be able to render them in tha Argilla UI and `create_token_highlights` to highlight tokens in a custom way. Both work on TextQuestion and TextField with use_markdown=True) and `assignments` (this mainly includes `assign_records` to assign records according to a number of annotators and records, an overlap and the shuffle option; and `assign_workspace` to assign and create if needed a workspace according to the record assignment). ([#4121](https://github.com/argilla-io/argilla/pull/4121))
 
 ### Fixed
 
@@ -30,9 +40,18 @@ These are the section headers that we use:
 - Fixed error in `ArgillaTrainer`, now we can train for `extractive_question_answering` using a validation sample ([#4204](https://github.com/argilla-io/argilla/pull/4204))
 - Fixed error in `ArgillaTrainer`, when training for `sentence-similarity` it didn't work with a list of values per record ([#4211](https://github.com/argilla-io/argilla/pull/4211))
 - Fixed error in the unification strategy for `RankingQuestion` ([#4295](https://github.com/argilla-io/argilla/pull/4295))
+- Fixed `TextClassificationSettings.labels_schema` order was not being preserved. Closes [#3828](https://github.com/argilla-io/argilla/issues/3828) ([#4332](https://github.com/argilla-io/argilla/pull/4332))
+- Fixed error when requesting non-existing API endpoints. Closes [#4073](https://github.com/argilla-io/argilla/issues/4073) ([#4325](https://github.com/argilla-io/argilla/pull/4325))
+- Fixed error when passing `draft` responses to create records endpoint. ([#4354](https://github.com/argilla-io/argilla/pull/4354))
 
 ### Changed
 
+- [breaking] Suggestions `agent` field only accepts now some specific characters and a limited length. ([#4265](https://github.com/argilla-io/argilla/pull/4265))
+- [breaking] Suggestions `score` field only accepts now float values in the range `0` to `1`. ([#4266](https://github.com/argilla-io/argilla/pull/4266))
+- Updated `POST /api/v1/dataset/:dataset_id/records/search` endpoint to support optional `query` attribute. ([#4327](https://github.com/argilla-io/argilla/pull/4327))
+- Updated `POST /api/v1/dataset/:dataset_id/records/search` endpoint to support `filter` and `sort` attributes. ([#4327](https://github.com/argilla-io/argilla/pull/4327))
+- Updated `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to support optional `query` attribute. ([#4270](https://github.com/argilla-io/argilla/pull/4270))
+- Updated `POST /api/v1/me/datasets/:dataset_id/records/search` endpoint to support `filter` and `sort` attributes. ([#4270](https://github.com/argilla-io/argilla/pull/4270))
 - Changed the logging style while pulling and pushing `FeedbackDataset` to Argilla from `tqdm` style to `rich`. ([#4267](https://github.com/argilla-io/argilla/pull/4267)). Contributed by @zucchini-nlp.
 - Updated `push_to_argilla` to print `repr` of the pushed `RemoteFeedbackDataset` after push and changed `show_progress` to True by default. ([#4223](https://github.com/argilla-io/argilla/pull/4223))
 - Changed `models` and `tokenizer` for the `ArgillaTrainer` to explicitly allow for changing them when needed. ([#4214](https://github.com/argilla-io/argilla/pull/4214)).
