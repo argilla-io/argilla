@@ -1,6 +1,6 @@
 <div class="start-page__intro" markdown="1">
 
-# Welcome to Argilla!
+# Welcome to
 
 <span class="start-page__logo"></span>
 
