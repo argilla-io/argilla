@@ -9,11 +9,7 @@
         ref="prevButton"
         @click="onClickPrev"
         :disabled="isFirstPage"
-        :title="
-          $platform.isMac
-            ? $t('shortcuts.pagination.go_to_previous_record_mac')
-            : $t('shortcuts.pagination.go_to_previous_record')
-        "
+        :title="$t('shortcuts.pagination.go_to_previous_record')"
       >
         <svgicon name="chevron-left" width="12" height="12" />
       </BaseButton>
@@ -23,11 +19,7 @@
         ref="nextButton"
         @click="onClickNext"
         :disabled="isLastPage"
-        :title="
-          $platform.isMac
-            ? $t('shortcuts.pagination.go_to_next_record_mac')
-            : $t('shortcuts.pagination.go_to_next_record')
-        "
+        :title="$t('shortcuts.pagination.go_to_next_record')"
       >
         <svgicon name="chevron-right" width="12" height="12" />
       </BaseButton>
@@ -89,12 +81,9 @@ export default {
       event.stopPropagation();
     },
     onPressKeyboardShortcuts(event) {
-      const { code, ctrlKey, metaKey } = event;
-      if (this.$platform.isMac) {
-        if (!metaKey) return;
-      } else {
-        if (!ctrlKey) return;
-      }
+      const { code, ctrlKey, metaKey, shiftKey } = event;
+
+      if (ctrlKey || metaKey || shiftKey) return;
 
       switch (code) {
         case "ArrowRight": {
