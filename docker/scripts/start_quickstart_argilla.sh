@@ -43,6 +43,10 @@ python -m argilla server database users create \
 # Load data
 python load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
 
+# Start rq worker
+echo "Starting rq worker"
+rq worker --with-scheduler 1>/dev/null 2>/dev/null &
+
 # Start Argilla
 echo "Starting Argilla"
 if [ -n "$ARGILLA_BASE_URL" ]; then
