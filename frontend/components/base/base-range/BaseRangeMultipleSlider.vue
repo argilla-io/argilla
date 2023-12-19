@@ -6,6 +6,10 @@
         v-model.number.lazy="values[0]"
         :min="min"
         :max="max"
+        @keydown.arrow-up.stop=""
+        @keydown.arrow-down.stop=""
+        @keydown.arrow-right.exact.stop=""
+        @keydown.arrow-left.exact.stop=""
       />
       <span class="range__separator" />
       <input
@@ -13,6 +17,10 @@
         v-model.number.lazy="values[1]"
         :min="min"
         :max="max"
+        @keydown.arrow-up.stop=""
+        @keydown.arrow-down.stop=""
+        @keydown.arrow-right.exact.stop=""
+        @keydown.arrow-left.exact.stop=""
       />
     </div>
     <div class="range__control">

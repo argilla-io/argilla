@@ -27,7 +27,7 @@ except ImportError:
     from typing_extensions import Annotated
 
 RESPONSES_BULK_CREATE_MIN_ITEMS = 1
-RESPONSES_BULK_CREATE_MAX_ITEMS = 50
+RESPONSES_BULK_CREATE_MAX_ITEMS = 100
 
 
 class ResponseValue(BaseModel):

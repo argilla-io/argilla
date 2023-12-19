@@ -31,11 +31,11 @@
       :placeholder="placeholder"
       :aria-description="description"
       autocomplete="off"
-      @keydown.enter.exact="applySearch"
+      @keydown.enter.exact.stop="applySearch"
       @keydown.arrow-right.stop=""
       @keydown.arrow-left.stop=""
       @keydown.delete.exact.stop=""
-      @keydown.enter.exact.stop=""
+      @keydown.backspace.exact.stop=""
     />
     <BaseButton
       @on-click="resetValue"

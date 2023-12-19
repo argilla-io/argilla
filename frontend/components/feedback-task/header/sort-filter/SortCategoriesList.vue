@@ -13,7 +13,7 @@
         }}</span>
         <li
           v-for="category in getCategoriesByGroup(group)"
-          :key="category.name"
+          :key="`${group}${category.name}`"
           :title="category.tooltip"
         >
           <BaseButton
@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     includeCategory(category) {
-      this.$emit("include-category", category.name);
+      this.$emit("include-category", category);
     },
     getCategoriesByGroup(group) {
       return this.categoriesFilteredBySearchText.filter(
