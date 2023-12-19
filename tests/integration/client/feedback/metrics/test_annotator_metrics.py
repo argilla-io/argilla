@@ -347,14 +347,12 @@ def test_annotator_metrics_unified_from_feedback_dataset(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    unified_dataset = dataset.compute_unified_responses(question, strategy_name)
-
     if responses_vs_suggestions:
-        metrics_report = unified_dataset.compute_responses_metrics(
+        metrics_report = dataset.compute_responses_metrics(
             question_name=question, metric_names=metric_names, strategy=strategy_name
         )
     else:
-        metrics_report = unified_dataset.compute_suggestions_metrics(
+        metrics_report = dataset.compute_suggestions_metrics(
             question_name=question, metric_names=metric_names, strategy=strategy_name
         )
 
@@ -362,9 +360,7 @@ def test_annotator_metrics_unified_from_feedback_dataset(
         assert isinstance(metrics_report, list)
     else:
         assert isinstance(metrics_report, AnnotatorMetricResult)
-        assert str(list(unified_dataset.records[0].unified_responses.values())[0][0].value) in str(
-            dataset.records[0].responses
-        )
+
         metrics_report = [metrics_report]
         metric_names = [metric_names]
 
