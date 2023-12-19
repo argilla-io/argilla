@@ -265,7 +265,7 @@ describe("Records", () => {
       expect(pageToFind).toEqual({ from: 1, many: 50 });
     });
 
-    test("the current page should be from 9 and many 10 when the user is paginating fordward from page 8 and the queue has 8 records in draft but status is pending", () => {
+    test("the current page should be from 1 and many 10 when the user is paginating forward from page 8 and the queue has 8 records in draft but status is pending", () => {
       const criteria = new RecordCriteria(
         "1",
         9,
@@ -362,7 +362,7 @@ describe("Records", () => {
 
       const pageToFind = records.getPageToFind(criteria);
 
-      expect(pageToFind).toEqual({ from: 9, many: 10 });
+      expect(pageToFind).toEqual({ from: 1, many: 10 });
     });
   });
 });
