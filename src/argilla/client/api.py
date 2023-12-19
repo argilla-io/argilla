@@ -244,8 +244,8 @@ def load(
             raise e
 
         warnings.warn(
-            "Loaded dataset is a `FeedbackDataset`. It's recommended to use `rg.FeedbackDataset.from_argilla` class "
-            "method instead.",
+            "Loaded dataset is a `FeedbackDataset`. It's recommended to use "
+            f"`rg.FeedbackDataset.from_argilla(name='{name}', workspace='{workspace}')` instead",
             UserWarning,
             stacklevel=2,
         )
@@ -311,7 +311,8 @@ def delete(name: str, workspace: Optional[str] = None) -> None:
         dataset.delete()
 
         warnings.warn(
-            "Removed dataset was a `FeedbackDataset`. It's recommended to use `rg.FeedbackDataset.delete` instead.",
+            "Removed dataset was a `FeedbackDataset`. It's recommended to use "
+            f"`rg.FeedbackDataset.from_argilla(name='{name}', workspace='{workspace}').delete()` instead.",
             UserWarning,
             stacklevel=2,
         )
