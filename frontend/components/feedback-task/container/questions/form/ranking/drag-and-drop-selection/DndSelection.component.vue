@@ -80,7 +80,6 @@
 
 <script>
 import "assets/icons/draggable";
-import { isNil } from "lodash";
 
 export default {
   name: "DndSelectionComponent",
@@ -129,7 +128,13 @@ export default {
     },
     isGlobalShortcut(event) {
       return (
-        event.shiftKey || event.key == "Tab" || event.ctrlKey || event.metaKey
+        event.key == "Tab" ||
+        event.code === "Enter" ||
+        event.code === "Backspace" ||
+        event.code === "ArrowLeft" ||
+        event.code === "ArrowRight" ||
+        event.code === "ArrowUp" ||
+        event.code === "ArrowDown"
       );
     },
     rankWithKeyboard(event, questionToMove) {
@@ -139,12 +144,6 @@ export default {
       event.stopPropagation();
 
       this.keyCode += event.key;
-
-      if (this.onUnRankFor(event.key, questionToMove)) {
-        this.focusOnFirstQuestionOrItem();
-        this.reset();
-        return;
-      }
 
       if (isNaN(this.keyCode)) {
         this.reset();
@@ -175,17 +174,6 @@ export default {
           this.reset();
         });
       }, 300);
-    },
-    onUnRankFor(key, question) {
-      const isRanked = !isNil(question.rank);
-
-      if (key == "Backspace" && isRanked) {
-        question.rank = null;
-
-        return true;
-      }
-
-      return false;
     },
     focusOnFirstQuestionOrItem() {
       this.$nextTick(() => {

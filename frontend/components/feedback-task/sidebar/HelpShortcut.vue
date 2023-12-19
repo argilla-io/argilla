@@ -119,20 +119,29 @@ export default {
   th:last-child {
     border-left: none;
     border-right: none;
+    padding-top: 2px;
   }
   td:first-child,
   th:first-child {
     border-left: none;
     border-bottom: none;
+    padding-bottom: 2px;
   }
-  th:last-child {
+  th:last-child,
+  th:first-child {
     display: none;
   }
   code {
-    padding: calc($base-space / 2);
+    display: inline-block;
+    padding: 2px 4px;
     border: 1px solid $black-10;
     border-radius: $border-radius;
-    background: $black-4;
+    background: palette(white) !important;
+    color: $black-87 !important;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Open Sans", "Helvetica Neue", sans-serif;
+    min-width: 24px;
+    text-align: center;
   }
 }
 </style>

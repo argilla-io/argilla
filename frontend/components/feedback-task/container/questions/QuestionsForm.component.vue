@@ -2,7 +2,7 @@
   <form
     class="questions-form"
     :class="questionFormClass"
-    @submit.prevent="onSubmit"
+    @submit.stop.prevent=""
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
   >
@@ -33,8 +33,8 @@
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
-          @on-click="onDiscard"
           :title="$t('shortcuts.questions_form.discard')"
+          @on-click="onDiscard"
         >
           <span class="button__shortcuts" v-text="'⌫'" /><span
             v-text="$t('questions_form.discard')"
@@ -44,13 +44,12 @@
           type="button"
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
-          @on-click="onSaveDraft"
-          :disabled="isSaveDraftButtonDisabled"
           :title="
             $platform.isMac
               ? $t('shortcuts.questions_form.draft_mac')
               : $t('shortcuts.questions_form.draft')
           "
+          @on-click="onSaveDraft"
         >
           <span class="button__shortcuts-group"
             ><span
@@ -71,6 +70,7 @@
               ? $t('to_submit_complete_required')
               : $t('shortcuts.questions_form.submit')
           "
+          @on-click="onSubmit"
         >
           <span class="button__shortcuts" v-text="'↵'" />
           <span v-text="$t('questions_form.submit')" />
@@ -102,7 +102,7 @@ export default {
     return {
       autofocusPosition: 0,
       interactionCount: 0,
-      isTouched: false,
+      isSubmittedTouched: false,
       userComesFromOutside: false,
     };
   },
@@ -115,7 +115,10 @@ export default {
       if (this.isDiscarding) return "--discarding --waiting";
       if (this.isDraftSaving) return "--saving-draft";
 
-      if (this.isTouched || (this.formHasFocus && this.interactionCount > 1))
+      if (
+        this.isSubmittedTouched ||
+        (this.formHasFocus && this.interactionCount > 1)
+      )
         return "--focused-form";
     },
     formHasFocus() {
@@ -130,16 +133,14 @@ export default {
     isSubmitButtonDisabled() {
       return !this.questionAreCompletedCorrectly;
     },
-    isSaveDraftButtonDisabled() {
-      return false;
-    },
   },
   watch: {
     record: {
       deep: true,
       immediate: true,
       handler() {
-        this.isTouched = this.record.isSubmitted && this.record.isModified;
+        this.isSubmittedTouched =
+          this.record.isSubmitted && this.record.isModified;
       },
     },
   },
@@ -150,6 +151,16 @@ export default {
     document.removeEventListener("keydown", this.handleGlobalKeys);
   },
   methods: {
+    async autoSubmitWithKeyboard() {
+      if (!this.record.isModified) return;
+      if (this.record.questions.length > 1) return;
+
+      const question = this.record.questions[0];
+
+      if (question.isSingleLabelType || question.isRatingType) {
+        await this.onSubmit();
+      }
+    },
     focusOnFirstQuestionFromOutside(event) {
       if (!this.userComesFromOutside) return;
       if (event.srcElement.id || event.srcElement.getAttribute("for")) return;
@@ -166,9 +177,11 @@ export default {
       this.userComesFromOutside = true;
     },
     handleGlobalKeys(event) {
-      const { code, shiftKey, ctrlKey, metaKey } = event;
+      const { code, ctrlKey, metaKey, shiftKey } = event;
 
-      if (code == "Tab" && this.userComesFromOutside) {
+      if (shiftKey) return;
+
+      if (code === "Tab" && this.userComesFromOutside) {
         this.focusOnFirstQuestion(event);
 
         return;
@@ -185,14 +198,17 @@ export default {
           break;
         }
         case "Enter": {
-          if (shiftKey) this.onSubmit();
+          this.onSubmit();
           break;
         }
         case "Backspace": {
-          if (shiftKey) this.onDiscard();
+          this.onDiscard();
           break;
         }
-        default:
+        default: {
+          this.autoSubmitWithKeyboard();
+          break;
+        }
       }
     },
     async onDiscard() {
