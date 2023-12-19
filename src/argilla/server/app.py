@@ -270,17 +270,4 @@ def configure_database(app: FastAPI):
                 _log_default_user_warning()
 
 
-try:
-    app = create_server_app()
-except ModuleNotFoundError as ex:
-    _module_name = ex.name
-
-    def fallback_app(*args, **kwargs):
-        raise RuntimeError(
-            "\n"
-            f"Cannot start argilla server. Some dependencies were not found:[{_module_name}].\n"
-            "Please, install missing modules or reinstall argilla with server extra deps:\n"
-            "pip install argilla[server]"
-        )
-
-    app = fallback_app
+app = create_server_app()
