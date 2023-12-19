@@ -205,8 +205,8 @@ class TestRemoteFeedbackDataset:
 
         remote.update_records(records)
 
-        for records in remote:
-            assert len(records.suggestions) == 0
+        for record in remote:
+            assert len(record.suggestions) == 0
 
     @pytest.mark.parametrize(
         "metadata", [("terms-metadata", "wrong-label"), ("integer-metadata", "wrong-integer"), ("float-metadata", 11.5)]

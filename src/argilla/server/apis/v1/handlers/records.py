@@ -180,7 +180,7 @@ async def delete_record_suggestions(
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
 ):
-    record = await _get_record(db, record_id)
+    record = await _get_record(db, record_id, with_dataset=True)
 
     await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
 

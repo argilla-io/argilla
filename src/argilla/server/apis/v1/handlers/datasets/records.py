@@ -30,7 +30,6 @@ from argilla.server.models import Record, User
 from argilla.server.policies import DatasetPolicyV1, authorize
 from argilla.server.schemas.v1.datasets import (
     Dataset,
-    Filter,
     Filters,
     FilterScope,
     MetadataFilterScope,
@@ -52,8 +51,6 @@ from argilla.server.schemas.v1.datasets import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
     TermsFilter,
-    TextQuery,
-    VectorQuery,
     VectorSettings,
 )
 from argilla.server.schemas.v1.datasets import (

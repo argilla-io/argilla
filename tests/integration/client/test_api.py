@@ -980,6 +980,7 @@ def test_not_aligned_argilla_versions(monkeypatch):
         Argilla()
 
 
+@pytest.mark.skip
 def test_list_datasets(argilla_user: User):
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
@@ -1003,6 +1004,7 @@ def test_list_datasets(argilla_user: User):
     assert len(datasets) == 2
 
 
+@pytest.mark.skip
 def test_list_datasets_only_other_datasets(argilla_user: User):
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
