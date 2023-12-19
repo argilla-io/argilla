@@ -445,8 +445,6 @@ export class RecordRepository {
     params.append("limit", howMany.toString());
     params.append("response_status", backendStatus);
 
-    if (backendStatus === "missing") params.append("response_status", "draft");
-
     return params;
   }
 }

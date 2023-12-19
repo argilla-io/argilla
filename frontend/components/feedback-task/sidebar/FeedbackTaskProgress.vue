@@ -17,10 +17,8 @@
 
 <template>
   <SidebarFeedbackTaskProgress
-    v-if="datasetMetrics.records"
-    :progressTotal="datasetMetrics.records"
-    :totalSubmitted="datasetMetrics.submitted"
-    :totalDiscarded="datasetMetrics.discarded"
+    v-if="datasetMetrics.total"
+    :metrics="datasetMetrics"
   />
 </template>
 

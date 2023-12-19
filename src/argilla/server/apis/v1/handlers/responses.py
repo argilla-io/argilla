@@ -17,12 +17,21 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import argilla.server.errors.future as errors
 from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
-from argilla.server.models import Response, User
-from argilla.server.policies import ResponsePolicyV1, authorize
-from argilla.server.schemas.v1.responses import Response as ResponseSchema
-from argilla.server.schemas.v1.responses import ResponseUpdate
+from argilla.server.models import Record, Response, User
+from argilla.server.policies import RecordPolicyV1, ResponsePolicyV1, authorize
+from argilla.server.schemas.v1.responses import (
+    Response as ResponseSchema,
+)
+from argilla.server.schemas.v1.responses import (
+    ResponseBulk,
+    ResponseBulkError,
+    ResponsesBulk,
+    ResponsesBulkCreate,
+    ResponseUpdate,
+)
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
@@ -36,7 +45,40 @@ async def _get_response(db: AsyncSession, response_id: UUID) -> Response:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Response with id `{response_id}` not found",
         )
+
     return response
+
+
+async def _get_record(db: AsyncSession, record_id: UUID) -> Record:
+    record = await datasets.get_record_by_id(db, record_id, with_dataset=True)
+    if record is None:
+        raise errors.NotFoundError(f"Record with id `{record_id}` not found")
+
+    return record
+
+
+@router.post("/me/responses/bulk", response_model=ResponsesBulk)
+async def create_current_user_responses_bulk(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    body: ResponsesBulkCreate,
+    current_user: User = Security(auth.get_current_user),
+):
+    responses_bulk_items = []
+    for item in body.items:
+        try:
+            record = await _get_record(db, item.record_id)
+
+            await authorize(current_user, RecordPolicyV1.create_response(record))
+
+            response = await datasets.upsert_response(db, search_engine, record, current_user, item)
+        except Exception as err:
+            responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))
+        else:
+            responses_bulk_items.append(ResponseBulk(item=ResponseSchema.from_orm(response), error=None))
+
+    return ResponsesBulk(items=responses_bulk_items)
 
 
 @router.put("/responses/{response_id}", response_model=ResponseSchema)

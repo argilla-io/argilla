@@ -6,15 +6,27 @@ const getCacheKey = (config) => {
   return `${config.method}-${config.url}-${JSON.stringify(config.params)}`;
 };
 
-const cache = {
+type Cache = {
+  items: Record<string, any>;
+  has: (key: string) => boolean;
+  get: (key: string) => any;
+  set: (key: string, value: any, seconds: number) => void;
+  delete: (key: string) => void;
+};
+
+const cache: Cache = {
   items: {},
   has(key) {
     return !!this.items[key];
   },
   get(key) {
+    if (!this.has(key)) return;
+
     return this.items[key];
   },
   set(key, value, seconds) {
+    if (this.has(key)) return;
+
     this.items[key] = value;
 
     setTimeout(() => {
@@ -55,9 +67,9 @@ export default ({ $axios }) => {
     if (response.config.method === "get") {
       if (!response.config.headers["cache-control"]) return response;
 
-      const userSecondsDefined = response.config.headers[
-        "cache-control"
-      ].replace("max-age=", "");
+      const userSecondsDefined = response.config.headers["cache-control"]
+        .replace("max-age", "")
+        .replace("=", "");
 
       const seconds = userSecondsDefined
         ? parseInt(userSecondsDefined)

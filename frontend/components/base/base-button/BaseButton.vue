@@ -123,7 +123,7 @@ export default {
   @include font-size(14px);
   line-height: 14px;
   padding: 12px 24px;
-  transition: all 0.4s $cb-normal;
+  transition: background 0.3s $cb-normal;
   cursor: pointer;
   &[disabled] {
     opacity: 0.5;

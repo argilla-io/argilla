@@ -8,33 +8,14 @@
   >
     <div class="questions-form__content">
       <div class="questions-form__header">
-        <div class="draft">
-          <p v-if="draftSaving">
-            <svgicon color="#0000005e" name="refresh" />
-            {{ $t("saving") }}
-          </p>
-          <p v-else-if="record.isDraft">
-            {{ $t("saved") }}
-            <BaseDate
-              class="tooltip"
-              :date="record.updatedAt"
-              format="date-relative-now"
-              :updateEverySecond="10"
-            />
-          </p>
-        </div>
-        <p class="questions-form__title --heading5 --medium">
-          {{ $t("submit-your-feedback") }}
-        </p>
         <p class="questions-form__guidelines-link">
-          Read the
           <NuxtLink
             :to="{
               name: 'dataset-id-settings',
               params: { id: datasetId },
             }"
             target="_blank"
-            >annotation guidelines <svgicon name="external-link" width="12" />
+            >Annotation guidelines <svgicon name="external-link" width="12" />
           </NuxtLink>
         </p>
       </div>
@@ -46,33 +27,53 @@
       />
     </div>
     <div class="footer-form">
-      <div class="footer-form__left-footer">
+      <div class="footer-form__content">
         <BaseButton
+          v-if="!record.isDiscarded || isDiscarding"
           type="button"
-          class="primary text"
-          @click.prevent="onClear"
-          :title="$t('shortcuts.questions_form.clear')"
-        >
-          <span v-text="'Clear'" />
-        </BaseButton>
-      </div>
-      <div class="footer-form__right-area">
-        <BaseButton
-          type="button"
-          class="primary outline"
-          @on-click="onDiscard"
-          :disabled="record.isDiscarded"
+          class="button--discard"
+          :class="isDiscarding ? '--button--discarding' : null"
           :title="$t('shortcuts.questions_form.discard')"
+          @on-click="onDiscard"
         >
-          <span v-text="'Discard'" />
+          <span class="button__shortcuts" v-text="'⌫'" /><span
+            v-text="$t('questions_form.discard')"
+          />
+        </BaseButton>
+        <BaseButton
+          type="button"
+          class="button--draft"
+          :class="isDraftSaving ? '--button--saving-draft' : null"
+          :title="
+            $platform.isMac
+              ? $t('shortcuts.questions_form.draft_mac')
+              : $t('shortcuts.questions_form.draft')
+          "
+          @on-click="onSaveDraft"
+        >
+          <span class="button__shortcuts-group"
+            ><span
+              class="button__shortcuts"
+              v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
+              class="button__shortcuts"
+              v-text="'S'"
+          /></span>
+          <span v-text="$t('questions_form.draft')" />
         </BaseButton>
         <BaseButton
           type="submit"
-          class="primary"
+          class="button--submit"
+          :class="isSubmitting ? '--button--submitting' : null"
           :disabled="isSubmitButtonDisabled"
-          :title="$t('shortcuts.questions_form.submit')"
+          :title="
+            isSubmitButtonDisabled
+              ? $t('to_submit_complete_required')
+              : $t('shortcuts.questions_form.submit')
+          "
+          @on-click="onSubmit"
         >
-          <span v-text="'Submit'" />
+          <span class="button__shortcuts" v-text="'↵'" />
+          <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
     </div>
@@ -110,8 +111,9 @@ export default {
   },
   computed: {
     questionFormClass() {
-      if (this.isSubmitting) return "--submitted --waiting";
-      if (this.isDiscarding) return "--discarded --waiting";
+      if (this.isSubmitting) return "--submitting --waiting";
+      if (this.isDiscarding) return "--discarding --waiting";
+      if (this.isDraftSaving) return "--saving-draft";
 
       if (
         this.isSubmittedTouched ||
@@ -129,9 +131,6 @@ export default {
       return this.record.questionAreCompletedCorrectly();
     },
     isSubmitButtonDisabled() {
-      if (this.record.isSubmitted)
-        return !this.isSubmittedTouched || !this.questionAreCompletedCorrectly;
-
       return !this.questionAreCompletedCorrectly;
     },
   },
@@ -140,10 +139,8 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        if (this.record.isModified) this.saveDraft(this.record);
-
         this.isSubmittedTouched =
-          this.record.isModified && this.record.isSubmitted;
+          this.record.isSubmitted && this.record.isModified;
       },
     },
   },
@@ -192,11 +189,12 @@ export default {
 
       switch (code) {
         case "KeyS": {
-          if (ctrlKey || metaKey) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.onSaveDraftImmediately();
-          }
+          if (this.$platform.isMac) {
+            if (!metaKey) return;
+          } else if (!ctrlKey) return;
+          event.preventDefault();
+          event.stopPropagation();
+          this.onSaveDraft();
           break;
         }
         case "Enter": {
@@ -227,11 +225,8 @@ export default {
 
       this.$emit("on-submit-responses");
     },
-    async onClear() {
-      await this.clear(this.record);
-    },
-    async onSaveDraftImmediately() {
-      await this.saveDraftImmediately(this.record);
+    onSaveDraft() {
+      this.saveAsDraft(this.record);
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -249,19 +244,14 @@ export default {
   display: flex;
   flex-direction: column;
   flex-basis: clamp(33%, 520px, 40%);
+  gap: $base-space;
   max-height: 100%;
   min-width: 0;
   justify-content: space-between;
-  border-radius: $border-radius-m;
-  border: 1px solid transparent;
-  background: palette(white);
   margin-bottom: auto;
   &__header {
-    align-items: baseline;
-  }
-  &__title {
-    margin: 0 0 calc($base-space / 2) 0;
-    color: $black-87;
+    display: flex;
+    justify-content: right;
   }
   &__guidelines-link {
     margin: 0;
@@ -281,43 +271,135 @@ export default {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 4;
-    padding: $base-space * 3;
+    gap: $base-space * 2;
+    padding: $base-space * 2;
     overflow: auto;
     scroll-behavior: smooth;
-  }
-
-  &.--pending,
-  &.--draft {
-    border-color: $black-10;
-  }
-  &.--discarded {
-    border-color: $discarded-color;
-  }
-  &.--submitted {
-    border-color: $submitted-color;
-  }
-  &.--focused-form {
-    border-color: palette(brown);
-  }
-  &.--waiting .questions-form__content {
-    opacity: 0.7;
+    border-radius: $border-radius-m;
+    border: 1px solid transparent;
+    background: palette(white);
+    .--pending & {
+      border-color: $black-10;
+    }
+    .--draft &,
+    .--saving-draft & {
+      border-color: $draft-color;
+    }
+    .--discarded &,
+    .--discarding & {
+      border-color: $discarded-color;
+    }
+    .--submitted &,
+    .--submitting & {
+      border-color: $submitted-color;
+    }
+    .--saving-draft & {
+      box-shadow: 0 0 0 1px $draft-color;
+    }
+    .--discarding & {
+      box-shadow: 0 0 0 1px $discarded-color;
+    }
+    .--submitting & {
+      box-shadow: 0 0 0 1px $submitted-color;
+    }
+    .--waiting & {
+      opacity: 0.7;
+    }
   }
 }
 
 .footer-form {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: $base-space * 2 $base-space * 3;
-  border-top: 1px solid $black-10;
-  &__left-area {
-    display: inline-flex;
+  &__content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: $border-radius-m;
+    border: 1px solid #c6d1ff;
+    background: #f5f7ff;
+    transition: border-color 0.35s ease;
+    container-type: inline-size;
+    &:hover {
+      border-color: transparent;
+      transition: border-color 0.35s ease;
+    }
   }
-  &__right-area {
+}
+
+.button {
+  &__shortcuts {
     display: inline-flex;
-    gap: $base-space * 2;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 4px;
+    height: $base-space * 2;
+    border-radius: $border-radius;
+    border-width: 1px 1px 3px 1px;
+    border-color: $black-20;
+    border-style: solid;
+    box-sizing: content-box;
+    color: $black-87;
+    background: palette(white);
+    @include font-size(11px);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Open Sans", "Helvetica Neue", sans-serif;
+    padding: 0 4px;
+  }
+  &__shortcuts-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+  &--submit,
+  &--draft,
+  &--discard {
+    width: 100%;
+    justify-content: center;
+    color: $black-87;
+    min-height: $base-space * 6;
+    border-radius: $border-radius-m - 1;
+    padding: $base-space * 2 $base-space;
+    &:hover,
+    &.--button--discarding {
+      color: $black-87;
+    }
+    &:disabled {
+      opacity: 0.7;
+      pointer-events: visible;
+      cursor: not-allowed;
+    }
+  }
+  &--submit {
+    &:hover:not([disabled]) {
+      background: #b3c4ff;
+    }
+    &:active:not([disabled]),
+    &.--button--submitting,
+    &.--button--submitting:hover {
+      background: $submitted-color;
+    }
+  }
+  &--draft {
+    &:hover:not([disabled]) {
+      background: #b2e6ee;
+    }
+    &:active:not([disabled]),
+    &.--button--saving-draft,
+    &.--button--saving-draft:hover {
+      background: $draft-color;
+    }
+  }
+  &--discard {
+    &:hover:not([disabled]) {
+      background: #e0dddd;
+    }
+    &:active:not([disabled]),
+    &.--button--discarding,
+    &.--button--discarding:hover {
+      background: $discarded-color;
+    }
   }
 }
 
@@ -358,6 +440,16 @@ export default {
       position: absolute;
       @extend %triangle-right;
       left: 100%;
+    }
+  }
+}
+
+@container (max-width: 500px) {
+  .button {
+    &--submit,
+    &--draft,
+    &--discard {
+      flex-direction: column;
     }
   }
 }
