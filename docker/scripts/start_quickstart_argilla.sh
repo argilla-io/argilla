@@ -5,7 +5,10 @@ set -e
 echo "Starting Elasticsearch"
 /usr/share/elasticsearch/bin/elasticsearch 1>/dev/null 2>/dev/null &
 
-echo "Waiting for elasticsearch to start"
+echo "Starting Redis"
+redis-server 1>/dev/null 2>/dev/null &
+
+echo "Waiting for Elasticsearch and Redis to start"
 sleep 30
 
 echo "Running database migrations"
