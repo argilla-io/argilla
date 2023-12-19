@@ -365,4 +365,42 @@ describe("Records", () => {
       expect(pageToFind).toEqual({ from: 1, many: 10 });
     });
   });
+
+  describe("append", () => {
+    test("should append the new records to the current records when not exists", () => {
+      const records = new Records([
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+    });
+
+    test("should replace the new records to the current records when exists and never change the total", () => {
+      const records = new Records(
+        [new Record("2", "1", [], [], null, [], 1, 4)],
+        200
+      );
+
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+      expect(records.total).toBe(200);
+    });
+  });
 });
