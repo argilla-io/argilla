@@ -1080,7 +1080,7 @@ def _validate_response_values(
     status: ResponseStatus,
 ):
     if not values:
-        if status != ResponseStatus.discarded:
+        if status not in [ResponseStatus.discarded, ResponseStatus.draft]:
             raise ValueError("missing response values")
         return
 

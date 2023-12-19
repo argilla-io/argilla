@@ -6,9 +6,11 @@ import { RecordCriteria } from "./RecordCriteria";
 const NEXT_RECORDS_TO_FETCH = 10;
 
 export class Records {
-  public readonly records: Record[];
-  constructor(records: Record[] = [], public readonly total: number = 0) {
-    this.records = records.sort((r1, r2) => (r1.page < r2.page ? -1 : 1));
+  constructor(
+    public records: Record[] = [],
+    public readonly total: number = 0
+  ) {
+    this.arrangeQueue();
   }
 
   get hasRecordsToAnnotate() {
@@ -44,7 +46,7 @@ export class Records {
     const isMovingToNext = page > this.lastRecord.page;
 
     if (isMovingToNext) {
-      const recordsAnnotated = this.quantityOfRecordsAnnotated(status);
+      const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
 
       return {
         from: this.lastRecord.page + 1 - recordsAnnotated,
@@ -59,6 +61,26 @@ export class Records {
     return currentPage;
   }
 
+  append(newRecords: Records) {
+    newRecords.records.forEach((newRecord) => {
+      const recordIndex = this.records.findIndex(
+        (record) => record.id === newRecord.id
+      );
+
+      if (recordIndex === -1) {
+        this.records.push(newRecord);
+      } else {
+        this.records[recordIndex] = newRecord;
+      }
+    });
+
+    this.arrangeQueue();
+  }
+
+  private arrangeQueue() {
+    this.records = this.records.sort((r1, r2) => (r1.page < r2.page ? -1 : 1));
+  }
+
   private get lastRecord() {
     return this.records[this.records.length - 1];
   }
@@ -67,12 +89,7 @@ export class Records {
     return this.records[0];
   }
 
-  private quantityOfRecordsAnnotated(status: RecordStatus) {
-    if (status === "pending")
-      return this.records.filter(
-        (record) => record.status !== "draft" && record.status !== status
-      ).length;
-
+  private recordsAnnotatedOnQueue(status: RecordStatus) {
     return this.records.filter((record) => record.status !== status).length;
   }
 }

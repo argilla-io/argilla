@@ -122,7 +122,7 @@ The following arguments apply to specific metadata types:
 ```
 
 ```{note}
-You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_metadata_property` method as explained [here](/practical_guides/create_update_dataset/metadata.md).
+You can also define metadata properties after the dataset has been configured or add them to an existing dataset in Argilla using the `add_metadata_property` method. In addition, you can now add text descriptives of your fields as metadata automatically with the `TextDescriptivesExtractor`. For more info, take a look [here](/practical_guides/create_update_dataset/metadata.md).
 ```
 
 ##### Define `vectors`
