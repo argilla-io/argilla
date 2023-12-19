@@ -14,7 +14,7 @@
 #  limitations under the License.
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 import textdescriptives as td
@@ -252,7 +252,7 @@ class TextDescriptivesExtractor:
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with text descriptives metrics added as metadata.
 
-        >>> from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
+        >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
         >>> records = [rg.FeedbackRecord(fields={"text": "This is a test."})]
         >>> tde = TextDescriptivesExtractor()
         >>> updated_records = tde.update_records(records)
@@ -289,7 +289,7 @@ class TextDescriptivesExtractor:
             Union[FeedbackDataset, RemoteFeedbackDataset]: A FeedbackDataset or RemoteFeedbackDataset with text descriptives metrics added as metadata.
 
         >>> import argilla as rg
-        >>> from argilla.client.feedback.integrations.textdescriptives_ import TextDescriptivesExtractor
+        >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
         >>> rg.init(...)
         >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
         >>> tde = TextDescriptivesExtractor()
