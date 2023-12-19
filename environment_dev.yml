@@ -58,7 +58,7 @@ dependencies:
       - trl>=0.5.0
       - sentence-transformers
       - rich!=13.1.0
-      - textdescriptives>=2.7.0
+      - textdescriptives>=2.7.0,<3.0.0
       - ipynbname>=2023.2.0.0
       # install Argilla in editable mode
       - -e .[server,listeners]
