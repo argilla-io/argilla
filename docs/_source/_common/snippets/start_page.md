@@ -2,9 +2,9 @@
 
 # Welcome to
 
-<span class="start-page__logo"></span>
-
 ## Argilla is a platform to build high-quality datasets
+
+If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
 
 </div>
 
@@ -85,7 +85,5 @@ records = [
 ]
 dataset.add_records(records)
 ```
-
-> If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
 
 </div>
