@@ -2,7 +2,7 @@
 
 # Welcome to
 
-## Argilla is a platform to build high-quality datasets
+## Argilla is a platform to build high-quality AI datasets
 
 If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
 
@@ -10,8 +10,7 @@ If you need support join the [Argilla Slack community](https://join.slack.com/t/
 
 <div class="start-page__content" markdown="1">
 
-To get started, you can create your first dataset as follows.
-For in-depth user guides, check the [documentation](https://docs.argilla.io/en/latest/) 📖.
+Get started by publishing your first dataset. 
 
 ### 1. Open an IDE, Jupyter or Collab
 
