@@ -32,6 +32,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed error in `TextClassificationSettings.from_dict` method in which the `label_schema` created was a list of `dict` instead of a list of `str`. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
+- Fixed total records on pagination component ([#4424](https://github.com/argilla-io/argilla/pull/4424))
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 

@@ -68,15 +68,15 @@ export default {
     },
   },
   async fetch() {
-    await this.onLoadRecords("replace");
+    await this.onLoadRecords();
   },
   methods: {
-    async onLoadRecords(mode) {
+    async onLoadRecords() {
       if (this.fetching) return Promise.resolve();
 
       this.fetching = true;
 
-      await this.loadRecords(mode, this.recordCriteria);
+      await this.loadRecords(this.recordCriteria);
 
       this.fetching = false;
     },
@@ -112,7 +112,7 @@ export default {
     },
     onChangeRecordFilter(criteria) {
       const filter = async () => {
-        await this.onLoadRecords("replace");
+        await this.onLoadRecords();
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
