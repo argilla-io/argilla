@@ -18,7 +18,8 @@ These are the section headers that we use:
 
 ### Added
 
-- Added strategy to handle and translate errors from server for `401 http status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
+- Added strategy to handle and translate errors from the server for `401` HTTP status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
+- Added integration for `textdescriptives` using `TextDescriptivesExtractor` to configure `metadata_properties` in `FeedbackDataset` and `FeedbackRecord`. ([#4400](https://github.com/argilla-io/argilla/pull/4400)). Contributed by @m-newhauser
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 
