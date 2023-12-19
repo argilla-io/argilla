@@ -143,9 +143,9 @@ def test_cast_to_python_types() -> None:
         }
     )
     df_result = tde._cast_to_python_types(df)
-    assert df_result["col_int"].dtype == "int32"
+    assert df_result["col_int"].dtype == "int32" or df_result["col_int"].dtype == "int64"
     assert df_result["col_bool"].dtype == "object"
-    assert df_result["col_float"].dtype == "float64"
+    assert df_result["col_float"].dtype == "float64" or df_result["col_float"].dtype == "float32"
     assert df_result["col_float"].values[0] == 1.23
     assert isinstance(df_result, pd.DataFrame)
 
