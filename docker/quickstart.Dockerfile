@@ -7,13 +7,18 @@ USER root
 RUN apt-get update && apt-get install -y \
   apt-transport-https \
   gnupg \
-  wget
+  wget \
+  lsb-release
 
 # Install Elasticsearch signing key
 RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
-
 # Add Elasticsearch repository
 RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
+
+# Install Redis signing key
+RUN wget -qO - https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+# Add Redis repository
+RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
 
 # Copy Argilla distribution files
 COPY scripts/start_quickstart_argilla.sh /home/argilla
@@ -25,10 +30,13 @@ RUN \
   echo -e "{  \"deployment\":  \"quickstart\" }" > /opt/venv/lib/python3.10/site-packages/argilla/server/static/deployment.json && \
   # Create a directory where Elasticsearch and Argilla will store their data
   mkdir /data && \
+  apt-get update && \
   # Install Elasticsearch and configure it
-  apt-get update && apt-get install -y elasticsearch=8.8.2 && \
+  apt-get install -y elasticsearch=8.8.2 && \
   chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
   chown argilla:argilla /etc/default/elasticsearch && \
+  # Install Redis
+  apt-get install -y redis && \
   # Install quickstart image dependencies
   pip install -r /packages/requirements.txt && \
   chmod +x /home/argilla/start_quickstart_argilla.sh && \
