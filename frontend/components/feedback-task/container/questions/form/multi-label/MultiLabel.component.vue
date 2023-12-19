@@ -9,6 +9,7 @@
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"
       :isFocused="isFocused"
+      :showShortcutsHelper="showShortcutsHelper"
       @on-focus="onFocus"
     />
   </div>
@@ -23,6 +24,10 @@ export default {
       required: true,
     },
     isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+    showShortcutsHelper: {
       type: Boolean,
       default: () => false,
     },
