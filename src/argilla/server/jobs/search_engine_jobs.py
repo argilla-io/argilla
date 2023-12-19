@@ -12,66 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import AsyncGenerator
 from uuid import UUID
 
+from argilla.cli.server.search_engine.reindex import Reindexer
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.jobs.queues import default_queue
-from argilla.server.models import Dataset, Record, Response, Suggestion
-from argilla.server.search_engine import SearchEngine, get_search_engine
+from argilla.server.search_engine import get_search_engine
 from rq import Retry
 from rq.decorators import job
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
-
-# TODO: Once we merge the branch with reindex cli task we can remove this class and use the other one.
-class Reindexer:
-    YIELD_PER = 100
-
-    @classmethod
-    async def reindex_dataset(cls, db: AsyncSession, search_engine: SearchEngine, dataset_id: UUID) -> Dataset:
-        dataset = (
-            await db.execute(
-                select(Dataset)
-                .filter_by(id=dataset_id)
-                .options(
-                    selectinload(Dataset.fields),
-                    selectinload(Dataset.questions),
-                    selectinload(Dataset.metadata_properties),
-                    selectinload(Dataset.vectors_settings),
-                )
-            )
-        ).scalar_one()
-
-        await search_engine.delete_index(dataset)
-        await search_engine.create_index(dataset)
-
-        return dataset
-
-    @classmethod
-    async def reindex_dataset_records(
-        cls, db: AsyncSession, search_engine: SearchEngine, dataset: Dataset
-    ) -> AsyncGenerator[list[Record], None]:
-        stream = await db.stream(
-            select(Record)
-            .filter_by(dataset_id=dataset.id)
-            .order_by(Record.inserted_at.asc())
-            .options(
-                selectinload(Record.responses).selectinload(Response.user),
-                selectinload(Record.suggestions).selectinload(Suggestion.question),
-                selectinload(Record.vectors),
-            )
-            .execution_options(yield_per=cls.YIELD_PER)
-        )
-
-        async for records_partition in stream.partitions():
-            records = [record for (record,) in records_partition]
-
-            await search_engine.index_records(dataset, records)
-
-            yield records
 
 
 # NOTE:
