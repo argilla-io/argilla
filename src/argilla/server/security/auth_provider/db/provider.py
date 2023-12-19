@@ -27,7 +27,9 @@ from argilla.server.errors import UnauthorizedError
 from argilla.server.models import User
 from argilla.server.security.auth_provider.base import AuthProvider, api_key_header
 from argilla.server.security.model import Token
-from .settings import Settings, settings as local_security
+
+from .settings import Settings
+from .settings import settings as local_security
 
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl=local_security.public_oauth_token_url, auto_error=False)
 
