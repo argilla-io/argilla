@@ -86,7 +86,7 @@ async def async_client(
     async def override_get_search_engine():
         yield mock_search_engine
 
-    mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch("argilla.server.app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     app.dependency_overrides[get_async_db] = override_get_async_db
     app.dependency_overrides[get_search_engine] = override_get_search_engine
