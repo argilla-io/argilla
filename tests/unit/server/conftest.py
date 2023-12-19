@@ -17,9 +17,6 @@ from typing import Dict, Generator
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.server.app import app
 from argilla.server.daos.backend import GenericElasticEngineBackend
@@ -32,6 +29,9 @@ from argilla.server.services.datasets import DatasetsService
 from argilla.server.settings import settings
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+
 from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 

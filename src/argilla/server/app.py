@@ -54,10 +54,8 @@ from argilla.server.errors import (
 from argilla.server.models import User
 from argilla.server.routes import api_router
 from argilla.server.security import auth
-
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
-
 
 _LOGGER = logging.getLogger("argilla")
 
