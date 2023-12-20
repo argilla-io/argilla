@@ -3,8 +3,8 @@
   <div v-else class="wrapper">
     <section class="wrapper__records">
       <DatasetFiltersComponent :recordCriteria="recordCriteria" />
+      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       <RecordFieldsAndSimilarity
-        v-if="!!record"
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
@@ -68,17 +68,15 @@ export default {
     },
   },
   async fetch() {
-    await this.onLoadRecords("replace");
+    await this.onLoadRecords();
   },
   methods: {
-    async onLoadRecords(mode) {
+    async onLoadRecords() {
       if (this.fetching) return Promise.resolve();
 
       this.fetching = true;
 
-      await this.loadRecords(mode, this.recordCriteria);
-
-      this.onSearchFinished();
+      await this.loadRecords(this.recordCriteria);
 
       this.fetching = false;
     },
@@ -101,7 +99,6 @@ export default {
         }, 100);
       }
 
-      this.onSearchFinished();
       this.fetching = false;
     },
     onChangeRecordPage(criteria) {
@@ -110,20 +107,17 @@ export default {
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
     },
     onChangeRecordFilter(criteria) {
       const filter = async () => {
-        await this.onLoadRecords("replace");
+        await this.onLoadRecords();
       };
 
       this.showNotificationForNewFilterWhenIfNeeded(filter, () =>
-        criteria.reset()
+        criteria.rollback()
       );
-    },
-    onSearchFinished() {
-      return this.$root.$emit("on-changed-total-records", this.records.total);
     },
     goToNext() {
       this.recordCriteria.nextPage();
@@ -181,6 +175,7 @@ export default {
   height: 100%;
   gap: $base-space * 2;
   padding: $base-space * 2;
+
   @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
@@ -197,7 +192,7 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: $base-space;
     height: 100%;
     min-width: 0;
   }

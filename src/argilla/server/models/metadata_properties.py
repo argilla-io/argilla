@@ -43,9 +43,17 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
     type: Literal[MetadataPropertyType.terms]
     values: Optional[List[str]] = None
 
-    def check_metadata(self, value: str) -> None:
-        if self.values is not None and value not in self.values:
-            raise ValueError(f"'{value}' is not an allowed term.")
+    def check_metadata(self, value: Union[str, List[str]]) -> None:
+        if self.values is None:
+            return
+
+        values = value
+        if isinstance(values, str):
+            values = [value]
+
+        for v in values:
+            if v not in self.values:
+                raise ValueError(f"'{v}' is not an allowed term.")
 
 
 NT = TypeVar("NT", int, float)

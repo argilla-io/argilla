@@ -11,6 +11,7 @@ import {
   MetricsRepository,
   MetadataRepository,
   VectorRepository,
+  AgentRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole } from "@/v1/infrastructure/services";
@@ -36,6 +37,8 @@ import { UpdateDatasetSettingUseCase } from "@/v1/domain/usecases/dataset-settin
 import { GetMetadataUseCase } from "@/v1/domain/usecases/get-metadata-use-case";
 import { GetDatasetVectorsUseCase } from "@/v1/domain/usecases/get-dataset-vectors-use-case";
 import { UpdateVectorSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-vector-setting-use-case";
+import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
+import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
@@ -50,6 +53,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetricsRepository).withDependency(useAxios).build(),
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
+    register(AgentRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -86,7 +90,9 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(MetricsRepository, useMetrics)
       .build(),
 
-    register(SaveDraftRecord).withDependency(RecordRepository).build(),
+    register(SaveDraftRecord)
+      .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
 
     register(GetDatasetSettingsUseCase)
       .withDependencies(
@@ -121,6 +127,14 @@ export const loadDependencyContainer = (context: Context) => {
     register(GetMetadataUseCase).withDependency(MetadataRepository).build(),
 
     register(GetDatasetVectorsUseCase).withDependency(VectorRepository).build(),
+
+    register(GetDatasetQuestionsFilterUseCase)
+      .withDependency(QuestionRepository)
+      .build(),
+
+    register(GetDatasetSuggestionsAgentsUseCase)
+      .withDependency(AgentRepository)
+      .build(),
   ];
 
   Container.register(dependencies);

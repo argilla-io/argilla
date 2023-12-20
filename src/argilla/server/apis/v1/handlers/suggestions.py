@@ -22,6 +22,7 @@ from argilla.server.database import get_async_db
 from argilla.server.models import Suggestion, User
 from argilla.server.policies import SuggestionPolicyV1, authorize
 from argilla.server.schemas.v1.suggestions import Suggestion as SuggestionSchema
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 
 router = APIRouter(tags=["suggestions"])
@@ -41,6 +42,7 @@ async def _get_suggestion(db: "AsyncSession", suggestion_id: UUID) -> Suggestion
 async def delete_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     suggestion_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -49,6 +51,6 @@ async def delete_suggestion(
     await authorize(current_user, SuggestionPolicyV1.delete(suggestion))
 
     try:
-        return await datasets.delete_suggestion(db, suggestion)
+        return await datasets.delete_suggestion(db, search_engine, suggestion)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))

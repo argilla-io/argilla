@@ -14,6 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Type
+from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
@@ -188,7 +189,7 @@ class TestSuiteRecords:
                 "extra-metadata": "yes",
             },
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [
                 {
                     "question_id": str(question_0.id),
@@ -241,7 +242,7 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "inserted_at": record.inserted_at.isoformat(),
@@ -274,6 +275,39 @@ class TestSuiteRecords:
             "updated_at": record.updated_at.isoformat(),
         }
         mock_search_engine.index_records.assert_not_called()
+
+    async def test_update_record_with_list_terms_metadata(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={
+                "metadata": {
+                    "terms-metadata-property": ["a", "b", "c"],
+                },
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": {
+                "terms-metadata-property": ["a", "b", "c"],
+            },
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_suggestions(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -955,7 +989,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize(
         "status, expected_status_code, expected_response_count",
-        [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 422, 0)],
+        [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 201, 1)],
     )
     async def test_create_record_response_without_values(
         self,
@@ -983,7 +1017,7 @@ class TestSuiteRecords:
             assert response_body == {
                 "id": str(UUID(response_body["id"])),
                 "values": None,
-                "status": "discarded",
+                "status": status,
                 "user_id": str(owner.id),
                 "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
                 "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
@@ -1214,7 +1248,7 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
     async def test_create_record_suggestion_update(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1238,6 +1272,8 @@ class TestSuiteRecords:
             "agent": None,
         }
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
+        mock_search_engine.update_record_suggestion.assert_called_once_with(suggestion)
 
     @pytest.mark.parametrize(
         "payload",
@@ -1340,7 +1376,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(
-        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
     ) -> None:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1360,6 +1396,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
+
+        expected_calls = [call(suggestion) for suggestion in suggestions]
+        mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
 
     async def test_delete_record_suggestions_with_no_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict

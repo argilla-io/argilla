@@ -32,14 +32,27 @@ export default {
     },
   },
   watch: {
-    imOffline() {
-      return Notification.dispatch("notify", {
-        message: "You are offline",
-        type: "error",
-      });
+    imOffline(isOffline, wasOffline) {
+      if (isOffline) {
+        return this.showNotification(this.$t("youAreOffline"));
+      }
+
+      if (wasOffline) {
+        return this.showNotification(this.$t("youAreOnlineAgain"));
+      }
+    },
+  },
+  methods: {
+    showNotification(message) {
+      Notification.dispatch("clear");
+
+      setTimeout(() => {
+        Notification.dispatch("notify", {
+          message: message,
+          type: "error",
+        });
+      }, 100);
     },
   },
 };
 </script>
-
-<style></style>

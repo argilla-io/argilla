@@ -1,9 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { ref, onBeforeMount } from "vue-demi";
-import {
-  LoadRecordsMode,
-  LoadRecordsToAnnotateUseCase,
-} from "@/v1/domain/usecases/load-records-to-annotate-use-case";
+import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
 import { GetDatasetVectorsUseCase } from "@/v1/domain/usecases/get-dataset-vectors-use-case";
@@ -20,15 +17,20 @@ export const useRecordFeedbackTaskViewModel = ({
   const datasetVectors = ref<DatasetVector[]>([]);
   const { state: records } = useRecords();
 
-  const loadRecords = async (
-    mode: LoadRecordsMode,
-    criteria: RecordCriteria
-  ) => {
-    await getRecords.load(mode, criteria);
+  const loadRecords = async (criteria: RecordCriteria) => {
+    try {
+      await getRecords.load(criteria);
+    } catch (err) {
+      criteria.reset();
+    }
   };
 
   const paginateRecords = (criteria: RecordCriteria) => {
-    return getRecords.paginate(criteria);
+    try {
+      return getRecords.paginate(criteria);
+    } catch (err) {
+      criteria.reset();
+    }
   };
 
   const loadVectors = async () => {

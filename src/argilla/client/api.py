@@ -16,103 +16,22 @@
 import asyncio
 import warnings
 from asyncio import Future
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from argilla.client.client import Argilla
 from argilla.client.datasets import Dataset
+from argilla.client.enums import DatasetType
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.models import BulkResponse, Record  # TODO Remove TextGenerationRecord
 from argilla.client.sdk.commons import errors
 from argilla.client.sdk.datasets.models import Dataset as DatasetModel
-from argilla.client.sdk.v1.datasets.api import list_datasets as list_datasets_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
-from argilla.client.sdk.workspaces.api import list_workspaces as list_workspaces_api_v0
+from argilla.client.singleton import ArgillaSingleton
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 
 Api = Argilla  # Backward compatibility
-
-
-class ArgillaSingleton:
-    """The active argilla singleton instance"""
-
-    _INSTANCE: Optional[Argilla] = None
-
-    @classmethod
-    def get(cls) -> Argilla:
-        if cls._INSTANCE is None:
-            return cls.init()
-        return cls._INSTANCE
-
-    @classmethod
-    def clear(cls) -> None:
-        cls._INSTANCE = None
-
-    @classmethod
-    def init(
-        cls,
-        api_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        workspace: Optional[str] = None,
-        timeout: int = 60,
-        extra_headers: Optional[Dict[str, str]] = None,
-        httpx_extra_kwargs: Optional[Dict[str, Any]] = None,
-    ) -> Argilla:
-        cls._INSTANCE = None
-
-        cls._INSTANCE = Argilla(
-            api_url=api_url,
-            api_key=api_key,
-            timeout=timeout,
-            workspace=workspace,
-            extra_headers=extra_headers,
-            httpx_extra_kwargs=httpx_extra_kwargs,
-        )
-
-        return cls._INSTANCE
-
-
-def init(
-    api_url: Optional[str] = None,
-    api_key: Optional[str] = None,
-    workspace: Optional[str] = None,
-    timeout: int = 60,
-    extra_headers: Optional[Dict[str, str]] = None,
-    httpx_extra_kwargs: Optional[Dict[str, Any]] = None,
-) -> None:
-    """Init the Python client.
-
-    If this function is called with `api_url=None` and `api_key=None` and no values have been set for the environment
-    variables `ARGILLA_API_URL` and `ARGILLA_API_KEY`, then the local credentials stored by a previous call to `argilla
-    login` command will be used. If local credentials are not found, then `api_url` and `api_key` will fallback to the
-    default values.
-
-    Args:
-        api_url: Address of the REST API. If `None` (default) and the env variable ``ARGILLA_API_URL`` is not set,
-            it will default to `http://localhost:6900`.
-        api_key: Authentication key for the REST API. If `None` (default) and the env variable ``ARGILLA_API_KEY``
-            is not set, it will default to `argilla.apikey`.
-        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
-            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
-        timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
-        extra_headers: Extra HTTP headers sent to the server. You can use this to customize
-            the headers of argilla client requests, like additional security restrictions. Default: `None`.
-        httpx_extra_kwargs: Extra kwargs passed to the `httpx.Client` constructor. For more information about the
-            available arguments, see https://www.python-httpx.org/api/#client. Defaults to `None`.
-
-    Examples:
-        >>> import argilla as rg
-        >>>
-        >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y")
-        >>> # Customizing request headers
-        >>> headers = {"X-Client-id":"id","X-Secret":"secret"}
-        >>> rg.init(api_url="http://localhost:9090", api_key="4AkeAPIk3Y", extra_headers=headers)
-    """
-    ArgillaSingleton.init(
-        api_url=api_url,
-        api_key=api_key,
-        workspace=workspace,
-        timeout=timeout,
-        extra_headers=extra_headers,
-        httpx_extra_kwargs=httpx_extra_kwargs,
-    )
 
 
 def log(
@@ -242,22 +161,6 @@ async def log_async(
     return await asyncio.wrap_future(future)
 
 
-def _check_if_feedback_dataset_exists(client: Argilla, name: str, workspace: str) -> bool:
-    response = list_workspaces_api_v0(client.http_client.httpx)
-    workspace_id = None
-    for ws in response.parsed:
-        if ws.name == workspace:
-            workspace_id = ws.id
-            break
-
-    response = list_datasets_api_v1(client.http_client.httpx)
-    for dataset in response.parsed:
-        if dataset.name == name and dataset.workspace_id == workspace_id:
-            return True
-
-    return False
-
-
 def load(
     name: str,
     workspace: Optional[str] = None,
@@ -271,7 +174,7 @@ def load(
     include_vectors: bool = True,
     include_metrics: bool = True,
     as_pandas: Optional[bool] = None,
-) -> Dataset:
+) -> Union[Dataset, "RemoteFeedbackDataset"]:
     """Loads a argilla dataset.
 
     Args:
@@ -333,14 +236,21 @@ def load(
             include_vectors=include_vectors,
             as_pandas=as_pandas,
         )
-    except errors.NotFoundApiError as e:
+    except errors.ArApiResponseError as e:
         workspace = workspace or argilla.get_workspace()
-        if _check_if_feedback_dataset_exists(client=argilla, name=name, workspace=workspace):
-            raise ValueError(
-                f"The dataset '{name}' exists but it is a `FeedbackDataset`. Use `rg.FeedbackDataset.from_argilla`"
-                " instead to load it."
-            )
-        raise e
+        try:
+            dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
+        except ValueError:
+            raise e
+
+        warnings.warn(
+            "Loaded dataset is a `FeedbackDataset`. It's recommended to use "
+            f"`rg.FeedbackDataset.from_argilla(name='{name}', workspace='{workspace}')` instead",
+            UserWarning,
+            stacklevel=2,
+        )
+
+        return dataset
 
 
 def copy(dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> None:
@@ -366,18 +276,46 @@ def copy(dataset: str, name_of_copy: str, workspace: Optional[str] = None) -> No
 
 def delete(name: str, workspace: Optional[str] = None) -> None:
     """
-    Deletes a dataset.
+    Deletes an Argilla dataset from the server. It can be used with both `Dataset` and `FeedbackDataset`, although
+    for the latter it's recommended to use `rg.FeedbackDataset.delete` instead.
 
     Args:
-        name: The dataset name.
-        workspace: The workspace to which records will be logged/loaded. If `None` (default) and the
-            env variable ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
+        name: The name of the dataset to delete.
+        workspace: The workspace to which the dataset belongs. If `None` (default) and the env variable
+            ``ARGILLA_WORKSPACE`` is not set, it will default to the private user workspace.
+
+    Raises:
+        ValueError: If no dataset is found with the given name and workspace.
+        PermissionError: If the dataset that's being deleted is a `FeedbackDataset` and the user doesn't have enough
+            permissions to delete it.
+        RuntimeError: If the dataset that's being deleted is a `FeedbackDataset` and some kind of error occurs during
+            the deletion process.
 
     Examples:
         >>> import argilla as rg
         >>> rg.delete(name="example-dataset")
     """
-    ArgillaSingleton.get().delete(name=name, workspace=workspace)
+    argilla = ArgillaSingleton.get()
+    workspace = workspace or argilla.get_workspace()
+    try:
+        # `delete` method is always successful, even if the dataset does not exist and that's why we need the extra
+        # call to `get_dataset` to check if the dataset exists. If it doesn't exist, then we try to delete a `FeedbackDataset`.
+        argilla.get_dataset(name=name, workspace=workspace)
+        argilla.delete(name=name, workspace=workspace)
+    except errors.ArApiResponseError as e:
+        try:
+            dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
+        except ValueError:
+            raise e
+
+        dataset.delete()
+
+        warnings.warn(
+            "Removed dataset was a `FeedbackDataset`. It's recommended to use "
+            f"`rg.FeedbackDataset.from_argilla(name='{name}', workspace='{workspace}').delete()` instead.",
+            UserWarning,
+            stacklevel=2,
+        )
 
 
 def delete_records(
@@ -461,7 +399,9 @@ def list_workspaces() -> List[WorkspaceModel]:
     return ArgillaSingleton.get().list_workspaces()
 
 
-def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
+def list_datasets(
+    workspace: Optional[str] = None, type: Optional[Union[str, DatasetType]] = None
+) -> List[Union[DatasetModel, "RemoteFeedbackDataset"]]:
     """Lists all the available datasets for the current user in Argilla.
 
     Args:
@@ -474,15 +414,15 @@ def list_datasets(workspace: Optional[str] = None) -> List[DatasetModel]:
         attributes: tags, metadata, name, id, task, owner, workspace, created_at,
         and last_updated.
     """
-    return ArgillaSingleton.get().list_datasets(workspace=workspace)
+    if type is not None:
+        type = type if isinstance(type, DatasetType) else DatasetType(type)
 
+    old_datasets = []
+    if type is None or type == DatasetType.other:
+        old_datasets = ArgillaSingleton.get().list_datasets(workspace=workspace)
 
-def active_client() -> Argilla:
-    """Returns the active argilla client.
+    datasets = []
+    if type is None or type == DatasetType.feedback:
+        datasets = FeedbackDataset.list(workspace=workspace)
 
-    If Active client is None, initialize a default one.
-    """
-    return ArgillaSingleton.get()
-
-
-active_api = active_client  # backward compatibility
+    return old_datasets + datasets

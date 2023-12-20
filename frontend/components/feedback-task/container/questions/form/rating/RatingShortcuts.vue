@@ -18,6 +18,19 @@ export default {
     },
   },
   methods: {
+    selectByKeyCode(keyCode) {
+      const target = this.options.find(({ value }) => value == keyCode);
+
+      if (target) document.getElementById(target.id).click();
+
+      this.reset();
+    },
+    hasJustOneCoincidence(keyCode) {
+      return (
+        this.options.filter((o) => o.value.toString().startsWith(keyCode))
+          .length == 1
+      );
+    },
     reset() {
       this.keyCode = "";
       this.timer = null;
@@ -27,25 +40,19 @@ export default {
       if (event.key == "Tab") return;
 
       if (event.code == "Space") {
-        document.activeElement.click();
-
-        return;
+        return document.activeElement.click();
       }
 
       this.keyCode += event.key;
 
-      if (isNaN(this.keyCode)) {
-        this.reset();
+      if (isNaN(this.keyCode)) return this.reset();
 
-        return;
+      if (this.hasJustOneCoincidence(this.keyCode)) {
+        return this.selectByKeyCode(this.keyCode);
       }
 
-      const target = this.options.find(({ value }) => value == this.keyCode);
-
       this.timer = setTimeout(() => {
-        if (target) document.getElementById(target.id).click();
-
-        this.reset();
+        this.selectByKeyCode(this.keyCode);
       }, 300);
     },
   },

@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla as rg
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.api import log
 from argilla.client.models import TextClassificationRecord
 from argilla.metrics.text_classification import f1, f1_multilabel
@@ -139,7 +139,7 @@ def test_dataset_labels_metric(mocked_client):
         records=records,
     )
 
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         dataset,
         metric="dataset_labels",
     )

@@ -15,7 +15,7 @@
 from typing import Dict, List, Optional, Union
 
 import argilla as rg
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.api import load
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import LabelingRule
@@ -90,16 +90,16 @@ class Rule:
 
     def add_to_dataset(self, dataset: str):
         """Add to rule to the given dataset"""
-        api.active_api().add_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
+        singleton.active_api().add_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def remove_from_dataset(self, dataset: str):
         """Removes the rule from the given dataset"""
 
-        api.active_api().delete_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
+        singleton.active_api().delete_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def update_at_dataset(self, dataset: str):
         """Updates the rule at the given dataset"""
-        api.active_api().update_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
+        singleton.active_api().update_dataset_labeling_rules(dataset, rules=[self._convert_to_labeling_rule()])
 
     def apply(self, dataset: str):
         """Apply the rule to a dataset and save matching ids of the records.
@@ -126,7 +126,7 @@ class Rule:
         Returns:
             The rule metrics.
         """
-        metrics = api.active_api().rule_metrics_for_dataset(
+        metrics = singleton.active_api().rule_metrics_for_dataset(
             dataset=dataset,
             rule=LabelingRule(query=self.query, label=self.label),
         )
@@ -180,7 +180,7 @@ def add_rules(dataset: str, rules: List[Rule]):
     Returns:
     """
     rules = [rule._convert_to_labeling_rule() for rule in rules]
-    return api.active_api().add_dataset_labeling_rules(dataset, rules)
+    return singleton.active_api().add_dataset_labeling_rules(dataset, rules)
 
 
 def delete_rules(dataset: str, rules: List[Rule]):
@@ -193,7 +193,7 @@ def delete_rules(dataset: str, rules: List[Rule]):
     Returns:
     """
     rules = [rule._convert_to_labeling_rule() for rule in rules]
-    api.active_api().delete_dataset_labeling_rules(dataset, rules)
+    singleton.active_api().delete_dataset_labeling_rules(dataset, rules)
 
 
 def update_rules(dataset: str, rules: List[Rule]):
@@ -206,7 +206,7 @@ def update_rules(dataset: str, rules: List[Rule]):
     Returns:
     """
     rules = [rule._convert_to_labeling_rule() for rule in rules]
-    api.active_api().update_dataset_labeling_rules(dataset, rules)
+    singleton.active_api().update_dataset_labeling_rules(dataset, rules)
 
 
 def load_rules(dataset: str) -> List[Rule]:
@@ -218,7 +218,7 @@ def load_rules(dataset: str) -> List[Rule]:
     Returns:
         A list of rules defined in the given dataset.
     """
-    rules = api.active_api().fetch_dataset_labeling_rules(dataset)
+    rules = singleton.active_api().fetch_dataset_labeling_rules(dataset)
     return [
         Rule(
             query=rule.query,

@@ -59,6 +59,9 @@ export default {
     @extend .filter-button;
   }
   &--active {
+    &:has(.filter-button-width-badges__badges) {
+      padding: 6px $base-space;
+    }
     &:hover {
       background: $black-6;
     }
@@ -67,6 +70,7 @@ export default {
     padding: 0;
     border-radius: 0;
     @include font-size(14px);
+    line-height: 1.3;
   }
   & > * {
     flex-shrink: 0;

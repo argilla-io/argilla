@@ -5,18 +5,16 @@
       <div
         v-for="(question, index) in questions"
         :key="question.id"
-        @keydown.shift.arrow-up.prevent="
+        @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)
         "
-        @keydown.shift.arrow-down.prevent="
+        @keydown.arrow-down.prevent="
           updateQuestionAutofocus(autofocusPosition + 1)
         "
       >
         <TextAreaComponent
           v-if="question.isTextType"
-          ref="text"
           :question="question"
-          :showSuggestion="showSuggestion"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />
@@ -25,7 +23,7 @@
           v-if="question.isSingleLabelType"
           ref="singleLabel"
           :question="question"
-          :showSuggestion="showSuggestion"
+          :showShortcutsHelper="showShortcutsHelper"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
@@ -35,7 +33,7 @@
           ref="multiLabel"
           v-if="question.isMultiLabelType"
           :question="question"
-          :showSuggestion="showSuggestion"
+          :showShortcutsHelper="showShortcutsHelper"
           :visibleOptions="question.settings.visible_options"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -45,7 +43,6 @@
           v-if="question.isRatingType"
           ref="rating"
           :question="question"
-          :showSuggestion="showSuggestion"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
@@ -55,7 +52,6 @@
           v-if="question.isRankingType"
           ref="ranking"
           :question="question"
-          :showSuggestion="showSuggestion"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />
@@ -65,6 +61,7 @@
 </template>
 
 <script>
+import { useQuestionsViewModel } from "./useQuestionsViewModel";
 export default {
   name: "QuestionsComponent",
   props: {
@@ -74,10 +71,6 @@ export default {
     },
     legend: {
       type: String,
-    },
-    showSuggestion: {
-      type: Boolean,
-      default: () => false,
     },
     autofocusPosition: {
       type: Number,
@@ -156,6 +149,9 @@ export default {
     checkIfQuestionIsFocused(index) {
       return this.autofocusPosition === index;
     },
+  },
+  setup() {
+    return useQuestionsViewModel();
   },
 };
 </script>

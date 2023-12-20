@@ -17,7 +17,7 @@ from typing import Optional, Set, Union
 
 import deprecated
 
-from argilla.client import api
+from argilla.client import singleton
 from argilla.metrics import helpers
 from argilla.metrics.models import MetricSummary
 
@@ -47,7 +47,7 @@ def tokens_length(name: str, query: Optional[str] = None, interval: int = 1) -> 
     """
     warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
 
-    metric = api.active_api().compute_metric(name, metric="tokens_length", query=query, interval=interval)
+    metric = singleton.active_api().compute_metric(name, metric="tokens_length", query=query, interval=interval)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -77,7 +77,7 @@ def token_frequency(name: str, query: Optional[str] = None, tokens: int = 1000) 
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # the top-50 tokens frequency
     """
-    metric = api.active_api().compute_metric(name, metric="token_frequency", query=query, size=tokens)
+    metric = singleton.active_api().compute_metric(name, metric="token_frequency", query=query, size=tokens)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -107,7 +107,7 @@ def token_length(name: str, query: Optional[str] = None) -> MetricSummary:
     """
     warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
 
-    metric = api.active_api().compute_metric(name, metric="token_length", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="token_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -144,7 +144,7 @@ def token_capitalness(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a histogram with results
         >>> summary.data # The token capitalness distribution
     """
-    metric = api.active_api().compute_metric(name, metric="token_capitalness", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="token_capitalness", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -217,7 +217,7 @@ def mention_length(
     accepted_levels = ["token", "char"]
     assert level in accepted_levels, f"Unexpected value for level. Accepted values are {accepted_levels}"
 
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_mention_{level}_length",
         query=query,
@@ -256,7 +256,7 @@ def entity_labels(
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # The top-20 entity tags
     """
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_labels",
         query=query,
@@ -297,7 +297,7 @@ def entity_density(
 
     warnings.warn(message=_UNUSED_METRIC_WARNING_MESSAGE, category=DeprecationWarning)
 
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_density",
         query=query,
@@ -340,7 +340,7 @@ def entity_capitalness(
         >>> summary = entity_capitalness(name="example-dataset")
         >>> summary.visualize()
     """
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_entity_capitalness",
         query=query,
@@ -403,7 +403,7 @@ def top_k_mentions(
     """
 
     threshold = max(1, threshold)
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric=f"{_check_compute_for(compute_for)}_top_k_mentions_consistency",
         query=query,
@@ -461,7 +461,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> import pandas as pd
         >>> pd.DataFrame(summary.data.values(), index=summary.data.keys())
     """
-    metric = api.active_api().compute_metric(name, metric="F1", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

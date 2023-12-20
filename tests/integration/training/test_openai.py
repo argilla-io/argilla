@@ -26,9 +26,9 @@ os.environ["OPENAI_API_KEY"] = "1234"
 def test_update_config(dataset_text_classification):
     trainer = ArgillaTrainer(name=dataset_text_classification, model=MODEL, framework=FRAMEWORK)
     trainer.update_config(model=3)
-    assert trainer._trainer.model_kwargs["model"] == 3
+    assert trainer._trainer.trainer_kwargs["model"] == 3
     trainer.update_config(prompt_loss_weight=1)
-    assert trainer._trainer.model_kwargs["prompt_loss_weight"] == 1
+    assert trainer._trainer.trainer_kwargs["prompt_loss_weight"] == 1
 
 
 def test_openai_train(dataset_text_classification, mocked_openai):

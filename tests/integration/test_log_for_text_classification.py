@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import argilla as rg
 import pytest
-from argilla.client.api import delete, init, load, log
+from argilla.client.api import load, log
 from argilla.client.client import Argilla
 from argilla.client.datasets import read_datasets
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
@@ -25,10 +25,11 @@ from argilla.client.sdk.commons.errors import (
     GenericApiError,
     ValidationApiError,
 )
+from argilla.client.singleton import init
 from argilla.server.settings import settings
 
-from tests import SUPPORTED_VECTOR_SEARCH
 from tests.factories import WorkspaceFactory
+from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
     from argilla.server.models import User
@@ -38,7 +39,7 @@ def test_log_records_with_multi_and_single_label_task(api: Argilla):
     dataset = "test_log_records_with_multi_and_single_label_task"
     expected_inputs = ["This is a text"]
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     records = [
         TextClassificationRecord(
             id=0,
@@ -67,25 +68,21 @@ def test_delete_and_create_for_different_task(api: Argilla):
     dataset = "test_delete_and_create_for_different_task"
     text = "This is a text"
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(TextClassificationRecord(id=0, inputs=text), name=dataset)
     api.load(dataset)
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(TokenClassificationRecord(id=0, text=text, tokens=text.split(" ")), name=dataset)
     api.load(dataset)
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 def test_similarity_search_in_python_client(api: Argilla):
     dataset = "test_similarity_search_in_python_client"
     text = "This is a text"
     vectors = {"my_bert": [1, 2, 3, 4]}
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(TextClassificationRecord(id=0, inputs=text, vectors=vectors), name=dataset)
     ds = api.load(dataset, vector=("my_bert", [1, 1, 1, 1]))
     assert len(ds) == 1
@@ -107,14 +104,10 @@ def test_similarity_search_in_python_client(api: Argilla):
         )
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 def test_log_data_with_vectors_and_update_ok(api: Argilla):
     dataset = "test_log_data_with_vectors_and_update_ok"
     text = "This is a text"
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
 
     records = [
         TextClassificationRecord(
@@ -139,7 +132,6 @@ def test_log_data_with_vectors_and_update_ok(api: Argilla):
     assert ds[0].id == 3
 
 
-@pytest.mark.skipif(condition=not SUPPORTED_VECTOR_SEARCH, reason="Vector search not supported")
 def test_log_data_with_vectors_and_update_ko(argilla_user: "User"):
     dataset = "test_log_data_with_vectors_and_update_ko"
     text = "This is a text"
@@ -147,7 +139,7 @@ def test_log_data_with_vectors_and_update_ko(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(TextClassificationRecord(id=0, inputs=text, vectors=vectors), name=dataset)
     load(dataset)
 
@@ -194,7 +186,7 @@ def test_search_keywords(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     ds = load(dataset, query="lim*")
@@ -216,7 +208,7 @@ def test_log_records_with_empty_metadata_list(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     expected_records = [
         TextClassificationRecord(text="The input text", metadata={"emptyList": []}),
         TextClassificationRecord(text="The input text", metadata={"emptyTuple": ()}),
@@ -238,7 +230,7 @@ def test_logging_with_metadata_limits_exceeded(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     expected_record = TextClassificationRecord(
         text="The input text",
@@ -263,7 +255,7 @@ def test_log_with_other_task(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     record = TextClassificationRecord(text="The input text")
     log(record, name=dataset)
 
@@ -285,7 +277,7 @@ def test_log_with_bulk_error(argilla_user: "User"):
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     try:
         log(
             [

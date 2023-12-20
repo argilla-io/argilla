@@ -9,6 +9,7 @@ interface BackendMetrics {
     count: number;
     submitted: number;
     discarded: number;
+    draft: number;
   };
 }
 
@@ -25,7 +26,8 @@ export class MetricsRepository {
         data.records.count,
         data.responses.count,
         data.responses.submitted,
-        data.responses.discarded
+        data.responses.discarded,
+        data.responses.draft
       );
     } catch {
       /* lint:disable:no-empty */

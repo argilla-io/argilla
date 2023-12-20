@@ -31,11 +31,11 @@
       :placeholder="placeholder"
       :aria-description="description"
       autocomplete="off"
-      @keydown.enter.exact="applySearch"
+      @keydown.enter.exact.stop="applySearch"
       @keydown.arrow-right.stop=""
       @keydown.arrow-left.stop=""
       @keydown.delete.exact.stop=""
-      @keydown.enter.exact.stop=""
+      @keydown.backspace.exact.stop=""
     />
     <BaseButton
       @on-click="resetValue"
@@ -121,7 +121,7 @@ $searchBarSize: $base-space * 4;
   display: flex;
   align-items: center;
   gap: $base-space;
-  padding: $base-space;
+  padding: 7px;
   max-height: $searchBarSize;
   max-width: $searchBarSize;
   border-radius: $border-radius-l;
@@ -136,6 +136,9 @@ $searchBarSize: $base-space * 4;
     background: palette(white);
     border: 1px solid $black-10;
     transition: all 0.3s ease;
+    .button.--search {
+      color: $black-37;
+    }
   }
   &.active,
   &.expanded {

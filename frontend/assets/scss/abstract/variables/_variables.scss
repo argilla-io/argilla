@@ -29,6 +29,7 @@ $palettes: (
     200: #4d4d4d,
     300: #686a6d,
     400: #838589,
+    500: #a7a7a7,
     600: #e6e6e6,
     700: #f5f5f5,
     800: #fafafa,
@@ -45,12 +46,13 @@ $palettes: (
     800: #f0f0fe,
   ),
   pink: (
-    base: #f2067a,
+    base: #73bfbd,
   ),
   yellow: (
-    base: #fff8a2,
-    light: #949494,
-    dark: #1d1d1d,
+    400: #fee075,
+  ),
+  orange: (
+    400: #fdbc4d,
   ),
   orange-red-crayola: (
     base: #ff675f,
@@ -68,6 +70,9 @@ $palettes: (
   ),
   red: (
     base: #cf3832,
+  ),
+  turquoise: (
+    base: #08a4bd,
   ),
 );
 
@@ -102,6 +107,23 @@ $danger: palette(red);
 $warning: palette(apricot, dark);
 $success: palette(green);
 $info: palette(grey, 600);
+
+// Status color
+//----------------
+$submitted-color: $primary-color;
+$discarded-color: palette(grey, 500);
+$pending-color: palette(brown);
+$draft-color: palette(turquoise);
+
+$submitted-color-medium: #92a8fc;
+$discarded-color-medium: #cbcbcb;
+$pending-color-medium: #fbc27d;
+$draft-color-medium: #93d9e3;
+
+$submitted-color-light: #b3c4ff;
+$discarded-color-light: #e0dddd;
+$pending-color-light: #fdebd9;
+$draft-color-light: #b2e6ee;
 
 // Fonts
 //-----------

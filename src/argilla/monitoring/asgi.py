@@ -113,7 +113,7 @@ class ArgillaLogHTTPMiddleware(BaseHTTPMiddleware):
     def init(self):
         if self._monitor:
             return
-        from argilla.client.api import active_api
+        from argilla.client.singleton import active_api
 
         self._monitor = BaseMonitor(
             self,

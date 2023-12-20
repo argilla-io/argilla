@@ -1,5 +1,8 @@
 <template>
-  <div class="similarity-reference">
+  <div
+    class="similarity-reference"
+    v-if="recordCriteria.isFilteringBySimilarity"
+  >
     <div class="similarity-reference__left">
       <SimilarityFilterLimit
         class="similarity-reference__dropdown"
@@ -73,21 +76,16 @@ export default {
     },
   },
   watch: {
-    "recordCriteria.similaritySearch.order"() {
-      this.filterChanged();
-    },
-    "recordCriteria.similaritySearch.limit"() {
-      this.filterChanged();
-    },
-    "recordCriteria.similaritySearch.vectorName"() {
-      this.filterChanged();
+    "recordCriteria.similaritySearch": {
+      deep: true,
+      handler() {
+        this.filterChanged();
+      },
     },
   },
   methods: {
     removeSimilaritySearch() {
       this.recordCriteria.similaritySearch.reset();
-
-      this.filterChanged();
     },
     filterChanged() {
       if (!this.recordCriteria.hasChanges) return;
@@ -105,12 +103,12 @@ export default {
   gap: $base-space;
   padding: $base-space 12px;
   justify-content: space-between;
-  max-width: min(600px, 100%);
+  max-width: 100%;
   margin-right: auto;
   border-radius: $border-radius;
   color: $black-54;
   background: $black-4;
-  @include font-size(13px);
+  @include font-size(12px);
   transition: background 0.3s ease-in-out;
   &:hover {
     background: $black-6;
@@ -161,10 +159,16 @@ export default {
   :deep(.dropdown__header) {
     background: none;
     cursor: pointer;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
   }
   :deep(.dropdown__content) {
     left: -$base-space;
     right: auto;
+    top: calc(100% + 4px);
   }
   p {
     margin: 0;

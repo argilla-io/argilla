@@ -3,8 +3,8 @@
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
-          ref="searchComponentRef"
           v-if="showSearch"
+          ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
           :placeholder="placeholder"
@@ -48,22 +48,30 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
+          :data-keyboard="index + 1"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <label
-          class="label-text cursor-pointer"
+          class="label-text"
           :class="{
             'label-active': option.isSelected,
+            '--suggestion': hasSuggestion(option.text),
             square: multiple,
             round: !multiple,
           }"
           :for="option.id"
-          v-text="option.text"
-          :title="option.text"
-        />
+          :title="
+            hasSuggestion(option.text)
+              ? `${$t('suggestion.name')}: ${option.text}`
+              : option.text
+          "
+        >
+          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
+          <span>{{ option.text }}</span>
+        </label>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -86,6 +94,9 @@ export default {
       type: Array,
       required: true,
     },
+    suggestions: {
+      type: [Array, String],
+    },
     placeholder: {
       type: String,
       default: () => "Search labels",
@@ -102,6 +113,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   model: {
     prop: "options",
@@ -111,6 +126,8 @@ export default {
     return {
       searchInput: "",
       isExpanded: false,
+      timer: null,
+      keyCode: "",
     };
   },
   created() {
@@ -126,7 +143,12 @@ export default {
             if (options.some((o) => o.contains(document.activeElement))) {
               return;
             }
-            options[0].focus();
+
+            if (options.length > 0) {
+              options[0].focus();
+            } else {
+              this.$refs.searchComponentRef?.searchInputRef.focus();
+            }
           });
         }
       },
@@ -181,27 +203,69 @@ export default {
   },
   methods: {
     keyboardHandler($event) {
+      if (this.timer) clearTimeout(this.timer);
+
       if (
         $event.key === "Tab" ||
+        $event.key === "Enter" ||
+        $event.key === "Backspace" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
       )
         return;
 
-      if (!this.$refs.searchComponentRef) return;
-
       const isSearchActive =
-        document.activeElement === this.$refs.searchComponentRef.searchInputRef;
+        document.activeElement ===
+        this.$refs.searchComponentRef?.searchInputRef;
+
       if (isSearchActive) return;
 
       if ($event.code == "Space") {
         $event.preventDefault();
         document.activeElement.click();
+
         return;
       }
 
-      this.$refs.searchComponentRef.focusInSearch();
+      this.keyCode += $event.key;
+
+      if (isNaN(this.keyCode)) {
+        this.$refs.searchComponentRef?.focusInSearch();
+
+        return this.reset();
+      }
+
+      if (this.hasJustOneCoincidence(this.keyCode)) {
+        return this.selectByKeyCode($event, this.keyCode);
+      }
+
+      this.timer = setTimeout(() => {
+        this.selectByKeyCode($event, this.keyCode);
+      }, 300);
+    },
+    hasJustOneCoincidence(keyCode) {
+      return (
+        this.$refs.options.filter((o) => o.dataset.keyboard.startsWith(keyCode))
+          .length == 1
+      );
+    },
+    reset() {
+      this.keyCode = "";
+      this.timer = null;
+    },
+    selectByKeyCode($event, keyCode) {
+      const match = this.$refs.options.find(
+        (option) => option.dataset.keyboard === keyCode
+      );
+
+      if (match) {
+        $event.preventDefault();
+
+        match.click();
+      }
+
+      this.reset();
     },
     onSelect({ id, isSelected }) {
       if (this.multiple) return;
@@ -209,6 +273,10 @@ export default {
       this.options.forEach((option) => {
         option.isSelected = option.id === id ? isSelected : false;
       });
+
+      if (isSelected) {
+        this.$emit("on-selected");
+      }
     },
     toggleShowLess() {
       this.isExpanded = !this.isExpanded;
@@ -224,11 +292,17 @@ export default {
         this.isExpanded = true;
       }
     },
+    hasSuggestion(value) {
+      return this.suggestions?.includes(value) || false;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+$suggestion-color: palette(yellow, 400);
+$label-color: palette(purple, 800);
+$label-dark-color: palette(purple, 200);
 .container {
   display: flex;
   flex-direction: column;
@@ -246,7 +320,7 @@ export default {
     border-radius: 5em;
     background: transparent;
     &:hover {
-      border-color: darken(palette(purple, 800), 12%);
+      border-color: darken($label-color, 12%);
     }
   }
 }
@@ -277,24 +351,44 @@ export default {
 }
 
 .label-text {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $base-space;
   width: 100%;
   height: 32px;
   min-width: 50px;
   max-width: 200px;
   text-align: center;
-  padding-inline: 12px;
-  background: palette(purple, 800);
-  color: palette(purple, 200);
-  line-height: 32px;
+  padding-inline: $base-space;
+  background: $label-color;
+  color: $label-dark-color;
   font-weight: 500;
   outline: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border: 2px solid transparent;
   border-radius: $border-radius-rounded;
+  cursor: pointer;
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  &.--suggestion {
+    background: $suggestion-color;
+    &:not(.label-active):hover {
+      background: darken($suggestion-color, 8%);
+    }
+  }
   &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 8%);
+    background: darken($label-color, 8%);
+  }
+  &.label-active {
+    color: white;
+    background: $label-dark-color;
+    &.--suggestion {
+      border: 2px solid $suggestion-color;
+    }
   }
 }
 
@@ -325,16 +419,26 @@ input[type="checkbox"] {
     }
   }
 }
-.label-active {
-  color: white;
-  background: palette(purple, 200);
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: $base-space * 2;
+  aspect-ratio: 1;
+  border-radius: $border-radius;
+  border-width: 1px 1px 3px 1px;
+  border-color: $black-20;
+  border-style: solid;
+  box-sizing: content-box;
+  color: $black-87;
+  background: palette(grey, 700);
+  @include font-size(11px);
+  font-family: monospace, monospace;
 }
 .no-result {
   display: block;
   height: $base-space * 4;
-}
-.cursor-pointer {
-  cursor: pointer;
 }
 
 .shuffle-move {

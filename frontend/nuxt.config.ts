@@ -58,11 +58,14 @@ const config: NuxtConfig = {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
+    { src: "~/plugins/logo" },
+
     { src: "~/plugins/directives" },
 
     { src: "~/plugins/di" },
 
-    { src: "~/plugins/plugins/vuex-orm-axios.js" },
+    { src: "~/plugins/plugins/axios.ts" },
+    { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
     { src: "~/plugins/plugins/vue-vega.js" },
     { src: "~/plugins/plugins/click-outside.js" },

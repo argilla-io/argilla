@@ -46,10 +46,6 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    isEditionModeActive: {
-      type: Boolean,
-      default: () => false,
-    },
   },
   data: () => {
     return {
@@ -72,11 +68,6 @@ export default {
           });
         }
       },
-    },
-    isEditionModeActive() {
-      if (this.isFocused && this.isEditionModeActive) {
-        this.$refs.text.focus();
-      }
     },
     value() {
       if (this.value !== this.currentValue) {

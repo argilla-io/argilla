@@ -100,9 +100,11 @@ export default {
         case "discarded":
           return "#B7B7B7";
         case "pending":
-          return "#bb720a";
+          return "#BB720A";
         case "submitted":
           return "#3E5CC9";
+        case "draft":
+          return "#73BFBD";
       }
     },
   },
@@ -129,19 +131,25 @@ $selector-width: 140px;
   &.discarded {
     &:hover,
     &:focus-within {
-      background: #f2f2f2;
+      background: lighten($discarded-color, 30%);
     }
   }
   &.submitted {
     &:hover,
     &:focus-within {
-      background: #ebf3ff;
+      background: lighten($submitted-color, 44%);
     }
   }
   &.pending {
     &:hover,
     &:focus-within {
-      background: #fff2e0;
+      background: lighten($pending-color, 54%);
+    }
+  }
+  &.draft {
+    &:hover,
+    &:focus-within {
+      background: lighten($draft-color, 56%);
     }
   }
   &__radio {
@@ -159,24 +167,31 @@ $selector-width: 140px;
   background: palette(white);
   @include font-size(14px);
   &.discarded {
-    color: #656363;
-    border: 1px solid #b7b7b7;
+    color: $black-54;
+    border: 1px solid $discarded-color;
     &:before {
-      background: #b7b7b7;
+      background: $discarded-color;
     }
   }
   &.submitted {
-    color: #3e5cc9;
-    border: 1px solid #3e5cc9;
+    color: $submitted-color;
+    border: 1px solid $submitted-color;
     &:before {
-      background: #3e5cc9;
+      background: $submitted-color;
     }
   }
   &.pending {
-    color: palette(brown);
-    border: 1px solid palette(brown);
+    color: $pending-color;
+    border: 1px solid $pending-color;
     &:before {
-      background: palette(brown);
+      background: $pending-color;
+    }
+  }
+  &.draft {
+    color: $draft-color;
+    border: 1px solid $draft-color;
+    &:before {
+      background: $draft-color;
     }
   }
   .svg-icon {

@@ -27,8 +27,6 @@ from argilla.server.apis.v0.models.token_classification import (
 )
 from argilla.server.commons.models import TaskType
 
-from tests import SUPPORTED_VECTOR_SEARCH
-
 
 @pytest.mark.asyncio
 async def test_load_as_different_task(async_client: "AsyncClient", argilla_user: User):
@@ -262,10 +260,6 @@ async def test_create_records_for_token_classification(
         assert metrics_validator(record)
 
 
-@pytest.mark.skipif(
-    condition=not SUPPORTED_VECTOR_SEARCH,
-    reason="Vector search not supported",
-)
 @pytest.mark.parametrize(
     ("include_metrics", "metrics_validator"),
     [

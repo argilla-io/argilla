@@ -1,7 +1,11 @@
 <template>
-  <span :class="['status-tag', getStatusInfo.class]">
+  <span
+    :key="recordStatus"
+    :class="['status-tag', getStatusInfo.class, { '--minimal': minimal }]"
+    :title="getStatusInfo.name"
+  >
     <svgicon
-      v-if="getStatusInfo.icon"
+      v-if="getStatusInfo.icon && !minimal"
       :name="getStatusInfo.icon"
       width="14"
       height="14"
@@ -39,11 +43,16 @@ export default {
           };
 
         case "pending":
-        case "draft":
           return {
             name: "Pending",
             icon: null,
             class: "--pending",
+          };
+        case "draft":
+          return {
+            name: "Draft",
+            icon: null,
+            class: "--draft",
           };
 
         case "discarded":
@@ -70,11 +79,11 @@ export default {
   display: inline-flex;
   z-index: 0;
   align-items: center;
-  padding: 0.2em 1em;
+  padding: 0.1em $base-space;
   color: palette(white);
   @include font-size(13px);
   border-radius: 50px;
-  font-weight: 600;
+  font-weight: 500;
 
   &.--validated {
     background: palette(green);
@@ -82,17 +91,21 @@ export default {
   }
 
   &.--discarded {
-    background: #a7a7a7;
-    border: 1px solid #a7a7a7;
+    background: $discarded-color;
+    border: 1px solid $discarded-color;
   }
   &.--submitted {
-    background: $primary-color;
-    border: 1px solid $primary-color;
+    background: $submitted-color;
+    border: 1px solid $submitted-color;
   }
   &.--pending,
   &.--edited {
-    background: palette(brown);
-    border: 1px solid palette(brown);
+    background: $pending-color;
+    border: 1px solid $pending-color;
+  }
+  &.--draft {
+    background: $draft-color;
+    border: 1px solid $draft-color;
   }
 
   .svg-icon {

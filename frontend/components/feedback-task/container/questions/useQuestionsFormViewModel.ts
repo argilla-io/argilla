@@ -12,35 +12,55 @@ import { useBeforeUnload } from "~/v1/infrastructure/services/useBeforeUnload";
 export const useQuestionFormViewModel = () => {
   const beforeUnload = useBeforeUnload();
   const queue = useQueue();
-  const debounceForAutoSave = useDebounce(2000);
-  const debounceForSavingMessage = useDebounce(1000);
+  const debounceForSubmit = useDebounce(300);
 
-  const draftSaving = ref(false);
+  const isDraftSaving = ref(false);
+  const isDiscarding = ref(false);
+  const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
   const clearUseCase = useResolve(ClearRecordUseCase);
   const saveDraftUseCase = useResolve(SaveDraftRecord);
 
-  const discard = (record: Record) => {
-    debounceForAutoSave.stop();
+  const discard = async (record: Record) => {
+    isDiscarding.value = true;
     beforeUnload.destroy();
 
-    queue.enqueue(() => {
+    await queue.enqueue(() => {
       return discardUseCase.execute(record);
     });
+
+    await debounceForSubmit.wait();
+
+    isDiscarding.value = false;
   };
 
-  const submit = (record: Record) => {
-    debounceForAutoSave.stop();
+  const submit = async (record: Record) => {
+    isSubmitting.value = true;
     beforeUnload.destroy();
 
-    queue.enqueue(() => {
+    await queue.enqueue(() => {
       return submitUseCase.execute(record);
     });
+
+    await debounceForSubmit.wait();
+
+    isSubmitting.value = false;
+  };
+
+  const saveAsDraft = async (record: Record) => {
+    isDraftSaving.value = true;
+    beforeUnload.destroy();
+
+    await queue.enqueue(() => {
+      return saveDraftUseCase.execute(record);
+    });
+
+    await debounceForSubmit.wait();
+    isDraftSaving.value = false;
   };
 
   const clear = (record: Record) => {
-    debounceForAutoSave.stop();
     beforeUnload.destroy();
 
     queue.enqueue(() => {
@@ -48,46 +68,13 @@ export const useQuestionFormViewModel = () => {
     });
   };
 
-  const onSaveDraft = async (record: Record) => {
-    if (!record.hasAnyQuestionAnswered) return;
-    draftSaving.value = true;
-
-    try {
-      beforeUnload.confirm();
-      await saveDraftUseCase.execute(record);
-    } finally {
-      await debounceForSavingMessage.wait();
-
-      draftSaving.value = false;
-      beforeUnload.destroy();
-    }
-  };
-
-  const saveDraft = async (record: Record) => {
-    if (record.isSubmitted) return;
-    beforeUnload.confirm();
-    await debounceForAutoSave.wait();
-
-    queue.enqueue(() => {
-      return onSaveDraft(record);
-    });
-  };
-
-  const saveDraftImmediately = (record: Record) => {
-    if (record.isSubmitted) return;
-    debounceForAutoSave.stop();
-
-    queue.enqueue(() => {
-      return onSaveDraft(record);
-    });
-  };
-
   return {
+    isDraftSaving,
+    isDiscarding,
+    isSubmitting,
     clear,
     submit,
     discard,
-    saveDraft,
-    draftSaving,
-    saveDraftImmediately,
+    saveAsDraft,
   };
 };

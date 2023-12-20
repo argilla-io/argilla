@@ -2,14 +2,12 @@
   <div class="sort-selector">
     <SortSelectorItem
       v-for="category in selectedSortingItems"
-      :key="category.name"
+      :key="`${category.key}${category.name}`"
       :category="category"
       :available-categories="nonSelectedSortingItems"
-      @clear-category="onClear(category.name)"
-      @change-sort-direction="onChangeSortDirection(category.name)"
-      @replace-sort-category="
-        onReplaceSortCategory(category.name, ...arguments)
-      "
+      @clear-category="onClear(category)"
+      @change-sort-direction="onChangeSortDirection(category)"
+      @replace-sort-category="onReplaceSortCategory(category, ...arguments)"
     />
     <BaseDropdown
       v-if="nonSelectedSortingItems.length"
@@ -55,25 +53,26 @@ export default {
     onToggleVisibility() {
       this.visibleDropdown = !this.visibleDropdown;
     },
-    includeSortCategory(categoryName) {
-      this.sortingItems.select(categoryName);
+    includeSortCategory(category) {
+      this.sortingItems.select(category);
 
       this.visibleDropdown = false;
     },
     applySorting() {
       this.$emit("apply-sort");
     },
-    onClear(categoryName) {
-      this.sortingItems.unselect(categoryName);
+    onClear(category) {
+      this.sortingItems.unselect(category);
+
       if (!this.selectedSortingItems.length) {
         this.applySorting();
       }
     },
-    onChangeSortDirection(categoryName) {
-      this.sortingItems.toggleSort(categoryName);
+    onChangeSortDirection(category) {
+      this.sortingItems.toggleSort(category);
     },
-    onReplaceSortCategory(categoryName, newCategoryName) {
-      this.sortingItems.replace(categoryName, newCategoryName);
+    onReplaceSortCategory(category, newCategory) {
+      this.sortingItems.replace(category, newCategory);
       this.visibleDropdown = false;
     },
   },

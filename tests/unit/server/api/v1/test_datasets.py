@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla._constants import API_KEY_HEADER_NAME
-from argilla.server.apis.v1.handlers.datasets import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla.server.apis.v1.handlers.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla.server.enums import (
     DatasetStatus,
     RecordInclude,
@@ -3088,6 +3088,45 @@ class TestSuiteDatasets:
             await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.discarded))
         ).scalar() == 1
 
+    async def test_create_dataset_records_with_draft_response(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: User,
+        owner_auth_header: dict,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await TextFieldFactory.create(name="output", dataset=dataset)
+
+        await TextQuestionFactory.create(name="input_ok", dataset=dataset)
+        await TextQuestionFactory.create(name="output_ok", dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"input": "Say Hello", "output": "Hello"},
+                    "responses": [
+                        {
+                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "status": "draft",
+                            "user_id": str(owner.id),
+                        }
+                    ],
+                },
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204
+        assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
+        assert (
+            await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.draft))
+        ).scalar() == 1
+
     async def test_create_dataset_records_with_invalid_response_status(
         self,
         async_client: "AsyncClient",
@@ -4600,6 +4639,7 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        vector = await VectorFactory(record=records[0], vector_settings=vector_settings, value=[1, 2, 3])
 
         mock_search_engine.similarity_search.return_value = SearchResponses(
             items=[

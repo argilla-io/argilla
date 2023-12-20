@@ -14,7 +14,7 @@
 
 import secrets
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from uuid import UUID
 
 from pydantic import parse_obj_as
@@ -24,7 +24,14 @@ from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from argilla.server.enums import DatasetStatus, MetadataPropertyType, ResponseStatus, SuggestionType, UserRole
+from argilla.server.enums import (
+    DatasetStatus,
+    MetadataPropertyType,
+    QuestionType,
+    ResponseStatus,
+    SuggestionType,
+    UserRole,
+)
 from argilla.server.models.base import DatabaseModel
 from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.mixins import inserted_at_current_value
@@ -85,6 +92,7 @@ class Response(DatabaseModel):
     user: Mapped["User"] = relationship(back_populates="responses")
 
     __table_args__ = (UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),)
+    __upsertable_columns__ = {"values", "status"}
 
     @property
     def is_submitted(self):
@@ -207,6 +215,11 @@ class Record(DatabaseModel):
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
+
 
 class Question(DatabaseModel):
     __tablename__ = "questions"
@@ -231,6 +244,10 @@ class Question(DatabaseModel):
     @property
     def parsed_settings(self) -> QuestionSettings:
         return parse_obj_as(QuestionSettings, self.settings)
+
+    @property
+    def type(self) -> QuestionType:
+        return QuestionType(self.settings["type"])
 
     def __repr__(self):
         return (

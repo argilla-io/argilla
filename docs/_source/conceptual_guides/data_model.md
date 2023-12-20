@@ -44,9 +44,18 @@ A **Record** represents an individual feedback data point within a dataset. It c
 Argilla allows for multiple concurrent annotators, seamlessly gathering feedback from many labelers. Each **Response** represents the input provided by a labeler in response to specific questions within a dataset. It includes the labeler's identification, the feedback value itself, and a status indicating whether the response has been submitted or discarded. These responses form the foundation of the collected feedback data, capturing the diverse perspectives and insights of the labelers.
 
 #### Suggestions
+
 **Suggestions** enhance the feedback collection process by providing machine-generated feedback to labelers. Suggestions serve as automated decision-making aids, leveraging rules, models, or language models (LLMs) to accelerate the feedback process.
 
 With Suggestions, each record can be equipped with multiple machine-generated recommendations (one per question). These suggestions can act as weak signals, seamlessly combining with human feedback to enhance the efficiency and accuracy of the feedback collection workflow. By leveraging the power of automated suggestions, labelers can make more informed decisions, resulting in a more streamlined, partially automated, and effective feedback collection process.
+
+#### Metadata
+
+**Metadata** will hold extra information that you want your record to have. For example, if it belongs to the training or the test dataset, a quick fact about something regarding that specific record. Feel free to use it as you need!
+
+#### Vector
+
+**Vectors** can be added to a record to represent the semantic meaning of a **field** or a combination of them. They can be used within the UI or the SDK to search the most or least similar records within your dataset.
 
 
 ## Other datasets
@@ -75,7 +84,7 @@ Records are defined by the type of **task** they are related to. Let's see three
 #### Examples
 
 ```{note}
-For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_dataset.md) instead.
+For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_update_dataset/create_dataset.md) instead.
 ```
 
 ##### Text Classification

@@ -1,33 +1,37 @@
 <template>
   <div class="fields">
     <SimilarityRecordReference
-      v-if="recordCriteria.isFilteredBySimilarity && !!records.reference"
+      v-show="recordCriteria.isFilteringBySimilarity"
+      v-if="!!records.reference"
       :fields="records.reference.fields"
       :recordCriteria="recordCriteria"
       :availableVectors="datasetVectors"
     />
-    <RecordFields :fields="record.fields" :key="`${record.id}_fields`">
+    <RecordFields
+      v-if="!!record"
+      :key="`${record.id}_fields`"
+      :fields="record.fields"
+    >
       <div class="fields__header">
-        <div class="fields__header--left">
-          <StatusTag class="fields__status" :recordStatus="record.status" />
-          <BaseCircleProgress
+        <div class="fields__header--left"></div>
+        <div class="fields__header--right">
+          <SimilarityScorePercentage
             v-if="
-              recordCriteria.isFilteredBySimilarity && record.score.percentage
+              recordCriteria.isFilteringBySimilarity && record.score.percentage
             "
-            class="similarity-icon"
+            class="similarity__progress"
             :value="record.score.percentage"
             :data-title="$t('similarityScore')"
-            :size="35"
           >
-            <svgicon name="similarity" width="30" height="30" />
-          </BaseCircleProgress>
-        </div>
-        <SimilarityFilter
-          v-if="datasetVectors?.length"
-          :availableVectors="datasetVectors"
-          :recordCriteria="recordCriteria"
-          :recordId="record.id"
-        /></div
+          </SimilarityScorePercentage>
+          <SimilarityFilter
+            v-if="datasetVectors?.length"
+            :availableVectors="datasetVectors"
+            :recordCriteria="recordCriteria"
+            :recordId="record.id"
+          />
+          <RecordStatus :recordStatus="record.status" />
+        </div></div
     ></RecordFields>
   </div>
 </template>
@@ -37,7 +41,6 @@ export default {
   props: {
     record: {
       type: Object,
-      required: true,
     },
     recordCriteria: {
       type: Object,
@@ -79,6 +82,11 @@ export default {
       align-items: center;
       gap: $base-space;
     }
+    &--right {
+      display: flex;
+      align-items: center;
+      gap: $base-space;
+    }
   }
   &__status {
     display: inline-flex;
@@ -86,11 +94,10 @@ export default {
   }
 }
 
-.similarity-icon {
-  color: $similarity-color;
+.similarity__progress {
   &[data-title] {
     position: relative;
-    @extend %has-tooltip--right;
+    @extend %has-tooltip--left;
   }
 }
 </style>

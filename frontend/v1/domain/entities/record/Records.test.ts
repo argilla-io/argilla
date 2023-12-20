@@ -100,7 +100,17 @@ describe("Records", () => {
 
   describe("getPageToFind", () => {
     test("the current page should be from 1 to 10 when no have records", () => {
-      const criteria = new RecordCriteria("1", 1, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        1,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
       const records = new Records([]);
 
       const pageToFind = records.getPageToFind(criteria);
@@ -109,7 +119,17 @@ describe("Records", () => {
     });
 
     test("the page should be from 10 and many 10 when the user submit one record in current queue and going to forward", () => {
-      const criteria = new RecordCriteria("1", 10, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        10,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
         new Record("2", "1", [], [], null, [], 1, 2),
@@ -137,7 +157,17 @@ describe("Records", () => {
     });
 
     test("the page should be from 9 and many 10 when the user submit two record in current queue and going to forward", () => {
-      const criteria = new RecordCriteria("1", 10, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        10,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
         new Record("2", "1", [], [], null, [], 1, 2),
@@ -171,7 +201,17 @@ describe("Records", () => {
     });
 
     test("the page should be from 2 and many 1 when the user start with page 3 and go to backward", () => {
-      const criteria = new RecordCriteria("1", 3, "pending", "", [], [], null);
+      const criteria = new RecordCriteria(
+        "1",
+        3,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        null
+      );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 3),
         new Record("2", "1", [], [], null, [], 1, 4),
@@ -189,10 +229,11 @@ describe("Records", () => {
         3,
         "pending",
         "",
-        [],
-        [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
       );
       const records = new Records([]);
 
@@ -207,10 +248,11 @@ describe("Records", () => {
         3,
         "pending",
         "",
-        [],
-        [],
-        // eslint-disable-next-line quotes
-        '{"recordId":"1","vectorName":"2","limit":50,"order":"most"}'
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
       );
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 3),
@@ -221,6 +263,144 @@ describe("Records", () => {
       const pageToFind = records.getPageToFind(criteria);
 
       expect(pageToFind).toEqual({ from: 1, many: 50 });
+    });
+
+    test("the current page should be from 1 and many 10 when the user is paginating forward from page 8 and the queue has 8 records in draft but status is pending", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        9,
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "1", updatedAt: "", value: "" },
+          [],
+          1,
+          1
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "2", updatedAt: "", value: "" },
+          [],
+          1,
+          2
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "3", updatedAt: "", value: "" },
+          [],
+          1,
+          3
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "4", updatedAt: "", value: "" },
+          [],
+          1,
+          4
+        ),
+        new Record(
+          "5",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "5", updatedAt: "", value: "" },
+          [],
+          1,
+          5
+        ),
+        new Record(
+          "6",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "6", updatedAt: "", value: "" },
+          [],
+          1,
+          6
+        ),
+        new Record(
+          "7",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "7", updatedAt: "", value: "" },
+          [],
+          1,
+          7
+        ),
+        new Record(
+          "8",
+          "1",
+          [],
+          [],
+          { status: "draft", id: "8", updatedAt: "", value: "" },
+          [],
+          1,
+          8
+        ),
+      ]);
+
+      const pageToFind = records.getPageToFind(criteria);
+
+      expect(pageToFind).toEqual({ from: 1, many: 10 });
+    });
+  });
+
+  describe("append", () => {
+    test("should append the new records to the current records when not exists", () => {
+      const records = new Records([
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "1", [], [], null, [], 1, 4),
+      ]);
+    });
+
+    test("should replace the new records to the current records when exists and never change the total", () => {
+      const records = new Records(
+        [new Record("2", "1", [], [], null, [], 1, 4)],
+        200
+      );
+
+      const newRecords = new Records([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+
+      records.append(newRecords);
+
+      expect(records.records).toEqual([
+        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+      ]);
+      expect(records.total).toBe(200);
     });
   });
 });

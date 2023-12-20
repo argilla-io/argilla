@@ -1,16 +1,15 @@
 <template>
   <div class="wrapper">
-    <QuestionHeaderComponent
-      :question="question"
-      :showSuggestion="showSuggestion"
-    />
+    <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
       :componentId="question.id"
+      :suggestions="question.suggestion?.suggestedAnswer"
       v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"
       :isFocused="isFocused"
+      :showShortcutsHelper="showShortcutsHelper"
       @on-focus="onFocus"
     />
   </div>
@@ -24,11 +23,11 @@ export default {
       type: Object,
       required: true,
     },
-    showSuggestion: {
+    isFocused: {
       type: Boolean,
       default: () => false,
     },
-    isFocused: {
+    showShortcutsHelper: {
       type: Boolean,
       default: () => false,
     },

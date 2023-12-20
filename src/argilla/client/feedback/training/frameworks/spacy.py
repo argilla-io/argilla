@@ -81,10 +81,7 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         ArgillaTrainerSkeleton.__init__(self, *args, **kwargs)
         import spacy
 
-        self._nlp = None
         self._model = model
-
-        self.config = {}
 
         if self._record_class == TokenClassificationRecord:
             self._column_mapping = {
@@ -92,14 +89,14 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
                 "token": "tokens",
                 "ner_tags": "ner_tags",
             }
-            self._pipeline = ["ner"]
+            self._spacy_pipeline_components = ["ner"]
         elif self._record_class == TextClassificationRecord:
             if self._multi_label:
                 self._column_mapping = {"text": "text", "binarized_label": "label"}
-                self._pipeline = ["textcat_multilabel"]
+                self._spacy_pipeline_components = ["textcat_multilabel"]
             else:
                 self._column_mapping = {"text": "text", "label": "label"}
-                self._pipeline = ["textcat"]
+                self._spacy_pipeline_components = ["textcat"]
         else:
             raise NotImplementedError("`rg.Text2TextRecord` is not supported yet.")
 
@@ -141,6 +138,10 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
 
         self.init_training_args()
 
+    def get_trainer_kwargs(self):
+        """Get the trainer kwargs to be used in the `spacy` trainer."""
+        return self.trainer_kwargs["training"]
+
     @requires_dependencies("spacy-huggingface-hub")
     def push_to_huggingface(self, output_dir: str, **kwargs) -> str:
         r"""Uploads the model to [huggingface's model hub](https://huggingface.co/models).
@@ -168,7 +169,7 @@ class _ArgillaSpaCyTrainerBase(_ArgillaSpaCyTrainerBaseV1, ArgillaTrainerSkeleto
         from spacy.cli.package import package
         from spacy_huggingface_hub import push
 
-        if self._nlp is None:
+        if self.trainer_model is None:
             raise ValueError(
                 "No pipeline was initialized, you must call either `init_model` or `train` before calling this method."
             )
@@ -250,8 +251,8 @@ class ArgillaSpaCyTrainer(ArgillaSpaCyTrainerV1, _ArgillaSpaCyTrainerBase):
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "freeze_tok2vec": self.freeze_tok2vec},
-            pipeline=self._pipeline,  # Used only to keep track for the config arguments
-            update_config_kwargs=self.config["training"],
+            pipeline=self._spacy_pipeline_components,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.trainer_kwargs["training"],
             **card_data_kwargs,
         )
 
@@ -286,7 +287,7 @@ class ArgillaSpaCyTransformersTrainer(ArgillaSpaCyTransformersTrainerV1, _Argill
             lang=self.language,
             gpu_id=self.gpu_id,
             framework_kwargs={"optimize": self.optimize, "update_transformer": self.update_transformer},
-            pipeline=self._pipeline,  # Used only to keep track for the config arguments
-            update_config_kwargs=self.config["training"],
+            pipeline=self._spacy_pipeline_components,  # Used only to keep track for the config arguments
+            update_config_kwargs=self.trainer_kwargs["training"],
             **card_data_kwargs,
         )

@@ -1,3 +1,4 @@
+export * from "./AgentRepository";
 export * from "./DatasetRepository";
 export * from "./FieldRepository";
 export * from "./MetadataMetricsRepository";

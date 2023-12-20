@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import json
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
@@ -21,10 +20,8 @@ from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import LabelQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas import (
+from argilla.client.feedback.training.schemas.base import (
     LabelQuestion,
-    LabelQuestionUnification,
-    RatingQuestion,
     RatingQuestionUnification,
     TrainingTask,
 )
@@ -32,6 +29,7 @@ from sentence_transformers import CrossEncoder, InputExample, SentenceTransforme
 
 from tests.integration.client.feedback.helpers import (
     formatting_func_sentence_transformers,
+    formatting_func_sentence_transformers_all_lists,
     formatting_func_sentence_transformers_case_1_b,
     formatting_func_sentence_transformers_case_2,
     formatting_func_sentence_transformers_case_3_a,
@@ -63,6 +61,7 @@ def formatting_func_errored(sample):
     "formatting_func",
     [
         formatting_func_sentence_transformers,
+        formatting_func_sentence_transformers_all_lists,
         formatting_func_sentence_transformers_case_1_b,
         formatting_func_sentence_transformers_case_2,
         formatting_func_sentence_transformers_case_3_b,
@@ -125,7 +124,7 @@ def test_prepare_for_training_sentence_transformers(
     assert trainer._trainer.trainer_kwargs["epochs"] == 1
     train_with_cleanup(trainer, __OUTPUT_DIR__)
     # Check we have a bi-encoder/cross-encoder
-    assert isinstance(trainer._trainer._trainer, model_type)
+    assert isinstance(trainer.get_trainer(), model_type)
 
     eval_trainer = ArgillaTrainer(
         dataset=dataset,
@@ -205,7 +204,7 @@ def test_prepare_for_training_sentence_transformers_bad_format(
         match_start = r"^Datasets containing a `sentence`"
 
     with pytest.raises(ValueError, match=match_start):
-        trainer = ArgillaTrainer(
+        ArgillaTrainer(
             dataset=dataset,
             task=task,
             framework="sentence-transformers",

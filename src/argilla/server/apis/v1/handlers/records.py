@@ -138,6 +138,7 @@ async def get_record_suggestions(
 async def upsert_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     suggestion_create: SuggestionCreate,
     current_user: User = Security(auth.get_current_user),
@@ -161,7 +162,7 @@ async def upsert_suggestion(
     # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
     # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
     try:
-        return await datasets.upsert_suggestion(db, record, question, suggestion_create)
+        return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
@@ -174,11 +175,12 @@ async def upsert_suggestion(
 async def delete_record_suggestions(
     *,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
 ):
-    record = await _get_record(db, record_id)
+    record = await _get_record(db, record_id, with_dataset=True)
 
     await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
 
@@ -194,7 +196,7 @@ async def delete_record_suggestions(
             detail=f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once",
         )
 
-    await datasets.delete_suggestions(db, record, suggestion_ids)
+    await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)

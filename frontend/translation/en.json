@@ -8,24 +8,37 @@
   "saved": "Saved",
   "minimize": "Minimize",
   "expand": "Expand",
-  "submit-your-feedback": "Submit your feedback",
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
+  "to_submit_complete_required": "To submit complete required responses",
   "changes_no_submit": "You didn't submit your changes",
   "shortcuts": {
     "label": "Shortcuts",
     "pagination": {
-      "go_to_previous_record": "Previous (ctrl + ←)",
-      "go_to_next_record": "Next (ctrl + →)",
-      "go_to_previous_record_mac": "Previous (⌘ cmd + ←)",
-      "go_to_next_record_mac": "Next (⌘ cmd + →)"
-    },
-    "questions_form": {
-      "clear": "Clear (⇧ shift + ␣ space)",
-      "discard": "Discard (⇧ shift + ⌫ backspace)",
-      "submit": "Submit (⇧ shift + ↵ enter)"
+      "go_to_previous_record": "Previous (←)",
+      "go_to_next_record": "Next (→)"
     }
+  },
+  "questions_form": {
+    "discard": "Discard",
+    "submit": "Submit",
+    "draft": "Save as draft"
+  },
+  "sorting": {
+    "score": "suggestion score",
+    "general": "general",
+    "metadata": "metadata"
+  },
+  "suggestion": {
+    "filter": {
+      "value": "Suggestion values",
+      "score": "Score",
+      "agent": "Agent"
+    },
+    "plural": "Suggestions",
+    "suggested-rank": "✨ Suggested rank",
+    "name": "✨ Suggestion"
   },
   "filters": "Filters",
   "filterBy": "Filter by...",
@@ -34,9 +47,17 @@
   "similarityScore": "Similarity Score",
   "similarUsing": "similar using",
   "metadata": "Metadata",
+  "responses": "Responses",
   "reset-all": "Reset all",
   "reset": "Reset",
   "with": "with",
   "find": "Find",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "youAreOnlineAgain": "You are online again",
+  "youAreOffline": "You are offline",
+  "argilla": {
+    "api": {
+      "errors::UnauthorizedError": "Could not validate credentials"
+    }
+  }
 }

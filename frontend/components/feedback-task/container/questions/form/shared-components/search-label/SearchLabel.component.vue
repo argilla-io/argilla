@@ -20,15 +20,13 @@
       :ref="searchRef"
       :placeholder="placeholder"
       @input="$emit('input', $event.target.value)"
-      @keydown.shift.enter.exact="looseFocus"
-      @keydown.shift.backspace.exact="looseFocus"
-      @keydown.shift.space.exact="looseFocus"
-      @keydown.ctrl.arrow-right.exact.prevent=""
-      @keydown.meta.arrow-right.exact.prevent=""
-      @keydown.ctrl.arrow-left.exact.prevent=""
-      @keydown.meta.arrow-left.exact.prevent=""
+      @keydown.arrow-up.prevent="looseFocus"
+      @keydown.arrow-down.prevent="looseFocus"
+      @keydown.arrow-right.exact.stop=""
+      @keydown.arrow-left.exact.stop=""
       @keydown.delete.exact.stop=""
       @keydown.enter.exact.stop=""
+      @keydown.backspace.exact.stop=""
     />
     <BaseIconWithBadge
       v-if="value"
@@ -95,7 +93,6 @@ export default {
   transition: all 0.2s ease-out;
   &:focus-within {
     border-color: $primary-color;
-    box-shadow: $shadow-300;
   }
   &:hover {
     transition: all 0.2s ease-in;

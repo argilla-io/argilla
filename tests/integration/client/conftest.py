@@ -16,7 +16,7 @@ import datetime
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
-from argilla.client.api import delete, init, log
+from argilla.client.api import log
 from argilla.client.datasets import read_datasets
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
@@ -53,8 +53,11 @@ from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
+from argilla.client.singleton import init
 from argilla.server.models import User
 from datasets import Dataset
+
+from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
@@ -80,12 +83,12 @@ def gutenberg_spacy_ner(argilla_user: User) -> Generator[str, None, None]:
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     yield dataset
 
-    delete(dataset, workspace=argilla_user.username)
+    delete_ignoring_errors(dataset, workspace=argilla_user.username)
 
 
 @pytest.fixture(scope="session")
@@ -472,7 +475,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "negative example"},
-                        "question-2": {"value": 1},
+                        "question-2": {"value": 2},
                         "question-3": {"value": "b"},
                         "question-4": {"value": ["b", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
@@ -525,7 +528,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 {
                     "values": {
                         "question-1": {"value": "negative example"},
-                        "question-2": {"value": 1},
+                        "question-2": {"value": 2},
                         "question-3": {"value": "c"},
                         "question-4": {"value": ["a", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
