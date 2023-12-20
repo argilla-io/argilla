@@ -27,7 +27,7 @@ Schedule jobs to run at a specific time or periodically.
 ```{grid-item-card} 📇 Text Descriptives as Metadata
 :link: add_text_descriptives_as_metadata.html
 
-Add text descriptives to you metadata to simplify the data annotation and filtering process.
+Add text descriptives to your metadata to simplify the data annotation and filtering process.
 ```
 ````
 
