@@ -84,12 +84,11 @@ def test_responses_and_suggestions_per_user(
         # TextQuestion
         ("question-1", None, None, None),
         # RatingQuestion
-        ("question-2", None, None, None),
         ("question-2", [1, 1, 1, 2], int, "majority"),
         # LabelQuestion
         ("question-3", [1, 1, 1, 2], str, "majority"),
         # MultiLabelQuestion
-        ("question-4", [1, 1, 1, 2], list, "majority"),
+        ("question-4", [("a", "c"), ("a", "c"), ("c", "b"), ("b", "c")], tuple, "majority"),
         # RankingQuestion
         # TODO(plaguss): Activate this test when we have a strategy for RankingQuestion (#4295)
         # ("question-5", [1, 1, 1, 2], str, "majority"),
@@ -121,11 +120,11 @@ def test_get_unified_responses_and_suggestions(
     if question == "question-1":
         with pytest.raises(NotImplementedError, match="^This function is not available"):
             get_unified_responses_and_suggestions(dataset, question)
-    elif expected_unified_responses is None:
-        with pytest.raises(ValueError, match="^Please unify the responses first:"):
-            get_unified_responses_and_suggestions(dataset, question)
     else:
         unified_dataset = dataset.compute_unified_responses(question, strategy)
         unified_responses, suggestions = get_unified_responses_and_suggestions(unified_dataset, question)
+        import pdb
+
+        pdb.set_trace()
         assert len(unified_responses) == len(suggestions) == len(expected_unified_responses)
         assert all([isinstance(response, value_type) for response in unified_responses])

@@ -562,7 +562,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             if not majority_value:
                 majority_value = [random.choice(list(counter.keys()))]
 
-            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=list(majority_value), strategy=self.value)]
         return records
 
     @classmethod

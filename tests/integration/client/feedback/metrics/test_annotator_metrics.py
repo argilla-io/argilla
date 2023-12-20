@@ -16,10 +16,9 @@ import uuid
 from typing import TYPE_CHECKING, List, Union
 
 import pytest
-from argilla import User
-from argilla.client import api
+from argilla import User, init
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
+from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
 from argilla.client.feedback.metrics.base import ModelMetricResult
 from argilla.client.feedback.schemas import FeedbackRecord
 
@@ -210,7 +209,7 @@ async def test_annotator_metric_from_remote_feedback_dataset(
     responses_vs_suggestions: bool,
     owner: User,
 ):
-    api.init(api_key=owner.api_key)
+    init(api_key=owner.api_key)
     workspace = await WorkspaceFactory.create(name="test_workspace")
     # Add the 4 users for the sample dataset
     for i in range(1, 4):
@@ -283,9 +282,9 @@ def test_annotator_metrics_unified(
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError):
-            UnifiedAnnotationMetric(dataset, question)
+            UnifiedAnnotatorMetric(dataset, question)
     else:
-        metric = UnifiedAnnotationMetric(
+        metric = UnifiedAnnotatorMetric(
             dataset, question, strategy_name=strategy_name, responses_vs_suggestions=responses_vs_suggestions
         )
         metrics_report = metric.compute(metric_names)

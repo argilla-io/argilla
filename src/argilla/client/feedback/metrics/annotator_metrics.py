@@ -166,13 +166,13 @@ class ModelMetric(AnnotatorMetric):
         )
 
 
-class UnifiedAnnotationMetric(AnnotatorMetric):
+class UnifiedAnnotatorMetric(AnnotatorMetric):
     """Main class to compute metrics for a unified dataset.
 
     Example:
         >>> import argilla as rg
-        >>> from argilla.client.feedback.metrics import UnifiedAnnotationMetric
-        >>> metric = UnifiedAnnotationMetric(dataset=dataset, question_name=question)
+        >>> from argilla.client.feedback.metrics import UnifiedAnnotatorMetric
+        >>> metric = UnifiedAnnotatorMetric(dataset=dataset, question_name=question)
         >>> metrics_report = metric.compute("accuracy")
     """
 
@@ -252,7 +252,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         return metrics
 
 
-class UnifiedModelMetric(UnifiedAnnotationMetric):
+class UnifiedModelMetric(UnifiedAnnotatorMetric):
     """"""
 
     def __init__(
@@ -495,7 +495,7 @@ class SpearmanCorrelationCoefficientMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         import scipy.stats as stats
 
-        return stats.spearmanr(x=suggestions, y=responses)[0]
+        return stats.spearmanr(a=suggestions, b=responses)[0]
 
 
 class GLEUMetric(AnnotatorMetricBase):
@@ -519,7 +519,7 @@ class GLEUMetric(AnnotatorMetricBase):
         import evaluate
 
         gleu = evaluate.load("google_bleu")
-        return gleu.compute(predictions=suggestions, references=suggestions)["google_bleu"]
+        return gleu.compute(predictions=responses, references=suggestions)["google_bleu"]  # test is symmetrical
 
 
 class ROUGEMetric(AnnotatorMetricBase):
@@ -540,7 +540,7 @@ class ROUGEMetric(AnnotatorMetricBase):
         import evaluate
 
         rouge = evaluate.load("rouge")
-        return rouge.compute(predictions=suggestions, references=responses)
+        return rouge.compute(predictions=responses, references=suggestions)  # test is symmetrical
 
 
 class NDCGMetric(AnnotatorMetricBase):
@@ -563,7 +563,7 @@ class NDCGMetric(AnnotatorMetricBase):
     def _compute(self, responses: List[str], suggestions: List[str]):
         from sklearn.metrics import ndcg_score
 
-        return ndcg_score(y_true=responses, y_pred=suggestions)
+        return ndcg_score(y_true=responses, y_score=suggestions)
 
 
 METRICS_PER_QUESTION = {

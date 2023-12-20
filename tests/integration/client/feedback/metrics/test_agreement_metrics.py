@@ -16,8 +16,7 @@ import uuid
 from typing import TYPE_CHECKING, FrozenSet, List, Tuple, Union
 
 import pytest
-from argilla import User
-from argilla.client import api
+from argilla import User, init
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.agreement_metrics import (
     AgreementMetric,
@@ -204,7 +203,7 @@ async def test_agreement_metrics_remote(
     metric_names: Union[str, List[str]],
     owner: User,
 ):
-    api.init(api_key=owner.api_key)
+    init(api_key=owner.api_key)
     workspace = await WorkspaceFactory.create(name="test_workspace")
     # Add the 4 users for the sample dataset
     for i in range(1, 4):
@@ -318,8 +317,8 @@ async def test_agreement_metrics_from_remote_feedback_dataset(
     question: str,
     metric_names: Union[str, List[str]],
     owner: User,
-):
-    api.init(api_key=owner.api_key)
+) -> None:
+    init(api_key=owner.api_key)
     workspace = await WorkspaceFactory.create(name="test_workspace")
     # Add the 4 users for the sample dataset
     for i in range(1, 4):

@@ -143,6 +143,9 @@ class UnificationMixin:
         if isinstance(question, str):
             question = self.question_by_name(question)
 
+        if not strategy:
+            strategy = "majority"
+
         if isinstance(strategy, str):
             if isinstance(question, LabelQuestion):
                 strategy = LabelQuestionStrategy(strategy)
