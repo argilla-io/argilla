@@ -203,8 +203,8 @@ We obtain a `dict` where the keys contain the `user_id` of a given annotator and
 Alternatively, we have the opportunity to compute the metrics directly from the dataset. Let’s use the following dataset for this, and compute the metrics for the suggestions:
 
 ```python
-suggestions_metrics = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
-suggestions_metrics['00000000-0000-0000-0000-000000000001']
+mmodel_metrics = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
+mmodel_metrics['00000000-0000-0000-0000-000000000001']
 # [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
 #  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
 #  AnnotatorMetricResult(metric_name='recall', count=1269, result=0.6166023130799764),
@@ -230,13 +230,13 @@ unified_metrics = metric.compute("accuracy")
 # AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
-We obtain the same container for the metrics result, but in this case, it’s not associated with any specific annotator but their general aligment.
+We obtain the same container for the metrics result, but in this case, it’s not associated with any specific annotator but their general alignment.
 
 We can make use of the same methods we saw above directly from the `FeedbackDataset`, but note the use of the strategy argument used here:
 
 ```python
-suggestions_metrics_unified = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
-suggestions_metrics_unified
+model_metrics_unified = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
+model_metrics_unified
 # [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
 #  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
 #  AnnotatorMetricResult(metric_name='recall', count=53990, result=0.7679974812646655),
