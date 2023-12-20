@@ -191,6 +191,7 @@ def test_multi_label_question_strategy_without_overlap(strategy, unified_respons
         "fields": {"text": "This is the first record", "label": "positive"},
         "responses": [
             {"values": {question_name: {"value": ["label1"]}}},
+            {"values": {question_name: {"value": ["label1"]}}},
             {"values": {question_name: {"value": ["label2"]}}},
         ],
     }

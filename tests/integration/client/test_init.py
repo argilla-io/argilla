@@ -11,26 +11,28 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import argilla.client.singleton
 import pytest
 from argilla.client import api
-from argilla.client.api import active_api, active_client
 from argilla.client.models import TextClassificationRecord
+from argilla.client.singleton import active_api, active_client
 from argilla.server.models import User
 
 from tests.factories import UserFactory, WorkspaceFactory
+from tests.integration.utils import delete_ignoring_errors
 
 
 def test_resource_leaking_with_several_init(argilla_user: User):
     dataset = "test_resource_leaking_with_several_init"
-    api.init(api_key=argilla_user.api_key)
-    api.delete(dataset)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    delete_ignoring_errors(dataset)
 
     # TODO: review performance in Windows. See https://github.com/recognai/argilla/pull/1702
     for i in range(0, 20):
-        api.init(api_key=argilla_user.api_key)
+        argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     for i in range(0, 10):
-        api.init(api_key=argilla_user.api_key)
+        argilla.client.singleton.init(api_key=argilla_user.api_key)
         api.log(TextClassificationRecord(text="The text"), name=dataset, verbose=False)
 
     assert len(api.load(dataset)) == 10
@@ -41,7 +43,7 @@ def test_init_with_extra_headers(argilla_user: User):
         "X-Custom-Header": "Mocking rules!",
         "Other-header": "Header value",
     }
-    api.init(api_key=argilla_user.api_key, extra_headers=expected_headers)
+    argilla.client.singleton.init(api_key=argilla_user.api_key, extra_headers=expected_headers)
     client = active_client()
 
     for key, value in expected_headers.items():
@@ -49,11 +51,11 @@ def test_init_with_extra_headers(argilla_user: User):
 
 
 def test_init(argilla_user: User):
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
     client = active_client()
     assert client.user.username == "argilla"
 
-    api.init(api_key="argilla.apikey")
+    argilla.client.singleton.init(api_key="argilla.apikey")
     client = active_api()
     assert client.user.username == "argilla"
 
@@ -62,7 +64,7 @@ def test_init(argilla_user: User):
 async def test_init_with_default_user_without_workspaces():
     argilla_user = await UserFactory.create(username="argilla")
 
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
     client = active_client()
 
     assert client.get_workspace() is None
@@ -76,7 +78,7 @@ async def test_init_with_default_user_and_different_workspace():
     workspace = await WorkspaceFactory.create()
     argilla_user = await UserFactory.create(username="argilla", workspaces=[workspace])
 
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
     client = active_client()
 
     assert client.get_workspace() is None

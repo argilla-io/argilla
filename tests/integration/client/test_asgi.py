@@ -28,13 +28,15 @@ from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.testclient import TestClient
 
+from tests.integration.utils import delete_ignoring_errors
+
 
 def test_argilla_middleware_for_text_classification(argilla_user: User):
     expected_endpoint = "/predict"
     expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
 
-    argilla.delete(expected_dataset_name)
+    delete_ignoring_errors(expected_dataset_name)
 
     app = FastAPI()
     app.add_middleware(
@@ -105,7 +107,7 @@ def test_argilla_middleware_for_token_classification(argilla_user: User):
     expected_endpoint = "/predict"
     expected_endpoint_get = "/predict_get"
     expected_dataset_name = "mlmodel_v3_monitor_ds"
-    argilla.delete(expected_dataset_name)
+    delete_ignoring_errors(expected_dataset_name)
 
     app = Starlette()
     app.add_middleware(

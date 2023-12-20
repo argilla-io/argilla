@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING, Any, List
 
 import pytest
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -79,7 +79,7 @@ def test_remote_dataset_with_records(
     feedback_dataset_records_with_metadata: List[FeedbackRecord],
     owner: "User",
 ):
-    api.init(api_key=owner.api_key)
+    singleton.init(api_key=owner.api_key)
     ws = Workspace.create(name="test-workspace")
 
     dataset = FeedbackDataset(

@@ -41,7 +41,10 @@ def condition_check_params(search):
     ],
 )
 def test_listener_with_parameters(mocked_client, dataset, query, metrics, condition, query_params):
-    delete(dataset)
+    try:
+        delete(dataset)
+    except Exception:
+        pass
 
     class TestListener:
         executed = False
