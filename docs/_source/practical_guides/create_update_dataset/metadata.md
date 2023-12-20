@@ -124,11 +124,35 @@ You can easily add text descriptives to your records or datasets using the `Text
 - `visible_for_annotators` (optional): Whether the extracted metrics should be visible to annotators. Defaults to `True`.
 - `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
 
-For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.ipynb).
+For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.html).
 
 ::::{tab-set}
 
+:::{tab-item} Dataset
+
+This can be used to update the dataset and configuration with `MetadataProperties` for `Fields` in a `FeedbackDataset` or a `RemoteFeedbackDataset`.
+
+```python
+from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+
+dataset = ... # FeedbackDataset or RemoteFeedbackDataset
+
+tde = TextDescriptivesExtractor(
+    model="en",
+    metrics=None,
+    fields=None,
+    visible_for_annotators=True,
+    show_progress=True,
+)
+
+dataset = tde.update_dataset(dataset)
+```
+:::
+
 :::{tab-item} Records
+
+This can be used to update the records with `Metadata` values for `Fields` in a list of `FeedbackRecords`.
+
 ```python
 from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
 
@@ -142,27 +166,11 @@ tde = TextDescriptivesExtractor(
     show_progress=True,
 )
 
-tde.update_records(records)
+records = tde.update_records(records)
 ```
+
 :::
 
-:::{tab-item} Dataset
-```python
-from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
-
-dataset = dataset # FeedbackDataset or RemoteFeedbackDataset
-
-tde = TextDescriptivesExtractor(
-    model="en",
-    metrics=None,
-    fields=None,
-    visible_for_annotators=True,
-    show_progress=True,
-)
-
-tde.update_dataset(dataset)
-```
-:::
 
 ::::
 
