@@ -33,7 +33,6 @@
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
-          :title="$t('shortcuts.questions_form.discard')"
           @on-click="onDiscard"
         >
           <span class="button__shortcuts" v-text="'⌫'" /><span
@@ -44,11 +43,6 @@
           type="button"
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
-          :title="
-            $platform.isMac
-              ? $t('shortcuts.questions_form.draft_mac')
-              : $t('shortcuts.questions_form.draft')
-          "
           @on-click="onSaveDraft"
         >
           <span class="button__shortcuts-group"
@@ -69,9 +63,7 @@
           ]"
           :disabled="isSubmitButtonDisabled"
           :title="
-            isSubmitButtonDisabled
-              ? $t('to_submit_complete_required')
-              : $t('shortcuts.questions_form.submit')
+            isSubmitButtonDisabled ? $t('to_submit_complete_required') : null
           "
           @on-click="onSubmit"
         >
