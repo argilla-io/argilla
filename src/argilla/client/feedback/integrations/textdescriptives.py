@@ -18,7 +18,6 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import textdescriptives as td
 from rich.progress import Progress
 
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
@@ -30,6 +29,7 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.utils.dependency import require_dependencies
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
@@ -67,6 +67,7 @@ class TextDescriptivesExtractor:
         >>> updated_ds = tde.update_dataset(ds)
         >>> updated_records = tde.update_records(ds.records)
         """
+        require_dependencies("textdescriptives")
         self.model = model
         self.metrics = metrics
         self.fields = fields
@@ -99,6 +100,8 @@ class TextDescriptivesExtractor:
         Returns:
             Optional[pd.DataFrame]: A dataframe containing the text descriptives metrics for the field, or None if the field is empty.
         """
+        import textdescriptives as td
+
         # If the field is empty, skip it
         field_text = [record.fields[field] for record in records if record.fields[field]]
         if not field_text:
