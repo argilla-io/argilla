@@ -169,7 +169,7 @@ In case you want to dig deeper into the measurement of the agreement between dif
 and Poesio (2007), Inter-Coder Agreement for Computational Linguistics*](https://www.researchgate.net/publication/200044186_Inter-Coder_Agreement_for_Computational_Linguistics).
 ```
 
-##### Supported Metrics for Agreement Metrics
+##### Supported Agreement Metrics
 
 We plan on adding more support for other metrics so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 
@@ -181,29 +181,29 @@ We plan on adding more support for other metrics so feel free to reach out on ou
 | RankingQuestion       | ✔️      |
 | TextQuestion          |        |
 
-#### Suggestions Metrics
+#### Model Metrics
 
-In contrast to agreement metrics, where we compare the responses of annotators with each other, it is a good practice to evaluate the responses of the annotators against some ground truths. As `FeedbackDataset` already offers the possibility to add `suggestions` to the responses, we can compare the annotator responses against the suggestions. This will give us two important insights: how reliable the responses of a given annotator are, and how good the suggestions we are giving to the annotators are. This way, we can take actions to improve the quality of the responses by making changes to the guidelines or the structure, and the suggestions given to the annotators by changing or updating the model we use. Note that each question type has a different set of metrics available.
+In contrast to agreement metrics, where we compare the responses of annotators with each other, it is a good practice to evaluate the suggestions of models against the annotators as ground truths. As `FeedbackDataset` already offers the possibility to add `suggestions` to the responses, we can compare these initial predictions against the verified reponses. This will give us two important insights: how reliable the responses of a given annotator are, and how good the suggestions we are giving to the annotators are. This way, we can take action to improve the quality of the responses by making changes to the guidelines or the structure, and the suggestions given to the annotators by changing or updating the model we use. Note that each question type has a different set of metrics available.
 
 Here is an example use of the `compute` function to calculate the metrics for a `FeedbackDataset`:
 
 ```python
 import argilla as rg
-from argilla.client.feedback.metrics import SuggestionsMetric
+from argilla.client.feedback.metrics import ModelMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = SuggestionsMetric(dataset=feedback_dataset, question_name="question_name")
+metric = ModelMetric(dataset=feedback_dataset, question_name="question_name")
 annotator_metrics = metric.compute("accuracy")
 # >>> annotator_metrics
 # {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
 ```
 
-We would obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. For the interpretation of these metrics, we assume here that the true labels or suggestions correspond to the suggestions given to an annotator and the predictions correspond to the responses given by an annotator. This way, we can interpret the metrics and see whether the annotator is giving good responses or not. Please note that the model used to generate the suggestions is expected to be a model of quality, otherwise the metrics will not be reliable. Also, the metrics are calculated for each annotator individually, so we can see which annotators are giving good responses and which are not.
+We obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. For the interpretation of these metrics, we assume here that the predictions correspond to the suggestions given to an annotator and the true labels correspond to the responses given by an annotator. This way, we can interpret the metrics and see whether the model is performing as expected. The metrics are calculated for each annotator individually, so we can see which annotators are giving responses that align with the model and which are not.
 
-We have the opportunity to compute the metrics directly from the dataset. Let’s use the following dataset for this, and compute the metrics for the suggestions:
+Alternatively, we have the opportunity to compute the metrics directly from the dataset. Let’s use the following dataset for this, and compute the metrics for the suggestions:
 
 ```python
-suggestions_metrics = dataset.compute_suggestions_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
+suggestions_metrics = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
 suggestions_metrics['00000000-0000-0000-0000-000000000001']
 # [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
 #  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
@@ -215,27 +215,27 @@ Keep in mind this dataset is quite big, so it may take some time both to downloa
 
 ##### For Unified Responses
 
-As we have seen `SuggestionsMetric` allows us to compare the responses of the annotators against the suggestions, which we choose to be the ground truths. The calculation is done separately for each of the annotators, which allows us to see the performance of each annotator. However, in some cases, we may want to see the performance of the annotators as a whole and not individually. For this, we can use the `UnifiedSuggestionsMetric` class, which allows us to calculate the metrics for the responses of all the annotators together.
+As we have seen `ModelMetric` allows us to compare the suggestions from models against responses from annotators, which we choose to be the ground truths. The calculation is done separately for each of the responses, which allows us to see the performance of the model against each annotator. However, in some cases, we may want to see the performance of the model against annotators as a whole and not individually. For this, we can use the `UnifiedModelMetric` class, which allows us to calculate the metrics for the unified responses. For this we rely on the unification strategies, defined in the [Unifying Disagreements](#unifying-disagreements).
 
 ```python
 import argilla as rg
-from argilla.client.feedback.metrics import UnifiedSuggestionsMetric
+from argilla.client.feedback.metrics import UnifiedModelMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
 strategy_name = "majority"
 unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_name)
-metric = UnifiedSuggestionsMetric(dataset=unified_dataset, question_name="question_name")
+metric = UnifiedModelMetric(dataset=unified_dataset, question_name="question_name")
 unified_metrics = metric.compute("accuracy")
 # >>> unified_metrics
 # AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
-We obtain the same container for the metrics result, but in this case, it’s not associated with any annotator.
+We obtain the same container for the metrics result, but in this case, it’s not associated with any specific annotator but their general aligment.
 
 We can make use of the same methods we saw above directly from the `FeedbackDataset`, but note the use of the strategy argument used here:
 
 ```python
-suggestions_metrics_unified = dataset.compute_suggestions_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
+suggestions_metrics_unified = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
 suggestions_metrics_unified
 # [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
 #  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
@@ -245,69 +245,7 @@ suggestions_metrics_unified
 
 By default, the responses will not be unified and we will have the responses at the annotator level, but if we ask for a specific strategy (see the strategies available for each question), they will be unified automatically and computed.
 
-
-#### Responses Metrics
-
-Instead of choosing the suggestions as our ground truths, we can go with the responses given by the annotators as our gold labels. This way, we will be able to compare the suggestions given to the annotators against the responses they give. As we expect that the suggestions should simplify the annotation process by shortening it, we will see how good the suggestions are and if they are helping the annotators to give better responses. The results of this metric will tell us if the model to create predictions needs to be improved.
-
-The following code snippet shows how to compute the metrics for the responses:
-
-```python
-import argilla as rg
-from argilla.client.feedback.metrics import ResponsesMetric
-
-feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = ResponsesMetric(dataset=feedback_dataset, question_name="question_name")
-annotator_metrics = metric.compute("accuracy")
-# >>> annotator_metrics
-# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
-```
-
-As it is the case with the `SuggestionsMetric`, we obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. Also, the metrics are calculated for each annotator individually, so we can see which annotators are giving good responses and which are not.
-
-We can compute the metrics directly from our feedback dataset. Let’s use the following dataset for this, and compute the metrics for the responses:
-
-``` python
-# Compute the metrics per annotator, assuming the true labels correspond to the responses, and the predicted labels are the suggestions
-responses_metrics = dataset.compute_responses_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
-responses_metrics['00000000-0000-0000-0000-000000000001']
-# [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
-#  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.6166023130799764),
-#  AnnotatorMetricResult(metric_name='recall', count=1269, result=0.5593881715337764),
-#  AnnotatorMetricResult(metric_name='f1-score', count=1269, result=0.5448304082545485)]
-```
-
-##### For Unified Responses
-
-ResponsesMetric has allowed us to compare the suggestions given to the annotators against the responses they give. As we have done with the suggestions metric above, we can also compute the metrics for the responses of all the annotators together. For this, we can use the `UnifiedResponsesMetric` class, which allows us to calculate the metrics for the responses of all the annotators together.
-
-```python
-import argilla as rg
-from argilla.client.feedback.metrics import UnifiedResponsesMetric
-
-feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-strategy_name = "majority"
-unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_name)
-metric = UnifiedResponsesMetric(dataset=unified_dataset, question_name="question_name")
-unified_metrics = metric.compute("accuracy")
-# >>> unified_metrics
-# AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
-```
-
-Now, we have the metrics for all the annotators together, which allows us to see the performance of the annotators as a whole and not individually.
-
-To make things easier, we can directly employ the `compute_suggestions_metrics` for the `FeedbackDataset` with the `strategy` argument, which will first unify all the responses and then compute the metrics.
-
-```python
-suggestions_metrics_unified = dataset.compute_suggestions_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
-suggestions_metrics_unified
-# [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
-#  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
-#  AnnotatorMetricResult(metric_name='recall', count=53990, result=0.7679974812646655),
-#  AnnotatorMetricResult(metric_name='f1-score', count=53990, result=0.786466989240015)]
-```
-
-#### Supported Metrics for Suggestions and Responses Metrics
+#### Supported Model Metrics
 
 We plan on adding more support for other metrics so feel free to reach out on our Slack or GitHub to help us prioritize each task.
 

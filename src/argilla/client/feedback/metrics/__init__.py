@@ -15,16 +15,12 @@
 
 from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
 from argilla.client.feedback.metrics.annotator_metrics import (
-    ResponsesMetric,
-    SuggestionsMetric,
-    UnifiedResponsesMetric,
-    UnifiedSuggestionsMetric,
+    ModelMetric,
+    UnifiedModelMetric,
 )
 
 __all__ = [
-    "ResponsesMetric",
-    "SuggestionsMetric",
+    "ModelMetric",
     "AgreementMetric",
-    "UnifiedResponsesMetric",
-    "UnifiedSuggestionsMetric",
+    "UnifiedModelMetric",
 ]

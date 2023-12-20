@@ -162,7 +162,7 @@ def test_annotator_metric_from_feedback_dataset(
     if responses_vs_suggestions:
         metrics_report = dataset.compute_responses_metrics(question_name=question, metric_names=metric_names)
     else:
-        metrics_report = dataset.compute_suggestions_metrics(question_name=question, metric_names=metric_names)
+        metrics_report = dataset.compute_model_metrics(question_name=question, metric_names=metric_names)
 
     assert len(metrics_report) == 3  # Number of annotators
     assert isinstance(metrics_report, dict)
@@ -228,7 +228,7 @@ async def test_annotator_metric_from_remote_feedback_dataset(
     if responses_vs_suggestions:
         metrics_report = remote.compute_responses_metrics(question_name=question, metric_names=metric_names)
     else:
-        metrics_report = remote.compute_suggestions_metrics(question_name=question, metric_names=metric_names)
+        metrics_report = remote.compute_model_metrics(question_name=question, metric_names=metric_names)
 
     assert len(metrics_report) == 3  # Number of annotators
     assert isinstance(metrics_report, dict)
@@ -352,7 +352,7 @@ def test_annotator_metrics_unified_from_feedback_dataset(
             question_name=question, metric_names=metric_names, strategy=strategy_name
         )
     else:
-        metrics_report = dataset.compute_suggestions_metrics(
+        metrics_report = dataset.compute_model_metrics(
             question_name=question, metric_names=metric_names, strategy=strategy_name
         )
 

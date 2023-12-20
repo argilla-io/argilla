@@ -147,28 +147,7 @@ class AnnotatorMetric(MetricBase):
         return dict(metrics)
 
 
-class ResponsesMetric(AnnotatorMetric):
-    """Where responses are the ground truths and the suggestions are compared against them."""
-
-    def __init__(
-        self,
-        dataset: FeedbackDataset,
-        question_name: str,
-        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
-        sort_by: Optional[List["SortBy"]] = None,
-        max_records: Optional[int] = None,
-    ) -> None:
-        super().__init__(
-            dataset,
-            question_name,
-            filter_by=filter_by,
-            sort_by=sort_by,
-            max_records=max_records,
-            responses_vs_suggestions=True,
-        )
-
-
-class SuggestionsMetric(AnnotatorMetric):
+class ModelMetric(AnnotatorMetric):
     """Where suggestions are the ground truths and the responses are compared against them."""
 
     def __init__(
@@ -185,7 +164,7 @@ class SuggestionsMetric(AnnotatorMetric):
             filter_by=filter_by,
             sort_by=sort_by,
             max_records=max_records,
-            responses_vs_suggestions=False,
+            responses_vs_suggestions=True,
         )
 
 
@@ -275,7 +254,9 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         return metrics
 
 
-class UnifiedResponsesMetric(UnifiedAnnotationMetric):
+class UnifiedModelMetric(UnifiedAnnotationMetric):
+    """"""
+
     def __init__(
         self,
         dataset: "FeedbackDataset",
@@ -291,25 +272,6 @@ class UnifiedResponsesMetric(UnifiedAnnotationMetric):
             sort_by=sort_by,
             max_records=max_records,
             responses_vs_suggestions=True,
-        )
-
-
-class UnifiedSuggestionsMetric(UnifiedAnnotationMetric):
-    def __init__(
-        self,
-        dataset: "FeedbackDataset",
-        question_name: str,
-        filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
-        sort_by: Optional[List["SortBy"]] = None,
-        max_records: Optional[int] = None,
-    ) -> None:
-        super().__init__(
-            dataset,
-            question_name,
-            filter_by=filter_by,
-            sort_by=sort_by,
-            max_records=max_records,
-            responses_vs_suggestions=False,
         )
 
 
@@ -329,7 +291,7 @@ class AccuracyMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import accuracy_score
 
-        return accuracy_score(responses, suggestions)
+        return accuracy_score(y_true=responses, y_pred=suggestions)
 
 
 class PrecisionMetric(AnnotatorMetricBase):
@@ -350,7 +312,7 @@ class PrecisionMetric(AnnotatorMetricBase):
             kwargs = {"average": "macro"}
         else:
             kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
-        return precision_score(responses, suggestions, **kwargs)
+        return precision_score(y_true=responses, y_pred=suggestions, **kwargs)
 
 
 class RecallMetric(AnnotatorMetricBase):
@@ -371,7 +333,7 @@ class RecallMetric(AnnotatorMetricBase):
             kwargs = {"average": "macro"}
         else:
             kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
-        return recall_score(responses, suggestions, **kwargs)
+        return recall_score(y_true=responses, y_pred=suggestions, **kwargs)
 
 
 class F1ScoreMetric(AnnotatorMetricBase):
@@ -428,7 +390,7 @@ class MultiLabelAccuracyMetric(MultiLabelMetrics):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import accuracy_score
 
-        return accuracy_score(responses, suggestions)
+        return accuracy_score(y_true=responses, y_pred=suggestions)
 
 
 class MultiLabelPrecisionMetric(MultiLabelMetrics):
@@ -443,7 +405,7 @@ class MultiLabelPrecisionMetric(MultiLabelMetrics):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import precision_score
 
-        return precision_score(responses, suggestions, average="macro")
+        return precision_score(y_true=responses, y_pred=suggestions, average="macro")
 
 
 class MultiLabelRecallMetric(MultiLabelMetrics):
@@ -458,7 +420,7 @@ class MultiLabelRecallMetric(MultiLabelMetrics):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import recall_score
 
-        return recall_score(responses, suggestions, average="macro")
+        return recall_score(y_true=responses, y_pred=suggestions, average="macro")
 
 
 class MultiLabelF1ScoreMetric(MultiLabelMetrics):
@@ -473,7 +435,7 @@ class MultiLabelF1ScoreMetric(MultiLabelMetrics):
     def _compute(self, responses, suggestions):
         from sklearn.metrics import f1_score
 
-        return f1_score(responses, suggestions, average="macro")
+        return f1_score(y_true=responses, y_pred=suggestions, average="macro")
 
 
 class ConfusionMatrixMetric(AnnotatorMetricBase):
@@ -492,7 +454,7 @@ class ConfusionMatrixMetric(AnnotatorMetricBase):
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
         labels_index = [f"responses_{label}" for label in labels]
         labels_columns = [f"suggestions_{label}" for label in labels]
-        result = confusion_matrix(responses, suggestions, labels=labels)
+        result = confusion_matrix(y_true=responses, y_pred=suggestions, labels=labels)
         return pd.DataFrame(result, index=labels_index, columns=labels_columns)
 
 
@@ -510,7 +472,7 @@ class MultiLabelConfusionMatrixMetric(MultiLabelMetrics):
         unique_responses = sorted(np.unique(responses))
         unique_suggestions = sorted(np.unique(suggestions))
         labels = sorted(set(unique_responses).union(set(unique_suggestions)))
-        matrices = multilabel_confusion_matrix(responses, suggestions, labels=labels)
+        matrices = multilabel_confusion_matrix(y_true=responses, y_pred=suggestions, labels=labels)
         report = {}
         for class_, matrix in zip(self._mlb.classes_, matrices):
             labels_index = [f"responses_{class_}_{i}" for i in ["true", "false"]]
@@ -527,7 +489,7 @@ class PearsonCorrelationCoefficientMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         import scipy.stats as stats
 
-        return stats.pearsonr(responses, suggestions)[0]
+        return stats.pearsonr(x=suggestions, y=responses)[0]
 
 
 class SpearmanCorrelationCoefficientMetric(AnnotatorMetricBase):
@@ -535,7 +497,7 @@ class SpearmanCorrelationCoefficientMetric(AnnotatorMetricBase):
     def _compute(self, responses, suggestions):
         import scipy.stats as stats
 
-        return stats.spearmanr(responses, suggestions)[0]
+        return stats.spearmanr(x=suggestions, y=responses)[0]
 
 
 class GLEUMetric(AnnotatorMetricBase):
@@ -559,7 +521,7 @@ class GLEUMetric(AnnotatorMetricBase):
         import evaluate
 
         gleu = evaluate.load("google_bleu")
-        return gleu.compute(predictions=responses, references=suggestions)["google_bleu"]
+        return gleu.compute(predictions=suggestions, references=suggestions)["google_bleu"]
 
 
 class ROUGEMetric(AnnotatorMetricBase):
@@ -580,7 +542,7 @@ class ROUGEMetric(AnnotatorMetricBase):
         import evaluate
 
         rouge = evaluate.load("rouge")
-        return rouge.compute(predictions=responses, references=suggestions)
+        return rouge.compute(predictions=suggestions, references=responses)
 
 
 class NDCGMetric(AnnotatorMetricBase):
@@ -603,7 +565,7 @@ class NDCGMetric(AnnotatorMetricBase):
     def _compute(self, responses: List[str], suggestions: List[str]):
         from sklearn.metrics import ndcg_score
 
-        return ndcg_score(responses, suggestions)
+        return ndcg_score(y_true=responses, y_pred=suggestions)
 
 
 METRICS_PER_QUESTION = {
