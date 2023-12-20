@@ -22,7 +22,7 @@ After configuring a `FeedbackDataset`, as shown in the [previous guide](/practic
 record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
-        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
+        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods."
     },
     metadata={"source": "encyclopedia"},
     vectors={"my_vector": [...], "my_other_vector": [...]},
@@ -46,7 +46,8 @@ record = rg.FeedbackRecord(
 ```
 
 #### Format `metadata`
-Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. If you want the metadata to correspond with the metadata properties configured for your dataset so that these can be used for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting. As well as adding one metadata property to a single record, you can also add aggregate metadata values for each record in the form of a list.
+
+Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. If you want the metadata to correspond with the metadata properties configured for your dataset so that these can be used for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting. As well as adding one metadata property to a single record, you can also add aggregate metadata values for the `TermsMetadataProperty` in the form of a list.
 
 ::::{tab-set}
 
