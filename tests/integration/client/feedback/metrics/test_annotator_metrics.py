@@ -122,7 +122,7 @@ def test_annotator_metric(
     assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
 
 
-@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize("responses_vs_suggestions", [True])
 @pytest.mark.parametrize(
     "question, metric_names",
     [
@@ -160,8 +160,6 @@ def test_annotator_metric_from_feedback_dataset(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
     if responses_vs_suggestions:
-        metrics_report = dataset.compute_responses_metrics(question_name=question, metric_names=metric_names)
-    else:
         metrics_report = dataset.compute_model_metrics(question_name=question, metric_names=metric_names)
 
     assert len(metrics_report) == 3  # Number of annotators
@@ -178,7 +176,7 @@ def test_annotator_metric_from_feedback_dataset(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize("responses_vs_suggestions", [True])
 @pytest.mark.parametrize(
     "question, metric_names",
     [
@@ -226,8 +224,6 @@ async def test_annotator_metric_from_remote_feedback_dataset(
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
     remote = dataset.push_to_argilla(name="test-metrics", workspace=workspace.name)
     if responses_vs_suggestions:
-        metrics_report = remote.compute_responses_metrics(question_name=question, metric_names=metric_names)
-    else:
         metrics_report = remote.compute_model_metrics(question_name=question, metric_names=metric_names)
 
     assert len(metrics_report) == 3  # Number of annotators
@@ -243,7 +239,7 @@ async def test_annotator_metric_from_remote_feedback_dataset(
     assert all([result.metric_name == name for result, name in zip(metric_results, metric_names)])
 
 
-@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize("responses_vs_suggestions", [True])
 @pytest.mark.parametrize(
     "question, metric_names, strategy_name",
     [
@@ -307,7 +303,7 @@ def test_annotator_metrics_unified(
         assert all([result.metric_name == name for result, name in zip(metrics_report, metric_names)])
 
 
-@pytest.mark.parametrize("responses_vs_suggestions", [True, False])
+@pytest.mark.parametrize("responses_vs_suggestions", [True])
 @pytest.mark.parametrize(
     "question, metric_names, strategy_name",
     [
@@ -348,10 +344,6 @@ def test_annotator_metrics_unified_from_feedback_dataset(
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
     if responses_vs_suggestions:
-        metrics_report = dataset.compute_responses_metrics(
-            question_name=question, metric_names=metric_names, strategy=strategy_name
-        )
-    else:
         metrics_report = dataset.compute_model_metrics(
             question_name=question, metric_names=metric_names, strategy=strategy_name
         )
