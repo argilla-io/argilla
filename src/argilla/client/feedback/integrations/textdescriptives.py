@@ -57,6 +57,14 @@ class TextDescriptivesExtractor:
             fields (Optional[List[str]]): A list of field names to extract metrics from. If None, all fields will be used.
             visible_for_annotators (bool): Whether the extracted metrics should be visible to annotators.
             show_progress (bool): Whether to show a progress bar when extracting metrics.
+
+        Examples:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+        >>> ds = rg.FeedbackDataset(...)
+        >>> tde = TextDescriptivesExtractor()
+        >>> updated_ds = tde.update_dataset(ds)
+        >>> updated_records = tde.update_records(ds.records)
         """
         self.model = model
         self.metrics = metrics
@@ -252,6 +260,7 @@ class TextDescriptivesExtractor:
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with text descriptives metrics added as metadata.
 
+        Examples:
         >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
         >>> records = [rg.FeedbackRecord(fields={"text": "This is a test."})]
         >>> tde = TextDescriptivesExtractor()
@@ -288,10 +297,10 @@ class TextDescriptivesExtractor:
         Returns:
             Union[FeedbackDataset, RemoteFeedbackDataset]: A FeedbackDataset or RemoteFeedbackDataset with text descriptives metrics added as metadata.
 
+        Examples:
         >>> import argilla as rg
         >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
-        >>> rg.init(...)
-        >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
+        >>> dataset = rg.FeedbackDataset(...)
         >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
 
