@@ -20,6 +20,11 @@ Learn how to use Argilla to process large scale documents for LLMs with Unstruct
 
 Learn how to use Argilla to monitor NLP models with FastAPI and ArgillaLogHTTPMiddleware.
 ```
+```{grid-item-card} Text Descriptives as Metadata
+:link: add_text_descriptives_as_metadata.html
+
+Add text descriptives to your metadata to simplify the data annotation and filtering process.
+```
 ````
 
 ```{toctree}
@@ -28,4 +33,5 @@ Learn how to use Argilla to monitor NLP models with FastAPI and ArgillaLogHTTPMi
 use_argilla_callback_in_langchain
 process_documents_with_unstructured
 monitor_endpoints with_fastapi
+add_text_descriptives_as_metadata
 ```
