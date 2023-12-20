@@ -195,7 +195,7 @@ feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
 metric = ModelMetric(dataset=feedback_dataset, question_name="question_name")
 annotator_metrics = metric.compute("accuracy")
 # >>> annotator_metrics
-# {'00000000-0000-0000-0000-000000000001': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.5)]}
+# {'00000000-0000-0000-0000-000000000001': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [ModelMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)]}
 ```
 
 We obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. For the interpretation of these metrics, we assume here that the predictions correspond to the suggestions given to an annotator and the true labels correspond to the responses given by an annotator. This way, we can interpret the metrics and see whether the model is performing as expected. The metrics are calculated for each annotator individually, so we can see which annotators are giving responses that align with the model and which are not.
@@ -204,11 +204,11 @@ Alternatively, we have the opportunity to compute the metrics directly from the 
 
 ```python
 mmodel_metrics = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
-mmodel_metrics['00000000-0000-0000-0000-000000000001']
-# [AnnotatorMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
-#  AnnotatorMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
-#  AnnotatorMetricResult(metric_name='recall', count=1269, result=0.6166023130799764),
-#  AnnotatorMetricResult(metric_name='f1-score', count=1269, result=0.5448304082545485)]
+suggestions_metrics['00000000-0000-0000-0000-000000000001']
+# [ModelMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
+#  ModelMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
+#  ModelMetricResult(metric_name='recall', count=1269, result=0.6166023130799764),
+#  ModelMetricResult(metric_name='f1-score', count=1269, result=0.5448304082545485)]
 ```
 
 Keep in mind this dataset is quite big, so it may take some time both to download and compute the metrics. You can check the [dataset](https://huggingface.co/datasets/argilla/go_emotions_raw) for more info.
@@ -227,7 +227,7 @@ unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_
 metric = UnifiedModelMetric(dataset=unified_dataset, question_name="question_name")
 unified_metrics = metric.compute("accuracy")
 # >>> unified_metrics
-# AnnotatorMetricResult(metric_name='accuracy', count=3, result=0.25)
+# ModelMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
 We obtain the same container for the metrics result, but in this case, it’s not associated with any specific annotator but their general alignment.
@@ -237,10 +237,10 @@ We can make use of the same methods we saw above directly from the `FeedbackData
 ```python
 model_metrics_unified = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
 model_metrics_unified
-# [AnnotatorMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
-#  AnnotatorMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
-#  AnnotatorMetricResult(metric_name='recall', count=53990, result=0.7679974812646655),
-#  AnnotatorMetricResult(metric_name='f1-score', count=53990, result=0.786466989240015)]
+# [ModelMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
+#  ModelMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
+#  ModelMetricResult(metric_name='recall', count=53990, result=0.7679974812646655),
+#  ModelMetricResult(metric_name='f1-score', count=53990, result=0.786466989240015)]
 ```
 
 By default, the responses will not be unified and we will have the responses at the annotator level, but if we ask for a specific strategy (see the strategies available for each question), they will be unified automatically and computed.

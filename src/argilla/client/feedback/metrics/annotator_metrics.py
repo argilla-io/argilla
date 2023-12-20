@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.base import AnnotatorMetricBase, AnnotatorMetricResult, MetricBase
+from argilla.client.feedback.metrics.base import AnnotatorMetricBase, MetricBase, ModelMetricResult
 from argilla.client.feedback.metrics.utils import (
     get_responses_and_suggestions_per_user,
     get_unified_responses_and_suggestions,
@@ -108,7 +108,7 @@ class AnnotatorMetric(MetricBase):
 
     def compute(
         self, metric_names: Union[str, List[str]], show_progress: bool = True
-    ) -> Dict[str, List[AnnotatorMetricResult]]:
+    ) -> Dict[str, List[ModelMetricResult]]:
         """Computes the annotator metrics for the given question.
 
         Args:
@@ -140,9 +140,7 @@ class AnnotatorMetric(MetricBase):
             for metric_name, metric_cls in metric_classes:
                 metric = metric_cls(responses=as_responses, suggestions=as_suggestions)
                 result = metric.compute()
-                metrics[user_id].append(
-                    AnnotatorMetricResult(metric_name=metric_name, result=result, count=len(responses))
-                )
+                metrics[user_id].append(ModelMetricResult(metric_name=metric_name, result=result, count=len(responses)))
 
         return dict(metrics)
 
@@ -214,7 +212,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
             warnings.warn("Some suggestions are None, the metric will be computed without them.")
         return unified_responses, suggestions
 
-    def compute(self, metric_names: Union[str, List[str]]) -> Union[AnnotatorMetricResult, List[AnnotatorMetricResult]]:
+    def compute(self, metric_names: Union[str, List[str]]) -> Union[ModelMetricResult, List[ModelMetricResult]]:
         """Computes the unified annotation metrics for the given question.
 
         Args:
@@ -246,7 +244,7 @@ class UnifiedAnnotationMetric(AnnotatorMetric):
         for metric_name, metric_cls in metric_classes:
             metric = metric_cls(responses=as_unified_responses, suggestions=as_suggestions)
             result = metric.compute()
-            metrics.append(AnnotatorMetricResult(metric_name=metric_name, result=result, count=len(unified_responses)))
+            metrics.append(ModelMetricResult(metric_name=metric_name, result=result, count=len(unified_responses)))
 
         if len(metric_names) == 1:
             return metrics[0]

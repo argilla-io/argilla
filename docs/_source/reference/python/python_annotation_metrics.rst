@@ -15,7 +15,7 @@ Base Metric
 -----------
 
 .. automodule:: argilla.client.feedback.metrics.base
-   :members: AgreementMetricResult, AnnotatorMetricResult
+   :members: AgreementMetricResult, ModelMetricResult
 
 .. autoclass:: argilla.client.feedback.metrics.base.MetricBase
    :members: __init__, compute, allowed_metrics

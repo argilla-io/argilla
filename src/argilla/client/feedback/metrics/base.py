@@ -47,7 +47,7 @@ class AgreementMetricResult(MetricResultBase):
     result: float
 
 
-class AnnotatorMetricResult(MetricResultBase):
+class ModelMetricResult(MetricResultBase):
     """Container for the result of an annotator metric.
 
     It contains two fields, `metric_name` and `result` with the value of the metric.

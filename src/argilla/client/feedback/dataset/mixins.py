@@ -34,7 +34,7 @@ from argilla.client.feedback.unification import (
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
     from argilla.client.feedback.metrics.agreement_metrics import AgreementMetricResult
-    from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetricResult
+    from argilla.client.feedback.metrics.annotator_metrics import ModelMetricResult
 
 
 class MetricsMixin:
@@ -49,7 +49,7 @@ class MetricsMixin:
         strategy: Optional[
             Union[str, LabelQuestionStrategy, MultiLabelQuestion, RatingQuestionStrategy, RankingQuestion]
         ] = None,
-    ) -> Union[Dict[str, List["AnnotatorMetricResult"]], "AnnotatorMetricResult", List["AnnotatorMetricResult"]]:
+    ) -> Union[Dict[str, List["ModelMetricResult"]], "ModelMetricResult", List["ModelMetricResult"]]:
         """Compute metrics for the annotators using the suggestions as the ground truth, and the responses
         as the predicted value, or if a strategy is provided, the same but applied to unified responses.
 

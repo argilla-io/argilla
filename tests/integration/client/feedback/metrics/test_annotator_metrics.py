@@ -20,7 +20,7 @@ from argilla import User
 from argilla.client import api
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotationMetric
-from argilla.client.feedback.metrics.base import AnnotatorMetricResult
+from argilla.client.feedback.metrics.base import ModelMetricResult
 from argilla.client.feedback.schemas import FeedbackRecord
 
 from tests.factories import UserFactory, WorkspaceFactory
@@ -115,7 +115,7 @@ def test_annotator_metric(
     metric_results = metrics_report[user_id]
     assert isinstance(metric_results, list)
     metric_result = metric_results[0]
-    assert isinstance(metric_result, AnnotatorMetricResult)
+    assert isinstance(metric_result, ModelMetricResult)
     if isinstance(metric_names, str):
         metric_names = [metric_names]
 
@@ -168,7 +168,7 @@ def test_annotator_metric_from_feedback_dataset(
     metric_results = metrics_report[user_id]
     assert isinstance(metric_results, list)
     metric_result = metric_results[0]
-    assert isinstance(metric_result, AnnotatorMetricResult)
+    assert isinstance(metric_result, ModelMetricResult)
     if isinstance(metric_names, str):
         metric_names = [metric_names]
 
@@ -232,7 +232,7 @@ async def test_annotator_metric_from_remote_feedback_dataset(
     metric_results = metrics_report[user_id]
     assert isinstance(metric_results, list)
     metric_result = metric_results[0]
-    assert isinstance(metric_result, AnnotatorMetricResult)
+    assert isinstance(metric_result, ModelMetricResult)
     if isinstance(metric_names, str):
         metric_names = [metric_names]
 
@@ -293,7 +293,7 @@ def test_annotator_metrics_unified(
         if isinstance(metric_names, list):
             assert isinstance(metrics_report, list)
         else:
-            assert isinstance(metrics_report, AnnotatorMetricResult)
+            assert isinstance(metrics_report, ModelMetricResult)
             assert str(list(dataset.records[0].unified_responses.values())[0][0].value) in str(
                 dataset.records[0].responses
             )
@@ -351,7 +351,7 @@ def test_annotator_metrics_unified_from_feedback_dataset(
     if isinstance(metric_names, list):
         assert isinstance(metrics_report, list)
     else:
-        assert isinstance(metrics_report, AnnotatorMetricResult)
+        assert isinstance(metrics_report, ModelMetricResult)
 
         metrics_report = [metrics_report]
         metric_names = [metric_names]
