@@ -691,6 +691,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
     return records
 
 
+@pytest.fixture
 def feedback_dataset_records_with_metadata() -> List[FeedbackRecord]:
     records = []
     external_id = 0
