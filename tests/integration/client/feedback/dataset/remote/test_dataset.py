@@ -827,7 +827,7 @@ class TestRemoteFeedbackDataset:
                 UserWarning,
                 match="A local `FeedbackDataset` returned because `unify_responses` is not supported for `RemoteFeedbackDataset`. ",
             ):
-                ds.unify_responses(question=None, strategy=None)
+                ds.compute_unified_responses(question=None, strategy=None)
 
         with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
             with pytest.warns(

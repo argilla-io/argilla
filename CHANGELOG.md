@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added annotation metrics module for the `FeedbackDataset` (`argilla.client.feedback.metrics`). ([#4175](https://github.com/argilla-io/argilla/pull/4175)).
 - Added strategy to handle and translate errors from the server for `401` HTTP status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
 - Added integration for `textdescriptives` using `TextDescriptivesExtractor` to configure `metadata_properties` in `FeedbackDataset` and `FeedbackRecord`. ([#4400](https://github.com/argilla-io/argilla/pull/4400)). Contributed by @m-newhauser
 - Added `POST /api/v1/me/responses/bulk` endpoint to create responses in bulk for current user. ([#4380](https://github.com/argilla-io/argilla/pull/4380))

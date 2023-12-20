@@ -22,6 +22,7 @@ from rich.progress import Progress
 from argilla.client.feedback.constants import DELETE_DATASET_RECORDS_MAX_NUMBER, PUSHING_BATCH_SIZE
 from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, SortBy
+from argilla.client.feedback.dataset.mixins import MetricsMixin, UnificationMixin
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
@@ -384,7 +385,7 @@ class RemoteFeedbackRecords(ArgillaRecordsMixin):
         return include
 
 
-class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
+class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMixin, UnificationMixin):
     # TODO: Call super method once the base init contains only commons init attributes
     def __init__(
         self,
@@ -989,33 +990,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord]):
         new_dataset._records = dataset.records
 
         return new_dataset
-
-    def unify_responses(
-        self,
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[
-            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
-        ],
-    ) -> "FeedbackDataset":
-        """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
-        to unify the responses for that question.
-
-        Args:
-            question The `question` parameter can be either a string representing the name of the
-                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
-                `RatingQuestion`, `RankingQuestion`).
-            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
-                responses for a given question. It can be either a string or an instance of a strategy class.
-        """
-        warnings.warn(
-            "A local `FeedbackDataset` returned because "
-            "`unify_responses` is not supported for `RemoteFeedbackDataset`. "
-            "`RemoteFeedbackDataset`.pull().unify_responses(*args, **kwargs)` is applied.",
-            UserWarning,
-        )
-        local = self.pull()
-        return local.unify_responses(question=question, strategy=strategy)
 
     def prepare_for_training(
         self,
