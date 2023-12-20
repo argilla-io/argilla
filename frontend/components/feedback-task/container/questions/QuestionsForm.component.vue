@@ -318,7 +318,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     border-radius: $border-radius-m;
-    background: #f5f7ff;
+    background: #f0f2fa;
     container-type: inline-size;
     &:hover {
       .button--submit:not(:hover) {
