@@ -114,6 +114,66 @@ dataset.update_records(modified_records)
 You can also follow the same strategy to modify existing metadata.
 ```
 
+### Add Text Descriptives
+
+You can easily add text descriptives to your records or datasets using the `TextDescriptivesExtractor` based on the [TextDescriptives](https://github.com/HLasse/TextDescriptives) library, which will add the corresponding metadata properties and metadata automatically. The `TextDescriptivesExtractor` can be used on a `FeedbackDataset` or a `RemoteFeedbackDataset` and accepts the following arguments:
+
+- `model` (optional): The language of the spacy model that will be used. Defaults to `en`. Check [here](https://spacy.io/usage/models) the available languages and models.
+- `metrics` (optional): A list of metrics to extract. The default extracted metrics are: `n_tokens`, `n_unique_tokens`, `n_sentences`, `perplexity`, `entropy`, and `flesch_reading_ease`. You can select your metrics according to the following groups `descriptive_stats`, `readability`, `dependency_distance`, `pos_proportions`, `coherence`, `quality`, and `information_theory`. For more information about each group, check this documentation [page](https://hlasse.github.io/TextDescriptives/descriptivestats.html).
+- `fields` (optional): A list of field names to extract metrics from. All fields will be used by default.
+- `visible_for_annotators` (optional): Whether the extracted metrics should be visible to annotators. Defaults to `True`.
+- `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
+
+For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.html).
+
+::::{tab-set}
+
+:::{tab-item} Dataset
+
+This can be used to update the dataset and configuration with `MetadataProperties` for `Fields` in a `FeedbackDataset` or a `RemoteFeedbackDataset`.
+
+```python
+from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+
+dataset = ... # FeedbackDataset or RemoteFeedbackDataset
+
+tde = TextDescriptivesExtractor(
+    model="en",
+    metrics=None,
+    fields=None,
+    visible_for_annotators=True,
+    show_progress=True,
+)
+
+dataset = tde.update_dataset(dataset)
+```
+:::
+
+:::{tab-item} Records
+
+This can be used to update the records with `Metadata` values for `Fields` in a list of `FeedbackRecords`.
+
+```python
+from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+
+records = [...] # FeedbackRecords or RemoteFeedbackRecords
+
+tde = TextDescriptivesExtractor(
+    model="en",
+    metrics=None,
+    fields=None,
+    visible_for_annotators=True,
+    show_progress=True,
+)
+
+records = tde.update_records(records)
+```
+
+:::
+
+
+::::
+
 
 ## Other datasets
 

@@ -15,7 +15,6 @@
       <div class="fields__header">
         <div class="fields__header--left"></div>
         <div class="fields__header--right">
-          <RecordStatus :recordStatus="record.status" />
           <SimilarityScorePercentage
             v-if="
               recordCriteria.isFilteringBySimilarity && record.score.percentage
@@ -31,6 +30,7 @@
             :recordCriteria="recordCriteria"
             :recordId="record.id"
           />
+          <RecordStatus :recordStatus="record.status" />
         </div></div
     ></RecordFields>
   </div>

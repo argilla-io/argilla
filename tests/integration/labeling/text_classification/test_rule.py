@@ -33,6 +33,7 @@ from argilla.labeling.text_classification.rule import RuleNotAppliedError
 from argilla.server.errors import EntityNotFoundError
 
 from tests.integration.helpers import SecuredClient
+from tests.integration.utils import delete_ignoring_errors
 
 
 @pytest.fixture
@@ -283,7 +284,7 @@ def test_copy_dataset_with_rules(mocked_client: SecuredClient, argilla_user: Use
     )
 
     copied_dataset = f"{dataset_name}_copy"
-    delete(copied_dataset)
+    delete_ignoring_errors(copied_dataset)
     copy(dataset_name, name_of_copy=copied_dataset)
 
     assert [{"q": r.query, "l": r.label} for r in load_rules(copied_dataset)] == [

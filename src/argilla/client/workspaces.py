@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Iterator, List, Optional, Union
 from uuid import UUID
 
-from argilla.client import active_client
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
@@ -29,6 +28,7 @@ from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces import api as workspaces_api
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
+from argilla.client.singleton import active_client
 from argilla.client.users import User
 from argilla.client.utils import allowed_for_roles
 

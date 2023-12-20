@@ -16,10 +16,10 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 import pytest
-from argilla.client.api import ArgillaSingleton
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel as WorkspaceModelV1
 from argilla.client.sdk.workspaces.models import WorkspaceModel as WorkspaceModelV0
+from argilla.client.singleton import ArgillaSingleton
 from argilla.client.users import User
 
 if TYPE_CHECKING:

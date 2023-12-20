@@ -72,7 +72,6 @@ export default {
       this.sortingItems.toggleSort(category);
     },
     onReplaceSortCategory(category, newCategory) {
-      debugger;
       this.sortingItems.replace(category, newCategory);
       this.visibleDropdown = false;
     },

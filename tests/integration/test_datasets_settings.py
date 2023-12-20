@@ -17,10 +17,11 @@ from uuid import uuid4
 
 import pytest
 from argilla import Workspace
-from argilla.client import api
-from argilla.client.api import delete, get_workspace, init
+from argilla.client import singleton
+from argilla.client.api import get_workspace
 from argilla.client.client import Argilla
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.client.singleton import init
 from argilla.datasets import (
     TextClassificationSettings,
     TokenClassificationSettings,
@@ -30,6 +31,8 @@ from argilla.datasets import (
 )
 from argilla.server.contexts import accounts
 from argilla.server.security.model import WorkspaceUserCreate
+
+from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
     from argilla.client.apis.datasets import LabelsSchemaSettings
@@ -43,16 +46,16 @@ if TYPE_CHECKING:
     ("settings_", "wrong_settings"),
     [
         (
-            TextClassificationSettings(label_schema={"A", "B"}),
-            TokenClassificationSettings(label_schema={"PER", "ORG"}),
+            TextClassificationSettings(label_schema=["A", "B"]),
+            TokenClassificationSettings(label_schema=["PER", "ORG"]),
         ),
         (
-            TokenClassificationSettings(label_schema={"PER", "ORG"}),
-            TextClassificationSettings(label_schema={"A", "B"}),
+            TokenClassificationSettings(label_schema=["PER", "ORG"]),
+            TextClassificationSettings(label_schema=["A", "B"]),
         ),
         (
             TokenClassificationSettings(label_schema=[1, 2, 3]),
-            TextClassificationSettings(label_schema={"A", "B"}),
+            TextClassificationSettings(label_schema=["A", "B"]),
         ),
     ],
 )
@@ -64,16 +67,16 @@ def test_settings_workflow(
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     workspace = get_workspace()
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     configure_dataset(dataset, settings=settings_, workspace=workspace)
 
-    current_api = api.active_api()
+    current_api = singleton.active_api()
     datasets_api = current_api.datasets
 
     found_settings = datasets_api.load_settings(dataset)
     assert {label for label in found_settings.label_schema} == {str(label) for label in settings_.label_schema}
 
-    settings_.label_schema = {"LALALA"}
+    settings_.label_schema = ["LALALA"]
     configure_dataset(dataset, settings_, workspace=workspace)
 
     found_settings = datasets_api.load_settings(dataset)
@@ -137,7 +140,7 @@ def test_configure_dataset_deprecation_warning(
 
 
 def test_list_dataset(mocked_client: "SecuredClient"):
-    from argilla.client.api import active_client
+    from argilla.client.singleton import active_client
 
     client = active_client()
     datasets = client.http_client.get("/api/datasets")
@@ -159,7 +162,7 @@ async def test_delete_dataset_by_non_creator(
 
     rg = Argilla()
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     rg.datasets.configure(
         dataset, settings=TextClassificationSettings(label_schema={"A", "B", "C"}), workspace=get_workspace()
     )

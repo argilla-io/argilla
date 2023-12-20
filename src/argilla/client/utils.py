@@ -22,10 +22,10 @@ try:
 except ImportError:
     from typing_extensions import ParamSpec
 
-from argilla.client.api import active_client
 from argilla.client.apis.status import Status
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.users.models import UserRole
+from argilla.client.singleton import active_client
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R")

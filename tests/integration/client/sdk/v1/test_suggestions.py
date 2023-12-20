@@ -14,28 +14,44 @@
 
 import pytest
 from argilla.client.client import Argilla
+from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla.client.feedback.schemas.fields import TextField
+from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.sdk.v1.suggestions.api import delete_suggestion
+from argilla.client.singleton import init
 from argilla.server.models import UserRole
 
-from tests.factories import (
-    DatasetFactory,
-    RecordFactory,
-    SuggestionFactory,
-    UserFactory,
-)
+from tests.factories import UserFactory, WorkspaceFactory
 
 
 @pytest.mark.asyncio
 class TestSuggestionsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_suggestions(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        record = await RecordFactory.create(dataset=dataset)
-        suggestion = await SuggestionFactory.create(record=record)
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+        workspace = await WorkspaceFactory.create()
+        user = await UserFactory.create(role=role, workspaces=[workspace])
 
-        api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+        init(api_key=user.api_key, workspace=workspace.name)
 
-        response = delete_suggestion(client=api.client.httpx, id=suggestion.id)
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text-field")],
+            questions=[TextQuestion(name="text-question")],
+        )
+
+        dataset.add_records(
+            FeedbackRecord(
+                fields={"text-field": "unit-test"},
+                suggestions=[{"question_name": "text-question", "value": "suggestion"}],
+            )
+        )
+
+        remote = dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
+
+        suggestion_id = remote[0].suggestions[0].id
+
+        api = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+        response = delete_suggestion(client=api.client.httpx, id=suggestion_id)
         assert response.status_code == 200
-        assert response.parsed.id == suggestion.id
+        assert response.parsed.id == suggestion_id
