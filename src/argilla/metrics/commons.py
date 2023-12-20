@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from argilla.client import api
+from argilla.client import singleton
 from argilla.metrics import helpers
 from argilla.metrics.models import MetricSummary
 
@@ -37,7 +37,7 @@ def text_length(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.active_api().compute_metric(name, metric="text_length", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="text_length", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -63,7 +63,7 @@ def records_status(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot an histogram with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.active_api().compute_metric(name, metric="status_distribution", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="status_distribution", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -92,7 +92,7 @@ def keywords(name: str, query: Optional[str] = None, size: int = 20) -> MetricSu
         >>> summary.data # returns the raw result data
     """
     assert size > 0, ValueError("size must be greater than 0")
-    metric = api.active_api().compute_metric(
+    metric = singleton.active_api().compute_metric(
         name,
         metric="words_cloud",
         query=query,

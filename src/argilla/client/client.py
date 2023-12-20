@@ -297,6 +297,20 @@ class Argilla:
             json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
 
+    def get_dataset(self, name: str, workspace: Optional[str] = None) -> DatasetModel:
+        """Gets a dataset by name.
+
+        Args:
+            name: The dataset name.
+            workspace: If provided, dataset will be retrieved from that workspace. Otherwise, the active workspace will
+                be used.
+
+        Returns:
+            A `Dataset` object containing the dataset information.
+        """
+        response = datasets_api.get_dataset(client=self.http_client, name=name, workspace=workspace)
+        return response.parsed
+
     def delete(self, name: str, workspace: Optional[str] = None):
         """Deletes a dataset.
 

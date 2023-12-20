@@ -15,8 +15,9 @@
 from time import sleep
 from typing import Any, Dict, List
 
-from argilla.client.api import Api, active_api
+from argilla.client.api import Api
 from argilla.client.models import TextClassificationRecord
+from argilla.client.singleton import active_api
 from argilla.monitoring.base import BaseMonitor
 
 

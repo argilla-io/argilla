@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from argilla.client import api
+from argilla.client import singleton
 from argilla.metrics import helpers
 from argilla.metrics.models import MetricSummary
 
@@ -37,7 +37,7 @@ def f1(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.active_api().compute_metric(name, metric="F1", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="F1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,
@@ -63,7 +63,7 @@ def f1_multilabel(name: str, query: Optional[str] = None) -> MetricSummary:
         >>> summary.visualize() # will plot a bar chart with results
         >>> summary.data # returns the raw result data
     """
-    metric = api.active_api().compute_metric(name, metric="MultiLabelF1", query=query)
+    metric = singleton.active_api().compute_metric(name, metric="MultiLabelF1", query=query)
 
     return MetricSummary.new_summary(
         data=metric.results,

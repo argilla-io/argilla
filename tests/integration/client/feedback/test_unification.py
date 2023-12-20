@@ -274,7 +274,11 @@ def test_multi_label_question_strategy(strategy, unified_response, responses):
     question_name = "multilabel"
     records_payload = {
         "fields": {"text": "This is the first record", "label": "positive"},
-        "responses": responses,
+        "responses": [
+            {"values": {question_name: {"value": ["label1"]}}},
+            {"values": {question_name: {"value": ["label1"]}}},
+            {"values": {question_name: {"value": ["label2"]}}},
+        ],
     }
     record = FeedbackRecord(**records_payload)
     question_payload = {

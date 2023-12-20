@@ -13,12 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
 import os
 import sys
 from time import sleep
 
-import argilla as rg
 import datasets
 import pandas as pd
 import pytest
