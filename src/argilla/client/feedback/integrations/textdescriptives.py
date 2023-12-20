@@ -16,6 +16,7 @@ import logging
 import re
 from typing import List, Optional, Union
 
+import numpy as np
 import pandas as pd
 import textdescriptives as td
 from rich.progress import Progress
@@ -113,6 +114,8 @@ class TextDescriptivesExtractor:
         if basic_metrics is None and self.metrics is None:
             basic_metrics = self.__basic_metrics
             field_metrics = field_metrics.loc[:, basic_metrics]
+        # Convert any None values to NaNs
+        field_metrics = field_metrics.fillna(value=np.nan)
         # Select all column names that contain ONLY NaNs
         nan_columns = field_metrics.columns[field_metrics.isnull().all()].tolist()
         if nan_columns:
