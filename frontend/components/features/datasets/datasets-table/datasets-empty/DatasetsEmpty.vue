@@ -71,7 +71,7 @@ export default {
     }
   }
   h2 {
-    font-weight: lighter;
+    font-weight: 500;
     @include font-size(16px);
   }
 }
@@ -82,13 +82,11 @@ export default {
   border: 1px solid $black-10;
   border-radius: $border-radius-m;
   p,
-  ::-moz-list-bullet {
-    display: block;
+  li {
     @include font-size(16px);
     margin-bottom: 8px;
   }
   h3 {
-    font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
     display: block;
     margin-top: 30px;
   }
@@ -105,6 +103,7 @@ export default {
     border: 1px solid $black-10;
     background: $black-4;
     padding-inline: 4px;
+    @include font-size(14px);
   }
 }
 </style>
