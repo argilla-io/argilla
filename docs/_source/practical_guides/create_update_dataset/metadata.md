@@ -100,7 +100,7 @@ record = rg.FeedbackRecord(
 
 #### Add `metadata`
 
-Once the `metadata_properties` were defined, to add metadata to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb). Remember that you can either define a single metadata value for a metadata property or aggregate metadata values in the form of a list for the cases where one record falls into multiple metadata categories.
+Once the `metadata_properties` were defined, to add metadata to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb). Remember that you can either define a single metadata value for a metadata property or aggregate metadata values for the `TermsMetadataProperty` in the form of a list for the cases where one record falls into multiple metadata categories.
 
 ```{note}
 The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
