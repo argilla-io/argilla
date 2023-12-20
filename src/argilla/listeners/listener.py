@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 import schedule
 
 import argilla
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.listeners.models import ListenerAction, ListenerCondition, Metrics, RGListenerContext, Search
 
@@ -162,7 +162,7 @@ class RGDatasetListener:
         3. Execute the action if condition is satisfied
 
         """
-        current_api = api.active_api()
+        current_api = singleton.active_api()
         try:
             dataset = current_api.datasets.find_by_name(self.dataset)
             self._LOGGER.debug(f"Found listener dataset {dataset.name}")

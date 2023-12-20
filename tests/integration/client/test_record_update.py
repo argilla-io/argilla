@@ -11,11 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from time import sleep
 
 import pytest
-from argilla.client.api import active_api, init
 from argilla.client.sdk.commons.errors import NotFoundApiError
+from argilla.client.singleton import active_api, init
 from argilla.server.models import User
 
 

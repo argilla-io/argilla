@@ -23,7 +23,7 @@ from argilla import (
     TextQuestion,
     Workspace,
 )
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord, RemoteSuggestionSchema
@@ -62,12 +62,12 @@ class TestSuiteRemoteFeedbackRecord:
     async def test_delete(self, owner: "User", test_dataset: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
-        api.init(api_key=owner.api_key)
+        singleton.init(api_key=owner.api_key)
 
         ws = Workspace.create(name="test-workspace")
         ws.add_user(user.id)
 
-        api.init(api_key=user.api_key)
+        singleton.init(api_key=user.api_key)
         remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote.add_records(
@@ -95,7 +95,7 @@ class TestSuiteRemoteFeedbackRecord:
         records = await RecordFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        api.init(api_key=user.api_key)
+        singleton.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         remote_records = [record for record in remote_dataset.records]
         assert all(isinstance(record, RemoteFeedbackRecord) for record in remote_records)
@@ -124,7 +124,7 @@ class TestSuiteRemoteFeedbackRecord:
         await SuggestionFactory.create(record=record, question=question)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        api.init(api_key=user.api_key, workspace=dataset.workspace.name)
+        singleton.init(api_key=user.api_key, workspace=dataset.workspace.name)
 
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         assert len(remote_dataset.records) == 1
@@ -150,7 +150,7 @@ class TestSuiteRemoteSuggestionSchema:
         await SuggestionFactory.create(record=record, question=question)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        api.init(api_key=user.api_key, workspace=dataset.workspace.name)
+        singleton.init(api_key=user.api_key, workspace=dataset.workspace.name)
 
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         assert len(remote_dataset.records) == 1

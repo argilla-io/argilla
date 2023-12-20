@@ -13,4 +13,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .api import active_client
+from argilla.client.singleton import active_client

@@ -15,20 +15,22 @@
 import time
 
 import pytest
-from argilla.client.api import delete, delete_records, init, load, log
+from argilla.client.api import delete_records, load, log
 from argilla.client.client import Argilla
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.commons.errors import ForbiddenApiError
+from argilla.client.singleton import init
 from argilla.server.models import User, UserRole
 
 from tests.factories import AnnotatorFactory, UserFactory, WorkspaceFactory
+from tests.integration.utils import delete_ignoring_errors
 
 
 def test_delete_records_from_dataset(argilla_user: "User"):
     dataset = "test_delete_records_from_dataset"
 
     init(api_key=argilla_user.api_key, workspace=argilla_user.username)
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(
         name=dataset,
         records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
@@ -58,7 +60,7 @@ async def test_delete_records_without_permission(owner: User, role: UserRole):
 
     client = Argilla(api_key=owner.api_key, workspace=workspace.name)
 
-    client.delete(dataset)
+    delete_ignoring_errors(dataset)
     records = [TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)]
     client.log(name=dataset, records=records)
 
@@ -83,7 +85,7 @@ async def test_delete_records_without_permission(owner: User, role: UserRole):
 def test_delete_records_with_unmatched_records(api):
     dataset = "test_delete_records_with_unmatched_records"
 
-    api.delete(dataset)
+    delete_ignoring_errors(dataset)
     api.log(
         name=dataset,
         records=[TextClassificationRecord(id=i, text="This is the text", metadata=dict(idx=i)) for i in range(0, 50)],
