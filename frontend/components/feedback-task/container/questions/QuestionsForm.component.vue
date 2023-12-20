@@ -318,13 +318,9 @@ export default {
     justify-content: space-between;
     align-items: center;
     border-radius: $border-radius-m;
-    border: 1px solid #c6d1ff;
     background: #f5f7ff;
-    transition: border-color 0.35s ease;
     container-type: inline-size;
     &:hover {
-      border-color: transparent;
-      transition: border-color 0.35s ease;
       .button--submit:not(:hover) {
         background: transparent;
       }
