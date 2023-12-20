@@ -37,7 +37,7 @@ These are the section headers that we use:
 
 ### Deprecated
 
-- The `missing` response status for filtering records is deprecated and will be removed in the release 1.23.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
+- The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
 
 ## [1.20.0](https://github.com/argilla-io/argilla/compare/v1.19.0...v1.20.0)
 
