@@ -14,10 +14,13 @@
 #  limitations under the License.
 import argilla
 import argilla as rg
+import argilla.client.singleton
 import pytest
-from argilla.client.api import delete, log
+from argilla.client.api import log
 from argilla.client.models import TextClassificationRecord
 from argilla.metrics.commons import keywords, records_status, text_length
+
+from tests.integration.utils import delete_ignoring_errors
 
 
 @pytest.fixture
@@ -34,7 +37,8 @@ def gutenberg_spacy_ner(mocked_client):
 
     dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
 
-    argilla.delete(dataset)
+    delete_ignoring_errors(dataset)
+
     argilla.log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -43,7 +47,7 @@ def gutenberg_spacy_ner(mocked_client):
 def test_status_distribution(mocked_client):
     dataset = "test_status_distribution"
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     log(
         [
@@ -73,7 +77,7 @@ def test_status_distribution(mocked_client):
 def test_text_length(mocked_client):
     dataset = "test_text_length"
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     log(
         [
@@ -147,11 +151,12 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
 
 
 def test_failing_metrics(argilla_user: "User"):
-    argilla.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    argilla.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     dataset_name = "test_failing_metrics"
 
-    argilla.delete(dataset_name)
+    delete_ignoring_errors(dataset_name)
+
     argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
 
     with pytest.raises(AssertionError, match="Metric missing-metric not found"):
-        argilla.active_client().compute_metric(name=dataset_name, metric="missing-metric")
+        argilla.client.singleton.active_client().compute_metric(name=dataset_name, metric="missing-metric")

@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import argilla.client.singleton
 import pytest
 from argilla import (
     FeedbackDataset,
@@ -25,7 +26,6 @@ from argilla import (
     VectorSettings,
     Workspace,
 )
-from argilla.client import api
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
@@ -38,6 +38,7 @@ from tests.factories import (
     RecordFactory,
     SuggestionFactory,
     UserFactory,
+    WorkspaceFactory,
 )
 
 
@@ -59,7 +60,7 @@ def test_dataset():
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
-        api.init(api_key=owner.api_key)
+        argilla.client.singleton.init(api_key=owner.api_key)
 
         workspace = Workspace.create(f"workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
@@ -73,7 +74,7 @@ class TestRecordsSDK:
             ],
         )
 
-        api.init(api_key=user.api_key, workspace=workspace.name)
+        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         remote_dataset = feedback_dataset.push_to_argilla(name="dataset", workspace=workspace)
         remote_dataset.add_records([FeedbackRecord(fields={"text": "text"})])
@@ -81,7 +82,7 @@ class TestRecordsSDK:
         record = remote_dataset.records[0]
 
         response = update_record(
-            client=api.active_api().client.httpx,
+            client=argilla.client.singleton.active_api().client.httpx,
             id=record.id,
             data={
                 "vectors": {
@@ -101,7 +102,7 @@ class TestRecordsSDK:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: ServerUser, role: UserRole) -> None:
-        api.init(api_key=owner.api_key)
+        argilla.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(f"workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
@@ -114,7 +115,7 @@ class TestRecordsSDK:
             ],
         )
 
-        api.init(api_key=user.api_key, workspace=workspace.name)
+        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         remote_dataset = feedback_dataset.push_to_argilla(name="dataset", workspace=workspace)
         remote_dataset.add_records([FeedbackRecord(fields={"text": "text"})])
@@ -122,7 +123,7 @@ class TestRecordsSDK:
         record = remote_dataset.records[0]
 
         response = update_record(
-            client=api.active_api().client.httpx,
+            client=argilla.client.singleton.active_api().client.httpx,
             id=record.id,
             data={
                 "vectors": {
@@ -144,12 +145,12 @@ class TestRecordsSDK:
     async def test_delete_record(self, owner: ServerUser, test_dataset: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
-        api.init(api_key=owner.api_key)
+        argilla.client.singleton.init(api_key=owner.api_key)
 
         workspace = Workspace.create("test-workspace")
         workspace.add_user(user.id)
 
-        api.init(api_key=user.api_key, workspace=workspace.name)
+        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
         remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace)
         remote.add_records(
             [
@@ -157,7 +158,7 @@ class TestRecordsSDK:
                 FeedbackRecord(fields={"text": "Hello world!"}),
             ]
         )
-        argilla_api = api.active_api()
+        argilla_api = argilla.client.singleton.active_api()
 
         for record in remote.records:
             response = delete_record(client=argilla_api.client.httpx, id=record.id)
@@ -167,34 +168,88 @@ class TestRecordsSDK:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_suggestions(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        records = await RecordFactory.create_batch(dataset=dataset, size=10)
-        suggestions = []
-        for record in records:
-            suggestions.append(await SuggestionFactory.create(record=record))
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+        workspace = await WorkspaceFactory.create()
+        user = await UserFactory.create(role=role, workspaces=[workspace])
 
-        api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
-        for suggestion in suggestions:
-            response = delete_suggestions(
-                client=api.client.httpx, id=suggestion.record.id, suggestion_ids=[suggestion.id]
-            )
-            assert response.status_code == 204
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text-field")],
+            questions=[
+                TextQuestion(name="text-question-1"),
+                TextQuestion(name="text-question-2"),
+            ],
+        )
+
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text-field": "unit-test"},
+                    suggestions=[
+                        {"question_name": "text-question-1", "value": "suggestion-1"},
+                        {"question_name": "text-question-2", "value": "suggestion-2"},
+                    ],
+                ),
+                FeedbackRecord(
+                    fields={"text-field": "unit-test"},
+                    suggestions=[
+                        {"question_name": "text-question-1", "value": "suggestion-1"},
+                        {"question_name": "text-question-2", "value": "suggestion-2"},
+                    ],
+                ),
+            ]
+        )
+
+        remote = dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
+
+        api = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+        for record in remote.records:
+            for suggestion in record.suggestions:
+                response = delete_suggestions(client=api.client.httpx, id=record.id, suggestion_ids=[suggestion.id])
+                assert response.status_code == 204
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_suggestions_batch(self, role: UserRole) -> None:
-        dataset = await DatasetFactory.create()
-        questions = await RatingQuestionFactory.create_batch(size=3, dataset=dataset, required=True)
-        record = await RecordFactory.create(dataset=dataset)
-        suggestions = []
-        for question, value in zip(questions, [1, 2, 3]):
-            suggestions.append(await SuggestionFactory.create(record=record, question=question, value=value))
-        user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
+        workspace = await WorkspaceFactory.create()
+        user = await UserFactory.create(role=role, workspaces=[workspace])
 
-        api = Argilla(api_key=user.api_key, workspace=dataset.workspace.name)
+        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
-        response = delete_suggestions(
-            client=api.client.httpx, id=record.id, suggestion_ids=[suggestion.id for suggestion in suggestions]
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text-field")],
+            questions=[
+                TextQuestion(name="text-question-1"),
+                TextQuestion(name="text-question-2"),
+            ],
         )
+
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text-field": "unit-test"},
+                    suggestions=[
+                        {"question_name": "text-question-1", "value": "suggestion-1"},
+                        {"question_name": "text-question-2", "value": "suggestion-2"},
+                    ],
+                ),
+                FeedbackRecord(
+                    fields={"text-field": "unit-test"},
+                    suggestions=[
+                        {"question_name": "text-question-1", "value": "suggestion-1"},
+                        {"question_name": "text-question-2", "value": "suggestion-2"},
+                    ],
+                ),
+            ]
+        )
+
+        remote = dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
+
+        record = remote[0]
+
+        suggestion_ids = [suggestion.id for suggestion in record.suggestions]
+
+        api = Argilla(api_key=user.api_key, workspace=workspace.name)
+
+        response = delete_suggestions(client=api.client.httpx, id=record.id, suggestion_ids=suggestion_ids)
         assert response.status_code == 204

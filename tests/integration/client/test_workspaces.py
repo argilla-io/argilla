@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 import pytest
-from argilla.client.api import ArgillaSingleton
 from argilla.client.sdk.users.models import UserModel, UserRole
+from argilla.client.singleton import ArgillaSingleton
 from argilla.client.workspaces import Workspace
 
 from tests.factories import (

@@ -16,7 +16,7 @@ from typing import Dict, Optional
 
 import typer
 
-from argilla.cli.datasets.enums import DatasetType
+from argilla.client.enums import DatasetType
 
 
 def list_datasets(
@@ -31,7 +31,7 @@ def list_datasets(
 
     from argilla.cli.rich import echo_in_panel, get_argilla_themed_table
     from argilla.client.api import list_datasets as list_datasets_api
-    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
+    from argilla.client.sdk.datasets.models import Dataset
     from argilla.client.workspaces import Workspace
 
     console = Console()
@@ -60,20 +60,8 @@ def list_datasets(
             )
             raise typer.Exit(code=1) from e
 
-    if type_ is None or type_ == DatasetType.feedback:
-        for dataset in FeedbackDataset.list(workspace):
-            table.add_row(
-                str(dataset.id),
-                dataset.name,
-                dataset.workspace.name,
-                "Feedback",
-                None,
-                dataset.created_at.isoformat(sep=" "),
-                dataset.updated_at.isoformat(sep=" "),
-            )
-
-    if type_ is None or type_ == DatasetType.other:
-        for dataset in list_datasets_api(workspace):
+    for dataset in list_datasets_api(workspace, type_):
+        if isinstance(dataset, Dataset):
             table.add_row(
                 dataset.id,
                 dataset.name,
@@ -82,6 +70,16 @@ def list_datasets(
                 build_tags_text(dataset.tags),
                 dataset.created_at.isoformat(sep=" "),
                 dataset.last_updated.isoformat(sep=" "),
+            )
+        else:
+            table.add_row(
+                str(dataset.id),
+                dataset.name,
+                dataset.workspace.name,
+                "Feedback",
+                None,
+                dataset.created_at.isoformat(sep=" "),
+                dataset.updated_at.isoformat(sep=" "),
             )
 
     console.print(table)

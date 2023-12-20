@@ -14,9 +14,11 @@
 
 from time import sleep
 
-from argilla.client.api import delete, load
+from argilla.client.api import load
 from argilla.monitoring.model_monitor import monitor
 from argilla.server.models import User
+
+from tests.integration.utils import delete_ignoring_errors
 
 
 def test_flair_monitoring(monkeypatch, argilla_user: User):
@@ -26,7 +28,7 @@ def test_flair_monitoring(monkeypatch, argilla_user: User):
     dataset = "test_flair_monitoring"
     model = "flair/ner-english"
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
 
     # load tagger
     tagger = SequenceTagger.load(model)
