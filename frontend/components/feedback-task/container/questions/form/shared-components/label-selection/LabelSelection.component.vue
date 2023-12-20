@@ -232,22 +232,23 @@ export default {
 
       if (isNaN(this.keyCode)) {
         this.$refs.searchComponentRef?.focusInSearch();
-        this.reset();
 
-        return;
+        return this.reset();
       }
 
-      if (this.options.length < 10) {
-        this.selectByKeyCode($event, this.keyCode);
-
-        this.reset();
-        return;
+      if (this.hasJustOneCoincidence(this.keyCode)) {
+        return this.selectByKeyCode($event, this.keyCode);
       }
 
       this.timer = setTimeout(() => {
         this.selectByKeyCode($event, this.keyCode);
-        this.reset();
       }, 300);
+    },
+    hasJustOneCoincidence(keyCode) {
+      return (
+        this.$refs.options.filter((o) => o.dataset.keyboard.startsWith(keyCode))
+          .length == 1
+      );
     },
     reset() {
       this.keyCode = "";
@@ -260,8 +261,11 @@ export default {
 
       if (match) {
         $event.preventDefault();
+
         match.click();
       }
+
+      this.reset();
     },
     onSelect({ id, isSelected }) {
       if (this.multiple) return;
