@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import datetime
+import random
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
@@ -65,6 +66,8 @@ if TYPE_CHECKING:
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,
     )
+
+random.seed(42)
 
 
 @pytest.fixture
