@@ -17,7 +17,7 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 class UserRole(str, Enum):

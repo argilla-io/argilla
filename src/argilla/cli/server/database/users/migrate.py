@@ -23,7 +23,7 @@ from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
-from argilla.utils.pydantic import BaseModel, constr
+from argilla.utils._import_pydantic import BaseModel, constr
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

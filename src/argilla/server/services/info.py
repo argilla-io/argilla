@@ -21,7 +21,7 @@ from fastapi import Depends
 
 from argilla import __version__ as version
 from argilla.server.daos.backend import GenericElasticEngineBackend
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 def size(bytes):

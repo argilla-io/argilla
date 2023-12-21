@@ -22,7 +22,7 @@ from uuid import UUID
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 class UpdateDatasetRequest(BaseModel):

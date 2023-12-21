@@ -18,7 +18,7 @@ from uuid import UUID
 
 import httpx
 
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 class RemoteSchema(BaseModel, ABC):

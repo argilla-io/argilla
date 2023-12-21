@@ -17,7 +17,7 @@ from typing import Any, Dict, Literal, Optional
 
 from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
-from argilla.utils.pydantic import BaseModel, Extra, Field, validator
+from argilla.utils._import_pydantic import BaseModel, Extra, Field, validator
 
 
 class FieldSchema(BaseModel, ABC):

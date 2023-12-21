@@ -21,7 +21,7 @@ from argilla.server.services.metrics import ServiceBaseMetric
 from argilla.server.services.metrics.models import ServiceBaseTaskMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class TaskConfig(BaseModel):

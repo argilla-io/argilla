@@ -23,7 +23,7 @@ from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Self
 
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

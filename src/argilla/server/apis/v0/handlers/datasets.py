@@ -27,7 +27,7 @@ from argilla.server.models import User
 from argilla.server.schemas.v0.datasets import CopyDatasetRequest, CreateDatasetRequest, Dataset, UpdateDatasetRequest
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
-from argilla.utils.pydantic import parse_obj_as
+from argilla.utils._import_pydantic import parse_obj_as
 
 router = APIRouter(tags=["datasets"], prefix="/datasets")
 

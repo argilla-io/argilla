@@ -26,7 +26,7 @@ from argilla.server.daos.backend.generic_elastic import PaginatedSortInfo
 from argilla.server.models import User
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 # TODO(@frascuchon): This will be merged with `records.py`
 #  once the similarity search feature is merged into develop

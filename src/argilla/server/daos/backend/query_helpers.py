@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from argilla.server.commons.models import TaskStatus
 from argilla.server.daos.backend.mappings.helpers import mappings
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:

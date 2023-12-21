@@ -25,8 +25,7 @@ from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfi
 from argilla.server.helpers import flatten_dict
 from argilla.server.settings import settings
 from argilla.utils import limit_value_length
-from argilla.utils.pydantic import BaseModel, Field, conint, constr, root_validator, validator
-from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils._import_pydantic import BaseModel, Field, GenericModel, conint, constr, root_validator, validator
 
 
 class DaoRecordsSearch(BaseModel):

@@ -19,8 +19,7 @@ from uuid import UUID
 from argilla.server.enums import MetadataPropertyType
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import MetadataPropertySettings, MetadataPropertyTitle
-from argilla.utils.pydantic import BaseModel, Field, validator
-from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils._import_pydantic import BaseModel, Field, GenericModel, validator
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 

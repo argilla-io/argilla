@@ -25,7 +25,7 @@ from typing import List, Optional
 from urllib.parse import urlparse
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH, DEFAULT_TELEMETRY_KEY
-from argilla.utils.pydantic import BaseSettings, Field, root_validator, validator
+from argilla.utils._import_pydantic import BaseSettings, Field, root_validator, validator
 
 
 class Settings(BaseSettings):

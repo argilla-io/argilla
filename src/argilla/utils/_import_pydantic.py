@@ -14,5 +14,9 @@
 
 try:
     from pydantic.v1 import *  # noqa: F403
+    from pydantic.v1.generics import *  # noqa: F403
+    from pydantic.v1.utils import *  # noqa: F403
 except ImportError:
     from pydantic import *  # noqa: F403
+    from pydantic.generics import *  # noqa: F403
+    from pydantic.utils import *  # noqa: F403

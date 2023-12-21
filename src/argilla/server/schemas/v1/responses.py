@@ -19,7 +19,7 @@ from uuid import UUID
 from fastapi import Body
 
 from argilla.server.models import ResponseStatus
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 try:
     from typing import Annotated

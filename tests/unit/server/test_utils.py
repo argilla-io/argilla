@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Set
 
 import pytest
 from argilla.server.utils import parse_query_param
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 from fastapi import HTTPException
 
 

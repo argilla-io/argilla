@@ -21,7 +21,7 @@ from argilla.client.feedback.schemas.validators import (
     validate_numeric_metadata_filter_bounds,
     validate_numeric_metadata_property_bounds,
 )
-from argilla.utils.pydantic import (
+from argilla.utils._import_pydantic import (
     BaseModel,
     Extra,
     Field,

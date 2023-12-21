@@ -37,8 +37,7 @@ from argilla.server.enums import (
     SortOrder,
 )
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
-from argilla.utils.pydantic import BaseModel, Field, root_validator
-from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils._import_pydantic import BaseModel, Field, GenericModel, root_validator
 
 __all__ = [
     "SearchEngine",

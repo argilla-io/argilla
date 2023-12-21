@@ -36,7 +36,7 @@ from argilla.server.services.tasks.text_classification.model import ServiceTextC
 from argilla.server.services.tasks.text_classification.model import (
     TextClassificationAnnotation as _TextClassificationAnnotation,
 )
-from argilla.utils.pydantic import BaseModel, Field, root_validator, validator
+from argilla.utils._import_pydantic import BaseModel, Field, root_validator, validator
 
 
 class UpdateLabelingRule(BaseModel):

@@ -26,7 +26,7 @@ from argilla.client.sdk.v1.datasets import api as datasets_api_v1
 from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel
 from argilla.client.singleton import active_client
 from argilla.client.workspaces import Workspace
-from argilla.utils.pydantic import BaseModel, Extra, ValidationError, create_model
+from argilla.utils._import_pydantic import BaseModel, Extra, ValidationError, create_model
 
 if typing.TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (

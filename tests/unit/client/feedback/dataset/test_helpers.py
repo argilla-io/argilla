@@ -26,7 +26,7 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes

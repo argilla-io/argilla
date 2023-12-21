@@ -27,7 +27,7 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets.api import get_dataset
 from argilla.client.sdk.datasets.models import TaskType
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 @dataclass

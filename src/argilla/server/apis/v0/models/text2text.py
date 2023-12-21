@@ -27,7 +27,7 @@ from argilla.server.commons.models import PredictionStatus
 from argilla.server.schemas.v0.datasets import UpdateDatasetRequest
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceBaseSearchResultsAggregations
-from argilla.utils.pydantic import BaseModel, Field, validator
+from argilla.utils._import_pydantic import BaseModel, Field, validator
 
 
 class Text2TextPrediction(BaseModel):

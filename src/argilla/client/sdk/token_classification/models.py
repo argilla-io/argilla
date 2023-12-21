@@ -27,7 +27,7 @@ from argilla.client.sdk.commons.models import (
     TaskStatus,
     UpdateDatasetRequest,
 )
-from argilla.utils.pydantic import BaseModel, Field, validator
+from argilla.utils._import_pydantic import BaseModel, Field, validator
 
 
 class EntitySpan(BaseModel):

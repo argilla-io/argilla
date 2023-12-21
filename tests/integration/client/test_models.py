@@ -26,7 +26,7 @@ from argilla.client.models import (
     TokenClassificationRecord,
     _Validators,
 )
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 
 @pytest.mark.parametrize(

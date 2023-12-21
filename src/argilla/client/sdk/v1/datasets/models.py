@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from argilla.utils.pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
+from argilla.utils._import_pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):

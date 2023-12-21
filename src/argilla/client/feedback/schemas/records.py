@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Uni
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
-from argilla.utils.pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
+from argilla.utils._import_pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema

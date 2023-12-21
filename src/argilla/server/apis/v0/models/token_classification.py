@@ -22,7 +22,7 @@ from argilla.server.services.search.model import ServiceBaseRecordsQuery, Servic
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation as _TokenClassificationAnnotation,
 )
-from argilla.utils.pydantic import BaseModel, Field, root_validator, validator
+from argilla.utils._import_pydantic import BaseModel, Field, root_validator, validator
 
 
 class TokenClassificationAnnotation(_TokenClassificationAnnotation):

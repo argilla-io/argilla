@@ -19,7 +19,7 @@ import pytest
 from argilla.server.commons.models import TaskType
 from argilla.server.daos.models.datasets import BaseDatasetDB
 from argilla.server.schemas.v0.datasets import CreateDatasetRequest, Dataset
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 
 @pytest.mark.parametrize(

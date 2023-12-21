@@ -17,7 +17,7 @@ from typing import Dict, Optional
 
 from argilla.client.sdk.commons.errors import HttpResponseError, UnauthorizedApiError
 from argilla.client.singleton import init
-from argilla.utils.pydantic import AnyHttpUrl, BaseModel
+from argilla.utils._import_pydantic import AnyHttpUrl, BaseModel
 
 ARGILLA_CACHE_DIR = Path.home() / ".cache" / "argilla"
 ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"

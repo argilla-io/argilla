@@ -28,7 +28,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     ValueSchema,
 )
-from argilla.utils.pydantic import BaseModel, root_validator, validator
+from argilla.utils._import_pydantic import BaseModel, root_validator, validator
 
 
 class UnifiedValueSchema(ValueSchema):

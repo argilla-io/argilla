@@ -19,7 +19,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, Query
 
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 # TODO: remove this function at some point
@@ -82,7 +82,7 @@ def parse_query_param(
     In addition, if a `pydantic.BaseModel` is provided, the dictionary is parsed into an instance of that model:
 
         ```python
-        from argilla.utils.pydantic import BaseModel, Field
+        from pydantic import BaseModel, Field
 
 
         class Params(BaseModel):

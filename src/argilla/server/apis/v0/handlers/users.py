@@ -27,7 +27,7 @@ from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
 from argilla.utils import telemetry
-from argilla.utils.pydantic import parse_obj_as
+from argilla.utils._import_pydantic import parse_obj_as
 
 router = APIRouter(tags=["users"])
 

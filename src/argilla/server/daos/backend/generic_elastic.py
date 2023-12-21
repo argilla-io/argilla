@@ -38,7 +38,7 @@ from argilla.server.daos.backend.search.model import (
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
 from argilla.server.settings import settings
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 def dataset_records_index(dataset_id: str) -> str:

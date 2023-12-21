@@ -15,7 +15,7 @@
 
 from argilla.server import helpers
 from argilla.server.settings import settings as server_settings
-from argilla.utils.pydantic import BaseSettings
+from argilla.utils._import_pydantic import BaseSettings
 
 
 class Settings(BaseSettings):

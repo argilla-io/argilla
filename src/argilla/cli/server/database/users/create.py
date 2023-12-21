@@ -26,7 +26,7 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
-from argilla.utils.pydantic import constr
+from argilla.utils._import_pydantic import constr
 
 USER_API_KEY_MIN_LENGTH = 8
 

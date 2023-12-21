@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional, TypeVar, Union
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
-from argilla.utils.pydantic import BaseModel, Field, root_validator
+from argilla.utils._import_pydantic import BaseModel, Field, root_validator
 
 
 class BaseDatasetDB(BaseModel):

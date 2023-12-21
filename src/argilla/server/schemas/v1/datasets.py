@@ -23,10 +23,17 @@ from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import TextQuery
-from argilla.utils.pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
-from argilla.utils.pydantic import Field as PydanticField
-from argilla.utils.pydantic.generics import GenericModel
-from argilla.utils.pydantic.utils import GetterDict
+from argilla.utils._import_pydantic import (
+    BaseModel,
+    GenericModel,
+    GetterDict,
+    PositiveInt,
+    conlist,
+    constr,
+    root_validator,
+    validator,
+)
+from argilla.utils._import_pydantic import Field as PydanticField
 
 try:
     from typing import Annotated

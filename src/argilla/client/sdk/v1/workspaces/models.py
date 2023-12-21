@@ -15,7 +15,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class WorkspaceModel(BaseModel):

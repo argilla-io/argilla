@@ -19,7 +19,7 @@ from argilla.client.api import Api
 from argilla.client.models import TextClassificationRecord
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 try:
     from transformers import (

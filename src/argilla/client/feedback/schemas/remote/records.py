@@ -24,7 +24,7 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
-from argilla.utils.pydantic import Field
+from argilla.utils._import_pydantic import Field
 
 if TYPE_CHECKING:
     import httpx

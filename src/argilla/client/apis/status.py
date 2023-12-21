@@ -20,7 +20,7 @@ from packaging.version import parse
 from argilla.client.apis import AbstractApi
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import ApiCompatibilityError
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class ApiInfo(BaseModel):

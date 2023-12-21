@@ -19,8 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, List, MutableMapping, Opti
 from uuid import uuid4
 
 from argilla.client.models import Vectors as ClientVectors
-from argilla.utils.pydantic import BaseModel, Field, validator
-from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils._import_pydantic import BaseModel, Field, GenericModel, validator
 
 if TYPE_CHECKING:
     from httpx import Response as HTTPXResponse

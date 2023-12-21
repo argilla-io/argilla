@@ -16,7 +16,7 @@ from typing import Any, Optional, Type, Union
 
 from starlette import status
 
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 
 class ServerError(Exception):

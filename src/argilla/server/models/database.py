@@ -35,7 +35,7 @@ from argilla.server.models.base import DatabaseModel
 from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.mixins import inserted_at_current_value
 from argilla.server.models.questions import QuestionSettings
-from argilla.utils.pydantic import parse_obj_as
+from argilla.utils._import_pydantic import parse_obj_as
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [

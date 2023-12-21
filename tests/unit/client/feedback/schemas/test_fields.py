@@ -17,7 +17,7 @@ from typing import Any, Dict
 import pytest
 from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.fields import TextField
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 
 @pytest.mark.parametrize(

@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
+from argilla.utils._import_pydantic import BaseModel
 from argilla.utils.dependency import require_dependencies
-from argilla.utils.pydantic import BaseModel
 
 __all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
 

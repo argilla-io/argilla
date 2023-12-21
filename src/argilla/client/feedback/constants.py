@@ -14,7 +14,7 @@
 from typing import List, Union
 
 from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
-from argilla.utils.pydantic import StrictFloat, StrictInt, StrictStr
+from argilla.utils._import_pydantic import StrictFloat, StrictInt, StrictStr
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32

@@ -18,7 +18,7 @@ from abc import ABC
 from typing import Any, List, Optional, Type
 
 from argilla.server.errors import InvalidTextSearchError
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class ClosedIndexError(Exception):

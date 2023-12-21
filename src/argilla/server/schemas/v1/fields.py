@@ -19,7 +19,7 @@ from uuid import UUID
 from argilla.server.enums import FieldType
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import FieldTitle
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class TextFieldSettings(BaseModel):

@@ -59,7 +59,7 @@ from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
-from argilla.utils.pydantic import ConfigError, ValidationError
+from argilla.utils._import_pydantic import ConfigError, ValidationError
 
 _LOGGER = logging.getLogger("argilla")
 

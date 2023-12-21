@@ -18,8 +18,8 @@ from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetr
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.text_classification.model import ServiceTextClassificationRecord
+from argilla.utils._import_pydantic import Field
 from argilla.utils.dependency import requires_dependencies
-from argilla.utils.pydantic import Field
 
 
 class F1Metric(ServicePythonMetric):

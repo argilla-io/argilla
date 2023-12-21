@@ -22,7 +22,7 @@ from argilla.server.helpers import flatten_dict
 from argilla.server.services.datasets import ServiceBaseDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
 from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
-from argilla.utils.pydantic import BaseModel, Field, root_validator, validator
+from argilla.utils._import_pydantic import BaseModel, Field, root_validator, validator
 
 
 class ServiceLabelingRule(BaseModel):

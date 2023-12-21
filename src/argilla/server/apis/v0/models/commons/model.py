@@ -25,8 +25,7 @@ from argilla.server.services.search.model import (
     ServiceSortableField,
 )
 from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord, ServiceBaseRecordInputs
-from argilla.utils.pydantic import BaseModel, Field
-from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils._import_pydantic import BaseModel, Field, GenericModel
 
 
 class SortableField(ServiceSortableField):

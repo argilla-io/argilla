@@ -34,7 +34,7 @@ from argilla.server.models import User, UserRole, Workspace
 from argilla.server.server import app
 from argilla.server.settings import settings
 from argilla.utils import telemetry
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

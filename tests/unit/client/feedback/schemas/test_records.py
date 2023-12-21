@@ -23,7 +23,7 @@ from argilla.client.feedback.schemas.records import (
     SuggestionSchema,
     ValueSchema,
 )
-from argilla.utils.pydantic import ValidationError
+from argilla.utils._import_pydantic import ValidationError
 
 
 @pytest.mark.parametrize(

@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import QuestionDescription, QuestionTitle
-from argilla.utils.pydantic import BaseModel, Field, PositiveInt, conlist
+from argilla.utils._import_pydantic import BaseModel, Field, PositiveInt, conlist
 
 try:
     from typing import Annotated

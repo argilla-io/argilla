@@ -19,7 +19,7 @@ from uuid import UUID
 from argilla.server.models import ResponseStatus
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import SuggestionCreate
-from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils._import_pydantic import BaseModel, Field
 
 
 class ResponseValue(BaseModel):

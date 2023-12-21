@@ -53,8 +53,8 @@ from argilla.client.feedback.unification import (
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
+from argilla.utils._import_pydantic import BaseModel
 from argilla.utils.dependency import require_dependencies, requires_dependencies
-from argilla.utils.pydantic import BaseModel
 
 _LOGGER = logging.getLogger(__name__)
 

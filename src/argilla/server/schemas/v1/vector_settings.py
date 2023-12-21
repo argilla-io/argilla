@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import VectorSettingsTitle
-from argilla.utils.pydantic import BaseModel
+from argilla.utils._import_pydantic import BaseModel
 
 
 class VectorSettings(BaseModel):
