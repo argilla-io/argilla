@@ -19,7 +19,7 @@ export const useFocusAnnotationViewModel = () => {
   const discard = async (record: Record) => {
     isDiscarding.value = true;
 
-    discardUseCase.execute(record);
+    await discardUseCase.execute(record);
 
     await debounceForSubmit.wait();
 
@@ -29,7 +29,7 @@ export const useFocusAnnotationViewModel = () => {
   const submit = async (record: Record) => {
     isSubmitting.value = true;
 
-    submitUseCase.execute(record);
+    await submitUseCase.execute(record);
 
     await debounceForSubmit.wait();
 
@@ -39,7 +39,7 @@ export const useFocusAnnotationViewModel = () => {
   const saveAsDraft = async (record: Record) => {
     isDraftSaving.value = true;
 
-    saveDraftUseCase.execute(record);
+    await saveDraftUseCase.execute(record);
 
     await debounceForSubmit.wait();
 

@@ -19,7 +19,7 @@ export const useBulkAnnotationViewModel = () => {
   const discard = async (records: Record[], recordReference: Record) => {
     isDiscarding.value = true;
 
-    discardUseCase.execute(records, recordReference);
+    await discardUseCase.execute(records, recordReference);
 
     await debounceForSubmit.wait();
 
@@ -29,7 +29,7 @@ export const useBulkAnnotationViewModel = () => {
   const submit = async (records: Record[], recordReference: Record) => {
     isSubmitting.value = true;
 
-    submitUseCase.execute(records, recordReference);
+    await submitUseCase.execute(records, recordReference);
 
     await debounceForSubmit.wait();
 
@@ -39,7 +39,7 @@ export const useBulkAnnotationViewModel = () => {
   const saveAsDraft = async (records: Record[], recordReference: Record) => {
     isDraftSaving.value = true;
 
-    saveDraftUseCase.execute(records, recordReference);
+    await saveDraftUseCase.execute(records, recordReference);
 
     await debounceForSubmit.wait();
 
