@@ -111,14 +111,16 @@ export default {
     },
     async onSubmit() {
       await this.submit(this.selectedRecords, this.record);
+
       this.$emit("on-submit-responses");
     },
     async onDiscard() {
       await this.discard(this.selectedRecords, this.record);
+
       this.$emit("on-discard-responses");
     },
     async onSaveDraft() {
-      // await this.saveDraft(this.record);
+      await this.saveAsDraft(this.selectedRecords, this.record);
     },
     toggleAllRecords() {
       if (this.selectedRecords.length === this.recordsOnPage.length) {

@@ -3,7 +3,7 @@ import { RecordResponseUpdatedEvent } from "../events/RecordResponseUpdatedEvent
 import { Record } from "../entities/record/Record";
 import { RecordRepository } from "@/v1/infrastructure/repositories";
 
-export class SaveDraftRecord {
+export class SaveDraftUseCase {
   constructor(
     private readonly recordRepository: RecordRepository,
     private readonly eventDispatcher: IEventDispatcher

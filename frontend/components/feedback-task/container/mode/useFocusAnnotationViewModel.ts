@@ -3,12 +3,10 @@ import { ref } from "vue-demi";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
 import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
-import { SaveDraftRecord } from "~/v1/domain/usecases/save-draft-use-case";
+import { SaveDraftUseCase } from "~/v1/domain/usecases/save-draft-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
-import { useQueue } from "~/v1/infrastructure/services/useQueue";
 
 export const useFocusAnnotationViewModel = () => {
-  const queue = useQueue();
   const debounceForSubmit = useDebounce(300);
 
   const isDraftSaving = ref(false);
@@ -16,14 +14,12 @@ export const useFocusAnnotationViewModel = () => {
   const isSubmitting = ref(false);
   const discardUseCase = useResolve(DiscardRecordUseCase);
   const submitUseCase = useResolve(SubmitRecordUseCase);
-  const saveDraftUseCase = useResolve(SaveDraftRecord);
+  const saveDraftUseCase = useResolve(SaveDraftUseCase);
 
   const discard = async (record: Record) => {
     isDiscarding.value = true;
 
-    await queue.enqueue(() => {
-      return discardUseCase.execute(record);
-    });
+    discardUseCase.execute(record);
 
     await debounceForSubmit.wait();
 
@@ -33,9 +29,7 @@ export const useFocusAnnotationViewModel = () => {
   const submit = async (record: Record) => {
     isSubmitting.value = true;
 
-    await queue.enqueue(() => {
-      return submitUseCase.execute(record);
-    });
+    submitUseCase.execute(record);
 
     await debounceForSubmit.wait();
 
@@ -45,11 +39,10 @@ export const useFocusAnnotationViewModel = () => {
   const saveAsDraft = async (record: Record) => {
     isDraftSaving.value = true;
 
-    await queue.enqueue(() => {
-      return saveDraftUseCase.execute(record);
-    });
+    saveDraftUseCase.execute(record);
 
     await debounceForSubmit.wait();
+
     isDraftSaving.value = false;
   };
 

@@ -93,6 +93,10 @@ export class RecordRepository {
     return this.createBulkRecord(records, "submitted");
   }
 
+  saveDraftBulkRecordResponse(records: Record[]) {
+    return this.createBulkRecord(records, "draft");
+  }
+
   saveDraft(record: Record): Promise<RecordAnswer> {
     if (record.answer) return this.updateRecordResponse(record, "draft");
 
