@@ -20,7 +20,7 @@
       <div class="bulk__records">
         <RecordFieldsAndSimilarity
           v-for="(record, i) in recordsOnPage"
-          :key="record.id"
+          :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
           :datasetVectors="datasetVectors"
           :records="records"
           :recordCriteria="recordCriteria"
