@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import datetime
+import random
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
@@ -65,6 +66,8 @@ if TYPE_CHECKING:
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,
     )
+
+random.seed(42)
 
 
 @pytest.fixture
@@ -555,6 +558,140 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
             external_id="5",
         ),
     ]
+
+
+@pytest.fixture
+def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
+    # This fixture contains the same records as `feedback_dataset_records` but with suggestions
+    # for each question so that we can test the annotator metrics.
+    # Generates 4 records from 3 annotators.
+
+    import random
+    import uuid
+
+    q1_options = ["positive", "negative"]
+    q2_options = [1, 2]
+    q3_options = ["a", "b", "c"]
+    q4_options = [["a", "b"], ["b", "c"], ["a", "c"]]
+    q5_options = [
+        [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+        [{"rank": 2, "value": "a"}, {"rank": 1, "value": "b"}],
+        [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+    ]
+
+    records = []
+
+    for record_id in range(1, 5):
+        responses = []
+        for annotator_id in range(1, 4):
+            # Make the random seed depend on the record_id and annotator_id for reproducibility.
+            random.seed(123 + record_id + annotator_id)
+            idx1 = random.randint(0, len(q1_options) - 1)
+            random.seed(123 + record_id + annotator_id + 1)
+            idx2 = random.randint(0, len(q2_options) - 1)
+            random.seed(123 + record_id + annotator_id + 2)
+            idx3 = random.randint(0, len(q3_options) - 1)
+            random.seed(123 + record_id + annotator_id + 3)
+            idx4 = random.randint(0, len(q4_options) - 1)
+            random.seed(123 + record_id + annotator_id + 4)
+            idx5 = random.randint(0, len(q5_options) - 1)
+
+            response_q1 = q1_options[idx1]
+            response_q2 = q2_options[idx2]
+            response_q3 = q3_options[idx3]
+            response_q4 = q4_options[idx4]
+            response_q5 = q5_options[idx5]
+
+            if annotator_id == 1:
+                # Always answer like the suggestion
+                suggestion_q1 = response_q1
+                suggestion_q2 = response_q2
+                suggestion_q3 = response_q3
+                suggestion_q4 = response_q4
+                suggestion_q5 = response_q5
+            elif annotator_id == 2:
+                # Never answer like the suggestion
+                suggestion_q1 = q1_options[idx1 - 1]
+                suggestion_q2 = q2_options[idx2 - 1]
+                suggestion_q3 = q3_options[idx3 - 1]
+                suggestion_q4 = q4_options[idx4 - 1]
+                suggestion_q5 = q5_options[idx5 - 1]
+            elif annotator_id == 3:
+                # Sometimes answer like the suggestion
+                if record_id % 2 == 0:
+                    suggestion_q1 = response_q1
+                    suggestion_q2 = response_q2
+                    suggestion_q3 = response_q3
+                    suggestion_q4 = response_q4
+                    suggestion_q5 = response_q5
+                else:
+                    suggestion_q1 = q1_options[idx1 - 1]
+                    suggestion_q2 = q2_options[idx2 - 1]
+                    suggestion_q3 = q3_options[idx3 - 1]
+                    suggestion_q4 = q4_options[idx4 - 1]
+                    suggestion_q5 = q5_options[idx5 - 1]
+
+            responses.append(
+                {
+                    "values": {
+                        "question-1": {"value": f"{response_q1} example"},
+                        "question-2": {"value": response_q2},
+                        "question-3": {"value": response_q3},
+                        "question-4": {"value": response_q4},
+                        "question-5": {"value": response_q5},
+                    },
+                    "status": "submitted",
+                    "user_id": uuid.UUID(int=annotator_id),
+                },
+            )
+
+        records.append(
+            FeedbackRecord(
+                fields={"text": f"This is a {response_q1} example", "label": f"{response_q1}"},
+                responses=responses,
+                suggestions=[
+                    {
+                        "question_name": "question-1",
+                        "value": suggestion_q1,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-2",
+                        "value": suggestion_q2,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-3",
+                        "value": suggestion_q3,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-4",
+                        "value": suggestion_q4,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                    {
+                        "question_name": "question-5",
+                        "value": suggestion_q5,
+                        "type": "human",
+                        "score": 0.0,
+                        "agent": f"agent-{annotator_id}",
+                    },
+                ],
+                metadata={"unit": "test"},
+                external_id=str(annotator_id + record_id),
+            )
+        )
+
+    return records
 
 
 @pytest.fixture

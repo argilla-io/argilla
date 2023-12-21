@@ -13,6 +13,7 @@ The Python reference guide for Argilla. This section contains:
 * :ref:`python_training`: The training integration module
 * :ref:`python_users`: The Python client module to manage users in Argilla
 * :ref:`python_workspaces`: The Python client module to manage workspaces in Argilla
+* :ref:`python_annotation_metrics`: The Python module to measure annotation metrics in Argilla's datasets
 
 .. toctree::
    :maxdepth: 2
@@ -27,3 +28,4 @@ The Python reference guide for Argilla. This section contains:
    python_listeners
    python_users
    python_workspaces
+   python_annotation_metrics

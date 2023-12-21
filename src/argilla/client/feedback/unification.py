@@ -51,11 +51,11 @@ class UnifiedValueSchema(ValueSchema):
 
 
 class RatingQuestionStrategyMixin:
-    def unify_responses(
+    def compute_unified_responses(
         self, records: List[FeedbackRecord], question: Union["RatingQuestionStrategy", "RankingQuestionStrategy"]
     ):
         """
-        The function `unify_responses` takes a list of feedback records and a rating question, and
+        The function `compute_unified_responses` takes a list of feedback records and a rating question, and
         returns a unified value based on the specified unification method.
 
         Args:
@@ -68,7 +68,7 @@ class RatingQuestionStrategyMixin:
             actual question
 
         Returns:
-        The method `unify_responses` returns the result of either the `_majority` or
+        The method `compute_unified_responses` returns the result of either the `_majority` or
         `_aggregate` method, depending on the value of `self.value`.
         """
         UnifiedValueSchema.update_forward_refs()
@@ -100,8 +100,8 @@ class RatingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
     MAX: str = "max"
     MIN: str = "min"
 
-    def unify_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
-        return super().unify_responses(records, question)
+    def compute_unified_responses(self, records: List[FeedbackRecord], question: RatingQuestion):
+        return super().compute_unified_responses(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         """
@@ -178,7 +178,7 @@ class TextQuestionStrategy(Enum):
 
     DISAGREEMENT = "disagreement"
 
-    def unify_responses(self, records: List[FeedbackRecord], question: str):
+    def compute_unified_responses(self, records: List[FeedbackRecord], question: str):
         UnifiedValueSchema.update_forward_refs()
         unified_records = []
         for rec in records:
@@ -214,8 +214,8 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
     MAX: str = "max"
     MIN: str = "min"
 
-    def unify_responses(self, records: List[FeedbackRecord], question: RankingQuestion):
-        return super().unify_responses(records, question)
+    def compute_unified_responses(self, records: List[FeedbackRecord], question: RankingQuestion):
+        return super().compute_unified_responses(records, question)
 
     def _aggregate(self, records: List[FeedbackRecord], question: str):
         """
@@ -376,9 +376,11 @@ class RankingQuestionStrategy(RatingQuestionStrategyMixin, Enum):
 
 
 class LabelQuestionStrategyMixin:
-    def unify_responses(self, records: List[FeedbackRecord], question: Union[str, LabelQuestion, MultiLabelQuestion]):
+    def compute_unified_responses(
+        self, records: List[FeedbackRecord], question: Union[str, LabelQuestion, MultiLabelQuestion]
+    ):
         """
-        The function `unify_responses` takes a list of feedback records and a question, and returns a
+        The function `compute_unified_responses` takes a list of feedback records and a question, and returns a
         unified value based on the specified unification method.
 
         Args:
@@ -389,7 +391,7 @@ class LabelQuestionStrategyMixin:
         `MultiLabelQuestion` object. It represents the question for which you want to unify the
         responses.
 
-        Returns: The method `unify_responses` returns the result of one of the following methods:
+        Returns: The method `compute_unified_responses` returns the result of one of the following methods:
         `_majority`, `_majority_weighted`, or `_disagreement`. The specific method that is called
         depends on the value of `self.value`.
         """
@@ -460,7 +462,7 @@ class LabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
     Examples:
         >>> from argilla import LabelQuestion, LabelQuestionStrategy
         >>> strategy = LabelQuestionStrategy("majority")
-        >>> records = strategy.unify_responses(records, question=LabelQuestion(...))
+        >>> records = strategy.compute_unified_responses(records, question=LabelQuestion(...))
     """
 
     MAJORITY: str = "majority"
@@ -560,7 +562,7 @@ class MultiLabelQuestionStrategy(LabelQuestionStrategyMixin, Enum):
             if not majority_value:
                 majority_value = [random.choice(list(counter.keys()))]
 
-            rec._unified_responses[question] = [UnifiedValueSchema(value=majority_value, strategy=self.value)]
+            rec._unified_responses[question] = [UnifiedValueSchema(value=list(majority_value), strategy=self.value)]
         return records
 
     @classmethod
@@ -644,18 +646,18 @@ class LabelQuestionUnification(BaseModel):
     question: Union[LabelQuestion, MultiLabelQuestion]
     strategy: Union[str, LabelQuestionStrategy, MultiLabelQuestionStrategy] = "majority"
 
-    def unify_responses(self, records: List[FeedbackRecord]):
+    def compute_unified_responses(self, records: List[FeedbackRecord]):
         """
-        The function `unify_responses` takes a list of `FeedbackRecord` objects and returns the unified
+        The function `compute_unified_responses` takes a list of `FeedbackRecord` objects and returns the unified
         responses using a strategy and a specific question.
 
         Args:
         - records The "records" parameter is a list of FeedbackRecord objects.
 
-        Returns: The method `unify_responses` returns the result of calling the `unify_responses` method
+        Returns: The method `compute_unified_responses` returns the result of calling the `compute_unified_responses` method
         of the `strategy` object, passing in the `records` and `question` as arguments.
         """
-        return self.strategy.unify_responses(records, self.question)
+        return self.strategy.compute_unified_responses(records, self.question)
 
     @root_validator
     def strategy_must_be_valid_and_align_with_question(cls, values: Dict[str, Any]) -> Dict[str, Any]:
