@@ -15,7 +15,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic.v1 import (
+from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
+from argilla.client.feedback.schemas.validators import (
+    validate_numeric_metadata_filter_bounds,
+    validate_numeric_metadata_property_bounds,
+)
+from argilla.utils.pydantic import (
     BaseModel,
     Extra,
     Field,
@@ -25,13 +31,6 @@ from pydantic.v1 import (
     ValidationError,
     root_validator,
     validator,
-)
-
-from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
-from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.validators import (
-    validate_numeric_metadata_filter_bounds,
-    validate_numeric_metadata_property_bounds,
 )
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 1

@@ -14,10 +14,9 @@
 
 from typing import Any, Dict, List, TypeVar
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, QueryRange, SortableField, SortConfig
 from argilla.server.services.tasks.commons import ServiceRecord
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class ServiceBaseRecordsQuery(BaseRecordsQuery):

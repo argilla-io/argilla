@@ -15,7 +15,6 @@
 from typing import Any, Dict, Optional, Union
 
 from fastapi import APIRouter, Depends, Security
-from pydantic.v1 import BaseModel
 
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.text2text import Text2TextRecord
@@ -28,6 +27,7 @@ from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.service import SearchRecordsService
 from argilla.server.services.storage.service import RecordsStorageService
+from argilla.utils.pydantic import BaseModel
 
 
 def configure_router(router: APIRouter):

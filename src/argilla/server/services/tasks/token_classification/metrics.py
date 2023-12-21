@@ -14,8 +14,6 @@
 
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
@@ -25,6 +23,7 @@ from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationRecord,
 )
 from argilla.utils import SpanUtils
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):

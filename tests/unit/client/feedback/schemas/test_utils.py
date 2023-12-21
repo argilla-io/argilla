@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
-from pydantic.v1 import BaseModel, Field
+from argilla.utils.pydantic import BaseModel, Field
 
 
 def test_label_mapping_mixin() -> None:

@@ -15,10 +15,9 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic.v1 import BaseModel, Field, root_validator
-
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
+from argilla.utils.pydantic import BaseModel, Field, root_validator
 
 
 class BaseDatasetDB(BaseModel):

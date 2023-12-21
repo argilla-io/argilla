@@ -17,7 +17,6 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
-from pydantic.v1 import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server import models
@@ -28,6 +27,7 @@ from argilla.server.policies import UserPolicy, authorize
 from argilla.server.security import auth
 from argilla.server.security.model import User, UserCreate
 from argilla.utils import telemetry
+from argilla.utils.pydantic import parse_obj_as
 
 router = APIRouter(tags=["users"])
 

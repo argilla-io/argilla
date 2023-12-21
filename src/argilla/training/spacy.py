@@ -17,11 +17,10 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic.v1 import BaseModel
-
 from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
 from argilla.training.base import ArgillaTrainerSkeleton
 from argilla.utils.dependency import require_dependencies
+from argilla.utils.pydantic import BaseModel
 
 __all__ = ["ArgillaSpaCyTrainer", "ArgillaSpaCyTransformersTrainer"]
 

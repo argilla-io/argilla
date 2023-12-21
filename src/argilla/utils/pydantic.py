@@ -12,16 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Literal, Optional
-from uuid import UUID
-
-from argilla.utils.pydantic import BaseModel
-
-
-class SuggestionModel(BaseModel):
-    id: UUID
-    question_id: UUID
-    value: Any
-    type: Optional[Literal["model", "human"]] = None
-    score: Optional[float] = None
-    agent: Optional[str] = None
+try:
+    from pydantic.v1 import *  # noqa: F403
+except ImportError:
+    from pydantic import *  # noqa: F403

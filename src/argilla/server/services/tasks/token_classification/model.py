@@ -15,13 +15,12 @@
 
 from typing import Dict, List, Optional, Set, Tuple
 
-from pydantic.v1 import BaseModel, Field, validator
-
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange
 from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord
 from argilla.utils import SpanUtils
+from argilla.utils.pydantic import BaseModel, Field, validator
 
 PREDICTED_MENTIONS_ES_FIELD_NAME = "predicted_mentions"
 MENTIONS_ES_FIELD_NAME = "mentions"

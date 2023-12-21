@@ -16,8 +16,8 @@ from typing import Any, Dict, List, Set
 
 import pytest
 from argilla.server.utils import parse_query_param
+from argilla.utils.pydantic import BaseModel, Field
 from fastapi import HTTPException
-from pydantic.v1 import BaseModel, Field
 
 
 @pytest.mark.parametrize(

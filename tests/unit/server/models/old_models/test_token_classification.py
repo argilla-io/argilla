@@ -26,7 +26,7 @@ from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )
-from pydantic.v1 import ValidationError
+from argilla.utils.pydantic import ValidationError
 
 
 def test_char_position():

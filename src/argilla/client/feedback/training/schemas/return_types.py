@@ -14,7 +14,7 @@
 
 from typing import Dict, List, Tuple, Union
 
-from pydantic.v1 import BaseModel
+from argilla.utils.pydantic import BaseModel
 
 
 class TextClassificationReturnTypes(BaseModel):

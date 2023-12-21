@@ -14,7 +14,6 @@
 
 import logging
 
-import pydantic.v1 as pydantic
 from fastapi.exceptions import RequestValidationError
 
 from argilla.server.errors.base_errors import BadRequestError, GenericServerError, ServerError, ValidationError

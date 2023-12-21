@@ -16,10 +16,9 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic.v1 import BaseModel
-
 from argilla.server.commons.models import TaskStatus
 from argilla.server.daos.backend.mappings.helpers import mappings
+from argilla.utils.pydantic import BaseModel
 
 
 def nested_mappings_from_base_model(model_class: Type[BaseModel]) -> Dict[str, Any]:

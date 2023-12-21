@@ -15,8 +15,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.client.models import TextClassificationRecord as ClientTextClassificationRecord
 from argilla.client.models import TokenAttributions as ClientTokenAttributions
 from argilla.client.sdk.commons.models import (
@@ -29,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     TaskStatus,
     UpdateDatasetRequest,
 )
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class ClassPrediction(BaseModel):

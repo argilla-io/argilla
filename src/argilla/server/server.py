@@ -31,7 +31,6 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic.v1 import ConfigError, ValidationError
 
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
@@ -60,6 +59,7 @@ from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings
 from argilla.server.static_rewrite import RewriteStaticFiles
+from argilla.utils.pydantic import ConfigError, ValidationError
 
 _LOGGER = logging.getLogger("argilla")
 

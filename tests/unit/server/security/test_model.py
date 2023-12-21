@@ -16,7 +16,7 @@ from typing import Union
 
 import pytest
 from argilla.server.security.model import User, UserCreate, WorkspaceCreate
-from pydantic.v1 import ValidationError
+from argilla.utils.pydantic import ValidationError
 
 from tests.factories import UserFactory, WorkspaceFactory
 

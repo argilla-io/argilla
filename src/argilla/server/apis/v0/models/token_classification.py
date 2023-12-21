@@ -14,8 +14,6 @@
 #  limitations under the License.
 from typing import Dict, List, Optional
 
-from pydantic.v1 import BaseModel, Field, root_validator, validator
-
 from argilla.server.apis.v0.models.commons.model import BaseRecord, BaseRecordInputs, BaseSearchResults, ScoreRange
 from argilla.server.commons.models import PredictionStatus
 from argilla.server.daos.backend.search.model import SortableField
@@ -24,6 +22,7 @@ from argilla.server.services.search.model import ServiceBaseRecordsQuery, Servic
 from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation as _TokenClassificationAnnotation,
 )
+from argilla.utils.pydantic import BaseModel, Field, root_validator, validator
 
 
 class TokenClassificationAnnotation(_TokenClassificationAnnotation):

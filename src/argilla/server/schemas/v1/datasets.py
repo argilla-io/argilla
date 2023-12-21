@@ -17,16 +17,16 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic.v1 import BaseModel, PositiveInt, conlist, constr, root_validator, validator
-from pydantic.v1 import Field as PydanticField
-from pydantic.v1.generics import GenericModel
-from pydantic.v1.utils import GetterDict
 
 from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
 from argilla.server.search_engine import TextQuery
+from argilla.utils.pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from argilla.utils.pydantic import Field as PydanticField
+from argilla.utils.pydantic.generics import GenericModel
+from argilla.utils.pydantic.utils import GetterDict
 
 try:
     from typing import Annotated

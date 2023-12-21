@@ -16,8 +16,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.client.models import Text2TextRecord as ClientText2TextRecord
 from argilla.client.sdk.commons.models import (
     MACHINE_NAME,
@@ -29,6 +27,7 @@ from argilla.client.sdk.commons.models import (
     TaskStatus,
     UpdateDatasetRequest,
 )
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class Text2TextPrediction(BaseModel):

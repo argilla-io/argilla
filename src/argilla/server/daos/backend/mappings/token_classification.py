@@ -14,10 +14,9 @@
 
 from typing import Optional
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.server.daos.backend.mappings.helpers import mappings
 from argilla.server.daos.backend.query_helpers import nested_mappings_from_base_model
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class MentionMetrics(BaseModel):

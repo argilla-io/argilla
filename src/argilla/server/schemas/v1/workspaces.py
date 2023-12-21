@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from pydantic.v1 import BaseModel
+from argilla.utils.pydantic import BaseModel
 
 
 class Workspace(BaseModel):

@@ -19,15 +19,14 @@ Common model for task definitions
 
 from typing import Any, Dict, Generic, List, TypeVar
 
-from pydantic.v1 import BaseModel, Field
-from pydantic.v1.generics import GenericModel
-
 from argilla.server.services.search.model import (
     ServiceQueryRange,
     ServiceSearchResultsAggregations,
     ServiceSortableField,
 )
 from argilla.server.services.tasks.commons import ServiceBaseAnnotation, ServiceBaseRecord, ServiceBaseRecordInputs
+from argilla.utils.pydantic import BaseModel, Field
+from argilla.utils.pydantic.generics import GenericModel
 
 
 class SortableField(ServiceSortableField):

@@ -14,10 +14,9 @@
 
 from typing import Any, ClassVar, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.server.services.search.model import ServiceRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class ServiceBaseMetric(BaseModel):

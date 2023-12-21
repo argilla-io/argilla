@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, List, Optional
 
 import typer
 import yaml
-from pydantic.v1 import BaseModel, constr
 
 from argilla.cli import typer_ext
 from argilla.cli.server.database.users.utils import get_or_new_workspace
@@ -24,6 +23,7 @@ from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.security.auth_provider.local.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
+from argilla.utils.pydantic import BaseModel, constr
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

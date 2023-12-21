@@ -16,12 +16,11 @@ from datetime import datetime
 from typing import Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from pydantic.v1 import BaseModel, Field, validator
-from pydantic.v1.generics import GenericModel
-
 from argilla.server.enums import MetadataPropertyType
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import MetadataPropertySettings, MetadataPropertyTitle
+from argilla.utils.pydantic import BaseModel, Field, validator
+from argilla.utils.pydantic.generics import GenericModel
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 

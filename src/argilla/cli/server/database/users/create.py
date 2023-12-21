@@ -15,7 +15,6 @@
 from typing import List, Optional
 
 import typer
-from pydantic.v1 import constr
 
 from argilla.cli import typer_ext
 from argilla.cli.server.database.users.utils import get_or_new_workspace
@@ -27,6 +26,7 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
+from argilla.utils.pydantic import constr
 
 USER_API_KEY_MIN_LENGTH = 8
 

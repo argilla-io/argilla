@@ -17,9 +17,9 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Body
-from pydantic.v1 import BaseModel, Field
 
 from argilla.server.models import ResponseStatus
+from argilla.utils.pydantic import BaseModel, Field
 
 try:
     from typing import Annotated

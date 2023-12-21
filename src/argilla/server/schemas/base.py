@@ -14,7 +14,7 @@
 
 from typing import Any, Dict, Set, Union
 
-from pydantic.v1 import BaseModel, root_validator
+from argilla.utils.pydantic import BaseModel, root_validator
 
 
 class UpdateSchema(BaseModel):

@@ -18,10 +18,10 @@ from typing import Any, Dict
 
 import psutil
 from fastapi import Depends
-from pydantic.v1 import BaseModel
 
 from argilla import __version__ as version
 from argilla.server.daos.backend import GenericElasticEngineBackend
+from argilla.utils.pydantic import BaseModel
 
 
 def size(bytes):

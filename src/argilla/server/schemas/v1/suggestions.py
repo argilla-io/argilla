@@ -15,9 +15,8 @@
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic.v1 import BaseModel, Field
-
 from argilla.server.models import SuggestionType
+from argilla.utils.pydantic import BaseModel, Field
 
 AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"
 AGENT_MIN_LENGTH = 1

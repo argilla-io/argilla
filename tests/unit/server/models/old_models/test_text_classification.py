@@ -25,7 +25,7 @@ from argilla.server.services.tasks.text_classification.model import (
     ClassPrediction,
     ServiceTextClassificationRecord,
 )
-from pydantic.v1 import ValidationError
+from argilla.utils.pydantic import ValidationError
 
 
 def test_flatten_metadata():

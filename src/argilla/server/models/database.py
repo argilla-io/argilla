@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from pydantic.v1 import parse_obj_as
 from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
@@ -36,6 +35,7 @@ from argilla.server.models.base import DatabaseModel
 from argilla.server.models.metadata_properties import MetadataPropertySettings
 from argilla.server.models.mixins import inserted_at_current_value
 from argilla.server.models.questions import QuestionSettings
+from argilla.utils.pydantic import parse_obj_as
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [

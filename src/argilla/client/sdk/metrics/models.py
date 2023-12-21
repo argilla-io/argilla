@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from pydantic.v1 import BaseModel, Field
+from argilla.utils.pydantic import BaseModel, Field
 
 
 class MetricInfo(BaseModel):
