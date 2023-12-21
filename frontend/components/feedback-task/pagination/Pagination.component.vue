@@ -1,29 +1,24 @@
 <template>
-  <div class="pagination">
-    <span class="pagination__info" v-if="!!items">
-      {{ currentPaginationRange }} of {{ items }}</span
+  <div class="pagination__buttons">
+    <BaseButton
+      ref="prevButton"
+      class="pagination__button"
+      :disabled="isFirstPage"
+      :title="$t('shortcuts.pagination.go_to_previous_record')"
+      @click="goToPrevPage"
     >
-    <div class="pagination__buttons">
-      <BaseButton
-        class="pagination__button"
-        ref="prevButton"
-        @click="onClickPrev"
-        :disabled="isFirstPage"
-        :title="$t('shortcuts.pagination.go_to_previous_record')"
-      >
-        <svgicon name="chevron-left" width="12" height="12" />
-      </BaseButton>
+      <svgicon name="chevron-left" width="12" height="12" />
+    </BaseButton>
 
-      <BaseButton
-        class="pagination__button"
-        ref="nextButton"
-        @click="onClickNext"
-        :disabled="isLastPage"
-        :title="$t('shortcuts.pagination.go_to_next_record')"
-      >
-        <svgicon name="chevron-right" width="12" height="12" />
-      </BaseButton>
-    </div>
+    <BaseButton
+      ref="nextButton"
+      class="pagination__button"
+      :disabled="isLastPage"
+      :title="$t('shortcuts.pagination.go_to_next_record')"
+      @click="goToNextPage"
+    >
+      <svgicon name="chevron-right" width="12" height="12" />
+    </BaseButton>
   </div>
 </template>
 
@@ -31,42 +26,13 @@
 export default {
   name: "PaginationComponent",
   props: {
-    currentPage: {
+    recordCriteria: {
+      type: Object,
+      required: true,
+    },
+    total: {
       type: Number,
-      default: () => 1,
-    },
-    items: {
-      type: Number,
-      default: () => 0,
-    },
-    itemsPerPage: {
-      type: Number,
-      default: () => 1,
-    },
-  },
-  computed: {
-    // TODO: Move to PageCriteria to support those computed
-    isFirstPage() {
-      return this.currentPage === 1;
-    },
-    isLastPage() {
-      return this.currentPage === this.items;
-    },
-    totalPages() {
-      return Math.ceil(this.items / this.itemsPerPage);
-    },
-    currentPaginationRange() {
-      return this.itemsPerPage > 1
-        ? `${this.currentRangeFrom} - ${this.currentRangeTo}`
-        : this.currentPage;
-    },
-    currentRangeFrom() {
-      return this.itemsPerPage * this.currentPage - (this.itemsPerPage - 1);
-    },
-    currentRangeTo() {
-      return this.itemsPerPage * this.currentPage > this.items
-        ? this.items
-        : this.itemsPerPage * this.currentPage;
+      required: true,
     },
   },
   mounted() {
@@ -74,6 +40,17 @@ export default {
   },
   destroyed() {
     document.removeEventListener("keydown", this.onPressKeyboardShortcuts);
+  },
+  computed: {
+    currentPage() {
+      return this.recordCriteria.committed.page.client.page;
+    },
+    isFirstPage() {
+      return this.recordCriteria.page.isFirstPage();
+    },
+    isLastPage() {
+      return this.currentPage === this.total;
+    },
   },
   methods: {
     stopPropagationForNativeBehavior(event) {
@@ -98,15 +75,17 @@ export default {
           elem.click();
           break;
         }
-        default:
-        // Do nothing => the code is not registered as shortcut
       }
     },
-    onClickPrev() {
-      this.$emit("on-click-prev");
+    goToNextPage() {
+      this.recordCriteria.nextPage();
+
+      this.$root.$emit("on-change-record-page", this.recordCriteria);
     },
-    onClickNext() {
-      this.$emit("on-click-next");
+    goToPrevPage() {
+      this.recordCriteria.previousPage();
+
+      this.$root.$emit("on-change-record-page", this.recordCriteria);
     },
   },
 };
@@ -114,17 +93,9 @@ export default {
 
 <style lang="scss" scoped>
 .pagination {
-  display: flex;
-  gap: $base-space;
-  justify-content: right;
-  align-items: center;
   &__buttons {
     display: flex;
     gap: $base-space;
-  }
-  &__info {
-    @include font-size(13px);
-    color: $black-37;
   }
   &__button.button {
     justify-content: center;

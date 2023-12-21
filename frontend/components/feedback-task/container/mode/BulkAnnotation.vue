@@ -15,10 +15,6 @@
           :value="selectedRecords.length === recordsOnPage.length"
           @input="toggleAllRecords"
         />
-        <PageSizeSelector
-          :options="recordCriteria.page.options"
-          v-model="recordCriteria.page.client.many"
-        />
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
       <div class="bulk__records">

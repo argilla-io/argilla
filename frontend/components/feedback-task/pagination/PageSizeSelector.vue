@@ -1,6 +1,5 @@
 <template>
   <div class="page-size__wrapper">
-    <p class="page-size__text" v-text="`${$t('records-per-page')}:`" />
     <BaseDropdown
       class="page-size"
       :visible="dropdownIsVisible"
@@ -108,12 +107,6 @@ export default {
       @extend .page-size__option;
       background: $black-4;
     }
-  }
-  &__text {
-    @include font-size(13px);
-    font-weight: 400;
-    color: $black-37;
-    margin: 0;
   }
   .svg-icon {
     flex-shrink: 0;
