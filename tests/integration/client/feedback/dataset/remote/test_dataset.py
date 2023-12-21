@@ -49,6 +49,7 @@ from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla.server.models import User as ServerUser
+from argilla.server.settings import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
