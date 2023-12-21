@@ -30,6 +30,7 @@ These are the section headers that we use:
 - Updated `argilla.load` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - [breaking] Updated `argilla.delete` functions to also work with `FeedbackDataset`s. It now raises an error if the dataset does not exist. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.list_datasets` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
+- Updated `pydantic` dependency constraint to `>=2.0.0`. ([#4450](https://github.com/argilla-io/argilla/pull/4450))
 
 ### Fixed
 
