@@ -16,8 +16,8 @@ from datetime import datetime
 from typing import Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator
-from pydantic.generics import GenericModel
+from pydantic.v1 import BaseModel, Field, validator
+from pydantic.v1.generics import GenericModel
 
 from argilla.server.enums import MetadataPropertyType
 from argilla.server.schemas.base import UpdateSchema

@@ -18,8 +18,8 @@ import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, conint, constr, root_validator, validator
-from pydantic.generics import GenericModel
+from pydantic.v1 import BaseModel, Field, conint, constr, root_validator, validator
+from pydantic.v1.generics import GenericModel
 
 from argilla import _messages
 from argilla._constants import _JS_MAX_SAFE_INTEGER, PROTECTED_METADATA_FIELD_PREFIX

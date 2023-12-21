@@ -54,7 +54,7 @@ from argilla.client.feedback.unification import (
 )
 from argilla.client.models import Framework
 from argilla.utils.dependency import require_dependencies, requires_dependencies
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -19,7 +19,7 @@ from enum import Enum
 from typing import Any, Dict, List, Union
 
 import pandas as pd
-from pydantic import BaseModel, root_validator, validator
+from pydantic.v1 import BaseModel, root_validator, validator
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,

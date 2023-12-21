@@ -14,7 +14,7 @@
 
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic.v1 import BaseModel, Field, validator
 
 from argilla.server.daos.models.datasets import EmbeddingsConfig
 

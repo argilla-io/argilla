@@ -24,7 +24,7 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
     _LabelQuestion,
 )
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 
 @pytest.mark.parametrize(

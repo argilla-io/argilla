@@ -14,7 +14,7 @@
 
 from typing import Any, Generic, List, Literal, Optional, Protocol, TypeVar, Union
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from argilla.server.enums import QuestionType, ResponseStatus
 

@@ -14,7 +14,7 @@
 
 from typing import Dict, List, Tuple, Union
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 
 class TextClassificationReturnTypes(BaseModel):

@@ -31,7 +31,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import ConfigError, ValidationError
+from pydantic.v1 import ConfigError, ValidationError
 
 from argilla import __version__ as argilla_version
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME

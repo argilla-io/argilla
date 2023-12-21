@@ -16,7 +16,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Security
-from pydantic import parse_obj_as
+from pydantic.v1 import parse_obj_as
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts

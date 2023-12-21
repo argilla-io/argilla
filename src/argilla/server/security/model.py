@@ -18,8 +18,8 @@ from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, constr, root_validator, validator
-from pydantic.utils import GetterDict
+from pydantic.v1 import BaseModel, Field, constr, root_validator, validator
+from pydantic.v1.utils import GetterDict
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.errors import BadRequestError, EntityNotFoundError

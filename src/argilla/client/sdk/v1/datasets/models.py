@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
+from pydantic.v1 import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):

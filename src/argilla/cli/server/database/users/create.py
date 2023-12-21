@@ -15,7 +15,7 @@
 from typing import List, Optional
 
 import typer
-from pydantic import constr
+from pydantic.v1 import constr
 
 from argilla.cli import typer_ext
 from argilla.cli.server.database.users.utils import get_or_new_workspace

@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from argilla.server.enums import FieldType
 from argilla.server.schemas.base import UpdateSchema

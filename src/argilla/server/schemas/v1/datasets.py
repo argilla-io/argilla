@@ -17,10 +17,10 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
-from pydantic import Field as PydanticField
-from pydantic.generics import GenericModel
-from pydantic.utils import GetterDict
+from pydantic.v1 import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from pydantic.v1 import Field as PydanticField
+from pydantic.v1.generics import GenericModel
+from pydantic.v1.utils import GetterDict
 
 from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla.server.schemas.base import UpdateSchema

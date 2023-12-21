@@ -15,7 +15,7 @@
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 
 class SuggestionModel(BaseModel):

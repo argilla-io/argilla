@@ -16,7 +16,7 @@ from types import TracebackType
 from typing import Any, ContextManager, Dict, Optional, Type
 
 from packaging.version import parse
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from argilla.client.apis import AbstractApi
 from argilla.client.sdk.client import AuthenticatedClient

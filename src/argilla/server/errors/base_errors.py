@@ -14,7 +14,7 @@
 
 from typing import Any, Optional, Type, Union
 
-import pydantic
+import pydantic.v1 as pydantic
 from starlette import status
 
 

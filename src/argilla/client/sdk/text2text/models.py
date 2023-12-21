@@ -16,7 +16,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from argilla.client.models import Text2TextRecord as ClientText2TextRecord
 from argilla.client.sdk.commons.models import (

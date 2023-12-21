@@ -15,7 +15,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import (
+from pydantic.v1 import (
     BaseModel,
     Extra,
     Field,

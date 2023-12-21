@@ -17,7 +17,7 @@ import warnings
 from abc import ABC
 from typing import Any, List, Optional, Type
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from argilla.server.errors import InvalidTextSearchError
 

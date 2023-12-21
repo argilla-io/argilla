@@ -14,7 +14,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from argilla.server.commons.models import PredictionStatus, TaskType
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceScoreRange

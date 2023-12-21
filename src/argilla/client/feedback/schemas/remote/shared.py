@@ -17,7 +17,7 @@ from typing import Optional
 from uuid import UUID
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 
 class RemoteSchema(BaseModel, ABC):

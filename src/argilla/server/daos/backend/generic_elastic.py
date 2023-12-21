@@ -14,7 +14,7 @@
 
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from argilla._constants import PROTECTED_METADATA_FIELD_PREFIX
 from argilla.logging import LoggingMixin

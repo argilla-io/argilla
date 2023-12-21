@@ -15,7 +15,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 
 class VectorSettingsModel(BaseModel):

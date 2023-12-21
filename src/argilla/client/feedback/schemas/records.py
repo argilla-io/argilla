@@ -16,7 +16,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
+from pydantic.v1 import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
 

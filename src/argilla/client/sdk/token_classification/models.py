@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic.v1 import BaseModel, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.client.models import TokenClassificationRecord as ClientTokenClassificationRecord
