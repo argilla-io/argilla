@@ -21,6 +21,7 @@ from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase, R
 from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTemplateMixin
+from argilla.client.feedback.dataset.mixins import MetricsMixin, UnificationMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 from argilla.client.feedback.schemas.questions import (
@@ -63,7 +64,14 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase[FeedbackRecord], TaskTemplateMixin):
+class FeedbackDataset(
+    ArgillaMixin,
+    HuggingFaceDatasetMixin,
+    FeedbackDatasetBase[FeedbackRecord],
+    TaskTemplateMixin,
+    MetricsMixin,
+    UnificationMixin,
+):
     def __init__(
         self,
         *,
@@ -418,44 +426,6 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
         self._metadata_properties = list(metadata_properties_mapping.values())
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
 
-    def unify_responses(
-        self: "FeedbackDatasetBase",
-        question: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion],
-        strategy: Union[
-            str, LabelQuestionStrategy, MultiLabelQuestionStrategy, RatingQuestionStrategy, RankingQuestionStrategy
-        ],
-    ) -> "FeedbackDataset":
-        """
-        The `unify_responses` function takes a question and a strategy as input and applies the strategy
-        to unify the responses for that question.
-
-        Args:
-            question The `question` parameter can be either a string representing the name of the
-                question, or an instance of one of the question classes (`LabelQuestion`, `MultiLabelQuestion`,
-                `RatingQuestion`, `RankingQuestion`).
-            strategy The `strategy` parameter is used to specify the strategy to be used for unifying
-                responses for a given question. It can be either a string or an instance of a strategy class.
-        """
-        if isinstance(question, str):
-            question = self.question_by_name(question)
-
-        if isinstance(strategy, str):
-            if isinstance(question, LabelQuestion):
-                strategy = LabelQuestionStrategy(strategy)
-            elif isinstance(question, MultiLabelQuestion):
-                strategy = MultiLabelQuestionStrategy(strategy)
-            elif isinstance(question, RatingQuestion):
-                strategy = RatingQuestionStrategy(strategy)
-            elif isinstance(question, RankingQuestion):
-                strategy = RankingQuestionStrategy(strategy)
-            elif isinstance(question, TextQuestion):
-                strategy = TextQuestionStrategy(strategy)
-            else:
-                raise ValueError(f"Question {question} is not supported yet")
-
-        strategy.unify_responses(self.records, question)
-        return self
-
     # TODO(alvarobartt,davidberenstein1957): we should consider having something like
     # `export(..., training=True)` to export the dataset records in any format, replacing
     # both `format_as` and `prepare_for_training`
@@ -511,12 +481,12 @@ class FeedbackDataset(ArgillaMixin, HuggingFaceDatasetMixin, FeedbackDatasetBase
             if task.formatting_func is None:
                 # in sentence-transformer models we can train without labels
                 if task.label:
-                    local_dataset = local_dataset.unify_responses(
+                    local_dataset = local_dataset.compute_unified_responses(
                         question=task.label.question, strategy=task.label.strategy
                     )
         elif isinstance(task, TrainingTaskForQuestionAnswering):
             if task.formatting_func is None:
-                local_dataset = self.unify_responses(question=task.answer.name, strategy="disagreement")
+                local_dataset = self.compute_unified_responses(question=task.answer.name, strategy="disagreement")
         elif not isinstance(
             task,
             (

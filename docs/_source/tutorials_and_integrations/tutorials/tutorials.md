@@ -55,6 +55,11 @@ Learn how to filter and query your `FeedbackDataset`.
 
 Learn how to train your model with `ArgillaTrainer`.
 ```
+```{grid-item-card} Use Metric to Evaluate Your Model
+:link: feedback/end2end_examples/use-metrics-007.html
+
+Learn how to use the metrics module to evaluate your model.
+```
 ````
 
 
@@ -119,7 +124,6 @@ Learn how to set up a project to curate a public dataset that can be used to fin
 
 Learn how to apply multimodality (video, audio and images) to your FeedbackDataset using the Argilla TextFields.
 ```
-
 ````
 
 **Other datasets**
