@@ -77,7 +77,7 @@
             isSubmitting ? '--button--submitting' : null,
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
-                    :loading="isSubmitting"
+          :loading="isSubmitting"
           :disabled="isSubmitButtonDisabled"
           :title="
             isSubmitButtonDisabled ? $t('to_submit_complete_required') : null
