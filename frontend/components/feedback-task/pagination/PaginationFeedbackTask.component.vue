@@ -52,7 +52,7 @@ export default {
   align-items: center;
   &__info {
     @include font-size(13px);
-    gap: $base-space / 2;
+    gap: calc($base-space/2);
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -61,7 +61,7 @@ export default {
     &--bulk {
       align-items: center;
       display: flex;
-      gap: $base-space / 2;
+      gap: calc($base-space/2);
     }
   }
 }
