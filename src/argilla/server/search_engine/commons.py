@@ -270,7 +270,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
         mapping = es_mapping_for_metadata_property(metadata_property)
-        index_name = await self._get_index_or_raise(dataset)
+        index_name = await self._get_dataset_index(dataset)
 
         await self.put_index_mapping_request(index_name, mapping)
 
@@ -280,7 +280,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._delete_index_request(index_name)
 
     async def index_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = await self._get_index_or_raise(dataset)
+        index_name = await self._get_dataset_index(dataset)
 
         bulk_actions = [
             {
@@ -297,7 +297,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._refresh_index_request(index_name)
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = await self._get_index_or_raise(dataset)
+        index_name = await self._get_dataset_index(dataset)
 
         bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
 
@@ -305,7 +305,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def update_record_response(self, response: Response):
         record = response.record
-        index_name = await self._get_index_or_raise(record.dataset)
+        index_name = await self._get_dataset_index(record.dataset)
 
         es_responses = self._map_record_responses_to_es([response])
 
@@ -313,14 +313,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def delete_record_response(self, response: Response):
         record = response.record
-        index_name = await self._get_index_or_raise(record.dataset)
+        index_name = await self._get_dataset_index(record.dataset)
 
         await self._update_document_request(
             index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
         )
 
     async def update_record_suggestion(self, suggestion: Suggestion):
-        index_name = await self._get_index_or_raise(suggestion.record.dataset)
+        index_name = await self._get_dataset_index(suggestion.record.dataset)
 
         es_suggestions = self._map_record_suggestions_to_es([suggestion])
 
@@ -331,7 +331,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
     async def delete_record_suggestion(self, suggestion: Suggestion):
-        index_name = await self._get_index_or_raise(suggestion.record.dataset)
+        index_name = await self._get_dataset_index(suggestion.record.dataset)
 
         await self._update_document_request(
             index_name,
@@ -340,7 +340,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
     async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
-        index_name = await self._get_index_or_raise(dataset)
+        index_name = await self._get_dataset_index(dataset)
 
         bulk_actions = [
             {
@@ -399,7 +399,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             # Wrapping filter in a list to use easily on each engine implementation
             query_filters = [self.build_elasticsearch_filter(filter)]
 
-        index = await self._get_index_or_raise(dataset)
+        index = await self._get_dataset_index(dataset)
         response = await self._request_similarity_search(
             index=index,
             vector_settings=vector_settings,
@@ -548,7 +548,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return search_engine_metadata
 
     async def configure_index_vectors(self, vector_settings: VectorSettings) -> None:
-        index = await self._get_index_or_raise(vector_settings.dataset)
+        index = await self._get_dataset_index(vector_settings.dataset)
 
         mappings = self._mapping_for_vector_settings(vector_settings)
         await self.put_index_mapping_request(index, mappings)
@@ -586,7 +586,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             bool_query["filter"] = self.build_elasticsearch_filter(filter)
 
         es_query = {"bool": bool_query}
-        index = await self._get_index_or_raise(dataset)
+        index = await self._get_dataset_index(dataset)
 
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
@@ -594,7 +594,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return await self._process_search_response(response)
 
     async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
-        index_name = await self._get_index_or_raise(metadata_property.dataset)
+        index_name = await self._get_dataset_index(metadata_property.dataset)
 
         if metadata_property.type == MetadataPropertyType.terms:
             return await self._metrics_for_terms_property(index_name, metadata_property)
@@ -730,10 +730,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             ],
         ]
 
-    async def _get_index_or_raise(self, dataset: Dataset):
+    async def _get_dataset_index(self, dataset: Dataset):
         index_name = es_index_name_for_dataset(dataset)
-        if not await self._index_exists_request(index_name):
-            raise ValueError(f"Cannot access to index for dataset {dataset.id}: the specified index does not exist")
 
         return index_name
 
