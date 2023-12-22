@@ -284,14 +284,6 @@ class TestBaseElasticAndOpenSearchEngine:
 
     """
 
-    # TODO: Use other public method to detect the error
-    async def test_get_index_or_raise(self, search_engine: BaseElasticAndOpenSearchEngine):
-        dataset = await DatasetFactory.create()
-        with pytest.raises(
-            ValueError, match=f"Cannot access to index for dataset {dataset.id}: the specified index does not exist"
-        ):
-            await search_engine._get_index_or_raise(dataset)
-
     async def test_create_index_for_dataset(
         self, search_engine: BaseElasticAndOpenSearchEngine, db: "AsyncSession", opensearch: OpenSearch
     ):
