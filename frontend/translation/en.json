@@ -64,5 +64,7 @@
     "api": {
       "errors::UnauthorizedError": "Could not validate credentials"
     }
-  }
+  },
+  "focus_mode": "Focus mode",
+  "bulk_mode": "Bulk mode"
 }

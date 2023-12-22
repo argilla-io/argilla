@@ -4,7 +4,7 @@
       class="switch"
       :class="{ active: recordCriteria.page.isFocusMode }"
       @click="switchFocusMode()"
-      data-title="Focus mode"
+      :data-title="$t('focus_mode')"
     >
       <svgicon name="focus-mode" />
     </button>
@@ -12,7 +12,7 @@
       class="switch"
       :class="{ active: recordCriteria.page.isBulkMode }"
       @click="switchFocusMode()"
-      data-title="Bulk mode"
+      :data-title="$t('bulk_mode')"
     >
       <svgicon name="bulk-mode" />
     </button>
