@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List, Union
 
 from pydantic import StrictFloat, StrictInt, StrictStr
 
@@ -23,7 +24,7 @@ DELETE_DATASET_RECORDS_MAX_NUMBER = 100
 FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}
 # We are using `pydantic`'s strict types to avoid implicit type conversions
 METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE = {
-    MetadataPropertyTypes.terms: StrictStr,
+    MetadataPropertyTypes.terms: Union[StrictStr, List[StrictStr]],
     MetadataPropertyTypes.integer: StrictInt,
     MetadataPropertyTypes.float: StrictFloat,
 }
@@ -32,4 +33,5 @@ PYDANTIC_STRICT_TO_PYTHON_TYPE = {
     StrictInt: int,
     StrictFloat: float,
     StrictStr: str,
+    Union[StrictStr, List[StrictStr]]: (str, list),
 }

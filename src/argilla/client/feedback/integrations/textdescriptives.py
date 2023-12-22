@@ -16,8 +16,8 @@ import logging
 import re
 from typing import List, Optional, Union
 
+import numpy as np
 import pandas as pd
-import textdescriptives as td
 from rich.progress import Progress
 
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
@@ -29,6 +29,7 @@ from argilla.client.feedback.schemas.metadata import (
 )
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla.utils.dependency import require_dependencies
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
@@ -57,7 +58,16 @@ class TextDescriptivesExtractor:
             fields (Optional[List[str]]): A list of field names to extract metrics from. If None, all fields will be used.
             visible_for_annotators (bool): Whether the extracted metrics should be visible to annotators.
             show_progress (bool): Whether to show a progress bar when extracting metrics.
+
+        Examples:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+        >>> ds = rg.FeedbackDataset(...)
+        >>> tde = TextDescriptivesExtractor()
+        >>> updated_ds = tde.update_dataset(ds)
+        >>> updated_records = tde.update_records(ds.records)
         """
+        require_dependencies("textdescriptives")
         self.model = model
         self.metrics = metrics
         self.fields = fields
@@ -90,6 +100,8 @@ class TextDescriptivesExtractor:
         Returns:
             Optional[pd.DataFrame]: A dataframe containing the text descriptives metrics for the field, or None if the field is empty.
         """
+        import textdescriptives as td
+
         # If the field is empty, skip it
         field_text = [record.fields[field] for record in records if record.fields[field]]
         if not field_text:
@@ -105,6 +117,8 @@ class TextDescriptivesExtractor:
         if basic_metrics is None and self.metrics is None:
             basic_metrics = self.__basic_metrics
             field_metrics = field_metrics.loc[:, basic_metrics]
+        # Convert any None values to NaNs
+        field_metrics = field_metrics.fillna(value=np.nan)
         # Select all column names that contain ONLY NaNs
         nan_columns = field_metrics.columns[field_metrics.isnull().all()].tolist()
         if nan_columns:
@@ -252,6 +266,7 @@ class TextDescriptivesExtractor:
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with text descriptives metrics added as metadata.
 
+        Examples:
         >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
         >>> records = [rg.FeedbackRecord(fields={"text": "This is a test."})]
         >>> tde = TextDescriptivesExtractor()
@@ -288,10 +303,10 @@ class TextDescriptivesExtractor:
         Returns:
             Union[FeedbackDataset, RemoteFeedbackDataset]: A FeedbackDataset or RemoteFeedbackDataset with text descriptives metrics added as metadata.
 
+        Examples:
         >>> import argilla as rg
         >>> from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
-        >>> rg.init(...)
-        >>> dataset = rg.FeedbackDataset.from_argilla(name="my-dataset")
+        >>> dataset = rg.FeedbackDataset(...)
         >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
 
