@@ -24,9 +24,11 @@ from argilla.server.models import Response, User
 from argilla.server.policies import ResponsePolicyV1, authorize
 from argilla.server.schemas.v1.responses import (
     Response as ResponseSchema,
-    ResponseUpdate,
+)
+from argilla.server.schemas.v1.responses import (
     ResponsesBulk,
     ResponsesBulkCreate,
+    ResponseUpdate,
 )
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth

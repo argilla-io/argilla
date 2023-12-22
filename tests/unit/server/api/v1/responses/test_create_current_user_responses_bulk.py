@@ -17,15 +17,15 @@ from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
-from httpx import AsyncClient
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.enums import ResponseStatus
 from argilla.server.models import Response, User
 from argilla.server.search_engine import SearchEngine
 from argilla.server.use_cases.responses.upsert_responses_in_bulk import UpsertResponsesInBulkUseCase
+from httpx import AsyncClient
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from tests.factories import (
     AnnotatorFactory,
     DatasetFactory,
@@ -390,10 +390,11 @@ class TestCreateCurrentUserResponsesBulk:
 
     @pytest.mark.skipif(reason="Profiling is not active", condition=not bool(os.getenv("TEST_PROFILING", None)))
     async def test_create_responses_in_bulk_profiling(self, db: "AsyncSession", elasticsearch_config: dict):
-        from pyinstrument import Profiler
-        from tests.factories import OwnerFactory, TextFieldFactory
-        from argilla.server.search_engine import ElasticSearchEngine
         from argilla.server.schemas.v1.responses import DraftResponseUpsert
+        from argilla.server.search_engine import ElasticSearchEngine
+        from pyinstrument import Profiler
+
+        from tests.factories import OwnerFactory, TextFieldFactory
 
         async def refresh_dataset(dataset):
             await dataset.awaitable_attrs.fields
