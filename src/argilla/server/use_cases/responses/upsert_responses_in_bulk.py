@@ -1,0 +1,46 @@
+from typing import List
+
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla.server.contexts import datasets
+from argilla.server.database import get_async_db
+from argilla.server.errors import future as errors
+from argilla.server.models import User
+from argilla.server.policies import RecordPolicyV1, authorize
+from argilla.server.schemas.v1.responses import Response, ResponseBulk, ResponseBulkError, ResponseUpsert
+from argilla.server.search_engine import SearchEngine, get_search_engine
+
+
+class UpsertResponsesInBulkUseCase:
+    def __init__(self, db: AsyncSession, search_engine: SearchEngine):
+        self.db = db
+        self.search_engine = search_engine
+
+    async def execute(self, responses: List[ResponseUpsert], user: User) -> List[ResponseBulk]:
+        responses_bulk_items = []
+
+        all_records = await datasets.get_records_by_ids(self.db, [item.record_id for item in responses])
+        non_empty_records = [r for r in all_records if r is not None]
+
+        await datasets.preload_records_relationships_before_validate(self.db, non_empty_records)
+        for item, record in zip(responses, all_records):
+            try:
+                if record is None:
+                    raise errors.NotFoundError(f"Record with id `{item.record_id}` not found")
+
+                await authorize(user, RecordPolicyV1.create_response(record))
+                response = await datasets.upsert_response(self.db, self.search_engine, record, user, item)
+            except Exception as err:
+                responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))
+            else:
+                responses_bulk_items.append(ResponseBulk(item=Response.from_orm(response), error=None))
+
+        return responses_bulk_items
+
+
+class UpsertResponsesInBulkUseCaseFactory:
+    def __call__(
+        self, db: AsyncSession = Depends(get_async_db), search_engine: SearchEngine = Depends(get_search_engine)
+    ):
+        return UpsertResponsesInBulkUseCase(db, search_engine)
