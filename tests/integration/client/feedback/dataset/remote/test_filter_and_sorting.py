@@ -16,9 +16,9 @@ from datetime import datetime
 from typing import List, Union
 from uuid import UUID
 
+import argilla.client.singleton
 import pytest
 from argilla import SortBy, TextField, TextQuestion
-from argilla.client import api
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
 from argilla.client.feedback.schemas.metadata import (
@@ -89,7 +89,7 @@ class TestFilteredRemoteFeedbackDataset:
             if status != ResponseStatusFilter.missing:
                 await ResponseFactory.create(record=record, status=status, values={})
 
-        api.init(api_key=user.api_key)
+        argilla.client.singleton.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         filtered_dataset = remote_dataset.filter_by(response_status=statuses)
         assert all([isinstance(record, RemoteFeedbackRecord) for record in filtered_dataset.records])
@@ -114,7 +114,7 @@ class TestFilteredRemoteFeedbackDataset:
         metadata_filters: Union[MetadataFilters, List[MetadataFilters]],
         expected_num_records: int,
     ) -> None:
-        api.init(api_key=owner.api_key)
+        argilla.client.singleton.init(api_key=owner.api_key)
 
         ws = Workspace.create(name="test-workspace")
 
@@ -139,8 +139,8 @@ class TestFilteredRemoteFeedbackDataset:
         feedback_dataset_records: List[FeedbackRecord],
         db: AsyncSession,
     ) -> None:
-        api.active_api()
-        api.init(api_key=argilla_user.api_key)
+        argilla.client.singleton.active_api()
+        argilla.client.singleton.init(api_key=argilla_user.api_key)
 
         dataset = FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -192,7 +192,7 @@ class TestFilteredRemoteFeedbackDataset:
                 record=record, user=user, values={question.name: {"value": ""}}, status="submitted"
             )
 
-        api.init(api_key=user.api_key)
+        argilla.client.singleton.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         filtered_dataset = remote_dataset.filter_by(response_status="submitted")
 
@@ -267,7 +267,7 @@ class TestFilteredRemoteFeedbackDataset:
             remote.filter_by(metadata_filters=IntegerMetadataFilter(name="unexpected-field", ge=4, le=5))
 
     def _create_test_dataset_with_records(self, owner: User, test_dataset: FeedbackDataset):
-        api.init(api_key=owner.api_key)
+        argilla.client.singleton.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
         remote = test_dataset.push_to_argilla(name="test_dataset", workspace=ws)
         for metadata in (

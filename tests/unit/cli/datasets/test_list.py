@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY, call
 
 import pytest
+from argilla.client.enums import DatasetType
 from rich.table import Table
 
 if TYPE_CHECKING:
@@ -37,16 +38,14 @@ class TestSuiteListDatasetsCommand:
         dataset: "Dataset",
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
-        feedback_dataset_list_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list", return_value=[remote_feedback_dataset]
+        list_datasets_mock = mocker.patch(
+            "argilla.client.api.list_datasets", return_value=[remote_feedback_dataset, dataset]
         )
-        list_datasets_mock = mocker.patch("argilla.client.api.list_datasets", return_value=[dataset])
 
         result = cli_runner.invoke(cli, "datasets list")
 
         assert result.exit_code == 0
-        feedback_dataset_list_mock.assert_called_once_with(None)
-        list_datasets_mock.assert_called_once_with(None)
+        list_datasets_mock.assert_called_once_with(None, None)
         add_row_spy.assert_has_calls(
             [
                 call(
@@ -74,15 +73,13 @@ class TestSuiteListDatasetsCommand:
 
     def test_list_datasets_with_workspace(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
         workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name")
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
         assert result.exit_code == 0
         workspace_from_name_mock.assert_called_once_with("unit-test")
-        feedback_dataset_list_mock.assert_called_once_with("unit-test")
-        list_datasets_mock.assert_called_once_with("unit-test")
+        list_datasets_mock.assert_called_once_with("unit-test", None)
 
     def test_list_datasets_with_non_existing_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
@@ -98,26 +95,22 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type feedback")
 
         assert result.exit_code == 0
-        feedback_dataset_list_mock.assert_called_once_with(None)
-        list_datasets_mock.assert_not_called()
+        list_datasets_mock.assert_called_once_with(None, DatasetType.feedback)
 
     def test_list_datasets_using_type_other_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        feedback_dataset_list_mock = mocker.patch("argilla.client.feedback.dataset.local.dataset.FeedbackDataset.list")
         list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type other")
 
         assert result.exit_code == 0
-        feedback_dataset_list_mock.assert_not_called()
-        list_datasets_mock.assert_called_once_with(None)
+        list_datasets_mock.assert_called_once_with(None, DatasetType.other)
 
 
 @pytest.mark.usefixtures("not_logged_mock")

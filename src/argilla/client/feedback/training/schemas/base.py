@@ -806,8 +806,8 @@ class TrainingTaskForTextClassification(BaseModel, TrainingData):
         else:
             return super()._format_data(dataset)
 
-    def unify_responses(self, responses: List[FeedbackRecord]):
-        self.defaults.label.strategy.unify_responses(responses=responses, field=self.defaults.label.question)
+    def compute_unified_responses(self, responses: List[FeedbackRecord]):
+        self.defaults.label.strategy.compute_unified_responses(responses=responses, field=self.defaults.label.question)
 
     @requires_dependencies("scikit-learn")
     def _train_test_split(self, data: List[dict], train_size: float, seed: int) -> Tuple[List[dict], List[dict]]:
@@ -1460,8 +1460,8 @@ class TrainingTaskForSentenceSimilarity(BaseModel, TrainingData):
 
             return outputs
 
-    def unify_responses(self, responses: List[FeedbackRecord]):
-        self.label.strategy.unify_responses(responses=responses, field=self.label.question)
+    def compute_unified_responses(self, responses: List[FeedbackRecord]):
+        self.label.strategy.compute_unified_responses(responses=responses, field=self.label.question)
 
     @requires_dependencies("scikit-learn")
     def _train_test_split(

@@ -16,7 +16,7 @@ import os
 from typing import TYPE_CHECKING
 
 from argilla.server.models import User, UserRole, Workspace, WorkspaceUser
-from argilla.server.security.auth_provider.local.settings import settings
+from argilla.server.security.auth_provider.db.settings import settings
 from click.testing import CliRunner
 from typer import Typer
 

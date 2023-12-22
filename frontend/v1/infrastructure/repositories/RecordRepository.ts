@@ -502,14 +502,13 @@ export class RecordRepository {
 
   private createParams(fromRecord: number, howMany: number, status: string) {
     const offset = `${fromRecord - 1}`;
-    const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
 
     params.append("include", "responses");
     params.append("include", "suggestions");
     params.append("offset", offset);
     params.append("limit", howMany.toString());
-    params.append("response_status", backendStatus);
+    params.append("response_status", status);
 
     return params;
   }

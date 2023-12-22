@@ -72,7 +72,11 @@ dataset.delete_metadata_properties(metadata_properties="groups")
 
 ### Format `metadata`
 
-Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. If you want the metadata to correspond with the metadata properties configured for your dataset so that these can be used for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting.
+Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. If you want the metadata to correspond with the metadata properties configured for your dataset so that these can be used for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting. For any metadata property, you can define a single metadata value in the form of a string or integer, or multiple metadata values in the form of a list of strings or integers.
+
+::::{tab-set}
+
+:::{tab-item} Single Metadata
 
 ```python
 record = rg.FeedbackRecord(
@@ -80,10 +84,23 @@ record = rg.FeedbackRecord(
     metadata={"source": "encyclopedia", "text_length":150}
 )
 ```
+:::
+
+:::{tab-item} Multiple Metadata
+```python
+record = rg.FeedbackRecord(
+    fields={...},
+    metadata={"source": ["encyclopedia", "wikipedia"], "text_length":150}
+)
+```
+
+:::
+
+::::
 
 #### Add `metadata`
 
-Once the `metadata_properties` were defined, to add metadata to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb).
+Once the `metadata_properties` were defined, to add metadata to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding metadata](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-metadata-003.ipynb). Remember that you can either define a single metadata value for a metadata property or aggregate metadata values for the `TermsMetadataProperty` in the form of a list for the cases where one record falls into multiple metadata categories.
 
 ```{note}
 The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
@@ -113,6 +130,66 @@ dataset.update_records(modified_records)
 ```{note}
 You can also follow the same strategy to modify existing metadata.
 ```
+
+### Add Text Descriptives
+
+You can easily add text descriptives to your records or datasets using the `TextDescriptivesExtractor` based on the [TextDescriptives](https://github.com/HLasse/TextDescriptives) library, which will add the corresponding metadata properties and metadata automatically. The `TextDescriptivesExtractor` can be used on a `FeedbackDataset` or a `RemoteFeedbackDataset` and accepts the following arguments:
+
+- `model` (optional): The language of the spacy model that will be used. Defaults to `en`. Check [here](https://spacy.io/usage/models) the available languages and models.
+- `metrics` (optional): A list of metrics to extract. The default extracted metrics are: `n_tokens`, `n_unique_tokens`, `n_sentences`, `perplexity`, `entropy`, and `flesch_reading_ease`. You can select your metrics according to the following groups `descriptive_stats`, `readability`, `dependency_distance`, `pos_proportions`, `coherence`, `quality`, and `information_theory`. For more information about each group, check this documentation [page](https://hlasse.github.io/TextDescriptives/descriptivestats.html).
+- `fields` (optional): A list of field names to extract metrics from. All fields will be used by default.
+- `visible_for_annotators` (optional): Whether the extracted metrics should be visible to annotators. Defaults to `True`.
+- `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
+
+For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.html).
+
+::::{tab-set}
+
+:::{tab-item} Dataset
+
+This can be used to update the dataset and configuration with `MetadataProperties` for `Fields` in a `FeedbackDataset` or a `RemoteFeedbackDataset`.
+
+```python
+from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+
+dataset = ... # FeedbackDataset or RemoteFeedbackDataset
+
+tde = TextDescriptivesExtractor(
+    model="en",
+    metrics=None,
+    fields=None,
+    visible_for_annotators=True,
+    show_progress=True,
+)
+
+dataset = tde.update_dataset(dataset)
+```
+:::
+
+:::{tab-item} Records
+
+This can be used to update the records with `Metadata` values for `Fields` in a list of `FeedbackRecords`.
+
+```python
+from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+
+records = [...] # FeedbackRecords or RemoteFeedbackRecords
+
+tde = TextDescriptivesExtractor(
+    model="en",
+    metrics=None,
+    fields=None,
+    visible_for_annotators=True,
+    show_progress=True,
+)
+
+records = tde.update_records(records)
+```
+
+:::
+
+
+::::
 
 
 ## Other datasets

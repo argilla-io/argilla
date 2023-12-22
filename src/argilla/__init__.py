@@ -38,12 +38,10 @@ __version__ = _version.version
 
 if _TYPE_CHECKING:
     from argilla.client.api import (
-        active_client,
         copy,
         delete,
         delete_records,
         get_workspace,
-        init,
         list_datasets,
         list_workspaces,
         load,
@@ -65,6 +63,7 @@ if _TYPE_CHECKING:
         TokenAttributions,
         TokenClassificationRecord,
     )
+    from argilla.client.singleton import active_client, init
     from argilla.client.users import User
     from argilla.client.utils import server_info
     from argilla.client.workspaces import Workspace
@@ -100,7 +99,7 @@ if _TYPE_CHECKING:
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
-    from argilla.server.server import app
+    from argilla.server.app import app
 
 
 # TODO: remove me
@@ -137,12 +136,10 @@ _import_structure = {
         "delete",
         "delete_records",
         "get_workspace",
-        "init",
         "load",
         "log",
         "log_async",
         "set_workspace",
-        "active_client",
         "list_datasets",
         "list_workspaces",
     ],
@@ -152,6 +149,10 @@ _import_structure = {
         "TextClassificationRecord",
         "TokenClassificationRecord",
         "TokenAttributions",
+    ],
+    "client.singleton": [
+        "init",
+        "active_client",
     ],
     "client.datasets": [
         "DatasetForText2Text",

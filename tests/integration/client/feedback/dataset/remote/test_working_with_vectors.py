@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import Any, List, Union
 
-import argilla as rg
+import argilla.client.singleton as rg
 import pytest
 from argilla import User, Workspace
 from argilla.feedback import (

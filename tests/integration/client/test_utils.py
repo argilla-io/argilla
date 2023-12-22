@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from argilla._version import version
-from argilla.client import api
+from argilla.client import singleton
 from argilla.client.utils import ServerInfo, server_info
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ def test_server_info_no_auth() -> None:
 
 
 def test_server_info(owner: "ServerUser") -> None:
-    api.init(api_key=owner.api_key)
+    singleton.init(api_key=owner.api_key)
     info = server_info()
     assert isinstance(info, ServerInfo)
     assert info.version == version

@@ -95,6 +95,7 @@ class Argilla:
         workspace: Optional[str] = None,
         timeout: int = 120,
         extra_headers: Optional[Dict[str, str]] = None,
+        httpx_extra_kwargs: Optional[Dict[str, Any]] = None,
     ):
         """
         Inits `Argilla` instance.
@@ -114,7 +115,8 @@ class Argilla:
             timeout: Wait `timeout` seconds for the connection to timeout. Default: 60.
             extra_headers: Extra HTTP headers sent to the server. You can use this to customize
                 the headers of argilla client requests, like additional security restrictions. Default: `None`.
-
+            httpx_extra_kwargs: Extra kwargs passed to the `httpx.Client` constructor. For more information about the
+                available arguments, see https://www.python-httpx.org/api/#client. Defaults to `None`.
         """
         from argilla.client.login import ArgillaCredentials
 
@@ -146,6 +148,7 @@ class Argilla:
             token=api_key,
             timeout=timeout,
             headers=headers.copy(),
+            httpx_extra_kwargs=httpx_extra_kwargs,
         )
 
         self._user = users_api.whoami(client=self.http_client)  # .parsed
@@ -296,6 +299,20 @@ class Argilla:
             name=dataset,
             json_body=CopyDatasetRequest(name=name_of_copy, target_workspace=workspace),
         )
+
+    def get_dataset(self, name: str, workspace: Optional[str] = None) -> DatasetModel:
+        """Gets a dataset by name.
+
+        Args:
+            name: The dataset name.
+            workspace: If provided, dataset will be retrieved from that workspace. Otherwise, the active workspace will
+                be used.
+
+        Returns:
+            A `Dataset` object containing the dataset information.
+        """
+        response = datasets_api.get_dataset(client=self.http_client, name=name, workspace=workspace)
+        return response.parsed
 
     def delete(self, name: str, workspace: Optional[str] = None):
         """Deletes a dataset.

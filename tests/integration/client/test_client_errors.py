@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client.api import init
 from argilla.client.sdk.commons.errors import UnauthorizedApiError
+from argilla.client.singleton import init
 
 
 def test_unauthorized_response_error(mocked_client):

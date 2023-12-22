@@ -145,7 +145,7 @@ async def delete_user(db: "AsyncSession", user: User) -> User:
     return await user.delete(db)
 
 
-async def authenticate_user(db: Session, username: str, password: str):
+async def authenticate_user(db: "AsyncSession", username: str, password: str):
     user = await get_user_by_username(db, username)
 
     if user and verify_password(password, user.password_hash):

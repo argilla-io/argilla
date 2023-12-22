@@ -15,10 +15,10 @@
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
+import argilla.client.singleton
 import datasets
 import pytest
 from argilla import User, Workspace
-from argilla.client import api
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 
 def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
 
@@ -66,7 +66,7 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
 
 @pytest.mark.asyncio
 async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser", db: "AsyncSession"):
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
 
@@ -288,7 +288,7 @@ def test_add_records_with_vectors() -> None:
 def test_add_records_validation_error(
     record: FeedbackRecord, exception_cls: Exception, exception_msg: str, argilla_user: "ServerUser"
 ) -> None:
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
@@ -319,8 +319,8 @@ def test_format_as(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
-    api.active_api()
-    api.init(api_key="argilla.apikey")
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key="argilla.apikey")
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -342,8 +342,8 @@ async def test_push_to_argilla_and_from_argilla(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     db: "AsyncSession",
 ) -> None:
-    api.active_api()
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -407,8 +407,8 @@ async def test_copy_dataset_in_argilla(
     feedback_dataset_records: List[FeedbackRecord],
     db: "AsyncSession",
 ) -> None:
-    api.active_api()
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -447,8 +447,8 @@ async def test_update_dataset_records_in_argilla(
     feedback_dataset_records: List[FeedbackRecord],
     db: "AsyncSession",
 ) -> None:
-    api.active_api()
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -521,8 +521,8 @@ def test_push_to_huggingface_and_from_huggingface(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
-    api.active_api()
-    api.init(api_key="argilla.apikey")
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key="argilla.apikey")
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -646,7 +646,7 @@ def test_prepare_for_training_text_classification(
     )
     dataset.add_records(feedback_dataset_records)
 
-    api.init(api_key=owner.api_key)
+    argilla.client.singleton.init(api_key=owner.api_key)
     ws = Workspace.create(name="test-workspace")
 
     remote = dataset.push_to_argilla(name="test-dataset", workspace=ws)
@@ -659,7 +659,7 @@ def test_prepare_for_training_text_classification(
 
 
 def test_push_to_argilla_with_vector_settings(argilla_user: User):
-    api.init(api_key=argilla_user.api_key)
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field")],

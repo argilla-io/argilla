@@ -12,6 +12,7 @@
       :key="`${record.id}_fields`"
       :fields="record.fields"
     >
+
       <template v-if="fixedHeader" v-slot:fixed-header>
         <RecordFieldsHeader
           class="fields__fixed-header"

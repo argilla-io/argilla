@@ -73,15 +73,14 @@
         <BaseButton
           type="submit"
           class="button--submit"
-          :class="isSubmitting ? '--button--submitting' : null"
-          :loading="isSubmitting"
-          :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
+          :class="[
+            isSubmitting ? '--button--submitting' : null,
+            isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
+          ]"
+                    :loading="isSubmitting"
+          :disabled="isSubmitButtonDisabled"
           :title="
-            !areActionsEnabled
-              ? $t('to_annotate_record_bulk_required')
-              : areQuestionsCompletedCorrectly
-              ? $t('to_submit_complete_required')
-              : $t('shortcuts.questions_form.submit')
+            isSubmitButtonDisabled ? $t('to_submit_complete_required') : null
           "
           @on-click="onSubmit"
         >
@@ -341,13 +340,12 @@ export default {
     justify-content: space-between;
     align-items: stretch;
     border-radius: $border-radius-m;
-    border: 1px solid #c6d1ff;
-    background: #f5f7ff;
-    transition: border-color 0.35s ease;
+    background: #f0f2fa;
     container-type: inline-size;
     &:hover {
-      border-color: transparent;
-      transition: border-color 0.35s ease;
+      .button--submit:not(:hover) {
+        background: transparent;
+      }
     }
   }
 }
@@ -387,12 +385,10 @@ export default {
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
-    &:hover,
-    &.--button--discarding {
+    &:hover {
       color: $black-87;
     }
     &:disabled {
-      opacity: 0.7;
       pointer-events: visible;
       cursor: not-allowed;
     }
@@ -404,33 +400,40 @@ export default {
     }
   }
   &--submit {
+    background: $submitted-color-light;
+    &[disabled] {
+      opacity: 0.5;
+    }
     &:hover:not([disabled]) {
-      background: #b3c4ff;
+      background: darken($submitted-color-light, 2%);
     }
     &:active:not([disabled]),
     &.--button--submitting,
     &.--button--submitting:hover {
-      background: $submitted-color;
+      background: $submitted-color-medium;
+    }
+    &.--button--remove-bg {
+      background: transparent;
     }
   }
   &--draft {
     &:hover:not([disabled]) {
-      background: #b2e6ee;
+      background: $draft-color-light;
     }
     &:active:not([disabled]),
     &.--button--saving-draft,
     &.--button--saving-draft:hover {
-      background: $draft-color;
+      background: $draft-color-medium;
     }
   }
   &--discard {
     &:hover:not([disabled]) {
-      background: #e0dddd;
+      background: $discarded-color-light;
     }
     &:active:not([disabled]),
     &.--button--discarding,
     &.--button--discarding:hover {
-      background: $discarded-color;
+      background: $discarded-color-medium;
     }
   }
 }

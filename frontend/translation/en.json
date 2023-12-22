@@ -17,12 +17,6 @@
     "pagination": {
       "go_to_previous_record": "Previous (←)",
       "go_to_next_record": "Next (→)"
-    },
-    "questions_form": {
-      "draft_mac": "Save as draft (⌘ cmd + s)",
-      "draft": "Save as draft (ctrl + s)",
-      "discard": "Discard (⌫ backspace)",
-      "submit": "Submit (↵ enter)"
     }
   },
   "questions_form": {

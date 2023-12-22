@@ -21,16 +21,17 @@ import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.cli.server.database.migrate import migrate_db
-from argilla.client.api import ArgillaSingleton, delete, log
+from argilla.client.api import log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
 from argilla.client.datasets import read_datasets
 from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
-from argilla.datasets.__init__ import configure_dataset
+from argilla.client.singleton import ArgillaSingleton
+from argilla.datasets import configure_dataset
+from argilla.server.app import app
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.server import app
 from argilla.server.settings import settings
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
@@ -45,6 +46,7 @@ from tests.factories import (
     UserFactory,
     WorkspaceFactory,
 )
+from tests.integration.utils import delete_ignoring_errors
 
 from ..database import SyncTestSession, TestSession, set_task
 from .helpers import SecuredClient
@@ -132,7 +134,7 @@ def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None
         session = TestSession()
         yield session
 
-    mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch("argilla.server.app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     app.dependency_overrides[get_async_db] = override_get_async_db
 
@@ -181,7 +183,7 @@ async def argilla_user() -> Generator[User, None, None]:
     user = await UserFactory.create(
         first_name="Argilla",
         username="argilla",
-        role=UserRole.admin,  # Force to use an admin user
+        role=UserRole.owner,
         password_hash="$2y$05$eaw.j2Kaw8s8vpscVIZMfuqSIX3OLmxA21WjtWicDdn0losQ91Hw.",
         api_key=DEFAULT_API_KEY,
         workspaces=[Workspace(name="argilla")],
@@ -250,7 +252,7 @@ def mocked_client(
     monkeypatch.setattr(httpx, "delete", client_.delete)
     monkeypatch.setattr(httpx, "put", client_.put)
 
-    from argilla.client.api import active_api
+    from argilla.client.singleton import active_api
 
     rb_api = active_api()
     monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)
@@ -280,7 +282,7 @@ def dataset_token_classification(mocked_client: SecuredClient) -> str:
         rec.prediction = []
         rec.prediction_agent = None
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -300,7 +302,7 @@ def dataset_text_classification(mocked_client: SecuredClient) -> str:
     labels = set([rec.annotation for rec in dataset_rb])
     configure_dataset(dataset, settings=TextClassificationSettings(label_schema=labels))
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -318,7 +320,7 @@ def dataset_text_classification_multi_label(mocked_client: SecuredClient) -> str
 
     dataset_rb = [rec for rec in dataset_rb if rec.annotation]
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=dataset_rb)
 
     return dataset
@@ -336,7 +338,7 @@ def dataset_text2text(mocked_client: SecuredClient) -> str:
     for entry in dataset_ds:
         records.append(Text2TextRecord(text=entry["text"], annotation=entry["prediction"][0]["text"]))
 
-    delete(dataset)
+    delete_ignoring_errors(dataset)
     log(name=dataset, records=records)
 
     return dataset

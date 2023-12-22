@@ -35,6 +35,7 @@ from pydantic.generics import GenericModel
 from argilla.server.enums import (
     MetadataPropertyType,
     RecordSortField,
+    ResponseStatus,
     ResponseStatusFilter,
     SimilarityOrder,
     SortOrder,
@@ -133,6 +134,18 @@ class UserResponseStatusFilter(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def response_statuses(self) -> List[ResponseStatus]:
+        return [
+            status.value
+            for status in self.statuses
+            if status not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
+        ]
+
+    @property
+    def has_pending_status(self) -> bool:
+        return ResponseStatusFilter.pending in self.statuses or ResponseStatusFilter.missing in self.statuses
 
 
 class MetadataFilter(BaseModel):
