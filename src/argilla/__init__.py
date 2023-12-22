@@ -99,7 +99,7 @@ if _TYPE_CHECKING:
     )
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
-    from argilla.server.server import app
+    from argilla.server.app import app
 
 
 # TODO: remove me

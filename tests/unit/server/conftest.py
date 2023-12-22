@@ -13,18 +13,18 @@
 #  limitations under the License.
 
 import contextlib
-from typing import AsyncGenerator, Dict, Generator
+from typing import Dict, Generator
 
 import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla.server.app import app
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
-from argilla.server.search_engine import OpenSearchEngine, SearchEngine, get_search_engine
-from argilla.server.server import app
+from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.settings import settings
 from argilla.utils import telemetry
@@ -86,7 +86,7 @@ async def async_client(
     async def override_get_search_engine():
         yield mock_search_engine
 
-    mocker.patch("argilla.server.server._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch("argilla.server.app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     app.dependency_overrides[get_async_db] = override_get_async_db
     app.dependency_overrides[get_search_engine] = override_get_search_engine
