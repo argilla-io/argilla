@@ -49,7 +49,7 @@
     :disabled="disabled"
     @click="onClick"
   >
-    <slot />
+    <BaseSpinner class="spinner" v-if="loading" /><slot v-else />
   </button>
 </template>
 
@@ -155,6 +155,9 @@ export default {
   .svg-icon {
     fill: palette(white);
   }
+  .spinner {
+    border-color: palette(white);
+  }
   &:hover,
   &:active,
   &.active {
@@ -208,6 +211,9 @@ export default {
   color: palette(grey, 200);
   .svg-icon {
     fill: palette(grey, 200);
+  }
+  .spinner {
+    border-color: palette(grey, 200);
   }
   &:hover,
   &:active,

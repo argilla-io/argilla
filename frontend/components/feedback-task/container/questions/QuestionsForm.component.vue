@@ -33,6 +33,7 @@
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
+          :loading="isDiscarding"
           :disabled="!areActionsEnabled"
           :title="
             !areActionsEnabled
@@ -49,6 +50,7 @@
           type="button"
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
+          :loading="isDraftSaving"
           :disabled="!areActionsEnabled"
           :title="
             !areActionsEnabled
@@ -72,6 +74,7 @@
           type="submit"
           class="button--submit"
           :class="isSubmitting ? '--button--submitting' : null"
+          :loading="isSubmitting"
           :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
           :title="
             !areActionsEnabled
@@ -336,7 +339,7 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
     border-radius: $border-radius-m;
     border: 1px solid #c6d1ff;
     background: #f5f7ff;
@@ -383,7 +386,7 @@ export default {
     color: $black-87;
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
-    padding: $base-space * 2 $base-space;
+    padding: $base-space;
     &:hover,
     &.--button--discarding {
       color: $black-87;
@@ -392,6 +395,12 @@ export default {
       opacity: 0.7;
       pointer-events: visible;
       cursor: not-allowed;
+    }
+    :deep(.spinner) {
+      height: $base-space * 3;
+      width: $base-space * 3;
+      border: 4px solid #ffffffd8;
+      border-top-color: #ffffff14;
     }
   }
   &--submit {
