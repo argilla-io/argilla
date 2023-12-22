@@ -145,7 +145,9 @@ export default {
             }
 
             if (options.length > 0) {
-              options[0].focus();
+              options[0].focus({
+                preventScroll: true,
+              });
             } else {
               this.$refs.searchComponentRef?.searchInputRef.focus();
             }

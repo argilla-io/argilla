@@ -36,9 +36,7 @@
           :loading="isDiscarding"
           :disabled="!areActionsEnabled"
           :title="
-            !areActionsEnabled
-              ? $t('to_annotate_record_bulk_required')
-              : $t('shortcuts.questions_form.discard')
+            !areActionsEnabled ? $t('to_annotate_record_bulk_required') : null
           "
           @on-click="onDiscard"
         >
@@ -53,11 +51,7 @@
           :loading="isDraftSaving"
           :disabled="!areActionsEnabled"
           :title="
-            !areActionsEnabled
-              ? $t('to_annotate_record_bulk_required')
-              : $platform.isMac
-              ? $t('shortcuts.questions_form.draft_mac')
-              : $t('shortcuts.questions_form.draft')
+            !areActionsEnabled ? $t('to_annotate_record_bulk_required') : null
           "
           @on-click="onSaveDraft"
         >
@@ -78,9 +72,13 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading="isSubmitting"
-          :disabled="isSubmitButtonDisabled"
+          :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
           :title="
-            isSubmitButtonDisabled ? $t('to_submit_complete_required') : null
+            !areActionsEnabled
+              ? $t('to_annotate_record_bulk_required')
+              : areQuestionsCompletedCorrectly
+              ? $t('to_submit_complete_required')
+              : null
           "
           @on-click="onSubmit"
         >
@@ -400,7 +398,9 @@ export default {
     }
   }
   &--submit {
-    background: $submitted-color-light;
+    &:not([disabled]) {
+      background: $submitted-color-light;
+    }
     &[disabled] {
       opacity: 0.5;
     }
