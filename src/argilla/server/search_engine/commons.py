@@ -473,16 +473,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             response_field = f"responses.{status_filter.user.username}.status"
 
         filters = []
-        statuses = [
-            ResponseStatus(status).value for status in status_filter.statuses if status != ResponseStatusFilter.missing
-        ]
-        if ResponseStatusFilter.missing in status_filter.statuses:
+        if status_filter.has_pending_status:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
             filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
 
-        if statuses:
+        if status_filter.response_statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
-            filters.append(es_terms_query(response_field, values=statuses))
+            filters.append(es_terms_query(response_field, values=status_filter.response_statuses))
 
         return {"bool": {"should": filters, "minimum_should_match": 1}}
 

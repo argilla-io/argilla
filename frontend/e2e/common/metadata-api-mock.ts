@@ -87,7 +87,7 @@ export const metadataPropertiesCompleted = async (page, datasetId) => {
 
 export const mockRecordForMetadataFilter = async (page, datasetId) => {
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft&metadata=correctness-langsmith%3Aincorrect`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=pending&response_status=draft&metadata=correctness-langsmith%3Aincorrect`,
     async (route) => {
       await route.fulfill({
         json: recordsMatchingMetadata,
@@ -98,7 +98,7 @@ export const mockRecordForMetadataFilter = async (page, datasetId) => {
 
 export const mockRecordForMetadataSorting = async (page, datasetId) => {
   await page.route(
-    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=missing&response_status=draft&sort_by=metadata.model-name%3Aasc`,
+    `*/**/api/v1/me/datasets/${datasetId}/records?include=responses&include=suggestions&offset=0&limit=10&response_status=pending&response_status=draft&sort_by=metadata.model-name%3Aasc`,
     async (route) => {
       await route.fulfill({
         json: recordsMatchingMetadata,
