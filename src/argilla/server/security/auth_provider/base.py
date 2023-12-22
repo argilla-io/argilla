@@ -12,10 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from abc import ABCMeta, abstractmethod
 from typing import Optional
 
-from fastapi import Depends
+from fastapi import Depends, FastAPI, Request
 from fastapi.security import APIKeyHeader, SecurityScopes
 
 from argilla._constants import API_KEY_HEADER_NAME
@@ -24,13 +24,24 @@ from argilla.server.models import User
 api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
 
 
-class AuthProvider:
+class AuthProvider(metaclass=ABCMeta):
     """Base class for auth provider"""
 
-    async def get_user(
+    @classmethod
+    @abstractmethod
+    def new_instance(cls):
+        pass
+
+    @abstractmethod
+    def configure_app(self, app: FastAPI):
+        pass
+
+    @abstractmethod
+    async def get_current_user(
         self,
         security_scopes: SecurityScopes,
+        request: Request,
         api_key: Optional[str] = Depends(api_key_header),
         **kwargs,
     ) -> User:
-        raise NotImplementedError()
+        pass

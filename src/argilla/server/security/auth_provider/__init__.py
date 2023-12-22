@@ -13,4 +13,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .local import LocalAuthProvider, create_local_auth_provider
+from .db import DBAuthProvider, settings  # noqa

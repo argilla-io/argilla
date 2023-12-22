@@ -215,8 +215,7 @@ def configure_storage(app: FastAPI):
 
 
 def configure_app_security(app: FastAPI):
-    if hasattr(auth, "router"):
-        app.include_router(auth.router)
+    auth.configure_app(app)
 
 
 def configure_app_logging(app: FastAPI):

@@ -16,7 +16,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import Depends, FastAPI, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, SecurityScopes
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,16 +34,18 @@ from .settings import settings as local_security
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl=local_security.public_oauth_token_url, auto_error=False)
 
 
-class LocalAuthProvider(AuthProvider):
+class DBAuthProvider(AuthProvider):
     def __init__(self, settings: Settings):
-        self.router = APIRouter(tags=["security"])
         self.settings = settings
 
-        # TODO: maybe it's better if we move this endpoint to apis/v0/handlers
-        @self.router.post(
-            settings.token_api_url,
-            response_model=Token,
-            operation_id="login_for_access_token",
+    @classmethod
+    def new_instance(cls) -> "DBAuthProvider":
+        settings = Settings()
+        return DBAuthProvider(settings=settings)
+
+    def configure_app(self, app: FastAPI):
+        @app.post(
+            self.settings.token_api_url, response_model=Token, operation_id="login_for_access_token", tags=["security"]
         )
         async def login_for_access_token(
             db: AsyncSession = Depends(get_async_db),
@@ -52,66 +54,16 @@ class LocalAuthProvider(AuthProvider):
             user = await accounts.authenticate_user(db, form_data.username, form_data.password)
             if not user:
                 raise UnauthorizedError()
+
             access_token_expires = timedelta(minutes=self.settings.token_expiration_in_minutes)
             access_token = self._create_access_token(user.username, expires_delta=access_token_expires)
+
             return Token(access_token=access_token)
-
-    def _create_access_token(self, username: str, expires_delta: Optional[timedelta] = None) -> str:
-        """
-        Creates an access token
-
-        Parameters
-        ----------
-        username:
-            The user name
-        expires_delta:
-            Token expiration
-
-        Returns
-        -------
-            An access token string
-        """
-        to_encode = {
-            "sub": username,
-        }
-        if expires_delta:
-            to_encode["exp"] = datetime.utcnow() + expires_delta
-
-        return jwt.encode(
-            to_encode,
-            self.settings.secret_key,
-            algorithm=self.settings.algorithm,
-        )
-
-    async def fetch_token_user(self, db: AsyncSession, token: str) -> Optional[User]:
-        """
-        Fetch the user for a given access token
-
-        Parameters
-        ----------
-        token:
-            The access token
-
-        Returns
-        -------
-            An User instance if a valid token was provided. None otherwise
-        """
-        try:
-            payload = jwt.decode(
-                token,
-                self.settings.secret_key,
-                algorithms=[self.settings.algorithm],
-            )
-            username: str = payload.get("sub")
-            if username:
-                user = await accounts.get_user_by_username(db, username)
-                return user
-        except JWTError:
-            return None
 
     async def get_current_user(
         self,
         security_scopes: SecurityScopes,
+        request: Request,
         db: AsyncSession = Depends(get_async_db),
         api_key: Optional[str] = Depends(api_key_header),
         token: Optional[str] = Depends(_oauth2_scheme),
@@ -128,8 +80,49 @@ class LocalAuthProvider(AuthProvider):
 
         return user
 
+    async def fetch_token_user(self, db: AsyncSession, token: str) -> Optional[User]:
+        """
+        Fetch the user for a given access token
 
-def create_local_auth_provider():
-    settings = Settings()
+        Parameters
+        ----------
+        token:
+            The access token
 
-    return LocalAuthProvider(settings=settings)
+        Returns
+        -------
+            An User instance if a valid token was provided. None otherwise
+        """
+        try:
+            payload = jwt.decode(token, self.settings.secret_key, algorithms=[self.settings.algorithm])
+            username: str = payload.get("sub")
+            if username:
+                user = await accounts.get_user_by_username(db, username)
+                return user
+        except JWTError:
+            return None
+
+    def _create_access_token(self, username: str, expires_delta: Optional[timedelta] = None) -> str:
+        """
+        Creates an access token
+
+        Parameters
+        ----------
+        username:
+            The user name
+        expires_delta:
+            Token expiration
+
+        Returns
+        -------
+            An access token string
+        """
+        to_encode = {"sub": username}
+        if expires_delta:
+            to_encode["exp"] = datetime.utcnow() + expires_delta
+
+        return jwt.encode(
+            to_encode,
+            self.settings.secret_key,
+            algorithm=self.settings.algorithm,
+        )
