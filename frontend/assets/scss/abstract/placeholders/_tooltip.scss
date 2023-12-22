@@ -88,6 +88,15 @@ $tooltip-border-radius: $border-radius-s;
     line-height: 1.4em;
   }
 }
+%tooltip-mini {
+  &:before {
+    content: none !important;
+  }
+  &:after {
+    padding: calc($base-space / 2);
+    background: $black-54;
+  }
+}
 %has-tooltip {
   &:after {
     content: attr(data-title);

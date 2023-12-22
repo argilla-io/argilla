@@ -27,7 +27,9 @@
         @on-click="resetFilters()"
         >{{ $t("reset") }}</BaseButton
       >
-      <slot></slot>
+      <div class="filters--right">
+        <slot></slot>
+      </div>
     </div>
     <div class="filters__list__wrapper" v-if="visibleFilters">
       <transition name="filterAppear" appear>
@@ -181,6 +183,9 @@ export default {
         background: lighten($primary-color, 44%);
       }
     }
+  }
+  &--right {
+    margin-left: auto;
   }
   .search-area {
     width: min(100%, 400px);

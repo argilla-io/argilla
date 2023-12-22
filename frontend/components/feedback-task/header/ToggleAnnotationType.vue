@@ -4,20 +4,24 @@
       class="switch"
       :class="{ active: recordCriteria.page.isFocusMode }"
       @click="switchFocusMode()"
+      data-title="Focus mode"
     >
-      Focus
+      <svgicon name="focus-mode" />
     </button>
     <button
       class="switch"
       :class="{ active: recordCriteria.page.isBulkMode }"
       @click="switchFocusMode()"
+      data-title="Bulk mode"
     >
-      Bulk
+      <svgicon name="bulk-mode" />
     </button>
   </div>
 </template>
 
 <script>
+import "assets/icons/focus-mode";
+import "assets/icons/bulk-mode";
 export default {
   props: {
     recordCriteria: {
@@ -40,28 +44,41 @@ export default {
 </script>
 
 <style scoped lang="scss">
+$button-height: $base-space * 4;
+$gutter: 2px;
 .annotation-type-switch {
   display: flex;
   align-items: center;
+  padding: $gutter;
   border-radius: $border-radius;
-  overflow: hidden;
+  background: $black-4;
 }
 
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 30px;
-  background-color: $black-4;
+  min-height: $button-height - $gutter * 2;
   border: none;
   color: $black-54;
+  background-color: transparent;
+  border-radius: $border-radius - $gutter;
   cursor: pointer;
   outline: none;
   transition: background-color 0.4s;
+  &:hover,
+  &.active:not(:hover) {
+    background-color: palette(white);
+  }
+  &.active:not(:hover) {
+    .annotation-type-switch:hover & {
+      background-color: transparent;
+    }
+  }
 }
-
-.switch.active {
-  background-color: $black-54;
-  color: palette(white);
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @extend %has-tooltip--bottom;
+  @extend %tooltip-mini;
 }
 </style>
