@@ -11,7 +11,7 @@
     <button
       class="switch"
       :class="{ active: recordCriteria.page.isBulkMode }"
-      @click="switchFocusMode()"
+      @click="switchBulkMode()"
       :data-title="$t('bulk_mode')"
     >
       <svgicon name="bulk-mode" />
@@ -31,11 +31,12 @@ export default {
   },
   methods: {
     switchFocusMode() {
-      if (this.recordCriteria.page.isFocusMode) {
-        this.recordCriteria.page.bulkMode();
-      } else {
-        this.recordCriteria.page.focusMode();
-      }
+      this.recordCriteria.page.focusMode();
+
+      this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
+    switchBulkMode() {
+      this.recordCriteria.page.bulkMode();
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },

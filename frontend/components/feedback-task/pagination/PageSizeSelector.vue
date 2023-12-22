@@ -30,7 +30,7 @@
 export default {
   props: {
     value: {
-      type: [String, Number],
+      type: Number,
       required: true,
     },
     options: {
@@ -45,22 +45,16 @@ export default {
   data() {
     return {
       dropdownIsVisible: false,
+      selectedValue: this.value,
     };
-  },
-  computed: {
-    selectedValue() {
-      const selectedOption = this.options.find(
-        (option) => this.value === option
-      );
-
-      return selectedOption;
-    },
   },
   methods: {
     onVisibility(value) {
       this.dropdownIsVisible = value;
     },
     selectOption(option) {
+      this.selectedValue = option;
+
       this.$emit("onValueChange", option);
 
       this.dropdownIsVisible = false;
