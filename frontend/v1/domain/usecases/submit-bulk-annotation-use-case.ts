@@ -9,7 +9,7 @@ export class SubmitBulkAnnotationUseCase {
     private readonly eventDispatcher: IEventDispatcher
   ) {}
 
-  async execute(records: Record[], recordReference: Record): Promise<void> {
+  async execute(records: Record[], recordReference: Record) {
     records.forEach((record) => record.answerWith(recordReference));
 
     const responses = await this.recordRepository.submitBulkRecordResponse(
@@ -27,5 +27,7 @@ export class SubmitBulkAnnotationUseCase {
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
     );
+
+    return responses.every((r) => r.success);
   }
 }

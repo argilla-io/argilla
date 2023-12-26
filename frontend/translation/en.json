@@ -11,6 +11,7 @@
   },
   "to_submit_complete_required": "To submit complete required responses",
   "to_annotate_record_bulk_required": "To annotate you must select at least one record",
+  "some_records_failed_to_annotate": "Some records failed to annotate",
   "changes_no_submit": "You didn't submit your changes",
   "shortcuts": {
     "label": "Shortcuts",

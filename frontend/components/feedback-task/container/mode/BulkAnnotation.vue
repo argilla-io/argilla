@@ -106,14 +106,20 @@ export default {
       );
     },
     async onSubmit() {
-      await this.submit(this.selectedRecords, this.record);
+      const allSuccessful = await this.submit(
+        this.selectedRecords,
+        this.record
+      );
 
-      this.$emit("on-submit-responses");
+      if (allSuccessful) this.$emit("on-submit-responses");
     },
     async onDiscard() {
-      await this.discard(this.selectedRecords, this.record);
+      const allSuccessful = await this.discard(
+        this.selectedRecords,
+        this.record
+      );
 
-      this.$emit("on-discard-responses");
+      if (allSuccessful) this.$emit("on-discard-responses");
     },
     async onSaveDraft() {
       await this.saveAsDraft(this.selectedRecords, this.record);

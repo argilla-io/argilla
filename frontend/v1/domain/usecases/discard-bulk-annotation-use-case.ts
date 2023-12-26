@@ -9,7 +9,7 @@ export class DiscardBulkAnnotationUseCase {
     private readonly eventDispatcher: IEventDispatcher
   ) {}
 
-  async execute(records: Record[], recordReference: Record): Promise<void> {
+  async execute(records: Record[], recordReference: Record) {
     records.forEach((record) => record.answerWith(recordReference));
 
     const responses = await this.recordRepository.discardBulkRecordResponse(
@@ -24,12 +24,10 @@ export class DiscardBulkAnnotationUseCase {
         record.discard(response);
       });
 
-    // TODO: Handle error
-    // responses[0].success
-    // responses[0].error
-
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
     );
+
+    return responses.every((r) => r.success);
   }
 }
