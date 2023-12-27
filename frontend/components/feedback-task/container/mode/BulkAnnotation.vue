@@ -9,12 +9,19 @@
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
       <div class="wrapper__records__header">
-        <BaseCheckbox
-          v-if="records.hasRecordsToAnnotate"
-          class="wrapper__records__header__checkbox"
-          :value="selectedRecords.length === recordsOnPage.length"
-          @input="toggleAllRecords"
-        />
+        <div class="wrapper__records__header--left">
+          <BaseCheckbox
+            v-if="records.hasRecordsToAnnotate"
+            class="wrapper__records__header__checkbox"
+            :value="selectedRecords.length === recordsOnPage.length"
+            @input="toggleAllRecords"
+          />
+          <span
+            class="wrapper__records__header__selection-text"
+            v-if="selectedRecords.length"
+            v-text="selectionInfoText"
+          />
+        </div>
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
       <SimilarityRecordReference
@@ -26,6 +33,7 @@
       />
       <div class="bulk__records">
         <Record
+          :class="{ 'record__wrapper--fixed-height': fixedHeight }"
           v-for="(record, i) in recordsOnPage"
           :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
           :datasetVectors="datasetVectors"
@@ -91,6 +99,7 @@ export default {
   data() {
     return {
       selectedRecords: [],
+      fixedHeight: false,
     };
   },
   computed: {
@@ -99,6 +108,11 @@ export default {
     },
     hasSelectedAtLeastOneRecord() {
       return this.selectedRecords.length > 0;
+    },
+    selectionInfoText() {
+      return `${this.selectedRecords.length} ${
+        this.selectedRecords.length === 1 ? "record" : "records"
+      } selected`;
     },
   },
   methods: {
@@ -188,11 +202,14 @@ export default {
       justify-content: flex-end;
       align-items: center;
       gap: $base-space;
-      padding: $base-space $base-space * 2;
-      border: 1px solid $black-10;
-      background: palette(white);
-      border-radius: $border-radius-m;
-      &__checkbox {
+      padding: 0 0 0 $base-space * 2;
+      &__selection-text {
+        color: $black-54;
+        @include font-size(13px);
+      }
+      &--left {
+        display: flex;
+        gap: $base-space;
         margin-left: 0;
         margin-right: auto;
       }
@@ -218,8 +235,12 @@ export default {
     overflow: auto;
     @extend %hide-scrollbar;
     .record__wrapper {
-      max-height: 300px;
       min-height: auto;
+      height: auto;
+      &--fixed-height {
+        max-height: 300px;
+        height: 100%;
+      }
     }
   }
 }
