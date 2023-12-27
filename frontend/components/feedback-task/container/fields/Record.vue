@@ -99,21 +99,4 @@ export default {
     }
   }
 }
-// .record {
-//   display: flex;
-//   flex-direction: column;
-//   background: palette(white);
-//   border: 1px solid palette(grey, 600);
-//   border-radius: $border-radius-m;
-//   min-height: 0;
-//   &__content {
-//     height: 100%;
-//     display: flex;
-//     flex-direction: column;
-//     overflow: auto;
-//     gap: $base-space * 2;
-//     padding: $base-space * 2;
-//     border-radius: $border-radius-m;
-//   }
-// }
 </style>
