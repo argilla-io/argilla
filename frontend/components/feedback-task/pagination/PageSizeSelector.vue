@@ -102,6 +102,18 @@ export default {
       background: $black-4;
     }
   }
+  &__text {
+    margin: 0;
+    @include font-size(13px);
+  }
+  :deep(.dropdown__header) {
+    color: $black-54;
+    background: $black-4;
+    padding: calc($base-space / 2);
+    &:hover {
+      background: $black-6;
+    }
+  }
   .svg-icon {
     flex-shrink: 0;
   }
