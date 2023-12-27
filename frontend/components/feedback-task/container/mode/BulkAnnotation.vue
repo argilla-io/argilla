@@ -17,8 +17,15 @@
         />
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
+      <SimilarityRecordReference
+        v-show="recordCriteria.isFilteringBySimilarity"
+        v-if="!!records.reference"
+        :fields="records.reference.fields"
+        :recordCriteria="recordCriteria"
+        :availableVectors="datasetVectors"
+      />
       <div class="bulk__records">
-        <RecordFieldsAndSimilarity
+        <Record
           v-for="(record, i) in recordsOnPage"
           :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
           :datasetVectors="datasetVectors"
@@ -26,7 +33,6 @@
           :recordCriteria="recordCriteria"
           :record="record"
           :fixed-header="true"
-          :show-record-similar="i === 0"
           :selectable-record="true"
           :selectedRecords="selectedRecords"
           @on-select-record="onSelectRecord"
@@ -211,7 +217,7 @@ export default {
     height: 100%;
     overflow: auto;
     @extend %hide-scrollbar;
-    .fields {
+    .record__wrapper {
       max-height: 300px;
       min-height: auto;
     }

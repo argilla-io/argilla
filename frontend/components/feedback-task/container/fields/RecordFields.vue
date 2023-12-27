@@ -1,20 +1,16 @@
 <template>
-  <div class="record">
-    <slot name="fixed-header"></slot>
-    <div class="record__content">
-      <slot name="content-header"></slot>
-      <div
-        v-for="{ id, title, content, isTextType, settings } in fields"
-        :key="id"
-      >
-        <TextFieldComponent
-          v-if="isTextType"
-          :title="title"
-          :fieldText="content"
-          :useMarkdown="settings.use_markdown"
-          :stringToHighlight="searchValue"
-        />
-      </div>
+  <div class="fields">
+    <div
+      v-for="{ id, title, content, isTextType, settings } in fields"
+      :key="id"
+    >
+      <TextFieldComponent
+        v-if="isTextType"
+        :title="title"
+        :fieldText="content"
+        :useMarkdown="settings.use_markdown"
+        :stringToHighlight="searchValue"
+      />
     </div>
   </div>
 </template>
@@ -33,23 +29,14 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
-.record {
+.fields {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background: palette(white);
-  border: 1px solid palette(grey, 600);
-  border-radius: $border-radius-m;
+  gap: $base-space;
+  min-width: 0;
+  height: 100%;
   min-height: 0;
-  &__content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    gap: $base-space * 2;
-    padding: $base-space * 2;
-    border-radius: $border-radius-m;
-  }
 }
 </style>

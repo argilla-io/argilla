@@ -11,7 +11,14 @@
       <div class="wrapper__records__header">
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
-      <RecordFieldsAndSimilarity
+      <SimilarityRecordReference
+        v-show="recordCriteria.isFilteringBySimilarity"
+        v-if="!!records.reference"
+        :fields="records.reference.fields"
+        :recordCriteria="recordCriteria"
+        :availableVectors="datasetVectors"
+      />
+      <Record
         :datasetVectors="datasetVectors"
         :records="records"
         :recordCriteria="recordCriteria"
