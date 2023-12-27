@@ -1,22 +1,22 @@
 <template>
   <div class="pagination" v-if="records.hasRecordsToAnnotate">
+    <PageSizeSelector
+      v-if="isBulkMode"
+      :options="recordCriteria.page.options"
+      v-model="recordCriteria.page.client.many"
+    />
     <span class="pagination__info">
       <span>{{ currentPage }}</span>
-      <span
-        class="pagination__info--bulk"
-        v-if="recordCriteria.committed.page.isBulkMode"
-      >
+      <span class="pagination__info--bulk" v-if="isBulkMode">
         -
-        <PageSizeSelector
-          :options="recordCriteria.page.options"
-          v-model="recordCriteria.page.client.many"
-        />
-      </span>
+        {{ currentPageEnd }}</span
+      >
       <span>of {{ records.total }}</span>
     </span>
     <PaginationComponent
       :recordCriteria="recordCriteria"
       :total="records.total"
+      :is-bulk-mode="isBulkMode"
     />
   </div>
 </template>
@@ -33,8 +33,20 @@ export default {
     },
   },
   computed: {
+    isBulkMode() {
+      return this.recordCriteria.committed.page.isBulkMode;
+    },
     currentPage() {
       return this.recordCriteria.committed.page.client.page;
+    },
+    currentPageEnd() {
+      return this.currentPage + this.currentPageItemsSize - 1 >
+        this.records.total
+        ? this.records.total
+        : this.currentPage + this.currentPageItemsSize - 1;
+    },
+    currentPageItemsSize() {
+      return this.recordCriteria.committed.page.client.many;
     },
   },
   setup() {

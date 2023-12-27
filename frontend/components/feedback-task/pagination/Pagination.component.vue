@@ -34,6 +34,10 @@ export default {
       type: Number,
       required: true,
     },
+    isBulkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortcuts);
@@ -45,11 +49,18 @@ export default {
     currentPage() {
       return this.recordCriteria.committed.page.client.page;
     },
+    currentPageSize() {
+      return this.recordCriteria.committed.page.client.many;
+    },
     isFirstPage() {
       return this.recordCriteria.page.isFirstPage();
     },
     isLastPage() {
-      return this.currentPage === this.total;
+      if (this.isBulkMode) {
+        return this.currentPage + this.currentPageSize >= this.total;
+      } else {
+        return this.currentPage === this.total;
+      }
     },
   },
   methods: {
