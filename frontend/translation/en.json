@@ -14,7 +14,11 @@
   "some_records_failed_to_annotate": "Some records failed to annotate",
   "changes_no_submit": "You didn't submit your changes",
   "bulkAnnotation": {
-    "recordsSelected": "1 record selected | {count} records selected"
+    "recordsSelected": "1 record selected | {count} records selected",
+    "recordsViewSettings": "Records view settings",
+    "recordsHeight": "Records height:",
+    "fixedHeight": "Fixed height (300px)",
+    "defaultHeight": "Default height"
   },
   "shortcuts": {
     "label": "Shortcuts",
@@ -58,7 +62,6 @@
   "cancel": "Cancel",
   "focus_mode": "Focus mode",
   "bulk_mode": "Bulk mode",
-
   "youAreOnlineAgain": "You are online again",
   "youAreOffline": "You are offline",
   "argilla": {

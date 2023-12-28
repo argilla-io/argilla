@@ -24,6 +24,7 @@
             "
           />
         </div>
+        <RecordsViewConfig v-model="recordHeight" />
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
       <SimilarityRecordReference
@@ -35,7 +36,9 @@
       />
       <div class="bulk__records">
         <Record
-          :class="{ 'record__wrapper--fixed-height': fixedHeight }"
+          :class="{
+            'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
+          }"
           v-for="(record, i) in recordsOnPage"
           :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
           :datasetVectors="datasetVectors"
@@ -102,7 +105,7 @@ export default {
   data() {
     return {
       selectedRecords: [],
-      fixedHeight: false,
+      recordHeight: "fixedHeight",
     };
   },
   computed: {
