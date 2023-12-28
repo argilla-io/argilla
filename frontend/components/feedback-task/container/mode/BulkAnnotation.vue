@@ -19,7 +19,9 @@
           <span
             class="wrapper__records__header__selection-text"
             v-if="selectedRecords.length"
-            v-text="selectionInfoText"
+            v-text="
+              $tc('bulkAnnotation.recordsSelected', this.selectedRecords.length)
+            "
           />
         </div>
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
@@ -108,11 +110,6 @@ export default {
     },
     hasSelectedAtLeastOneRecord() {
       return this.selectedRecords.length > 0;
-    },
-    selectionInfoText() {
-      return `${this.selectedRecords.length} ${
-        this.selectedRecords.length === 1 ? "record" : "records"
-      } selected`;
     },
   },
   methods: {
@@ -204,6 +201,7 @@ export default {
       gap: $base-space;
       padding: 0 0 0 $base-space * 2;
       &__selection-text {
+        user-select: none;
         color: $black-54;
         @include font-size(13px);
       }
