@@ -34,10 +34,6 @@ export default {
       type: Number,
       required: true,
     },
-    isBulkMode: {
-      type: Boolean,
-      default: false,
-    },
   },
   mounted() {
     document.addEventListener("keydown", this.onPressKeyboardShortcuts);
@@ -61,6 +57,9 @@ export default {
       } else {
         return this.currentPage === this.total;
       }
+    },
+    isBulkMode() {
+      return this.recordCriteria.committed.page.isBulkMode;
     },
   },
   methods: {

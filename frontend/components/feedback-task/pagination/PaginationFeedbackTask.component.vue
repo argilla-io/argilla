@@ -16,7 +16,6 @@
     <PaginationComponent
       :recordCriteria="recordCriteria"
       :total="records.total"
-      :is-bulk-mode="isBulkMode"
     />
   </div>
 </template>
