@@ -60,6 +60,7 @@
       :class="statusClass"
       :datasetId="recordCriteria.datasetId"
       :record="record"
+      :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
       :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"

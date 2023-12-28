@@ -29,7 +29,7 @@
     <div class="footer-form">
       <div class="footer-form__content">
         <BaseButton
-          v-if="!record.isDiscarded || isDiscarding"
+          v-if="showDiscardButton || isDiscarding"
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
@@ -103,6 +103,10 @@ export default {
     record: {
       type: Object,
       required: true,
+    },
+    showDiscardButton: {
+      type: Boolean,
+      default: true,
     },
     areActionsEnabled: {
       type: Boolean,
