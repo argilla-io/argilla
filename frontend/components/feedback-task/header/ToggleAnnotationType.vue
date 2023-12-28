@@ -66,9 +66,15 @@ $gutter: 2px;
   cursor: pointer;
   outline: none;
   transition: background-color 0.4s;
+  .svg-icon {
+    fill: $black-37;
+  }
   &:hover,
   &.active:not(:hover) {
     background-color: palette(white);
+    .svg-icon {
+      fill: $black-54;
+    }
   }
   &.active:not(:hover) {
     .annotation-type-switch:hover & {
