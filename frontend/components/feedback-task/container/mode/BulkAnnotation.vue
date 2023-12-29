@@ -34,8 +34,9 @@
         :recordCriteria="recordCriteria"
         :availableVectors="datasetVectors"
       />
-      <div class="bulk__records">
+      <div class="bulk__records snap">
         <Record
+          class="snap-child"
           :class="{
             'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
           }"
@@ -170,6 +171,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.snap {
+  scroll-snap-type: y mandatory;
+}
+.snap-child {
+  scroll-snap-align: start;
+}
 .wrapper {
   display: flex;
   flex-wrap: wrap;
