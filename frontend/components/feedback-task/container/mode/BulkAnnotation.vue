@@ -20,7 +20,7 @@
             class="wrapper__records__header__selection-text"
             v-if="selectedRecords.length"
             v-text="
-              $tc('bulkAnnotation.recordsSelected', this.selectedRecords.length)
+              $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
             "
           />
         </div>
@@ -42,7 +42,6 @@
           v-for="(record, i) in recordsOnPage"
           :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
           :datasetVectors="datasetVectors"
-          :records="records"
           :recordCriteria="recordCriteria"
           :record="record"
           :fixed-header="true"

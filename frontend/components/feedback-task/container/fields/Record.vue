@@ -37,10 +37,6 @@ export default {
       type: Array,
       required: false,
     },
-    records: {
-      type: Object,
-      required: true,
-    },
     selectableRecord: {
       type: Boolean,
       default: false,

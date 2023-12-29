@@ -20,7 +20,6 @@
       />
       <Record
         :datasetVectors="datasetVectors"
-        :records="records"
         :recordCriteria="recordCriteria"
         :record="record"
       />
