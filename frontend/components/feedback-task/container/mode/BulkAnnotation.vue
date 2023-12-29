@@ -44,8 +44,6 @@
           :datasetVectors="datasetVectors"
           :recordCriteria="recordCriteria"
           :record="record"
-          :fixed-header="true"
-          :selectable-record="true"
           :selectedRecords="selectedRecords"
           @on-select-record="onSelectRecord"
         />

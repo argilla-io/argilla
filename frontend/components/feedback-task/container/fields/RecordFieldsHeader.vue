@@ -2,7 +2,7 @@
   <div class="fields__header">
     <div class="fields__header--left">
       <BaseCheckbox
-        v-if="selectableRecord"
+        v-if="Array.isArray(selectedRecords)"
         class="fields__checkbox"
         :value="selectedRecords.includes(record)"
         @input="onSelectedRecord"
@@ -18,7 +18,7 @@
       >
       </SimilarityScorePercentage>
       <SimilarityFilter
-        v-if="datasetVectors?.length"
+        v-if="datasetVectors.length"
         :availableVectors="datasetVectors"
         :recordCriteria="recordCriteria"
         :recordId="record.id"
@@ -30,10 +30,6 @@
 <script>
 export default {
   props: {
-    selectableRecord: {
-      type: Boolean,
-      default: false,
-    },
     record: {
       type: Object,
       required: true,
@@ -48,7 +44,6 @@ export default {
     },
     selectedRecords: {
       type: Array,
-      default: () => [],
     },
   },
   methods: {

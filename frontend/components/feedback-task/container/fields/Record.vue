@@ -1,22 +1,13 @@
 <template>
   <div class="record__wrapper" v-if="!!record" :key="`${record.id}_fields`">
     <div class="record">
-      <RecordFieldsHeader
-        v-if="fixedHeader"
-        class="record__fixed-header"
-        :record="record"
-        :recordCriteria="recordCriteria"
-        :datasetVectors="datasetVectors"
-        :selectableRecord="selectableRecord"
-        :selectedRecords="selectedRecords"
-        @on-select-record="onSelectedRecord"
-      />
       <div class="record__content">
         <RecordFieldsHeader
-          v-if="!fixedHeader"
           :record="record"
           :recordCriteria="recordCriteria"
           :datasetVectors="datasetVectors"
+          :selectedRecords="selectedRecords"
+          @on-select-record="onSelectedRecord"
         />
         <RecordFields :fields="record.fields" />
       </div>
@@ -37,17 +28,8 @@ export default {
       type: Array,
       required: false,
     },
-    selectableRecord: {
-      type: Boolean,
-      default: false,
-    },
     selectedRecords: {
       type: Array,
-      default: () => [],
-    },
-    fixedHeader: {
-      type: Boolean,
-      default: false,
     },
   },
   computed: {
