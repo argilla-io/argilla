@@ -36,7 +36,12 @@
           :loading="isDiscarding"
           :disabled="!areActionsEnabled"
           :title="
-            !areActionsEnabled ? $t('to_annotate_record_bulk_required') : null
+            !areActionsEnabled
+              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
+              : $tc(
+                  'bulkAnnotation.records_to_be_applied',
+                  numberOfSelectedRecords
+                )
           "
           @on-click="onDiscard"
         >
@@ -51,7 +56,12 @@
           :loading="isDraftSaving"
           :disabled="!areActionsEnabled"
           :title="
-            !areActionsEnabled ? $t('to_annotate_record_bulk_required') : null
+            !areActionsEnabled
+              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
+              : $tc(
+                  'bulkAnnotation.records_to_be_applied',
+                  numberOfSelectedRecords
+                )
           "
           @on-click="onSaveDraft"
         >
@@ -75,10 +85,13 @@
           :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
           :title="
             !areActionsEnabled
-              ? $t('to_annotate_record_bulk_required')
+              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
               : areQuestionsCompletedCorrectly
               ? $t('to_submit_complete_required')
-              : null
+              : $tc(
+                  'bulkAnnotation.records_to_be_applied',
+                  numberOfSelectedRecords
+                )
           "
           @on-click="onSubmit"
         >
@@ -123,6 +136,9 @@ export default {
     isDraftSaving: {
       type: Boolean,
       required: true,
+    },
+    numberOfSelectedRecords: {
+      type: Number,
     },
   },
   data() {

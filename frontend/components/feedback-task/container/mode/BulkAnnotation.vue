@@ -66,6 +66,7 @@
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
       :are-actions-enabled="hasSelectedAtLeastOneRecord"
+      :number-of-selected-records="selectedRecords.length"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
       @on-save-draft="onSaveDraft"
