@@ -458,47 +458,6 @@ export default {
   }
 }
 
-.draft {
-  position: absolute;
-  right: $base-space * 2;
-  top: $base-space;
-  user-select: none;
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: center;
-  margin: 0;
-  @include font-size(12px);
-  color: $black-37;
-  font-weight: 500;
-  p {
-    margin: 0;
-    &:hover {
-      .tooltip {
-        opacity: 1;
-        height: auto;
-        width: auto;
-        overflow: visible;
-      }
-    }
-  }
-  .tooltip {
-    opacity: 0;
-    height: auto;
-    width: 0;
-    @extend %tooltip;
-    top: 50%;
-    transform: translateY(-50%);
-    right: calc(100% + 10px);
-    overflow: hidden;
-    &:before {
-      position: absolute;
-      @extend %triangle-right;
-      left: 100%;
-    }
-  }
-}
-
 @container (max-width: 500px) {
   .button {
     &--submit,
