@@ -94,7 +94,9 @@ $tooltip-border-radius: $border-radius-s;
   }
   &:after {
     padding: calc($base-space / 2);
-    background: $black-54;
+    background: #0009;
+    @include font-size(12px);
+    line-height: 1.2;
   }
 }
 %has-tooltip {

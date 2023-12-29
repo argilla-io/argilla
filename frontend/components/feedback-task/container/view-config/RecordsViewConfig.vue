@@ -4,8 +4,12 @@
     :visible="dropdownIsVisible"
     @visibility="onChangeDropDownVisibility"
     ><template slot="dropdown-header"
-      ><span :title="$t('bulkAnnotation.recordsViewSettings')"
+      ><span
+        :data-title="
+          !dropdownIsVisible && $t('bulkAnnotation.recordsViewSettings')
+        "
         ><svgicon
+          class="view-config__icon"
           width="20"
           height="20"
           color="#989898"
@@ -96,5 +100,11 @@ export default {
       background: transparent;
     }
   }
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @extend %has-tooltip--bottom;
+  @extend %tooltip-mini;
 }
 </style>
