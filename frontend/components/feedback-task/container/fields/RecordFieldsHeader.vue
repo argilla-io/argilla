@@ -9,7 +9,6 @@
       />
     </div>
     <div class="fields__header--right">
-      <RecordStatus class="fields__status" :recordStatus="record.status" />
       <SimilarityScorePercentage
         v-if="recordCriteria.isFilteringBySimilarity && record.score.percentage"
         class="similarity__progress"
@@ -23,6 +22,7 @@
         :recordCriteria="recordCriteria"
         :recordId="record.id"
       />
+      <RecordStatus :recordStatus="record.status" />
     </div>
   </div>
 </template>
@@ -76,10 +76,6 @@ export default {
       align-items: center;
       gap: $base-space;
     }
-  }
-  &__status {
-    display: inline-flex;
-    margin-right: auto;
   }
 }
 
