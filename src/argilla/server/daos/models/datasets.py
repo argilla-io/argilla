@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, root_validator
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator
 
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType

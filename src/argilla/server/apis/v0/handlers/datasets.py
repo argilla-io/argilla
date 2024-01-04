@@ -16,7 +16,7 @@
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, Security
-from pydantic import parse_obj_as
+from argilla.server.pydantic_v1 import parse_obj_as
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import (

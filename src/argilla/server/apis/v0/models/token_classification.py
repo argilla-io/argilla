@@ -14,7 +14,7 @@
 #  limitations under the License.
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, root_validator, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
 
 from argilla.server.apis.v0.models.commons.model import BaseRecord, BaseRecordInputs, BaseSearchResults, ScoreRange
 from argilla.server.commons.models import PredictionStatus

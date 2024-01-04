@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Security
-from pydantic import BaseModel, Field
+from argilla.server.pydantic_v1 import BaseModel, Field
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies

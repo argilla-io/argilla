@@ -15,7 +15,7 @@ import json
 from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends, Query, Security
-from pydantic import BaseModel, Field
+from argilla.server.pydantic_v1 import BaseModel, Field
 
 from argilla.client.sdk.token_classification.models import TokenClassificationQuery
 from argilla.server.apis.v0.models.commons.model import SortableField

@@ -18,8 +18,8 @@ import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, conint, constr, root_validator, validator
-from pydantic.generics import GenericModel
+from argilla.server.pydantic_v1 import BaseModel, Field, conint, constr, root_validator, validator
+from argilla.server.pydantic_v1.generics import GenericModel
 
 from argilla import _messages
 from argilla._constants import _JS_MAX_SAFE_INTEGER, PROTECTED_METADATA_FIELD_PREFIX
@@ -108,7 +108,7 @@ class BaseRecordInDB(GenericModel, Generic[AnnotationDB]):
 
         return values
 
-    @root_validator()
+    @root_validator(skip_on_failure=True)
     def prepare_record_for_db(cls, values):
         values = cls.update_annotation(values, "prediction")
         values = cls.update_annotation(values, "annotation")

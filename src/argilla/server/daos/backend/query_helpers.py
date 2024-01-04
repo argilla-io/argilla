@@ -16,7 +16,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel
+from argilla.server.pydantic_v1 import BaseModel
 
 from argilla.server.commons.models import TaskStatus
 from argilla.server.daos.backend.mappings.helpers import mappings

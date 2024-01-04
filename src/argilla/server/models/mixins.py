@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Set, TypeVar, Union
 
-from pydantic import BaseModel
+from argilla.server.pydantic_v1 import BaseModel
 from sqlalchemy import sql
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert

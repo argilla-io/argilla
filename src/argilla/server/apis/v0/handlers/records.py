@@ -15,7 +15,7 @@
 from typing import Optional, Union
 
 from fastapi import APIRouter, Depends, Query, Security
-from pydantic import BaseModel
+from argilla.server.pydantic_v1 import BaseModel
 
 from argilla.client.sdk.token_classification.models import TokenClassificationQuery
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies

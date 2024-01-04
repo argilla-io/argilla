@@ -15,7 +15,7 @@
 
 from typing import Dict, List, Optional, Set, Tuple
 
-from pydantic import BaseModel, Field, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskType

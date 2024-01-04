@@ -16,7 +16,7 @@
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
 
 from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
@@ -39,7 +39,7 @@ class ServiceLabelingRule(BaseModel):
     )
     description: Optional[str] = Field(None, description="A brief description of the rule")
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def initialize_labels(cls, values):
         label = values.get("label", None)
         labels = values.get("labels", [])
@@ -164,7 +164,7 @@ class ServiceTextClassificationRecord(ServiceBaseRecord[TextClassificationAnnota
 
     _SCORE_DEVIATION_ERROR: ClassVar[float] = 0.001
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def validate_record(cls, values):
         """fastapi validator method"""
         prediction = values.get("prediction", None)

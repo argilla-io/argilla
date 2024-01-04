@@ -15,7 +15,7 @@
 
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 
 from argilla.server.apis.v0.models.commons.model import (
     BaseAnnotation,
