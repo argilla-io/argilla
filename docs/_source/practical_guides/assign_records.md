@@ -70,7 +70,7 @@ for username, records in assignments.items():
 ```
 
 ```{Note}
-If you prefer to have a single dataset accessible to all teammates, you can assign the records using the metadata whether without overlap (adding a single annotator) or with overlap (adding a list of multiple annotators). Annotators will just need to filter the dataset in the Argilla UI by their username to get their assigned records:
+If you prefer to have a single dataset accessible to all teammates, you can assign the records using the metadata whether without overlap (by adding a single annotator as metadata to each record) or with overlap (by adding a list of multiple annotators). Annotators will just need to filter the dataset in the Argilla UI by their username to get their assigned records:
 ```python
 #Add the metadata to the existing records using id to identify each record
 id_modified_records = {}
