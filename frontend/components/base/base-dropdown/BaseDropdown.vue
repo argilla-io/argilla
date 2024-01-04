@@ -77,6 +77,13 @@ export default {
       return this.boundary === "viewport";
     },
   },
+  watch: {
+    visible() {
+      this.$nextTick(() => {
+        this.setViewportPosition();
+      });
+    },
+  },
   methods: {
     onClose() {
       this.$emit("visibility", false);
@@ -86,10 +93,6 @@ export default {
     },
     onClick() {
       this.onToggle();
-
-      this.$nextTick(() => {
-        this.setViewportPosition();
-      });
     },
     setViewportPosition() {
       if (!this.isViewportBoundary) return;
