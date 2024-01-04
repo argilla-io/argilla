@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from pydantic import Field
+from argilla.pydantic_v1 import Field
 
 from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema

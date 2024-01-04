@@ -16,7 +16,7 @@ import typing
 from typing import Any, Dict, List, Optional, Type, Union
 
 import httpx
-from pydantic import BaseModel, Extra, ValidationError, create_model
+from argilla.pydantic_v1 import BaseModel, Extra, ValidationError, create_model
 
 from argilla.client.feedback.constants import FIELD_TYPE_TO_PYTHON_TYPE
 from argilla.client.feedback.dataset.base import FeedbackDatasetBase

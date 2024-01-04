@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field, PositiveInt, validator
+from argilla.pydantic_v1 import BaseModel, Field, PositiveInt, validator
 
 from argilla.client.feedback.schemas.validators import title_must_have_value
 

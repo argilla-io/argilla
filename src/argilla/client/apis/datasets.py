@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from pydantic import BaseModel, Field
+from argilla.pydantic_v1 import BaseModel, Field
 
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (

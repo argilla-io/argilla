@@ -16,7 +16,7 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Extra, Field, conint, conlist, root_validator, validator
+from argilla.pydantic_v1 import BaseModel, Extra, Field, conint, conlist, root_validator, validator
 
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.utils import LabelMappingMixin

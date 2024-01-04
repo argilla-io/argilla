@@ -15,7 +15,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import (
+from argilla.pydantic_v1 import (
     BaseModel,
     Extra,
     Field,
@@ -202,7 +202,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
 
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
+    _bounds_validator = root_validator(allow_reuse=True, skip_on_failure=True)(validate_numeric_metadata_property_bounds)
 
     @property
     def server_settings(self) -> Dict[str, Any]:
@@ -396,7 +396,7 @@ class _NumericMetadataFilterSchema(MetadataFilterSchema):
     le: Optional[Union[int, float]] = None
     ge: Optional[Union[int, float]] = None
 
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_filter_bounds)
+    _bounds_validator = root_validator(allow_reuse=True, skip_on_failure=True)(validate_numeric_metadata_filter_bounds)
 
     @property
     def query_string(self) -> str:

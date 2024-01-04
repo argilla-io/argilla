@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import List, Union
 
-from pydantic import StrictFloat, StrictInt, StrictStr
+from argilla.pydantic_v1 import StrictFloat, StrictInt, StrictStr
 
 from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
 
