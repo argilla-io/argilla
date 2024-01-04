@@ -110,8 +110,8 @@ class Settings(BaseSettings):
         " Values containing higher than this will be truncated",
     )
 
+    # See also the telemetry.py module
     enable_telemetry: bool = True
-
     telemetry_key: str = DEFAULT_TELEMETRY_KEY
 
     @validator("home_path", always=True)
