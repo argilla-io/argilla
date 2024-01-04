@@ -16,9 +16,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Dict, Hashable, List, Tuple, Union
 
 import pandas as pd
-from argilla.pydantic_v1 import BaseModel
 
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
+from argilla.pydantic_v1 import BaseModel
 
 if TYPE_CHECKING:
     from argilla.client.feedback.dataset import FeedbackDataset

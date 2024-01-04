@@ -35,7 +35,6 @@ from argilla.server.settings import settings
 from argilla.utils import telemetry
 from argilla.utils.telemetry import TelemetryClient
 from fastapi.testclient import TestClient
-from tests.pydantic_v1 import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -46,6 +45,7 @@ from tests.factories import (
     WorkspaceFactory,
 )
 from tests.integration.utils import delete_ignoring_errors
+from tests.pydantic_v1 import BaseModel
 
 from ..database import SyncTestSession, TestSession, set_task
 from .helpers import SecuredClient

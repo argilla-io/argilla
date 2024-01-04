@@ -16,11 +16,11 @@ from types import TracebackType
 from typing import Any, ContextManager, Dict, Optional, Type
 
 from packaging.version import parse
-from argilla.pydantic_v1 import BaseModel
 
 from argilla.client.apis import AbstractApi
 from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.errors import ApiCompatibilityError
+from argilla.pydantic_v1 import BaseModel
 
 
 class ApiInfo(BaseModel):

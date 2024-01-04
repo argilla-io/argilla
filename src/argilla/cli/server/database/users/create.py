@@ -15,10 +15,10 @@
 from typing import List, Optional
 
 import typer
-from argilla.pydantic_v1 import constr
 
 from argilla.cli import typer_ext
 from argilla.cli.server.database.users.utils import get_or_new_workspace
+from argilla.pydantic_v1 import constr
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole

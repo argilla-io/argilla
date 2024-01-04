@@ -14,9 +14,8 @@
 
 from typing import Optional
 
-from argilla.pydantic_v1 import BaseModel, Field, PositiveInt, validator
-
 from argilla.client.feedback.schemas.validators import title_must_have_value
+from argilla.pydantic_v1 import BaseModel, Field, PositiveInt, validator
 
 
 class VectorSettings(BaseModel):

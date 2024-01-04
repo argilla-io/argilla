@@ -15,9 +15,8 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, TypeVar, Union
 
-from argilla.server.pydantic_v1 import BaseModel, Field, validator
-
 from argilla.server.commons.models import TaskStatus
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 
 
 class SortOrder(str, Enum):

@@ -13,11 +13,10 @@
 #  limitations under the License.
 
 import contextlib
-from typing import Dict, Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
-
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
@@ -36,8 +35,9 @@ from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
     from unittest.mock import MagicMock
+
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture(scope="session")

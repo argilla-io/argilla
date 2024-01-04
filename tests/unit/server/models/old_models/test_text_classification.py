@@ -25,6 +25,7 @@ from argilla.server.services.tasks.text_classification.model import (
     ClassPrediction,
     ServiceTextClassificationRecord,
 )
+
 from tests.pydantic_v1 import ValidationError
 
 

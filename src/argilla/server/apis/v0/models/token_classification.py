@@ -14,11 +14,10 @@
 #  limitations under the License.
 from typing import Dict, List, Optional
 
-from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
-
 from argilla.server.apis.v0.models.commons.model import BaseRecord, BaseRecordInputs, BaseSearchResults, ScoreRange
 from argilla.server.commons.models import PredictionStatus
 from argilla.server.daos.backend.search.model import SortableField
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
 from argilla.server.schemas.v0.datasets import UpdateDatasetRequest
 from argilla.server.services.search.model import ServiceBaseRecordsQuery, ServiceBaseSearchResultsAggregations
 from argilla.server.services.tasks.token_classification.model import (

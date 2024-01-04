@@ -16,11 +16,10 @@ from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel, Field, constr
-from argilla.server.pydantic_v1.utils import GetterDict
-
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.models import UserRole
+from argilla.server.pydantic_v1 import BaseModel, Field, constr
+from argilla.server.pydantic_v1.utils import GetterDict
 
 WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 

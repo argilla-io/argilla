@@ -16,9 +16,9 @@ from typing import Union
 
 import pytest
 from argilla.server.security.model import User, UserCreate, WorkspaceCreate
-from tests.pydantic_v1 import ValidationError
 
 from tests.factories import UserFactory, WorkspaceFactory
+from tests.pydantic_v1 import ValidationError
 
 
 @pytest.mark.parametrize("invalid_name", ["work space", "work/space", "work.space", "_", "-"])

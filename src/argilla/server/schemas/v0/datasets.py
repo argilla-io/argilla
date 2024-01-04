@@ -20,10 +20,9 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel, Field
-
 from argilla._constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.commons.models import TaskType
+from argilla.server.pydantic_v1 import BaseModel, Field
 
 
 class UpdateDatasetRequest(BaseModel):

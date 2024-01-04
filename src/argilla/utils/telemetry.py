@@ -16,13 +16,14 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from argilla._constants import DEFAULT_TELEMETRY_KEY
 from argilla.pydantic_v1 import BaseSettings
 
 if TYPE_CHECKING:
     from fastapi import Request
+
     from argilla.server.commons.models import TaskType
 
 

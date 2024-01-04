@@ -29,9 +29,6 @@ from typing import (
 )
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel, Field, root_validator
-from argilla.server.pydantic_v1.generics import GenericModel
-
 from argilla.server.enums import (
     MetadataPropertyType,
     RecordSortField,
@@ -41,6 +38,8 @@ from argilla.server.enums import (
     SortOrder,
 )
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator
+from argilla.server.pydantic_v1.generics import GenericModel
 
 __all__ = [
     "SearchEngine",

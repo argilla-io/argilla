@@ -17,8 +17,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from argilla.pydantic_v1 import Field
-
 from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
@@ -26,6 +24,7 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.records import api as records_api_v1
 from argilla.client.sdk.v1.suggestions import api as suggestions_api_v1
 from argilla.client.utils import allowed_for_roles
+from argilla.pydantic_v1 import Field
 
 if TYPE_CHECKING:
     import httpx

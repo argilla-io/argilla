@@ -15,10 +15,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
+from argilla.server.enums import MetadataPropertyType
 from argilla.server.pydantic_v1 import BaseModel, Field
 from argilla.server.pydantic_v1.generics import GenericModel
-
-from argilla.server.enums import MetadataPropertyType
 
 __all__ = [
     "MetadataPropertySettings",

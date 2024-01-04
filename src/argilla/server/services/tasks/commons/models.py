@@ -14,9 +14,8 @@
 
 from typing import Generic, TypeVar
 
-from argilla.server.pydantic_v1 import BaseModel
-
 from argilla.server.daos.models.records import BaseAnnotationDB, BaseRecordDB, BaseRecordInDB
+from argilla.server.pydantic_v1 import BaseModel
 
 
 class ServiceBaseAnnotation(BaseAnnotationDB):

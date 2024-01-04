@@ -13,9 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.pydantic_v1 import BaseSettings
-
 from argilla.server import helpers
+from argilla.server.pydantic_v1 import BaseSettings
 from argilla.server.settings import settings as server_settings
 
 

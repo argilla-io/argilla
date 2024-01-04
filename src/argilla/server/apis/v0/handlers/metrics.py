@@ -17,12 +17,12 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Security
-from argilla.server.pydantic_v1 import BaseModel, Field
 
 from argilla.server.apis.v0.helpers import deprecate_endpoint
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.commons.config import TaskConfig, TasksFactory
 from argilla.server.models import User
+from argilla.server.pydantic_v1 import BaseModel, Field
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.metrics import MetricsService

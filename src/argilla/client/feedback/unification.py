@@ -19,7 +19,6 @@ from enum import Enum
 from typing import Any, Dict, List, Union
 
 import pandas as pd
-from argilla.pydantic_v1 import BaseModel, root_validator, validator
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -29,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     ValueSchema,
 )
+from argilla.pydantic_v1 import BaseModel, root_validator, validator
 
 
 class UnifiedValueSchema(ValueSchema):

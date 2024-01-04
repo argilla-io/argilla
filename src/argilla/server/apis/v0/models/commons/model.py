@@ -21,7 +21,6 @@ from typing import Any, Dict, Generic, List, TypeVar
 
 from argilla.server.pydantic_v1 import BaseModel, Field
 from argilla.server.pydantic_v1.generics import GenericModel
-
 from argilla.server.services.search.model import (
     ServiceQueryRange,
     ServiceSearchResultsAggregations,

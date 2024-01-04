@@ -18,8 +18,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from argilla.pydantic_v1 import BaseModel, Field
-
 from argilla.client.apis import AbstractApi, api_compatibility
 from argilla.client.sdk.commons.errors import (
     AlreadyExistsApiError,
@@ -29,6 +27,7 @@ from argilla.client.sdk.commons.errors import (
 )
 from argilla.client.sdk.datasets.api import get_dataset
 from argilla.client.sdk.datasets.models import TaskType
+from argilla.pydantic_v1 import BaseModel, Field
 
 
 @dataclass

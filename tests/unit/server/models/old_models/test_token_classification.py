@@ -26,6 +26,7 @@ from argilla.server.services.tasks.token_classification.model import (
     EntitySpan,
     ServiceTokenClassificationRecord,
 )
+
 from tests.pydantic_v1 import ValidationError
 
 

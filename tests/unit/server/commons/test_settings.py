@@ -14,6 +14,7 @@
 
 import pytest
 from argilla.server.settings import Settings
+
 from tests.pydantic_v1 import ValidationError
 
 

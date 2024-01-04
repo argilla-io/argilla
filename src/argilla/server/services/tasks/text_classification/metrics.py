@@ -15,7 +15,6 @@
 from typing import Any, ClassVar, Dict, Iterable, List
 
 from argilla.server.pydantic_v1 import Field
-
 from argilla.server.services.metrics import ServiceBaseMetric, ServicePythonMetric
 from argilla.server.services.metrics.models import CommonTasksMetrics
 from argilla.server.services.search.model import ServiceRecordsQuery
