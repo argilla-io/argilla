@@ -24,7 +24,7 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataFilter,
     TermsMetadataProperty,
 )
-from pydantic import ValidationError, create_model
+from tests.pydantic_v1 import ValidationError, create_model
 
 
 @pytest.mark.parametrize(
