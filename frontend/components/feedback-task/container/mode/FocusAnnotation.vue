@@ -19,11 +19,12 @@
         :availableVectors="datasetVectors"
       />
       <Record
+        v-if="records.hasRecordsToAnnotate"
         :datasetVectors="datasetVectors"
         :recordCriteria="recordCriteria"
         :record="record"
       />
-      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+      <div v-else class="wrapper--empty">
         <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
       </div>
     </section>

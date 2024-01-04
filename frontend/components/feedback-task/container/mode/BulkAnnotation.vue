@@ -24,7 +24,10 @@
             "
           />
         </div>
-        <RecordsViewConfig v-model="recordHeight" />
+        <RecordsViewConfig
+          v-if="records.hasRecordsToAnnotate"
+          v-model="recordHeight"
+        />
         <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
       </div>
       <SimilarityRecordReference
@@ -34,7 +37,7 @@
         :recordCriteria="recordCriteria"
         :availableVectors="datasetVectors"
       />
-      <div class="bulk__records snap">
+      <div class="bulk__records snap" v-if="records.hasRecordsToAnnotate">
         <Record
           class="snap-child"
           :class="{
@@ -49,7 +52,7 @@
           @on-select-record="onSelectRecord"
         />
       </div>
-      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
+      <div v-else class="wrapper--empty">
         <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
       </div>
     </section>
