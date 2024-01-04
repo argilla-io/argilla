@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 import contextlib
-from typing import Dict, Generator
+from typing import Dict, Generator, TYPE_CHECKING
 
 import pytest
 import pytest_asyncio
+
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.server.app import app
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
@@ -34,6 +34,10 @@ from opensearchpy import OpenSearch
 
 from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+    from unittest.mock import MagicMock
 
 
 @pytest.fixture(scope="session")
@@ -79,6 +83,8 @@ def owner_auth_header(owner: User) -> Dict[str, str]:
 async def async_client(
     request, mock_search_engine: SearchEngine, mocker: "MockerFixture"
 ) -> Generator["AsyncClient", None, None]:
+    from argilla.server.app import app
+
     async def override_get_async_db():
         session = TestSession()
         yield session
@@ -112,11 +118,6 @@ def records_dao(es: GenericElasticEngineBackend):
 @pytest.fixture(scope="session")
 def datasets_dao(records_dao: DatasetRecordsDAO, es: GenericElasticEngineBackend):
     return DatasetsDAO.get_instance(es=es, records_dao=records_dao)
-
-
-@pytest.fixture(scope="session")
-def datasets_service(datasets_dao: DatasetsDAO):
-    return DatasetsService.get_instance(datasets_dao)
 
 
 @pytest_asyncio.fixture(scope="function")
