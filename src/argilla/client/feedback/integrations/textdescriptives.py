@@ -278,9 +278,14 @@ class TextDescriptivesExtractor:
         metadata_properties = self._create_metadata_properties(extracted_metrics)
         # Add each metadata property iteratively to the dataset
         for prop in metadata_properties:
-            if overwrite and prop.name in dataset.metadata_properties:
-                dataset.delete_metadata_properties(prop.name)
-            dataset.add_metadata_property(prop)
+            if dataset.metadata_property_by_name(prop.name):
+                # potentially overwrite visible_for_annotators settings
+                metadata_property = dataset.metadata_property_by_name(prop.name)
+                if overwrite and metadata_property.visible_for_annotators != prop.visible_for_annotators:
+                    dataset.delete_metadata_property(prop.name)
+                    dataset.add_metadata_property(prop)
+            else:
+                dataset.add_metadata_property(prop)
         return dataset
 
     def _add_text_descriptives_to_metadata(
