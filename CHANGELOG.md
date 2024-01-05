@@ -32,6 +32,7 @@ These are the section headers that we use:
 - Added list support for term metadata properties. (Closes [#4359](https://github.com/argilla-io/argilla/issues/4359))
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 - Added `httpx_extra_kwargs` argument to `rg.init` and `Argilla` to allow passing extra arguments to `httpx.Client` used by `Argilla`. ([#4440](https://github.com/argilla-io/argilla/pull/4441))
+- Added `vector_settings` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 
 ### Changed
 
@@ -40,7 +41,7 @@ These are the section headers that we use:
 - Updated `argilla.load` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - [breaking] Updated `argilla.delete` functions to also work with `FeedbackDataset`s. It now raises an error if the dataset does not exist. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.list_datasets` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
-- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4425](https://github.com/argilla-io/argilla/pull/4424))
+- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 
 ### Fixed
 

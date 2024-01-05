@@ -522,6 +522,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMi
             + textwrap.indent(f"\nquestions={self.questions}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
             + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
+            + textwrap.indent(f"\nvectors_settings={self.vectors_settings}", indent)
             + "\n)"
         )
 
