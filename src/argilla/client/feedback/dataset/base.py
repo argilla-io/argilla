@@ -17,12 +17,21 @@ from typing import TYPE_CHECKING, Any, Generic, Iterable, List, Literal, Optiona
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
+
+    from argilla.client.feedback.schemas.types import (
+        AllowedFieldTypes,
+        AllowedMetadataPropertyTypes,
+        AllowedQuestionTypes,
+        AllowedRemoteFieldTypes,
+        AllowedRemoteMetadataPropertyTypes,
+        AllowedRemoteQuestionTypes,
+        AllowedRemoteVectorSettingsTypes,
+        AllowedVectorSettingsTypes,
+    )
 
 
 R = TypeVar("R", bound=FeedbackRecord)
@@ -35,12 +44,6 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     @abstractmethod
     def records(self) -> Iterable[R]:
         """Returns the records of the dataset."""
-        pass
-
-    @property
-    @abstractmethod
-    def vectors_settings(self) -> List[VectorSettings]:
-        """Returns the vector settings of the dataset."""
         pass
 
     @abstractmethod
@@ -78,11 +81,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def fields(self) -> Union[List[AllowedFieldTypes]]:
+    def fields(self) -> Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]]:
         """Returns the fields that define the schema of the records in the dataset."""
         pass
 
-    def field_by_name(self, name: str) -> Optional[Union[AllowedFieldTypes]]:
+    def field_by_name(self, name: str) -> Optional[Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]]:
         """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
@@ -92,11 +95,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def questions(self) -> Union[List[AllowedQuestionTypes]]:
+    def questions(self) -> Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]]:
         """Returns the questions that will be used to annotate the dataset."""
         pass
 
-    def question_by_name(self, name: str) -> Optional[Union[AllowedQuestionTypes]]:
+    def question_by_name(self, name: str) -> Optional[Union["AllowedQuestionTypes", "AllowedRemoteQuestionTypes"]]:
         """Returns the question by name if it exists.
 
         Args:
@@ -106,11 +109,15 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def metadata_properties(self) -> Union[List["AllowedMetadataPropertyTypes"]]:
+    def metadata_properties(
+        self,
+    ) -> Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]:
         """Returns the metadata properties that will be indexed and could be used to filter the dataset."""
         pass
 
-    def metadata_property_by_name(self, name: str) -> Optional[Union["AllowedMetadataPropertyTypes"]]:
+    def metadata_property_by_name(
+        self, name: str
+    ) -> Optional[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]]:
         """Returns the metadata property by name if it exists.
 
         Args:
@@ -118,7 +125,15 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """
         return self.__get_property_by_name(name, self.metadata_properties, "metadata property")
 
-    def vector_settings_by_name(self, name: str) -> Optional["VectorSettings"]:
+    @property
+    @abstractmethod
+    def vectors_settings(self) -> Union[List["AllowedVectorSettingsTypes"], List["AllowedRemoteVectorSettingsTypes"]]:
+        """Returns the vector settings that will be used to index the dataset."""
+        pass
+
+    def vector_settings_by_name(
+        self, name: str
+    ) -> Optional[Union["AllowedVectorSettingsTypes", "AllowedRemoteVectorSettingsTypes"]]:
         """Returns the vector settings by name if it exists.
 
         Args:

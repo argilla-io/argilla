@@ -40,6 +40,8 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteRatingQuestion,
     RemoteTextQuestion,
 )
+from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
+from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 AllowedFieldTypes = TextField
 AllowedRemoteFieldTypes = RemoteTextField
@@ -51,3 +53,5 @@ AllowedMetadataPropertyTypes = Union[TermsMetadataProperty, FloatMetadataPropert
 AllowedRemoteMetadataPropertyTypes = Union[
     RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty
 ]
+AllowedVectorSettingsTypes = VectorSettings
+AllowedRemoteVectorSettingsTypes = RemoteVectorSettings
