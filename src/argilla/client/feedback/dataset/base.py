@@ -13,9 +13,8 @@
 #  limitations under the License.
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
 
-from argilla.client.feedback.dataset import helpers
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedMetadataPropertyTypes, AllowedQuestionTypes
@@ -25,11 +24,6 @@ from argilla.utils.dependency import requires_dependencies
 if TYPE_CHECKING:
     from datasets import Dataset
 
-    from argilla.client.feedback.schemas.types import (
-        AllowedRemoteFieldTypes,
-        AllowedRemoteMetadataPropertyTypes,
-        AllowedRemoteQuestionTypes,
-    )
 
 R = TypeVar("R", bound=FeedbackRecord)
 
@@ -124,7 +118,6 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         """
         return self.__get_property_by_name(name, self.metadata_properties, "metadata property")
 
-    @abstractmethod
     def vector_settings_by_name(self, name: str) -> Optional["VectorSettings"]:
         """Returns the vector settings by name if it exists.
 

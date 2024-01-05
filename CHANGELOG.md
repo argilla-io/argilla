@@ -35,16 +35,18 @@ These are the section headers that we use:
 
 ### Changed
 
-- More productive and simpler shortcuts system ([#4215](https://github.com/argilla-io/argilla/pull/4215))
+- More productive and simpler shortcut system ([#4215](https://github.com/argilla-io/argilla/pull/4215))
 - Move `ArgillaSingleton`, `init` and `active_client` to a new module `singleton`. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.load` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - [breaking] Updated `argilla.delete` functions to also work with `FeedbackDataset`s. It now raises an error if the dataset does not exist. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.list_datasets` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
+- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return None instead of raising an error ([#4425](https://github.com/argilla-io/argilla/pull/4424))
 
 ### Fixed
 
 - Fixed error in `TextClassificationSettings.from_dict` method in which the `label_schema` created was a list of `dict` instead of a list of `str`. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Fixed total records on pagination component ([#4424](https://github.com/argilla-io/argilla/pull/4424))
+
 
 ### Removed
 

@@ -24,13 +24,6 @@ from argilla.client.feedback.dataset.local.mixins import ArgillaMixin, TaskTempl
 from argilla.client.feedback.dataset.mixins import MetricsMixin, UnificationMixin
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
-from argilla.client.feedback.schemas.questions import (
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextQuestion,
-)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas.base import (
@@ -43,13 +36,6 @@ from argilla.client.feedback.training.schemas.base import (
     TrainingTaskForSFT,
     TrainingTaskForTextClassification,
     TrainingTaskTypes,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RankingQuestionStrategy,
-    RatingQuestionStrategy,
-    TextQuestionStrategy,
 )
 from argilla.client.models import Framework
 
@@ -304,13 +290,6 @@ class FeedbackDataset(
         self._unique_metadata_property(metadata_property)
         self._metadata_properties.append(metadata_property)
         return metadata_property
-
-    def vector_settings_by_name(self, name: str) -> VectorSettings:
-        vector_settings = self._vectors_settings.get(name)
-        if not vector_settings:
-            raise KeyError(f"Vector settings with name '{name!r}' does not exist in the dataset.")
-
-        return vector_settings
 
     def add_vector_settings(self, vector_settings: VectorSettings) -> VectorSettings:
         if self._vectors_settings.get(vector_settings.name):
