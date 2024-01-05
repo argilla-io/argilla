@@ -160,7 +160,12 @@ tde = TextDescriptivesExtractor(
     show_progress=True,
 )
 
-dataset = tde.update_dataset(dataset)
+dataset = tde.update_dataset(
+    dataset=dataset
+    fields=None # None means using all fields
+    update_records=True # Also, update the records in the dataset
+    overwrite=False # Whether to overwrite existing vectors
+)
 ```
 :::
 
@@ -180,11 +185,14 @@ tde = TextDescriptivesExtractor(
     show_progress=True,
 )
 
-records = tde.update_records(records)
+records = tde.update_records(
+    records=records,
+    fields=None # None means using all fields
+    overwrite=False # Whether to overwrite existing vectors
+)
 ```
 
 :::
-
 
 ::::
 
