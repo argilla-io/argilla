@@ -1,19 +1,27 @@
-import { computed, onBeforeMount, ref } from "vue-demi";
+import { computed, onBeforeMount, onBeforeUnmount, ref, watch } from "vue-demi";
 import { useResolve } from "ts-injecty";
 import { useDatasetViewModel } from "./useDatasetViewModel";
 import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { useDatasetSetting } from "~/v1/infrastructure/storage/DatasetSettingStorage";
-import { useRole, useRoutes } from "@/v1/infrastructure/services";
+import {
+  useBeforeUnload,
+  useRole,
+  useRoutes,
+} from "@/v1/infrastructure/services";
 import { DatasetSetting } from "~/v1/domain/entities/DatasetSetting";
+import { Notification } from "~/models/Notifications";
+import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
 interface Tab {
-  id: string;
+  id: "info" | "fields" | "questions" | "metadata" | "vector" | "danger-zone";
   name: string;
   component: string;
 }
 
 export const useDatasetSettingViewModel = () => {
   const routes = useRoutes();
+  const beforeUnload = useBeforeUnload();
+  const t = useTranslate();
 
   const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();
@@ -53,7 +61,7 @@ export const useDatasetSettingViewModel = () => {
     tabs.value.push({
       id: "danger-zone",
       name: "Danger zone",
-      component: "settingsDangerZone",
+      component: "SettingsDangerZone",
     });
   };
 
@@ -85,15 +93,65 @@ export const useDatasetSettingViewModel = () => {
     ];
   });
 
-  const goToDataset = () => {
+  const onGoToDataset = () => {
     if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
 
     routes.goToFeedbackTaskAnnotationPage(datasetId);
   };
 
+  const goToTabWithModification = () => {
+    const goToTab = (id: Tab["id"]) => {
+      document.getElementById(id).click();
+    };
+
+    if (datasetSetting.isDatasetModified) return goToTab("info");
+    if (datasetSetting.isQuestionsModified) return goToTab("questions");
+    if (datasetSetting.isFieldsModified) return goToTab("fields");
+    if (datasetSetting.isMetadataPropertiesModified) return goToTab("metadata");
+    if (datasetSetting.isVectorsModified) return goToTab("vector");
+  };
+
+  const goToDataset = () => {
+    if (datasetSetting.isModified) {
+      return setTimeout(() => {
+        Notification.dispatch("notify", {
+          message: t("changes_no_submit"),
+          buttonText: t("button.ignore_and_continue"),
+          permanent: true,
+          type: "warning",
+          onClick() {
+            Notification.dispatch("clear");
+
+            onGoToDataset();
+          },
+          onClose() {
+            Notification.dispatch("clear");
+
+            goToTabWithModification();
+          },
+        });
+      }, 100);
+    }
+
+    onGoToDataset();
+  };
+
   onBeforeMount(() => {
     loadDatasetSetting();
   });
+
+  onBeforeUnmount(() => {
+    beforeUnload.destroy();
+  });
+
+  watch(
+    () => datasetSetting.isModified,
+    (isModified) => {
+      if (isModified) return beforeUnload.confirm();
+
+      beforeUnload.destroy();
+    }
+  );
 
   return {
     isLoadingDataset,

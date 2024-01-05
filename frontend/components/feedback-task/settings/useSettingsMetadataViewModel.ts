@@ -8,6 +8,10 @@ export const useSettingsMetadataViewModel = () => {
   const updateMetadataSetting = useResolve(UpdateMetadataSettingUseCase);
   const updateDatasetSetting = useResolve(UpdateDatasetSettingUseCase);
 
+  const restore = (metadata: Metadata) => {
+    metadata.restore();
+  };
+
   const updateMetadata = async (metadata: Metadata) => {
     await updateMetadataSetting.execute(metadata);
   };
@@ -17,6 +21,7 @@ export const useSettingsMetadataViewModel = () => {
   };
 
   return {
+    restore,
     updateMetadata,
     updateDataset,
   };

@@ -19,6 +19,7 @@
   <ul class="tabs">
     <li v-for="{ id, name } in tabs" :key="id" class="tab">
       <button
+        :id="id"
         :class="['tab__button', `--${tabSize}`, getTabClass(id)]"
         @click="changeTab(id)"
       >

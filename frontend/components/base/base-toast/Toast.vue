@@ -54,6 +54,10 @@ export default {
       type: [String, Error],
       required: true,
     },
+    permanent: {
+      type: Boolean,
+      default: false,
+    },
     numberOfChars: {
       type: Number,
       default: 0,
@@ -182,8 +186,12 @@ export default {
       );
     },
     close() {
-      this.timer.stop();
+      if (!this.permanent) {
+        this.timer.stop();
+      }
+
       clearTimeout(this.queueTimer);
+
       this.isActive = false;
       // Timeout for the animation complete before destroying
       setTimeout(() => {
@@ -206,7 +214,9 @@ export default {
         this.correctParent.insertAdjacentElement("afterbegin", this.$el);
       }
       this.isActive = true;
-      this.timer = new Timer(this.close, this.duration);
+      if (!this.permanent) {
+        this.timer = new Timer(this.close, this.duration);
+      }
     },
     async whenClicked(...arg) {
       if (!this.dismissible) return;
@@ -220,6 +230,8 @@ export default {
     },
     toggleTimer(newVal) {
       if (!this.pauseOnHover) return;
+      if (this.permanent) return;
+
       if (newVal) {
         this.timer.pause();
       } else {
