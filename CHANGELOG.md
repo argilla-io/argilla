@@ -16,6 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+
+### Fixed
+
+- Paginating to a new record, automatically scrolls down to selected form area ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+
 ### Deprecated
 
 - The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
@@ -24,7 +32,6 @@ These are the section headers that we use:
 
 ### Added
 
-- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
 - Added new draft queue for annotation view ([#4334](https://github.com/argilla-io/argilla/pull/4334))
 - Added annotation metrics module for the `FeedbackDataset` (`argilla.client.feedback.metrics`). ([#4175](https://github.com/argilla-io/argilla/pull/4175)).
 - Added strategy to handle and translate errors from the server for `401` HTTP status code` ([#4362](https://github.com/argilla-io/argilla/pull/4362))
