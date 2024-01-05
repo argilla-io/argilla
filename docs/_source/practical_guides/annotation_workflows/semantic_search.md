@@ -80,7 +80,6 @@ See https://github.com/opensearch-project/k-NN/issues/1286
 This may result in unexpected results when combining filtering with vector search with this engine.
 :::
 
-
 ## Add vectors to your data
 
 The first and most important thing to do before leveraging semantic search is to turn text into a numerical representation: a vector. In practical terms, you can think of a vector as an array or list of numbers. You can associate this list of numbers with an Argilla Record by using the aforementioned `vectors` field. But the question is: **how do you create these vectors?**

@@ -44,7 +44,7 @@ class TextDescriptivesExtractor:
         self,
         model: str = "en",
         metrics: Optional[List[str]] = None,
-        fields: Optional[List[str]] = None,
+        basic_metrics: Optional[List[str]] = None,
         visible_for_annotators: Optional[bool] = True,
         show_progress: Optional[bool] = True,
     ):
@@ -73,18 +73,20 @@ class TextDescriptivesExtractor:
             model = "en_core_web_md"
             warnings.warn("Using 'en_core_web_md' as default spaCy model for English language.")
         self.model = model
+        if metrics is None and basic_metrics is None:
+            metrics = ["descriptive_stats", "information_theory", "readability"]
+            basic_metrics = [
+                "n_tokens",
+                "n_unique_tokens",
+                "n_sentences",
+                "perplexity",
+                "entropy",
+                "flesch_reading_ease",
+            ]
         self.metrics = metrics
-        self.fields = fields
+        self.basic_metrics = basic_metrics
         self.visible_for_annotators = visible_for_annotators
         self.show_progress = show_progress
-        self.__basic_metrics = [
-            "n_tokens",
-            "n_unique_tokens",
-            "n_sentences",
-            "perplexity",
-            "entropy",
-            "flesch_reading_ease",
-        ]
 
     def _extract_metrics_for_single_field(
         self,
@@ -114,7 +116,7 @@ class TextDescriptivesExtractor:
             field_metrics = field_metrics.drop("text", axis=1)
             # If basic metrics is None, use all basic metrics
             if basic_metrics is None and self.metrics is None:
-                basic_metrics = self.__basic_metrics
+                basic_metrics = self.basic_metrics
                 field_metrics = field_metrics.loc[:, basic_metrics]
             # Convert any None values to NaNs
             field_metrics = field_metrics.fillna(value=np.nan)
@@ -161,8 +163,8 @@ class TextDescriptivesExtractor:
     def _extract_metrics_for_all_fields(
         self,
         records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
-        fields: List[str] = None,
-        overwrite: bool = False,
+        fields: List[str],
+        overwrite: bool,
     ) -> pd.DataFrame:
         """
         Extract text descriptives metrics for all named fields from a list of feedback records
@@ -174,11 +176,6 @@ class TextDescriptivesExtractor:
         Returns:
             pd.DataFrame: A dataframe containing the text descriptives metrics for each record and field.
         """
-        # If fields is None, use all fields
-        if self.fields:
-            fields = self.fields
-        else:
-            raise ValueError("No fields were provided.")
         # Extract all metrics for each field
         field_metrics = {
             field: self._extract_metrics_for_single_field(records=records, field=field, overwrite=overwrite)
@@ -264,12 +261,12 @@ class TextDescriptivesExtractor:
         return properties
 
     def _create_metadata_property_settings(
-        self, dataset: Union[FeedbackDataset, RemoteFeedbackDataset], overwrite: bool = False
+        self, dataset: Union[FeedbackDataset, RemoteFeedbackDataset], fields: List[str], overwrite: bool = False
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
         # Create a mock record with the specified fields
-        records = [FeedbackRecord(fields={field: "mock the mocker" for field in self.fields})]
+        records = [FeedbackRecord(fields={field: "mock the mocker" for field in fields})]
         # Extract text descriptives metrics from records
-        extracted_metrics = self._extract_metrics_for_all_fields(records)
+        extracted_metrics = self._extract_metrics_for_all_fields(records=records, fields=fields, overwrite=overwrite)
         # Cast integer and boolean columns to Python native types
         extracted_metrics = self._cast_to_python_types(extracted_metrics)
         # Clean column names
@@ -277,8 +274,9 @@ class TextDescriptivesExtractor:
         # Create metadata properties based on dataframe columns and data types
         metadata_properties = self._create_metadata_properties(extracted_metrics)
         # Add each metadata property iteratively to the dataset
+        available_metadata_properties = [prop.name for prop in dataset.metadata_properties]
         for prop in metadata_properties:
-            if dataset.metadata_property_by_name(prop.name):
+            if prop.name in available_metadata_properties:
                 # potentially overwrite visible_for_annotators settings
                 metadata_property = dataset.metadata_property_by_name(prop.name)
                 if overwrite and metadata_property.visible_for_annotators != prop.visible_for_annotators:
@@ -337,13 +335,17 @@ class TextDescriptivesExtractor:
         >>> tde = TextDescriptivesExtractor()
         >>> updated_records = tde.update_records(records)
         """
-        self.fields = fields
+        available_fields = set()
         # ensure records are unique and don't update updated indices
         modified_records = []
         for rec in records:
             modified_records.append(rec)
+            for key in rec.fields:
+                available_fields.add(key)
+        if fields is None:
+            fields = list(available_fields)
         # Extract text descriptives metrics from records
-        extracted_metrics = self._extract_metrics_for_all_fields(modified_records, overwrite=overwrite)
+        extracted_metrics = self._extract_metrics_for_all_fields(modified_records, overwrite=overwrite, fields=fields)
         # If the dataframe doesn't contain any columns, return the original records and log a warning
         if extracted_metrics.shape[1] == 0:
             warnings.warn(
@@ -363,7 +365,7 @@ class TextDescriptivesExtractor:
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
         fields: Optional[List[str]] = None,
-        include_records: Optional[bool] = True,
+        update_records: Optional[bool] = True,
         overwrite: Optional[bool] = False,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
         """
@@ -373,7 +375,7 @@ class TextDescriptivesExtractor:
 
         Args:
             dataset (Union[FeedbackDataset, RemoteFeedbackDataset]): A FeedbackDataset or RemoteFeedbackDataset.
-            include_records (Optional[bool]): Whether to update the records in the dataset too. Defaults to True.
+            update_records (Optional[bool]): Whether to update the records in the dataset too. Defaults to True.
             overwrite (Optional[bool]): Whether to overwrite existing metadata properties with the same name. Defaults to False.
 
         Returns:
@@ -388,28 +390,24 @@ class TextDescriptivesExtractor:
 
         """
         # If overwrite is True, include_records must also be True
-        if overwrite and not include_records:
+        if overwrite and not update_records:
             raise ValueError("Cannot overwrite metadata properties without including records.")
         if not isinstance(dataset, (FeedbackDataset, RemoteFeedbackDataset)):
             raise ValueError(
                 f"Provided object is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
             )
         # If fields is None, use all fields
-        if fields:
-            self.fields = fields
-        if not self.fields:
-            self.fields = [field.name for field in dataset.fields]
-        else:
-            for field in self.fields:
-                if field not in [field.name for field in dataset.fields]:
-                    raise ValueError(f"Field {field} is not present in the dataset.")
-
+        if fields is None:
+            fields = [field.name for field in dataset.fields]
+        available_fields = [field.name for field in dataset.fields]
+        if not all([field in available_fields for field in fields]):
+            raise ValueError(f"Fields {fields} are not present in the dataset.")
         # Create metadata properties based on dataframe columns and data types
-        dataset = self._create_metadata_property_settings(dataset=dataset, overwrite=overwrite)
+        dataset = self._create_metadata_property_settings(dataset=dataset, fields=fields, overwrite=overwrite)
 
         # Update the records in the dataset too
-        if include_records:
-            records = self.update_records(records=dataset.records, fields=self.fields, overwrite=overwrite)
+        if update_records:
+            records = self.update_records(records=dataset.records, fields=fields, overwrite=overwrite)
             if isinstance(dataset, RemoteFeedbackDataset):
                 dataset.update_records(records)
         return dataset

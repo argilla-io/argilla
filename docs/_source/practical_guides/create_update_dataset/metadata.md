@@ -137,7 +137,6 @@ You can easily add text descriptives to your records or datasets using the `Text
 
 - `model` (optional): The language of the spacy model that will be used. Defaults to `en`. Check [here](https://spacy.io/usage/models) the available languages and models.
 - `metrics` (optional): A list of metrics to extract. The default extracted metrics are: `n_tokens`, `n_unique_tokens`, `n_sentences`, `perplexity`, `entropy`, and `flesch_reading_ease`. You can select your metrics according to the following groups `descriptive_stats`, `readability`, `dependency_distance`, `pos_proportions`, `coherence`, `quality`, and `information_theory`. For more information about each group, check this documentation [page](https://hlasse.github.io/TextDescriptives/descriptivestats.html).
-- `fields` (optional): A list of field names to extract metrics from. All fields will be used by default.
 - `visible_for_annotators` (optional): Whether the extracted metrics should be visible to annotators. Defaults to `True`.
 - `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
 
@@ -157,7 +156,6 @@ dataset = ... # FeedbackDataset or RemoteFeedbackDataset
 tde = TextDescriptivesExtractor(
     model="en",
     metrics=None,
-    fields=None,
     visible_for_annotators=True,
     show_progress=True,
 )
@@ -178,7 +176,6 @@ records = [...] # FeedbackRecords or RemoteFeedbackRecords
 tde = TextDescriptivesExtractor(
     model="en",
     metrics=None,
-    fields=None,
     visible_for_annotators=True,
     show_progress=True,
 )

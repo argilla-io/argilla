@@ -62,15 +62,15 @@ def test_update_dataset(
     records: List[FeedbackRecord],
 ) -> None:
     dataset.add_records(records)
-    dataset = td_extractor.update_dataset(dataset, fields=["field_1"], include_records=False)
+    dataset = td_extractor.update_dataset(dataset, fields=["field_1"], update_records=False)
     assert dataset.metadata_property_by_name("field_1_n_tokens")
     assert not dataset.metadata_property_by_name("field_2_n_tokens")
     assert not dataset.records[0].metadata
-    dataset = td_extractor.update_dataset(dataset, fields=["field_2"], include_records=False)
-    dataset = td_extractor.update_dataset(dataset, include_records=True, fields=["field_1"])
+    dataset = td_extractor.update_dataset(dataset, fields=["field_2"], update_records=False)
+    dataset = td_extractor.update_dataset(dataset, update_records=True, fields=["field_1"])
     assert "field_1_n_tokens" in dataset.records[0].metadata
     assert "field_2_n_tokens" not in dataset.records[0].metadata
-    dataset = td_extractor.update_dataset(dataset, include_records=True, fields=["field_2"])
+    dataset = td_extractor.update_dataset(dataset, update_records=True, fields=["field_2"])
     assert "field_1_n_tokens" in dataset.records[0].metadata
     assert "field_2_n_tokens" in dataset.records[0].metadata
     assert "field_2_n_tokens" not in dataset.records[1].vectors

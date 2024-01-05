@@ -15,8 +15,6 @@
 import warnings
 from typing import List, Optional, Union
 
-from sentence_transformers import SentenceTransformer
-
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
@@ -31,31 +29,36 @@ class SentenceTransformersExtractor:
 
     def __init__(
         self,
-        model: Optional[Union[SentenceTransformer, str]] = "TaylorAI/bge-micro-v2",
-        fields: Optional[List[str]] = None,
+        model: Optional[Union["SentenceTransformer", str]] = "TaylorAI/bge-micro-v2",
         show_progress: Optional[bool] = True,
         **kwargs,
     ):
         require_dependencies("sentence_transformers")
-        self.fields = fields
+        from sentence_transformers import SentenceTransformer
+
         self.show_progress = show_progress
         if isinstance(model, str):
             self.model = SentenceTransformer(model, **kwargs)
         else:
             if kwargs:
                 warnings.warn(
-                    "kwargs for initializing SentenceTransformer are ignored when passing a SentenceTransformer instance"
+                    "kwargs for initializing SentenceTransformer are ignored when passing a SentenceTransformer instance."
                 )
             self.model = model
         self.embedding_dim = self.model.encode(["sample sentence"])[0].shape[0]
 
     def _create_vector_settings(
-        self, dataset: Union[FeedbackDataset, RemoteFeedbackDataset], overwrite: bool = False
+        self,
+        dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
+        fields: Optional[List[str]],
+        overwrite: bool = False,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
-        for field in self.fields:
-            if dataset.vector_settings_by_name(field):
+        available_vector_settings = [setting.name for setting in dataset.vectors_settings]
+        for field in fields:
+            if field in available_vector_settings:
+                setting = dataset.vector_settings_by_name(field)
                 if overwrite:
-                    if dataset.vectors_settings[field].dimensions != self.embedding_dim:
+                    if setting.dimensions != self.embedding_dim:
                         dataset.delete_vectors_settings(field)
                         dataset.add_vector_settings(
                             VectorSettings(
@@ -64,7 +67,6 @@ class SentenceTransformersExtractor:
                             )
                         )
                 else:
-                    setting = dataset.vector_settings_by_name(field)
                     if setting.dimensions != self.embedding_dim:
                         raise ValueError(
                             f"Field {field} has a different embedding dimension ({dataset.vectors_settings[field].dimensions}) than the provided model ({self.embedding_dim})."
@@ -104,15 +106,19 @@ class SentenceTransformersExtractor:
     def update_records(
         self,
         records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
-        fields: List[str],
+        fields: Optional[List[str]] = None,
         overwrite: Optional[bool] = None,
         **kwargs,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
-        self.fields = fields
+        available_fields = set()
         # unwrap potential records from RemoteFeedbackDataset
         modified_records = []
-        for record in records:
-            modified_records.append(record)
+        for rec in records:
+            modified_records.append(rec)
+            for key in rec.fields:
+                available_fields.add(key)
+        if fields is None:
+            fields = list(available_fields)
         # encode fields
         for field in fields:
             modified_records = self._encode_single_field(modified_records, field, overwrite, **kwargs)
@@ -122,30 +128,27 @@ class SentenceTransformersExtractor:
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
         fields: Optional[List[str]] = None,
-        include_records: bool = True,
+        update_records: bool = True,
         overwrite: bool = False,
         **kwargs,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
-        if overwrite and not include_records:
+        if overwrite and not update_records:
             raise ValueError("Cannot overwrite metadata properties without including records.")
         if not isinstance(dataset, (FeedbackDataset, RemoteFeedbackDataset)):
             raise ValueError(
                 f"Provided object is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
             )
         # If fields is None, use all fields
-        if fields:
-            self.fields = fields
-        if not self.fields:
-            self.fields = [field.name for field in dataset.fields]
-        else:
-            for field in self.fields:
-                if field not in [field.name for field in dataset.fields]:
-                    raise ValueError(f"Field {field} is not present in the dataset.")
+        if fields is None:
+            fields = [field.name for field in dataset.fields]
+        available_fields = [field.name for field in dataset.fields]
+        if not all([field in available_fields for field in fields]):
+            raise ValueError(f"Fields {fields} are not present in the dataset.")
 
-        dataset = self._create_vector_settings(dataset=dataset, overwrite=overwrite)
+        dataset = self._create_vector_settings(dataset=dataset, fields=fields, overwrite=overwrite)
 
-        if include_records:
-            records = self.update_records(records=dataset.records, fields=self.fields, overwrite=overwrite, **kwargs)
+        if update_records:
+            records = self.update_records(records=dataset.records, fields=fields, overwrite=overwrite, **kwargs)
             if isinstance(dataset, RemoteFeedbackDataset):
                 print(records[0].vectors)
                 dataset.update_records(records)
