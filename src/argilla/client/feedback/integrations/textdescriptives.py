@@ -357,6 +357,7 @@ class TextDescriptivesExtractor:
     def update_dataset(
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
+        fields: Optional[List[str]] = None,
         include_records: Optional[bool] = True,
         overwrite: Optional[bool] = False,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
@@ -389,8 +390,14 @@ class TextDescriptivesExtractor:
                 f"Provided object is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
             )
         # If fields is None, use all fields
+        if fields:
+            self.fields = fields
         if not self.fields:
             self.fields = [field.name for field in dataset.fields]
+        else:
+            for field in self.fields:
+                if field not in [field.name for field in dataset.fields]:
+                    raise ValueError(f"Field {field} is not present in the dataset.")
 
         # Create metadata properties based on dataframe columns and data types
         dataset = self._create_metadata_property_settings(dataset=dataset, overwrite=overwrite)
