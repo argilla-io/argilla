@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 
 ### Deprecated
 
