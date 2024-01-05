@@ -3,7 +3,7 @@
     <BaseBreadcrumbs
       v-if="breadcrumbs.length"
       :breadcrumbs="breadcrumbs"
-      :copy-button="copyButton"
+      :copy-button="true"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId">
@@ -29,8 +29,10 @@
 </template>
 
 <script>
+import { useRole } from "~/v1/infrastructure/services";
+
 export default {
-  name: "HeaderFeedbaskTaskComponent",
+  name: "HeaderFeedbackTaskComponent",
   props: {
     datasetId: {
       type: String,
@@ -45,24 +47,13 @@ export default {
       default: () => false,
     },
   },
-  data() {
-    return {
-      copyButton: false,
-    };
-  },
-  computed: {
-    /**
-     * @deprecated Replace with useRole
-     */
-    isAdminOrOwnerRole() {
-      const role = this.$auth.user.role;
-      return role === "admin" || role === "owner";
-    },
-  },
   methods: {
     onClickTrain() {
       this.$emit("on-click-train");
     },
+  },
+  setup() {
+    return useRole();
   },
 };
 </script>

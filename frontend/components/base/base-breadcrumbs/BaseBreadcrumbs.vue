@@ -33,11 +33,10 @@
         >
       </li>
     </ul>
-    <base-action-tooltip tooltip="Copied">
+    <base-action-tooltip :tooltip="$t('copied')">
       <a
         v-if="copyButton"
         class="breadcrumbs__copy"
-        href="#"
         @click.prevent="
           $copyToClipboard(
             filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name
@@ -100,6 +99,8 @@ export default {
     }
   }
   &__copy {
+    user-select: none;
+    cursor: pointer;
     &:hover {
       .svg-icon {
         fill: darken(palette(white), 10%);
