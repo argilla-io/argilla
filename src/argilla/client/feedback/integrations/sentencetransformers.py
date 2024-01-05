@@ -53,14 +53,29 @@ class SentenceTransformersExtractor:
         self, dataset: Union[FeedbackDataset, RemoteFeedbackDataset], overwrite: bool = False
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
         for field in self.fields:
-            if overwrite and field in dataset.vectors_settings:
-                dataset.delete_vectors_settings(field)
-            dataset.add_vector_settings(
-                VectorSettings(
-                    name=field,
-                    dimensions=self.embedding_dim,
+            if dataset.vector_settings_by_name(field):
+                if overwrite:
+                    if dataset.vectors_settings[field].dimensions != self.embedding_dim:
+                        dataset.delete_vectors_settings(field)
+                        dataset.add_vector_settings(
+                            VectorSettings(
+                                name=field,
+                                dimensions=self.embedding_dim,
+                            )
+                        )
+                else:
+                    setting = dataset.vector_settings_by_name(field)
+                    if setting.dimensions != self.embedding_dim:
+                        raise ValueError(
+                            f"Field {field} has a different embedding dimension ({dataset.vectors_settings[field].dimensions}) than the provided model ({self.embedding_dim})."
+                        )
+            else:
+                dataset.add_vector_settings(
+                    VectorSettings(
+                        name=field,
+                        dimensions=self.embedding_dim,
+                    )
                 )
-            )
         return dataset
 
     def _encode_single_field(
@@ -106,6 +121,7 @@ class SentenceTransformersExtractor:
     def update_dataset(
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
+        fields: Optional[List[str]] = None,
         include_records: bool = True,
         overwrite: bool = False,
         **kwargs,
@@ -117,8 +133,14 @@ class SentenceTransformersExtractor:
                 f"Provided object is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
             )
         # If fields is None, use all fields
+        if fields:
+            self.fields = fields
         if not self.fields:
             self.fields = [field.name for field in dataset.fields]
+        else:
+            for field in self.fields:
+                if field not in [field.name for field in dataset.fields]:
+                    raise ValueError(f"Field {field} is not present in the dataset.")
 
         dataset = self._create_vector_settings(dataset=dataset, overwrite=overwrite)
 
