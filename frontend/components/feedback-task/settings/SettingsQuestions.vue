@@ -2,7 +2,7 @@
   <SynchronizeScroll class="settings__container">
     <div class="settings__edition-form">
       <div class="settings__edition-form__content">
-        <h2 class="--heading5 --medium">Edit questions</h2>
+        <h2 class="--heading5 --medium" v-text="$t('settings.editQuestions')" />
         <div v-for="question in settings.questions" :key="question.id">
           <form
             @submit.prevent="onSubmit(question)"
@@ -17,7 +17,7 @@
               :validations="question.validate().title"
               class="settings__edition-form__group"
             >
-              <label :for="`title-${question.id}`">Title</label>
+              <label :for="`title-${question.id}`" v-text="$t('title')" />
               <input
                 type="type"
                 :id="`title-${question.id}`"
@@ -29,7 +29,10 @@
               :validations="question.validate().description"
               class="settings__edition-form__group"
             >
-              <label :for="`description-${question.id}`">Description</label>
+              <label
+                :for="`description-${question.id}`"
+                v-text="$t('description')"
+              />
               <textarea
                 :id="`description-${question.id}`"
                 v-model="question.description"
@@ -40,7 +43,7 @@
               v-if="question.isTextType"
               :id="`use-markdown-${question.id}`"
               v-model="question.settings.use_markdown"
-              >Use Markdown</BaseSwitch
+              >{{ $t("useMarkdown") }}</BaseSwitch
             >
 
             <BaseRangeSlider
@@ -52,7 +55,7 @@
               :min="3"
               :max="question.settings.options.length"
               v-model="question.settings.visible_options"
-              >Visible options</BaseRangeSlider
+              >{{ $t("visibleOptions") }}</BaseRangeSlider
             >
 
             <div class="settings__edition-form__footer">
@@ -62,14 +65,14 @@
                 @on-click="restore(question)"
                 :disabled="!question.isModified"
               >
-                <span v-text="'Cancel'" />
+                <span v-text="$t('cancel')" />
               </BaseButton>
               <BaseButton
                 type="submit"
                 class="primary small"
                 :disabled="!question.isModified || !question.isQuestionValid"
               >
-                <span v-text="'Update'" />
+                <span v-text="$t('update')" />
               </BaseButton>
             </div>
           </form>

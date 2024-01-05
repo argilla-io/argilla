@@ -33,19 +33,19 @@ export const useDatasetSettingViewModel = () => {
     tabs.value.push({ id: "info", name: "Info", component: "SettingsInfo" });
     tabs.value.push({
       id: "fields",
-      name: "Fields",
+      name: t("fields"),
       component: "SettingsFields",
     });
     tabs.value.push({
       id: "questions",
-      name: "Questions",
+      name: t("questions"),
       component: "SettingsQuestions",
     });
 
     if (datasetSettings.hasMetadataProperties) {
       tabs.value.push({
         id: "metadata",
-        name: "Metadata",
+        name: t("metadata"),
         component: "SettingsMetadata",
       });
     }
@@ -53,14 +53,14 @@ export const useDatasetSettingViewModel = () => {
     if (datasetSettings.hasVectors) {
       tabs.value.push({
         id: "vector",
-        name: "Vectors",
+        name: t("vectors"),
         component: "SettingsVectors",
       });
     }
 
     tabs.value.push({
       id: "danger-zone",
-      name: "Danger zone",
+      name: t("dangerZone"),
       component: "SettingsDangerZone",
     });
   };

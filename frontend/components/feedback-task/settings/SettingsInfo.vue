@@ -38,14 +38,14 @@
               @on-click="restore(settings.dataset)"
               :disabled="!settings.dataset.isModified"
             >
-              <span v-text="'Cancel'" />
+              <span v-text="$t('cancel')" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
               :disabled="!settings.dataset.isModified"
             >
-              <span v-text="'Update'" />
+              <span v-text="$t('update')" />
             </BaseButton>
           </div>
         </form>

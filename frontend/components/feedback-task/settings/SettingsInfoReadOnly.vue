@@ -46,8 +46,7 @@ export default {
     },
     guidelines() {
       return (
-        this.settings.dataset.guidelines ||
-        "This dataset has no annotation guidelines"
+        this.settings.dataset.guidelines || this.$t("noAnnotationGuidelines")
       );
     },
   },
