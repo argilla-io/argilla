@@ -40,7 +40,7 @@ These are the section headers that we use:
 - Updated `argilla.load` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - [breaking] Updated `argilla.delete` functions to also work with `FeedbackDataset`s. It now raises an error if the dataset does not exist. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.list_datasets` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
-- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return None instead of raising an error ([#4425](https://github.com/argilla-io/argilla/pull/4424))
+- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4425](https://github.com/argilla-io/argilla/pull/4424))
 
 ### Fixed
 
