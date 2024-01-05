@@ -21,70 +21,6 @@ from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
-# @pytest.fixture
-# def datasets() -> List[FeedbackDataset]:
-#     return [
-#         FeedbackDataset(
-#             fields=[
-#                 TextField(name="field_1"),
-#                 TextField(name="field_2", required=False),
-#             ]
-#         ),
-#         FeedbackDataset(
-#             fields=[
-#                 TextField(name="field_1"),
-#             ]
-#         ),
-#         FeedbackDataset(
-#             fields=[
-#                 TextField(name="field_1"),
-#                 TextField(name="field_2", required=False),
-#             ],
-#             vectors_settings=[
-#                 VectorSettings(
-#                     name="field_1",
-#                     dimensions=384,
-#                 ),
-#                 VectorSettings(
-#                     name="test",
-#                     dimensions=384,
-#                 ),
-#             ],
-#         ),
-#         FeedbackDataset(
-#             fields=[
-#                 TextField(name="field_1"),
-#                 TextField(name="field_2", required=False),
-#             ],
-#             vectors_settings=[
-#                 VectorSettings(
-#                     name="field_1",
-#                     dimensions=384,
-#                 ),
-#                 VectorSettings(
-#                     name="field_2",
-#                     dimensions=768,
-#                 ),
-#             ],
-#         ),
-#         FeedbackDataset(
-#             fields=[
-#                 TextField(name="field_1"),
-#                 TextField(name="field_2", required=False),
-#             ],
-#             vectors_settings=[
-#                 VectorSettings(
-#                     name="field_1",
-#                     dimensions=384,
-#                 ),
-#                 VectorSettings(
-#                     name="field_2",
-#                     dimensions=384,
-#                 ),
-#             ],
-#         ),
-#     ]
-
 
 @pytest.fixture
 def records() -> List[FeedbackRecord]:
@@ -103,11 +39,6 @@ def records() -> List[FeedbackRecord]:
 
 @pytest.fixture
 def st_extractor() -> SentenceTransformersExtractor:
-    return SentenceTransformersExtractor()
-
-
-@pytest.fixture
-def st_extractor_2() -> SentenceTransformersExtractor:
     return SentenceTransformersExtractor()
 
 
