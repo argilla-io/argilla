@@ -1,10 +1,9 @@
 import { computed, onBeforeMount, ref } from "vue-demi";
 import { useResolve } from "ts-injecty";
-import { useRouter } from "@nuxtjs/composition-api";
 import { useDatasetViewModel } from "./useDatasetViewModel";
 import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { useDatasetSetting } from "~/v1/infrastructure/storage/DatasetSettingStorage";
-import { useRole } from "@/v1/infrastructure/services";
+import { useRole, useRoutes } from "@/v1/infrastructure/services";
 import { DatasetSetting } from "~/v1/domain/entities/DatasetSetting";
 
 interface Tab {
@@ -14,7 +13,8 @@ interface Tab {
 }
 
 export const useDatasetSettingViewModel = () => {
-  const router = useRouter();
+  const routes = useRoutes();
+
   const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();
   const getDatasetSetting = useResolve(GetDatasetSettingsUseCase);
@@ -69,7 +69,7 @@ export const useDatasetSettingViewModel = () => {
     } catch (error) {
       handleError(error.response);
 
-      router.push("/");
+      routes.go("/");
     } finally {
       isLoadingDataset.value = false;
     }
@@ -85,6 +85,12 @@ export const useDatasetSettingViewModel = () => {
     ];
   });
 
+  const goToDataset = () => {
+    if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
+
+    routes.goToFeedbackTaskAnnotationPage(datasetId);
+  };
+
   onBeforeMount(() => {
     loadDatasetSetting();
   });
@@ -96,5 +102,6 @@ export const useDatasetSettingViewModel = () => {
     isAdminOrOwnerRole,
     datasetId,
     datasetSetting,
+    goToDataset,
   };
 };

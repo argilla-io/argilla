@@ -8,6 +8,7 @@
           :datasetId="datasetId"
           :breadcrumbs="breadcrumbs"
           :showTrainButton="true"
+          :showSettingButton="true"
           @on-click-train="showTrainModal(true)"
         />
         <BaseModal

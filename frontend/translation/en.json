@@ -9,6 +9,10 @@
   "minimize": "Minimize",
   "expand": "Expand",
   "copied": "Copied",
+  "settings": {
+    "title": "Dataset settings",
+    "seeYourDataset": "See your dataset"
+  },
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
