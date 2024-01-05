@@ -16,12 +16,13 @@ from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, Iterable, List, Literal, Optional, Tuple, TypeVar, Union
 
 from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
-from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
+from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.utils.dependency import requires_dependencies
 
 if TYPE_CHECKING:
     from datasets import Dataset
 
+    from argilla.client.feedback.schemas.records import SortBy
     from argilla.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
@@ -145,7 +146,7 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         return self.__get_property_by_name(name, self.vectors_settings, "vector settings")
 
     @abstractmethod
-    def sort_by(self, sort: List[SortBy]) -> "FeedbackDatasetBase":
+    def sort_by(self, sort: List["SortBy"]) -> "FeedbackDatasetBase":
         """Sorts the records in the dataset by the given field."""
         pass
 
