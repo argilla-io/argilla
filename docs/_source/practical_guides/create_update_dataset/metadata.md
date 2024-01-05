@@ -140,7 +140,7 @@ You can easily add text descriptives to your records or datasets using the `Text
 - `visible_for_annotators` (optional): Whether the extracted metrics should be visible to annotators. Defaults to `True`.
 - `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
 
-For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.html).
+For a practical example, check our [tutorial on adding text descriptives as metadata](/tutorials_and_integrations/integrations/add_text_descriptives_as_metadata.ipynb).
 
 ::::{tab-set}
 

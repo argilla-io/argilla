@@ -91,6 +91,39 @@ record = rg.FeedbackRecord(
 )
 ```
 
+#### Add `vectors`
+
+Once the `vector_settings` were defined, to add vectors to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding vectors](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-vectors-004.ipynb).
+
+```{note}
+The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
+```
+
+::::{tab-set}
+
+:::{tab-item} Local dataset
+```python
+for record in dataset.records:
+    record.vectors["my_vectors"] = [0.1, 0.2, 0.3, 0.4]
+```
+:::
+
+:::{tab-item} Remote dataset
+```python
+modified_records = []
+for record in dataset.records:
+    record.vectors["my_vectors"] = [0.1, 0.2, 0.3, 0.4]
+    modified_records.append(record)
+dataset.update_records(modified_records)
+```
+:::
+
+::::
+
+```{note}
+You can also follow the same strategy to modify existing vectors.
+```
+
 ### Add Sentence Transformers `vectors`
 
 You can easily add semantic embeddings to your records or datasets using the `SentenceTransformersExtractor` based on the [sentence-transformers](https://sbert.net/) library. This extractor is available in the Python SDK and can be used to configure settings for a dataset and extract embeddings from a list of records. The `SentenceTransformersExtractor` has the following arguments:
@@ -98,7 +131,7 @@ You can easily add semantic embeddings to your records or datasets using the `Se
 - `model_name`: The name of the model to use for extracting embeddings. You can find a list of available models [here](https://www.sbert.net/docs/pretrained_models.html).
 - `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
 
-For a practical example, check our [tutorial on adding sentence transformer embeddings as vectors](/tutorials_and_integrations/integrations/add_sentence_transformers_embeddings_as_vectors.html).
+For a practical example, check our [tutorial on adding sentence transformer embeddings as vectors](/tutorials_and_integrations/integrations/add_sentence_transformers_embeddings_as_vectors.ipynb).
 
 ::::{tab-set}
 
@@ -149,41 +182,6 @@ records = tde.update_records(
 :::
 
 ::::
-
-
-#### Add `vectors`
-
-Once the `vector_settings` were defined, to add vectors to the records, it slightly depends on whether you are using a `FeedbackDataset` or a `RemoteFeedbackDataset`. For an end-to-end example, check our [tutorial on adding vectors](/tutorials_and_integrations/tutorials/feedback/end2end_examples/add-vectors-004.ipynb).
-
-```{note}
-The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an instance of `FeedbackDataset` whereas the dataset pulled from Argilla is an instance of `RemoteFeedbackDataset`. The difference between the two is that the former is a local one and the changes made on it stay locally. On the other hand, the latter is a remote one and the changes made on it are directly reflected on the dataset on the Argilla server, which can make your process faster.
-```
-
-::::{tab-set}
-
-:::{tab-item} Local dataset
-```python
-for record in dataset.records:
-    record.vectors["my_vectors"] = [0.1, 0.2, 0.3, 0.4]
-```
-:::
-
-:::{tab-item} Remote dataset
-```python
-modified_records = []
-for record in dataset.records:
-    record.vectors["my_vectors"] = [0.1, 0.2, 0.3, 0.4]
-    modified_records.append(record)
-dataset.update_records(modified_records)
-```
-:::
-
-::::
-
-```{note}
-You can also follow the same strategy to modify existing vectors.
-```
-
 
 ## Other datasets
 
