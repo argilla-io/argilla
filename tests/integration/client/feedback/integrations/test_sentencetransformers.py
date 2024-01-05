@@ -62,15 +62,15 @@ def test_update_dataset(
     records: List[FeedbackRecord],
 ):
     dataset.add_records(records)
-    dataset = st_extractor.update_dataset(dataset, fields=["field_1"], include_records=False)
+    dataset = st_extractor.update_dataset(dataset, fields=["field_1"], update_records=False)
     assert dataset.vector_settings_by_name("field_1")
     assert not dataset.vector_settings_by_name("field_2")
     assert not dataset.records[0].vectors
-    dataset = st_extractor.update_dataset(dataset, fields=["field_2"], include_records=False)
-    dataset = st_extractor.update_dataset(dataset, include_records=True, fields=["field_1"])
+    dataset = st_extractor.update_dataset(dataset, fields=["field_2"], update_records=False)
+    dataset = st_extractor.update_dataset(dataset, update_records=True, fields=["field_1"])
     assert "field_1" in dataset.records[0].vectors
     assert "field_2" not in dataset.records[0].vectors
-    dataset = st_extractor.update_dataset(dataset, include_records=True, fields=["field_2"])
+    dataset = st_extractor.update_dataset(dataset, update_records=True, fields=["field_2"])
     assert "field_1" in dataset.records[0].vectors
     assert "field_2" in dataset.records[0].vectors
     assert "field_2" not in dataset.records[1].vectors

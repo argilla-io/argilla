@@ -385,7 +385,7 @@ class TextDescriptivesExtractor:
         >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
         """
-        # If overwrite is True, include_records must also be True
+        # If overwrite is True, update_records must also be True
         if overwrite and not update_records:
             raise ValueError("Cannot overwrite metadata properties without including records.")
         if not isinstance(dataset, (FeedbackDataset, RemoteFeedbackDataset)):
