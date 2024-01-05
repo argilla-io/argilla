@@ -33,6 +33,24 @@ class SentenceTransformersExtractor:
         show_progress: Optional[bool] = True,
         **kwargs,
     ):
+        """
+        Initialize the SentenceTransformersExtractor.
+
+        Args:
+            model (Optional[Union["SentenceTransformer", str]]): The SentenceTransformer model to use.
+                Defaults to "TaylorAI/bge-micro-v2".
+            show_progress (Optional[bool]): Whether to show the progress bar during encoding.
+                Defaults to True.
+            **kwargs: Additional keyword arguments to pass to the init of the SentenceTransformer model.
+
+        Examples:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.textdescriptives import SentenceTransformersExtractor
+        >>> ds = rg.FeedbackDataset(...)
+        >>> tde = SentenceTransformersExtractor()
+        >>> updated_ds = tde.update_dataset(ds)
+        >>> updated_records = tde.update_records(ds.records)
+        """
         require_dependencies("sentence_transformers")
         from sentence_transformers import SentenceTransformer
 
@@ -53,6 +71,17 @@ class SentenceTransformersExtractor:
         fields: Optional[List[str]],
         overwrite: bool = False,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
+        """
+        Create or update vector settings for the given dataset.
+
+        Args:
+            dataset (Union[FeedbackDataset, RemoteFeedbackDataset]): The dataset to create or update vector settings for.
+            fields (Optional[List[str]]): The list of fields to create or update vector settings for.
+            overwrite (bool, optional): Whether to overwrite existing vector settings if they have different dimensions. Defaults to False.
+
+        Returns:
+            Union[FeedbackDataset, RemoteFeedbackDataset]: The dataset with updated vector settings.
+        """
         available_vector_settings = [setting.name for setting in dataset.vectors_settings]
         for field in fields:
             if field in available_vector_settings:
@@ -83,6 +112,18 @@ class SentenceTransformersExtractor:
     def _encode_single_field(
         self, records: List[Union[RemoteFeedbackRecord, FeedbackRecord]], field: str, overwrite: bool, **kwargs
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
+        """
+        Encode a single field in the records with vectors.
+
+        Args:
+            records (List[Union[RemoteFeedbackRecord, FeedbackRecord]]): The list of records to encode.
+            field (str): The field to encode.
+            overwrite (bool): Whether to overwrite existing vectors for the field.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            List[Union[FeedbackRecord, RemoteFeedbackRecord]]: The updated list of records.
+        """
         texts = []
         idxs = []
         # only
@@ -110,6 +151,25 @@ class SentenceTransformersExtractor:
         overwrite: Optional[bool] = None,
         **kwargs,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
+        """
+        Update the records by encoding fields with vectors.
+
+        Args:
+            records (List[Union[FeedbackRecord, RemoteFeedbackRecord]]): The records to update.
+            fields (Optional[List[str]]): The fields to update. If None, use all available fields.
+            overwrite (Optional[bool]): Whether to overwrite existing vectors. If None, use the value from
+                the parent method. Defaults to None.
+            **kwargs: Additional keyword arguments for encoding with sentence-transformers.
+
+        Returns:
+            List[Union[FeedbackRecord, RemoteFeedbackRecord]]: The updated records.
+
+        Examples:
+        >>> from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
+        >>> records = [rg.FeedbackRecord(fields={"text": "This is a test."})]
+        >>> tde = SentenceTransformersExtractor()
+        >>> updated_records = tde.update_records(records)
+        """
         available_fields = set()
         # unwrap potential records from RemoteFeedbackDataset
         modified_records = []
@@ -132,6 +192,26 @@ class SentenceTransformersExtractor:
         overwrite: bool = False,
         **kwargs,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
+        """
+        Update the dataset by encoding fields with vectors.
+
+        Args:
+            dataset (Union[FeedbackDataset, RemoteFeedbackDataset]): The dataset to update.
+            fields (Optional[List[str]]): The fields to update. If None, use all available fields.
+            update_records (bool): Whether to update the records with vectors. Defaults to True.
+            overwrite (bool): Whether to overwrite existing vectors. Defaults to False.
+            **kwargs: Additional keyword arguments for encoding with sentence-transformers.
+
+        Returns:
+            Union[FeedbackDataset, RemoteFeedbackDataset]: The updated dataset.
+
+        Examples:
+        >>> import argilla as rg
+        >>> from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
+        >>> dataset = rg.FeedbackDataset(...)
+        >>> tde = SentenceTransformersExtractor()
+        >>> updated_dataset = tde.update_dataset(dataset)
+        """
         if overwrite and not update_records:
             raise ValueError("Cannot overwrite metadata properties without including records.")
         if not isinstance(dataset, (FeedbackDataset, RemoteFeedbackDataset)):
@@ -150,6 +230,5 @@ class SentenceTransformersExtractor:
         if update_records:
             records = self.update_records(records=dataset.records, fields=fields, overwrite=overwrite, **kwargs)
             if isinstance(dataset, RemoteFeedbackDataset):
-                print(records[0].vectors)
                 dataset.update_records(records)
         return dataset

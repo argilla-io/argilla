@@ -44,7 +44,6 @@ class TextDescriptivesExtractor:
         self,
         model: str = "en",
         metrics: Optional[List[str]] = None,
-        basic_metrics: Optional[List[str]] = None,
         visible_for_annotators: Optional[bool] = True,
         show_progress: Optional[bool] = True,
     ):
@@ -56,7 +55,6 @@ class TextDescriptivesExtractor:
             metrics (Optional[List[str]]): A list of metrics to extract
                 [“descriptive_stats”, “readability”, “dependency_distance”, “pos_proportions”, “coherence”, “quality”, “information_theory”].
                 If None, all metrics will be extracted.
-            fields (Optional[List[str]]): A list of field names to extract metrics from. If None, all fields will be used.
             visible_for_annotators (bool): Whether the extracted metrics should be visible to annotators.
             show_progress (bool): Whether to show a progress bar when extracting metrics.
 
@@ -73,18 +71,15 @@ class TextDescriptivesExtractor:
             model = "en_core_web_md"
             warnings.warn("Using 'en_core_web_md' as default spaCy model for English language.")
         self.model = model
-        if metrics is None and basic_metrics is None:
-            metrics = ["descriptive_stats", "information_theory", "readability"]
-            basic_metrics = [
-                "n_tokens",
-                "n_unique_tokens",
-                "n_sentences",
-                "perplexity",
-                "entropy",
-                "flesch_reading_ease",
-            ]
         self.metrics = metrics
-        self.basic_metrics = basic_metrics
+        self.__basic_metrics = [
+            "n_tokens",
+            "n_unique_tokens",
+            "n_sentences",
+            "perplexity",
+            "entropy",
+            "flesch_reading_ease",
+        ]
         self.visible_for_annotators = visible_for_annotators
         self.show_progress = show_progress
 
@@ -116,7 +111,7 @@ class TextDescriptivesExtractor:
             field_metrics = field_metrics.drop("text", axis=1)
             # If basic metrics is None, use all basic metrics
             if basic_metrics is None and self.metrics is None:
-                basic_metrics = self.basic_metrics
+                basic_metrics = self.__basic_metrics
                 field_metrics = field_metrics.loc[:, basic_metrics]
             # Convert any None values to NaNs
             field_metrics = field_metrics.fillna(value=np.nan)
@@ -324,6 +319,7 @@ class TextDescriptivesExtractor:
 
         Args:
             records (List[Union[FeedbackRecord, RemoteFeedbackRecord]]): A list of FeedbackDataset or RemoteFeedbackDataset records.
+            fields (List[str]): A list of fields to extract metrics for. If None, extract metrics for all fields.
             overwrite (Optional[bool]): Whether to overwrite existing metadata properties with the same name. Defaults to False.
 
         Returns:
@@ -375,6 +371,7 @@ class TextDescriptivesExtractor:
 
         Args:
             dataset (Union[FeedbackDataset, RemoteFeedbackDataset]): A FeedbackDataset or RemoteFeedbackDataset.
+            fields (Optional[List[str]]): A list of fields to extract metrics for. If None, extract metrics for all fields.
             update_records (Optional[bool]): Whether to update the records in the dataset too. Defaults to True.
             overwrite (Optional[bool]): Whether to overwrite existing metadata properties with the same name. Defaults to False.
 
@@ -387,7 +384,6 @@ class TextDescriptivesExtractor:
         >>> dataset = rg.FeedbackDataset(...)
         >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
-
         """
         # If overwrite is True, include_records must also be True
         if overwrite and not update_records:
