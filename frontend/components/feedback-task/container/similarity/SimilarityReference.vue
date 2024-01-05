@@ -124,7 +124,7 @@ export default {
     flex-shrink: 0;
     min-width: 0;
   }
-  &__button-icon {
+  &__button-icon.button {
     padding: 0;
     color: $black-54;
   }
@@ -148,7 +148,7 @@ export default {
       line-height: 1rem;
       color: $similarity-color;
     }
-    &__button-close {
+    &__button-close.button {
       padding: 0;
       color: $similarity-color;
       &:hover {
