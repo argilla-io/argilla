@@ -23,15 +23,27 @@ const actions = {
     _,
     { message, type, numberOfChars, permanent, buttonText, onClick, onClose }
   ) {
-    return Vue.$toast.open({
-      message,
-      permanent,
-      numberOfChars,
-      buttonText,
-      onClick,
-      onClose,
-      type: type || "default",
-    });
+    actions.clear();
+
+    return setTimeout(() => {
+      Vue.$toast.open({
+        message,
+        permanent,
+        numberOfChars,
+        buttonText,
+        onClick() {
+          actions.clear();
+
+          onClick();
+        },
+        onClose() {
+          actions.clear();
+
+          onClose();
+        },
+        type: type || "default",
+      });
+    }, 100);
   },
   clear() {
     return Vue.$toast.clear();
