@@ -44,9 +44,9 @@ export const useRoutes = () => {
 
   const previousRouteMatchWith = (value: string): boolean => {
     const previousRoute = getPreviousRoute();
+    const currentRoute = route.value.fullPath;
 
-    if (previousRoute !== route.value.fullPath)
-      return previousRoute.includes(value);
+    if (previousRoute !== currentRoute) return previousRoute.includes(value);
 
     return false;
   };
