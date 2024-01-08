@@ -45,7 +45,7 @@ dependencies:
       - plotly>=4.1.0
       - snorkel>=0.9.7
       - spacy~=3.6.0
-      - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
+      - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
       - spacy-transformers>=1.2.5
       - spacy-huggingface-hub >= 0.0.10
       - transformers[torch]>=4.30.0 # <- required for DPO with TRL
