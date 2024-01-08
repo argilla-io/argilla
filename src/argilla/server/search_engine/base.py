@@ -29,9 +29,6 @@ from typing import (
 )
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator
-from pydantic.generics import GenericModel
-
 from argilla.server.enums import (
     MetadataPropertyType,
     RecordSortField,
@@ -41,6 +38,8 @@ from argilla.server.enums import (
     SortOrder,
 )
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator
+from argilla.server.pydantic_v1.generics import GenericModel
 
 __all__ = [
     "SearchEngine",
@@ -182,7 +181,7 @@ class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
 
     _json_model: ClassVar[Type[_RangeModel]]
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         ge = values.get("ge")
         le = values.get("le")
@@ -232,7 +231,7 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: MetadataPropertyType = Field(MetadataPropertyType.terms, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.terms)
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -243,11 +242,11 @@ class NumericMetadataMetrics(GenericModel, Generic[NT]):
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: MetadataPropertyType = Field(MetadataPropertyType.integer, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.integer)
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: MetadataPropertyType = Field(MetadataPropertyType.float, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.float)
 
 
 MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]

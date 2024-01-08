@@ -15,12 +15,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel
-
 from argilla.client.api import Api
 from argilla.client.models import TextClassificationRecord
 from argilla.monitoring.base import BaseMonitor
 from argilla.monitoring.types import MissingType
+from argilla.pydantic_v1 import BaseModel
 
 try:
     from transformers import (

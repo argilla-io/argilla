@@ -44,8 +44,8 @@ dependencies:
       - pgmpy
       - plotly>=4.1.0
       - snorkel>=0.9.7
-      - spacy==3.5.3
-      - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
+      - spacy~=3.6.0
+      - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
       - sentence-transformers>=2.0.0,<3.0.0
       - spacy-transformers>=1.2.5
       - spacy-huggingface-hub >= 0.0.10

@@ -15,7 +15,6 @@
 from typing import Any, Dict, Optional, Union
 
 from fastapi import APIRouter, Depends, Security
-from pydantic import BaseModel
 
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.text2text import Text2TextRecord
@@ -24,6 +23,7 @@ from argilla.server.apis.v0.models.token_classification import TokenClassificati
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskStatus
 from argilla.server.models import User
+from argilla.server.pydantic_v1 import BaseModel
 from argilla.server.security import auth
 from argilla.server.services.datasets import DatasetsService
 from argilla.server.services.search.service import SearchRecordsService

@@ -15,9 +15,8 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel, Field, validator
-
 from argilla.server.commons.models import TaskStatus
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 
 
 class SortOrder(str, Enum):
@@ -76,7 +75,7 @@ class VectorSearch(BaseModel):
 class BaseRecordsQuery(BaseQuery):
     query_text: Optional[str] = None
 
-    ids: Optional[List[Union[str, int]]]
+    ids: Optional[List[Union[str, int]]] = None
 
     annotated_by: List[str] = Field(default_factory=list)
     predicted_by: List[str] = Field(default_factory=list)

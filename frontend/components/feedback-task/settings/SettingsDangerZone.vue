@@ -1,7 +1,7 @@
 <template>
   <div class="settings__container">
     <div class="settings__content">
-      <h2 class="--heading5 --medium">Delete dataset</h2>
+      <h2 class="--heading5 --medium" v-text="$t('settings.deleteDataset')" />
       <DatasetDeleteFeedbackTask :dataset="settings.dataset" />
     </div>
   </div>

@@ -10,9 +10,9 @@
     <template v-slot:center>
       <div class="settings__wrapper">
         <TopDatasetSettingsFeedbackTaskContent
-          :datasetId="datasetId"
           class="settings__header"
           :separator="!isAdminOrOwnerRole"
+          @goToDataset="goToDataset"
         />
         <SettingsInfoReadOnly
           v-if="!isAdminOrOwnerRole"

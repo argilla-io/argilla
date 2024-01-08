@@ -44,14 +44,10 @@ export default {
   },
   methods: {
     showNotification(message) {
-      Notification.dispatch("clear");
-
-      setTimeout(() => {
-        Notification.dispatch("notify", {
-          message: message,
-          type: "error",
-        });
-      }, 100);
+      Notification.dispatch("notify", {
+        message: message,
+        type: "error",
+      });
     },
   },
 };

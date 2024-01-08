@@ -15,10 +15,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Literal, Optional
 
-from pydantic import BaseModel, Extra, Field, validator
-
 from argilla.client.feedback.schemas.enums import FieldTypes
 from argilla.client.feedback.schemas.validators import title_must_have_value
+from argilla.pydantic_v1 import BaseModel, Extra, Field, validator
 
 
 class FieldSchema(BaseModel, ABC):

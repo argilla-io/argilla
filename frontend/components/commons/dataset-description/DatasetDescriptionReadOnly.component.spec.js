@@ -7,6 +7,9 @@ const options = {
   propsData: {
     guidelines: "Lorem ipsum",
   },
+  mocks: {
+    $t: (msg) => msg,
+  },
 };
 beforeEach(() => {
   wrapper = shallowMount(DatasetDescriptionReadOnly, options);
@@ -16,7 +19,7 @@ afterEach(() => {
   wrapper.destroy();
 });
 
-describe("DatasetDescriptionComponent", () => {
+describe("DatasetDescriptionReadonlyComponent", () => {
   it("render the component", () => {
     expect(wrapper.is(DatasetDescriptionReadOnly)).toBe(true);
   });

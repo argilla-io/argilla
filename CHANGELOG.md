@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+
 ### Deprecated
 
 - The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
@@ -28,6 +33,7 @@ These are the section headers that we use:
 ### Changed
 
 - [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4454](https://github.com/argilla-io/argilla/pull/4454))
+- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
 
 ## [1.21.0](https://github.com/argilla-io/argilla/compare/v1.20.0...v1.21.0)
 
@@ -41,6 +47,7 @@ These are the section headers that we use:
 - Added list support for term metadata properties. (Closes [#4359](https://github.com/argilla-io/argilla/issues/4359))
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 - Added `httpx_extra_kwargs` argument to `rg.init` and `Argilla` to allow passing extra arguments to `httpx.Client` used by `Argilla`. ([#4440](https://github.com/argilla-io/argilla/pull/4441))
+
 
 ### Changed
 
