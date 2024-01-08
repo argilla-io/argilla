@@ -134,7 +134,7 @@ export default {
       Notification.dispatch("notify", {
         message: this.$t("changes_no_submit"),
         buttonText: this.$t("button.ignore_and_continue"),
-        numberOfChars: 500,
+        permanent: true,
         type: "warning",
         onClick() {
           return onFilter();
