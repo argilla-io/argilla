@@ -25,7 +25,6 @@ import backoff
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from pydantic import ConfigError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
@@ -52,6 +51,8 @@ from argilla.server.errors import (
     WrongTaskError,
 )
 from argilla.server.models import User
+from argilla.server.pydantic_v1 import ValidationError
+from argilla.server.pydantic_v1.errors import ConfigError
 from argilla.server.routes import api_router
 from argilla.server.security import auth
 from argilla.server.settings import settings

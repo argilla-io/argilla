@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
+from argilla.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -112,7 +112,7 @@ class FeedbackRecordsSearchVectorQuery(BaseModel):
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_required(cls, values: dict) -> dict:
         """Check that either 'record_id' or 'value' is provided"""
         record_id = values.get("record_id")

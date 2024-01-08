@@ -17,12 +17,12 @@ from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
-from pydantic import BaseModel, PositiveInt, conlist, constr, root_validator, validator
-from pydantic import Field as PydanticField
-from pydantic.generics import GenericModel
-from pydantic.utils import GetterDict
 
 from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
+from argilla.server.pydantic_v1 import BaseModel, PositiveInt, conlist, constr, root_validator, validator
+from argilla.server.pydantic_v1 import Field as PydanticField
+from argilla.server.pydantic_v1.generics import GenericModel
+from argilla.server.pydantic_v1.utils import GetterDict
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.records import RecordUpdate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
@@ -218,7 +218,7 @@ class TextQuestionSettingsCreate(BaseModel):
 
 
 class UniqueValuesCheckerMixin(BaseModel):
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         options = values.get("options", [])
         seen = set()
@@ -283,7 +283,7 @@ class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     )
     visible_options: Optional[int] = PydanticField(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         visible_options = values.get("visible_options")
         if visible_options is not None:
@@ -544,7 +544,7 @@ class RecordIncludeParam(BaseModel):
     relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
     vectors: Optional[List[str]] = PydanticField(None, alias="vectors")
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         relationships = values.get("relationships")
         if not relationships:
@@ -589,7 +589,7 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
     min: Optional[NT] = None
     max: Optional[NT] = None
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         min = values.get("min")
         max = values.get("max")
@@ -706,7 +706,7 @@ class VectorQuery(BaseModel):
     value: Optional[List[float]] = None
     order: SimilarityOrder = SimilarityOrder.most_similar
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_required(cls, values: dict) -> dict:
         """Check that either 'record_id' or 'value' is provided"""
         record_id = values.get("record_id")
@@ -765,7 +765,7 @@ class RangeFilter(BaseModel):
     ge: Optional[float]
     le: Optional[float]
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_ge_and_le(cls, values: dict) -> dict:
         ge, le = values.get("ge"), values.get("le")
 

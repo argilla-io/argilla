@@ -29,7 +29,7 @@ dependencies = [
     # pandas -> For data loading
     "pandas >=1.0.0,<2.0.0",
     # Aligned pydantic version with server fastAPI
-    "pydantic >= 1.10.7,< 2.0",
+    "pydantic >= 1.10.7",
     # monitoring
     "wrapt >= 1.13,< 1.15",
     # weaksupervision
@@ -49,10 +49,11 @@ dynamic = ["version"]
 [project.optional-dependencies]
 server = [
     # Basic dependencies
-    "fastapi >= 0.103.1",
+    "fastapi >= 0.103.1,< 1.0.0",
+    "pydantic >= 1.10.7,< 2.0",
+    "uvicorn[standard] >= 0.15.0,< 0.25.0",
     "opensearch-py ~= 2.0.0",
     "elasticsearch8[async] ~= 8.7.0",
-    "uvicorn[standard] >= 0.15.0,< 0.21.0",
     "smart-open",
     "brotli-asgi >= 1.1,< 1.3",
     # Database dependencies
@@ -98,7 +99,7 @@ integrations = [
     "pgmpy",
     "plotly >= 4.1.0",
     "snorkel >= 0.9.7",
-    "spacy == 3.5.3",
+    "spacy>=3.5.0,<3.7.0",
     "spacy-transformers >= 1.2.5",
     "spacy-huggingface-hub >= 0.0.10",
     "transformers[torch] >= 4.30.0",

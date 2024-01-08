@@ -15,7 +15,13 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import (
+from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
+from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
+from argilla.client.feedback.schemas.validators import (
+    validate_numeric_metadata_filter_bounds,
+    validate_numeric_metadata_property_bounds,
+)
+from argilla.pydantic_v1 import (
     BaseModel,
     Extra,
     Field,
@@ -25,13 +31,6 @@ from pydantic import (
     ValidationError,
     root_validator,
     validator,
-)
-
-from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
-from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.validators import (
-    validate_numeric_metadata_filter_bounds,
-    validate_numeric_metadata_property_bounds,
 )
 
 TERMS_METADATA_PROPERTY_MIN_VALUES = 1
@@ -202,7 +201,9 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
 
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_property_bounds)
+    _bounds_validator = root_validator(allow_reuse=True, skip_on_failure=True)(
+        validate_numeric_metadata_property_bounds
+    )
 
     @property
     def server_settings(self) -> Dict[str, Any]:
@@ -396,7 +397,7 @@ class _NumericMetadataFilterSchema(MetadataFilterSchema):
     le: Optional[Union[int, float]] = None
     ge: Optional[Union[int, float]] = None
 
-    _bounds_validator = root_validator(allow_reuse=True)(validate_numeric_metadata_filter_bounds)
+    _bounds_validator = root_validator(allow_reuse=True, skip_on_failure=True)(validate_numeric_metadata_filter_bounds)
 
     @property
     def query_string(self) -> str:

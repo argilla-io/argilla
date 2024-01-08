@@ -13,9 +13,8 @@
 #  limitations under the License.
 from typing import List, Union
 
-from pydantic import StrictFloat, StrictInt, StrictStr
-
 from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
+from argilla.pydantic_v1 import StrictFloat, StrictInt, StrictStr
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32

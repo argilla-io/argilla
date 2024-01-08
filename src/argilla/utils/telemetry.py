@@ -18,17 +18,37 @@ import platform
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from argilla.server.commons.models import TaskType
-from argilla.server.settings import settings
+from argilla._constants import DEFAULT_TELEMETRY_KEY
+from argilla.pydantic_v1 import BaseSettings
 
 if TYPE_CHECKING:
     from fastapi import Request
+
+    from argilla.server.commons.models import TaskType
+
+
+class TelemetrySettings(BaseSettings):
+    """
+    Telemetry settings
+
+    This settings class is defined here to not depend on the server settings.
+    """
+
+    enable_telemetry: bool = True
+    telemetry_key: str = DEFAULT_TELEMETRY_KEY
+
+    class Config:
+        env_prefix = "ARGILLA_"
+
+
+telemetry_settings = TelemetrySettings()
+
 
 try:
     from analytics import Client  # This import works only for version 2.2.0
 except (ImportError, ModuleNotFoundError):
     # TODO: show some warning info
-    settings.enable_telemetry = False
+    telemetry_settings.enable_telemetry = False
     Client = None
 
 
@@ -37,9 +57,9 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class TelemetryClient:
-    enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
+    enable_telemetry: dataclasses.InitVar[bool] = telemetry_settings.enable_telemetry
     disable_send: dataclasses.InitVar[bool] = False
-    api_key: dataclasses.InitVar[str] = settings.telemetry_key
+    api_key: dataclasses.InitVar[str] = telemetry_settings.telemetry_key
     host: dataclasses.InitVar[str] = "https://api.segment.io"
 
     _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
@@ -88,7 +108,7 @@ def _process_request_info(request: "Request"):
     return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
 
 
-async def track_bulk(task: TaskType, records: int):
+async def track_bulk(task: "TaskType", records: int):
     _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 

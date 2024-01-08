@@ -15,7 +15,7 @@
 import warnings
 from typing import Any, Callable, Dict
 
-from pydantic import BaseModel, PrivateAttr
+from argilla.pydantic_v1 import BaseModel, PrivateAttr
 
 
 # TODO(@frascuchon): Define as dataclasses.dataclass
