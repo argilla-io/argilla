@@ -120,7 +120,7 @@ $checkbox-color-dark: $primary-color;
     min-width: $checkbox-size;
     height: $checkbox-size;
     position: relative;
-    border-radius: 1px;
+    border-radius: 3px;
     border: 1px solid $checkbox-color;
     text-align: center;
     vertical-align: middle;
