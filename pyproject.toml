@@ -99,7 +99,7 @@ integrations = [
     "pgmpy",
     "plotly >= 4.1.0",
     "snorkel >= 0.9.7",
-    "spacy ~= 3.5.3",
+    "spacy>=3.5.0,<3.7.0",
     "spacy-transformers >= 1.2.5",
     "spacy-huggingface-hub >= 0.0.10",
     "transformers[torch] >= 4.30.0",
