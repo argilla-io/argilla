@@ -59,21 +59,43 @@ assignments = assign_workspaces(
 
 for username, records in assignments.items():
     dataset = rg.FeedbackDataset(
-        fields=fields, questions=questions, metadata=metadata,
-        vector_settings=vector_settings, guidelines=guidelines
+        fields=fields,
+        questions=questions,
+        metadata_properties=metadata_properties,
+        vector_settings=vector_settings,
+        guidelines=guidelines
     )
     dataset.add_records(records)
     remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=username)
 ```
 
 ```{Note}
-If you prefer to have a single dataset accessible to all teammates, you can assign the records using the metadata. Annotators will just need to filter the dataset in the Argilla UI by their username to get their assigned records:
+If you prefer to have a single dataset accessible to all teammates, you can assign the records using the metadata whether without overlap (by adding a single annotator as metadata to each record) or with overlap (by adding a list of multiple annotators). Annotators will just need to filter the dataset in the Argilla UI by their username to get their assigned records:
 ```python
-modified_records = []
+#Add the metadata to the existing records using id to identify each record
+id_modified_records = {}
 for username, records in assignments.items():
-     for record in records:
-        record.metadata['annotator'] = username
-        modified_records.append(record)
+    for record in records:
+        record_id = id(record)
+        if record_id not in id_modified_records:
+            id_modified_records[record_id] = record
+            record.metadata["annotators"] = []
+        if username not in id_modified_records[record_id].metadata["annotators"]:
+            id_modified_records[record_id].metadata["annotators"].append(username)
+
+# Get the unique records with their updated metadata
+modified_records = list(id_modified_records.values())
+
+# Push the dataset with the modified records
+dataset = rg.FeedbackDataset(
+        fields=fields,
+        questions=questions,
+        metadata_properties=[rg.TermsMetadataProperty(name="annotators")]
+        vector_settings=vector_settings,
+        guidelines=guidelines,
+    )
+dataset.add_records(modified_records)
+remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace="workspace_name")
 ```
 
 
