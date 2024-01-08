@@ -16,6 +16,7 @@
         <svgicon name="code" width="20" height="20" />Train
       </BaseButton>
       <NuxtLink
+        v-if="showSettingButton"
         :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
       >
         <DatasetSettingsIconFeedbackTaskComponent
@@ -44,7 +45,11 @@ export default {
     },
     showTrainButton: {
       type: Boolean,
-      default: () => false,
+      default: false,
+    },
+    showSettingButton: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {

@@ -19,15 +19,31 @@ import Vue from "vue";
 const getters = {};
 
 const actions = {
-  notify(_, { message, type, numberOfChars, buttonText, onClick, onClose }) {
-    return Vue.$toast.open({
-      message,
-      numberOfChars,
-      buttonText,
-      onClick,
-      onClose,
-      type: type || "default",
-    });
+  notify(
+    _,
+    { message, type, numberOfChars, permanent, buttonText, onClick, onClose }
+  ) {
+    actions.clear();
+
+    return setTimeout(() => {
+      Vue.$toast.open({
+        message,
+        permanent,
+        numberOfChars,
+        buttonText,
+        onClick() {
+          actions.clear();
+
+          onClick();
+        },
+        onClose() {
+          actions.clear();
+
+          onClose();
+        },
+        type: type || "default",
+      });
+    }, 100);
   },
   clear() {
     return Vue.$toast.clear();

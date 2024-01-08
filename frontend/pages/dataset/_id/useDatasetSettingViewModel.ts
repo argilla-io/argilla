@@ -1,22 +1,33 @@
-import { computed, onBeforeMount, ref } from "vue-demi";
+import { computed, onBeforeMount, onBeforeUnmount, ref, watch } from "vue-demi";
 import { useResolve } from "ts-injecty";
-import { useRouter } from "@nuxtjs/composition-api";
 import { useDatasetViewModel } from "./useDatasetViewModel";
 import { GetDatasetSettingsUseCase } from "~/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
 import { useDatasetSetting } from "~/v1/infrastructure/storage/DatasetSettingStorage";
-import { useRole } from "@/v1/infrastructure/services";
+import {
+  useBeforeUnload,
+  useRole,
+  useRoutes,
+  useTranslate,
+} from "@/v1/infrastructure/services";
 import { DatasetSetting } from "~/v1/domain/entities/DatasetSetting";
+import { Notification } from "~/models/Notifications";
 
 interface Tab {
-  id: string;
+  id: "info" | "fields" | "questions" | "metadata" | "vector" | "danger-zone";
   name: string;
   component: string;
 }
 
 export const useDatasetSettingViewModel = () => {
-  const router = useRouter();
+  const routes = useRoutes();
+  const beforeUnload = useBeforeUnload();
+  const t = useTranslate();
+
   const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();
+  const { datasetId, isLoadingDataset, handleError, createRootBreadCrumbs } =
+    useDatasetViewModel();
+
   const getDatasetSetting = useResolve(GetDatasetSettingsUseCase);
 
   const tabs = ref<Tab[]>([]);
@@ -25,19 +36,19 @@ export const useDatasetSettingViewModel = () => {
     tabs.value.push({ id: "info", name: "Info", component: "SettingsInfo" });
     tabs.value.push({
       id: "fields",
-      name: "Fields",
+      name: t("fields"),
       component: "SettingsFields",
     });
     tabs.value.push({
       id: "questions",
-      name: "Questions",
+      name: t("questions"),
       component: "SettingsQuestions",
     });
 
     if (datasetSettings.hasMetadataProperties) {
       tabs.value.push({
         id: "metadata",
-        name: "Metadata",
+        name: t("metadata"),
         component: "SettingsMetadata",
       });
     }
@@ -45,20 +56,17 @@ export const useDatasetSettingViewModel = () => {
     if (datasetSettings.hasVectors) {
       tabs.value.push({
         id: "vector",
-        name: "Vectors",
+        name: t("vectors"),
         component: "SettingsVectors",
       });
     }
 
     tabs.value.push({
       id: "danger-zone",
-      name: "Danger zone",
-      component: "settingsDangerZone",
+      name: t("dangerZone"),
+      component: "SettingsDangerZone",
     });
   };
-
-  const { datasetId, isLoadingDataset, handleError, createRootBreadCrumbs } =
-    useDatasetViewModel();
 
   const loadDatasetSetting = async () => {
     try {
@@ -69,7 +77,7 @@ export const useDatasetSettingViewModel = () => {
     } catch (error) {
       handleError(error.response);
 
-      router.push("/");
+      routes.go("/");
     } finally {
       isLoadingDataset.value = false;
     }
@@ -85,9 +93,59 @@ export const useDatasetSettingViewModel = () => {
     ];
   });
 
+  const onGoToDataset = () => {
+    if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
+
+    routes.goToFeedbackTaskAnnotationPage(datasetId);
+  };
+
+  const goToTabWithModification = () => {
+    const goToTab = (id: Tab["id"]) => {
+      document.getElementById(id).click();
+    };
+
+    if (datasetSetting.isDatasetModified) return goToTab("info");
+    if (datasetSetting.isFieldsModified) return goToTab("fields");
+    if (datasetSetting.isQuestionsModified) return goToTab("questions");
+    if (datasetSetting.isMetadataPropertiesModified) return goToTab("metadata");
+    if (datasetSetting.isVectorsModified) return goToTab("vector");
+  };
+
+  const goToDataset = () => {
+    if (datasetSetting.isModified) {
+      return Notification.dispatch("notify", {
+        message: t("changes_no_submit"),
+        buttonText: t("button.ignore_and_continue"),
+        permanent: true,
+        type: "warning",
+        onClick() {
+          onGoToDataset();
+        },
+        onClose() {
+          goToTabWithModification();
+        },
+      });
+    }
+
+    onGoToDataset();
+  };
+
   onBeforeMount(() => {
     loadDatasetSetting();
   });
+
+  onBeforeUnmount(() => {
+    beforeUnload.destroy();
+  });
+
+  watch(
+    () => datasetSetting.isModified,
+    (isModified) => {
+      if (isModified) return beforeUnload.confirm();
+
+      beforeUnload.destroy();
+    }
+  );
 
   return {
     isLoadingDataset,
@@ -96,5 +154,6 @@ export const useDatasetSettingViewModel = () => {
     isAdminOrOwnerRole,
     datasetId,
     datasetSetting,
+    goToDataset,
   };
 };

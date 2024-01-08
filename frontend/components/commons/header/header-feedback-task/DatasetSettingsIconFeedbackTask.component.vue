@@ -1,7 +1,7 @@
 <template>
   <BaseIconWithBadge
     class="button-settings"
-    tooltip="Dataset settings"
+    :tooltip="$t('settings.title')"
     :show-badge="showBadge"
     badge-vertical-position="top"
     badge-horizontal-position="right"
@@ -16,13 +16,8 @@ export default {
   props: {
     showBadge: {
       type: Boolean,
-      default: () => false,
+      default: false,
     },
-  },
-  data() {
-    return {
-      isLoading: false,
-    };
   },
 };
 </script>
