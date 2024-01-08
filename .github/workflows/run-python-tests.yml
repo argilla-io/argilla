@@ -95,6 +95,12 @@ jobs:
         run: |
           pip install -e ".[server,listeners]"
           pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
+      - name: Run tests with pydantic v2 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
+        run: |
+          pip install "pydantic~=2.0"
+          pytest ${{ inputs.pytestArgs }} -vs
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v3
         with:
