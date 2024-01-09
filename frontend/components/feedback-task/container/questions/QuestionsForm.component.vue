@@ -36,7 +36,7 @@
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
           :disabled="!areActionsEnabled"
-          :title="
+          :data-title="
             !areActionsEnabled
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
               : $tc(
@@ -56,7 +56,7 @@
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
           :disabled="!areActionsEnabled"
-          :title="
+          :data-title="
             !areActionsEnabled
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
               : $tc(
@@ -84,7 +84,7 @@
           ]"
           :loading="isSubmitting"
           :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
-          :title="
+          :data-title="
             !areActionsEnabled
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
               : areQuestionsCompletedCorrectly
@@ -410,6 +410,10 @@ export default {
     &:disabled {
       pointer-events: visible;
       cursor: not-allowed;
+      opacity: 1;
+      & > * {
+        opacity: 0.5;
+      }
     }
     :deep(.spinner) {
       height: $base-space * 3;
@@ -421,9 +425,6 @@ export default {
   &--submit {
     &:not([disabled]) {
       background: $submitted-color-light;
-    }
-    &[disabled] {
-      opacity: 0.5;
     }
     &:hover:not([disabled]) {
       background: darken($submitted-color-light, 2%);
@@ -457,6 +458,12 @@ export default {
       background: $discarded-color-medium;
     }
   }
+}
+
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 
 @container (max-width: 500px) {
