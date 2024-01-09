@@ -3,7 +3,7 @@
     <BaseBreadcrumbs
       v-if="breadcrumbs.length"
       :breadcrumbs="breadcrumbs"
-      :copy-button="true"
+      :copy-button="showCopyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId">
@@ -34,7 +34,6 @@ export default {
   props: {
     datasetId: {
       type: String,
-      required: true,
     },
     breadcrumbs: {
       type: Array,
@@ -45,6 +44,10 @@ export default {
       default: false,
     },
     showSettingButton: {
+      type: Boolean,
+      default: false,
+    },
+    showCopyButton: {
       type: Boolean,
       default: false,
     },
