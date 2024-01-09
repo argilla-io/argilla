@@ -39,6 +39,9 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             raise NotImplementedError("SetFit only supports the `TextClassification` task.")
 
         if self._multi_label:
+            self._dataset = self._dataset.remove_columns("label")
+            self._eval_dataset = self._eval_dataset.remove_columns("label")
+            self._train_dataset = self._train_dataset.remove_columns("label")
             self._column_mapping = {"text": "text", "binarized_label": "label"}
             self.multi_target_strategy = "one-vs-rest"
         else:
