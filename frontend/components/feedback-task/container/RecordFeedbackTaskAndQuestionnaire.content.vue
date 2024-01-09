@@ -131,22 +131,18 @@ export default {
         return onFilter();
       }
 
-      setTimeout(() => {
-        Notification.dispatch("notify", {
-          message: this.$t("changes_no_submit"),
-          buttonText: this.$t("button.ignore_and_continue"),
-          numberOfChars: 500,
-          type: "warning",
-          onClick() {
-            Notification.dispatch("clear");
-            return onFilter();
-          },
-          onClose() {
-            Notification.dispatch("clear");
-            return onClose();
-          },
-        });
-      }, 100);
+      Notification.dispatch("notify", {
+        message: this.$t("changes_no_submit"),
+        buttonText: this.$t("button.ignore_and_continue"),
+        permanent: true,
+        type: "warning",
+        onClick() {
+          return onFilter();
+        },
+        onClose() {
+          return onClose();
+        },
+      });
     },
   },
   setup(props) {

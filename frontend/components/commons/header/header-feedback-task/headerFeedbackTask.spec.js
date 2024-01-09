@@ -1,7 +1,7 @@
 import { shallowMount } from "@vue/test-utils";
 import HeaderFeedbackTask from "./HeaderFeedbackTask.component";
+import * as useRole from "~/v1/infrastructure/services/useRole";
 
-let wrapper = null;
 const options = {
   stubs: [
     "BaseTopbarBrand",
@@ -11,13 +11,6 @@ const options = {
     "UserAvatarTooltip",
     "NuxtLink",
   ],
-  mocks: {
-    $auth: {
-      user: {
-        role: "admin",
-      },
-    },
-  },
   propsData: {
     breadcrumbs: [
       { link: { name: "datasets" }, name: "Home" },
@@ -38,51 +31,62 @@ const options = {
   },
 };
 
-beforeEach(() => {
-  wrapper = shallowMount(HeaderFeedbackTask, options);
-});
-
-afterEach(() => {
-  wrapper.destroy();
-});
-
 describe("HeaderFeedbackTask", () => {
-  it("render the component", () => {
-    expect(wrapper.is(HeaderFeedbackTask)).toBe(true);
-  });
-  it("render Train button if user role is admin", () => {
-    expect(wrapper.findComponent({ ref: "trainButtonRef" }).exists()).toBe(
-      true
-    );
-  });
-  it("render Train button if user role is owner", () => {
-    const wrapper = shallowMount(HeaderFeedbackTask, {
-      ...options,
-      mocks: {
-        $auth: {
-          user: {
-            role: "owner",
-          },
-        },
-      },
+  test("render the component", () => {
+    jest.spyOn(useRole, "useRole").mockReturnValue({
+      isAdminOrOwnerRole: true,
     });
-    expect(wrapper.findComponent({ ref: "trainButtonRef" }).exists()).toBe(
-      true
-    );
+
+    const wrapper = shallowMount(HeaderFeedbackTask, options);
+
+    expect(wrapper.is(HeaderFeedbackTask)).toBeTruthy();
   });
-  it("Don't render Train button if user role is not admin or owner", () => {
-    const wrapper = shallowMount(HeaderFeedbackTask, {
-      ...options,
-      mocks: {
-        $auth: {
-          user: {
-            role: "annotator",
-          },
-        },
-      },
+
+  describe("Train button", () => {
+    describe("show when", () => {
+      test("render Train button if user role is admin or owner", () => {
+        jest.spyOn(useRole, "useRole").mockReturnValue({
+          isAdminOrOwnerRole: true,
+        });
+
+        const wrapper = shallowMount(HeaderFeedbackTask, options);
+
+        expect(
+          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
+        ).toBeTruthy();
+      });
     });
-    expect(wrapper.findComponent({ ref: "trainButtonRef" }).exists()).toBe(
-      false
-    );
+
+    describe("hide when", () => {
+      test("no render Train button if user role is not admin or owner", () => {
+        jest.spyOn(useRole, "useRole").mockReturnValue({
+          isAdminOrOwnerRole: false,
+        });
+
+        const wrapper = shallowMount(HeaderFeedbackTask, options);
+
+        expect(
+          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
+        ).toBeFalsy();
+      });
+
+      test("no render Train button if showTrainButton is false", () => {
+        jest.spyOn(useRole, "useRole").mockReturnValue({
+          isAdminOrOwnerRole: true,
+        });
+
+        const wrapper = shallowMount(HeaderFeedbackTask, {
+          ...options,
+          propsData: {
+            ...options.propsData,
+            showTrainButton: false,
+          },
+        });
+
+        expect(
+          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
+        ).toBeFalsy();
+      });
+    });
   });
 });

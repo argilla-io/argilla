@@ -15,7 +15,8 @@
               params: { id: datasetId },
             }"
             target="_blank"
-            >Annotation guidelines <svgicon name="external-link" width="12" />
+            >{{ $t("annotationGuidelines") }}
+            <svgicon name="external-link" width="12" />
           </NuxtLink>
         </p>
       </div>

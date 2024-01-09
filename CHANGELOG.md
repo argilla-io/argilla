@@ -19,6 +19,8 @@ These are the section headers that we use:
 ### Added
 
 - Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+- Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 
 ### Fixed
 
@@ -27,6 +29,10 @@ These are the section headers that we use:
 ### Deprecated
 
 - The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
+
+### Added
+
+- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
 
 ## [1.21.0](https://github.com/argilla-io/argilla/compare/v1.20.0...v1.21.0)
 
@@ -40,6 +46,7 @@ These are the section headers that we use:
 - Added list support for term metadata properties. (Closes [#4359](https://github.com/argilla-io/argilla/issues/4359))
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 - Added `httpx_extra_kwargs` argument to `rg.init` and `Argilla` to allow passing extra arguments to `httpx.Client` used by `Argilla`. ([#4440](https://github.com/argilla-io/argilla/pull/4441))
+- Added `ResponseStatusFilter` enum in `__init__` imports of Argilla ([#4118](https://github.com/argilla-io/argilla/pull/4463)). Contributed by @Piyush-Kumar-Ghosh.
 
 ### Changed
 

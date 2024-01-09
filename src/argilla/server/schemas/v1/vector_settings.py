@@ -16,8 +16,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
-
+from argilla.server.pydantic_v1 import BaseModel
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.datasets import VectorSettingsTitle
 

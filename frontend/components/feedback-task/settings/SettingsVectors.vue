@@ -1,7 +1,7 @@
 <template>
   <div class="settings__container">
     <div class="settings__edition-form">
-      <h2 class="--heading5 --medium">Edit vectors</h2>
+      <h2 class="--heading5 --medium" v-text="$t('settings.editVectors')" />
       <div v-for="vector in settings.vectors" :key="vector.id">
         <form
           @submit.prevent="onSubmit(vector)"
@@ -15,12 +15,12 @@
             :validations="vector.validate().title"
             class="settings__edition-form__group"
           >
-            <label for="vector.title">Title</label>
+            <label for="vector.title" v-text="$t('title')" />
             <input type="text" id="vector.title" v-model="vector.title" />
           </Validation>
 
           <div class="settings__edition-form__group">
-            <label for="vector.dimensions">Dimension</label>
+            <label for="vector.dimensions" v-text="$t('dimension')" />
             <input
               type="number"
               id="vector.dimensions"
@@ -36,14 +36,14 @@
               @on-click="restore(vector)"
               :disabled="!vector.isModified"
             >
-              <span v-text="'Cancel'" />
+              <span v-text="$t('cancel')" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
               :disabled="!vector.isModified || !vector.isValid"
             >
-              <span v-text="'Update'" />
+              <span v-text="$t('update')" />
             </BaseButton>
           </div>
         </form>

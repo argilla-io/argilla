@@ -17,9 +17,8 @@ import warnings
 from abc import ABC
 from typing import Any, List, Optional, Type
 
-from pydantic import BaseModel
-
 from argilla.server.errors import InvalidTextSearchError
+from argilla.server.pydantic_v1 import BaseModel
 
 
 class ClosedIndexError(Exception):

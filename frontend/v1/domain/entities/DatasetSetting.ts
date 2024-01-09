@@ -20,4 +20,34 @@ export class DatasetSetting {
   get hasMetadataProperties() {
     return this.metadataProperties.length > 0;
   }
+
+  get isModified(): boolean {
+    return (
+      this.isDatasetModified ||
+      this.isQuestionsModified ||
+      this.isFieldsModified ||
+      this.isVectorsModified ||
+      this.isMetadataPropertiesModified
+    );
+  }
+
+  get isMetadataPropertiesModified(): boolean {
+    return this.metadataProperties.some((m) => m.isModified);
+  }
+
+  get isVectorsModified(): boolean {
+    return this.vectors.some((v) => v.isModified);
+  }
+
+  get isFieldsModified(): boolean {
+    return this.fields.some((f) => f.isModified);
+  }
+
+  get isQuestionsModified(): boolean {
+    return this.questions.some((q) => q.isModified);
+  }
+
+  get isDatasetModified(): boolean {
+    return this.dataset?.isModified;
+  }
 }

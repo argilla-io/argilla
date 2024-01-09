@@ -3,7 +3,7 @@
     <BaseBreadcrumbs
       v-if="breadcrumbs.length"
       :breadcrumbs="breadcrumbs"
-      :copy-button="copyButton"
+      :copy-button="true"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId">
@@ -16,12 +16,10 @@
         <svgicon name="code" width="20" height="20" />Train
       </BaseButton>
       <NuxtLink
+        v-if="showSettingButton"
         :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
       >
-        <DatasetSettingsIconFeedbackTaskComponent
-          v-if="datasetId"
-          :datasetId="datasetId"
-        />
+        <DatasetSettingsIconFeedbackTaskComponent v-if="datasetId" />
       </NuxtLink>
     </template>
     <user-avatar-tooltip />
@@ -29,8 +27,10 @@
 </template>
 
 <script>
+import { useRole } from "~/v1/infrastructure/services";
+
 export default {
-  name: "HeaderFeedbaskTaskComponent",
+  name: "HeaderFeedbackTaskComponent",
   props: {
     datasetId: {
       type: String,
@@ -42,27 +42,20 @@ export default {
     },
     showTrainButton: {
       type: Boolean,
-      default: () => false,
+      default: false,
     },
-  },
-  data() {
-    return {
-      copyButton: false,
-    };
-  },
-  computed: {
-    /**
-     * @deprecated Replace with useRole
-     */
-    isAdminOrOwnerRole() {
-      const role = this.$auth.user.role;
-      return role === "admin" || role === "owner";
+    showSettingButton: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
     onClickTrain() {
       this.$emit("on-click-train");
     },
+  },
+  setup() {
+    return useRole();
   },
 };
 </script>

@@ -25,10 +25,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from deprecated import deprecated
-from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from argilla import _messages
 from argilla._constants import _JS_MAX_SAFE_INTEGER, DEFAULT_MAX_KEYWORD_LENGTH, PROTECTED_METADATA_FIELD_PREFIX
+from argilla.pydantic_v1 import BaseModel, Field, PrivateAttr, root_validator, validator
 from argilla.utils.span_utils import SpanUtils
 
 _LOGGER = logging.getLogger(__name__)
@@ -176,7 +176,7 @@ class _Validators(BaseModel):
 
         return v
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def _check_and_update_status(cls, values):
         """Updates the status if an annotation is provided and no status is specified."""
         values["status"] = values.get("status") or ("Default" if values.get("annotation") is None else "Validated")
@@ -305,7 +305,7 @@ class TextClassificationRecord(_Validators):
     metrics: Optional[Dict[str, Any]] = None
     search_keywords: Optional[List[str]] = None
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def _check_text_and_inputs(cls, values):
         """Check if either text or inputs were provided. Copy text to inputs."""
         if isinstance(values.get("inputs"), str):

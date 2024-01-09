@@ -19,7 +19,6 @@ from enum import Enum
 from typing import Any, Dict, List, Union
 
 import pandas as pd
-from pydantic import BaseModel, root_validator, validator
 
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -29,6 +28,7 @@ from argilla.client.feedback.schemas import (
     RatingQuestion,
     ValueSchema,
 )
+from argilla.pydantic_v1 import BaseModel, root_validator, validator
 
 
 class UnifiedValueSchema(ValueSchema):
@@ -659,7 +659,7 @@ class LabelQuestionUnification(BaseModel):
         """
         return self.strategy.compute_unified_responses(records, self.question)
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def strategy_must_be_valid_and_align_with_question(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         strategy = values.get("strategy", "majority")
         question = values.get("question")

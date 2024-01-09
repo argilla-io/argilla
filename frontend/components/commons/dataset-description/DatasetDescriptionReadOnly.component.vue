@@ -2,7 +2,7 @@
   <div class="description">
     <h2
       class="--heading5 --medium description__title"
-      v-text="'Annotation guidelines'"
+      v-text="$t('annotationGuidelines')"
     />
     <RenderMarkdownBaseComponent
       class="--body1 description__text"

@@ -100,3 +100,9 @@ jobs:
         with:
           name: coverage-report-${{ env.COVERAGE_REPORT }}
           path: ${{ env.COVERAGE_REPORT }}.xml
+      - name: Run tests with pydantic v2 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
+        run: |
+          pip install "pydantic~=2.0" pytest-custom_exit_code
+          pytest --suppress-no-test-exit-code ${{ inputs.pytestArgs }} -vs
