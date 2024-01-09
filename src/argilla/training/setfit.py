@@ -27,7 +27,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger.setLevel(logging.INFO)
 
     def __init__(self, *args, **kwargs):
-        require_dependencies(["torch", "datasets", "transformers", "setfit>=0.6"])
+        require_dependencies(["torch", "datasets", "transformers", "setfit>=1.0.0"])
         if kwargs.get("model") is None and "model" in kwargs:
             kwargs["model"] = "all-MiniLM-L6-v2"
             self._logger.warning(f"No model defined. Using the default model {kwargs['model']}.")
