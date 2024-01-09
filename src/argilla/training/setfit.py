@@ -40,7 +40,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
 
         if self._multi_label:
             # As we are going to rename binarized_label as label, we need to remove the column that was previously called label.
-            # This change is due to SetFit >=1.0.0
+            # This change is due to SetFit version >=1.0.0
             self._dataset = self._dataset.remove_columns("label")
             self._eval_dataset = self._eval_dataset.remove_columns("label")
             self._train_dataset = self._train_dataset.remove_columns("label")
