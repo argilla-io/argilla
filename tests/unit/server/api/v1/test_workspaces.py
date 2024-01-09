@@ -15,8 +15,8 @@ import contextlib
 from uuid import uuid4
 
 import pytest
-from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.commons.models import TaskType
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import UserRole
 
 from tests.factories import AnnotatorFactory, DatasetFactory, UserFactory, WorkspaceFactory

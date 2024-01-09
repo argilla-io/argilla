@@ -14,7 +14,6 @@
 from typing import TYPE_CHECKING, List, Optional
 
 import pytest
-from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text2text import (
     Text2TextBulkRequest,
@@ -22,6 +21,7 @@ from argilla.server.apis.v0.models.text2text import (
     Text2TextSearchResults,
 )
 from argilla.server.commons.models import TaskType
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import User
 
 if TYPE_CHECKING:
