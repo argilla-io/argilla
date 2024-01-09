@@ -46,7 +46,7 @@
               'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
             }"
             v-for="(record, i) in recordsOnPage"
-            :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
+            :key="`${recordCriteria.committed.page.client.page}_${record.id}_${i}`"
             :datasetVectors="datasetVectors"
             :recordCriteria="recordCriteria"
             :record="record"
