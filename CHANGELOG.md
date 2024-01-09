@@ -20,14 +20,20 @@ These are the section headers that we use:
 
 - Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 - Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+
+## Changed
+
+- Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
 
 ### Deprecated
 
 - The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
 
-### Added
+## Removed
 
-- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- The deprecated `python -m argilla database` command has been removed. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
+
 
 ## [1.21.0](https://github.com/argilla-io/argilla/compare/v1.20.0...v1.21.0)
 

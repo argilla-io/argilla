@@ -11,18 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typer import Typer
 
-from typing import TYPE_CHECKING
+from .reindex import reindex
 
-if TYPE_CHECKING:
-    from click.testing import CliRunner
-    from pytest_mock import MockerFixture
-    from typer import Typer
+app = Typer(help="Commands for Argilla server search engine management", no_args_is_help=True)
 
+app.command(name="reindex", help="Reindex all Argilla entities into search engine.")(reindex)
 
-def test_start_command(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
-    uvicorn_run_mock = mocker.patch("uvicorn.run")
-    result = cli_runner.invoke(cli, "server start --host 1.1.1.1 --port 6899 --no-access-log")
-
-    assert result.exit_code == 0
-    uvicorn_run_mock.assert_called_once_with("argilla:app", host="1.1.1.1", port=6899, access_log=False)
+if __name__ == "__main__":
+    app()

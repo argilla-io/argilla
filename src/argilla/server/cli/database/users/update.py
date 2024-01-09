@@ -11,27 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 
 import typer
 
-from argilla.cli import typer_ext
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import UserRole
 
 
-async def update(
-    username: str = typer.Argument(
-        default=None,
-        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
-    ),
-    role: UserRole = typer.Option(
-        prompt=True,
-        default=None,
-        show_default=False,
-        help="New role for the user.",
-    ),
-):
+async def _update(username: str, role: UserRole):
     async with AsyncSessionLocal() as session:
         user = await accounts.get_user_by_username(session, username)
 
@@ -51,5 +40,20 @@ async def update(
         typer.echo(f"• role: {old_role.value!r} -> {user.role.value!r}")
 
 
+def update(
+    username: str = typer.Argument(
+        default=None,
+        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+    ),
+    role: UserRole = typer.Option(
+        prompt=True,
+        default=None,
+        show_default=False,
+        help="New role for the user.",
+    ),
+):
+    asyncio.run(_update(username, role))
+
+
 if __name__ == "__main__":
-    typer_ext.run(update)
+    typer.run(update)

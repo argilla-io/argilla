@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 def test_create(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
-        f"server database users create --first-name first-name --username username --role {role_string} "
+        f"database users create --first-name first-name --username username --role {role_string} "
         "--password 12345678 --workspace workspace",
     )
 
@@ -51,7 +51,7 @@ def test_create(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_stri
 def test_create_with_default_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --password 12345678",
+        "database users create --first-name first-name --username username --password 12345678",
         input="\n",
     )
 
@@ -68,7 +68,7 @@ def test_create_with_default_role(sync_db: "Session", cli_runner: CliRunner, cli
 def test_create_with_input_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --password 12345678",
+        "database users create --first-name first-name --username username --password 12345678",
         input=f"{role_string}\n",
     )
 
@@ -84,7 +84,7 @@ def test_create_with_input_role(sync_db: "Session", cli_runner: CliRunner, cli: 
 def test_create_with_invalid_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role bad_role "
+        "database users create --first-name first-name --username username --role bad_role "
         "--password 12345678 --workspace workspace",
     )
 
@@ -96,7 +96,7 @@ def test_create_with_invalid_role(sync_db: "Session", cli_runner: CliRunner, cli
 def test_create_with_input_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner",
+        "database users create --first-name first-name --username username --role owner",
         input="12345678\n12345678\n",
     )
 
@@ -111,7 +111,7 @@ def test_create_with_input_password(sync_db: "Session", cli_runner: CliRunner, c
 
 def test_create_with_invalid_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli, "server database users create --first-name first-name --username username --password 1234 --role owner"
+        cli, "database users create --first-name first-name --username username --password 1234 --role owner"
     )
 
     assert result.exit_code == 1
@@ -121,7 +121,7 @@ def test_create_with_invalid_password(sync_db: "Session", cli_runner: CliRunner,
 
 def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli, "server database users create --first-name first-name --password 12345678", input="username\n"
+        cli, "database users create --first-name first-name --password 12345678", input="username\n"
     )
 
     assert result.exit_code == 0
@@ -134,7 +134,7 @@ def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, c
 def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username Invalid-Username --password 12345678 --role owner",
+        "database users create --first-name first-name --username Invalid-Username --password 12345678 --role owner",
     )
 
     assert result.exit_code == 1
@@ -146,7 +146,7 @@ def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner
     UserSyncFactory.create(username="username")
 
     result = cli_runner.invoke(
-        cli, "server database users create --first-name first-name --username username --role owner --password 12345678"
+        cli, "database users create --first-name first-name --username username --role owner --password 12345678"
     )
 
     assert result.exit_code == 0
@@ -158,7 +158,7 @@ def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner
 def test_create_with_last_name(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --last-name last-name --username username --password 12345678 --role owner",
+        "database users create --first-name first-name --last-name last-name --username username --password 12345678 --role owner",
     )
 
     assert result.exit_code == 0
@@ -173,7 +173,7 @@ def test_create_with_last_name(sync_db: "Session", cli_runner: CliRunner, cli: T
 def test_create_with_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
+        "database users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
     )
 
     assert result.exit_code == 0
@@ -188,7 +188,7 @@ def test_create_with_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typ
 def test_create_with_invalid_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 --api-key abc",
+        "database users create --first-name first-name --username username --role owner --password 12345678 --api-key abc",
     )
 
     assert result.exit_code == 1
@@ -201,7 +201,7 @@ def test_create_with_existing_api_key(sync_db: "Session", cli_runner: CliRunner,
 
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
+        "database users create --first-name first-name --username username --role owner --password 12345678 --api-key abcdefgh",
     )
 
     assert result.exit_code == 0
@@ -213,7 +213,7 @@ def test_create_with_existing_api_key(sync_db: "Session", cli_runner: CliRunner,
 def test_create_with_multiple_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 "
+        "database users create --first-name first-name --username username --role owner --password 12345678 "
         "--workspace workspace-a --workspace workspace-b",
     )
 
@@ -232,7 +232,7 @@ def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunn
 
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 "
+        "database users create --first-name first-name --username username --role owner --password 12345678 "
         "--workspace workspace-a --workspace workspace-b --workspace workspace-c",
     )
 
@@ -248,7 +248,7 @@ def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunn
 def test_create_with_invalid_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "server database users create --first-name first-name --username username --role owner --password 12345678 "
+        "database users create --first-name first-name --username username --role owner --password 12345678 "
         "--workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
     )
 
