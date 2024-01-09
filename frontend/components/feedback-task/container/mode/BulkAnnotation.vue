@@ -1,80 +1,83 @@
 <template>
-  <div class="wrapper">
-    <section class="wrapper__records">
-      <DatasetFiltersComponent :recordCriteria="recordCriteria">
-        <ToggleAnnotationType
-          v-if="
-            records.hasRecordsToAnnotate && recordCriteria.committed.isPending
-          "
-          :recordCriteria="recordCriteria"
-      /></DatasetFiltersComponent>
-      <div class="wrapper__records__header">
-        <div class="wrapper__records__header--left">
-          <BaseCheckbox
-            v-if="records.hasRecordsToAnnotate"
-            class="wrapper__records__header__checkbox"
-            :value="selectedRecords.length === recordsOnPage.length"
-            @input="toggleAllRecords"
-          />
-          <span
-            class="wrapper__records__header__selection-text"
-            v-if="selectedRecords.length"
-            v-text="
-              $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
+  <span>
+    <LoadLine v-if="isSubmitting || isDraftSaving || isDiscarding" />
+    <div class="wrapper">
+      <section class="wrapper__records">
+        <DatasetFiltersComponent :recordCriteria="recordCriteria">
+          <ToggleAnnotationType
+            v-if="
+              records.hasRecordsToAnnotate && recordCriteria.committed.isPending
             "
+            :recordCriteria="recordCriteria"
+        /></DatasetFiltersComponent>
+        <div class="wrapper__records__header">
+          <div class="wrapper__records__header--left">
+            <BaseCheckbox
+              v-if="records.hasRecordsToAnnotate"
+              class="wrapper__records__header__checkbox"
+              :value="selectedRecords.length === recordsOnPage.length"
+              @input="toggleAllRecords"
+            />
+            <span
+              class="wrapper__records__header__selection-text"
+              v-if="selectedRecords.length"
+              v-text="
+                $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
+              "
+            />
+          </div>
+          <RecordsViewConfig
+            v-if="records.hasRecordsToAnnotate"
+            v-model="recordHeight"
+          />
+          <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+        </div>
+        <SimilarityRecordReference
+          v-show="recordCriteria.isFilteringBySimilarity"
+          v-if="!!records.reference"
+          :fields="records.reference.fields"
+          :recordCriteria="recordCriteria"
+          :availableVectors="datasetVectors"
+        />
+        <div class="bulk__records snap" v-if="records.hasRecordsToAnnotate">
+          <Record
+            class="snap-child"
+            :class="{
+              'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
+            }"
+            v-for="(record, i) in recordsOnPage"
+            :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
+            :datasetVectors="datasetVectors"
+            :recordCriteria="recordCriteria"
+            :record="record"
+            :selectedRecords="selectedRecords"
+            @on-select-record="onSelectRecord"
           />
         </div>
-        <RecordsViewConfig
-          v-if="records.hasRecordsToAnnotate"
-          v-model="recordHeight"
-        />
-        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
-      </div>
-      <SimilarityRecordReference
-        v-show="recordCriteria.isFilteringBySimilarity"
-        v-if="!!records.reference"
-        :fields="records.reference.fields"
-        :recordCriteria="recordCriteria"
-        :availableVectors="datasetVectors"
-      />
-      <div class="bulk__records snap" v-if="records.hasRecordsToAnnotate">
-        <Record
-          class="snap-child"
-          :class="{
-            'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
-          }"
-          v-for="(record, i) in recordsOnPage"
-          :key="`${recordCriteria.committed.page}_${record.id}_${i}`"
-          :datasetVectors="datasetVectors"
-          :recordCriteria="recordCriteria"
-          :record="record"
-          :selectedRecords="selectedRecords"
-          @on-select-record="onSelectRecord"
-        />
-      </div>
-      <div v-else class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </section>
+        <div v-else class="wrapper--empty">
+          <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+        </div>
+      </section>
 
-    <QuestionsFormComponent
-      v-if="!!record"
-      :key="`${record.id}_questions`"
-      class="wrapper__form"
-      :class="statusClass"
-      :datasetId="recordCriteria.datasetId"
-      :record="record"
-      :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
-      :is-draft-saving="isDraftSaving"
-      :is-submitting="isSubmitting"
-      :is-discarding="isDiscarding"
-      :are-actions-enabled="hasSelectedAtLeastOneRecord"
-      :number-of-selected-records="selectedRecords.length"
-      @on-submit-responses="onSubmit"
-      @on-discard-responses="onDiscard"
-      @on-save-draft="onSaveDraft"
-    />
-  </div>
+      <QuestionsFormComponent
+        v-if="!!record"
+        :key="`${record.id}_questions`"
+        class="wrapper__form"
+        :class="statusClass"
+        :datasetId="recordCriteria.datasetId"
+        :record="record"
+        :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
+        :is-draft-saving="isDraftSaving"
+        :is-submitting="isSubmitting"
+        :is-discarding="isDiscarding"
+        :are-actions-enabled="hasSelectedAtLeastOneRecord"
+        :number-of-selected-records="selectedRecords.length"
+        @on-submit-responses="onSubmit"
+        @on-discard-responses="onDiscard"
+        @on-save-draft="onSaveDraft"
+      />
+    </div>
+  </span>
 </template>
 <script>
 import { useBulkAnnotationViewModel } from "./useBulkAnnotationViewModel";
