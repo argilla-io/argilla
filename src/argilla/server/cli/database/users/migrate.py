@@ -11,14 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from typing import TYPE_CHECKING, List, Optional
+import asyncio
+from typing import List, Optional, TYPE_CHECKING
 
 import typer
 import yaml
 
-from argilla.cli import typer_ext
-from argilla.cli.server.database.users.utils import get_or_new_workspace
+from .utils import get_or_new_workspace
 from argilla.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
@@ -105,10 +104,10 @@ class UsersMigrator:
         return [user["username"]] + workspace_names
 
 
-async def migrate():
+def migrate():
     """Migrate users defined in YAML file to database."""
-    await UsersMigrator(settings.users_db_file).migrate()
+    asyncio.run(UsersMigrator(settings.users_db_file).migrate())
 
 
 if __name__ == "__main__":
-    typer_ext.run(migrate)
+    typer.run(migrate)

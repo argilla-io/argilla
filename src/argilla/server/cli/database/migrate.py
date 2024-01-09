@@ -21,8 +21,8 @@ from alembic.script import ScriptDirectory
 from alembic.util import CommandError
 
 from argilla.cli import typer_ext
-from argilla.cli.server.database import utils
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
+from . import utils
 
 
 def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB Revision to migrate to")):

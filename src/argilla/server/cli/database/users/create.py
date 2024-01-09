@@ -11,13 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import asyncio
 from typing import List, Optional
 
 import typer
 
-from argilla.cli import typer_ext
-from argilla.cli.server.database.users.utils import get_or_new_workspace
+from .utils import get_or_new_workspace
 from argilla.pydantic_v1 import constr
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
@@ -57,38 +56,19 @@ def api_key_callback(api_key: str) -> str:
     return api_key
 
 
-async def create(
-    first_name: str = typer.Option(default=None, help="First name as a string."),
-    username: str = typer.Option(
-        default=None,
-        prompt=True,
-        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
-    ),
-    role: UserRole = typer.Option(
-        prompt=True,
-        default=UserRole.annotator.value,
-        show_default=True,
-        help="Role for the user.",
-    ),
-    password: str = typer.Option(
-        default=None,
-        prompt=True,
-        confirmation_prompt=True,
-        hide_input=True,
-        callback=password_callback,
-        help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
-    ),
-    last_name: str = typer.Option(default=None, help="Last name as a string."),
-    api_key: Optional[str] = typer.Option(
-        default=None,
-        callback=api_key_callback,
-        help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
-    ),
-    workspace: List[str] = typer.Option(
-        default=[], help="A workspace that the user will be a member of (can be used multiple times)."
-    ),
+async def _create(
+    first_name: str,
+    username: str,
+    role: UserRole,
+    password: str,
+    last_name: Optional[str] = None,
+    api_key: Optional[str] = None,
+    workspace: List[str] = None,
 ):
     """Creates a new user in the Argilla database with provided parameters"""
+    if workspace is None:
+        workspace = []
+
     async with AsyncSessionLocal() as session:
         if await accounts.get_user_by_username(session, username):
             typer.echo(f"User with username {username!r} already exists in database. Skipping...")
@@ -129,5 +109,39 @@ async def create(
         typer.echo(f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}")
 
 
+def create(
+    first_name: str = typer.Option(default=None, help="First name as a string."),
+    username: str = typer.Option(
+        default=None,
+        prompt=True,
+        help="Username as a lowercase string without spaces allowing letters, numbers, dashes and underscores.",
+    ),
+    role: UserRole = typer.Option(
+        prompt=True,
+        default=UserRole.annotator.value,
+        show_default=True,
+        help="Role for the user.",
+    ),
+    password: str = typer.Option(
+        default=None,
+        prompt=True,
+        confirmation_prompt=True,
+        hide_input=True,
+        callback=password_callback,
+        help=f"Password as a string with a minimum length of {USER_PASSWORD_MIN_LENGTH} characters.",
+    ),
+    last_name: str = typer.Option(default=None, help="Last name as a string."),
+    api_key: Optional[str] = typer.Option(
+        default=None,
+        callback=api_key_callback,
+        help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
+    ),
+    workspace: List[str] = typer.Option(
+        default=[], help="A workspace that the user will be a member of (can be used multiple times)."
+    ),
+):
+    asyncio.run(_create(first_name, username, role, password, last_name, api_key, workspace))
+
+
 if __name__ == "__main__":
-    typer_ext.run(create)
+    typer.run(create)

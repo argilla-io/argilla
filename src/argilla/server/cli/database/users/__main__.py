@@ -11,15 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from argilla.cli.typer_ext import ArgillaTyper
+from typer import Typer
 
 from .create import create
 from .create_default import create_default
 from .migrate import migrate
 from .update import update
 
-app = ArgillaTyper(help="Commands for user management using the database connection", no_args_is_help=True)
+app = Typer(help="Commands for user management using the database connection", no_args_is_help=True)
 
 app.command(name="create_default", help="Creates default users and workspaces in the Argilla database.")(create_default)
 app.command(name="create", help="Creates a user and add it to the Argilla database.", no_args_is_help=True)(create)
