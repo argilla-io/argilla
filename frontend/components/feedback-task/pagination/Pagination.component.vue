@@ -105,14 +105,12 @@ export default {
 .pagination {
   &__buttons {
     display: flex;
-    gap: $base-space;
   }
   &__button.button {
     justify-content: center;
     padding: $base-space;
-    background: $black-4;
     &:hover:not([disabled]) {
-      background: $black-6;
+      background: $black-4;
     }
   }
 }

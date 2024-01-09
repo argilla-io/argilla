@@ -108,10 +108,10 @@ export default {
   }
   :deep(.dropdown__header) {
     color: $black-54;
-    background: $black-4;
+    background: transparent;
     padding: calc($base-space / 2);
     &:hover {
-      background: $black-6;
+      background: $black-4;
     }
   }
   .svg-icon {

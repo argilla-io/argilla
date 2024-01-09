@@ -307,7 +307,8 @@ export default {
       text-decoration: none;
       &:hover,
       &:focus {
-        text-decoration: underline;
+        color: $black-54;
+        transition: color 0.2s ease-in-out;
       }
     }
   }
