@@ -29,7 +29,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
 from argilla import __version__ as argilla_version
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
+from argilla.server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.logging import configure_logging
 from argilla.server import helpers
 from argilla.server.contexts import accounts
