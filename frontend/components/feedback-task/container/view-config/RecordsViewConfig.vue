@@ -104,7 +104,6 @@ export default {
 [data-title] {
   position: relative;
   overflow: visible;
-  @extend %has-tooltip--bottom;
-  @extend %tooltip-mini;
+  @include tooltip-mini("top");
 }
 </style>

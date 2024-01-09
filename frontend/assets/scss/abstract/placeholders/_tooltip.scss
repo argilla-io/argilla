@@ -1,5 +1,6 @@
 // tooltip
 $tooltip-bg: palette(grey, 100);
+$tooltip-mini-bg: palette(grey, 150);
 $tooltip-color: palette(white);
 $tooltip-font-size: 13px;
 $tooltip-triangle-size: 7px;
@@ -88,17 +89,6 @@ $tooltip-border-radius: $border-radius-s;
     line-height: 1.4em;
   }
 }
-%tooltip-mini {
-  &:before {
-    content: none !important;
-  }
-  &:after {
-    padding: calc($base-space / 2);
-    background: #0009;
-    @include font-size(12px);
-    line-height: 1.2;
-  }
-}
 %has-tooltip {
   &:after {
     content: attr(data-title);
@@ -155,4 +145,37 @@ $tooltip-border-radius: $border-radius-s;
     $tooltip-triangle-size,
     $tooltip-bg
   );
+}
+
+@mixin tooltip-mini($position, $offset: 4px) {
+  @if $position == "left" {
+    @extend %has-tooltip--left;
+    &:after {
+      right: calc(100% + $offset);
+    }
+  } @else if $position == "bottom" {
+    @extend %has-tooltip--bottom;
+    &:after {
+      top: calc(100% + $offset);
+    }
+  } @else if $position == "top" {
+    @extend %has-tooltip--top;
+    &:after {
+      bottom: calc(100% + $offset);
+    }
+  } @else if $position == "right" {
+    @extend %has-tooltip--right;
+    &:after {
+      left: calc(100% + $offset);
+    }
+  }
+  &:before {
+    content: none !important;
+  }
+  &:after {
+    padding: calc($base-space / 2);
+    background: $tooltip-mini-bg;
+    @include font-size(13px);
+    line-height: 1.2;
+  }
 }
