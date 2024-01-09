@@ -50,13 +50,12 @@
     "draft": "Save as draft"
   },
   "sorting": {
+    "addOtherField": "+ Add another field",
     "suggestion": {
       "score": "Suggestion score",
       "value": "Suggestion value"
     },
-    "response": {
-      "value": "Response value"
-    },
+    "response": "Response value",
     "record": "general",
     "metadata": "metadata"
   },

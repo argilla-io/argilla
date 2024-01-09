@@ -111,7 +111,7 @@ class SuggestionValueSort extends Sort {
 
 class ResponseValueSort extends Sort {
   constructor(private readonly question: Question) {
-    super("response", "value");
+    super("response");
   }
 
   get name() {
