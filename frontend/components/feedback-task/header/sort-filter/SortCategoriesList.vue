@@ -13,7 +13,7 @@
         }}</span>
         <li
           v-for="category in getCategoriesByGroup(group)"
-          :key="`${group}${category.name}`"
+          :key="category.id"
           :title="category.tooltip"
         >
           <BaseButton

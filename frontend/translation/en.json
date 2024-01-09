@@ -50,8 +50,14 @@
     "draft": "Save as draft"
   },
   "sorting": {
-    "score": "suggestion score",
-    "general": "general",
+    "suggestion": {
+      "score": "Suggestion score",
+      "value": "Suggestion value"
+    },
+    "response": {
+      "value": "Response value"
+    },
+    "record": "general",
     "metadata": "metadata"
   },
   "suggestion": {
