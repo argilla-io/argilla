@@ -26,11 +26,12 @@ from rich import print as rprint
 from rich.progress import Progress
 
 from argilla._constants import (
+    DATASET_NAME_REGEX_PATTERN,
     DEFAULT_API_KEY,
     DEFAULT_API_URL,
     DEFAULT_USERNAME,
-    ES_INDEX_REGEX_PATTERN,
     WORKSPACE_HEADER_NAME,
+    WORKSPACE_NAME_REGEX_PATTERN,
 )
 from argilla.client.apis.datasets import Datasets
 from argilla.client.apis.metrics import MetricsAPI
@@ -54,25 +55,18 @@ from argilla.client.sdk.client import AuthenticatedClient
 from argilla.client.sdk.commons.api import bulk
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError, InputValueError, NotFoundApiError
 from argilla.client.sdk.datasets import api as datasets_api
-from argilla.client.sdk.datasets.models import CopyDatasetRequest, TaskType
-from argilla.client.sdk.datasets.models import Dataset as DatasetModel
+from argilla.client.sdk.datasets.models import CopyDatasetRequest, Dataset as DatasetModel, TaskType
 from argilla.client.sdk.metrics import api as metrics_api
 from argilla.client.sdk.metrics.models import MetricInfo
-from argilla.client.sdk.text2text.models import CreationText2TextRecord, Text2TextBulkData
-from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
+from argilla.client.sdk.text2text.models import (CreationText2TextRecord, Text2TextBulkData,
+                                                 Text2TextRecord as SdkText2TextRecord, )
 from argilla.client.sdk.text_classification import api as text_classification_api
-from argilla.client.sdk.text_classification.models import (
-    CreationTextClassificationRecord,
-    LabelingRule,
-    LabelingRuleMetricsSummary,
-    TextClassificationBulkData,
-)
-from argilla.client.sdk.text_classification.models import TextClassificationRecord as SdkTextClassificationRecord
-from argilla.client.sdk.token_classification.models import (
-    CreationTokenClassificationRecord,
-    TokenClassificationBulkData,
-)
-from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
+from argilla.client.sdk.text_classification.models import (CreationTextClassificationRecord, LabelingRule,
+                                                           LabelingRuleMetricsSummary, TextClassificationBulkData,
+                                                           TextClassificationRecord as SdkTextClassificationRecord, )
+from argilla.client.sdk.token_classification.models import (CreationTokenClassificationRecord,
+                                                            TokenClassificationBulkData,
+                                                            TokenClassificationRecord as SdkTokenClassificationRecord, )
 from argilla.client.sdk.users import api as users_api
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
@@ -238,10 +232,10 @@ class Argilla:
         if not workspace:
             raise Exception("Must provide a workspace")
 
-        if not re.match(ES_INDEX_REGEX_PATTERN, workspace):
+        if not re.match(WORKSPACE_NAME_REGEX_PATTERN, workspace):
             raise InputValueError(
                 f"Provided workspace name {workspace} does not match the pattern"
-                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
+                f" {WORKSPACE_NAME_REGEX_PATTERN}. Please, use a valid name for your"
                 " workspace. This limitation is caused by naming conventions for indexes"
                 " in Elasticsearch. If applicable, you can try to lowercase the name of your workspace."
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
@@ -392,10 +386,10 @@ class Argilla:
         if not name:
             raise InputValueError("Empty dataset name has been passed as argument.")
 
-        if not re.match(ES_INDEX_REGEX_PATTERN, name):
+        if not re.match(DATASET_NAME_REGEX_PATTERN, name):
             raise InputValueError(
                 f"Provided dataset name {name} does not match the pattern"
-                f" {ES_INDEX_REGEX_PATTERN}. Please, use a valid name for your"
+                f" {DATASET_NAME_REGEX_PATTERN}. Please, use a valid name for your"
                 " dataset. This limitation is caused by naming conventions for indexes"
                 " in Elasticsearch."
                 " https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html"
