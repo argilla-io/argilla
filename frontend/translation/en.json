@@ -50,8 +50,7 @@
     "recordsHeight": "Records height:",
     "fixedHeight": "Fixed height (300px)",
     "defaultHeight": "Default height",
-    "to_annotate_record_bulk_required": "No record selected",
-    "records_to_be_applied": "1 record selected | {count} records selected"
+    "to_annotate_record_bulk_required": "No record selected"
   },
   "shortcuts": {
     "label": "Shortcuts",
