@@ -14,7 +14,7 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.text_classification import (
     CreateLabelingRule,
     LabelingRule,

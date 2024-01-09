@@ -15,7 +15,7 @@
 from uuid import UUID, uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets.records import LIST_DATASET_RECORDS_LIMIT_LE
 from argilla.server.enums import RecordInclude, SortOrder
 from argilla.server.search_engine import (

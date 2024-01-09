@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
-from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla.server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
 from argilla.server.daos.records import DatasetRecordsDAO
