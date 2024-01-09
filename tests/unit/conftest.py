@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, AsyncGenerator, Generator
 import httpx
 import pytest
 import pytest_asyncio
-from argilla.cli.server.database.migrate import migrate_db
+from argilla.server.cli.database.migrate import migrate_db
 from argilla.server.database import database_url_sync
 from argilla.server.settings import settings
 from sqlalchemy import NullPool, create_engine

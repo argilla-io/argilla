@@ -20,7 +20,7 @@ import httpx
 import pytest
 import pytest_asyncio
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.cli.server.database.migrate import migrate_db
+from argilla.server.cli.database.migrate import migrate_db
 from argilla.client.api import log
 from argilla.client.apis.datasets import TextClassificationSettings
 from argilla.client.client import Argilla, AuthenticatedClient
