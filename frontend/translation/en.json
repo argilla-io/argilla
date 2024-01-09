@@ -17,6 +17,14 @@
   "visibleOptions": "Visible options",
   "annotationGuidelines": "Annotation guidelines",
   "noAnnotationGuidelines": "This dataset has no annotation guidelines",
+  "breadcrumbs": {
+    "home": "Home",
+    "datasetSettings": "settings",
+    "userSettings": "my settings"
+  },
+  "userSettings": {
+    "title": "My settings"
+  },
   "settings": {
     "title": "Dataset settings",
     "seeYourDataset": "See your dataset",

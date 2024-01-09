@@ -3,8 +3,8 @@
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :breadcrumbs="[
-          { link: { name: 'datasets' }, name: 'Home' },
-          { link: {}, name: 'my settings' },
+          { link: { name: 'datasets' }, name: $t('breadcrumbs.home') },
+          { link: {}, name: $t('breadcrumbs.userSettings') },
         ]"
       />
     </template>
