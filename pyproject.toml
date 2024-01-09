@@ -106,7 +106,7 @@ integrations = [
     "evaluate",
     "seqeval",
     "sentence-transformers",
-    "setfit>=0.7.0,<1.0.0",
+    "setfit>=1.0.0",
     "span_marker",
     "textdescriptives>=2.7.0,<3.0.0",
     "openai>=0.27.10,<1.0.0",
