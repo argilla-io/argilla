@@ -29,7 +29,7 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")
     )
 
-    result = cli_runner.invoke(cli, "server database users migrate")
+    result = cli_runner.invoke(cli, "database users migrate")
 
     assert result.exit_code == 0
     assert sync_db.query(User).count() == 5
@@ -82,7 +82,7 @@ def test_migrate_with_one_user_file(monkeypatch, sync_db: "Session", cli_runner:
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")
     )
 
-    result = cli_runner.invoke(cli, "server database users migrate")
+    result = cli_runner.invoke(cli, "database users migrate")
 
     assert result.exit_code == 0
     assert sync_db.query(User).count() == 1
@@ -103,7 +103,7 @@ def test_migrate_with_invalid_user(monkeypatch, sync_db: "Session", cli_runner: 
         settings, "users_db_file", os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
     )
 
-    result = cli_runner.invoke(cli, "server database users migrate")
+    result = cli_runner.invoke(cli, "database users migrate")
 
     assert result.exit_code == 1
     assert sync_db.query(User).count() == 0
@@ -118,7 +118,7 @@ def test_migrate_with_invalid_workspace(monkeypatch, sync_db: "Session", cli_run
         os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml"),
     )
 
-    result = cli_runner.invoke(cli, "server database users migrate")
+    result = cli_runner.invoke(cli, "database users migrate")
 
     assert result.exit_code == 1
     assert sync_db.query(User).count() == 0
@@ -129,7 +129,7 @@ def test_migrate_with_invalid_workspace(monkeypatch, sync_db: "Session", cli_run
 def test_migrate_with_nonexistent_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     monkeypatch.setattr(settings, "users_db_file", "nonexistent.yml")
 
-    result = cli_runner.invoke(cli, "server database users migrate")
+    result = cli_runner.invoke(cli, "database users migrate")
 
     assert result.exit_code == 1
     assert sync_db.query(User).count() == 0
