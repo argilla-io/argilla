@@ -25,6 +25,7 @@ from sqlalchemy.orm import selectinload
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import Dataset, Record, Response, Suggestion
 from argilla.server.search_engine import SearchEngine, get_search_engine
+
 from .rich import echo_in_panel
 
 

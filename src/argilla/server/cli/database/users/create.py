@@ -16,7 +16,6 @@ from typing import List, Optional
 
 import typer
 
-from .utils import get_or_new_workspace
 from argilla.pydantic_v1 import constr
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
@@ -26,6 +25,8 @@ from argilla.server.security.model import (
     UserCreate,
     WorkspaceCreate,
 )
+
+from .utils import get_or_new_workspace
 
 USER_API_KEY_MIN_LENGTH = 8
 

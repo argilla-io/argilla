@@ -16,6 +16,7 @@ import alembic.config
 import typer
 
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
+
 from . import utils
 
 

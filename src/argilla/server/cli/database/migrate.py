@@ -22,6 +22,7 @@ from alembic.util import CommandError
 
 from argilla.cli import typer_ext
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
+
 from . import utils
 
 

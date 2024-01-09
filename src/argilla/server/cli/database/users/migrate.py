@@ -12,17 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import asyncio
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import typer
 import yaml
 
-from .utils import get_or_new_workspace
 from argilla.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.security.auth_provider.db.settings import settings
 from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
+
+from .utils import get_or_new_workspace
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
