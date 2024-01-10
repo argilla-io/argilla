@@ -14,10 +14,11 @@
 
 from uuid import UUID
 
-from argilla.cli.server.search_engine.reindex import Reindexer
+from argilla.server.cli.search_engine.reindex import Reindexer
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.jobs.queues import default_queue
-from argilla.server.search_engine import get_search_engine
+from argilla.server.search_engine.base import SearchEngine
+from argilla.server.settings import settings
 from rq import Retry
 from rq.decorators import job
 
@@ -29,9 +30,8 @@ from rq.decorators import job
 # > reindex_dataset.delay(UUID("cfcc028a-1669-4b6a-baf5-9b50e0538e44"))
 @job(default_queue, retry=Retry(max=3, interval=60))
 async def reindex_dataset(dataset_id: UUID):
-    async with AsyncSessionLocal() as db:
-        async for search_engine in get_search_engine():
-            dataset = await Reindexer.reindex_dataset(db, search_engine, dataset_id)
+    async with AsyncSessionLocal() as db, SearchEngine.get_by_name(settings.search_engine) as search_engine:
+        dataset = await Reindexer.reindex_dataset(db, search_engine, dataset_id)
 
-            async for records in Reindexer.reindex_dataset_records(db, search_engine, dataset):
-                ...
+        async for records in Reindexer.reindex_dataset_records(db, search_engine, dataset):
+            ...
