@@ -125,15 +125,17 @@ export class LoadRecordsToAnnotateUseCase {
             )
           : null;
 
-        const suggestions = record.suggestions.map((suggestion) => {
-          return new Suggestion(
-            suggestion.id,
-            suggestion.question_id,
-            suggestion.value,
-            suggestion.score,
-            suggestion.agent
-          );
-        });
+        const suggestions = !criteria.page.isBulkMode
+          ? record.suggestions.map((suggestion) => {
+              return new Suggestion(
+                suggestion.id,
+                suggestion.question_id,
+                suggestion.value,
+                suggestion.score,
+                suggestion.agent
+              );
+            })
+          : [];
 
         return new Record(
           record.id,
