@@ -48,9 +48,10 @@
     "recordsSelected": "1 record selected | {count} records selected",
     "recordsViewSettings": "Records view settings",
     "recordsHeight": "Records height:",
-    "fixedHeight": "Fixed height (300px)",
+    "fixedHeight": "Fixed height",
     "defaultHeight": "Default height",
-    "to_annotate_record_bulk_required": "No record selected"
+    "to_annotate_record_bulk_required": "No record selected",
+    "select_to_annotate": "Select to annotate"
   },
   "shortcuts": {
     "label": "Shortcuts",
