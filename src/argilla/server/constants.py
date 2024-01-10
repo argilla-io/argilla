@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-_ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
-
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
 WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
 
 DEFAULT_USERNAME = "argilla"
 DEFAULT_PASSWORD = "1234"
-DEFAULT_API_URL = "http://localhost:6900"
 DEFAULT_API_KEY = "argilla.apikey"
+
 DEFAULT_MAX_KEYWORD_LENGTH = 128
+DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
-DATASET_NAME_REGEX_PATTERN = _ES_INDEX_REGEX_PATTERN
-WORKSPACE_NAME_REGEX_PATTERN = _ES_INDEX_REGEX_PATTERN
+# The metadata field name prefix defined for protected (non-searchable) values
+PROTECTED_METADATA_FIELD_PREFIX = "_"
 
-# constants for prepare_for_training(framework="openai")
-OPENAI_SEPARATOR = "\n\n###\n\n"
-OPENAI_END_TOKEN = " END"
-OPENAI_WHITESPACE = " "
-OPENAI_LEGACY_MODELS = ["babbage", "davinci", "curie", "ada"]
+ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+
+JS_MAX_SAFE_INTEGER = 9007199254740991

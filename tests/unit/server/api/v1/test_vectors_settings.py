@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.enums import UserRole
 from argilla.server.schemas.v1.datasets import VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH
 
