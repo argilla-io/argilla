@@ -3,6 +3,7 @@
     <div class="fields__header--left">
       <BaseCheckbox
         v-if="Array.isArray(selectedRecords)"
+        :decoration-circle="true"
         class="fields__checkbox"
         :value="selectedRecords.includes(record)"
         @input="onSelectedRecord"
@@ -75,6 +76,16 @@ export default {
       display: flex;
       align-items: center;
       gap: $base-space;
+    }
+  }
+  &__checkbox {
+    &:not(.checked):hover {
+      :deep(.checkbox__container) {
+        border-color: $black-37;
+      }
+    }
+    :deep(.checkbox__container) {
+      border-color: $black-20;
     }
   }
 }

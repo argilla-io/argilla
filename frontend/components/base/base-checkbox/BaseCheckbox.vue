@@ -16,11 +16,11 @@
   -->
 
 <template>
-  <div class="re-checkbox" :class="[classes]" @click.prevent="toggleCheck">
-    <label v-if="$slots.default" :for="id" class="checkbox-label">
+  <div class="checkbox" :class="[classes]" @click.prevent="toggleCheck">
+    <label v-if="$slots.default" :for="id" class="checkbox__label">
       <slot />
     </label>
-    <div class="checkbox-container" tabindex="0">
+    <div class="checkbox__container" tabindex="0">
       <input
         :id="id"
         type="checkbox"
@@ -41,7 +41,27 @@ export default {
     prop: "areChecked",
     event: "change",
   },
-  props: ["areChecked", "value", "id", "disabled"],
+  props: {
+    id: {
+      type: String,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    value: {
+      type: [String, Number, Boolean],
+      default: false,
+    },
+    areChecked: {
+      type: [Array, Boolean],
+      default: false,
+    },
+    decorationCircle: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       checked: this.value || false,
@@ -56,6 +76,7 @@ export default {
             : _.find(this.areChecked, this.value)
           : this.checked,
         disabled: this.disabled,
+        "decoration-circle": this.decorationCircle,
       };
     },
   },
@@ -97,15 +118,16 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$checkbox-size: 20px;
-$checkbox-touch-size: 20px;
+$checkbox-size: 16px;
+$checkbox-touch-size: 16px;
 $checkbox-color: palette(grey, 600);
 $checkbox-color-dark: $primary-color;
-.re-checkbox {
+$checkbox-border-radius: 3px;
+$checkbox-decoration-circle-color: #7994ff;
+.checkbox {
   width: auto;
   display: inline-flex;
   position: relative;
-  border-radius: 1px;
   &.disabled {
     opacity: 0.6;
   }
@@ -115,12 +137,12 @@ $checkbox-color-dark: $primary-color;
       cursor: pointer;
     }
   }
-  .checkbox-container {
+  &__container {
     width: $checkbox-size;
     min-width: $checkbox-size;
     height: $checkbox-size;
     position: relative;
-    border-radius: 3px;
+    border-radius: $checkbox-border-radius;
     border: 1px solid $checkbox-color;
     text-align: center;
     vertical-align: middle;
@@ -132,7 +154,6 @@ $checkbox-color-dark: $primary-color;
       transition: all 0.2s ease-in-out;
       display: block;
       margin: auto;
-      margin-top: 2px;
     }
     &:focus {
       outline: none;
@@ -142,30 +163,89 @@ $checkbox-color-dark: $primary-color;
       left: -999em;
     }
   }
-  .checkbox-label {
+  &__label {
     line-height: $checkbox-size;
     margin-right: $base-space;
     word-break: break-word;
     hyphens: auto;
   }
   &--dark {
-    .checkbox-container {
+    .checkbox__container {
       border: 1px solid $black-20;
       &:after {
         background: $checkbox-color-dark;
       }
     }
   }
+  &.decoration-circle {
+    .checkbox__container {
+      animation: checkbox-animation 1s forwards;
+      &:after,
+      &:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: $border-radius-rounded;
+        transition: all 0.3s ease-in-out;
+      }
+      &:after {
+        animation: checkbox-animation-circle 1s forwards;
+      }
+    }
+    &:hover {
+      .checkbox__container {
+        &:before {
+          transform: scale(2.2);
+          background: $checkbox-decoration-circle-color;
+          opacity: 0.1;
+          transition: all 0.3s ease-in-out;
+        }
+      }
+    }
+  }
 }
 
-.re-checkbox.checked {
-  .checkbox-container {
+.checkbox.checked {
+  .checkbox__container {
     background: $primary-color;
     border: 1px solid $primary-color;
     .svg-icon {
       transform: scale(1);
       transition: all 0.2s ease-in-out;
     }
+  }
+}
+
+@keyframes checkbox-animation {
+  0% {
+    transform: scale(0);
+    border-radius: 50%;
+    background: white;
+  }
+  50% {
+    background: white;
+  }
+  100% {
+    transform: scale(1);
+    border-radius: $checkbox-border-radius;
+  }
+}
+@keyframes checkbox-animation-circle {
+  0% {
+    transform: scale(0);
+    background: $checkbox-decoration-circle-color;
+    opacity: 1;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
   }
 }
 </style>

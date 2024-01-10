@@ -13,7 +13,13 @@
         <div class="wrapper__records__header">
           <div class="wrapper__records__header--left">
             <BaseCheckbox
+              :data-title="
+                !selectedRecords.length
+                  ? $t('bulkAnnotation.select_to_annotate')
+                  : null
+              "
               v-if="records.hasRecordsToAnnotate"
+              :decoration-circle="true"
               class="wrapper__records__header__checkbox"
               :value="selectedRecords.length === recordsOnPage.length"
               @input="toggleAllRecords"
@@ -220,8 +226,19 @@ export default {
         color: $black-54;
         @include font-size(13px);
       }
+      &__checkbox {
+        &:not(.checked):hover {
+          :deep(.checkbox__container) {
+            border-color: $black-37;
+          }
+        }
+        :deep(.checkbox__container) {
+          border-color: $black-20;
+        }
+      }
       &--left {
         display: flex;
+        align-items: center;
         gap: $base-space;
         margin-left: 0;
         margin-right: auto;
@@ -256,5 +273,9 @@ export default {
       }
     }
   }
+}
+
+[data-title] {
+  @include tooltip-mini("top-right");
 }
 </style>
