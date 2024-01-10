@@ -524,6 +524,13 @@ class RecordCreate(BaseModel):
 
         return values
 
+    @validator("metadata", pre=True)
+    def skip_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if metadata is None:
+            return metadata
+
+        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
+
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
