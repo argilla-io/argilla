@@ -6,12 +6,16 @@ const SORT_DESC = "desc";
 
 type SortOrderOptions = "asc" | "desc";
 
-type SortOptions = "metadata" | "record" | "suggestion";
+type SortOptions = "metadata" | "record" | "suggestion" | "response";
+
+type SortProperty = "score" | "value";
+
+type SortId = string;
 
 export interface SortSearch {
   entity: SortOptions;
   name: string;
-  property?: string;
+  property?: SortProperty;
   order: SortOrderOptions;
 }
 
@@ -20,7 +24,7 @@ abstract class Sort {
 
   constructor(
     public readonly key: SortOptions,
-    public readonly group: string
+    public readonly property?: SortProperty
   ) {}
 
   toggleSort() {
@@ -31,6 +35,16 @@ abstract class Sort {
 
   abstract get title(): string;
 
+  get id(): SortId {
+    return this.property
+      ? `${this.key}.${this.name}.${this.property}`
+      : `${this.key}.${this.name}`;
+  }
+
+  get group(): string {
+    return this.property ? `${this.key}.${this.property}` : this.key;
+  }
+
   get canSort(): boolean {
     return true;
   }
@@ -39,11 +53,11 @@ abstract class Sort {
     return this.title;
   }
 }
-type SortIdentifier = Pick<Sort, "key" | "name">;
+type SortIdentifier = Pick<Sort, "key" | "name" | "property">;
 
 class MetadataSort extends Sort {
   constructor(private readonly metadata: Metadata) {
-    super("metadata", "metadata");
+    super("metadata");
   }
 
   get name() {
@@ -77,9 +91,45 @@ class SuggestionScoreSort extends Sort {
   }
 }
 
+class SuggestionValueSort extends Sort {
+  constructor(private readonly question: Question) {
+    super("suggestion", "value");
+  }
+
+  get name() {
+    return this.question.name;
+  }
+
+  get title() {
+    return this.question.name;
+  }
+
+  get tooltip() {
+    return this.question.title;
+  }
+}
+
+class ResponseValueSort extends Sort {
+  constructor(private readonly question: Question) {
+    super("response");
+  }
+
+  get name() {
+    return this.question.name;
+  }
+
+  get title() {
+    return this.question.name;
+  }
+
+  get tooltip() {
+    return this.question.title;
+  }
+}
+
 class RecordSort extends Sort {
   constructor(public readonly name: string, public readonly title = name) {
-    super("record", "general");
+    super("record");
   }
 }
 
@@ -92,9 +142,17 @@ export class SortList {
     this.categoriesSorts.push(new RecordSort("inserted_at"));
     this.categoriesSorts.push(new RecordSort("updated_at"));
 
-    questions?.forEach((question) =>
-      this.categoriesSorts.push(new SuggestionScoreSort(question))
+    questions?.forEach((q) =>
+      this.categoriesSorts.push(new SuggestionScoreSort(q))
     );
+
+    questions
+      ?.filter((q) => q.isRatingType)
+      .forEach((q) => this.categoriesSorts.push(new SuggestionValueSort(q)));
+
+    questions
+      ?.filter((q) => q.isRatingType)
+      .forEach((q) => this.categoriesSorts.push(new ResponseValueSort(q)));
 
     metadata?.forEach((metadata) =>
       this.categoriesSorts.push(new MetadataSort(metadata))
@@ -120,9 +178,7 @@ export class SortList {
   }
 
   unselect(sort: SortIdentifier) {
-    const indexOf = this.selectedCategories.findIndex(
-      (s) => s.key === sort.key && s.name === sort.name
-    );
+    const indexOf = this.findIndexSelectedCategory(sort);
 
     if (indexOf > -1) {
       this.selectedCategories.splice(indexOf, 1);
@@ -132,9 +188,7 @@ export class SortList {
   replace(actualSort: SortIdentifier, newSort: SortIdentifier) {
     const newCategoryFound = this.findByCategory(newSort);
 
-    const indexOf = this.selectedCategories.findIndex(
-      (s) => s.key === actualSort.key && s.name === actualSort.name
-    );
+    const indexOf = this.findIndexSelectedCategory(actualSort);
 
     if (indexOf > -1) {
       this.selectedCategories.splice(indexOf, 1, newCategoryFound);
@@ -145,8 +199,8 @@ export class SortList {
     this.selectedCategories = [];
   }
 
-  toggleSort(identifier: SortIdentifier) {
-    const found = this.findByCategory(identifier);
+  toggleSort(sort: SortIdentifier) {
+    const found = this.findByCategory(sort);
 
     if (found) found.toggleSort();
   }
@@ -166,21 +220,23 @@ export class SortList {
   }
 
   private createSortCriteria(): SortSearch[] {
-    return this.selectedCategories.map(({ key: entity, name, sort: order }) => {
-      if (entity === "suggestion")
+    return this.selectedCategories.map(
+      ({ key: entity, property, name, sort: order }) => {
+        if (property)
+          return {
+            entity,
+            name,
+            property,
+            order,
+          };
+
         return {
           entity,
           name,
-          property: "score",
           order,
         };
-
-      return {
-        entity,
-        name,
-        order,
-      };
-    });
+      }
+    );
   }
 
   complete(sort: SortSearch[]) {
@@ -190,8 +246,12 @@ export class SortList {
 
     if (!sort.length) return;
 
-    sort.forEach(({ entity, name, order }) => {
-      const found = this.findByCategory({ key: entity, name });
+    sort.forEach(({ entity, name, order, property }) => {
+      const found = this.findByCategory({
+        key: entity,
+        name,
+        property,
+      });
 
       if (found) {
         found.sort = order;
@@ -204,8 +264,16 @@ export class SortList {
   }
 
   private findByCategory(sort: SortIdentifier) {
-    return this.categoriesSorts.find(
-      (s) => s.key === sort.key && s.name === sort.name
-    );
+    return this.categoriesSorts.find((s) => s.id === this.toId(sort));
+  }
+
+  private findIndexSelectedCategory(sort: SortIdentifier) {
+    return this.selectedCategories.findIndex((s) => s.id === this.toId(sort));
+  }
+
+  private toId(sort: SortIdentifier) {
+    if (sort.property) return `${sort.key}.${sort.name}.${sort.property}`;
+
+    return `${sort.key}.${sort.name}`;
   }
 }

@@ -15,9 +15,9 @@
 import alembic.config
 import typer
 
-from argilla.cli import typer_ext
-from argilla.cli.server.database import utils
 from argilla.server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
+
+from . import utils
 
 
 def revisions():
@@ -41,4 +41,4 @@ def revisions():
 
 
 if __name__ == "__main__":
-    typer_ext.run(revisions)
+    typer.run(revisions)

@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import asyncio
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
@@ -22,11 +22,11 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla.cli import typer_ext
-from argilla.cli.rich import echo_in_panel
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import Dataset, Record, Response, Suggestion
 from argilla.server.search_engine import SearchEngine, get_search_engine
+
+from .rich import echo_in_panel
 
 
 class Reindexer:
@@ -145,9 +145,7 @@ async def _reindex_dataset_records(
         progress.advance(task, advance=len(records))
 
 
-async def reindex(
-    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed")
-) -> None:
+async def _reindex(feedback_dataset_id: Optional[UUID] = None) -> None:
     async with AsyncSessionLocal() as db:
         async for search_engine in get_search_engine():
             with Progress() as progress:
@@ -157,5 +155,11 @@ async def reindex(
                     await _reindex_datasets(db, search_engine, progress)
 
 
+def reindex(
+    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed")
+) -> None:
+    asyncio.run(_reindex(feedback_dataset_id))
+
+
 if __name__ == "__main__":
-    typer_ext.run(reindex)
+    typer.run(reindex)

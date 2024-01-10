@@ -11,21 +11,17 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 
 import typer
 
 from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
-from argilla.cli import typer_ext
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole, Workspace
 
 
-async def create_default(
-    api_key: str = typer.Option(default=DEFAULT_API_KEY, help="API key for the user."),
-    password: str = typer.Option(default=DEFAULT_PASSWORD, help="Password for the user."),
-    quiet: bool = typer.Option(is_flag=True, default=False, help="Run without output."),
-):
+async def _create_default(api_key: str, password: str, quiet: bool):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
     async with AsyncSessionLocal() as session:
         if await accounts.get_user_by_username(session, DEFAULT_USERNAME):
@@ -52,5 +48,13 @@ async def create_default(
             typer.echo(f"• api_key:  {api_key!r}")
 
 
+def create_default(
+    api_key: str = typer.Option(default=DEFAULT_API_KEY, help="API key for the user."),
+    password: str = typer.Option(default=DEFAULT_PASSWORD, help="Password for the user."),
+    quiet: bool = typer.Option(is_flag=True, default=False, help="Run without output."),
+):
+    asyncio.run(_create_default(api_key, password, quiet))
+
+
 if __name__ == "__main__":
-    typer_ext.run(create_default)
+    typer.run(create_default)

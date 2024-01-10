@@ -6,15 +6,22 @@
       class="sort-selector-item__dropdown"
     >
       <span slot="dropdown-header" class="sort-selector-item__dropdown__header">
-        <span
-          class="sort-selector-item__dropdown__header__text"
-          title="category.title"
-          v-text="category.title"
-        />
+        <div class="sort-selector-item__dropdown__header__item">
+          <span
+            class="sort-selector-item__dropdown__header__group"
+            v-text="$t(`sorting.${category.group}`)"
+          />
+          <span
+            class="sort-selector-item__dropdown__header__text"
+            title="category.title"
+            v-text="category.title"
+          />
+        </div>
         <svgicon width="12" height="12" name="chevron-down" />
       </span>
       <span slot="dropdown-content">
         <SortCategoriesList
+          v-if="availableCategories.length"
           :categories="availableCategories"
           @include-category="replaceCategory"
         ></SortCategoriesList>
@@ -86,11 +93,23 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-direction: row;
       width: 100%;
-      padding: $base-space;
+      padding: calc($base-space / 2) $base-space;
       border: 1px solid $black-10;
       border-radius: $border-radius;
       cursor: pointer;
+      &__item {
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+      }
+      &__group {
+        margin-top: calc($base-space / 2 * -1);
+        color: $black-37;
+        @include font-size(10px);
+        text-transform: capitalize;
+      }
       &__text {
         overflow: hidden;
         text-overflow: ellipsis;

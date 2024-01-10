@@ -374,9 +374,11 @@ export class RecordRepository {
             order: sort.order,
           };
 
-          if (sort.entity === "suggestion") {
+          if (sort.property) {
             backendSort.scope.question = sort.name;
             backendSort.scope.property = sort.property;
+          } else if (sort.entity === "response") {
+            backendSort.scope.question = sort.name;
           } else if (sort.entity === "metadata") {
             backendSort.scope.metadata_property = sort.name;
           } else if (sort.entity === "record") {

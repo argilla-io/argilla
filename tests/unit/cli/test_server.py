@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.cli.typer_ext import ArgillaTyper
+import pytest
 
-from .reindex import reindex
 
-app = ArgillaTyper(help="Commands for Argilla server search engine management", no_args_is_help=True)
+class TestSuiteServerCli:
+    @pytest.mark.skipif(reason="Argilla server is installed", condition=False)
+    def test_server_cli_is_present(self, cli_runner: "CliRunner", cli: "Typer") -> None:
+        result = cli_runner.invoke(cli, "server --help")
 
-app.command(name="reindex", help="Reindex all Argilla entities into search engine.")(reindex)
-
-if __name__ == "__main__":
-    app()
+        assert result.exit_code == 0
+        assert "Commands for Argilla server management" in result.stdout
