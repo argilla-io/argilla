@@ -168,6 +168,14 @@ $tooltip-border-radius: $border-radius-s;
     &:after {
       left: calc(100% + $offset);
     }
+  } @else if $position == "top-right" {
+    @extend %has-tooltip--right;
+    &:after {
+      left: -$offset;
+      bottom: calc(100% + $offset);
+      top: auto;
+      transform: none;
+    }
   }
   &:before {
     content: none !important;
@@ -175,7 +183,7 @@ $tooltip-border-radius: $border-radius-s;
   &:after {
     padding: calc($base-space / 2);
     background: $tooltip-mini-bg;
-    @include font-size(13px);
+    @include font-size(12px);
     line-height: 1.2;
   }
 }
