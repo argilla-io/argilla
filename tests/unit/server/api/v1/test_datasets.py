@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import math
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
@@ -99,7 +100,6 @@ from tests.factories import (
     VectorSettingsFactory,
     WorkspaceFactory,
 )
-from tests.unit.server.api.v1.test_list_dataset_records import TestSuiteListDatasetRecords
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -2541,15 +2541,20 @@ class TestSuiteDatasets:
         [
             (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "c"),
             (TermsMetadataPropertyFactory, {"values": None}, "c"),
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, None),
+            (TermsMetadataPropertyFactory, {"values": None}, None),
             (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, 5),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, None),
             (FloatMetadataPropertyFactory, {"min": 0.0, "max": 1}, 0.5),
             (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.5}, 0.35),
             (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.89),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, None),
         ],
     )
     async def test_create_dataset_records_with_metadata_values(
         self,
         async_client: "AsyncClient",
+        db: "AsyncSession",
         owner_auth_header: dict,
         MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
         settings: Dict[str, Any],
@@ -2574,6 +2579,48 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 204
+
+        record = (await db.execute(select(Record))).scalar()
+        assert record.metadata_ == {"metadata-property": value}
+
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings",
+        [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}),
+        ],
+    )
+    async def test_create_dataset_records_with_metadata_nan_values(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": math.nan},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 204
+
+        record = (await db.execute(select(Record))).scalar()
+        assert record.metadata_ == {}
 
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
@@ -2835,7 +2882,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
@@ -2937,7 +2984,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {
@@ -2966,7 +3013,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {
@@ -3030,7 +3077,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
                             "user_id": str(owner.id),
@@ -3138,7 +3185,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
                             "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
@@ -3200,7 +3247,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.draft)
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": "1"},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": "1"},
             ],
         }
 
@@ -3220,7 +3267,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": str(external_id),
                 }
                 for external_id in range(0, RECORDS_CREATE_MIN_ITEMS - 1)
@@ -3242,7 +3289,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": str(external_id),
                 }
                 for external_id in range(0, RECORDS_CREATE_MAX_ITEMS + 1)
@@ -3263,9 +3310,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 1},
                 {"fields": "invalid", "external_id": 2},
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 3},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 3},
             ]
         }
 
@@ -3283,8 +3330,8 @@ class TestSuiteDatasets:
         await DatasetFactory.create()
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 2},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 1},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 2},
             ]
         }
 
