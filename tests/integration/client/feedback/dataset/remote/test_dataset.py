@@ -16,10 +16,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
-import numpy
-
 import argilla as rg
 import argilla.client.singleton
+import numpy
 import pytest
 from argilla import (
     FeedbackRecord,
