@@ -13,9 +13,8 @@
 #  limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
 
-from argilla.client.feedback.constants import METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE, PYDANTIC_STRICT_TO_PYTHON_TYPE
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.validators import (
     validate_numeric_metadata_filter_bounds,
@@ -92,14 +91,18 @@ class MetadataPropertySchema(BaseModel, ABC):
     def _validate_filter(self, metadata_filter: "MetadataFilters") -> None:
         pass
 
+    @abstractmethod
     def _check_allowed_value_type(self, value: Any) -> Any:
-        expected_type = PYDANTIC_STRICT_TO_PYTHON_TYPE[METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type]]
-        if not isinstance(value, expected_type):
-            raise ValueError(
-                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
-                f"only values of type {expected_type} are allowed."
-            )
-        return value
+        ...
+
+    @abstractmethod
+    def _validator(self, value: Any) -> Any:
+        ...
+
+
+def _validator_definition(schema: MetadataPropertySchema) -> Dict[str, Any]:
+    """Returns a dictionary with the pydantic validator definition for the provided schema."""
+    return {f"{schema.name}_validator": validator(schema.name, allow_reuse=True, pre=True)(schema._validator)}
 
 
 class TermsMetadataProperty(MetadataPropertySchema):
@@ -161,21 +164,33 @@ class TermsMetadataProperty(MetadataPropertySchema):
 
         return introduced_value
 
+    def _check_allowed_value_type(self, value: Any) -> Any:
+        if value is not None:
+            if isinstance(value, str):
+                return value
+            if isinstance(value, list):
+                return [self._check_allowed_value_type(v) for v in value]
+            raise TypeError(
+                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+                "only values of type `str` or `list` are allowed."
+            )
+        return value
+
     def _validator(self, value: Any) -> Any:
         return self._all_values_exist(self._check_allowed_value_type(value))
 
     @property
-    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[StrictStr, None]], Dict[str, Callable]]:
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, tuple], Dict[str, Callable]]:
         # TODO: Simplify the validation logic and do not base on dynamic pydantic models
-        return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type], None)},
-            {f"{self.name}_validator": validator(self.name, allow_reuse=True, pre=True)(self._validator)},
-        )
+        field_type, default_value = Optional[Union[StrictStr, List[StrictStr]]], None
+
+        return {self.name: (field_type, default_value)}, _validator_definition(self)
 
     def _validate_filter(self, metadata_filter: "TermsMetadataFilter") -> None:
         if self.values is not None and not all(value in self.values for value in metadata_filter.values):
             raise ValidationError(
-                f"Provided 'values={metadata_filter.values}' is not valid, only values in {self.values} are allowed."
+                f"Provided 'values={metadata_filter.values}' is not valid, only values in {self.values} are allowed.",
+                model=type(metadata_filter),
             )
 
 
@@ -236,34 +251,31 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
     def _validator(self, value: Any) -> Any:
         return self._value_in_bounds(self._check_allowed_value_type(value))
 
-    @property
-    def _pydantic_field_with_validator(
-        self,
-    ) -> Tuple[Dict[str, Tuple[Union[StrictInt, StrictFloat], None]], Dict[str, Callable]]:
-        return (
-            {self.name: (METADATA_PROPERTY_TYPE_TO_PYDANTIC_TYPE[self.type], None)},
-            {f"{self.name}_validator": validator(self.name, allow_reuse=True, pre=True)(self._validator)},
-        )
-
     def _validate_filter(self, metadata_filter: Union["IntegerMetadataFilter", "FloatMetadataFilter"]) -> None:
-        metadata_filter = metadata_filter.dict()
+        metadata_filter_ = metadata_filter.dict()
         for allowed_arg in ["ge", "le"]:
-            if metadata_filter[allowed_arg] is not None:
+            if metadata_filter_[allowed_arg] is not None:
                 if (
                     self.max is not None
                     and self.min is not None
-                    and not (self.max >= metadata_filter[allowed_arg] >= self.min)
+                    and not (self.max >= metadata_filter_[allowed_arg] >= self.min)
                 ):
                     raise ValidationError(
-                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values between {self.min} and {self.max} are allowed."
+                        f"Provided '{allowed_arg}={metadata_filter_[allowed_arg]}' is not valid, "
+                        f"only values between {self.min} and {self.max} are allowed.",
+                        model=type(metadata_filter),
                     )
-                if self.max is not None and not (self.max >= metadata_filter[allowed_arg]):
+                if self.max is not None and not (self.max >= metadata_filter_[allowed_arg]):
                     raise ValidationError(
-                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values under {self.max} are allowed."
+                        f"Provided '{allowed_arg}={metadata_filter_[allowed_arg]}' is not valid, "
+                        f"only values under {self.max} are allowed.",
+                        model=type(metadata_filter),
                     )
-                if self.min is not None and not (self.min <= metadata_filter[allowed_arg]):
+                if self.min is not None and not (self.min <= metadata_filter_[allowed_arg]):
                     raise ValidationError(
-                        f"Provided '{allowed_arg}={metadata_filter[allowed_arg]}' is not valid, only values over {self.min} are allowed."
+                        f"Provided '{allowed_arg}={metadata_filter_[allowed_arg]}' is not valid, "
+                        f"only values over {self.min} are allowed.",
+                        model=type(metadata_filter),
                     )
 
 
@@ -292,6 +304,23 @@ class IntegerMetadataProperty(_NumericMetadataPropertySchema):
     min: Optional[int] = None
     max: Optional[int] = None
 
+    @property
+    def _pydantic_field_with_validator(
+        self,
+    ) -> Tuple[Dict[str, tuple], Dict[str, Callable]]:
+        field_type, default_value = Optional[StrictInt], None
+        return {self.name: (field_type, default_value)}, _validator_definition(self)
+
+    def _check_allowed_value_type(self, value: Any) -> Any:
+        if value is not None:
+            if isinstance(value, int):
+                return value
+            raise TypeError(
+                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+                "only values of type `int` are allowed."
+            )
+        return value
+
 
 class FloatMetadataProperty(_NumericMetadataPropertySchema):
     """Schema for the `FeedbackDataset` metadata properties of type `float`. This kind
@@ -317,6 +346,23 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     type: Literal[MetadataPropertyTypes.float] = Field(MetadataPropertyTypes.float.value, allow_mutation=False)
     min: Optional[float] = None
     max: Optional[float] = None
+
+    def _check_allowed_value_type(self, value: Any) -> Any:
+        if value is not None:
+            if isinstance(value, (int, float)):
+                return value
+            raise TypeError(
+                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+                "only values of type `int` or `float` are allowed."
+            )
+        return value
+
+    @property
+    def _pydantic_field_with_validator(
+        self,
+    ) -> Tuple[Dict[str, tuple], Dict[str, Any]]:
+        field_type, default_value = Optional[StrictFloat], None
+        return {self.name: (field_type, default_value)}, _validator_definition(self)
 
 
 class MetadataFilterSchema(BaseModel, ABC):
