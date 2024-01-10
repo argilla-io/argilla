@@ -29,7 +29,7 @@ class SentenceTransformersExtractor:
 
     def __init__(
         self,
-        model: Optional[Union["SentenceTransformer", str]] = "TaylorAI/bge-micro-v2",
+        model: Union["SentenceTransformer", str] = "TaylorAI/bge-micro-v2",
         show_progress: Optional[bool] = True,
         **kwargs,
     ):
@@ -63,12 +63,12 @@ class SentenceTransformersExtractor:
                     "kwargs for initializing SentenceTransformer are ignored when passing a SentenceTransformer instance."
                 )
             self.model = model
-        self.embedding_dim = self.model.encode(["sample sentence"])[0].shape[0]
+        self.embedding_dim = self.model.get_sentence_embedding_dimension()
 
     def _create_vector_settings(
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
-        fields: Optional[List[str]],
+        fields: List[str],
         overwrite: bool = False,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
         """
@@ -76,7 +76,7 @@ class SentenceTransformersExtractor:
 
         Args:
             dataset (Union[FeedbackDataset, RemoteFeedbackDataset]): The dataset to create or update vector settings for.
-            fields (Optional[List[str]]): The list of fields to create or update vector settings for.
+            fields (List[str]): The list of fields to create or update vector settings for.
             overwrite (bool, optional): Whether to overwrite existing vector settings if they have different dimensions. Defaults to False.
 
         Returns:
