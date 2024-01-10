@@ -27,7 +27,7 @@ export default {
   props: {
     color: {
       type: String,
-      default: "#ff675f",
+      default: "#3e5cc9",
     },
     height: {
       type: String,
