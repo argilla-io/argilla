@@ -123,7 +123,7 @@ $checkbox-touch-size: 16px;
 $checkbox-color: palette(grey, 600);
 $checkbox-color-dark: $primary-color;
 $checkbox-border-radius: 3px;
-$checkbox-decoration-circle-color: #7994ff;
+$checkbox-decoration-circle-color: #6b87f8;
 .checkbox {
   width: auto;
   display: inline-flex;
