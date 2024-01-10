@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-
 from argilla.server.models import ResponseStatus
 from argilla.server.pydantic_v1 import BaseModel, Field, validator
 from argilla.server.schemas.base import UpdateSchema
