@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, UserRole
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select

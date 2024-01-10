@@ -25,6 +25,7 @@ These are the section headers that we use:
 ### Changed
 
 - Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
+- The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties are skipped when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 
@@ -49,7 +50,6 @@ These are the section headers that we use:
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 - Added `httpx_extra_kwargs` argument to `rg.init` and `Argilla` to allow passing extra arguments to `httpx.Client` used by `Argilla`. ([#4440](https://github.com/argilla-io/argilla/pull/4441))
 - Added `ResponseStatusFilter` enum in `__init__` imports of Argilla ([#4118](https://github.com/argilla-io/argilla/pull/4463)). Contributed by @Piyush-Kumar-Ghosh.
-
 
 ### Changed
 

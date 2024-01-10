@@ -18,13 +18,15 @@ import platform
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from argilla._constants import DEFAULT_TELEMETRY_KEY
 from argilla.pydantic_v1 import BaseSettings
 
 if TYPE_CHECKING:
     from fastapi import Request
 
     from argilla.server.commons.models import TaskType
+
+
+_DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
 
 class TelemetrySettings(BaseSettings):
@@ -35,7 +37,7 @@ class TelemetrySettings(BaseSettings):
     """
 
     enable_telemetry: bool = True
-    telemetry_key: str = DEFAULT_TELEMETRY_KEY
+    telemetry_key: str = _DEFAULT_TELEMETRY_KEY
 
     class Config:
         env_prefix = "ARGILLA_"

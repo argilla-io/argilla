@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.commons.model import BulkResponse
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
@@ -28,6 +27,7 @@ from argilla.server.apis.v0.models.text_classification import (
     TextClassificationSearchResults,
 )
 from argilla.server.commons.models import PredictionStatus, TaskType
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import User
 from argilla.server.schemas.v0.datasets import Dataset
 
