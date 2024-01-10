@@ -3366,17 +3366,17 @@ class TestSuiteDatasets:
                     {
                         "id": str(records[0].id),
                         "metadata": {
-                            "terms-metadata-property": "a",
+                            "terms-metadata-property": None,
                             "integer-metadata-property": 0,
                             "float-metadata-property": 0.0,
-                            "extra-metadata": "yes",
+                            "extra-metadata": None,
                         },
                     },
                     {
                         "id": str(records[1].id),
                         "metadata": {
                             "terms-metadata-property": "b",
-                            "integer-metadata-property": 1,
+                            "integer-metadata-property": None,
                             "float-metadata-property": 1.0,
                             "extra-metadata": "yes",
                         },
@@ -3386,7 +3386,7 @@ class TestSuiteDatasets:
                         "metadata": {
                             "terms-metadata-property": "c",
                             "integer-metadata-property": 2,
-                            "float-metadata-property": 2.0,
+                            "float-metadata-property": None,
                             "extra-metadata": "yes",
                         },
                     },
@@ -3401,16 +3401,16 @@ class TestSuiteDatasets:
 
         # Record 0
         assert records[0].metadata_ == {
-            "terms-metadata-property": "a",
+            "terms-metadata-property": None,
             "integer-metadata-property": 0,
             "float-metadata-property": 0.0,
-            "extra-metadata": "yes",
+            "extra-metadata": None,
         }
 
         # Record 1
         assert records[1].metadata_ == {
             "terms-metadata-property": "b",
-            "integer-metadata-property": 1,
+            "integer-metadata-property": None,
             "float-metadata-property": 1.0,
             "extra-metadata": "yes",
         }
@@ -3419,7 +3419,7 @@ class TestSuiteDatasets:
         assert records[2].metadata_ == {
             "terms-metadata-property": "c",
             "integer-metadata-property": 2,
-            "float-metadata-property": 2.0,
+            "float-metadata-property": None,
             "extra-metadata": "yes",
         }
 
@@ -3672,6 +3672,41 @@ class TestSuiteDatasets:
             "detail": "Record at position 1 is not valid because metadata is not valid: 'terms' metadata property "
             "validation failed because 'i was not declared' is not an allowed term."
         }
+
+    async def test_update_dataset_records_with_metadata_nan_value(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(dataset=dataset, name="terms")
+        await FloatMetadataPropertyFactory.create(dataset=dataset, name="float")
+        records = await RecordFactory.create_batch(3, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {"terms": math.nan},
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {"float": math.nan},
+                    },
+                    {
+                        "id": str(records[2].id),
+                        "metadata": {"terms": "a"},
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+
+        assert records[0].metadata_ == {}
+        assert records[1].metadata_ == {}
+        assert records[2].metadata_ == {"terms": "a"}
 
     async def test_update_dataset_records_with_invalid_suggestions(
         self, async_client: "AsyncClient", owner_auth_header: dict
