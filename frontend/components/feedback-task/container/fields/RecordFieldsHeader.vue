@@ -3,7 +3,7 @@
     <div class="fields__header--left">
       <BaseCheckbox
         v-if="Array.isArray(selectedRecords)"
-        :decoration-circle="true"
+        :decoration-circle="animateCheckboxes"
         class="fields__checkbox"
         :value="selectedRecords.includes(record)"
         @input="onSelectedRecord"
@@ -47,10 +47,20 @@ export default {
       type: Array,
     },
   },
+  data() {
+    return {
+      animateCheckboxes: false,
+    };
+  },
   methods: {
     onSelectedRecord(isSelected) {
       this.$emit("on-select-record", isSelected, this.record);
     },
+  },
+  created() {
+    this.$nuxt.$on("animate-checkboxes", () => {
+      this.animateCheckboxes = true;
+    });
   },
 };
 </script>
