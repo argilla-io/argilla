@@ -16,10 +16,9 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import validator
 
 from argilla.server.models import ResponseStatus
-from argilla.server.pydantic_v1 import BaseModel, Field
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
@@ -55,6 +54,7 @@ class RecordUpdate(UpdateSchema):
     vectors: Optional[Dict[str, List[float]]]
 
     @validator("metadata_", pre=True)
+    @classmethod
     def skip_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
