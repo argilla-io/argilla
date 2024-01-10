@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
-    redis: str = "redis://localhost:6379/0"
+    redis_url: str = "redis://localhost:6379/0"
 
     docs_enabled: bool = True
 
