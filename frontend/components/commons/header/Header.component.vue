@@ -3,7 +3,6 @@
     <BaseBreadcrumbs
       v-if="breadcrumbs"
       :breadcrumbs="breadcrumbs"
-      :copy-button="copyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <DatasetSettingsIcon
@@ -20,11 +19,6 @@ import { getDatasetModelPrimaryKey } from "@/models/Dataset";
 
 export default {
   name: "HeaderComponent",
-  data() {
-    return {
-      copyButton: false,
-    };
-  },
   computed: {
     datasetId() {
       return getDatasetModelPrimaryKey({

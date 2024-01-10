@@ -29,17 +29,17 @@ from typing import (
 )
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator
-from pydantic.generics import GenericModel
-
 from argilla.server.enums import (
     MetadataPropertyType,
     RecordSortField,
+    ResponseStatus,
     ResponseStatusFilter,
     SimilarityOrder,
     SortOrder,
 )
 from argilla.server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
+from argilla.server.pydantic_v1 import BaseModel, Field, root_validator
+from argilla.server.pydantic_v1.generics import GenericModel
 
 __all__ = [
     "SearchEngine",
@@ -134,6 +134,18 @@ class UserResponseStatusFilter(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    @property
+    def response_statuses(self) -> List[ResponseStatus]:
+        return [
+            status.value
+            for status in self.statuses
+            if status not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
+        ]
+
+    @property
+    def has_pending_status(self) -> bool:
+        return ResponseStatusFilter.pending in self.statuses or ResponseStatusFilter.missing in self.statuses
+
 
 class MetadataFilter(BaseModel):
     metadata_property: MetadataProperty
@@ -169,7 +181,7 @@ class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
 
     _json_model: ClassVar[Type[_RangeModel]]
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         ge = values.get("ge")
         le = values.get("le")
@@ -219,7 +231,7 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: MetadataPropertyType = Field(MetadataPropertyType.terms, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.terms)
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -230,11 +242,11 @@ class NumericMetadataMetrics(GenericModel, Generic[NT]):
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: MetadataPropertyType = Field(MetadataPropertyType.integer, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.integer)
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: MetadataPropertyType = Field(MetadataPropertyType.float, const=True)
+    type: MetadataPropertyType = Field(MetadataPropertyType.float)
 
 
 MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]

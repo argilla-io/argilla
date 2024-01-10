@@ -1,7 +1,7 @@
 <template>
   <div class="settings__container">
     <div class="settings__edition-form">
-      <h2 class="--heading5 --medium">Edit metadata properties</h2>
+      <h2 class="--heading5 --medium" v-text="$t('settings.editMetadata')" />
       <div v-for="metadata in settings.metadataProperties" :key="metadata.id">
         <form
           @submit.prevent="updateMetadata(metadata)"
@@ -16,13 +16,13 @@
             :validations="metadata.validate().title"
             class="settings__edition-form__group"
           >
-            <label for="metadata.title">Title</label>
+            <label for="metadata.title" v-text="$t('title')" />
             <input type="text" id="metadata.title" v-model="metadata.title" />
           </Validation>
 
-          <BaseSwitch v-model="metadata.visibleForAnnotators"
-            >Visible for annotators</BaseSwitch
-          >
+          <BaseSwitch v-model="metadata.visibleForAnnotators">{{
+            $t("visibleForAnnotators")
+          }}</BaseSwitch>
 
           <div class="settings__edition-form__footer">
             <BaseButton
@@ -31,27 +31,27 @@
               @on-click="restore(metadata)"
               :disabled="!metadata.isModified"
             >
-              <span v-text="'Cancel'" />
+              <span v-text="$t('cancel')" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
               :disabled="!metadata.isModified || !metadata.isValid"
             >
-              <span v-text="'Update'" />
+              <span v-text="$t('update')" />
             </BaseButton>
           </div>
         </form>
       </div>
 
-      <h2 class="--heading5 --medium">Extra metadata</h2>
+      <h2 class="--heading5 --medium" v-text="$t('extraMetadata')" />
       <form
         @submit.prevent="updateDataset(settings.dataset)"
         class="settings__edition-form__metadata"
       >
-        <BaseSwitch v-model="settings.dataset.allowExtraMetadata"
-          >Allow extra metadata</BaseSwitch
-        >
+        <BaseSwitch v-model="settings.dataset.allowExtraMetadata">{{
+          $t("allowExtraMetadata")
+        }}</BaseSwitch>
         <div class="settings__edition-form__footer">
           <BaseButton
             type="button"
@@ -59,14 +59,14 @@
             @on-click="settings.dataset.restore()"
             :disabled="!settings.dataset.isModified"
           >
-            <span v-text="'Cancel'" />
+            <span v-text="$t('cancel')" />
           </BaseButton>
           <BaseButton
             type="submit"
             class="primary small"
             :disabled="!settings.dataset.isModified"
           >
-            <span v-text="'Update'" />
+            <span v-text="$t('update')" />
           </BaseButton>
         </div>
       </form>

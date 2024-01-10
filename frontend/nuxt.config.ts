@@ -58,6 +58,8 @@ const config: NuxtConfig = {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
+    { src: "~/plugins/logo" },
+
     { src: "~/plugins/directives" },
 
     { src: "~/plugins/di" },

@@ -216,11 +216,6 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def unify_responses(self, *args, **kwargs):
-        """Unifies the responses for a given question."""
-        pass
-
-    @abstractmethod
     def add_metadata_property(self, *args, **kwargs):
         """Adds a new `metadata_property` to the current `FeedbackDataset`."""
         pass

@@ -18,8 +18,7 @@ import warnings
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
-import matplotlib.pyplot as plt
-from matplotlib.colors import rgb2hex
+from argilla.utils.dependency import require_dependencies
 
 # Define html supported types for each media
 SUPPORTED_MEDIA_TYPES = {
@@ -174,6 +173,9 @@ def create_token_highlights(
         >>> html = create_token_highlights(tokens, weights, c_map='viridis')
         >>> html = create_token_highlights(tokens, weights, c_map=custom_RGB)
     """
+    require_dependencies("matplotlib")
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import rgb2hex
 
     if len(tokens) != len(weights):
         raise ValueError("Length of tokens and weights must be the same.")

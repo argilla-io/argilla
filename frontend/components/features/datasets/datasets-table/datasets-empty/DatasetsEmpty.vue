@@ -1,32 +1,15 @@
 <template>
   <div class="datasets-empty">
-    <div class="datasets-empty__body">
-      <svgicon
-        class="datasets-empty__icon"
-        width="44"
-        height="46"
-        name="unavailable"
-      />
-      <p class="datasets-empty__title">There aren't any datasets yet</p>
-      <p class="datasets-empty__subtitle">
-        The Argilla web app allows you to log, explore and annotate your
-        data.<br />
-        Start logging data with our Python client, or
-        <a :href="$config.documentationSite" target="_blank">see the docs</a>
-        for more information.
-      </p>
-    </div>
     <base-spinner v-if="$fetchState.pending" />
-    <documentation-viewer v-else :content="content" />
+    <documentation-viewer
+      class="datasets-empty__content"
+      v-else
+      :content="content"
+    />
   </div>
 </template>
 
 <script>
-import "assets/icons/unavailable";
-const TAB_MARKER = ":::{tab-item} ";
-const TAB_ITEM_FINISH_MARKER = ":::";
-const TAB_FINISH_MARKER = "::::";
-
 export default {
   data() {
     return {
@@ -45,60 +28,82 @@ export default {
 
     const startPage = await folderContent("./start_page.md");
 
-    const tabs = startPage.body.split(TAB_MARKER);
-    tabs.shift();
-
-    for (const tab of tabs) {
-      const tabName = tab.split("\n")[0].trim();
-
-      const code = tab
-        .replace(tabName, "")
-        .replace(TAB_ITEM_FINISH_MARKER, "")
-        .replace(TAB_FINISH_MARKER, "")
-        .trim();
-
-      this.content.tabs.push({
-        id: tabName.trim().toLowerCase(),
-        name: tabName,
-        markdown: code,
-      });
-    }
+    this.content.tabs.push({
+      id: "start-page",
+      name: "Start page",
+      markdown: startPage.body,
+    });
   },
 };
 </script>
 <style lang="scss" scoped>
 .datasets-empty {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+  &__content {
+    max-width: max(900px, 50vw);
+    width: auto;
+    padding-top: $base-space * 2;
+    padding-bottom: $base-space * 4;
+    color: $black-54;
+    line-height: 1.5;
+  }
+  :deep(h1),
+  :deep(h2),
+  :deep(h3),
+  :deep(h4) {
+    color: $black-87;
+  }
+}
+:deep(.start-page__intro) {
+  margin-bottom: $base-space * 3;
   text-align: center;
-  color: $black-54;
-  line-height: 20px;
-  padding-top: 3vh;
-  &__body {
-    height: fit-content;
-  }
-  &__icon {
-    margin-bottom: 1em;
-  }
-  &__title {
-    margin: 0 auto 1em auto;
+  h1 {
+    display: block;
     @include font-size(20px);
-    font-weight: 300;
-    max-width: 520px;
-  }
-  &__subtitle {
-    margin: 0 auto 1em auto;
-    @include font-size(14px);
-    max-width: 520px;
-    a {
-      color: $brand-primary-color;
-      text-decoration: none;
-      &:hover {
-        color: darken($brand-primary-color, 10%);
-      }
+    font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
+    margin-top: 30px;
+    font-weight: lighter;
+    &:after {
+      content: "";
+      display: block;
+      height: min(30px, 30vw);
+      background: url("/images/logo.svg") center / contain no-repeat;
+      margin: $base-space * 2;
     }
+  }
+  h2 {
+    font-weight: 500;
+    @include font-size(16px);
+  }
+}
+:deep(.start-page__content) {
+  display: inline-block;
+  background: palette(white);
+  padding: $base-space * 3;
+  border: 1px solid $black-10;
+  border-radius: $border-radius-m;
+  p,
+  li {
+    @include font-size(16px);
+    margin-bottom: 8px;
+  }
+  h3 {
+    display: block;
+    margin-top: 30px;
+  }
+  a {
+    text-decoration: none;
+    color: $primary-color;
+    &:hover {
+      color: darken($primary-color, 10%);
+    }
+  }
+  p > code:not(.hljs),
+  li > code:not(.hljs) {
+    color: $black-54;
+    border: 1px solid $black-10;
+    background: $black-4;
+    padding-inline: 4px;
+    @include font-size(14px);
   }
 }
 </style>

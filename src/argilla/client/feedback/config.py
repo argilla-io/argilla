@@ -24,7 +24,7 @@ except ImportError:
 
 import json
 
-from pydantic import BaseModel, Field
+from argilla.pydantic_v1 import BaseModel, Field
 
 try:
     from yaml import SafeLoader, load, safe_dump

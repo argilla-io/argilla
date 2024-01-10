@@ -3,7 +3,7 @@
     <BaseCard
       card-type="danger"
       :title="`<strong>${dataset.name}</strong>`"
-      text="Be careful, this action is not reversible"
+      :text="$t('settings.deleteWarning')"
       buttonText="Delete"
       @card-action="toggleDeleteModal(true)"
     />
@@ -13,23 +13,25 @@
       :modal-custom="true"
       :prevent-body-scroll="true"
       modal-class="modal-secondary"
-      :modal-title="'Delete confirmation'"
+      :modal-title="$t('settings.deleteConfirmation')"
       :modal-visible="showDeleteModal"
       @close-modal="toggleDeleteModal(false)"
     >
       <div>
-        <p>
-          You are about to delete:
-          <strong> {{ this.dataset.name }}</strong> from workspace
-          <strong> {{ dataset.workspace }}</strong
-          >. This action cannot be undone
-        </p>
+        <p
+          v-html="
+            $t('settings.deleteConfirmationMessage', {
+              datasetName: dataset.name,
+              workspaceName: dataset.workspace,
+            })
+          "
+        />
         <div class="modal-buttons">
           <BaseButton class="primary outline" @click="toggleDeleteModal(false)">
-            Cancel
+            {{ $t("cancel") }}
           </BaseButton>
           <BaseButton class="primary" @click="deleteDataset(dataset)">
-            Yes, delete
+            {{ $t("yesDelete") }}
           </BaseButton>
         </div>
       </div>

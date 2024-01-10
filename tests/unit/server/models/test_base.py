@@ -18,10 +18,11 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 import pytest
 import pytest_asyncio
 from argilla.server.models.base import DatabaseModel
-from pydantic import BaseModel
 from sqlalchemy import JSON, inspect, select
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column
+
+from tests.pydantic_v1 import BaseModel
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

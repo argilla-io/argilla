@@ -14,8 +14,6 @@
 
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import BaseModel, Field
-
 from argilla._constants import PROTECTED_METADATA_FIELD_PREFIX
 from argilla.logging import LoggingMixin
 from argilla.server.commons.models import TaskType
@@ -39,6 +37,7 @@ from argilla.server.daos.backend.search.model import (
 )
 from argilla.server.errors import BadRequestError, EntityNotFoundError
 from argilla.server.errors.task_errors import MetadataLimitExceededError
+from argilla.server.pydantic_v1 import BaseModel, Field
 from argilla.server.settings import settings
 
 

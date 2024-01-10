@@ -374,9 +374,11 @@ export class RecordRepository {
             order: sort.order,
           };
 
-          if (sort.entity === "suggestion") {
+          if (sort.property) {
             backendSort.scope.question = sort.name;
             backendSort.scope.property = sort.property;
+          } else if (sort.entity === "response") {
+            backendSort.scope.question = sort.name;
           } else if (sort.entity === "metadata") {
             backendSort.scope.metadata_property = sort.name;
           } else if (sort.entity === "record") {
@@ -436,14 +438,13 @@ export class RecordRepository {
 
   private createParams(fromRecord: number, howMany: number, status: string) {
     const offset = `${fromRecord - 1}`;
-    const backendStatus = status === "pending" ? "missing" : status;
     const params = new URLSearchParams();
 
     params.append("include", "responses");
     params.append("include", "suggestions");
     params.append("offset", offset);
     params.append("limit", howMany.toString());
-    params.append("response_status", backendStatus);
+    params.append("response_status", status);
 
     return params;
   }

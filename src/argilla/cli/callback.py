@@ -15,8 +15,8 @@
 import typer
 
 from argilla.cli.rich import echo_in_panel
-from argilla.client.api import init
 from argilla.client.login import ArgillaCredentials
+from argilla.client.singleton import init
 
 
 def init_callback() -> None:

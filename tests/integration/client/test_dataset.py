@@ -13,12 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import copy
-import logging
 import os
 import sys
 from time import sleep
 
-import argilla as rg
 import datasets
 import pandas as pd
 import pytest
@@ -474,6 +472,7 @@ class TestDatasetForTextClassification:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "vectors",
             "multi_label",
             "explanation",
             "id",
@@ -506,6 +505,7 @@ class TestDatasetForTextClassification:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "vectors",
             "multi_label",
             "explanation",
             "id",
@@ -656,21 +656,20 @@ class TestDatasetForTokenClassification:
         assert isinstance(train, spacy.tokens.DocBin)
         assert len(train) == 100
 
-        train, test = rb_dataset.prepare_for_training(
-            framework="spacy", lang=spacy.blank("en"), train_size=0.8, seed=42
-        )
+        nlp = spacy.blank("en")
+        train, test = rb_dataset.prepare_for_training(framework="spacy", lang=nlp, train_size=0.8, seed=42)
         assert isinstance(train, spacy.tokens.DocBin)
         assert isinstance(test, spacy.tokens.DocBin)
         assert len(train) == 80
         assert len(test) == 20
-        assert "id" in train[0].user_data
-        assert "id" in test[0].user_data
 
-    @pytest.mark.skipif(
-        _HF_HUB_ACCESS_TOKEN is None,
-        reason="You need a HF Hub access token to test the push_to_hub feature",
-    )
-    def test_prepare_for_training_with_openai(self, request, records):
+        train_doc = next(train.get_docs(nlp.vocab))
+        test_doc = next(test.get_docs(nlp.vocab))
+
+        assert "id" in train_doc.user_data
+        assert "id" in test_doc.user_data
+
+    def test_prepare_for_training_with_openai(self):
         ner_dataset = datasets.load_dataset(
             # TODO(@frascuchon): Move dataset to the new org
             "rubrix/gutenberg_spacy-ner",
@@ -727,44 +726,43 @@ class TestDatasetForTokenClassification:
         train = rb_dataset.prepare_for_training()
         assert (set(train.column_names)) == set(["id", "tokens", "ner_tags"])
 
-        assert isinstance(train, datasets.DatasetD.Dataset) or isinstance(train, datasets.Dataset)
+        assert isinstance(train, datasets.Dataset) or isinstance(train, datasets.Dataset)
         assert "ner_tags" in train.column_names
         assert len(train) == 100
-        assert train.features["ner_tags"] == [
-            datasets.ClassLabel(
-                names=[
-                    "O",
-                    "B-CARDINAL",
-                    "I-CARDINAL",
-                    "B-DATE",
-                    "I-DATE",
-                    "B-FAC",
-                    "I-FAC",
-                    "B-GPE",
-                    "I-GPE",
-                    "B-LANGUAGE",
-                    "I-LANGUAGE",
-                    "B-LOC",
-                    "I-LOC",
-                    "B-NORP",
-                    "I-NORP",
-                    "B-ORDINAL",
-                    "I-ORDINAL",
-                    "B-ORG",
-                    "I-ORG",
-                    "B-PERSON",
-                    "I-PERSON",
-                    "B-PRODUCT",
-                    "I-PRODUCT",
-                    "B-QUANTITY",
-                    "I-QUANTITY",
-                    "B-TIME",
-                    "I-TIME",
-                    "B-WORK_OF_ART",
-                    "I-WORK_OF_ART",
-                ]
-            )
-        ]
+
+        assert train.features["ner_tags"].feature == datasets.ClassLabel(
+            names=[
+                "O",
+                "B-CARDINAL",
+                "I-CARDINAL",
+                "B-DATE",
+                "I-DATE",
+                "B-FAC",
+                "I-FAC",
+                "B-GPE",
+                "I-GPE",
+                "B-LANGUAGE",
+                "I-LANGUAGE",
+                "B-LOC",
+                "I-LOC",
+                "B-NORP",
+                "I-NORP",
+                "B-ORDINAL",
+                "I-ORDINAL",
+                "B-ORG",
+                "I-ORG",
+                "B-PERSON",
+                "I-PERSON",
+                "B-PRODUCT",
+                "I-PRODUCT",
+                "B-QUANTITY",
+                "I-QUANTITY",
+                "B-TIME",
+                "I-TIME",
+                "B-WORK_OF_ART",
+                "I-WORK_OF_ART",
+            ]
+        )
 
         _push_to_hub_with_retries(
             train,
@@ -794,6 +792,7 @@ class TestDatasetForTokenClassification:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "vectors",
             "id",
             "metadata",
             "status",
@@ -906,11 +905,7 @@ class TestDatasetForText2Text:
         with pytest.raises(NotImplementedError):
             ds.prepare_for_training("spacy", lang=spacy.blank("en"), train_size=1)
 
-    @pytest.mark.skipif(
-        _HF_HUB_ACCESS_TOKEN is None,
-        reason="You need a HF Hub access token to test the push_to_hub feature",
-    )
-    def test_prepare_for_training_with_openai(self, request, records):
+    def test_prepare_for_training_with_openai(self):
         ds = DatasetForText2Text(
             [Text2TextRecord(text="Michael is a professor at Harvard but", annotation=" he used to work at MIT")]
         )
@@ -920,7 +915,7 @@ class TestDatasetForText2Text:
         assert isinstance(jsonl, list)
         assert isinstance(jsonl[0], dict)
         assert "prompt" in jsonl[0] and "completion" in jsonl[0] and "id" in jsonl[0]
-        assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but"
+        assert jsonl[0]["prompt"] == "Michael is a professor at Harvard but\n\n###\n\n"
 
     def test_prepare_for_training_with_spark_nlp(self):
         ds = DatasetForText2Text([Text2TextRecord(text="mock", annotation="mock"), Text2TextRecord(text="mock")] * 10)
@@ -968,6 +963,7 @@ class TestDatasetForText2Text:
             "prediction_agent",
             "annotation",
             "annotation_agent",
+            "vectors",
             "id",
             "metadata",
             "status",

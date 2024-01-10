@@ -17,8 +17,9 @@ import sys
 import cleanlab
 import pytest
 from argilla import User
-from argilla.client.api import delete, init, load, log
+from argilla.client.api import delete, load, log
 from argilla.client.models import TextClassificationRecord
+from argilla.client.singleton import init
 from argilla.labeling.text_classification import find_label_errors
 from argilla.labeling.text_classification.label_errors import (
     MissingPredictionError,

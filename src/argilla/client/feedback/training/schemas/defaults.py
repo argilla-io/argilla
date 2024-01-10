@@ -28,7 +28,7 @@ from argilla.client.feedback.unification import (
     RankingQuestionUnification,
     RatingQuestionUnification,
 )
-from pydantic import BaseModel
+from argilla.pydantic_v1 import BaseModel
 
 
 class TextClassificationDefaults(BaseModel):

@@ -1,12 +1,9 @@
 <template>
   <div class="top-content" :class="separator ? '--separator' : null">
-    <h1>Dataset settings</h1>
-    <base-button
-      :to="{ name: 'dataset-id-annotation-mode', params: { id: datasetId } }"
-      class="secondary text"
-    >
+    <h1 v-text="$t('settings.title')" />
+    <base-button @click="$emit('goToDataset')" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
-      See your dataset
+      {{ $t("settings.seeYourDataset") }}
     </base-button>
   </div>
 </template>
@@ -15,10 +12,6 @@
 export default {
   name: "TopDatasetSettingsFeedbackTaskContent",
   props: {
-    datasetId: {
-      type: String,
-      required: true,
-    },
     separator: {
       type: Boolean,
       default: true,

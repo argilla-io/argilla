@@ -8,12 +8,14 @@
     />
     <ul class="sort-categories__list">
       <template v-for="group in filteredGroups">
-        <span class="sort-categories__group" :key="group">{{
-          $t(`sorting.${group}`)
-        }}</span>
+        <span
+          class="sort-categories__group"
+          :key="group"
+          v-text="$t(`sorting.${group}`)"
+        />
         <li
           v-for="category in getCategoriesByGroup(group)"
-          :key="`${group}${category.name}`"
+          :key="category.id"
           :title="category.tooltip"
         >
           <BaseButton

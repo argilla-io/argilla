@@ -14,10 +14,9 @@
 
 from typing import List, Optional, Set, Type
 
-from pydantic import BaseModel
-
 from argilla.server.commons.models import TaskType
 from argilla.server.errors import EntityNotFoundError, WrongTaskError
+from argilla.server.pydantic_v1 import BaseModel
 from argilla.server.services.datasets import ServiceBaseDataset, ServiceDataset
 from argilla.server.services.metrics import ServiceBaseMetric
 from argilla.server.services.metrics.models import ServiceBaseTaskMetrics

@@ -2,7 +2,7 @@
   <div class="sort-selector">
     <SortSelectorItem
       v-for="category in selectedSortingItems"
-      :key="`${category.key}${category.name}`"
+      :key="category.id"
       :category="category"
       :available-categories="nonSelectedSortingItems"
       @clear-category="onClear(category)"
@@ -15,7 +15,7 @@
     >
       <span slot="dropdown-header">
         <BaseButton class="secondary small light" @click="onToggleVisibility">
-          + Add another field</BaseButton
+          {{ $t("sorting.addOtherField") }}</BaseButton
         >
       </span>
       <span slot="dropdown-content">
@@ -72,7 +72,6 @@ export default {
       this.sortingItems.toggleSort(category);
     },
     onReplaceSortCategory(category, newCategory) {
-      debugger;
       this.sortingItems.replace(category, newCategory);
       this.visibleDropdown = false;
     },

@@ -18,13 +18,15 @@ import argilla
 import pytest
 from argilla.client.models import TextClassificationRecord
 
+from tests.integration.utils import delete_ignoring_errors
+
 
 def test_classifier_monitoring_with_all_scores(
     mocked_client,
     classifier_monitor_all_scores,
     classifier_dataset,
 ):
-    argilla.delete(classifier_dataset)
+    delete_ignoring_errors(classifier_dataset)
 
     expected_text = "This is a text, yeah"
     classifier_monitor_all_scores(expected_text)
@@ -39,7 +41,7 @@ def test_classifier_monitoring_with_all_scores(
 
 
 def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dataset):
-    argilla.delete(classifier_dataset)
+    delete_ignoring_errors(classifier_dataset)
 
     expected_text = "This is a text, yeah"
     classifier_monitor(expected_text)
@@ -52,7 +54,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     assert record.inputs == {"text": expected_text}
     assert len(record.prediction) == 1
 
-    argilla.delete(classifier_dataset)
+    delete_ignoring_errors(classifier_dataset)
     texts = ["This is a text", "And another text here"]
     classifier_monitor(texts)
 
@@ -62,7 +64,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     assert len(df) == 2
     assert set([r["text"] for r in df.inputs.values.tolist()]) == set(texts)
 
-    argilla.delete(classifier_dataset)
+    delete_ignoring_errors(classifier_dataset)
     classifier_monitor(expected_text, metadata={"some": "metadata"})
 
     sleep(1)  # wait for the consumer time
@@ -213,7 +215,7 @@ def test_monitor_zero_short_passing_labels_as_args(
     mocked_monitor,
     dataset,
 ):
-    argilla.delete(dataset)
+    delete_ignoring_errors(dataset)
     predictions = mocked_monitor(text, labels, hypothesis_template=hypothesis)
 
     check_zero_shot_results(
@@ -238,7 +240,7 @@ def test_monitor_zero_short_passing_labels_keyword_arg(
     mocked_monitor,
     dataset,
 ):
-    argilla.delete(dataset)
+    delete_ignoring_errors(dataset)
     predictions = mocked_monitor(
         text,
         candidate_labels=labels,
@@ -267,8 +269,8 @@ def test_monitor_zero_shot_with_multilabel(
     mocked_monitor,
     dataset,
 ):
-    argilla.delete(dataset)
-    argilla.delete(dataset + "_multi")
+    delete_ignoring_errors(dataset)
+    delete_ignoring_errors(dataset + "_multi")
     predictions = mocked_monitor(
         text,
         candidate_labels=labels,
@@ -302,7 +304,7 @@ def test_monitor_zero_shot_with_text_array(
     mocked_monitor,
     dataset,
 ):
-    argilla.delete(dataset)
+    delete_ignoring_errors(dataset)
     predictions = mocked_monitor([text], candidate_labels=labels, hypothesis_template=hypothesis)
 
     check_zero_shot_results(
@@ -327,7 +329,7 @@ def test_monitor_zero_shot_passing_metadata(
     mocked_monitor,
     dataset,
 ):
-    argilla.delete(dataset)
+    delete_ignoring_errors(dataset)
     expected_metadata = {"type": "test"}
     mocked_monitor(
         text,

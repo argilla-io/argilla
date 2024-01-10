@@ -23,7 +23,7 @@ def whoami() -> None:
 
     from argilla.cli.callback import init_callback
     from argilla.cli.rich import echo_in_panel
-    from argilla.client.api import active_client
+    from argilla.client.singleton import active_client
 
     init_callback()
     user = active_client()._user

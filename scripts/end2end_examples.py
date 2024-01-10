@@ -30,25 +30,19 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import papermill
-import typer
 from argilla._constants import DEFAULT_API_KEY
 
 
 @dataclass
 class ExampleNotebook:
-    sort_index: int = field(init=False)
     src_filename: Path
     dst_filename: Path
+    sort_index: int
     parameters: Dict = field(default_factory=dict)
 
     def __post_init__(self):
         self.src_filename = Path(self.src_filename)
-        assert self.src_filename.exists(), f"File {self.src_filename} does not exist"
-        self.sort_index = int(self.src_filename.stem.split("-")[-1])
         self.dst_filename = Path(self.dst_filename)
-        dst_folder = self.dst_filename.parent
-        if not dst_folder.exists():
-            dst_folder.mkdir(exist_ok=True)
 
     def run(self):
         try:
@@ -101,6 +95,12 @@ def main(
     Run the end2end example notebooks. If no arguments are passed, it
     will try to get the api_key and the hf_token from the environment variables.
     """
+    if isinstance(examples_folder, str):
+        examples_folder = Path(examples_folder)
+
+    if not examples_folder.exists():
+        raise ValueError(f"Folder {examples_folder} does not exist")
+
     if not hf_token:
         hf_token = get_huggingface_token()
 
@@ -115,9 +115,15 @@ def main(
 
     with tempfile.TemporaryDirectory() as tmpdir:
         examples = []
-        for filename in examples_folder.glob("*.ipynb"):
+        for idx, filename in enumerate(examples_folder.glob("*.ipynb")):
+            filename = Path(filename)
+            if "-" in filename.stem:
+                sort_index = int(filename.stem.split("-")[-1])
+            else:
+                sort_index = idx
             examples.append(
                 ExampleNotebook(
+                    sort_index=sort_index,
                     src_filename=filename,
                     dst_filename=Path(tmpdir) / output_notebook,
                     parameters=notebook_parameters,
@@ -130,4 +136,5 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    main(examples_folder="docs/_source/getting_started")
+    main()

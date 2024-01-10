@@ -8,6 +8,30 @@
   "saved": "Saved",
   "minimize": "Minimize",
   "expand": "Expand",
+  "copied": "Copied",
+  "title": "Title",
+  "description": "Description",
+  "useMarkdown": "Use Markdown",
+  "visibleForAnnotators": "Visible for annotators",
+  "allowExtraMetadata": "Allow extra metadata",
+  "extraMetadata": "Extra metadata",
+  "dimension": "Dimension",
+  "visibleOptions": "Visible options",
+  "annotationGuidelines": "Annotation guidelines",
+  "noAnnotationGuidelines": "This dataset has no annotation guidelines",
+  "settings": {
+    "title": "Dataset settings",
+    "seeYourDataset": "See your dataset",
+    "editFields": "Edit fields",
+    "editQuestions": "Edit questions",
+    "editMetadata": "Edit metadata properties",
+    "editVectors": "Edit vectors",
+    "deleteDataset": "Delete dataset",
+    "deleteWarning": "Be careful, this action is not reversible",
+    "deleteConfirmation": "Delete confirmation",
+    "deleteConfirmationMessage": "You are about to delete: <strong>{datasetName}</strong> from workspace <strong>{workspaceName}</strong>. This action cannot be undone",
+    "yesDelete": "Yes, delete"
+  },
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
@@ -18,12 +42,6 @@
     "pagination": {
       "go_to_previous_record": "Previous (←)",
       "go_to_next_record": "Next (→)"
-    },
-    "questions_form": {
-      "draft_mac": "Save as draft (⌘ cmd + s)",
-      "draft": "Save as draft (ctrl + s)",
-      "discard": "Discard (⌫ backspace)",
-      "submit": "Submit (↵ enter)"
     }
   },
   "questions_form": {
@@ -32,8 +50,13 @@
     "draft": "Save as draft"
   },
   "sorting": {
-    "score": "suggestion score",
-    "general": "general",
+    "addOtherField": "+ Add another field",
+    "suggestion": {
+      "score": "Suggestion score",
+      "value": "Suggestion value"
+    },
+    "response": "Response value",
+    "record": "general",
     "metadata": "metadata"
   },
   "suggestion": {
@@ -52,13 +75,18 @@
   "similarTo": "Similar to",
   "similarityScore": "Similarity Score",
   "similarUsing": "similar using",
+  "fields": "Fields",
+  "questions": "Questions",
   "metadata": "Metadata",
+  "vectors": "Vectors",
+  "dangerZone": "Danger zone",
   "responses": "Responses",
   "reset-all": "Reset all",
   "reset": "Reset",
   "with": "with",
   "find": "Find",
   "cancel": "Cancel",
+  "update": "Update",
   "youAreOnlineAgain": "You are online again",
   "youAreOffline": "You are offline",
   "argilla": {
