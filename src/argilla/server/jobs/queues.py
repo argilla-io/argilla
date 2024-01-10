@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import redis
 from argilla.server.settings import settings
-from redis import Redis
 from rq import Queue
 
-redis_connection = Redis(host=settings.redis_host, port=settings.redis_port)
+redis_connection = redis.from_url(settings.redis)
 
 default_queue = Queue(connection=redis_connection)
