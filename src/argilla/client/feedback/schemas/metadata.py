@@ -165,16 +165,16 @@ class TermsMetadataProperty(MetadataPropertySchema):
         return introduced_value
 
     def _check_allowed_value_type(self, value: Any) -> Any:
-        if value is not None:
-            if isinstance(value, str):
-                return value
-            if isinstance(value, list):
-                return [self._check_allowed_value_type(v) for v in value]
-            raise TypeError(
-                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
-                "only values of type `str` or `list` are allowed."
-            )
-        return value
+        if value is None or isinstance(value, str):
+            return value
+        
+        if isinstance(value, list):
+            return [self._check_allowed_value_type(v) for v in value]
+        
+        raise TypeError(
+            f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+            "only values of type `str` or `list` are allowed."
+        )
 
     def _validator(self, value: Any) -> Any:
         return self._all_values_exist(self._check_allowed_value_type(value))
@@ -348,14 +348,13 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     max: Optional[float] = None
 
     def _check_allowed_value_type(self, value: Any) -> Any:
-        if value is not None:
-            if isinstance(value, (int, float)):
-                return value
-            raise TypeError(
-                f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
-                "only values of type `int` or `float` are allowed."
-            )
-        return value
+        if value is None or isinstance(value, (int, float)):
+            return value
+            
+        raise TypeError(
+            f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
+            "only values of type `int` or `float` are allowed."
+        )
 
     @property
     def _pydantic_field_with_validator(
