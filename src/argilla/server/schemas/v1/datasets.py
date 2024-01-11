@@ -525,11 +525,16 @@ class RecordCreate(BaseModel):
         return values
 
     @validator("metadata", pre=True)
-    def skip_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    @classmethod
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
 
-        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
+        for k, v in metadata.items():
+            if v != v:
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
+
+        return metadata
 
 
 class RecordsCreate(BaseModel):

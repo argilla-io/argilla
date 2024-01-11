@@ -2617,10 +2617,7 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
         )
 
-        assert response.status_code == 204
-
-        record = (await db.execute(select(Record))).scalar()
-        assert record.metadata_ == {}
+        assert response.status_code == 422
 
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
@@ -3702,11 +3699,7 @@ class TestSuiteDatasets:
             },
         )
 
-        assert response.status_code == 204
-
-        assert records[0].metadata_ == {}
-        assert records[1].metadata_ == {}
-        assert records[2].metadata_ == {"terms": "a"}
+        assert response.status_code == 422
 
     async def test_update_dataset_records_with_invalid_suggestions(
         self, async_client: "AsyncClient", owner_auth_header: dict

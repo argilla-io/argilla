@@ -26,7 +26,7 @@ These are the section headers that we use:
 
 - Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
-- `nan` values in metadata properties are skipped when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+- `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 
 ### Deprecated
