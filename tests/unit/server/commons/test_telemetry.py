@@ -17,8 +17,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from argilla.server.commons.models import TaskType
-from argilla.utils import telemetry
-from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
+from argilla.server import telemetry
+from argilla.server.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
@@ -41,7 +41,7 @@ async def test_track_login(test_telemetry: MagicMock):
         "user-agent": None,
         "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
-    test_telemetry.assert_called_once_with("UserInfoRequested", expected_event_data)
+    test_telemetry.track_data.assert_called_once_with(action="UserInfoRequested", data=expected_event_data)
 
 
 @pytest.mark.asyncio
@@ -49,4 +49,6 @@ async def test_track_bulk(test_telemetry):
     task, records = TaskType.token_classification, 100
 
     await telemetry.track_bulk(task=task, records=records)
-    test_telemetry.assert_called_once_with("LogRecordsRequested", {"task": task, "records": records})
+    test_telemetry.track_data.assert_called_once_with(
+        action="LogRecordsRequested", data={"task": task, "records": records}
+    )

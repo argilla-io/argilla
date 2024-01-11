@@ -2212,7 +2212,7 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.assert_called_once_with(
+        test_telemetry.track_data.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
         )
 
@@ -2927,7 +2927,7 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.assert_called_once_with(
+        test_telemetry.track_data.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
         )
 
@@ -4929,7 +4929,7 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_with_error_on_index_creation(

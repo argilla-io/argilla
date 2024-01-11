@@ -72,4 +72,4 @@ class TestAPIErrorHandler:
     async def test_track_error(self, test_telemetry, error, expected_event):
         await APIErrorHandler.track_error(error, request=mock_request)
 
-        test_telemetry.assert_called_once_with("ServerErrorFound", expected_event)
+        test_telemetry.track_data.assert_called_once_with(action="ServerErrorFound",data=expected_event)
