@@ -35,13 +35,8 @@
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
-          :disabled="!areActionsEnabled"
-          :data-title="
-            !areActionsEnabled
-              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
-              : numberOfSelectedRecords &&
-                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
-          "
+          :disabled="isDiscardDisabled"
+          :data-title="draftSavingTooltip"
           @on-click="onDiscard"
         >
           <span
@@ -55,13 +50,8 @@
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
-          :disabled="!areActionsEnabled"
-          :data-title="
-            !areActionsEnabled
-              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
-              : numberOfSelectedRecords &&
-                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
-          "
+          :disabled="isDraftSaveDisabled"
+          :data-title="draftSavingTooltip"
           @on-click="onSaveDraft"
         >
           <span v-if="!isDraftSaving"
@@ -81,14 +71,11 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading="isSubmitting"
-          :disabled="areQuestionsCompletedCorrectly || !areActionsEnabled"
+          :disabled="!questionAreCompletedCorrectly || isSubmitDisabled"
           :data-title="
-            !areActionsEnabled
-              ? $t('bulkAnnotation.to_annotate_record_bulk_required')
-              : areQuestionsCompletedCorrectly
+            !questionAreCompletedCorrectly && !isSubmitDisabled
               ? $t('to_submit_complete_required')
-              : numberOfSelectedRecords &&
-                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
+              : submitTooltip
           "
           @on-click="onSubmit"
         >
@@ -134,8 +121,29 @@ export default {
       type: Boolean,
       required: true,
     },
-    numberOfSelectedRecords: {
-      type: Number,
+    isSubmitDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    isDiscardDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    isDraftSaveDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    submitTooltip: {
+      type: String,
+      default: null,
+    },
+    discardTooltip: {
+      type: String,
+      default: null,
+    },
+    draftSavingTooltip: {
+      type: String,
+      default: null,
     },
   },
   data() {
@@ -166,9 +174,6 @@ export default {
     },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
-    },
-    areQuestionsCompletedCorrectly() {
-      return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
@@ -252,19 +257,18 @@ export default {
         }
       }
     },
-    onDiscard() {
-      if (!this.areActionsEnabled) return;
-
-      this.$emit("on-discard-responses");
-    },
     onSubmit() {
-      if (!this.areActionsEnabled || this.areQuestionsCompletedCorrectly)
-        return;
+      if (this.isSubmitDisabled || !this.questionAreCompletedCorrectly) return;
 
       this.$emit("on-submit-responses");
     },
+    onDiscard() {
+      if (this.isDiscardDisabled) return;
+
+      this.$emit("on-discard-responses");
+    },
     onSaveDraft() {
-      if (!this.areActionsEnabled) return;
+      if (this.isDraftSaveDisabled) return;
 
       this.$emit("on-save-draft");
     },

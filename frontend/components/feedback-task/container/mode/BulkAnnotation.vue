@@ -73,11 +73,15 @@
         :datasetId="recordCriteria.datasetId"
         :record="record"
         :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
-        :is-draft-saving="isDraftSaving"
         :is-submitting="isSubmitting"
         :is-discarding="isDiscarding"
-        :are-actions-enabled="hasSelectedAtLeastOneRecord"
-        :number-of-selected-records="selectedRecords.length"
+        :is-draft-saving="isDraftSaving"
+        :is-submit-disabled="!hasSelectedAtLeastOneRecord"
+        :is-discard-disabled="!hasSelectedAtLeastOneRecord"
+        :is-draft-save-disabled="!hasSelectedAtLeastOneRecord"
+        :submit-tooltip="bulkActionsTooltip"
+        :discard-tooltip="bulkActionsTooltip"
+        :draft-saving-tooltip="bulkActionsTooltip"
         @on-submit-responses="onSubmit"
         @on-discard-responses="onDiscard"
         @on-save-draft="onSaveDraft"
@@ -123,8 +127,20 @@ export default {
     recordsOnPage() {
       return this.records.getRecordsOn(this.recordCriteria.committed.page);
     },
+    numberOfSelectedRecords() {
+      return this.selectedRecords.length;
+    },
     hasSelectedAtLeastOneRecord() {
-      return this.selectedRecords.length > 0;
+      return this.numberOfSelectedRecords > 0;
+    },
+    bulkActionsTooltip() {
+      if (!this.hasSelectedAtLeastOneRecord)
+        return this.$t("bulkAnnotation.to_annotate_record_bulk_required");
+
+      return this.$tc(
+        "bulkAnnotation.recordsSelected",
+        this.numberOfSelectedRecords
+      );
     },
   },
   methods: {
