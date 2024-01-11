@@ -117,9 +117,7 @@ class RecordIncludeParam(BaseModel):
         if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
             # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
             # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
-            raise HTTPException(
-                status_code=422,
-                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
+            raise ValueError("'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
             )
 
         return values
