@@ -21,17 +21,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
-from argilla.server.models import User
+from argilla.server.models import Record, User
 from argilla.server.policies import RecordPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import Record as RecordSchema
-from argilla.server.schemas.v1.records import RecordUpdate, Response, ResponseCreate
+from argilla.server.schemas.v1.records import Record as RecordSchema
+from argilla.server.schemas.v1.records import RecordUpdate
+from argilla.server.schemas.v1.responses import Response, ResponseCreate
 from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.security import auth
 from argilla.server.utils import parse_uuids
-
-if TYPE_CHECKING:
-    from argilla.server.models import Record
 
 DELETE_RECORD_SUGGESTIONS_LIMIT = 100
 
@@ -44,7 +42,7 @@ async def _get_record(
     with_dataset: bool = False,
     with_suggestions: bool = False,
     with_vectors: bool = False,
-) -> "Record":
+) -> Record:
     record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions, with_vectors)
     if not record:
         raise HTTPException(
