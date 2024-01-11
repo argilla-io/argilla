@@ -385,13 +385,6 @@ class TextDescriptivesExtractor:
         >>> tde = TextDescriptivesExtractor()
         >>> updated_dataset = tde.update_dataset(dataset)
         """
-        # If overwrite is True, update_records must also be True
-        if overwrite and not update_records:
-            raise ValueError("Cannot overwrite metadata properties without including records.")
-        if not isinstance(dataset, (FeedbackDataset, RemoteFeedbackDataset)):
-            raise ValueError(
-                f"Provided object is of `type={type(dataset)}` while only `type=FeedbackDataset` or `type=RemoteFeedbackDataset` are allowed."
-            )
         # If fields is None, use all fields
         if fields is None:
             fields = [field.name for field in dataset.fields]
