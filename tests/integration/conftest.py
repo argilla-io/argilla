@@ -29,13 +29,12 @@ from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
+from argilla.server import telemetry as server_telemetry
 from argilla.server.cli.database.migrate import migrate_db
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.settings import settings
-from argilla.server import telemetry as server_telemetry
 from argilla.utils import telemetry as client_telemetry
-
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -207,6 +206,7 @@ def server_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
 
     server_telemetry._CLIENT = mock_telemetry
     return server_telemetry._CLIENT
+
 
 @pytest.fixture(autouse=True)
 def client_telemetry_client(mocker: "MockerFixture") -> "MagicMock":

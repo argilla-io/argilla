@@ -17,6 +17,7 @@ from typing import List, Optional, Type
 
 from fastapi import Depends
 
+from argilla.server import telemetry
 from argilla.server.commons.config import TasksFactory
 from argilla.server.commons.models import TaskStatus
 from argilla.server.daos.backend.base import WrongLogDataError
@@ -27,7 +28,6 @@ from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
-from argilla.server import telemetry
 
 
 @dataclasses.dataclass

@@ -16,8 +16,8 @@ import uuid
 from unittest.mock import MagicMock
 
 import pytest
-from argilla.server.commons.models import TaskType
 from argilla.server import telemetry
+from argilla.server.commons.models import TaskType
 from argilla.server.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
 

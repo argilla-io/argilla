@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
+from argilla.server import telemetry
 from argilla.server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.datasets import DatasetsDAO
@@ -26,7 +27,6 @@ from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.search_engine import SearchEngine, get_search_engine
 from argilla.server.settings import settings
-from argilla.server import telemetry
 from argilla.server.telemetry import TelemetryClient
 from httpx import AsyncClient
 from opensearchpy import OpenSearch
@@ -106,7 +106,7 @@ async def async_client(
 @pytest.fixture(autouse=True)
 def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     mock_telemetry = mocker.Mock(TelemetryClient)
-    mock_telemetry.machine_id= uuid.uuid4()
+    mock_telemetry.machine_id = uuid.uuid4()
 
     telemetry._CLIENT = mock_telemetry
     return telemetry._CLIENT

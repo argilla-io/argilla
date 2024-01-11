@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from argilla.pydantic_v1 import BaseSettings
 
-
 _DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
 
