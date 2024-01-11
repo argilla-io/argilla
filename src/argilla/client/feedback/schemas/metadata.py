@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import math
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
 
@@ -248,8 +248,14 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
                     )
         return provided_value
 
+    def _check_nan(self, provided_value: Optional[Union[int, float]]) -> Optional[Union[int, float]]:
+        if provided_value is not None and math.isnan(provided_value):
+            raise ValueError(f"Provided '{self.name}={provided_value}' is not valid, NaN values are not allowed.")
+
+        return provided_value
+
     def _validator(self, value: Any) -> Any:
-        return self._value_in_bounds(self._check_allowed_value_type(value))
+        return self._value_in_bounds(self._check_allowed_value_type(self._check_nan(value)))
 
     def _validate_filter(self, metadata_filter: Union["IntegerMetadataFilter", "FloatMetadataFilter"]) -> None:
         metadata_filter_ = metadata_filter.dict()

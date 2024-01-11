@@ -859,10 +859,9 @@ class TestRemoteFeedbackDataset:
             )
             for i in range(1, 20)
         ]
-        remote_dataset.add_records(records)
 
-        assert len(remote_dataset.records) == len(records)
-        assert all("float-metadata" not in record.metadata for record in remote_dataset.records)
+        with pytest.raises(ValueError, match="NaN values are not allowed"):
+            remote_dataset.add_records(records)
 
     async def test_add_records_with_metadata_including_none_values(
         self, owner: "User", feedback_dataset: FeedbackDataset
