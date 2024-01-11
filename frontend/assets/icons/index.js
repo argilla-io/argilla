@@ -2,6 +2,7 @@
 require('./arrow-down')
 require('./arrow-up')
 require('./bulk-mode')
+require('./change-height')
 require('./check')
 require('./chevron-down')
 require('./chevron-left')

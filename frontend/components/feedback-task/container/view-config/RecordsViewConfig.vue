@@ -14,7 +14,7 @@
           class="view-config__icon"
           width="20"
           height="20"
-          name="settings" /></BaseButton
+          name="change-height" /></BaseButton
     ></template>
     <template slot="dropdown-content">
       <div class="view-config__content">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import "assets/icons/change-height";
 export default {
   data() {
     return {
