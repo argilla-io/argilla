@@ -27,7 +27,7 @@ from argilla.server.policies import DatasetPolicy, is_authorized
 from argilla.server.services.datasets import ServiceDataset
 from argilla.server.services.search.model import ServiceBaseRecordsQuery
 from argilla.server.services.tasks.commons import ServiceRecord
-from argilla.utils import telemetry
+from argilla.server import telemetry
 
 
 @dataclasses.dataclass

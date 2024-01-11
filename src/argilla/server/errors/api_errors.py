@@ -25,7 +25,7 @@ from argilla.server.errors.base_errors import (
     ServerError,
 )
 from argilla.server.pydantic_v1 import BaseModel
-from argilla.utils import telemetry
+from argilla.server import telemetry
 
 
 class ErrorDetail(BaseModel):
