@@ -26,10 +26,6 @@ if TYPE_CHECKING:
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,
-        AllowedRemoteFieldTypes,
-        AllowedRemoteMetadataPropertyTypes,
-        AllowedRemoteQuestionTypes,
-        AllowedRemoteVectorSettingsTypes,
         AllowedVectorSettingsTypes,
     )
 
@@ -81,11 +77,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def fields(self) -> Union[List["AllowedFieldTypes"], List["AllowedRemoteFieldTypes"]]:
+    def fields(self) -> List["AllowedFieldTypes"]:
         """Returns the fields that define the schema of the records in the dataset."""
         pass
 
-    def field_by_name(self, name: str) -> Optional[Union["AllowedFieldTypes", "AllowedRemoteFieldTypes"]]:
+    def field_by_name(self, name: str) -> Optional["AllowedFieldTypes"]:
         """Returns the field by name if it exists. Otherwise a `ValueError` is raised.
 
         Args:
@@ -95,11 +91,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def questions(self) -> Union[List["AllowedQuestionTypes"], List["AllowedRemoteQuestionTypes"]]:
+    def questions(self) -> List["AllowedQuestionTypes"]:
         """Returns the questions that will be used to annotate the dataset."""
         pass
 
-    def question_by_name(self, name: str) -> Optional[Union["AllowedQuestionTypes", "AllowedRemoteQuestionTypes"]]:
+    def question_by_name(self, name: str) -> Optional["AllowedQuestionTypes"]:
         """Returns the question by name if it exists.
 
         Args:
@@ -111,13 +107,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
     @abstractmethod
     def metadata_properties(
         self,
-    ) -> Union[List["AllowedMetadataPropertyTypes"], List["AllowedRemoteMetadataPropertyTypes"]]:
+    ) -> List["AllowedMetadataPropertyTypes"]:
         """Returns the metadata properties that will be indexed and could be used to filter the dataset."""
         pass
 
-    def metadata_property_by_name(
-        self, name: str
-    ) -> Optional[Union["AllowedMetadataPropertyTypes", "AllowedRemoteMetadataPropertyTypes"]]:
+    def metadata_property_by_name(self, name: str) -> Optional["AllowedMetadataPropertyTypes"]:
         """Returns the metadata property by name if it exists.
 
         Args:
@@ -127,13 +121,11 @@ class FeedbackDatasetBase(ABC, Generic[R], metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def vectors_settings(self) -> Union[List["AllowedVectorSettingsTypes"], List["AllowedRemoteVectorSettingsTypes"]]:
+    def vectors_settings(self) -> List["AllowedVectorSettingsTypes"]:
         """Returns the vector settings that will be used to index the dataset."""
         pass
 
-    def vector_settings_by_name(
-        self, name: str
-    ) -> Optional[Union["AllowedVectorSettingsTypes", "AllowedRemoteVectorSettingsTypes"]]:
+    def vector_settings_by_name(self, name: str) -> Optional["AllowedVectorSettingsTypes"]:
         """Returns the vector settings by name if it exists.
 
         Args:
