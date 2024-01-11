@@ -167,10 +167,10 @@ class TermsMetadataProperty(MetadataPropertySchema):
     def _check_allowed_value_type(self, value: Any) -> Any:
         if value is None or isinstance(value, str):
             return value
-        
+
         if isinstance(value, list):
             return [self._check_allowed_value_type(v) for v in value]
-        
+
         raise TypeError(
             f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
             "only values of type `str` or `list` are allowed."
@@ -350,7 +350,7 @@ class FloatMetadataProperty(_NumericMetadataPropertySchema):
     def _check_allowed_value_type(self, value: Any) -> Any:
         if value is None or isinstance(value, (int, float)):
             return value
-            
+
         raise TypeError(
             f"Provided '{self.name}={value}' of type {type(value)} is not valid, "
             "only values of type `int` or `float` are allowed."
