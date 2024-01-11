@@ -185,5 +185,6 @@ $tooltip-border-radius: $border-radius-s;
     background: $tooltip-mini-bg;
     @include font-size(12px);
     line-height: 1.2;
+    white-space: pre;
   }
 }

@@ -39,7 +39,8 @@
           :data-title="
             !areActionsEnabled
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
-              : $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
+              : numberOfSelectedRecords &&
+                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
           "
           @on-click="onDiscard"
         >
@@ -58,7 +59,8 @@
           :data-title="
             !areActionsEnabled
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
-              : $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
+              : numberOfSelectedRecords &&
+                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
           "
           @on-click="onSaveDraft"
         >
@@ -85,7 +87,8 @@
               ? $t('bulkAnnotation.to_annotate_record_bulk_required')
               : areQuestionsCompletedCorrectly
               ? $t('to_submit_complete_required')
-              : $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
+              : numberOfSelectedRecords &&
+                $tc('bulkAnnotation.recordsSelected', numberOfSelectedRecords)
           "
           @on-click="onSubmit"
         >

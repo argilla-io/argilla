@@ -41,7 +41,7 @@
   "button": {
     "ignore_and_continue": "Ignore and continue"
   },
-  "to_submit_complete_required": "To submit complete required responses",
+  "to_submit_complete_required": "To submit complete \nrequired responses",
   "some_records_failed_to_annotate": "Some records failed to annotate",
   "changes_no_submit": "You didn't submit your changes",
   "bulkAnnotation": {
