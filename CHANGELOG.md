@@ -22,6 +22,7 @@ These are the section headers that we use:
 - Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 - Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
 - API v1 responses returning `Record` schema now always include `dataset_id` as attribute. ([]())
+- API v1 responses returning `Response` schema now always include `record_id` as attribute. ([]())
 
 ## Changed
 
