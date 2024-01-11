@@ -249,7 +249,7 @@ class _NumericMetadataPropertySchema(MetadataPropertySchema):
         return provided_value
 
     def _check_nan(self, provided_value: Optional[Union[int, float]]) -> Optional[Union[int, float]]:
-        if provided_value is not None and math.isnan(provided_value):
+        if provided_value != provided_value:
             raise ValueError(f"Provided '{self.name}={provided_value}' is not valid, NaN values are not allowed.")
 
         return provided_value
