@@ -106,7 +106,7 @@ async def async_client(
 @pytest.fixture(autouse=True)
 def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     mock_telemetry = mocker.Mock(TelemetryClient)
-    mock_telemetry.machine_id = uuid.uuid4()
+    mock_telemetry.server_id = mocker.MagicMock(return_value=uuid.uuid4())
 
     telemetry._CLIENT = mock_telemetry
     return telemetry._CLIENT
