@@ -34,6 +34,7 @@
 </template>
 
 <script>
+// TODO: Improve this component.
 import "assets/icons/check";
 import _ from "lodash";
 export default {

@@ -177,12 +177,6 @@ export default {
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
   },
-  mounted() {
-    this.$root.$emit("animate-checkboxes");
-  },
-  destroyed() {
-    this.$root.$off("animate-checkboxes");
-  },
   setup() {
     return useBulkAnnotationViewModel();
   },
