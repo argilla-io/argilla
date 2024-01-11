@@ -218,7 +218,7 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $base-space;
+    gap: $base-space * 2;
     height: 100%;
     min-width: 0;
     &__header {
@@ -240,7 +240,7 @@ export default {
       &--left {
         display: flex;
         align-items: center;
-        gap: $base-space;
+        gap: $base-space * 2;
         margin-left: 0;
         margin-right: auto;
       }
