@@ -43,9 +43,11 @@
           "
           @on-click="onDiscard"
         >
-          <span class="button__shortcuts" v-text="'⌫'" /><span
-            v-text="$t('questions_form.discard')"
-          />
+          <span
+            v-if="!isDiscarding"
+            class="button__shortcuts"
+            v-text="'⌫'"
+          /><span v-text="$t('questions_form.discard')" />
         </BaseButton>
         <BaseButton
           type="button"
@@ -60,7 +62,7 @@
           "
           @on-click="onSaveDraft"
         >
-          <span
+          <span v-if="!isDraftSaving"
             ><span
               class="button__shortcuts"
               v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
@@ -87,7 +89,7 @@
           "
           @on-click="onSubmit"
         >
-          <span class="button__shortcuts" v-text="'↵'" />
+          <span v-if="!isSubmitting" class="button__shortcuts" v-text="'↵'" />
           <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
@@ -406,12 +408,6 @@ export default {
       & > * {
         opacity: 0.5;
       }
-    }
-    :deep(.spinner) {
-      height: $base-space * 3;
-      width: $base-space * 3;
-      border: 4px solid #ffffffd8;
-      border-top-color: #ffffff14;
     }
   }
   &--submit {

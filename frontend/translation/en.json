@@ -46,10 +46,9 @@
   "changes_no_submit": "You didn't submit your changes",
   "bulkAnnotation": {
     "recordsSelected": "1 record selected | {count} records selected",
-    "recordsViewSettings": "Records view settings",
-    "recordsHeight": "Records height:",
-    "fixedHeight": "Fixed height",
-    "defaultHeight": "Default height",
+    "recordsViewSettings": "Record size",
+    "fixedHeight": "Collapse records",
+    "defaultHeight": "Expand records",
     "to_annotate_record_bulk_required": "No record selected",
     "select_to_annotate": "Select to annotate"
   },

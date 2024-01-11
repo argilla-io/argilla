@@ -185,6 +185,7 @@ export default {
     }
   }
   &--right {
+    flex-shrink: 0;
     margin-left: auto;
   }
   .search-area {

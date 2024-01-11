@@ -49,7 +49,8 @@
     :disabled="disabled"
     @click="onClick"
   >
-    <BaseSpinner class="spinner" v-if="loading" /><slot v-else />
+    <BaseSpinner class="spinner" v-if="loading" />
+    <slot />
   </button>
 </template>
 
@@ -139,6 +140,12 @@ export default {
 }
 .button {
   @extend %button;
+  .spinner {
+    height: 20px;
+    width: 20px;
+    border: 3px solid #242323d8;
+    border-top-color: #00000021;
+  }
 }
 .small {
   @include font-size(13px);

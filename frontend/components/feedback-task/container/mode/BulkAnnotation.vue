@@ -233,13 +233,8 @@ export default {
         @include font-size(13px);
       }
       &__checkbox {
-        &:not(.checked):hover {
-          :deep(.checkbox__container) {
-            border-color: $black-37;
-          }
-        }
         :deep(.checkbox__container) {
-          border-color: $black-20;
+          border-color: $black-54;
         }
       }
       &--left {
@@ -274,7 +269,7 @@ export default {
       min-height: auto;
       height: auto;
       &--fixed-height {
-        max-height: 300px;
+        max-height: 80%;
         height: 100%;
       }
     }

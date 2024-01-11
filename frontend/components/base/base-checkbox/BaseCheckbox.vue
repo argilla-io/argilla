@@ -189,10 +189,11 @@ $checkbox-decoration-circle-color: #6b87f8;
         width: 100%;
         height: 100%;
         border-radius: $border-radius-rounded;
-        transition: all 0.3s ease-in-out;
+        transition: transition 0.3s ease-in-out;
       }
       &:after {
         animation: checkbox-animation-circle 1s forwards;
+        transition: all 0.3s ease-in-out;
       }
     }
     &:hover {
@@ -201,7 +202,7 @@ $checkbox-decoration-circle-color: #6b87f8;
           transform: scale(2.2);
           background: $checkbox-decoration-circle-color;
           opacity: 0.1;
-          transition: all 0.3s ease-in-out;
+          transition: transform 0.3s ease-in-out;
         }
       }
     }

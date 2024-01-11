@@ -4,23 +4,20 @@
     :visible="dropdownIsVisible"
     @visibility="onChangeDropDownVisibility"
     ><template slot="dropdown-header"
-      ><span
+      ><BaseButton
+        class="view-config__button"
         :data-title="
           !dropdownIsVisible && $t('bulkAnnotation.recordsViewSettings')
         "
-        ><svgicon
+      >
+        <svgicon
           class="view-config__icon"
           width="20"
           height="20"
-          color="#989898"
-          name="settings" /></span
+          name="settings" /></BaseButton
     ></template>
     <template slot="dropdown-content">
       <div class="view-config__content">
-        <span
-          class="view-config__text"
-          v-text="$t('bulkAnnotation.recordsHeight')"
-        />
         <BaseRadioButton
           v-for="option in recordsViewConfig.height"
           :key="option.id"
@@ -44,10 +41,10 @@ export default {
       recordsViewConfig: {
         height: [
           {
-            id: "fixedHeight",
+            id: "defaultHeight",
           },
           {
-            id: "defaultHeight",
+            id: "fixedHeight",
           },
         ],
       },
@@ -90,6 +87,9 @@ export default {
     gap: $base-space;
     min-width: 200px;
     padding: $base-space;
+  }
+  &__button.button {
+    padding: 0;
   }
   :deep(.radio-button) {
     @include font-size(13px);
