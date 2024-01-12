@@ -47,13 +47,7 @@ from argilla.server.schemas.v1.datasets import (
     FIELD_CREATE_TITLE_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
-    RANKING_OPTIONS_MAX_ITEMS,
-    RATING_OPTIONS_MAX_ITEMS,
-    RATING_OPTIONS_MIN_ITEMS,
     TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
-    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
-    VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
-    VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
@@ -61,6 +55,12 @@ from argilla.server.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
+    RANKING_OPTIONS_MAX_ITEMS,
+    RATING_OPTIONS_MAX_ITEMS,
+    RATING_OPTIONS_MIN_ITEMS,
+    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
+    VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
+    VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
 )
 from argilla.server.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
 from argilla.server.search_engine import (
@@ -317,6 +317,7 @@ class TestSuiteDatasets:
                     "description": "Question Description",
                     "required": True,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(text_question.dataset_id),
                     "inserted_at": text_question.inserted_at.isoformat(),
                     "updated_at": text_question.updated_at.isoformat(),
                 },
@@ -341,6 +342,7 @@ class TestSuiteDatasets:
                             {"value": 10},
                         ],
                     },
+                    "dataset_id": str(rating_question.dataset_id),
                     "inserted_at": rating_question.inserted_at.isoformat(),
                     "updated_at": rating_question.updated_at.isoformat(),
                 },
@@ -396,6 +398,7 @@ class TestSuiteDatasets:
                     "description": question.description,
                     "required": question.required,
                     "settings": {"type": QuestionFactory.settings["type"], **settings},
+                    "dataset_id": str(question.dataset_id),
                     "inserted_at": question.inserted_at.isoformat(),
                     "updated_at": question.updated_at.isoformat(),
                 }
@@ -1265,6 +1268,7 @@ class TestSuiteDatasets:
             "description": None,
             "required": False,
             "settings": expected_settings,
+            "dataset_id": str(UUID(response_body["dataset_id"])),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }

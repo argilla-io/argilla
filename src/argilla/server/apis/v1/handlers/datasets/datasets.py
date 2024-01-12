@@ -36,13 +36,11 @@ from argilla.server.schemas.v1.datasets import (
     MetadataProperties,
     MetadataProperty,
     MetadataPropertyCreate,
-    Question,
-    QuestionCreate,
-    Questions,
     VectorSettings,
     VectorSettingsCreate,
     VectorsSettings,
 )
+from argilla.server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla.server.search_engine import (
     SearchEngine,
     get_search_engine,
