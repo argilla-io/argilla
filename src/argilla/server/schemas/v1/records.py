@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from argilla.server.models import ResponseStatus
-from argilla.server.pydantic_v1 import BaseModel, Field
+from argilla.server.pydantic_v1 import BaseModel, Field, validator
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.suggestions import SuggestionCreate
 
@@ -51,3 +51,15 @@ class RecordUpdate(UpdateSchema):
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None
     vectors: Optional[Dict[str, List[float]]]
+
+    @validator("metadata_", pre=True)
+    @classmethod
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if metadata is None:
+            return metadata
+
+        for k, v in metadata.items():
+            if v != v:
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
+
+        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN

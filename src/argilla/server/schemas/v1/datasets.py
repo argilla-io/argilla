@@ -524,6 +524,18 @@ class RecordCreate(BaseModel):
 
         return values
 
+    @validator("metadata", pre=True)
+    @classmethod
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if metadata is None:
+            return metadata
+
+        for k, v in metadata.items():
+            if v != v:
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
+
+        return metadata
+
 
 class RecordsCreate(BaseModel):
     items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
