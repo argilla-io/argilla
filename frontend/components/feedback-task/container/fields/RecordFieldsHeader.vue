@@ -4,7 +4,7 @@
       <BaseCheckbox
         v-if="Array.isArray(selectedRecords)"
         class="fields__checkbox"
-        :decoration-circle="true"
+        :decoration-circle="recordCriteria.isComingToBulkMode"
         :value="selectedRecords.includes(record)"
         @input="onSelectedRecord"
       />

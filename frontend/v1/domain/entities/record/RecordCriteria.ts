@@ -6,7 +6,18 @@ import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";
 import { PageCriteria } from "../page/PageCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
-class CommittedRecordCriteria {
+interface IRecordCriteria {
+  readonly page: PageCriteria;
+  readonly status: RecordStatus;
+  readonly searchText: string;
+  readonly metadata: MetadataCriteria;
+  readonly sortBy: SortCriteria;
+  readonly response: ResponseCriteria;
+  readonly suggestion: SuggestionCriteria;
+  readonly similaritySearch: SimilarityCriteria;
+}
+
+class CommittedRecordCriteria implements IRecordCriteria {
   public readonly page: PageCriteria;
   public readonly status: RecordStatus;
   public readonly searchText: string;
@@ -16,7 +27,7 @@ class CommittedRecordCriteria {
   public readonly suggestion: SuggestionCriteria;
   public readonly similaritySearch: SimilarityCriteria;
 
-  constructor(private readonly recordCriteria: RecordCriteria) {
+  constructor(recordCriteria: IRecordCriteria) {
     const pageCommitted = new PageCriteria();
     const similaritySearchCommitted = new SimilarityCriteria();
     const metadataCommitted = new MetadataCriteria();
@@ -24,15 +35,15 @@ class CommittedRecordCriteria {
     const responseCommitted = new ResponseCriteria();
     const suggestionCommitted = new SuggestionCriteria();
 
-    pageCommitted.withValue(this.recordCriteria.page);
-    metadataCommitted.withValue(this.recordCriteria.metadata);
-    sortByCommitted.withValue(this.recordCriteria.sortBy);
-    suggestionCommitted.withValue(this.recordCriteria.suggestion);
-    responseCommitted.withValue(this.recordCriteria.response);
-    similaritySearchCommitted.withValue(this.recordCriteria.similaritySearch);
+    pageCommitted.withValue(recordCriteria.page);
+    metadataCommitted.withValue(recordCriteria.metadata);
+    sortByCommitted.withValue(recordCriteria.sortBy);
+    suggestionCommitted.withValue(recordCriteria.suggestion);
+    responseCommitted.withValue(recordCriteria.response);
+    similaritySearchCommitted.withValue(recordCriteria.similaritySearch);
 
-    this.status = this.recordCriteria.status;
-    this.searchText = this.recordCriteria.searchText;
+    this.status = recordCriteria.status;
+    this.searchText = recordCriteria.searchText;
     this.page = pageCommitted;
     this.metadata = metadataCommitted;
     this.sortBy = sortByCommitted;
@@ -46,9 +57,10 @@ class CommittedRecordCriteria {
   }
 }
 
-export class RecordCriteria {
+export class RecordCriteria implements IRecordCriteria {
   public isChangingAutomatically = false;
   public committed: CommittedRecordCriteria;
+  public previous?: CommittedRecordCriteria;
 
   public page: PageCriteria;
   public metadata: MetadataCriteria;
@@ -148,19 +160,15 @@ export class RecordCriteria {
     return this.committed.similaritySearch.isCompleted;
   }
 
+  get isComingToBulkMode(): boolean {
+    return (
+      (!this.previous || this.previous.page.isFocusMode) &&
+      this.committed.page.isBulkMode
+    );
+  }
+
   get hasChanges(): boolean {
-    if (this.committed.status !== this.status) return true;
-    if (this.committed.searchText !== this.searchText) return true;
-
-    if (!this.page.isEqual(this.committed.page)) return true;
-    if (!this.metadata.isEqual(this.committed.metadata)) return true;
-    if (!this.sortBy.isEqual(this.committed.sortBy)) return true;
-    if (!this.response.isEqual(this.committed.response)) return true;
-    if (!this.suggestion.isEqual(this.committed.suggestion)) return true;
-    if (!this.similaritySearch.isEqual(this.committed.similaritySearch))
-      return true;
-
-    return false;
+    return this.areDifferent(this, this.committed);
   }
 
   complete(
@@ -187,7 +195,15 @@ export class RecordCriteria {
   }
 
   commit() {
+    if (this.committed) {
+      this.previous = new CommittedRecordCriteria(this.committed);
+    }
+
     this.committed = new CommittedRecordCriteria(this);
+
+    if (!this.areDifferent(this.committed, this.previous)) {
+      this.previous = null;
+    }
 
     this.isChangingAutomatically = false;
   }
@@ -205,7 +221,8 @@ export class RecordCriteria {
   }
 
   reset() {
-    // TODO: Review why the similarity is not calling here...
+    // Not call the similaritySearch.reset() because it is not managed as a global filter.
+    // Not clear the searchText because it is not managed as a global filter.
 
     this.page.reset();
     this.metadata.reset();
@@ -226,5 +243,23 @@ export class RecordCriteria {
 
   previousPage() {
     this.page.goTo(this.committed.page.previous);
+  }
+
+  private areDifferent(previous: IRecordCriteria, actual: IRecordCriteria) {
+    if (!previous) return false;
+    if (!actual) return false;
+
+    if (actual.status !== previous.status) return true;
+    if (actual.searchText !== previous.searchText) return true;
+
+    if (!previous.page.isEqual(actual.page)) return true;
+    if (!previous.metadata.isEqual(actual.metadata)) return true;
+    if (!previous.sortBy.isEqual(actual.sortBy)) return true;
+    if (!previous.response.isEqual(actual.response)) return true;
+    if (!previous.suggestion.isEqual(actual.suggestion)) return true;
+    if (!previous.similaritySearch.isEqual(actual.similaritySearch))
+      return true;
+
+    return false;
   }
 }

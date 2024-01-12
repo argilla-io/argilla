@@ -640,4 +640,44 @@ describe("RecordCriteria", () => {
       expect(criteria.page.client.page).toEqual(1);
     });
   });
+
+  describe("isComingToBulkMode", () => {
+    test("should return true when previous mode has focus and now is bulk", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "3",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.page.bulkMode();
+
+      criteria.commit();
+
+      expect(criteria.isComingToBulkMode).toBeTruthy();
+    });
+
+    test("should return true when the criteria does not have any change", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1~10",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.commit();
+
+      expect(criteria.isComingToBulkMode).toBeTruthy();
+    });
+  });
 });
