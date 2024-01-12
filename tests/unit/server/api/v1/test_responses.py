@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Type
 from uuid import uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Response, ResponseStatus, UserRole
 from argilla.server.search_engine import SearchEngine
 from sqlalchemy import func, select

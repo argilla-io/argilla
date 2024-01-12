@@ -46,7 +46,7 @@ from argilla.server.search_engine import (
     get_search_engine,
 )
 from argilla.server.security import auth
-from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
+from argilla.server.telemetry import TelemetryClient, get_telemetry_client
 
 CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
 

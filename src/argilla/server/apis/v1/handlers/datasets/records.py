@@ -98,8 +98,8 @@ from argilla.server.search_engine import (
     TermsFilter as SearchEngineTermsFilter,
 )
 from argilla.server.security import auth
+from argilla.server.telemetry import TelemetryClient, get_telemetry_client
 from argilla.server.utils import parse_query_param, parse_uuids
-from argilla.utils.telemetry import TelemetryClient, get_telemetry_client
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LE = 1000
@@ -634,7 +634,6 @@ async def search_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),

@@ -15,7 +15,7 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._constants import DEFAULT_API_KEY
+from argilla.server.constants import DEFAULT_API_KEY
 from argilla.server.security.auth_provider.db import DBAuthProvider
 from fastapi.security import SecurityScopes
 
