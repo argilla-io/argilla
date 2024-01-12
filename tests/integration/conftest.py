@@ -202,7 +202,7 @@ def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
 @pytest.fixture(autouse=True)
 def server_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
     mock_telemetry = mocker.Mock(server_telemetry.TelemetryClient)
-    mock_telemetry.server_id = mocker.MagicMock(return_value=uuid.UUID(int=uuid.getnode()))
+    mock_telemetry.server_id = uuid.uuid4()
 
     server_telemetry._CLIENT = mock_telemetry
     return server_telemetry._CLIENT
@@ -211,7 +211,7 @@ def server_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
 @pytest.fixture(autouse=True)
 def client_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
     mock_telemetry = mocker.Mock(client_telemetry.TelemetryClient)
-    mock_telemetry.machine_id = mocker.MagicMock(return_value=uuid.UUID(int=uuid.getnode()))
+    mock_telemetry.machine_id = uuid.uuid4()
 
     client_telemetry._CLIENT = mock_telemetry
     return client_telemetry._CLIENT
