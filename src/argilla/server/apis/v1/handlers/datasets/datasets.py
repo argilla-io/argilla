@@ -27,6 +27,7 @@ from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, a
 from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
+    DatasetMetrics,
     Datasets,
     DatasetUpdate,
     Field,
@@ -35,7 +36,6 @@ from argilla.server.schemas.v1.datasets import (
     MetadataProperties,
     MetadataProperty,
     MetadataPropertyCreate,
-    Metrics,
     Question,
     QuestionCreate,
     Questions,
@@ -175,7 +175,7 @@ async def get_dataset(
     return dataset
 
 
-@router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
+@router.get("/me/datasets/{dataset_id}/metrics", response_model=DatasetMetrics)
 async def get_current_user_dataset_metrics(
     *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):

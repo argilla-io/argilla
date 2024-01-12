@@ -26,11 +26,11 @@ from argilla.server.models import Question, Suggestion
 from argilla.server.schemas.v1.datasets import (
     FilterScope,
     MetadataFilterScope,
-    RecordFilterScope,
-    ResponseFilterScope,
     SearchRecordsQuery,
     SuggestionFilterScope,
 )
+from argilla.server.schemas.v1.records import RecordFilterScope
+from argilla.server.schemas.v1.responses import ResponseFilterScope
 
 
 class SearchRecordsQueryValidator:

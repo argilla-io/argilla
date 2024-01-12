@@ -37,12 +37,6 @@ from argilla.server.schemas.v1.datasets import (
     MetadataQueryParams,
     Order,
     RangeFilter,
-    RecordFilterScope,
-    RecordIncludeParam,
-    Records,
-    RecordsCreate,
-    RecordsUpdate,
-    ResponseFilterScope,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
@@ -53,9 +47,17 @@ from argilla.server.schemas.v1.datasets import (
     TermsFilter,
     VectorSettings,
 )
-from argilla.server.schemas.v1.datasets import (
+from argilla.server.schemas.v1.records import (
     Record as RecordSchema,
 )
+from argilla.server.schemas.v1.records import (
+    RecordFilterScope,
+    RecordIncludeParam,
+    Records,
+    RecordsCreate,
+    RecordsUpdate,
+)
+from argilla.server.schemas.v1.responses import ResponseFilterScope
 from argilla.server.search_engine import (
     AndFilter,
     FloatMetadataFilter,

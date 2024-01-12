@@ -16,16 +16,16 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
-from fastapi import HTTPException, Query
+from fastapi import Query
 
-from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
+from argilla.server.enums import SimilarityOrder, SortOrder
 from argilla.server.pydantic_v1 import BaseModel, PositiveInt, conlist, constr, root_validator, validator
 from argilla.server.pydantic_v1 import Field as PydanticField
 from argilla.server.pydantic_v1.generics import GenericModel
-from argilla.server.pydantic_v1.utils import GetterDict
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.records import RecordUpdate
-from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
+from argilla.server.schemas.v1.questions import QuestionDescription, QuestionName, QuestionTitle
+from argilla.server.schemas.v1.records import Record, RecordFilterScope
+from argilla.server.schemas.v1.responses import ResponseFilterScope
 from argilla.server.search_engine import TextQuery
 
 try:
@@ -34,7 +34,7 @@ except ImportError:
     from typing_extensions import Annotated
 
 from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType
-from argilla.server.models import QuestionSettings, QuestionType, ResponseStatus
+from argilla.server.models import QuestionSettings, QuestionType
 
 DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
 DATASET_NAME_MIN_LENGTH = 1
@@ -47,14 +47,6 @@ FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
 FIELD_CREATE_TITLE_MIN_LENGTH = 1
 FIELD_CREATE_TITLE_MAX_LENGTH = 500
-
-QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-QUESTION_CREATE_NAME_MIN_LENGTH = 1
-QUESTION_CREATE_NAME_MAX_LENGTH = 200
-QUESTION_CREATE_TITLE_MIN_LENGTH = 1
-QUESTION_CREATE_TITLE_MAX_LENGTH = 500
-QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
-QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
@@ -90,12 +82,6 @@ RANKING_OPTIONS_MAX_ITEMS = 50
 
 TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
 TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
-
-RECORDS_CREATE_MIN_ITEMS = 1
-RECORDS_CREATE_MAX_ITEMS = 1000
-
-RECORDS_UPDATE_MIN_ITEMS = 1
-RECORDS_UPDATE_MAX_ITEMS = 1000
 
 TERMS_FILTER_VALUES_MIN_ITEMS = 1
 TERMS_FILTER_VALUES_MAX_ITEMS = 250
@@ -163,7 +149,7 @@ class ResponseMetrics(BaseModel):
     draft: int
 
 
-class Metrics(BaseModel):
+class DatasetMetrics(BaseModel):
     records: RecordMetrics
     responses: ResponseMetrics
 
@@ -339,32 +325,6 @@ class Questions(BaseModel):
     items: List[Question]
 
 
-QuestionName = Annotated[
-    constr(
-        regex=QUESTION_CREATE_NAME_REGEX,
-        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
-        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
-    ),
-    PydanticField(..., description="The name of the question"),
-]
-
-QuestionTitle = Annotated[
-    constr(
-        min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
-        max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
-    ),
-    PydanticField(..., description="The title of the question"),
-]
-
-QuestionDescription = Annotated[
-    constr(
-        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
-    ),
-    PydanticField(..., description="The description of the question"),
-]
-
-
 class QuestionCreate(BaseModel):
     name: QuestionName
     title: QuestionTitle
@@ -413,173 +373,6 @@ class VectorSettingsCreate(BaseModel):
     )
     title: VectorSettingsTitle
     dimensions: PositiveInt
-
-
-class ResponseValue(BaseModel):
-    value: Any
-
-
-class ResponseValueCreate(BaseModel):
-    value: Any
-
-
-class Response(BaseModel):
-    id: UUID
-    values: Optional[Dict[str, ResponseValue]]
-    status: ResponseStatus
-    user_id: UUID
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class RecordGetterDict(GetterDict):
-    def get(self, key: str, default: Any) -> Any:
-        if key == "metadata":
-            return getattr(self._obj, "metadata_", None)
-
-        if key == "responses" and not self._obj.is_relationship_loaded("responses"):
-            return default
-
-        if key == "suggestions" and not self._obj.is_relationship_loaded("suggestions"):
-            return default
-
-        if key == "vectors":
-            if self._obj.is_relationship_loaded("vectors"):
-                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
-            else:
-                return default
-
-        return super().get(key, default)
-
-
-class Record(BaseModel):
-    id: UUID
-    fields: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]]
-    external_id: Optional[str]
-    # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
-    # response: Optional[Response]
-    responses: Optional[List[Response]]
-    suggestions: Optional[List[Suggestion]]
-    vectors: Optional[Dict[str, List[float]]]
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-        getter_dict = RecordGetterDict
-
-
-class Records(BaseModel):
-    items: List[Record]
-    # TODO(@frascuchon): Make it required once fetch records without metadata filter computes also the total
-    total: Optional[int] = None
-
-
-class UserSubmittedResponseCreate(BaseModel):
-    user_id: UUID
-    values: Dict[str, ResponseValueCreate]
-    status: Literal[ResponseStatus.submitted]
-
-
-class UserDiscardedResponseCreate(BaseModel):
-    user_id: UUID
-    values: Optional[Dict[str, ResponseValueCreate]]
-    status: Literal[ResponseStatus.discarded]
-
-
-class UserDraftResponseCreate(BaseModel):
-    user_id: UUID
-    values: Dict[str, ResponseValueCreate]
-    status: Literal[ResponseStatus.draft]
-
-
-UserResponseCreate = Annotated[
-    Union[UserSubmittedResponseCreate, UserDraftResponseCreate, UserDiscardedResponseCreate],
-    PydanticField(discriminator="status"),
-]
-
-
-class RecordCreate(BaseModel):
-    fields: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]]
-    external_id: Optional[str]
-    responses: Optional[List[UserResponseCreate]]
-    suggestions: Optional[List[SuggestionCreate]]
-    vectors: Optional[Dict[str, List[float]]]
-
-    @validator("responses")
-    def check_user_id_is_unique(cls, values: Optional[List[UserResponseCreate]]) -> Optional[List[UserResponseCreate]]:
-        if values is None:
-            return values
-
-        user_ids = []
-        for value in values:
-            if value.user_id in user_ids:
-                raise ValueError(f"'responses' contains several responses for the same user_id={str(value.user_id)!r}")
-            user_ids.append(value.user_id)
-
-        return values
-
-
-class RecordsCreate(BaseModel):
-    items: conlist(item_type=RecordCreate, min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
-
-
-class RecordUpdateWithId(RecordUpdate):
-    id: UUID
-
-
-class RecordsUpdate(BaseModel):
-    # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = PydanticField(
-        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
-    )
-
-
-class RecordIncludeParam(BaseModel):
-    relationships: Optional[List[RecordInclude]] = PydanticField(None, alias="keys")
-    vectors: Optional[List[str]] = PydanticField(None, alias="vectors")
-
-    @root_validator(skip_on_failure=True)
-    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        relationships = values.get("relationships")
-        if not relationships:
-            return values
-
-        vectors = values.get("vectors")
-        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
-            # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
-            # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
-            raise HTTPException(
-                status_code=422,
-                detail="'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
-            )
-
-        return values
-
-    @property
-    def with_responses(self) -> bool:
-        return self._has_relationships and RecordInclude.responses in self.relationships
-
-    @property
-    def with_suggestions(self) -> bool:
-        return self._has_relationships and RecordInclude.suggestions in self.relationships
-
-    @property
-    def with_all_vectors(self) -> bool:
-        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
-
-    @property
-    def with_some_vector(self) -> bool:
-        return self.vectors is not None and len(self.vectors) > 0
-
-    @property
-    def _has_relationships(self):
-        return self.relationships is not None
 
 
 NT = TypeVar("NT", int, float)
@@ -721,17 +514,6 @@ class VectorQuery(BaseModel):
 class Query(BaseModel):
     text: Optional[TextQuery] = None
     vector: Optional[VectorQuery] = None
-
-
-class RecordFilterScope(BaseModel):
-    entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
-
-
-class ResponseFilterScope(BaseModel):
-    entity: Literal["response"]
-    question: Optional[QuestionName]
-    property: Optional[Literal["status"]]
 
 
 class SuggestionFilterScope(BaseModel):

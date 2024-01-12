@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel, Field, PositiveInt, conlist
+from typing_extensions import Annotated
+
+from argilla.server.pydantic_v1 import BaseModel, Field, PositiveInt, conlist, constr
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.datasets import QuestionDescription, QuestionTitle
 
 try:
     from typing import Annotated
@@ -26,6 +27,16 @@ except ImportError:
     from typing_extensions import Annotated
 
 from argilla.server.models import QuestionType
+
+QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+QUESTION_CREATE_NAME_MIN_LENGTH = 1
+QUESTION_CREATE_NAME_MAX_LENGTH = 200
+
+QUESTION_CREATE_TITLE_MIN_LENGTH = 1
+QUESTION_CREATE_TITLE_MAX_LENGTH = 500
+
+QUESTION_CREATE_DESCRIPTION_MIN_LENGTH = 1
+QUESTION_CREATE_DESCRIPTION_MAX_LENGTH = 1000
 
 
 class TextQuestionSettings(BaseModel):
@@ -123,6 +134,34 @@ QuestionSettingsUpdate = Annotated[
         RankingQuestionSettingsUpdate,
     ],
     Field(..., discriminator="type"),
+]
+
+
+QuestionName = Annotated[
+    constr(
+        regex=QUESTION_CREATE_NAME_REGEX,
+        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
+        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
+    ),
+    Field(..., description="The name of the question"),
+]
+
+
+QuestionTitle = Annotated[
+    constr(
+        min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
+        max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
+    ),
+    Field(..., description="The title of the question"),
+]
+
+
+QuestionDescription = Annotated[
+    constr(
+        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+    ),
+    Field(..., description="The description of the question"),
 ]
 
 
