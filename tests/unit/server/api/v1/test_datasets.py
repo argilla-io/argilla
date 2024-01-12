@@ -44,13 +44,15 @@ from argilla.server.models import (
 from argilla.server.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
-    METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
-    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
 from argilla.server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.metadata_properties import (
+    METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
+)
 from argilla.server.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
@@ -480,6 +482,7 @@ class TestSuiteDatasets:
                     "title": terms_property.title,
                     "settings": {"type": "terms", "values": ["a", "b", "c"]},
                     "visible_for_annotators": True,
+                    "dataset_id": str(terms_property.dataset_id),
                     "inserted_at": terms_property.inserted_at.isoformat(),
                     "updated_at": terms_property.updated_at.isoformat(),
                 },
@@ -489,6 +492,7 @@ class TestSuiteDatasets:
                     "title": integer_property.title,
                     "settings": {"type": "integer", "min": None, "max": None},
                     "visible_for_annotators": True,
+                    "dataset_id": str(integer_property.dataset_id),
                     "inserted_at": integer_property.inserted_at.isoformat(),
                     "updated_at": integer_property.updated_at.isoformat(),
                 },
@@ -498,6 +502,7 @@ class TestSuiteDatasets:
                     "title": float_property.title,
                     "settings": {"type": "float", "min": None, "max": None},
                     "visible_for_annotators": True,
+                    "dataset_id": str(float_property.dataset_id),
                     "inserted_at": float_property.inserted_at.isoformat(),
                     "updated_at": float_property.updated_at.isoformat(),
                 },
@@ -1688,6 +1693,7 @@ class TestSuiteDatasets:
             "title": "title",
             "settings": expected_settings,
             "visible_for_annotators": True,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -1720,6 +1726,7 @@ class TestSuiteDatasets:
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "visible_for_annotators": True,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             **metadata_property_json,

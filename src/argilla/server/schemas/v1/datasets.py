@@ -13,16 +13,15 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Query
 
-from argilla.server.enums import DatasetStatus, MetadataPropertyType, SimilarityOrder, SortOrder
-from argilla.server.pydantic_v1 import BaseModel, PositiveInt, constr, root_validator
-from argilla.server.pydantic_v1 import Field as PydanticField
-from argilla.server.pydantic_v1.generics import GenericModel
+from argilla.server.enums import DatasetStatus, SimilarityOrder, SortOrder
+from argilla.server.pydantic_v1 import BaseModel, Field, PositiveInt, constr, root_validator
 from argilla.server.schemas.base import UpdateSchema
+from argilla.server.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla.server.schemas.v1.questions import QuestionName
 from argilla.server.schemas.v1.records import Record, RecordFilterScope
 from argilla.server.schemas.v1.responses import ResponseFilterScope
@@ -39,20 +38,11 @@ DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
 DATASET_GUIDELINES_MAX_LENGTH = 10000
 
-METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
-METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
-METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
-
 VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
 VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
-
-TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
-TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
 
 TERMS_FILTER_VALUES_MIN_ITEMS = 1
 TERMS_FILTER_VALUES_MAX_ITEMS = 250
@@ -85,12 +75,12 @@ class Datasets(BaseModel):
 
 DatasetName = Annotated[
     constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
-    PydanticField(..., description="Dataset name"),
+    Field(..., description="Dataset name"),
 ]
 
 DatasetGuidelines = Annotated[
     constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
-    PydanticField(..., description="Dataset guidelines"),
+    Field(..., description="Dataset guidelines"),
 ]
 
 
@@ -151,12 +141,12 @@ VectorSettingsTitle = Annotated[
         min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
         max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
     ),
-    PydanticField(..., description="The title of the vector settings"),
+    Field(..., description="The title of the vector settings"),
 ]
 
 
 class VectorSettingsCreate(BaseModel):
-    name: str = PydanticField(
+    name: str = Field(
         ...,
         regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
         min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
@@ -165,107 +155,6 @@ class VectorSettingsCreate(BaseModel):
     )
     title: VectorSettingsTitle
     dimensions: PositiveInt
-
-
-NT = TypeVar("NT", int, float)
-
-
-class NumericMetadataProperty(GenericModel, Generic[NT]):
-    min: Optional[NT] = None
-    max: Optional[NT] = None
-
-    @root_validator(skip_on_failure=True)
-    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        min = values.get("min")
-        max = values.get("max")
-
-        if min is not None and max is not None and min >= max:
-            raise ValueError(f"'min' ({min}) must be lower than 'max' ({max})")
-
-        return values
-
-
-class TermsMetadataPropertyCreate(BaseModel):
-    type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = PydanticField(
-        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
-    )
-
-
-class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
-    type: Literal[MetadataPropertyType.integer]
-
-
-class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
-    type: Literal[MetadataPropertyType.float]
-
-
-MetadataPropertyName = Annotated[
-    str,
-    PydanticField(
-        ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
-        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
-        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    ),
-]
-
-MetadataPropertyTitle = Annotated[
-    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
-    PydanticField(..., description="The title of the metadata property"),
-]
-
-MetadataPropertySettingsCreate = Annotated[
-    Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
-    PydanticField(..., discriminator="type"),
-]
-
-
-class MetadataPropertyCreate(BaseModel):
-    name: MetadataPropertyName
-    title: MetadataPropertyTitle
-    settings: MetadataPropertySettingsCreate
-    visible_for_annotators: bool = True
-
-
-class TermsMetadataProperty(BaseModel):
-    type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = None
-
-
-class IntegerMetadataProperty(BaseModel):
-    type: Literal[MetadataPropertyType.integer]
-    min: Optional[int] = None
-    max: Optional[int] = None
-
-
-class FloatMetadataProperty(BaseModel):
-    type: Literal[MetadataPropertyType.float]
-    min: Optional[float] = None
-    max: Optional[float] = None
-
-
-MetadataPropertySettings = Annotated[
-    Union[TermsMetadataProperty, IntegerMetadataProperty, FloatMetadataProperty],
-    PydanticField(..., discriminator="type"),
-]
-
-
-class MetadataProperty(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    settings: MetadataPropertySettings
-    visible_for_annotators: bool
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class MetadataProperties(BaseModel):
-    items: List[MetadataProperty]
 
 
 class MetadataParsedQueryParam:
@@ -277,7 +166,7 @@ class MetadataParsedQueryParam:
 
 
 class MetadataQueryParams(BaseModel):
-    metadata: List[str] = PydanticField(Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+    metadata: List[str] = Field(Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
@@ -321,16 +210,14 @@ class MetadataFilterScope(BaseModel):
 
 FilterScope = Annotated[
     Union[RecordFilterScope, ResponseFilterScope, SuggestionFilterScope, MetadataFilterScope],
-    PydanticField(..., discriminator="entity"),
+    Field(..., discriminator="entity"),
 ]
 
 
 class TermsFilter(BaseModel):
     type: Literal["terms"]
     scope: FilterScope
-    values: List[str] = PydanticField(
-        ..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS
-    )
+    values: List[str] = Field(..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS)
 
 
 class RangeFilter(BaseModel):
@@ -352,13 +239,11 @@ class RangeFilter(BaseModel):
         return values
 
 
-Filter = Annotated[Union[TermsFilter, RangeFilter], PydanticField(..., discriminator="type")]
+Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="type")]
 
 
 class Filters(BaseModel):
-    and_: List[Filter] = PydanticField(
-        None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS
-    )
+    and_: List[Filter] = Field(None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS)
 
 
 class Order(BaseModel):
@@ -369,7 +254,7 @@ class Order(BaseModel):
 class SearchRecordsQuery(BaseModel):
     query: Optional[Query]
     filters: Optional[Filters]
-    sort: Optional[List[Order]] = PydanticField(
+    sort: Optional[List[Order]] = Field(
         None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
     )
 
