@@ -18,7 +18,7 @@ from uuid import UUID
 
 from fastapi import Query
 
-from argilla.server.enums import DatasetStatus, FieldType, MetadataPropertyType, SimilarityOrder, SortOrder
+from argilla.server.enums import DatasetStatus, MetadataPropertyType, SimilarityOrder, SortOrder
 from argilla.server.pydantic_v1 import BaseModel, PositiveInt, constr, root_validator
 from argilla.server.pydantic_v1 import Field as PydanticField
 from argilla.server.pydantic_v1.generics import GenericModel
@@ -38,12 +38,6 @@ DATASET_NAME_MIN_LENGTH = 1
 DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
 DATASET_GUIDELINES_MAX_LENGTH = 10000
-
-FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-FIELD_CREATE_NAME_MIN_LENGTH = 1
-FIELD_CREATE_NAME_MAX_LENGTH = 200
-FIELD_CREATE_TITLE_MIN_LENGTH = 1
-FIELD_CREATE_TITLE_MAX_LENGTH = 500
 
 METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
@@ -129,50 +123,6 @@ class ResponseMetrics(BaseModel):
 class DatasetMetrics(BaseModel):
     records: RecordMetrics
     responses: ResponseMetrics
-
-
-class TextFieldSettings(BaseModel):
-    type: Literal[FieldType.text]
-    use_markdown: bool = False
-
-
-class Field(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    required: bool
-    settings: TextFieldSettings
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class Fields(BaseModel):
-    items: List[Field]
-
-
-FieldName = Annotated[
-    constr(
-        regex=FIELD_CREATE_NAME_REGEX,
-        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
-        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
-    ),
-    PydanticField(..., description="The name of the field"),
-]
-
-FieldTitle = Annotated[
-    constr(min_length=FIELD_CREATE_TITLE_MIN_LENGTH, max_length=FIELD_CREATE_TITLE_MAX_LENGTH),
-    PydanticField(..., description="The title of the field"),
-]
-
-
-class FieldCreate(BaseModel):
-    name: FieldName
-    title: FieldTitle
-    required: Optional[bool]
-    settings: TextFieldSettings
 
 
 class VectorSettings(BaseModel):

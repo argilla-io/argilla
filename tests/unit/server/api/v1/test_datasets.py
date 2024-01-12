@@ -44,14 +44,13 @@ from argilla.server.models import (
 from argilla.server.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
-    FIELD_CREATE_NAME_MAX_LENGTH,
-    FIELD_CREATE_TITLE_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
     TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
+from argilla.server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
 from argilla.server.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
@@ -224,6 +223,7 @@ class TestSuiteDatasets:
                     "title": "Text Field A",
                     "required": True,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(dataset.id),
                     "inserted_at": text_field_a.inserted_at.isoformat(),
                     "updated_at": text_field_a.updated_at.isoformat(),
                 },
@@ -233,6 +233,7 @@ class TestSuiteDatasets:
                     "title": "Text Field B",
                     "required": False,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(dataset.id),
                     "inserted_at": text_field_b.inserted_at.isoformat(),
                     "updated_at": text_field_b.updated_at.isoformat(),
                 },
@@ -953,6 +954,7 @@ class TestSuiteDatasets:
             "title": "title",
             "required": False,
             "settings": expected_settings,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
