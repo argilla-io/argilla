@@ -18,7 +18,7 @@ from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.enums import ResponseStatus
 from argilla.server.models import Dataset, Record, Response, Suggestion, User, UserRole
 from argilla.server.search_engine import SearchEngine

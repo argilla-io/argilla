@@ -92,11 +92,35 @@ class RecordCreate(BaseModel):
 
         return values
 
+    @validator("metadata", pre=True)
+    @classmethod
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if metadata is None:
+            return metadata
+
+        for k, v in metadata.items():
+            if v != v:
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
+
+        return metadata
+
 
 class RecordUpdate(UpdateSchema):
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None
     vectors: Optional[Dict[str, List[float]]]
+
+    @validator("metadata_", pre=True)
+    @classmethod
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if metadata is None:
+            return metadata
+
+        for k, v in metadata.items():
+            if v != v:
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
+
+        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
 
 class RecordUpdateWithId(RecordUpdate):

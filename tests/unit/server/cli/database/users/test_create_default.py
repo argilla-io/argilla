@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import TYPE_CHECKING
 
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
+from argilla.server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.models import User, UserRole
 

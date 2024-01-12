@@ -95,6 +95,12 @@ def test_generate_pydantic_schema_for_metadata(
             "Provided 'int-metadata=wrong' of type <class 'str'> is not valid",
         ),
         (
+            [IntegerMetadataProperty(name="int-metadata", min=0, max=10)],
+            {"int-metadata": float("nan")},
+            ValidationError,
+            "Provided 'int-metadata=nan' is not valid, NaN values are not allowed.",
+        ),
+        (
             [FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
             {"float-metadata": 100.0},
             ValidationError,
@@ -105,6 +111,12 @@ def test_generate_pydantic_schema_for_metadata(
             {"float-metadata": "wrong"},
             ValidationError,
             "Provided 'float-metadata=wrong' of type <class 'str'> is not valid",
+        ),
+        (
+            [FloatMetadataProperty(name="float-metadata", min=0.0, max=10.0)],
+            {"float-metadata": float("nan")},
+            ValidationError,
+            "Provided 'float-metadata=nan' is not valid, NaN values are not allowed.",
         ),
     ],
 )

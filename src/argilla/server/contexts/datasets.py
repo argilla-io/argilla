@@ -518,7 +518,8 @@ async def _validate_metadata(
             continue
 
         try:
-            metadata_property.parsed_settings.check_metadata(value)
+            if value is not None:
+                metadata_property.parsed_settings.check_metadata(value)
         except ValueError as e:
             raise ValueError(f"'{name}' metadata property validation failed because {e}") from e
 
