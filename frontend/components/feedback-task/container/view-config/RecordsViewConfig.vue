@@ -81,11 +81,10 @@ export default {
 
 <style lang="scss" scoped>
 .view-config {
-  @include font-size(13px);
   &__content {
     display: flex;
     flex-direction: column;
-    gap: $base-space;
+    gap: $base-space * 2;
     min-width: 200px;
     padding: $base-space;
   }
@@ -93,7 +92,6 @@ export default {
     padding: 0;
   }
   :deep(.radio-button) {
-    @include font-size(13px);
     margin: 0;
   }
   :deep(.dropdown__header) {

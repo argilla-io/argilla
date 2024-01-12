@@ -6,7 +6,7 @@
       @click="switchFocusMode()"
       :data-title="$t('focus_mode')"
     >
-      <svgicon name="focus-mode" />
+      <svgicon name="focus-mode" width="18" />
     </button>
     <button
       class="switch"
@@ -14,7 +14,7 @@
       @click="switchBulkMode()"
       :data-title="$t('bulk_mode')"
     >
-      <svgicon name="bulk-mode" />
+      <svgicon name="bulk-mode" width="18" />
     </button>
   </div>
 </template>

@@ -163,7 +163,6 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
   }
   :deep(.dropdown__content) {
     left: -$base-space;
