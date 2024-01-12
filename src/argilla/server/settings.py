@@ -72,6 +72,8 @@ class Settings(BaseSettings):
     elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
+    redis_url: str = "redis://localhost:6379/0"
+
     docs_enabled: bool = True
 
     namespace: str = Field(default=None, regex=r"^[a-z]+$")

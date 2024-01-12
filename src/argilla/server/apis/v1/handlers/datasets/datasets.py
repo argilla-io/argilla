@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from argilla.server.contexts import accounts, datasets
 from argilla.server.database import get_async_db
 from argilla.server.enums import ResponseStatusFilter
+from argilla.server.jobs import search_engine_jobs
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import ResponseStatus, User
 from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, authorize, is_authorized
@@ -43,6 +44,7 @@ from argilla.server.schemas.v1.datasets import (
     VectorSettingsCreate,
     VectorsSettings,
 )
+from argilla.server.schemas.v1.jobs import Job
 from argilla.server.search_engine import (
     SearchEngine,
     get_search_engine,
@@ -379,6 +381,22 @@ async def publish_dataset(
         return dataset
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.put("/datasets/{dataset_id}/reindex", status_code=status.HTTP_202_ACCEPTED, response_model=Job)
+async def reindex_dataset(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await _get_dataset(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicyV1.reindex(dataset))
+
+    job = search_engine_jobs.reindex_dataset.delay(dataset_id)
+
+    return Job(id=job.id, status=job.get_status())
 
 
 @router.delete("/datasets/{dataset_id}", response_model=Dataset)

@@ -5,7 +5,10 @@ set -e
 echo "Starting Elasticsearch"
 /usr/share/elasticsearch/bin/elasticsearch 1>/dev/null 2>/dev/null &
 
-echo "Waiting for elasticsearch to start"
+echo "Starting Redis"
+redis-server 1>/dev/null 2>/dev/null &
+
+echo "Waiting for Elasticsearch and Redis to start"
 sleep 30
 
 echo "Running database migrations"
@@ -39,6 +42,10 @@ python -m argilla server database users create \
 
 # Load data
 python load_data.py "$OWNER_API_KEY" "$LOAD_DATASETS" &
+
+# Start rq worker
+echo "Starting rq worker"
+rq worker --with-scheduler 1>/dev/null 2>/dev/null &
 
 # Start Argilla
 echo "Starting Argilla"
