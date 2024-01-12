@@ -120,7 +120,7 @@ export default {
   data() {
     return {
       selectedRecords: [],
-      recordHeight: "fixedHeight",
+      recordHeight: "defaultHeight",
     };
   },
   computed: {
