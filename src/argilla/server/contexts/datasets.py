@@ -55,12 +55,12 @@ from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
     FieldCreate,
     MetadataPropertyCreate,
-    QuestionCreate,
 )
 from argilla.server.schemas.v1.datasets import (
     VectorSettings as VectorSettingsSchema,
 )
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
+from argilla.server.schemas.v1.questions import QuestionCreate
 from argilla.server.schemas.v1.records import (
     RecordCreate,
     RecordIncludeParam,
