@@ -12,7 +12,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(true);
@@ -28,7 +28,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(false);
@@ -44,7 +44,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(false);
@@ -78,7 +78,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySimilarity).toBe(false);
@@ -96,7 +96,7 @@ describe("RecordCriteria", () => {
         "",
         "response.ge.1le.5",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(true);
@@ -112,7 +112,7 @@ describe("RecordCriteria", () => {
         "",
         "response.option1~option2",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(true);
@@ -128,7 +128,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(false);
@@ -146,7 +146,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "content_class.value.operator.and.values.hate.pii",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySuggestion).toBe(true);
@@ -162,7 +162,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySuggestion).toBe(false);
@@ -180,7 +180,7 @@ describe("RecordCriteria", () => {
         "suggestion.relevant.score.asc",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isSortingBy).toBe(true);
@@ -196,7 +196,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isSortingBy).toBe(false);
@@ -214,7 +214,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(true);
@@ -230,7 +230,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(false);
@@ -246,7 +246,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(false);
@@ -264,7 +264,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(true);
@@ -280,7 +280,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(true);
@@ -296,7 +296,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
@@ -312,7 +312,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
@@ -330,7 +330,7 @@ describe("RecordCriteria", () => {
         "",
         "response.ge.1le.5",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByResponse).toBe(true);
@@ -346,7 +346,7 @@ describe("RecordCriteria", () => {
         "",
         "response.option1~option2",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByResponse).toBe(true);
@@ -364,7 +364,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "content_class.score.ge0.le0.24",
-        null
+        ""
       );
 
       expect(criteria.isFilteredBySuggestion).toBe(true);
@@ -382,7 +382,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.page.goTo(2);
@@ -400,7 +400,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.status = "submitted";
@@ -418,7 +418,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.searchText = "Can ML help to improve your business processes?";
@@ -436,7 +436,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.metadata.complete("your_feel.happy~sad");
@@ -454,7 +454,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.sortBy.complete(
@@ -498,7 +498,7 @@ describe("RecordCriteria", () => {
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.page.goTo(2);
@@ -678,6 +678,158 @@ describe("RecordCriteria", () => {
       criteria.commit();
 
       expect(criteria.isComingToBulkMode).toBeTruthy();
+    });
+  });
+
+  describe("reset", () => {
+    test("should reset page", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.page.goTo(2);
+
+      criteria.reset();
+
+      expect(criteria.page.client.page).toEqual(1);
+    });
+
+    test("should reset metadata", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "metadata.ge.1le.5",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.metadata.value).toEqual([]);
+    });
+
+    test("should reset sortBy", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "suggestion.relevant.score.asc",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.sortBy.value).toEqual([]);
+    });
+
+    test("should reset response", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "response.ge.1le.5",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.response.value).toEqual([]);
+    });
+
+    test("should reset suggestion", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "content_class.value.operator.and.values.hate.pii",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.suggestion.value).toEqual([]);
+    });
+
+    test("should NO reset similaritySearch", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
+      );
+
+      criteria.reset();
+
+      expect(criteria.similaritySearch.urlParams).toEqual(
+        "record.1.vector.2.limit.50.order.most"
+      );
+    });
+
+    test("should NO reset status", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.status = "submitted";
+
+      criteria.reset();
+
+      expect(criteria.status).toEqual("submitted");
+    });
+
+    test("should NO reset searchText", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "Can AI help us?",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.searchText).toEqual("Can AI help us?");
     });
   });
 });
