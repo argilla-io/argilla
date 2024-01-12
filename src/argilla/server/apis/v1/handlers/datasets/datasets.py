@@ -30,9 +30,6 @@ from argilla.server.schemas.v1.datasets import (
     DatasetMetrics,
     Datasets,
     DatasetUpdate,
-    Field,
-    FieldCreate,
-    Fields,
     MetadataProperties,
     MetadataProperty,
     MetadataPropertyCreate,
@@ -40,6 +37,7 @@ from argilla.server.schemas.v1.datasets import (
     VectorSettingsCreate,
     VectorsSettings,
 )
+from argilla.server.schemas.v1.fields import Field, FieldCreate, Fields
 from argilla.server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla.server.search_engine import (
     SearchEngine,

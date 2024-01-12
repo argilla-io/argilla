@@ -53,12 +53,12 @@ from argilla.server.models import (
 from argilla.server.models.suggestions import SuggestionCreateWithRecordId
 from argilla.server.schemas.v1.datasets import (
     DatasetCreate,
-    FieldCreate,
     MetadataPropertyCreate,
 )
 from argilla.server.schemas.v1.datasets import (
     VectorSettings as VectorSettingsSchema,
 )
+from argilla.server.schemas.v1.fields import FieldCreate
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyUpdate
 from argilla.server.schemas.v1.questions import QuestionCreate
 from argilla.server.schemas.v1.records import (
