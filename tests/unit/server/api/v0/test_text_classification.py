@@ -224,7 +224,7 @@ async def test_create_records_for_text_classification(async_client: "AsyncClient
         "words": {"data": 1},
     }
 
-    test_telemetry.assert_called()
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio

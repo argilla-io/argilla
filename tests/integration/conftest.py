@@ -14,6 +14,7 @@
 import asyncio
 import contextlib
 import tempfile
+import uuid
 from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 
 import httpx
@@ -28,12 +29,12 @@ from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
+from argilla.server import telemetry as server_telemetry
 from argilla.server.cli.database.migrate import migrate_db
 from argilla.server.database import get_async_db
 from argilla.server.models import User, UserRole, Workspace
 from argilla.server.settings import settings
-from argilla.utils import telemetry
-from argilla.utils.telemetry import TelemetryClient
+from argilla.utils import telemetry as client_telemetry
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -199,15 +200,28 @@ def argilla_auth_header(argilla_user: User) -> Dict[str, str]:
 
 
 @pytest.fixture(autouse=True)
-def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
-    telemetry._CLIENT = TelemetryClient(disable_send=True)
+def server_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
+    mock_telemetry = mocker.Mock(server_telemetry.TelemetryClient)
+    mock_telemetry.server_id = uuid.uuid4()
 
-    return mocker.spy(telemetry._CLIENT, "track_data")
+    server_telemetry._CLIENT = mock_telemetry
+    return server_telemetry._CLIENT
+
+
+@pytest.fixture(autouse=True)
+def client_telemetry_client(mocker: "MockerFixture") -> "MagicMock":
+    mock_telemetry = mocker.Mock(client_telemetry.TelemetryClient)
+    mock_telemetry.machine_id = uuid.uuid4()
+
+    client_telemetry._CLIENT = mock_telemetry
+    return client_telemetry._CLIENT
 
 
 @pytest.mark.parametrize("client", [True], indirect=True)
 @pytest.fixture(autouse=True)
-def using_test_client_from_argilla_python_client(monkeypatch, test_telemetry: "MagicMock", client: "TestClient"):
+def using_test_client_from_argilla_python_client(
+    monkeypatch, server_telemetry_client, client_telemetry_client, client: "TestClient"
+):
     real_whoami = users_api.whoami
 
     def whoami_mocked(*args, **kwargs):
