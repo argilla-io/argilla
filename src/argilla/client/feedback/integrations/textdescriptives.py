@@ -242,11 +242,11 @@ class TextDescriptivesExtractor:
                     visible_for_annotators=self.visible_for_annotators,
                     values=df[col].unique().tolist(),
                 )
-            elif dtype in ["int64", "int32"]:
+            elif dtype in ["int64", "int32", "int16", "int8", "int128", "int256", "int"]:
                 prop = IntegerMetadataProperty(
                     name=name, title=title, visible_for_annotators=self.visible_for_annotators
                 )
-            elif dtype in ["float64", "float32"]:
+            elif dtype in ["float64", "float32", "float16", "float128", "float256", "float"]:
                 prop = FloatMetadataProperty(name=name, title=title, visible_for_annotators=self.visible_for_annotators)
             else:
                 warnings.warn(f"Unhandled data type for column {col}: {dtype}")
@@ -302,6 +302,10 @@ class TextDescriptivesExtractor:
             )
             for record, metrics in zip(records, df.to_dict("records")):
                 filtered_metrics = {key: value for key, value in metrics.items() if not pd.isna(value)}
+                filtered_metrics = {
+                    key: int(value) if isinstance(value, float) and value.is_integer() else value
+                    for key, value in filtered_metrics.items()
+                }
                 record.metadata.update(filtered_metrics)
                 modified_records.append(record)
                 progress_bar.update(task, advance=1)

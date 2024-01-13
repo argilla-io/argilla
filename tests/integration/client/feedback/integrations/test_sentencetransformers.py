@@ -15,14 +15,23 @@
 from typing import List
 
 import pytest
+from argilla import init
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from typing_extensions import TYPE_CHECKING
+
+from tests.factories import WorkspaceFactory
+
+if TYPE_CHECKING:
+    from asyncio import AbstractEventLoop
+
+    from argilla import User
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def records() -> List[FeedbackRecord]:
     return [
         FeedbackRecord(fields={"field_1": "This is a test", "field_2": "This is a test"}),
@@ -37,12 +46,7 @@ def records() -> List[FeedbackRecord]:
     ]
 
 
-@pytest.fixture
-def st_extractor() -> SentenceTransformersExtractor:
-    return SentenceTransformersExtractor()
-
-
-@pytest.fixture
+@pytest.fixture(scope="function")
 def dataset() -> FeedbackDataset:
     ds = FeedbackDataset(
         fields=[
@@ -56,11 +60,38 @@ def dataset() -> FeedbackDataset:
     return ds
 
 
-def test_update_dataset(
+@pytest.fixture(scope="session")
+def st_extractor() -> SentenceTransformersExtractor:
+    return SentenceTransformersExtractor()
+
+
+@pytest.mark.usefixtures("st_extractor", "records")
+def test_update_records(st_extractor: SentenceTransformersExtractor, records: List[FeedbackRecord]):
+    records = st_extractor.update_records(records, fields=["field_1"])
+    assert "field_1" in records[0].vectors
+    assert "field_2" not in records[0].vectors
+    records = st_extractor.update_records(records, fields=["field_2"])
+    assert "field_1" in records[0].vectors
+    assert "field_2" in records[0].vectors
+
+
+@pytest.mark.asyncio(scope="function")
+@pytest.mark.usefixtures("owner", "st_extractor", "dataset", "records")
+@pytest.mark.parametrize("remote", [True, False])
+async def test_update_dataset(
     st_extractor: SentenceTransformersExtractor,
     dataset: FeedbackDataset,
     records: List[FeedbackRecord],
+    remote: bool,
+    owner: "User",
+    event_loop: "AbstractEventLoop",
 ):
+    if remote:
+        init(api_key=owner.api_key)
+        ws_name, ds_name = "test_workspace", "st_extractor_test"
+        ws = await WorkspaceFactory.create(name=ws_name)
+        dataset = dataset.push_to_argilla(name=ds_name, workspace=ws.name)
+        dataset = FeedbackDataset.from_argilla(name=ds_name, workspace=ws.name, with_vectors="all")
     dataset.add_records(records)
     dataset = st_extractor.update_dataset(dataset, fields=["field_1"], update_records=False)
     assert dataset.vector_settings_by_name("field_1")
@@ -74,12 +105,3 @@ def test_update_dataset(
     assert "field_1" in dataset.records[0].vectors
     assert "field_2" in dataset.records[0].vectors
     assert "field_2" not in dataset.records[1].vectors
-
-
-def test_update_records(st_extractor: SentenceTransformersExtractor, records: List[FeedbackRecord]):
-    records = st_extractor.update_records(records, fields=["field_1"])
-    assert "field_1" in records[0].vectors
-    assert "field_2" not in records[0].vectors
-    records = st_extractor.update_records(records, fields=["field_2"])
-    assert "field_1" in records[0].vectors
-    assert "field_2" in records[0].vectors
