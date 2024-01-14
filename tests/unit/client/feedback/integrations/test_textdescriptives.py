@@ -30,12 +30,15 @@ from argilla.client.feedback.schemas.records import FeedbackRecord
 
 @pytest.fixture
 def records():
-    return [
-        FeedbackRecord(fields={"text": "This is a test."}),
-        FeedbackRecord(fields={"text": "This is another test."}),
-    ]
+    return
 
 
+@pytest.fixture(scope="session")
+def td_extractor() -> TextDescriptivesExtractor:
+    return TextDescriptivesExtractor()
+
+
+@pytest.mark.fixtures("td_extractor")
 @pytest.mark.parametrize(
     "records",
     [
@@ -67,9 +70,8 @@ def records():
         ],
     ],
 )
-def test_extract_metrics_for_single_field(records) -> None:
-    tde = TextDescriptivesExtractor()
-    field_metrics = tde._extract_metrics_for_single_field(records, "required-field")
+def test_extract_metrics_for_single_field(records, td_extractor: TextDescriptivesExtractor) -> None:
+    field_metrics = td_extractor._extract_metrics_for_single_field(records, "required-field")
     assert field_metrics["required-field_n_tokens"].values[0] == 4
     assert len(field_metrics) == len(records)  # Assert the number of rows in the DataFrame
     assert isinstance(field_metrics, pd.DataFrame)  # Assert the data type of the DataFrame
@@ -80,8 +82,8 @@ def test_extract_metrics_for_single_field(records) -> None:
     assert "optional-field" not in field_metrics.columns
 
 
-def test_extract_metrics_for_single_field_empty_field() -> None:
-    tde = TextDescriptivesExtractor()
+@pytest.mark.fixtures("td_extractor")
+def test_extract_metrics_for_single_field_empty_field(td_extractor: TextDescriptivesExtractor) -> None:
     records = [
         FeedbackRecord(
             fields={"required-field": "This is a test.", "optional-field": None},
@@ -90,10 +92,11 @@ def test_extract_metrics_for_single_field_empty_field() -> None:
             fields={"required-field": "This is another test.", "optional-field": None},
         ),
     ]
-    field_metrics = tde._extract_metrics_for_single_field(records, "optional-field")
+    field_metrics = td_extractor._extract_metrics_for_single_field(records, "optional-field")
     assert field_metrics is None
 
 
+@pytest.mark.fixtures("td_extractor")
 @pytest.mark.parametrize(
     "records",
     [
@@ -125,16 +128,15 @@ def test_extract_metrics_for_single_field_empty_field() -> None:
         ],
     ],
 )
-def test_extract_metrics_for_all_fields(records) -> None:
-    tde = TextDescriptivesExtractor()
-    field_metrics = tde._extract_metrics_for_all_fields(records)
+def test_extract_metrics_for_all_fields(records, td_extractor: TextDescriptivesExtractor) -> None:
     expected_fields = [key for record in records for key, value in record.fields.items() if value is not None]
+    field_metrics = td_extractor._extract_metrics_for_all_fields(records, overwrite=False, fields=expected_fields)
     assert field_metrics["required-field_n_tokens"].values[0] == 4
     assert all(any(field == col or field + "_" in col for col in field_metrics.columns) for field in expected_fields)
 
 
-def test_cast_to_python_types() -> None:
-    tde = TextDescriptivesExtractor()
+@pytest.mark.fixtures("td_extractor")
+def test_cast_to_python_types(td_extractor: TextDescriptivesExtractor) -> None:
     df = pd.DataFrame(
         {
             "col_int": [1, 2, 3],
@@ -142,7 +144,7 @@ def test_cast_to_python_types() -> None:
             "col_float": [1.234, 2.345, 3.456],
         }
     )
-    df_result = tde._cast_to_python_types(df)
+    df_result = td_extractor._cast_to_python_types(df)
     assert df_result["col_int"].dtype == "int32" or df_result["col_int"].dtype == "int64"
     assert df_result["col_bool"].dtype == "object"
     assert df_result["col_float"].dtype == "float64" or df_result["col_float"].dtype == "float32"
@@ -150,14 +152,15 @@ def test_cast_to_python_types() -> None:
     assert isinstance(df_result, pd.DataFrame)
 
 
-def test_clean_column_name() -> None:
-    tde = TextDescriptivesExtractor()
-    assert tde._clean_column_name("Test_Col") == "test_col"
-    assert tde._clean_column_name("test col") == "test_col"
-    assert tde._clean_column_name("Test-Col") == "test_col"
-    assert tde._clean_column_name("Test.Col") == "test_col"
+@pytest.mark.fixtures("td_extractor")
+def test_clean_column_name(td_extractor: TextDescriptivesExtractor) -> None:
+    assert td_extractor._clean_column_name("Test_Col") == "test_col"
+    assert td_extractor._clean_column_name("test col") == "test_col"
+    assert td_extractor._clean_column_name("Test-Col") == "test_col"
+    assert td_extractor._clean_column_name("Test.Col") == "test_col"
 
 
+@pytest.mark.fixtures("td_extractor")
 @pytest.mark.parametrize(
     "column_name, expected_prop_type, expected_title, expected_visible, expected_type, expected_values",
     [
@@ -168,9 +171,14 @@ def test_clean_column_name() -> None:
     ],
 )
 def test_create_metadata_properties(
-    column_name, expected_prop_type, expected_title, expected_visible, expected_type, expected_values
+    column_name,
+    expected_prop_type,
+    expected_title,
+    expected_visible,
+    expected_type,
+    expected_values,
+    td_extractor: TextDescriptivesExtractor,
 ) -> None:
-    tde = TextDescriptivesExtractor()
     df = pd.DataFrame(
         {
             "col_int": pd.Series([1, 2, 3], dtype="int32"),
@@ -179,7 +187,7 @@ def test_create_metadata_properties(
             "col_obj": pd.Series(["value_1", "value_2", "value_3"], dtype="object"),
         }
     )
-    properties = tde._create_metadata_properties(df)
+    properties = td_extractor._create_metadata_properties(df)
     prop = next((prop for prop in properties if prop.name == column_name), None)
     assert isinstance(prop, expected_prop_type)
     assert prop.name == column_name
@@ -190,6 +198,7 @@ def test_create_metadata_properties(
         assert prop.values == expected_values
 
 
+@pytest.mark.fixtures("td_extractor")
 @pytest.mark.parametrize(
     "records",
     [
@@ -221,29 +230,33 @@ def test_create_metadata_properties(
         ],
     ],
 )
-def test_update_records_metrics_extracted(records) -> None:
-    tde = TextDescriptivesExtractor()
+def test_update_records_metrics_extracted(records, td_extractor: TextDescriptivesExtractor) -> None:
     extracted_metrics = pd.DataFrame({"text_n_tokens": [4, 5]})
-    tde._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
-    tde._cast_to_python_types = MagicMock(return_value=extracted_metrics)
-    tde._clean_column_name = MagicMock(side_effect=lambda col: col)
-    tde._add_text_descriptives_to_metadata = MagicMock(return_value=records)
-    updated_records = tde.update_records(records)
-    tde._extract_metrics_for_all_fields.assert_called_once_with(records)
-    tde._cast_to_python_types.assert_called_once_with(extracted_metrics)
-    tde._clean_column_name.assert_called_with("text_n_tokens")
-    tde._add_text_descriptives_to_metadata.assert_called_once_with(records, extracted_metrics)
+    td_extractor._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
+    td_extractor._cast_to_python_types = MagicMock(return_value=extracted_metrics)
+    td_extractor._clean_column_name = MagicMock(side_effect=lambda col: col)
+    td_extractor._add_text_descriptives_to_metadata = MagicMock(return_value=records)
+    updated_records = td_extractor.update_records(records)
+    td_extractor._extract_metrics_for_all_fields.assert_called_once()
+    td_extractor._cast_to_python_types.assert_called_once_with(extracted_metrics)
+    td_extractor._clean_column_name.assert_called_with("text_n_tokens")
+    td_extractor._add_text_descriptives_to_metadata.assert_called_once_with(records, extracted_metrics)
     assert updated_records == records
 
 
-def test_update_records_no_metrics_extracted(records):
-    tde = TextDescriptivesExtractor()
-    tde._extract_metrics_for_all_fields = MagicMock(return_value=pd.DataFrame())
-    updated_records = tde.update_records(records)
+@pytest.mark.fixtures("td_extractor")
+def test_update_records_no_metrics_extracted(td_extractor: TextDescriptivesExtractor):
+    records = [
+        FeedbackRecord(fields={"text": "This is a test."}),
+        FeedbackRecord(fields={"text": "This is another test."}),
+    ]
+    td_extractor._extract_metrics_for_all_fields = MagicMock(return_value=pd.DataFrame())
+    updated_records = td_extractor.update_records(records)
     assert updated_records == records
 
 
-def test_update_feedback_dataset():
+@pytest.mark.fixtures("td_extractor")
+def test_update_feedback_dataset(td_extractor: TextDescriptivesExtractor):
     dataset = FeedbackDataset(
         fields=[TextField(name="text")],
         questions=[TextQuestion(name="question")],
@@ -254,20 +267,22 @@ def test_update_feedback_dataset():
     ]
     dataset.add_records(records)
 
-    tde = TextDescriptivesExtractor()
-
     extracted_metrics = pd.DataFrame({"text_n_tokens": [4, 5]})
-    tde._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
-    tde._cast_to_python_types = MagicMock(return_value=extracted_metrics)
-    tde._clean_column_name = MagicMock(side_effect=lambda col: col)
-    tde._create_metadata_properties = MagicMock(return_value=[IntegerMetadataProperty(name="text_n_tokens")])
+    td_extractor._extract_metrics_for_all_fields = MagicMock(return_value=extracted_metrics)
+    td_extractor._cast_to_python_types = MagicMock(return_value=extracted_metrics)
+    td_extractor._clean_column_name = MagicMock(side_effect=lambda col: col)
+    td_extractor._create_metadata_properties = MagicMock(return_value=[IntegerMetadataProperty(name="text_n_tokens")])
 
-    updated_dataset = tde.update_dataset(dataset)
+    updated_dataset = td_extractor.update_dataset(dataset, update_records=False)
 
-    tde._extract_metrics_for_all_fields.assert_called_once_with(records)
-    tde._cast_to_python_types.assert_called_once_with(extracted_metrics)
-    tde._clean_column_name.assert_called_with("text_n_tokens")
-    tde._create_metadata_properties.assert_called_once_with(extracted_metrics)
+    td_extractor._extract_metrics_for_all_fields.call_count == 1
+
+    updated_dataset = td_extractor.update_dataset(dataset, update_records=True)
+
+    td_extractor._extract_metrics_for_all_fields.call_count == 3
+    td_extractor._cast_to_python_types.assert_called_with(extracted_metrics)
+    td_extractor._clean_column_name.assert_called_with("text_n_tokens")
+    td_extractor._create_metadata_properties.assert_called_with(extracted_metrics)
     assert updated_dataset == dataset
     assert isinstance(updated_dataset, FeedbackDataset)
     assert updated_dataset.metadata_properties == [
@@ -277,9 +292,11 @@ def test_update_feedback_dataset():
     ]
 
 
-def test_update_dataset_with_invalid_dataset():
-    tde = TextDescriptivesExtractor()
-    dataset = "invalid_dataset"
-
+@pytest.mark.fixtures("td_extractor")
+def test_update_dataset_with_invalid_fields(td_extractor: TextDescriptivesExtractor):
+    dataset = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="question")],
+    )
     with pytest.raises(ValueError):
-        tde.update_dataset(dataset)
+        td_extractor.update_dataset(dataset, fields=["my_fake_field"])

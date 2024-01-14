@@ -124,6 +124,64 @@ dataset.update_records(modified_records)
 You can also follow the same strategy to modify existing vectors.
 ```
 
+### Add Sentence Transformers `vectors`
+
+You can easily add semantic embeddings to your records or datasets using the `SentenceTransformersExtractor` based on the [sentence-transformers](https://sbert.net/) library. This extractor is available in the Python SDK and can be used to configure settings for a dataset and extract embeddings from a list of records. The `SentenceTransformersExtractor` has the following arguments:
+
+- `model_name`: The name of the model to use for extracting embeddings. You can find a list of available models [here](https://www.sbert.net/docs/pretrained_models.html).
+- `show_progress` (optional): Whether to show a progress bar when extracting metrics. Defaults to `True`.
+
+For a practical example, check our [tutorial on adding sentence transformer embeddings as vectors](/tutorials_and_integrations/integrations/add_sentence_transformers_embeddings_as_vectors.ipynb).
+
+::::{tab-set}
+
+:::{tab-item} Dataset
+
+This can be used to update the dataset and configuration with `VectorSettings` for `Fields` in a `FeedbackDataset` or a `RemoteFeedbackDataset`.
+
+```python
+from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
+
+dataset = ... # FeedbackDataset or RemoteFeedbackDataset
+
+tde = SentenceTransformersExtractor(
+    model="TaylorAI/bge-micro-v2",
+    show_progress=True,
+)
+
+dataset = tde.update_dataset(
+    dataset=dataset
+    fields=None # None means using all fields
+    update_records=True # Also, update the records in the dataset
+    overwrite=False # Whether to overwrite existing vectors
+)
+```
+:::
+
+:::{tab-item} Records
+
+This can be used to update the records with `vector` values for `Fields` in a list of `FeedbackRecords`.
+
+```python
+from argilla.client.feedback.integrations.textdescrisentencetransformersptives import SentenceTransformersExtractor
+
+records = [...] # FeedbackRecords or RemoteFeedbackRecords
+
+tde = SentenceTransformersExtractor(
+    model="TaylorAI/bge-micro-v2",
+    show_progress=True,
+)
+
+records = tde.update_records(
+    records=records,
+    fields=None # None means using all fields
+    overwrite=False # Whether to overwrite existing vectors
+)
+```
+
+:::
+
+::::
 
 ## Other datasets
 

@@ -25,6 +25,8 @@ These are the section headers that we use:
 ### Changed
 
 - Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
+- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4454](https://github.com/argilla-io/argilla/pull/4454))
+- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
@@ -36,6 +38,8 @@ These are the section headers that we use:
 ### Removed
 
 - The deprecated `python -m argilla database` command has been removed. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
+- Added `vector_settings` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
+- Added integration for `sentence-transformers` using `SentenceTransformersExtractor` to configure `vector_settings` in `FeedbackDataset` and `FeedbackRecord`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 
 ## [1.21.0](https://github.com/argilla-io/argilla/compare/v1.20.0...v1.21.0)
 
@@ -53,7 +57,7 @@ These are the section headers that we use:
 
 ### Changed
 
-- More productive and simpler shortcuts system ([#4215](https://github.com/argilla-io/argilla/pull/4215))
+- More productive and simpler shortcut system ([#4215](https://github.com/argilla-io/argilla/pull/4215))
 - Move `ArgillaSingleton`, `init` and `active_client` to a new module `singleton`. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - Updated `argilla.load` functions to also work with `FeedbackDataset`s. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
 - [breaking] Updated `argilla.delete` functions to also work with `FeedbackDataset`s. It now raises an error if the dataset does not exist. ([#4347](https://github.com/argilla-io/argilla/pull/4347))
