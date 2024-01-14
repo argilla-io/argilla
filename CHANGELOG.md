@@ -19,20 +19,23 @@ These are the section headers that we use:
 ### Added
 
 - Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
-- Warning on feedback dataset settings when leaving page with unsaved changes ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
-- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- Warning on feedback dataset settings when leaving page with unsaved changes. ([#4461](https://github.com/argilla-io/argilla/pull/4461))
+- Added pydantic v2 support using the python SDK. ([#4459](https://github.com/argilla-io/argilla/pull/4459))
 
-## Changed
+### Changed
 
 - Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
 - [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 - Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
+- `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+- `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 
 ### Deprecated
 
 - The `missing` response status for filtering records is deprecated and will be removed in the release v1.24.0. Use `pending` instead. ([#4433](https://github.com/argilla-io/argilla/pull/4433))
 
-## Removed
+### Removed
 
 - The deprecated `python -m argilla database` command has been removed. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
 - Added `vector_settings` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
@@ -51,7 +54,6 @@ These are the section headers that we use:
 - Added new CLI task to reindex datasets and records into the search engine. ([#4404](https://github.com/argilla-io/argilla/pull/4404))
 - Added `httpx_extra_kwargs` argument to `rg.init` and `Argilla` to allow passing extra arguments to `httpx.Client` used by `Argilla`. ([#4440](https://github.com/argilla-io/argilla/pull/4441))
 - Added `ResponseStatusFilter` enum in `__init__` imports of Argilla ([#4118](https://github.com/argilla-io/argilla/pull/4463)). Contributed by @Piyush-Kumar-Ghosh.
-
 
 ### Changed
 

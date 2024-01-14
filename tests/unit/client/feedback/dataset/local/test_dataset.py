@@ -226,8 +226,8 @@ def test_add_record_with_numpy_values(property_class: Type["AllowedMetadataPrope
     metadata_property = property_class(name="numeric_property")
     dataset.add_metadata_property(metadata_property)
 
-    property_to_primitive_type = {IntegerMetadataProperty: int, FloatMetadataProperty: float}
-    expected_type = property_to_primitive_type[property_class]
+    property_to_expected_type_msg = {IntegerMetadataProperty: "`int`", FloatMetadataProperty: "`int` or `float`"}
+    expected_type_msg = property_to_expected_type_msg[property_class]
 
     value = numpy_type(10.0)
     record = FeedbackRecord(fields={"required-field": "text"}, metadata={"numeric_property": value})
@@ -235,7 +235,7 @@ def test_add_record_with_numpy_values(property_class: Type["AllowedMetadataPrope
     with pytest.raises(
         ValueError,
         match=f"Provided 'numeric_property={value}' of type {str(numpy_type)} is not valid, "
-        f"only values of type {expected_type} are allowed.",
+        f"only values of type {expected_type_msg} are allowed.",
     ):
         dataset.add_records(record)
 

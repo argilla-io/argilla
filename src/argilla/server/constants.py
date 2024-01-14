@@ -11,13 +11,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Union
 
-from argilla.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
-from argilla.pydantic_v1 import StrictFloat, StrictInt, StrictStr
+API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
+WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
 
-FETCHING_BATCH_SIZE = 250
-PUSHING_BATCH_SIZE = 32
-DELETE_DATASET_RECORDS_MAX_NUMBER = 100
+DEFAULT_USERNAME = "argilla"
+DEFAULT_PASSWORD = "1234"
+DEFAULT_API_KEY = "argilla.apikey"
 
-FIELD_TYPE_TO_PYTHON_TYPE = {FieldTypes.text: str}
+DEFAULT_MAX_KEYWORD_LENGTH = 128
+DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
+
+# The metadata field name prefix defined for protected (non-searchable) values
+PROTECTED_METADATA_FIELD_PREFIX = "_"
+
+ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
+
+JS_MAX_SAFE_INTEGER = 9007199254740991
