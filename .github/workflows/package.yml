@@ -82,10 +82,6 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
             runsOn: extended-runner
-          - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-2.4.1
-            runsOn: ubuntu-latest
     name: Run end2end tests
     uses: ./.github/workflows/end2end-examples.yml
     needs: check_repo_files
