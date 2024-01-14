@@ -314,7 +314,7 @@ class TextDescriptivesExtractor:
     def update_records(
         self,
         records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
-        fields: List[str],
+        fields: Optional[List[str]] = None,
         overwrite: Optional[bool] = False,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
         """

@@ -148,7 +148,7 @@ class SentenceTransformersExtractor:
         self,
         records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
         fields: Optional[List[str]] = None,
-        overwrite: Optional[bool] = None,
+        overwrite: Optional[bool] = False,
         **kwargs,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
         """
@@ -188,8 +188,8 @@ class SentenceTransformersExtractor:
         self,
         dataset: Union[FeedbackDataset, RemoteFeedbackDataset],
         fields: Optional[List[str]] = None,
-        update_records: bool = True,
-        overwrite: bool = False,
+        update_records: Optional[bool] = True,
+        overwrite: Optional[bool] = False,
         **kwargs,
     ) -> Union[FeedbackDataset, RemoteFeedbackDataset]:
         """
