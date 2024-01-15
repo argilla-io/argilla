@@ -2,7 +2,9 @@ import { shallowMount } from "@vue/test-utils";
 import LabelSelectionComponent from "./LabelSelection.component";
 
 let wrapper = null;
+const $t = () => {};
 const options = {
+  mocks: { $t },
   stubs: ["SearchLabelComponent"],
   propsData: {
     componentId: `componentId`,

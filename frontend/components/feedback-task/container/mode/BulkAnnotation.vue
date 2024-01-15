@@ -287,6 +287,6 @@ export default {
 }
 
 [data-title] {
-  @include tooltip-mini("top-right");
+  @include tooltip-mini("right", 12px);
 }
 </style>

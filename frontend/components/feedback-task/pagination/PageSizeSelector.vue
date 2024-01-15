@@ -1,6 +1,7 @@
 <template>
   <div class="page-size__wrapper">
     <BaseDropdown
+      :data-title="$t('bulkAnnotation.pageSize')"
       class="page-size"
       :visible="dropdownIsVisible"
       @visibility="onVisibility"
@@ -121,5 +122,8 @@ export default {
   .svg-icon {
     flex-shrink: 0;
   }
+}
+[data-title] {
+  @include tooltip-mini("top");
 }
 </style>

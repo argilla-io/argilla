@@ -3,6 +3,7 @@
     <div class="fields__header--left">
       <BaseCheckbox
         v-if="Array.isArray(selectedRecords)"
+        :data-title="$t('select')"
         class="fields__checkbox"
         :decoration-circle="recordCriteria.isComingToBulkMode"
         :value="selectedRecords.includes(record)"
@@ -14,7 +15,7 @@
         v-if="recordCriteria.isFilteringBySimilarity && record.score.percentage"
         class="similarity__progress"
         :value="record.score.percentage"
-        :data-title="$t('similarityScore')"
+        :data-title="$t('similarity.similarityScore')"
       >
       </SimilarityScorePercentage>
       <SimilarityFilter
@@ -93,7 +94,13 @@ export default {
 .similarity__progress {
   &[data-title] {
     position: relative;
-    @extend %has-tooltip--left;
+    @include tooltip-mini("top", 2px);
+    cursor: default;
   }
+}
+.fields__checkbox[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("right", 12px);
 }
 </style>

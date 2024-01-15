@@ -12,7 +12,7 @@
         class="similarity-reference__dropdown"
         v-model="recordCriteria.similaritySearch.order"
       />
-      <p>{{ $t("similarTo") }}</p>
+      <p>{{ $t("similarity.similarTo") }}</p>
       <span class="similarity-reference__preview">
         <span
           v-for="text in preview"
@@ -37,6 +37,7 @@
 
     <div class="similarity-reference__right">
       <BaseButton
+        :data-title="$t('similarity.expand')"
         class="similarity-reference__button-icon"
         :title="visibleReferenceRecord ? $t('minimize') : $t('expand')"
         @on-click="
@@ -174,5 +175,10 @@ export default {
     white-space: nowrap;
     font-weight: 500;
   }
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 </style>

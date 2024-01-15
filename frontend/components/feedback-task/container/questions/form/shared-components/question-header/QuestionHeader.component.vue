@@ -3,7 +3,9 @@
     <BaseTooltip
       v-if="question.suggestion"
       :text="suggestionTooltipText"
+      :offset="4"
       position="left"
+      minimalist
     >
       <span class="title-area__suggestion-icon" v-text="`✨ `" />
     </BaseTooltip>
@@ -78,6 +80,7 @@ export default {
   font-weight: 500;
   &__suggestion-icon {
     font-size: 1.2em;
+    cursor: default;
   }
 }
 

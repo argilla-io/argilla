@@ -14,7 +14,7 @@
       ref="nextButton"
       class="pagination__button"
       :disabled="isLastPage"
-      :title="$t('shortcuts.pagination.go_to_next_record')"
+      :data-title="$t('shortcuts.pagination.go_to_next_record')"
       @click="goToNextPage"
     >
       <svgicon name="chevron-right" width="12" height="12" />
@@ -113,5 +113,9 @@ export default {
       background: $black-4;
     }
   }
+}
+.button[data-title] {
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 </style>

@@ -13,6 +13,7 @@
       :class="[
         'tooltip-content',
         positionClass,
+        minimalist ? 'tooltip-content--minimalist' : null,
         showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
       ]"
       :style="{
@@ -47,6 +48,10 @@ export default {
     offset: {
       type: Number,
       default: 8,
+    },
+    minimalist: {
+      type: Boolean,
+      default: true,
     },
   },
   methods: {
@@ -134,6 +139,11 @@ export default {
   @include font-size($tooltip-font-size);
   font-weight: 500;
   white-space: pre;
+  &--minimalist {
+    background: palette(grey, 150);
+    @include font-size(12px);
+    padding: calc($base-space / 2);
+  }
   &--hide {
     opacity: 0;
     pointer-events: none;
@@ -145,7 +155,7 @@ export default {
   }
 }
 
-.tooltip-content {
+.tooltip-content:not(.tooltip-content--minimalist) {
   &.position-top {
     &::after {
       content: "";

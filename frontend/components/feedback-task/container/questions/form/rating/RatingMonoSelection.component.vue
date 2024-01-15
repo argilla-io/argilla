@@ -6,7 +6,13 @@
         v-for="option in options"
         :key="option.id"
         @keydown.enter.prevent
-        :title="suggestions === option.value ? $t('suggestion.name') : null"
+        :data-title="
+          suggestions === option.value
+            ? $t('suggestion.name')
+            : option.isSelected
+            ? $t('annotation')
+            : null
+        "
       >
         <input
           ref="options"
@@ -154,5 +160,11 @@ input[type="checkbox"] {
       }
     }
   }
+}
+
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 </style>

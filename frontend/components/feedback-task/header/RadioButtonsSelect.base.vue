@@ -19,7 +19,11 @@
   <div v-if="options.length">
     <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
       <span slot="dropdown-header">
-        <BaseButton class="selected-option" :class="currentOptionId">
+        <BaseButton
+          class="selected-option"
+          :class="currentOptionId"
+          :data-title="$t('status')"
+        >
           {{ currentOptionName }}
           <svgicon name="chevron-down" width="8" height="8" />
         </BaseButton>
@@ -203,5 +207,10 @@ $selector-width: 140px;
     width: $base-space;
     border-radius: 50%;
   }
+}
+
+[data-title] {
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 </style>

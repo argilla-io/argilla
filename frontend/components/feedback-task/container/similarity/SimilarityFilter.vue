@@ -3,7 +3,7 @@
     v-if="availableVectors.length === 1"
     class="small"
     @click="findSimilarUniqueVector"
-    >{{ $t("findSimilar") }}</BaseButton
+    >{{ $t("similarity.findSimilar") }}</BaseButton
   >
   <BaseDropdown
     v-else
@@ -19,7 +19,7 @@
       <div class="similarity-filter__dropdown">
         <span class="similarity-filter__header">
           <SimilarityFilterOrder v-model="order" />
-          {{ $t("similarUsing") }}:
+          {{ $t("similarity.similarUsing") }}:
         </span>
         <SimilarityFilterVectorRadioButtons
           v-model="vectorName"
