@@ -79,6 +79,19 @@ You can track your progress and the number of `Pending`, `Draft`, `Submitted` an
 ```{include} /_common/shortcuts.md
 ```
 
+### Focus vs Bulk view
+
+In Argilla's Feedback Task datasets, you can annotate and process records in two ways:
+
+- **Focus view**: you can only see, respond and perfom actions on one record at a time. This is better for records that need to be examined closely and individually before responding.
+- **Bulk view**: you can see multiple records in a list so you can respond and perform actions on more than one record at a time. This is useful for actions that can be taken on many records that have similar characteristics e.g., apply a label or discard all records in a specific language, or save/submit records with a suggestion score over a safe threshold.
+
+In the queue of **Pending** records, you can change from _Focus_ to _Bulk_ view. Once in the _Bulk view_, you can expand or collapse records --i.e. see the full length of all records in the page or set a fixed height-- and select the number of records you want to see per page.
+
+To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card.
+
+Once records are selected, choose the responses that apply to all selected records (if any) and do the desired action: _Discard_, _Save as draft_ or even _Submit_. Note that you can only submit the records if all required questions have been answered.
+
 ## Other datasets
 
 ```{include} /_common/other_datasets.md
