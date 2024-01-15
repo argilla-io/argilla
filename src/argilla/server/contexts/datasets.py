@@ -421,12 +421,17 @@ async def get_record_by_id(
 
 async def get_records_by_ids(
     db: "AsyncSession",
-    dataset_id: UUID,
     records_ids: Iterable[UUID],
+    dataset_id: Optional[UUID] = None,
     include: Optional["RecordIncludeParam"] = None,
     user_id: Optional[UUID] = None,
-) -> List[Record]:
-    query = select(Record).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids))
+) -> List[Union[Record, None]]:
+    query = select(Record)
+
+    if dataset_id:
+        query.filter(Record.dataset_id == dataset_id)
+
+    query = query.filter(Record.id.in_(records_ids))
 
     if include and include.with_responses:
         if not user_id:
@@ -443,7 +448,7 @@ async def get_records_by_ids(
 
     # Preserve the order of the `record_ids` list
     record_order_map = {record.id: record for record in records}
-    ordered_records = [record_order_map[record_id] for record_id in records_ids]
+    ordered_records = [record_order_map.get(record_id, None) for record_id in records_ids]
 
     return ordered_records
 
@@ -818,6 +823,16 @@ async def _preload_record_relationships_before_index(db: "AsyncSession", record:
             selectinload(Record.responses).selectinload(Response.user),
             selectinload(Record.suggestions).selectinload(Suggestion.question),
             selectinload(Record.vectors),
+        )
+    )
+
+
+async def preload_records_relationships_before_validate(db: "AsyncSession", records: List[Record]) -> None:
+    await db.execute(
+        select(Record)
+        .filter(Record.id.in_([record.id for record in records]))
+        .options(
+            selectinload(Record.dataset).selectinload(Dataset.questions),
         )
     )
 

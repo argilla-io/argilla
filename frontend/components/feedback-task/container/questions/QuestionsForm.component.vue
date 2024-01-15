@@ -30,23 +30,31 @@
     <div class="footer-form">
       <div class="footer-form__content">
         <BaseButton
-          v-if="!record.isDiscarded || isDiscarding"
+          v-if="showDiscardButton || isDiscarding"
           type="button"
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
+          :loading="isDiscarding"
+          :disabled="isDiscardDisabled"
+          :data-title="draftSavingTooltip"
           @on-click="onDiscard"
         >
-          <span class="button__shortcuts" v-text="'⌫'" /><span
-            v-text="$t('questions_form.discard')"
-          />
+          <span
+            v-if="!isDiscarding"
+            class="button__shortcuts"
+            v-text="'⌫'"
+          /><span v-text="$t('questions_form.discard')" />
         </BaseButton>
         <BaseButton
           type="button"
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
+          :loading="isDraftSaving"
+          :disabled="isDraftSaveDisabled"
+          :data-title="draftSavingTooltip"
           @on-click="onSaveDraft"
         >
-          <span class="button__shortcuts-group"
+          <span v-if="!isDraftSaving"
             ><span
               class="button__shortcuts"
               v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
@@ -62,13 +70,16 @@
             isSubmitting ? '--button--submitting' : null,
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
-          :disabled="isSubmitButtonDisabled"
-          :title="
-            isSubmitButtonDisabled ? $t('to_submit_complete_required') : null
+          :loading="isSubmitting"
+          :disabled="!questionAreCompletedCorrectly || isSubmitDisabled"
+          :data-title="
+            !questionAreCompletedCorrectly && !isSubmitDisabled
+              ? $t('to_submit_complete_required')
+              : submitTooltip
           "
           @on-click="onSubmit"
         >
-          <span class="button__shortcuts" v-text="'↵'" />
+          <span v-if="!isSubmitting" class="button__shortcuts" v-text="'↵'" />
           <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
@@ -80,10 +91,7 @@
 import "assets/icons/external-link";
 import "assets/icons/refresh";
 
-import { useQuestionFormViewModel } from "./useQuestionsFormViewModel";
-
 export default {
-  name: "QuestionsFormComponent",
   props: {
     datasetId: {
       type: String,
@@ -93,6 +101,50 @@ export default {
       type: Object,
       required: true,
     },
+    showDiscardButton: {
+      type: Boolean,
+      default: true,
+    },
+    areActionsEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    isSubmitting: {
+      type: Boolean,
+      required: true,
+    },
+    isDiscarding: {
+      type: Boolean,
+      required: true,
+    },
+    isDraftSaving: {
+      type: Boolean,
+      required: true,
+    },
+    isSubmitDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    isDiscardDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    isDraftSaveDisabled: {
+      type: Boolean,
+      default: false,
+    },
+    submitTooltip: {
+      type: String,
+      default: null,
+    },
+    discardTooltip: {
+      type: String,
+      default: null,
+    },
+    draftSavingTooltip: {
+      type: String,
+      default: null,
+    },
   },
   data() {
     return {
@@ -101,9 +153,6 @@ export default {
       isSubmittedTouched: false,
       userComesFromOutside: false,
     };
-  },
-  setup() {
-    return useQuestionFormViewModel();
   },
   computed: {
     questionFormClass() {
@@ -125,9 +174,6 @@ export default {
     },
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
-    },
-    isSubmitButtonDisabled() {
-      return !this.questionAreCompletedCorrectly;
     },
   },
   watch: {
@@ -183,14 +229,18 @@ export default {
         return;
       }
 
+      if (!this.areActionsEnabled) return;
+
       switch (code) {
         case "KeyS": {
           if (this.$platform.isMac) {
             if (!metaKey) return;
           } else if (!ctrlKey) return;
+
           event.preventDefault();
           event.stopPropagation();
           this.onSaveDraft();
+
           break;
         }
         case "Enter": {
@@ -207,22 +257,20 @@ export default {
         }
       }
     },
-    async onDiscard() {
-      if (this.record.isDiscarded) return;
-
-      await this.discard(this.record);
-
-      this.$emit("on-discard-responses");
-    },
-    async onSubmit() {
-      if (this.isSubmitButtonDisabled) return;
-
-      await this.submit(this.record);
+    onSubmit() {
+      if (this.isSubmitDisabled || !this.questionAreCompletedCorrectly) return;
 
       this.$emit("on-submit-responses");
     },
+    onDiscard() {
+      if (this.isDiscardDisabled) return;
+
+      this.$emit("on-discard-responses");
+    },
     onSaveDraft() {
-      this.saveAsDraft(this.record);
+      if (this.isDraftSaveDisabled) return;
+
+      this.$emit("on-save-draft");
     },
     updateQuestionAutofocus(index) {
       this.interactionCount++;
@@ -259,7 +307,8 @@ export default {
       text-decoration: none;
       &:hover,
       &:focus {
-        text-decoration: underline;
+        color: $black-54;
+        transition: color 0.2s ease-in-out;
       }
     }
   }
@@ -309,7 +358,7 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
     border-radius: $border-radius-m;
     background: #f0f2fa;
     container-type: inline-size;
@@ -355,19 +404,22 @@ export default {
     color: $black-87;
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
-    padding: $base-space * 2 $base-space;
+    padding: $base-space;
     &:hover {
       color: $black-87;
     }
     &:disabled {
       pointer-events: visible;
       cursor: not-allowed;
+      opacity: 1;
+      & > * {
+        opacity: 0.5;
+      }
     }
   }
   &--submit {
-    background: $submitted-color-light;
-    &[disabled] {
-      opacity: 0.5;
+    &:not([disabled]) {
+      background: $submitted-color-light;
     }
     &:hover:not([disabled]) {
       background: darken($submitted-color-light, 2%);
@@ -403,45 +455,10 @@ export default {
   }
 }
 
-.draft {
-  position: absolute;
-  right: $base-space * 2;
-  top: $base-space;
-  user-select: none;
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  align-items: center;
-  margin: 0;
-  @include font-size(12px);
-  color: $black-37;
-  font-weight: 500;
-  p {
-    margin: 0;
-    &:hover {
-      .tooltip {
-        opacity: 1;
-        height: auto;
-        width: auto;
-        overflow: visible;
-      }
-    }
-  }
-  .tooltip {
-    opacity: 0;
-    height: auto;
-    width: 0;
-    @extend %tooltip;
-    top: 50%;
-    transform: translateY(-50%);
-    right: calc(100% + 10px);
-    overflow: hidden;
-    &:before {
-      position: absolute;
-      @extend %triangle-right;
-      left: 100%;
-    }
-  }
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 
 @container (max-width: 500px) {

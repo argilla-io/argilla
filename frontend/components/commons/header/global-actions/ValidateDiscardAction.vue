@@ -262,12 +262,12 @@ export default {
   gap: calc($base-space / 2);
   align-items: center;
   width: 100%;
-  .re-checkbox {
+  .checkbox {
     position: relative;
     left: 0;
     top: 0;
     margin: 0 $base-space 0 0;
-    &:not(.checked):deep(.checkbox-container) {
+    &:not(.checked):deep(.checkbox__container) {
       border-color: $black-20;
     }
   }

@@ -3,23 +3,66 @@ import { SortCriteria } from "../sort/SortCriteria";
 import { MetadataCriteria } from "../metadata/MetadataCriteria";
 import { ResponseCriteria } from "../response/ResponseCriteria";
 import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";
+import { PageCriteria } from "../page/PageCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
-interface CommittedRecordCriteria {
-  page: number;
-  status: RecordStatus;
-  searchText: string;
-  metadata: MetadataCriteria;
-  sortBy: SortCriteria;
-  response: ResponseCriteria;
-  suggestion: SuggestionCriteria;
-  similaritySearch: SimilarityCriteria;
+interface IRecordCriteria {
+  readonly page: PageCriteria;
+  readonly status: RecordStatus;
+  readonly searchText: string;
+  readonly metadata: MetadataCriteria;
+  readonly sortBy: SortCriteria;
+  readonly response: ResponseCriteria;
+  readonly suggestion: SuggestionCriteria;
+  readonly similaritySearch: SimilarityCriteria;
 }
 
-export class RecordCriteria {
+class CommittedRecordCriteria implements IRecordCriteria {
+  public readonly page: PageCriteria;
+  public readonly status: RecordStatus;
+  public readonly searchText: string;
+  public readonly metadata: MetadataCriteria;
+  public readonly sortBy: SortCriteria;
+  public readonly response: ResponseCriteria;
+  public readonly suggestion: SuggestionCriteria;
+  public readonly similaritySearch: SimilarityCriteria;
+
+  constructor(recordCriteria: IRecordCriteria) {
+    const pageCommitted = new PageCriteria();
+    const similaritySearchCommitted = new SimilarityCriteria();
+    const metadataCommitted = new MetadataCriteria();
+    const sortByCommitted = new SortCriteria();
+    const responseCommitted = new ResponseCriteria();
+    const suggestionCommitted = new SuggestionCriteria();
+
+    pageCommitted.withValue(recordCriteria.page);
+    metadataCommitted.withValue(recordCriteria.metadata);
+    sortByCommitted.withValue(recordCriteria.sortBy);
+    suggestionCommitted.withValue(recordCriteria.suggestion);
+    responseCommitted.withValue(recordCriteria.response);
+    similaritySearchCommitted.withValue(recordCriteria.similaritySearch);
+
+    this.status = recordCriteria.status;
+    this.searchText = recordCriteria.searchText;
+    this.page = pageCommitted;
+    this.metadata = metadataCommitted;
+    this.sortBy = sortByCommitted;
+    this.response = responseCommitted;
+    this.suggestion = suggestionCommitted;
+    this.similaritySearch = similaritySearchCommitted;
+  }
+
+  get isPending() {
+    return this.status === "pending";
+  }
+}
+
+export class RecordCriteria implements IRecordCriteria {
   public isChangingAutomatically = false;
   public committed: CommittedRecordCriteria;
+  public previous?: CommittedRecordCriteria;
 
+  public page: PageCriteria;
   public metadata: MetadataCriteria;
   public sortBy: SortCriteria;
   public response: ResponseCriteria;
@@ -28,7 +71,7 @@ export class RecordCriteria {
 
   constructor(
     public readonly datasetId: string,
-    public page: number,
+    page: string,
     public status: RecordStatus,
     public searchText: string,
     metadata: string,
@@ -37,6 +80,7 @@ export class RecordCriteria {
     suggestion: string,
     similaritySearch: string
   ) {
+    this.page = new PageCriteria();
     this.metadata = new MetadataCriteria();
     this.sortBy = new SortCriteria();
     this.response = new ResponseCriteria();
@@ -116,24 +160,19 @@ export class RecordCriteria {
     return this.committed.similaritySearch.isCompleted;
   }
 
+  get isComingToBulkMode(): boolean {
+    return (
+      (!this.previous || this.previous.page.isFocusMode) &&
+      this.committed.page.isBulkMode
+    );
+  }
+
   get hasChanges(): boolean {
-    if (this.committed.page !== this.page) return true;
-    if (this.committed.status !== this.status) return true;
-
-    if (this.committed.searchText !== this.searchText) return true;
-
-    if (!this.metadata.isEqual(this.committed.metadata)) return true;
-    if (!this.sortBy.isEqual(this.committed.sortBy)) return true;
-    if (!this.response.isEqual(this.committed.response)) return true;
-    if (!this.suggestion.isEqual(this.committed.suggestion)) return true;
-    if (!this.similaritySearch.isEqual(this.committed.similaritySearch))
-      return true;
-
-    return false;
+    return this.areDifferent(this, this.committed);
   }
 
   complete(
-    page: number,
+    page: string,
     status: RecordStatus,
     searchText: string,
     metadata: string,
@@ -144,10 +183,10 @@ export class RecordCriteria {
   ) {
     this.isChangingAutomatically = true;
 
-    this.page = Number(page ?? 1);
     this.status = status ?? "pending";
     this.searchText = searchText ?? "";
 
+    this.page.complete(page);
     this.metadata.complete(metadata);
     this.sortBy.complete(sortBy);
     this.response.complete(response);
@@ -156,69 +195,71 @@ export class RecordCriteria {
   }
 
   commit() {
-    // TODO: Move to instance of commit
-    const similaritySearchCommitted = new SimilarityCriteria();
-    const metadataCommitted = new MetadataCriteria();
-    const sortByCommitted = new SortCriteria();
-    const responseCommitted = new ResponseCriteria();
-    const suggestionCommitted = new SuggestionCriteria();
+    if (this.committed) {
+      this.previous = new CommittedRecordCriteria(this.committed);
+    }
 
-    similaritySearchCommitted.withValue(
-      this.similaritySearch.recordId,
-      this.similaritySearch.vectorName,
-      this.similaritySearch.limit,
-      this.similaritySearch.order
-    );
-    metadataCommitted.withValue(this.metadata.value);
-    sortByCommitted.witValue(this.sortBy.value);
-    responseCommitted.withValue(this.response.value);
-    suggestionCommitted.withValue(this.suggestion.value);
+    this.committed = new CommittedRecordCriteria(this);
 
-    this.committed = {
-      page: this.page,
-      status: this.status,
-      searchText: this.searchText,
-
-      metadata: metadataCommitted,
-      sortBy: sortByCommitted,
-      response: responseCommitted,
-      suggestion: suggestionCommitted,
-      similaritySearch: similaritySearchCommitted,
-    };
+    if (!this.areDifferent(this.committed, this.previous)) {
+      this.previous = null;
+    }
 
     this.isChangingAutomatically = false;
   }
 
   rollback() {
-    this.page = this.committed.page;
     this.status = this.committed.status;
     this.searchText = this.committed.searchText;
-    this.metadata = this.committed.metadata;
 
-    this.metadata.withValue(this.committed.metadata.value);
-    this.sortBy.witValue(this.committed.sortBy.value);
-    this.response.withValue(this.committed.response.value);
-    this.suggestion.withValue(this.committed.suggestion.value);
-    this.similaritySearch.withValue(
-      this.committed.similaritySearch.recordId,
-      this.committed.similaritySearch.vectorName,
-      this.committed.similaritySearch.limit,
-      this.committed.similaritySearch.order
-    );
+    this.page.withValue(this.committed.page);
+    this.metadata.withValue(this.committed.metadata);
+    this.sortBy.withValue(this.committed.sortBy);
+    this.response.withValue(this.committed.response);
+    this.suggestion.withValue(this.committed.suggestion);
+    this.similaritySearch.withValue(this.committed.similaritySearch);
   }
 
   reset() {
+    // Not call the similaritySearch.reset() because it is not managed as a global filter.
+    // Not clear the searchText because it is not managed as a global filter.
+
+    this.page.reset();
     this.metadata.reset();
     this.sortBy.reset();
     this.response.reset();
     this.suggestion.reset();
   }
 
+  get queuePage(): number {
+    return this.isFilteringBySimilarity
+      ? this.page.server.from
+      : this.page.client.page;
+  }
+
   nextPage() {
-    this.page = this.committed.page + 1;
+    this.page.goTo(this.committed.page.next);
   }
 
   previousPage() {
-    this.page = this.committed.page - 1;
+    this.page.goTo(this.committed.page.previous);
+  }
+
+  private areDifferent(previous: IRecordCriteria, actual: IRecordCriteria) {
+    if (!previous) return false;
+    if (!actual) return false;
+
+    if (actual.status !== previous.status) return true;
+    if (actual.searchText !== previous.searchText) return true;
+
+    if (!previous.page.isEqual(actual.page)) return true;
+    if (!previous.metadata.isEqual(actual.metadata)) return true;
+    if (!previous.sortBy.isEqual(actual.sortBy)) return true;
+    if (!previous.response.isEqual(actual.response)) return true;
+    if (!previous.suggestion.isEqual(actual.suggestion)) return true;
+    if (!previous.similaritySearch.isEqual(actual.similaritySearch))
+      return true;
+
+    return false;
   }
 }

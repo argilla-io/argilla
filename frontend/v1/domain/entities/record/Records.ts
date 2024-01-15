@@ -1,9 +1,7 @@
-import { Pagination } from "../Pagination";
+import { PageCriteria } from "../page/PageCriteria";
 import { Record } from "./Record";
 import { RecordStatus } from "./RecordAnswer";
 import { RecordCriteria } from "./RecordCriteria";
-
-const NEXT_RECORDS_TO_FETCH = 10;
 
 export class Records {
   constructor(
@@ -17,48 +15,64 @@ export class Records {
     return this.records.length > 0;
   }
 
-  existsRecordOn(page: number) {
-    return !!this.getRecordOn(page);
+  existsRecordOn(criteria: PageCriteria) {
+    return !!this.getRecordOn(criteria);
   }
 
-  getRecordOn(page: number) {
-    return this.records.find((record) => record.page === page);
+  getRecordOn(criteria: PageCriteria) {
+    return this.records.find((record) => record.page === criteria.client.page);
+  }
+
+  getRecordsOn(criteria: PageCriteria): Record[] {
+    return this.records
+      .filter((record) => record.page >= criteria.client.page)
+      .splice(0, criteria.client.many);
   }
 
   getById(recordId: string): Record {
     return this.records.find((record) => record.id === recordId);
   }
 
-  getPageToFind(criteria: RecordCriteria): Pagination {
-    const { page, status, isFilteringBySimilarity, similaritySearch } =
-      criteria;
+  synchronizeQueuePagination(criteria: RecordCriteria): void {
+    const {
+      page,
+      status,
+      isFilteringBySimilarity,
+      similaritySearch,
+      committed,
+    } = criteria;
 
-    if (isFilteringBySimilarity)
-      return { from: 1, many: similaritySearch.limit };
+    if (page.isBulkMode && committed.page.isFocusMode) return;
+    if (page.isFocusMode && committed.page.isBulkMode) return;
 
-    const currentPage: Pagination = {
-      from: page,
-      many: NEXT_RECORDS_TO_FETCH,
-    };
+    if (isFilteringBySimilarity) {
+      return page.synchronizePagination({
+        from: 1,
+        many: similaritySearch.limit,
+      });
+    }
 
-    if (!this.hasRecordsToAnnotate) return currentPage;
+    if (this.hasRecordsToAnnotate) {
+      const isMovingForward = page.client.page > this.lastRecord.page;
 
-    const isMovingToNext = page > this.lastRecord.page;
+      if (isMovingForward) {
+        const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
 
-    if (isMovingToNext) {
-      const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
+        return page.synchronizePagination({
+          from: this.lastRecord.page + 1 - recordsAnnotated,
+          many: page.client.many,
+        });
+      } else if (this.firstRecord.page > page.client.page)
+        return page.synchronizePagination({
+          from: this.firstRecord.page - 1,
+          many: 1,
+        });
+    }
 
-      return {
-        from: this.lastRecord.page + 1 - recordsAnnotated,
-        many: NEXT_RECORDS_TO_FETCH,
-      };
-    } else if (this.firstRecord.page > page)
-      return {
-        from: this.firstRecord.page - 1,
-        many: 1,
-      };
-
-    return currentPage;
+    page.synchronizePagination({
+      from: page.client.page,
+      many: page.client.many,
+    });
   }
 
   append(newRecords: Records) {

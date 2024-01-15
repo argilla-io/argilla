@@ -5,14 +5,14 @@ describe("RecordCriteria", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "searchText",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(true);
@@ -21,14 +21,14 @@ describe("RecordCriteria", () => {
     test("should return false if searchText is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(false);
@@ -37,14 +37,14 @@ describe("RecordCriteria", () => {
     test("should return false if searchText is undefined", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         undefined,
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByText).toBe(false);
@@ -55,7 +55,7 @@ describe("RecordCriteria", () => {
     test("should return true if similaritySearch is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
@@ -71,14 +71,14 @@ describe("RecordCriteria", () => {
     test("should return false if similaritySearch is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySimilarity).toBe(false);
@@ -89,14 +89,14 @@ describe("RecordCriteria", () => {
     test("should return true if response is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "response.ge.1le.5",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(true);
@@ -105,14 +105,14 @@ describe("RecordCriteria", () => {
     test("should return true if response is terms", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "response.option1~option2",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(true);
@@ -121,14 +121,14 @@ describe("RecordCriteria", () => {
     test("should return false if response is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringByResponse).toBe(false);
@@ -139,14 +139,14 @@ describe("RecordCriteria", () => {
     test("should return true if suggestion is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "content_class.value.operator.and.values.hate.pii",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySuggestion).toBe(true);
@@ -155,14 +155,14 @@ describe("RecordCriteria", () => {
     test("should return false if suggestion is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteringBySuggestion).toBe(false);
@@ -173,14 +173,14 @@ describe("RecordCriteria", () => {
     test("should return true if sortBy is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "suggestion.relevant.score.asc",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isSortingBy).toBe(true);
@@ -189,14 +189,14 @@ describe("RecordCriteria", () => {
     test("should return false if sortBy is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isSortingBy).toBe(false);
@@ -207,14 +207,14 @@ describe("RecordCriteria", () => {
     test("should return true if searchText is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "searchText",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(true);
@@ -223,14 +223,14 @@ describe("RecordCriteria", () => {
     test("should return false if searchText is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(false);
@@ -239,14 +239,14 @@ describe("RecordCriteria", () => {
     test("should return false if searchText is undefined", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         undefined,
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByText).toBe(false);
@@ -257,14 +257,14 @@ describe("RecordCriteria", () => {
     test("return true if metadata is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "metadata.ge.1le.5",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(true);
@@ -273,14 +273,14 @@ describe("RecordCriteria", () => {
     test("return true if metadata is terms", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "metadata.option1~option2",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(true);
@@ -289,14 +289,14 @@ describe("RecordCriteria", () => {
     test("return false if metadata is empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
@@ -305,14 +305,14 @@ describe("RecordCriteria", () => {
     test("return false if metadata is undefined", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         undefined,
         "",
         "",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByMetadata).toBe(false);
@@ -323,14 +323,14 @@ describe("RecordCriteria", () => {
     test("should return true if response is range", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "response.ge.1le.5",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByResponse).toBe(true);
@@ -339,14 +339,14 @@ describe("RecordCriteria", () => {
     test("should return true if response is terms", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "response.option1~option2",
         "",
-        null
+        ""
       );
 
       expect(criteria.isFilteredByResponse).toBe(true);
@@ -357,14 +357,14 @@ describe("RecordCriteria", () => {
     test("should return true if suggestion is not empty", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "content_class.score.ge0.le0.24",
-        null
+        ""
       );
 
       expect(criteria.isFilteredBySuggestion).toBe(true);
@@ -375,17 +375,17 @@ describe("RecordCriteria", () => {
     test("return true if page is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
-      criteria.page = 2;
+      criteria.page.goTo(2);
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -393,14 +393,14 @@ describe("RecordCriteria", () => {
     test("return true if status is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.status = "submitted";
@@ -411,14 +411,14 @@ describe("RecordCriteria", () => {
     test("return true if searchText is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "Can AI help us?",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.searchText = "Can ML help to improve your business processes?";
@@ -429,14 +429,14 @@ describe("RecordCriteria", () => {
     test("return true if metadata is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.metadata.complete("your_feel.happy~sad");
@@ -447,14 +447,14 @@ describe("RecordCriteria", () => {
     test("return true if sortBy is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
       criteria.sortBy.complete(
@@ -473,7 +473,7 @@ describe("RecordCriteria", () => {
     test("return true if similaritySearch is different", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
@@ -491,17 +491,17 @@ describe("RecordCriteria", () => {
     test("return false if page, status, searchText, metadata, sortBy or similaritySearch are same after commit", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "",
         "",
         "",
         "",
         "",
-        null
+        ""
       );
 
-      criteria.page = 2;
+      criteria.page.goTo(2);
       criteria.status = "submitted";
       criteria.searchText = "Love ML";
       criteria.metadata.value = [
@@ -527,7 +527,7 @@ describe("RecordCriteria", () => {
     test("restore committed changes", () => {
       const criteria = new RecordCriteria(
         "datasetId",
-        1,
+        "1",
         "pending",
         "Do you love ML?",
         "your_feel.happy~sad",
@@ -537,7 +537,7 @@ describe("RecordCriteria", () => {
         "record:1,vector:2,limit:50,order:most"
       );
 
-      criteria.page = 1;
+      criteria.page.goTo(1);
       criteria.status = "discarded";
       criteria.searchText = "Do you love AI?";
       criteria.metadata.complete("your_feel.sad");
@@ -554,6 +554,282 @@ describe("RecordCriteria", () => {
       expect(criteria.similaritySearch).toEqual(
         criteria.committed.similaritySearch
       );
+    });
+  });
+
+  describe("nextPage", () => {
+    test("should increment page focus mode", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "Do you love ML?",
+        "your_feel.happy~sad",
+        "inserted_at:desc",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
+      );
+
+      criteria.nextPage();
+
+      expect(criteria.page.client.page).toEqual(2);
+    });
+
+    test("should increment page bulk mode", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "Do you love ML?",
+        "your_feel.happy~sad",
+        "inserted_at:desc",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
+      );
+
+      criteria.page.mode = "bulk";
+      criteria.page.client.many = 10;
+      criteria.commit();
+
+      criteria.nextPage();
+
+      expect(criteria.page.client.page).toEqual(11);
+    });
+  });
+
+  describe("previousPage", () => {
+    test("should decrement page", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "3",
+        "pending",
+        "Do you love ML?",
+        "your_feel.happy~sad",
+        "inserted_at:desc",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
+      );
+
+      criteria.previousPage();
+
+      expect(criteria.page.client.page).toEqual(2);
+    });
+
+    test("should decrement page bulk mode", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "11",
+        "pending",
+        "Do you love ML?",
+        "your_feel.happy~sad",
+        "inserted_at:desc",
+        "",
+        "",
+        "record:1,vector:2,limit:50,order:most"
+      );
+
+      criteria.page.mode = "bulk";
+      criteria.page.client.many = 10;
+      criteria.commit();
+
+      criteria.previousPage();
+
+      expect(criteria.page.client.page).toEqual(1);
+    });
+  });
+
+  describe("isComingToBulkMode", () => {
+    test("should return true when previous mode has focus and now is bulk", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "3",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.page.bulkMode();
+
+      criteria.commit();
+
+      expect(criteria.isComingToBulkMode).toBeTruthy();
+    });
+
+    test("should return true when the criteria does not have any change", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1~10",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.commit();
+
+      expect(criteria.isComingToBulkMode).toBeTruthy();
+    });
+  });
+
+  describe("reset", () => {
+    test("should reset page", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.page.goTo(2);
+
+      criteria.reset();
+
+      expect(criteria.page.client.page).toEqual(1);
+    });
+
+    test("should reset metadata", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "metadata.ge.1le.5",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.metadata.value).toEqual([]);
+    });
+
+    test("should reset sortBy", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "suggestion.relevant.score.asc",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.sortBy.value).toEqual([]);
+    });
+
+    test("should reset response", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "response.ge.1le.5",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.response.value).toEqual([]);
+    });
+
+    test("should reset suggestion", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "content_class.value.operator.and.values.hate.pii",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.suggestion.value).toEqual([]);
+    });
+
+    test("should NO reset similaritySearch", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "record.1.vector.2.limit.50.order.most"
+      );
+
+      criteria.reset();
+
+      expect(criteria.similaritySearch.urlParams).toEqual(
+        "record.1.vector.2.limit.50.order.most"
+      );
+    });
+
+    test("should NO reset status", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.status = "submitted";
+
+      criteria.reset();
+
+      expect(criteria.status).toEqual("submitted");
+    });
+
+    test("should NO reset searchText", () => {
+      const criteria = new RecordCriteria(
+        "datasetId",
+        "1",
+        "pending",
+        "Can AI help us?",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      criteria.reset();
+
+      expect(criteria.searchText).toEqual("Can AI help us?");
     });
   });
 });

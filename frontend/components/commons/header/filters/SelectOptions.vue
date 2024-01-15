@@ -21,7 +21,7 @@
       <base-checkbox
         :id="optionValue(option)"
         v-model="selectedOptions"
-        class="re-checkbox--dark"
+        class="checkbox--dark"
         :value="optionValue(option)"
       >
         {{ optionName(option) }}
@@ -93,7 +93,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.re-checkbox {
+.checkbox {
   margin: 0;
   width: 100% !important;
   cursor: default;

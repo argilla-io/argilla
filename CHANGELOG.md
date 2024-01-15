@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
 - Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 - Warning on feedback dataset settings when leaving page with unsaved changes. ([#4461](https://github.com/argilla-io/argilla/pull/4461))
 - Added pydantic v2 support using the python SDK. ([#4459](https://github.com/argilla-io/argilla/pull/4459))
@@ -30,6 +31,10 @@ These are the section headers that we use:
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+
+### Fixed
+
+- Paginating to a new record, automatically scrolls down to selected form area ([#4333](https://github.com/argilla-io/argilla/pull/4333))
 
 ### Deprecated
 

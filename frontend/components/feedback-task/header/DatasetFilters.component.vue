@@ -27,6 +27,9 @@
         @on-click="resetFilters()"
         >{{ $t("reset") }}</BaseButton
       >
+      <div class="filters--right">
+        <slot></slot>
+      </div>
     </div>
     <div class="filters__list__wrapper" v-if="visibleFilters">
       <transition name="filterAppear" appear>
@@ -86,7 +89,7 @@ export default {
     newFiltersChanged() {
       if (!this.recordCriteria.hasChanges) return;
       if (!this.recordCriteria.isChangingAutomatically) {
-        this.recordCriteria.page = 1;
+        this.recordCriteria.page.goToFirst();
       }
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
@@ -180,6 +183,10 @@ export default {
         background: lighten($primary-color, 44%);
       }
     }
+  }
+  &--right {
+    flex-shrink: 0;
+    margin-left: auto;
   }
   .search-area {
     width: min(100%, 400px);

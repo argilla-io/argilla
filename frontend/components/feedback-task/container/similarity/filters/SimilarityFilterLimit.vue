@@ -1,5 +1,9 @@
 <template>
-  <SimilarityConfigDropdown v-model="selected" :options="[10, 50, 100, 200]" />
+  <SimilarityConfigDropdown
+    :data-title="$t('similarity.records')"
+    v-model="selected"
+    :options="[10, 50, 100, 200]"
+  />
 </template>
 <script>
 export default {
@@ -28,3 +32,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
+}
+</style>

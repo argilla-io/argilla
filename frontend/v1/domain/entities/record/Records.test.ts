@@ -1,3 +1,4 @@
+import { PageCriteria } from "../page/PageCriteria";
 import { Record } from "./Record";
 import { RecordCriteria } from "./RecordCriteria";
 import { Records } from "./Records";
@@ -37,21 +38,33 @@ describe("Records", () => {
 
   describe("existsRecordOn", () => {
     test("should return true when the record exists", () => {
+      const page = new PageCriteria();
+      page.client = {
+        page: 1,
+        many: 10,
+      };
+
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
       ]);
 
-      const exists = records.existsRecordOn(1);
+      const exists = records.existsRecordOn(page);
 
       expect(exists).toBeTruthy();
     });
 
     test("should return false when the record not exists in this page", () => {
+      const page = new PageCriteria();
+      page.client = {
+        page: 1,
+        many: 10,
+      };
+
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 2),
       ]);
 
-      const exists = records.existsRecordOn(1);
+      const exists = records.existsRecordOn(page);
 
       expect(exists).toBeFalsy();
     });
@@ -59,21 +72,33 @@ describe("Records", () => {
 
   describe("getRecordOn", () => {
     test("should return the record when the record exists", () => {
+      const page = new PageCriteria();
+      page.client = {
+        page: 1,
+        many: 10,
+      };
+
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 1),
       ]);
 
-      const record = records.getRecordOn(1);
+      const record = records.getRecordOn(page);
 
       expect(record).toEqual(new Record("1", "1", [], [], null, [], 1, 1));
     });
 
     test("should return undefined when the record not exists in this page", () => {
+      const page = new PageCriteria();
+      page.client = {
+        page: 1,
+        many: 10,
+      };
+
       const records = new Records([
         new Record("1", "1", [], [], null, [], 1, 2),
       ]);
 
-      const record = records.getRecordOn(1);
+      const record = records.getRecordOn(page);
 
       expect(record).toBeUndefined();
     });
@@ -98,11 +123,11 @@ describe("Records", () => {
     });
   });
 
-  describe("getPageToFind", () => {
+  describe("synchronizePagination", () => {
     test("the current page should be from 1 to 10 when no have records", () => {
       const criteria = new RecordCriteria(
         "1",
-        1,
+        "1",
         "pending",
         "",
         "",
@@ -113,15 +138,15 @@ describe("Records", () => {
       );
       const records = new Records([]);
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 1, many: 10 });
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
     });
 
     test("the page should be from 10 and many 10 when the user submit one record in current queue and going to forward", () => {
       const criteria = new RecordCriteria(
         "1",
-        10,
+        "10",
         "pending",
         "",
         "",
@@ -149,17 +174,17 @@ describe("Records", () => {
         updatedAt: "2021-01-01",
       });
 
-      criteria.page += 1;
+      criteria.nextPage();
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 10, many: 10 });
+      expect(criteria.page.server).toEqual({ from: 10, many: 10 });
     });
 
     test("the page should be from 9 and many 10 when the user submit two record in current queue and going to forward", () => {
       const criteria = new RecordCriteria(
         "1",
-        10,
+        "10",
         "pending",
         "",
         "",
@@ -193,17 +218,17 @@ describe("Records", () => {
         updatedAt: "2021-01-01",
       });
 
-      criteria.page += 1;
+      criteria.nextPage();
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 9, many: 10 });
+      expect(criteria.page.server).toEqual({ from: 9, many: 10 });
     });
 
     test("the page should be from 2 and many 1 when the user start with page 3 and go to backward", () => {
       const criteria = new RecordCriteria(
         "1",
-        3,
+        "3",
         "pending",
         "",
         "",
@@ -216,17 +241,17 @@ describe("Records", () => {
         new Record("1", "1", [], [], null, [], 1, 3),
         new Record("2", "1", [], [], null, [], 1, 4),
       ]);
-      criteria.page -= 1;
+      criteria.previousPage();
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 2, many: 1 });
+      expect(criteria.page.server).toEqual({ from: 2, many: 1 });
     });
 
     test("the current page should be from 1 and many 50 when the user is filtering by similarity", () => {
       const criteria = new RecordCriteria(
         "1",
-        3,
+        "3",
         "pending",
         "",
         "",
@@ -237,15 +262,15 @@ describe("Records", () => {
       );
       const records = new Records([]);
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 1, many: 50 });
+      expect(criteria.page.server).toEqual({ from: 1, many: 50 });
     });
 
     test("the current page should be from 1 and many 50 when the user is filtering by similarity but is going to backward", () => {
       const criteria = new RecordCriteria(
         "1",
-        3,
+        "3",
         "pending",
         "",
         "",
@@ -258,17 +283,17 @@ describe("Records", () => {
         new Record("1", "1", [], [], null, [], 1, 3),
         new Record("2", "1", [], [], null, [], 1, 4),
       ]);
-      criteria.page -= 1;
+      criteria.previousPage();
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 1, many: 50 });
+      expect(criteria.page.server).toEqual({ from: 1, many: 50 });
     });
 
     test("the current page should be from 1 and many 10 when the user is paginating forward from page 8 and the queue has 8 records in draft but status is pending", () => {
       const criteria = new RecordCriteria(
         "1",
-        9,
+        "9",
         "pending",
         "",
         "",
@@ -360,9 +385,58 @@ describe("Records", () => {
         ),
       ]);
 
-      const pageToFind = records.getPageToFind(criteria);
+      records.synchronizeQueuePagination(criteria);
 
-      expect(pageToFind).toEqual({ from: 1, many: 10 });
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
+    });
+
+    test("when the user is in bulk mode but was in focus mode the page should be from 1 and many 10", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        "5",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record("1", "1", [], [], null, [], 1, 5),
+      ]);
+
+      criteria.page.bulkMode();
+
+      records.synchronizeQueuePagination(criteria);
+
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
+    });
+
+    test("when the user was in bulk mode but is in focus mode the page should be from 1 and many 10", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        "55",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record("1", "1", [], [], null, [], 1, 55),
+      ]);
+
+      criteria.page.bulkMode();
+      criteria.commit();
+
+      criteria.page.focusMode();
+
+      records.synchronizeQueuePagination(criteria);
+
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
     });
   });
 

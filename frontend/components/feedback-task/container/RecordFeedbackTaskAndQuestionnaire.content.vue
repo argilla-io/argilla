@@ -1,31 +1,31 @@
 <template>
   <BaseLoading v-if="$fetchState.pending || $fetchState.error" />
-  <div v-else class="wrapper">
-    <section class="wrapper__records">
-      <DatasetFiltersComponent :recordCriteria="recordCriteria" />
-      <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
-      <RecordFieldsAndSimilarity
-        :datasetVectors="datasetVectors"
-        :records="records"
-        :recordCriteria="recordCriteria"
-        :record="record"
-      />
-      <div v-if="!records.hasRecordsToAnnotate" class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </section>
 
-    <QuestionsFormComponent
-      v-if="!!record"
-      :key="`${record.id}_questions`"
-      class="wrapper__form"
-      :class="statusClass"
-      :datasetId="recordCriteria.datasetId"
-      :record="record"
-      @on-submit-responses="goToNext"
-      @on-discard-responses="goToNext"
-    />
-  </div>
+  <BulkAnnotation
+    v-else-if="
+      recordCriteria.committed.page.isBulkMode &&
+      recordCriteria.committed.isPending
+    "
+    :record-criteria="recordCriteria"
+    :dataset-vectors="datasetVectors"
+    :records="records"
+    :record="record"
+    :no-records-message="noRecordsMessage"
+    :status-class="statusClass"
+    @on-submit-responses="goToNext"
+    @on-discard-responses="goToNext"
+  />
+  <FocusAnnotation
+    v-else
+    :record-criteria="recordCriteria"
+    :dataset-vectors="datasetVectors"
+    :records="records"
+    :record="record"
+    :no-records-message="noRecordsMessage"
+    :status-class="statusClass"
+    @on-submit-responses="goToNext"
+    @on-discard-responses="goToNext"
+  />
 </template>
 
 <script>
@@ -61,7 +61,7 @@ export default {
       return `You have no ${status} records`;
     },
     statusClass() {
-      return `--${this.record.status}`;
+      return `--${this.record?.status}`;
     },
     shouldShowNotification() {
       return this.record?.isSubmitted && this.record?.isModified;
