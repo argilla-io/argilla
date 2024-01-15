@@ -44,8 +44,6 @@ from argilla.server.models import (
 from argilla.server.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
-    VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
-    VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
 from argilla.server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
 from argilla.server.schemas.v1.metadata_properties import (
@@ -65,6 +63,10 @@ from argilla.server.schemas.v1.questions import (
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
 )
 from argilla.server.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
+from argilla.server.schemas.v1.vector_settings import (
+    VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+    VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+)
 from argilla.server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
@@ -617,6 +619,7 @@ class TestSuiteDatasets:
                     "name": vector_settings.name,
                     "title": vector_settings.title,
                     "dimensions": vector_settings.dimensions,
+                    "dataset_id": str(vector_settings.dataset_id),
                     "inserted_at": vector_settings.inserted_at.isoformat(),
                     "updated_at": vector_settings.updated_at.isoformat(),
                 }
@@ -2014,6 +2017,7 @@ class TestSuiteDatasets:
             "name": "vectors-for-semantic-search",
             "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             "dimensions": 384,
+            "dataset_id": str(vector_settings.dataset_id),
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }

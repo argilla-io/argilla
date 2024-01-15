@@ -45,7 +45,6 @@ from argilla.server.schemas.v1.datasets import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
     TermsFilter,
-    VectorSettings,
 )
 from argilla.server.schemas.v1.records import (
     Record as RecordSchema,
@@ -58,6 +57,7 @@ from argilla.server.schemas.v1.records import (
     RecordsUpdate,
 )
 from argilla.server.schemas.v1.responses import ResponseFilterScope
+from argilla.server.schemas.v1.vector_settings import VectorSettings
 from argilla.server.search_engine import (
     AndFilter,
     FloatMetadataFilter,

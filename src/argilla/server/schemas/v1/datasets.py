@@ -16,10 +16,10 @@ from datetime import datetime
 from typing import List, Literal, Optional, Union
 from uuid import UUID
 
-from fastapi import Query
+import fastapi
 
 from argilla.server.enums import DatasetStatus, SimilarityOrder, SortOrder
-from argilla.server.pydantic_v1 import BaseModel, Field, PositiveInt, constr, root_validator
+from argilla.server.pydantic_v1 import BaseModel, Field, constr, root_validator
 from argilla.server.schemas.base import UpdateSchema
 from argilla.server.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla.server.schemas.v1.questions import QuestionName
@@ -38,12 +38,6 @@ DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
 DATASET_GUIDELINES_MAX_LENGTH = 10000
 
-VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
-VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
-VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
-VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH = 1
-VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
-
 TERMS_FILTER_VALUES_MIN_ITEMS = 1
 TERMS_FILTER_VALUES_MAX_ITEMS = 250
 
@@ -52,6 +46,18 @@ FILTERS_AND_MAX_ITEMS = 50
 
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
+
+DatasetName = Annotated[
+    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
+    Field(..., description="Dataset name"),
+]
+
+
+DatasetGuidelines = Annotated[
+    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
+    Field(..., description="Dataset guidelines"),
+]
 
 
 class Dataset(BaseModel):
@@ -71,17 +77,6 @@ class Dataset(BaseModel):
 
 class Datasets(BaseModel):
     items: List[Dataset]
-
-
-DatasetName = Annotated[
-    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
-    Field(..., description="Dataset name"),
-]
-
-DatasetGuidelines = Annotated[
-    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
-    Field(..., description="Dataset guidelines"),
-]
 
 
 class DatasetCreate(BaseModel):
@@ -115,48 +110,6 @@ class DatasetMetrics(BaseModel):
     responses: ResponseMetrics
 
 
-class VectorSettings(BaseModel):
-    id: UUID
-    name: str
-    title: str
-    dimensions: int
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-    def check_vector(self, value: List[float]) -> None:
-        num_elements = len(value)
-        if num_elements != self.dimensions:
-            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
-
-
-class VectorsSettings(BaseModel):
-    items: List[VectorSettings]
-
-
-VectorSettingsTitle = Annotated[
-    constr(
-        min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
-        max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
-    ),
-    Field(..., description="The title of the vector settings"),
-]
-
-
-class VectorSettingsCreate(BaseModel):
-    name: str = Field(
-        ...,
-        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
-        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
-        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
-        description="The title of the vector settings",
-    )
-    title: VectorSettingsTitle
-    dimensions: PositiveInt
-
-
 class MetadataParsedQueryParam:
     def __init__(self, string: str):
         k, *v = string.split(":", maxsplit=1)
@@ -166,7 +119,7 @@ class MetadataParsedQueryParam:
 
 
 class MetadataQueryParams(BaseModel):
-    metadata: List[str] = Field(Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+    metadata: List[str] = Field(fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
