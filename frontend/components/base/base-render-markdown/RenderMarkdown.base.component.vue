@@ -11,7 +11,9 @@ const preprocess = (html) => {
   return html.replace(/[^\S\r\n]+$/gm, "");
 };
 const postprocess = (html) => {
-  return DOMPurify.sanitize(html);
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ["embed"],
+  });
 };
 
 DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
