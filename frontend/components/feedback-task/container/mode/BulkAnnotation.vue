@@ -174,7 +174,12 @@ export default {
       if (allSuccessful) this.$emit("on-discard-responses");
     },
     async onSaveDraft() {
-      await this.saveAsDraft(this.selectedRecords, this.record);
+      const allSuccessful = await this.saveAsDraft(
+        this.selectedRecords,
+        this.record
+      );
+
+      if (allSuccessful) this.selectedRecords = [];
     },
     toggleAllRecords() {
       if (this.selectedRecords.length === this.recordsOnPage.length) {
