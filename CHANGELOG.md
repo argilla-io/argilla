@@ -16,25 +16,28 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.22.0](https://github.com/argilla-io/argilla/compare/v1.21.0...v1.22.0)
+
 ### Added
 
-- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
-- Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Added Bulk annotation support. ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+- Restore filters from feedback dataset settings. ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
 - Warning on feedback dataset settings when leaving page with unsaved changes. ([#4461](https://github.com/argilla-io/argilla/pull/4461))
 - Added pydantic v2 support using the python SDK. ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- Added `vector_settings` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
+- Added integration for `sentence-transformers` using `SentenceTransformersExtractor` to configure `vector_settings` in `FeedbackDataset` and `FeedbackRecord`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 
 ### Changed
 
 - Module `argilla.cli.server` definitions have been moved to `argilla.server.cli` module. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
-- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error ([#4454](https://github.com/argilla-io/argilla/pull/4454))
-- Added pydantic v2 support using the python SDK ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- [breaking] Changed `vector_settings_by_name` for generic `property_by_name` usage, which will return `None` instead of raising an error. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 
 ### Fixed
 
-- Paginating to a new record, automatically scrolls down to selected form area ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+- Paginating to a new record, automatically scrolls down to selected form area. ([#4333](https://github.com/argilla-io/argilla/pull/4333))
 
 ### Deprecated
 
@@ -43,8 +46,6 @@ These are the section headers that we use:
 ### Removed
 
 - The deprecated `python -m argilla database` command has been removed. ([#4472](https://github.com/argilla-io/argilla/pull/4472))
-- Added `vector_settings` to the `__repr__` method of the `FeedbackDataset` and `RemoteFeedbackDataset`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
-- Added integration for `sentence-transformers` using `SentenceTransformersExtractor` to configure `vector_settings` in `FeedbackDataset` and `FeedbackRecord`. ([#4454](https://github.com/argilla-io/argilla/pull/4454))
 
 ## [1.21.0](https://github.com/argilla-io/argilla/compare/v1.20.0...v1.21.0)
 
