@@ -100,7 +100,7 @@ class ResponsesBulkCreate(BaseModel):
     items: List[ResponseUpsert] = Field(
         ...,
         min_items=RESPONSES_BULK_CREATE_MIN_ITEMS,
-        max_items=RESPONSES_BULK_CREATE_MAX_ITEMS,
+        # max_items=RESPONSES_BULK_CREATE_MAX_ITEMS,
     )
 
 
