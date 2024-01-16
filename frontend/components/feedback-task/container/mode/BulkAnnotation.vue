@@ -71,7 +71,7 @@
 
       <QuestionsFormComponent
         v-if="!!record"
-        :key="`${record.id}_questions`"
+        :key="`${recordCriteria.committed.page.client.page}_${record.id}_questions`"
         class="wrapper__form"
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
@@ -163,7 +163,7 @@ export default {
         this.record
       );
 
-      if (allSuccessful) this.$emit("on-submit-responses");
+      if (allSuccessful) this.selectedRecords = [];
     },
     async onDiscard() {
       const allSuccessful = await this.discard(
@@ -171,7 +171,7 @@ export default {
         this.record
       );
 
-      if (allSuccessful) this.$emit("on-discard-responses");
+      if (allSuccessful) this.selectedRecords = [];
     },
     async onSaveDraft() {
       const allSuccessful = await this.saveAsDraft(
