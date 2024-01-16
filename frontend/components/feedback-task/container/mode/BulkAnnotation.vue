@@ -183,6 +183,10 @@ export default {
         this.selectedRecords = [...this.recordsOnPage];
       }
     },
+    resetScroll() {
+      if (!this.$refs.bulkScrollableArea) return;
+      this.$refs.bulkScrollableArea.scrollTop = 0;
+    },
   },
   watch: {
     "recordCriteria.status"() {
@@ -190,9 +194,7 @@ export default {
     },
     "recordCriteria.committed.page"() {
       this.selectedRecords = [];
-      this.$nextTick(() => {
-        this.$refs.bulkScrollableArea.scrollTop = 0;
-      });
+      this.resetScroll();
     },
     "recordCriteria.page.client.many"() {
       this.recordCriteria.page.goToFirst();
