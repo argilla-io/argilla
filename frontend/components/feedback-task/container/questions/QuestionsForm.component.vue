@@ -35,8 +35,8 @@
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
-          :disabled="isDiscardDisabled"
-          :data-title="draftSavingTooltip"
+          :disabled="isDiscardDisabled || isSaving"
+          :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onDiscard"
         >
           <span
@@ -50,8 +50,8 @@
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
-          :disabled="isDraftSaveDisabled"
-          :data-title="draftSavingTooltip"
+          :disabled="isDraftSaveDisabled || isSaving"
+          :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onSaveDraft"
         >
           <span v-if="!isDraftSaving"
@@ -71,11 +71,15 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading="isSubmitting"
-          :disabled="!questionAreCompletedCorrectly || isSubmitDisabled"
+          :disabled="
+            !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
+          "
           :data-title="
-            !questionAreCompletedCorrectly && !isSubmitDisabled
-              ? $t('to_submit_complete_required')
-              : submitTooltip
+            !isSaving
+              ? !questionAreCompletedCorrectly && !isSubmitDisabled
+                ? $t('to_submit_complete_required')
+                : submitTooltip
+              : null
           "
           @on-click="onSubmit"
         >
@@ -175,6 +179,9 @@ export default {
     questionAreCompletedCorrectly() {
       return this.record.questionAreCompletedCorrectly();
     },
+    isSaving() {
+      return this.isDraftSaving || this.isDiscarding || this.isSubmitting;
+    },
   },
   watch: {
     record: {
@@ -258,17 +265,22 @@ export default {
       }
     },
     onSubmit() {
-      if (this.isSubmitDisabled || !this.questionAreCompletedCorrectly) return;
+      if (
+        this.isSubmitDisabled ||
+        this.isSaving ||
+        !this.questionAreCompletedCorrectly
+      )
+        return;
 
       this.$emit("on-submit-responses");
     },
     onDiscard() {
-      if (this.isDiscardDisabled) return;
+      if (this.isDiscardDisabled || this.isSaving) return;
 
       this.$emit("on-discard-responses");
     },
     onSaveDraft() {
-      if (this.isDraftSaveDisabled) return;
+      if (this.isDraftSaveDisabled || this.isSaving) return;
 
       this.$emit("on-save-draft");
     },

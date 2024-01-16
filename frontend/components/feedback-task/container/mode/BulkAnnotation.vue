@@ -10,6 +10,13 @@
             "
             :recordCriteria="recordCriteria"
         /></DatasetFiltersComponent>
+        <SimilarityRecordReference
+          v-show="recordCriteria.isFilteringBySimilarity"
+          v-if="!!records.reference"
+          :fields="records.reference.fields"
+          :recordCriteria="recordCriteria"
+          :availableVectors="datasetVectors"
+        />
         <div class="wrapper__records__header">
           <div class="wrapper__records__header--left">
             <BaseCheckbox
@@ -38,14 +45,11 @@
           />
           <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
         </div>
-        <SimilarityRecordReference
-          v-show="recordCriteria.isFilteringBySimilarity"
-          v-if="!!records.reference"
-          :fields="records.reference.fields"
-          :recordCriteria="recordCriteria"
-          :availableVectors="datasetVectors"
-        />
-        <div class="bulk__records snap" v-if="records.hasRecordsToAnnotate">
+        <div
+          ref="bulkScrollableArea"
+          class="bulk__records snap"
+          v-if="records.hasRecordsToAnnotate"
+        >
           <Record
             class="snap-child"
             :class="{
@@ -170,7 +174,12 @@ export default {
       if (allSuccessful) this.$emit("on-discard-responses");
     },
     async onSaveDraft() {
-      await this.saveAsDraft(this.selectedRecords, this.record);
+      const allSuccessful = await this.saveAsDraft(
+        this.selectedRecords,
+        this.record
+      );
+
+      if (allSuccessful) this.selectedRecords = [];
     },
     toggleAllRecords() {
       if (this.selectedRecords.length === this.recordsOnPage.length) {
@@ -179,6 +188,10 @@ export default {
         this.selectedRecords = [...this.recordsOnPage];
       }
     },
+    resetScroll() {
+      if (!this.$refs.bulkScrollableArea) return;
+      this.$refs.bulkScrollableArea.scrollTop = 0;
+    },
   },
   watch: {
     "recordCriteria.status"() {
@@ -186,6 +199,7 @@ export default {
     },
     "recordCriteria.committed.page"() {
       this.selectedRecords = [];
+      this.resetScroll();
     },
     "recordCriteria.page.client.many"() {
       this.recordCriteria.page.goToFirst();
