@@ -4,7 +4,7 @@
       ref="prevButton"
       class="pagination__button"
       :disabled="isFirstPage"
-      :title="$t('shortcuts.pagination.go_to_previous_record')"
+      :data-title="$t('shortcuts.pagination.go_to_previous_record')"
       @click="goToPrevPage"
     >
       <svgicon name="chevron-left" width="12" height="12" />

@@ -77,13 +77,27 @@ export const useBulkAnnotationViewModel = () => {
     try {
       isDraftSaving.value = true;
 
-      await saveDraftUseCase.execute(records, recordReference);
+      const allSuccessful = await saveDraftUseCase.execute(
+        records,
+        recordReference
+      );
+
+      if (!allSuccessful) {
+        Notification.dispatch("notify", {
+          message: t("some_records_failed_to_annotate"),
+          type: "error",
+        });
+      }
 
       await debounceForSubmit.wait();
+
+      return allSuccessful;
     } catch (error) {
     } finally {
       isDraftSaving.value = false;
     }
+
+    return false;
   };
 
   return {

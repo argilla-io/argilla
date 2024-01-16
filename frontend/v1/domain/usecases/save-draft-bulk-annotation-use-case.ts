@@ -9,7 +9,7 @@ export class SaveDraftBulkAnnotationUseCase {
     private readonly eventDispatcher: IEventDispatcher
   ) {}
 
-  async execute(records: Record[], recordReference: Record): Promise<void> {
+  async execute(records: Record[], recordReference: Record) {
     records.forEach((record) => record.answerWith(recordReference));
 
     const responses = await this.recordRepository.saveDraftBulkRecordResponse(
@@ -27,5 +27,7 @@ export class SaveDraftBulkAnnotationUseCase {
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
     );
+
+    return responses.every((r) => r.success);
   }
 }

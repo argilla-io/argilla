@@ -13,7 +13,7 @@
     class="similarity-filter"
   >
     <template slot="dropdown-header">
-      <BaseButton class="small">{{ $t("findSimilar") }}</BaseButton>
+      <BaseButton class="small">{{ $t("similarity.findSimilar") }}</BaseButton>
     </template>
     <template slot="dropdown-content">
       <div class="similarity-filter__dropdown">

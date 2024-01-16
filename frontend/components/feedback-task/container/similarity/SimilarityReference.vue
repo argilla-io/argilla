@@ -37,7 +37,11 @@
 
     <div class="similarity-reference__right">
       <BaseButton
-        :data-title="$t('similarity.expand')"
+        :data-title="
+          !visibleReferenceRecord
+            ? $t('similarity.expand')
+            : $t('similarity.collapse')
+        "
         class="similarity-reference__button-icon"
         :title="visibleReferenceRecord ? $t('minimize') : $t('expand')"
         @on-click="

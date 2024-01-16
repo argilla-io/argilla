@@ -94,7 +94,8 @@
     "similarTo": "Similar to",
     "similarityScore": "Similarity Score",
     "similarUsing": "similar using",
-    "expand": "Expand"
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "filters": "Filters",
   "filterBy": "Filter by...",
