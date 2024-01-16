@@ -13,7 +13,7 @@ interface ServerPagination {
 }
 
 export class PageCriteria extends Criteria {
-  public readonly options = [10, 25, 50, 100];
+  public readonly options = [10, 25, 50, 100, 250, 500, 750, 1000];
   public mode: "focus" | "bulk" = "focus";
   public client: BrowserPagination;
   private _server: ServerPagination;
