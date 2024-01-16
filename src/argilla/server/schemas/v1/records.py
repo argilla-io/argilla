@@ -13,23 +13,35 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from fastapi import HTTPException
+import fastapi
+from typing_extensions import Annotated
 
-from argilla.server.enums import RecordInclude, RecordSortField
+from argilla.server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
 from argilla.server.pydantic_v1.utils import GetterDict
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.responses import Response, UserResponseCreate
-from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate
+from argilla.server.schemas.v1.metadata_properties import MetadataPropertyName
+from argilla.server.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
+from argilla.server.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
+from argilla.server.search_engine import TextQuery
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000
 
 RECORDS_UPDATE_MIN_ITEMS = 1
 RECORDS_UPDATE_MAX_ITEMS = 1000
+
+FILTERS_AND_MIN_ITEMS = 1
+FILTERS_AND_MAX_ITEMS = 50
+
+TERMS_FILTER_VALUES_MIN_ITEMS = 1
+TERMS_FILTER_VALUES_MAX_ITEMS = 250
+
+SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
+SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
 
 
 class RecordGetterDict(GetterDict):
@@ -186,3 +198,109 @@ class RecordsCreate(BaseModel):
 class RecordsUpdate(BaseModel):
     # TODO: review this definition and align to create model
     items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
+
+
+class MetadataParsedQueryParam:
+    def __init__(self, string: str):
+        k, *v = string.split(":", maxsplit=1)
+
+        self.name: str = k
+        self.value: str = "".join(v).strip()
+
+
+class MetadataQueryParams(BaseModel):
+    metadata: List[str] = Field(fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
+
+    @property
+    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
+        # TODO: Validate metadata fields names from query params
+        return [MetadataParsedQueryParam(q) for q in self.metadata]
+
+
+class VectorQuery(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+    order: SimilarityOrder = SimilarityOrder.most_similar
+
+    @root_validator(skip_on_failure=True)
+    def check_required(cls, values: dict) -> dict:
+        """Check that either 'record_id' or 'value' is provided"""
+        record_id = values.get("record_id")
+        value = values.get("value")
+
+        if bool(record_id) == bool(value):
+            raise ValueError("Either 'record_id' or 'value' must be provided")
+
+        return values
+
+
+class Query(BaseModel):
+    text: Optional[TextQuery] = None
+    vector: Optional[VectorQuery] = None
+
+
+class MetadataFilterScope(BaseModel):
+    entity: Literal["metadata"]
+    metadata_property: MetadataPropertyName
+
+
+FilterScope = Annotated[
+    Union[RecordFilterScope, ResponseFilterScope, SuggestionFilterScope, MetadataFilterScope],
+    Field(..., discriminator="entity"),
+]
+
+
+class Order(BaseModel):
+    scope: FilterScope
+    order: SortOrder
+
+
+class TermsFilter(BaseModel):
+    type: Literal["terms"]
+    scope: FilterScope
+    values: List[str] = Field(..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS)
+
+
+class RangeFilter(BaseModel):
+    type: Literal["range"]
+    scope: FilterScope
+    ge: Optional[float]
+    le: Optional[float]
+
+    @root_validator(skip_on_failure=True)
+    def check_ge_and_le(cls, values: dict) -> dict:
+        ge, le = values.get("ge"), values.get("le")
+
+        if ge is None and le is None:
+            raise ValueError("At least one of 'ge' or 'le' must be provided")
+
+        if ge is not None and le is not None and ge > le:
+            raise ValueError("'ge' must have a value less than or equal to 'le'")
+
+        return values
+
+
+Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="type")]
+
+
+class Filters(BaseModel):
+    and_: List[Filter] = Field(None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS)
+
+
+class SearchRecordsQuery(BaseModel):
+    query: Optional[Query]
+    filters: Optional[Filters]
+    sort: Optional[List[Order]] = Field(
+        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+    )
+
+
+class SearchRecord(BaseModel):
+    record: Record
+    query_score: Optional[float]
+
+
+class SearchRecordsResult(BaseModel):
+    items: List[SearchRecord]
+    total: int = 0

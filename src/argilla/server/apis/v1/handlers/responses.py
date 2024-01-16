@@ -22,9 +22,7 @@ from argilla.server.contexts import datasets
 from argilla.server.database import get_async_db
 from argilla.server.models import Record, Response, User
 from argilla.server.policies import RecordPolicyV1, ResponsePolicyV1, authorize
-from argilla.server.schemas.v1.responses import (
-    Response as ResponseSchema,
-)
+from argilla.server.schemas.v1.responses import Response as ResponseSchema
 from argilla.server.schemas.v1.responses import (
     ResponseBulk,
     ResponseBulkError,
