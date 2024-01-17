@@ -212,7 +212,3 @@ def create_token_highlights(
 
     html_str.append("</p>")
     return "".join(html_str)
-
-
-def pdf_to_html():
-    pass
