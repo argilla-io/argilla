@@ -71,10 +71,16 @@ export class Records {
           many: page.client.many,
         });
       } else if (this.firstRecord.page > page.client.page)
-        return page.synchronizePagination({
-          from: this.firstRecord.page - 1,
-          many: 1,
-        });
+        if (page.isBulkMode)
+          return page.synchronizePagination({
+            from: this.firstRecord.page - page.client.many,
+            many: page.client.many,
+          });
+
+      return page.synchronizePagination({
+        from: this.firstRecord.page - 1,
+        many: 1,
+      });
     }
 
     page.synchronizePagination({
