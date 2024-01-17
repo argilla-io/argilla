@@ -13,6 +13,8 @@ import {
 } from "@/v1/infrastructure/repositories";
 
 export class LoadRecordsToAnnotateUseCase {
+  private isBuffering = false;
+
   constructor(
     private readonly recordRepository: RecordRepository,
     private readonly questionRepository: QuestionRepository,
@@ -23,13 +25,13 @@ export class LoadRecordsToAnnotateUseCase {
   async load(criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
 
-    let newRecords = await this.loadRecords(criteria);
+    let newRecords = await this.getRecords(criteria);
     let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && !page.isFirstPage()) {
       criteria.page.goToFirst();
 
-      newRecords = await this.loadRecords(criteria);
+      newRecords = await this.getRecords(criteria);
 
       isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
     }
@@ -48,16 +50,15 @@ export class LoadRecordsToAnnotateUseCase {
   async paginate(criteria: RecordCriteria): Promise<boolean> {
     const { page } = criteria;
     const records = this.recordsStorage.get();
+
     let isNextRecordExist = records.existsRecordOn(page);
 
-    if (!criteria.isFilteringBySimilarity) {
-      if (!isNextRecordExist) {
-        const newRecords = await this.loadRecords(criteria);
+    if (!isNextRecordExist) {
+      await this.loadBuffer(criteria);
 
-        records.append(newRecords);
-
-        isNextRecordExist = records.existsRecordOn(page);
-      }
+      isNextRecordExist = records.existsRecordOn(page);
+    } else {
+      this.loadBuffer(criteria);
     }
 
     if (isNextRecordExist) {
@@ -68,12 +69,34 @@ export class LoadRecordsToAnnotateUseCase {
       criteria.commit();
     }
 
-    this.recordsStorage.save(records);
-
     return isNextRecordExist;
   }
 
-  private async loadRecords(criteria: RecordCriteria) {
+  private async loadBuffer(criteria: RecordCriteria) {
+    const { page, isFilteringBySimilarity } = criteria;
+    if (isFilteringBySimilarity) return;
+
+    if (this.isBuffering) return;
+
+    this.isBuffering = true;
+
+    try {
+      const records = this.recordsStorage.get();
+
+      if (records.getBufferedRecordsOn(page) > 5) return;
+
+      const newRecords = await this.getRecords(criteria);
+
+      records.append(newRecords);
+
+      this.recordsStorage.save(newRecords);
+    } catch {
+    } finally {
+      this.isBuffering = false;
+    }
+  }
+
+  private async getRecords(criteria: RecordCriteria) {
     const { datasetId } = criteria;
     const savedRecords = this.recordsStorage.get();
     savedRecords.synchronizeQueuePagination(criteria);
