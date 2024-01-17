@@ -18,10 +18,16 @@ These are the section headers that we use:
 
 ### Added
 
-- Bulk annotation ([#4333](https://github.com/argilla-io/argilla/pull/4333))
-- Restore filters from feedback dataset settings ([#4461])(https://github.com/argilla-io/argilla/pull/4461)
+- Bulk annotation. ([#4333](https://github.com/argilla-io/argilla/pull/4333))
+- Restore filters from feedback dataset settings. ([#4461](https://github.com/argilla-io/argilla/pull/4461))
 - Warning on feedback dataset settings when leaving page with unsaved changes. ([#4461](https://github.com/argilla-io/argilla/pull/4461))
 - Added pydantic v2 support using the python SDK. ([#4459](https://github.com/argilla-io/argilla/pull/4459))
+- API v1 responses returning `Record` schema now always include `dataset_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
+- API v1 responses returning `Response` schema now always include `record_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
+- API v1 responses returning `Question` schema now always include `dataset_id` attribute. ([#4487](https://github.com/argilla-io/argilla/pull/4487))
+- API v1 responses returning `Field` schema now always include `dataset_id` attribute. ([#4488](https://github.com/argilla-io/argilla/pull/4488))
+- API v1 responses returning `MetadataProperty` schema now always include `dataset_id` attribute. ([#4489](https://github.com/argilla-io/argilla/pull/4489))
+- API v1 responses returning `VectorSettings` schema now always include `dataset_id` attribute. ([#4490](https://github.com/argilla-io/argilla/pull/4490))
 
 ### Changed
 

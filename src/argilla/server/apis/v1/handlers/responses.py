@@ -22,9 +22,7 @@ from argilla.server.database import get_async_db
 from argilla.server.errors.future import NotFoundError
 from argilla.server.models import Response, User
 from argilla.server.policies import ResponsePolicyV1, authorize
-from argilla.server.schemas.v1.responses import (
-    Response as ResponseSchema,
-)
+from argilla.server.schemas.v1.responses import Response as ResponseSchema
 from argilla.server.schemas.v1.responses import (
     ResponsesBulk,
     ResponsesBulkCreate,
