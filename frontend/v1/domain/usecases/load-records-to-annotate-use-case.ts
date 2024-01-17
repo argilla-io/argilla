@@ -45,6 +45,8 @@ export class LoadRecordsToAnnotateUseCase {
     criteria.commit();
 
     this.recordsStorage.save(newRecords);
+
+    this.loadBuffer(criteria);
   }
 
   async paginate(criteria: RecordCriteria): Promise<boolean> {
@@ -67,37 +69,19 @@ export class LoadRecordsToAnnotateUseCase {
     return isNextRecordExist;
   }
 
-  private async loadBuffer(criteria: RecordCriteria) {
+  private loadBuffer(criteria: RecordCriteria) {
     const { page, isFilteringBySimilarity } = criteria;
+
     if (isFilteringBySimilarity) return;
-    if (this.isBuffering) return;
 
     const records = this.recordsStorage.get();
-
-    const onGetBufferedRecords = async () => {
-      try {
-        this.isBuffering = true;
-
-        const newRecords = await this.getRecords(criteria);
-
-        records.append(newRecords);
-
-        this.recordsStorage.save(records);
-      } catch {
-      } finally {
-        this.isBuffering = false;
-      }
-    };
-
     const isNextRecordExist = records.existsRecordOn(page);
 
-    if (!isNextRecordExist) {
-      return await onGetBufferedRecords();
-    } else if (!records.hasNecessaryBuffering(page)) {
-      onGetBufferedRecords();
-    }
+    if (!isNextRecordExist) return this.getNextRecords(criteria);
 
-    return Promise.resolve();
+    if (!records.hasNecessaryBuffering(page)) {
+      this.getNextRecords(criteria);
+    }
   }
 
   private async getRecords(criteria: RecordCriteria) {
@@ -224,5 +208,29 @@ export class LoadRecordsToAnnotateUseCase {
     }
 
     return new Records(recordsToAnnotate, recordsFromBackend.total);
+  }
+
+  private async getNextRecords(criteria: RecordCriteria) {
+    if (this.isBuffering) return;
+
+    const records = this.recordsStorage.get();
+    const newCriteria = criteria.clone();
+
+    try {
+      this.isBuffering = true;
+
+      if (criteria.page.isBulkMode && !criteria.isPaginatingBackward) {
+        newCriteria.nextPage();
+      }
+
+      const newRecords = await this.getRecords(newCriteria);
+
+      records.append(newRecords);
+
+      this.recordsStorage.save(records);
+    } catch {
+    } finally {
+      this.isBuffering = false;
+    }
   }
 }
