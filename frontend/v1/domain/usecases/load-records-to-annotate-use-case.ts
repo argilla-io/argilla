@@ -49,9 +49,10 @@ export class LoadRecordsToAnnotateUseCase {
 
   async paginate(criteria: RecordCriteria): Promise<boolean> {
     const { page } = criteria;
-    const records = this.recordsStorage.get();
 
     await this.loadBuffer(criteria);
+
+    const records = this.recordsStorage.get();
 
     const isNextRecordExist = records.existsRecordOn(page);
 
@@ -81,7 +82,7 @@ export class LoadRecordsToAnnotateUseCase {
 
         records.append(newRecords);
 
-        this.recordsStorage.save(newRecords);
+        this.recordsStorage.save(records);
       } catch {
       } finally {
         this.isBuffering = false;
@@ -91,7 +92,7 @@ export class LoadRecordsToAnnotateUseCase {
     const isNextRecordExist = records.existsRecordOn(page);
 
     if (!isNextRecordExist) {
-      await onGetBufferedRecords();
+      return await onGetBufferedRecords();
     } else if (!records.hasNecessaryBuffering(page)) {
       onGetBufferedRecords();
     }
