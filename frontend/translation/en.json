@@ -89,7 +89,7 @@
     "name": "✨ Suggestion"
   },
   "similarity": {
-    "records": "Records",
+    "record-number": "Record number",
     "findSimilar": "Find similar",
     "similarTo": "Similar to",
     "similarityScore": "Similarity Score",
