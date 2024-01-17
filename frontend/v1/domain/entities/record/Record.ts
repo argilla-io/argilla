@@ -75,6 +75,18 @@ export class Record {
     this.initialize();
   }
 
+  answerWith(recordReference: Record) {
+    this.questions.forEach((question) => {
+      const questionReference = recordReference.questions.find(
+        (q) => q.id === question.id
+      );
+
+      if (!questionReference) return;
+
+      question.clone(questionReference);
+    });
+  }
+
   initialize() {
     this.completeQuestion();
 
@@ -111,16 +123,15 @@ export class Record {
 
   private completeQuestion() {
     return this.questions.map((question) => {
-      const answerForQuestion = this.answer?.value[question.name];
+      const answer = this.answer?.value[question.name];
       const suggestion = this.suggestions?.find(
         (s) => s.questionId === question.id
       );
       question.addSuggestion(suggestion);
-
       if (this.isPending || this.isDraft) {
-        question.complete(answerForQuestion);
+        question.responseIfUnanswered(answer);
       } else {
-        question.forceComplete(answerForQuestion);
+        question.response(answer);
       }
 
       return question;

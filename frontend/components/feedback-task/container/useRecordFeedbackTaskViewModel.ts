@@ -25,12 +25,16 @@ export const useRecordFeedbackTaskViewModel = ({
     }
   };
 
-  const paginateRecords = (criteria: RecordCriteria) => {
+  const paginateRecords = async (criteria: RecordCriteria) => {
+    let isNextRecordExist = false;
+
     try {
-      return getRecords.paginate(criteria);
+      isNextRecordExist = await getRecords.paginate(criteria);
     } catch (err) {
       criteria.reset();
     }
+
+    return isNextRecordExist;
   };
 
   const loadVectors = async () => {

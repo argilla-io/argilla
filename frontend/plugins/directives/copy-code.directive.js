@@ -6,7 +6,7 @@ Vue.directive("copy-code", {
     const preElements = el.getElementsByTagName("PRE");
 
     for (const pre of preElements) {
-      const code = pre.children[0].innerText;
+      const code = pre.children[0] ? pre.children[0].innerText : pre.innerText;
 
       const container = document.createElement("div");
       container.style.position = "relative";

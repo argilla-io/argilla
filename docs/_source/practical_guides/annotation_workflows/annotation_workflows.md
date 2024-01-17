@@ -38,5 +38,5 @@ active_learning
 weak_supervision
 semantic_search
 job_scheduling
-text_descriptives_as_metadata
+add_text_descriptives_as_metadata
 ```

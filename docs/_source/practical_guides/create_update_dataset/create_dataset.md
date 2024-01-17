@@ -146,8 +146,9 @@ vectors_settings = [
     )
 ]
 ```
+
 ```{note}
-You can also define vector settings after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_vector_settings` method as explained [here](/practical_guides/create_update_dataset/vectors.md).
+You can also define vector settings after the dataset has been configured or add them to an existing dataset in Argilla. To do that use the `add_vector_settings` method. In addition, you can now add text descriptives of your fields as metadata automatically with the `SentenceTransformersExtractor`. For more info, take a look [here](/practical_guides/create_update_dataset/vectors.md).
 ```
 
 ##### Define `guidelines`

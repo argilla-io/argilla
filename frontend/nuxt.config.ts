@@ -18,7 +18,6 @@
 import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
-import { translations } from "./translation";
 
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
@@ -117,14 +116,16 @@ const config: NuxtConfig = {
   ],
 
   i18n: {
-    locales: ["en"],
+    locales: [
+      {
+        code: "en",
+        file: "en.json",
+      },
+    ],
+    lazy: true,
+    langDir: "translation/",
     defaultLocale: "en",
     strategy: "no_prefix",
-    vueI18n: {
-      messages: {
-        en: translations.en,
-      },
-    },
   },
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)

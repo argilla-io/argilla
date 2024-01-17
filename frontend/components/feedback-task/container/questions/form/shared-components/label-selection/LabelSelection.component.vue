@@ -63,11 +63,14 @@
             round: !multiple,
           }"
           :for="option.id"
-          :title="
+          :data-title="
             hasSuggestion(option.text)
               ? `${$t('suggestion.name')}: ${option.text}`
-              : option.text
+              : option.isSelected
+              ? $t('annotation')
+              : null
           "
+          :title="option.text"
         >
           <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
           <span>{{ option.text }}</span>
@@ -145,7 +148,9 @@ export default {
             }
 
             if (options.length > 0) {
-              options[0].focus();
+              options[0].focus({
+                preventScroll: true,
+              });
             } else {
               this.$refs.searchComponentRef?.searchInputRef.focus();
             }
@@ -439,6 +444,12 @@ input[type="checkbox"] {
 .no-result {
   display: block;
   height: $base-space * 4;
+}
+
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 
 .shuffle-move {

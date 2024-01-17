@@ -20,20 +20,19 @@
     <p class="metrics__title">Progress</p>
     <div class="metrics__info">
       <p class="metrics__info__name">Total</p>
-      <span class="metrics__info__counter"
-        >{{ metrics.respondedProgress }}%</span
-      >
+      <span class="metrics__info__counter">{{
+        metrics.progress | percent
+      }}</span>
     </div>
     <div class="metrics__numbers">
-      <span>{{ metrics.responded | formatNumber }}</span
-      >/{{ metrics.total | formatNumber }}
+      <span v-text="metrics.responded" />/{{ metrics.total }}
     </div>
     <BaseProgress
       re-mode="determinate"
       :multiple="true"
-      :progress="metrics.submittedProgress"
-      :progress-secondary="metrics.draftProgress"
-      :progress-tertiary="metrics.discardedProgress"
+      :progress="metrics.percentage.submitted"
+      :progress-secondary="metrics.percentage.discarded"
+      :progress-tertiary="metrics.percentage.draft"
       :progress-bg="itemColor(0)"
       :color="itemColor(2)"
       :color-secondary="itemColor(1)"

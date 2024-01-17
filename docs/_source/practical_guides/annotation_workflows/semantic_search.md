@@ -80,7 +80,6 @@ See https://github.com/opensearch-project/k-NN/issues/1286
 This may result in unexpected results when combining filtering with vector search with this engine.
 :::
 
-
 ## Add vectors to your data
 
 The first and most important thing to do before leveraging semantic search is to turn text into a numerical representation: a vector. In practical terms, you can think of a vector as an array or list of numbers. You can associate this list of numbers with an Argilla Record by using the aforementioned `vectors` field. But the question is: **how do you create these vectors?**
@@ -103,38 +102,7 @@ If you run into issues when logging records with large vectors using `rg.log`, w
 
 SentenceTransformers is a Python framework for state-of-the-art sentence, text and image embeddings. There are dozens of [pre-trained models available](https://huggingface.co/models?pipeline_tag=sentence-similarity&sort=downloads) on the Hugging Face Hub.
 
-The code below will load a dataset from the Hub, encode the `text` field, and create the `vectors` field which will contain only one key (`mini-lm-sentence-transformers`).
-
-```{note}
-
-Vector keys are arbitrary names that will be used as a name for the vector and shown in the UI if there's more than 1 so users can decide which vector to use for finding similar records. Remember you can associate several vectors to one record by using different keys.
-```
-
-```{warning}
-Due to the vector dimension limitation of Elasticsearch and Opensearch Lucene-based engines, currently, you cannot register vectors with dimensions greater than `1024`.
-```
-
-To run the code below you need to install `sentence_transformers` and `datasets` with pip: `pip install sentence_transformers datasets`
-
-```python
-from sentence_transformers import SentenceTransformer
-
-from datasets import load_dataset
-
-# Define fast version of sentence transformers
-encoder = SentenceTransformer("BAAI/bge-small-en", device="cpu")
-
-# Load dataset
-dataset = load_dataset("PolyAI/banking77", split="test")
-
-# Encode text field using batched computation
-dataset = dataset.map(lambda batch: {"vectors": encoder.encode(batch["text"])}, batch_size=32, batched=True)
-
-# Turn vectors into a dictionary
-dataset = dataset.map(
-    lambda r: {"vectors": {"mini-lm-sentence-transformers": r["vectors"]}}
-)
-```
+Given its fundamental and open source versatile nature, we have decided to add a native integration with SentenceTransformers. This integration allows you to easily add embeddings to your records or datasets using the `SentenceTransformersExtractor` based on the [sentence-transformers](https://sbert.net/) library. This integration can be found [here](/practical_guides/create_update_dataset/vectors.md).
 
 ### OpenAI `Embeddings`
 

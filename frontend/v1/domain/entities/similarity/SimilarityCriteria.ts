@@ -27,12 +27,9 @@ export class SimilarityCriteria extends Criteria {
     this.order = params[7] as SimilarityOrder;
   }
 
-  withValue(
-    recordId: string,
-    vectorName: string,
-    limit: number,
-    order: SimilarityOrder
-  ) {
+  withValue(similarityCriteria: SimilarityCriteria) {
+    const { recordId, vectorName, limit, order } = similarityCriteria;
+
     if (!recordId && !vectorName && !limit && !order) return;
 
     this.recordId = recordId;

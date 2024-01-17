@@ -9,6 +9,7 @@
           :breadcrumbs="breadcrumbs"
           :showTrainButton="true"
           :showSettingButton="true"
+          :showCopyButton="true"
           @on-click-train="showTrainModal(true)"
         />
         <BaseModal

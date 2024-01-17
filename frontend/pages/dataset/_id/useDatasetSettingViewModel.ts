@@ -88,7 +88,7 @@ export const useDatasetSettingViewModel = () => {
       ...createRootBreadCrumbs(datasetSetting.dataset),
       {
         link: {},
-        name: "settings",
+        name: t("breadcrumbs.datasetSettings"),
       },
     ];
   });

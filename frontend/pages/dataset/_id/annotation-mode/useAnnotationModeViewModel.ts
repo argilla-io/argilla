@@ -26,62 +26,62 @@ export const useAnnotationModeViewModel = () => {
   const recordCriteria = ref<RecordCriteria>(
     new RecordCriteria(
       datasetId,
-      routes.getQueryParams<number>("_page"),
-      routes.getQueryParams<RecordStatus>("_status"),
-      routes.getQueryParams<RecordStatus>("_search"),
-      routes.getQueryParams<string>("_metadata"),
-      routes.getQueryParams<string>("_sort"),
-      routes.getQueryParams<string>("_response"),
-      routes.getQueryParams<string>("_suggestion"),
-      routes.getQueryParams<string>("_similarity")
+      routes.getQueryParams<string>("page"),
+      routes.getQueryParams<RecordStatus>("status"),
+      routes.getQueryParams<RecordStatus>("search"),
+      routes.getQueryParams<string>("metadata"),
+      routes.getQueryParams<string>("sort"),
+      routes.getQueryParams<string>("response"),
+      routes.getQueryParams<string>("suggestion"),
+      routes.getQueryParams<string>("similarity")
     )
   );
 
   routes.watchBrowserNavigation(() => {
     recordCriteria.value.complete(
-      routes.getQueryParams<number>("_page"),
-      routes.getQueryParams<RecordStatus>("_status"),
-      routes.getQueryParams<RecordStatus>("_search"),
-      routes.getQueryParams<string>("_metadata"),
-      routes.getQueryParams<string>("_sort"),
-      routes.getQueryParams<string>("_response"),
-      routes.getQueryParams<string>("_suggestion"),
-      routes.getQueryParams<string>("_similarity")
+      routes.getQueryParams<string>("page"),
+      routes.getQueryParams<RecordStatus>("status"),
+      routes.getQueryParams<RecordStatus>("search"),
+      routes.getQueryParams<string>("metadata"),
+      routes.getQueryParams<string>("sort"),
+      routes.getQueryParams<string>("response"),
+      routes.getQueryParams<string>("suggestion"),
+      routes.getQueryParams<string>("similarity")
     );
   });
 
   const updateQueryParams = async () => {
     await routes.setQueryParams(
       {
-        key: "_page",
-        value: recordCriteria.value.committed.page.toString(),
+        key: "page",
+        value: recordCriteria.value.committed.page.urlParams,
       },
       {
-        key: "_status",
+        key: "status",
         value: recordCriteria.value.committed.status,
       },
       {
-        key: "_search",
+        key: "search",
         value: recordCriteria.value.committed.searchText,
       },
       {
-        key: "_metadata",
+        key: "metadata",
         value: recordCriteria.value.committed.metadata.urlParams,
       },
       {
-        key: "_sort",
+        key: "sort",
         value: recordCriteria.value.committed.sortBy.urlParams,
       },
       {
-        key: "_response",
+        key: "response",
         value: recordCriteria.value.committed.response.urlParams,
       },
       {
-        key: "_suggestion",
+        key: "suggestion",
         value: recordCriteria.value.committed.suggestion.urlParams,
       },
       {
-        key: "_similarity",
+        key: "similarity",
         value: recordCriteria.value.committed.similaritySearch.urlParams,
       }
     );

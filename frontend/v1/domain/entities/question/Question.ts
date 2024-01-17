@@ -1,4 +1,4 @@
-import { RecordAnswer } from "../record/RecordAnswer";
+import { Answer } from "../IAnswer";
 import {
   QuestionAnswer,
   QuestionType,
@@ -147,18 +147,22 @@ export class Question {
     this.initializeOriginal();
   }
 
-  complete(answer: RecordAnswer) {
+  clone(questionReference: Question) {
+    this.answer = questionReference.answer;
+  }
+
+  responseIfUnanswered(answer: Answer) {
     if (this.suggestion) {
-      this.answer.complete(this.suggestion);
+      this.answer.responseIfUnanswered(this.suggestion);
     } else if (answer) {
-      this.answer.complete(answer);
+      this.answer.responseIfUnanswered(answer);
     }
   }
 
-  forceComplete(answer: RecordAnswer) {
+  response(answer: Answer) {
     if (!answer) return;
 
-    this.answer.forceComplete(answer);
+    this.answer.response(answer);
   }
 
   addSuggestion(suggestion: Suggestion) {
