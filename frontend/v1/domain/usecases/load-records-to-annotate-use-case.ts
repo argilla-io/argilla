@@ -51,15 +51,9 @@ export class LoadRecordsToAnnotateUseCase {
     const { page } = criteria;
     const records = this.recordsStorage.get();
 
-    let isNextRecordExist = records.existsRecordOn(page);
+    await this.loadBuffer(criteria);
 
-    if (!isNextRecordExist) {
-      await this.loadBuffer(criteria);
-
-      isNextRecordExist = records.existsRecordOn(page);
-    } else {
-      this.loadBuffer(criteria);
-    }
+    const isNextRecordExist = records.existsRecordOn(page);
 
     if (isNextRecordExist) {
       const record = records.getRecordOn(page);
@@ -75,25 +69,34 @@ export class LoadRecordsToAnnotateUseCase {
   private async loadBuffer(criteria: RecordCriteria) {
     const { page, isFilteringBySimilarity } = criteria;
     if (isFilteringBySimilarity) return;
-
     if (this.isBuffering) return;
 
-    this.isBuffering = true;
+    const records = this.recordsStorage.get();
 
-    try {
-      const records = this.recordsStorage.get();
+    const onGetBufferedRecords = async () => {
+      try {
+        this.isBuffering = true;
 
-      if (records.getBufferedRecordsOn(page) > 5) return;
+        const newRecords = await this.getRecords(criteria);
 
-      const newRecords = await this.getRecords(criteria);
+        records.append(newRecords);
 
-      records.append(newRecords);
+        this.recordsStorage.save(newRecords);
+      } catch {
+      } finally {
+        this.isBuffering = false;
+      }
+    };
 
-      this.recordsStorage.save(newRecords);
-    } catch {
-    } finally {
-      this.isBuffering = false;
+    const isNextRecordExist = records.existsRecordOn(page);
+
+    if (!isNextRecordExist) {
+      await onGetBufferedRecords();
+    } else if (!records.hasNecessaryBuffering(page)) {
+      onGetBufferedRecords();
     }
+
+    return Promise.resolve();
   }
 
   private async getRecords(criteria: RecordCriteria) {

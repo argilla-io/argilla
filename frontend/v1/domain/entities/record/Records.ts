@@ -23,12 +23,12 @@ export class Records {
     return this.records.find((record) => record.page === criteria.client.page);
   }
 
-  getBufferedRecordsOn(criteria: PageCriteria): number {
+  hasNecessaryBuffering(criteria: PageCriteria) {
     const bufferedRecords = this.records.filter(
       (record) => record.page > criteria.client.page
     );
 
-    return bufferedRecords.length;
+    return bufferedRecords.length > criteria.buffer;
   }
 
   getRecordsOn(criteria: PageCriteria): Record[] {
