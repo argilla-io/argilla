@@ -171,8 +171,12 @@ export class RecordCriteria implements IRecordCriteria {
     return this.areDifferent(this, this.committed);
   }
 
+  get isPaginatingForward() {
+    return this.page.client.page > this.previous?.page.client.page;
+  }
+
   get isPaginatingBackward() {
-    return this.page.client.page < this.committed.page.client.page;
+    return this.page.client.page < this.previous?.page.client.page;
   }
 
   complete(

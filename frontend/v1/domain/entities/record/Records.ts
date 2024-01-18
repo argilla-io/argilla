@@ -70,17 +70,22 @@ export class Records {
           from: this.lastRecord.page + 1 - recordsAnnotated,
           many: page.client.many,
         });
-      } else if (this.firstRecord.page > page.client.page)
+      }
+
+      const isMovingBackward = this.firstRecord.page > page.client.page;
+
+      if (isMovingBackward) {
         if (page.isBulkMode)
           return page.synchronizePagination({
             from: this.firstRecord.page - page.client.many,
             many: page.client.many,
           });
 
-      return page.synchronizePagination({
-        from: this.firstRecord.page - 1,
-        many: 1,
-      });
+        return page.synchronizePagination({
+          from: this.firstRecord.page - 1,
+          many: 1,
+        });
+      }
     }
 
     page.synchronizePagination({
@@ -109,11 +114,11 @@ export class Records {
     this.records = this.records.sort((r1, r2) => (r1.page < r2.page ? -1 : 1));
   }
 
-  private get lastRecord() {
+  get lastRecord() {
     return this.records[this.records.length - 1];
   }
 
-  private get firstRecord() {
+  get firstRecord() {
     return this.records[0];
   }
 

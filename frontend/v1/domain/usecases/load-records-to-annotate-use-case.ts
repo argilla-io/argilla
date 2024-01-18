@@ -45,18 +45,23 @@ export class LoadRecordsToAnnotateUseCase {
     criteria.commit();
 
     this.recordsStorage.save(newRecords);
-
-    this.loadBuffer(criteria);
   }
 
-  async paginate(criteria: RecordCriteria): Promise<boolean> {
-    const { page } = criteria;
-
-    await this.loadBuffer(criteria);
+  async paginate(criteria: RecordCriteria) {
+    const { page, isFilteringBySimilarity } = criteria;
 
     const records = this.recordsStorage.get();
+    let isNextRecordExist = records.existsRecordOn(page);
 
-    const isNextRecordExist = records.existsRecordOn(page);
+    if (!isFilteringBySimilarity && !isNextRecordExist) {
+      const newRecords = await this.getRecords(criteria);
+
+      records.append(newRecords);
+
+      isNextRecordExist = records.existsRecordOn(page);
+
+      this.recordsStorage.save(records);
+    }
 
     if (isNextRecordExist) {
       const record = records.getRecordOn(page);
@@ -66,26 +71,25 @@ export class LoadRecordsToAnnotateUseCase {
       criteria.commit();
     }
 
+    this.loadBuffer(criteria);
+
     return isNextRecordExist;
   }
 
   private loadBuffer(criteria: RecordCriteria) {
-    const { page, isFilteringBySimilarity } = criteria;
+    const { page, isFilteringBySimilarity, isPaginatingBackward } = criteria;
 
-    if (isFilteringBySimilarity) return;
+    if (isFilteringBySimilarity || isPaginatingBackward) return;
 
     const records = this.recordsStorage.get();
-    const isNextRecordExist = records.existsRecordOn(page);
-
-    if (!isNextRecordExist) return this.getNextRecords(criteria);
 
     if (!records.hasNecessaryBuffering(page)) {
-      this.getNextRecords(criteria);
+      this.loadBufferedRecords(criteria);
     }
   }
 
   private async getRecords(criteria: RecordCriteria) {
-    const { datasetId } = criteria;
+    const { datasetId, queuePage } = criteria;
     const savedRecords = this.recordsStorage.get();
     savedRecords.synchronizeQueuePagination(criteria);
 
@@ -98,7 +102,7 @@ export class LoadRecordsToAnnotateUseCase {
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const recordPage = index + criteria.queuePage;
+        const recordPage = index + queuePage;
 
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])
@@ -210,8 +214,10 @@ export class LoadRecordsToAnnotateUseCase {
     return new Records(recordsToAnnotate, recordsFromBackend.total);
   }
 
-  private async getNextRecords(criteria: RecordCriteria) {
+  private async loadBufferedRecords(criteria: RecordCriteria) {
     if (this.isBuffering) return;
+
+    const { isPaginatingForward } = criteria;
 
     const records = this.recordsStorage.get();
     const newCriteria = criteria.clone();
@@ -219,9 +225,13 @@ export class LoadRecordsToAnnotateUseCase {
     try {
       this.isBuffering = true;
 
-      if (criteria.page.isBulkMode && !criteria.isPaginatingBackward) {
-        newCriteria.nextPage();
+      if (isPaginatingForward) {
+        newCriteria.page.goTo(records.lastRecord.page + 1);
       }
+
+      // if (isPaginatingBackward) {
+      //   newCriteria.page.goTo(records.firstRecord.page - page.client.many);
+      // }
 
       const newRecords = await this.getRecords(newCriteria);
 
