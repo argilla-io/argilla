@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.__file__), "alembic.ini"))
+ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla.server.__file__), "alembic.ini"))
 TAGGED_REVISIONS = OrderedDict(
     {
         "1.7": "1769ee58fbb4",
