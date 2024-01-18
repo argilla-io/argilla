@@ -8,9 +8,6 @@
           "
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
-      <div class="wrapper__records__header">
-        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
-      </div>
       <SimilarityRecordReference
         v-show="recordCriteria.isFilteringBySimilarity"
         v-if="!!records.reference"
@@ -18,6 +15,9 @@
         :recordCriteria="recordCriteria"
         :availableVectors="datasetVectors"
       />
+      <div class="wrapper__records__header">
+        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+      </div>
       <Record
         v-if="records.hasRecordsToAnnotate"
         :datasetVectors="datasetVectors"
