@@ -20,7 +20,7 @@ from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-import argilla
+import argilla.server
 from argilla.server.settings import settings
 
 if TYPE_CHECKING:
