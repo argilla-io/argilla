@@ -97,6 +97,7 @@
     "expand": "Expand",
     "collapse": "Collapse"
   },
+  "status": "Status",
   "filters": "Filters",
   "filterBy": "Filter by...",
   "fields": "Fields",
