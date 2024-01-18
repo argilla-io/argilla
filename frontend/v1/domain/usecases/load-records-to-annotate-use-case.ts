@@ -229,10 +229,6 @@ export class LoadRecordsToAnnotateUseCase {
         newCriteria.page.goTo(records.lastRecord.page + 1);
       }
 
-      // if (isPaginatingBackward) {
-      //   newCriteria.page.goTo(records.firstRecord.page - page.client.many);
-      // }
-
       const newRecords = await this.getRecords(newCriteria);
 
       records.append(newRecords);
