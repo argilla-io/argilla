@@ -438,6 +438,31 @@ describe("Records", () => {
 
       expect(criteria.page.server).toEqual({ from: 1, many: 10 });
     });
+
+    test("when te user is in bulk mode and is paginating backward the page should be from 1 and many 10 when the user is in page 11", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        "11",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record("1", "1", [], [], null, [], 1, 11),
+      ]);
+
+      criteria.page.bulkMode();
+      criteria.commit();
+      criteria.previousPage();
+
+      records.synchronizeQueuePagination(criteria);
+
+      expect(criteria.page.server).toEqual({ from: 1, many: 10 });
+    });
   });
 
   describe("append", () => {
