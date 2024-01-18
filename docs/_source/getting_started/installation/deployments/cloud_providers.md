@@ -144,6 +144,102 @@ This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com
 
 ## Google Cloud Platform (GCP)
 
-Coming soon!
+Deploying Argilla Server to Google Cloud Platform involves creating a compute instance, setting up Docker and Docker Compose, and configuring network settings for external traffic. Follow these steps:
 
-> 🚒 **If you'd like support with this and/or want to contribute this guide, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+### 1. Create an Instance
+
+Create a new Google Cloud VM instance with the necessary specifications:
+
+```bash
+gcloud compute instances create "argilla-instance" \
+  --machine-type "n1-standard-2" \
+  --image-family "debian-10" \
+  --image-project "debian-cloud" \
+  --boot-disk-size "50GB" \
+  --zone "asia-south2-a"
+```
+
+### 2. SSH into the Instance
+
+Once the instance is running, connect to it using SSH:
+
+```bash
+gcloud compute ssh argilla-instance --zone asia-south2-a
+```
+
+### 3. Install Dependencies
+
+Update the package manager and install necessary dependencies:
+
+```bash
+sudo apt-get update
+
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common gnupg2 lsb-release
+```
+
+### 4. Install Docker and Docker Compose
+
+Install Docker Engine and Docker Compose on the instance:
+
+```bash
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+```
+
+### 5. Launch Argilla with Docker Compose
+
+Grab the `docker-compose.yaml` file from the repository and start the Argilla Server:
+
+```bash
+mkdir argilla && cd argilla
+
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml
+
+sudo docker compose up -d
+```
+
+### 6. Allow External Traffic
+
+Configure the firewall rules to allow incoming traffic on the required ports:
+
+```bash
+gcloud compute instances add-tags argilla-instance --zone asia-south2-a --tags=argilla-instance
+
+gcloud compute firewall-rules create allow-6900 --allow tcp:6900 --target-tags argilla-instance --description "Allow incoming traffic on port 6900"
+```
+
+### 7. Assign a Static IP Address
+
+Reserve and assign a static IP address to ensure that the server can be consistently accessed via the same IP:
+
+```bash
+gcloud compute addresses create my-static-ip --region asia-south2
+```
+
+### 8. Configure Instance with Static IP
+
+Bind the static IP address to the instance:
+
+```bash
+STATIC_IP=$(gcloud compute addresses list --format="value(address)" --filter="name=my-static-ip")
+
+gcloud compute instances delete-access-config argilla-instance --zone asia-south2-a --access-config-name "external-nat"
+
+gcloud compute instances add-access-config argilla-instance --zone asia-south2-a --address $STATIC_IP
+```
+
+### 9. Test Connection
+
+Confirm the server is accessible by making an HTTP request to the Argilla server:
+
+```bash
+curl -vI $STATIC_IP:6900
+```
+
+Now you can access the Argilla instance in your browser using the URL `http://[STATIC_IP]:6900`.
+
