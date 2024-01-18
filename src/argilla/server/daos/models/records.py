@@ -18,7 +18,7 @@ import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
-from argilla import _messages
+from argilla.server import _messages
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.constants import JS_MAX_SAFE_INTEGER, PROTECTED_METADATA_FIELD_PREFIX
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
