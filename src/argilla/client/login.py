@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -19,9 +20,13 @@ from argilla.client.sdk.commons.errors import HttpResponseError, UnauthorizedApi
 from argilla.client.singleton import init
 from argilla.pydantic_v1 import AnyHttpUrl, BaseModel
 
-ARGILLA_CACHE_DIR = Path.home() / ".cache" / "argilla"
-ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
+cache_dir_env = os.environ.get("ARGILLA_CACHE_DIR")
+if cache_dir_env:
+    ARGILLA_CACHE_DIR = Path(cache_dir_env)
+else:
+    ARGILLA_CACHE_DIR = Path.home() / ".cache" / "argilla"
 
+ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
 
 class ArgillaCredentials(BaseModel):
     api_url: AnyHttpUrl
