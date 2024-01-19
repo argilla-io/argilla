@@ -28,6 +28,7 @@ else:
 
 ARGILLA_CREDENTIALS_FILE = ARGILLA_CACHE_DIR / "credentials.json"
 
+
 class ArgillaCredentials(BaseModel):
     api_url: AnyHttpUrl
     api_key: str
