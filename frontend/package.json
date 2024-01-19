@@ -59,6 +59,7 @@
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.22.5",
+    "@intlify/eslint-plugin-vue-i18n": "^2.0.0",
     "@nuxt/types": "^2.15.8",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/eslint-config-typescript": "^12.0.0",
