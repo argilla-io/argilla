@@ -23,14 +23,14 @@ from argilla.server.contexts.datasets import (
     get_question_by_name_and_dataset_id_or_raise,
 )
 from argilla.server.models import Question, Suggestion
-from argilla.server.schemas.v1.datasets import (
+from argilla.server.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
     RecordFilterScope,
-    ResponseFilterScope,
     SearchRecordsQuery,
-    SuggestionFilterScope,
 )
+from argilla.server.schemas.v1.responses import ResponseFilterScope
+from argilla.server.schemas.v1.suggestions import SuggestionFilterScope
 
 
 class SearchRecordsQueryValidator:
