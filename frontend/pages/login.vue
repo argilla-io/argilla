@@ -18,40 +18,52 @@
 <template>
   <div class="container">
     <BaseLoading v-if="hasAuthToken" />
-    <form class="form" @submit.prevent="onLoginUser">
-      <brand-logo class="form__logo" />
-      <div class="form__content">
-        <p class="form__title">Welcome</p>
-        <p class="form__text">Please enter your details to login.</p>
-        <div class="form__input" :class="{ active: login.username }">
-          <label class="form__label">Username</label>
-          <input
-            v-model="login.username"
-            type="text"
-            placeholder="Enter your username"
-          />
-        </div>
-        <div class="form__input" :class="{ active: login.password }">
-          <label class="form__label">Password</label>
-          <input
-            v-model="login.password"
-            type="password"
-            placeholder="Enter your password"
-          />
-        </div>
-        <p v-if="deployment === 'quickstart'">
-          You are using the Quickstart version of Argilla. Check
-          <a :href="$config.documentationSiteQuickStart" target="_blank"
-            >this guide</a
-          >
-          to learn more about usage and configuration options.
-        </p>
-        <base-button type="submit" class="form__button primary"
-          >Enter</base-button
-        >
-        <p class="form__error" v-if="error">{{ formattedError }}</p>
+
+    <div class="login--left">
+      <div class="login--left__header">
+        <brand-logo class="form__logo" />
       </div>
-    </form>
+
+      <div class="login--left__form">
+        <form class="form" @submit.prevent="onLoginUser">
+          <div>
+            <p class="form__title">Welcome</p>
+
+            <p class="form__text">Please enter your details to login.</p>
+            <div class="form__input" :class="{ active: login.username }">
+              <label class="form__label">Username</label>
+              <input
+                v-model="login.username"
+                type="text"
+                placeholder="Enter your username"
+              />
+            </div>
+            <div class="form__input" :class="{ active: login.password }">
+              <label class="form__label">Password</label>
+              <input
+                v-model="login.password"
+                type="password"
+                placeholder="Enter your password"
+              />
+            </div>
+            <p v-if="deployment === 'quickstart'">
+              You are using the Quickstart version of Argilla. Check
+              <a :href="$config.documentationSiteQuickStart" target="_blank"
+                >this guide</a
+              >
+              to learn more about usage and configuration options.
+            </p>
+            <base-button type="submit" class="form__button primary"
+              >Enter</base-button
+            >
+            <p class="form__error" v-if="error">{{ formattedError }}</p>
+          </div>
+        </form>
+
+        <OAuthLogin />
+      </div>
+    </div>
+
     <div class="login--right">
       <p class="login__claim">Build, improve, and monitor data for NLP</p>
       <geometric-shape-a />
@@ -156,9 +168,9 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  min-height: 100vh;
   background: $brand-secondary-color;
   display: flex;
+  min-height: 100vh;
   a {
     outline: none;
     color: $brand-primary-color;
@@ -169,17 +181,9 @@ export default {
   }
 }
 .form {
-  background: palette(white);
   display: flex;
-  padding: $base-space * 5;
-  z-index: 1;
-  min-height: 100vh;
-  width: 50vw;
   flex-flow: column;
-  &__content {
-    max-width: 300px;
-    margin: auto;
-  }
+
   &__logo {
     text-align: left;
     max-width: 120px;
@@ -229,10 +233,34 @@ export default {
     color: #ff4f46;
   }
 }
+
 input:-webkit-autofill {
   box-shadow: 0 0 0px 1000px palette(white) inset;
 }
 .login {
+  &--left {
+    background: palette(white);
+    padding: $base-space * 5;
+    z-index: 1;
+    width: 50vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &__header {
+      height: 10%;
+    }
+
+    &__form {
+      max-width: 300px;
+      margin: auto;
+      height: 90%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
   &--right {
     display: flex;
     flex-flow: column;
