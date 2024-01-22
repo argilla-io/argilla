@@ -85,48 +85,13 @@ export class RecordRepository {
     return this.createRecordResponse(record, "submitted");
   }
 
-  discardBulkRecordResponse(records: Record[]) {
-    return this.createBulkRecord(records, "discarded");
-  }
-
-  submitBulkRecordResponse(records: Record[]) {
-    return this.createBulkRecord(records, "submitted");
-  }
-
-  saveDraftBulkRecordResponse(records: Record[]) {
-    return this.createBulkRecord(records, "draft");
-  }
-
   saveDraft(record: Record): Promise<RecordAnswer> {
     if (record.answer) return this.updateRecordResponse(record, "draft");
 
     return this.createRecordResponse(record, "draft");
   }
 
-  private async updateRecordResponse(
-    record: Record,
-    status: BackendRecordStatus
-  ) {
-    try {
-      const request = this.createRequest(status, record.questions);
-
-      const { data } = await this.axios.put<BackendResponseResponse>(
-        `/v1/responses/${record.answer.id}`,
-        request
-      );
-
-      return new RecordAnswer(data.id, status, data.values, data.updated_at);
-    } catch (error) {
-      throw {
-        response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
-      };
-    }
-  }
-
-  private async createBulkRecord(
-    records: Record[],
-    status: BackendRecordStatus
-  ) {
+  async annotateBulkRecords(records: Record[], status: BackendRecordStatus) {
     try {
       const request = this.createRequestForBulk(status, records);
 
@@ -150,12 +115,33 @@ export class RecordRepository {
         }
 
         return {
+          success: false,
           error: error.detail,
         };
       });
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE_BULK,
+      };
+    }
+  }
+
+  private async updateRecordResponse(
+    record: Record,
+    status: BackendRecordStatus
+  ) {
+    try {
+      const request = this.createRequest(status, record.questions);
+
+      const { data } = await this.axios.put<BackendResponseResponse>(
+        `/v1/responses/${record.answer.id}`,
+        request
+      );
+
+      return new RecordAnswer(data.id, status, data.values, data.updated_at);
+    } catch (error) {
+      throw {
+        response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
       };
     }
   }

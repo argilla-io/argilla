@@ -11,13 +11,13 @@ export class LoadRecordsToAnnotateUseCase {
   async load(criteria: RecordCriteria): Promise<void> {
     const { page } = criteria;
 
-    let newRecords = await this.loadRecords(criteria);
+    let newRecords = await this.getRecords.execute(criteria);
     let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && !page.isFirstPage()) {
       criteria.page.goToFirst();
 
-      newRecords = await this.loadRecords(criteria);
+      newRecords = await this.getRecords.execute(criteria);
 
       isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
     }
@@ -40,7 +40,7 @@ export class LoadRecordsToAnnotateUseCase {
 
     if (!criteria.isFilteringBySimilarity) {
       if (!isNextRecordExist) {
-        const newRecords = await this.loadRecords(criteria);
+        const newRecords = await this.getRecords.execute(criteria);
 
         records.append(newRecords);
 
@@ -59,9 +59,5 @@ export class LoadRecordsToAnnotateUseCase {
     this.recordsStorage.save(records);
 
     return isNextRecordExist;
-  }
-
-  private loadRecords(criteria: RecordCriteria) {
-    return this.getRecords.execute(criteria);
   }
 }

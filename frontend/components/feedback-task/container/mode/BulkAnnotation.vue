@@ -175,16 +175,18 @@ export default {
     },
     async onSubmit() {
       const allSuccessful = await this.submit(
-        this.selectedRecords,
-        this.record
+        this.recordCriteria,
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
     },
     async onDiscard() {
       const allSuccessful = await this.discard(
-        this.selectedRecords,
-        this.record
+        this.recordCriteria,
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
@@ -192,8 +194,8 @@ export default {
     async onSaveDraft() {
       const allSuccessful = await this.saveAsDraft(
         this.recordCriteria,
-        this.selectedRecords,
-        this.record
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
