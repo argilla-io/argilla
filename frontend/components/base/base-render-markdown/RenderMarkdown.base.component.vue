@@ -12,7 +12,9 @@ const preprocess = (html) => {
 };
 const postprocess = (html) => {
   return DOMPurify.sanitize(html, {
-    ADD_TAGS: ["embed"],
+    ADD_TAGS: ["embed", "object"],
+    ADD_ATTR: ["data"],
+    ADD_URI_SAFE_ATTR: ["data"],
   });
 };
 

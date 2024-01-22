@@ -17,6 +17,7 @@ import base64
 import warnings
 from pathlib import Path
 from typing import Callable, List, Optional, Union
+from urllib.parse import urlparse
 
 from argilla.utils.dependency import require_dependencies
 
@@ -143,6 +144,54 @@ def image_to_html(media_source: Union[str, bytes], file_type: Optional[str] = No
         >>> html = image_to_html("my_image.png")
     """
     return media_to_html("image", media_source, file_type)
+
+
+def pdf_to_html(input_file: Union[str, bytes]) -> str:
+    """
+    Converts a PDF file to a base64-encoded data URL and embeds it in HTML.
+
+    Args:
+        input_file: The path to the PDF file or a bytes object containing the PDF data.
+
+    Returns:
+        HTML tag with embedded base64 data.
+
+    Raises:
+        FileNotFoundError: If the file does not exist or is empty.
+        ValueError: If the file does not exist, is not a PDF or larger than 5MB.
+
+    Examples:
+        >>> from argilla.client.feedback.utils import pdf_to_html
+        >>> html = pdf_to_html("my_pdf.pdf")
+        >>> html = pdf_to_html(b"my_pdf.pdf")
+        >>> html = pdf_to_html("https://my_pdf.pdf")
+    """
+
+    if isinstance(input_file, str) and urlparse(input_file).scheme in ["http", "https"]:
+        html = f'<embed src="{input_file}" type="application/pdf" width="700px" height="700px"/></embed>'
+        return html
+
+    if isinstance(input_file, bytes):
+        file_data = input_file
+    else:
+        pdf_path = Path(input_file)
+
+        if not pdf_path.exists() or pdf_path.stat().st_size == 0:
+            raise FileNotFoundError(f"File {input_file} does not exist or is empty.")
+        if pdf_path.suffix.lower() != ".pdf":
+            raise ValueError("Provided file is not a PDF.")
+        file_data = pdf_path.read_bytes()
+
+    if len(file_data) > 5000000:
+        raise ValueError(
+            f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
+        )
+
+    pdf_base64 = base64.b64encode(file_data).decode("utf-8")
+    data_url = f"data:application/pdf;base64,{pdf_base64}"
+    html = f'<object id="pdf" data="{data_url}" type="application/pdf" width="700" height="700"><p>Unable to display PDF file.</p></object>'
+
+    return html
 
 
 def create_token_highlights(

@@ -21,6 +21,7 @@ from argilla.client.feedback.utils import (
     create_token_highlights,
     image_to_html,
     media_to_html,
+    pdf_to_html,
     video_to_html,
 )
 
@@ -111,6 +112,54 @@ def test_wrappers(func, path, expected, tmp_path):
     expected_html = expected.format(encoded_data)
 
     assert func(str(temp_file)) == expected_html
+
+
+@pytest.mark.parametrize(
+    "input_file, expected",
+    [
+        (
+            "test.pdf",
+            '<object id="pdf" data="data:application/pdf;base64,{}" type="application/pdf" width="700" height="700"><p>Unable to display PDF file.</p></object>',
+        ),
+        (
+            b"dummy_data",
+            '<object id="pdf" data="data:application/pdf;base64,{}" type="application/pdf" width="700" height="700"><p>Unable to display PDF file.</p></object>',
+        ),
+        (
+            "https://my_pdf.pdf",
+            '<embed src="https://my_pdf.pdf" type="application/pdf" width="700px" height="700px"/></embed>',
+        ),
+        ("non_existent.pdf", "does not exist or is empty."),
+        ("empty.pdf", "does not exist or is empty."),
+        ("test.txt", "Provided file is not a PDF."),
+        ("large.pdf", "It is recommended to use files smaller than 5MB"),
+    ],
+)
+def test_pdf_to_html(input_file, expected, tmp_path):
+    if isinstance(input_file, bytes):
+        file_data = input_file
+    elif "https://" in input_file:
+        file_data = input_file
+    elif "large.pdf" in input_file:
+        temp_file = tmp_path / "large.pdf"
+        temp_file.write_bytes(b"dummy_data" * 5000010)
+        file_data = str(temp_file)
+    else:
+        temp_file = tmp_path / input_file
+        if "non_existent.pdf" not in input_file and "empty.pdf" not in input_file:
+            temp_file.write_bytes(b"dummy_data")
+        file_data = str(temp_file)
+
+    encoded_data = base64.b64encode(b"dummy_data").decode("utf-8")
+
+    if expected.startswith("<"):
+        expected = expected.format(encoded_data)
+
+    try:
+        result = pdf_to_html(file_data)
+        assert result == expected
+    except (ValueError, FileNotFoundError) as e:
+        assert expected in str(e)
 
 
 @pytest.mark.parametrize(
