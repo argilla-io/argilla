@@ -71,6 +71,7 @@ class TestFilteredRemoteFeedbackDataset:
         [
             ([ResponseStatusFilter.draft], 1),
             ([ResponseStatusFilter.missing], 10),
+            ([ResponseStatusFilter.pending], 10),
             ([ResponseStatusFilter.discarded], 1),
             ([ResponseStatusFilter.submitted], 1),
             ([ResponseStatusFilter.discarded, ResponseStatusFilter.submitted], 2),
@@ -86,7 +87,7 @@ class TestFilteredRemoteFeedbackDataset:
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         for status, record in zip(statuses, records):
-            if status != ResponseStatusFilter.missing:
+            if status not in [ResponseStatusFilter.missing, ResponseStatusFilter.pending]:
                 await ResponseFactory.create(record=record, status=status, values={})
 
         argilla.client.singleton.init(api_key=user.api_key)

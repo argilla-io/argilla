@@ -186,5 +186,6 @@ $tooltip-border-radius: $border-radius-s;
     @include font-size(12px);
     line-height: 1.2;
     white-space: pre;
+    text-transform: none;
   }
 }

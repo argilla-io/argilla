@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
 import argilla.server.errors.future as errors
+import argilla.server.search_engine as search_engine
 from argilla.server.apis.v1.handlers.datasets.datasets import _get_dataset
 from argilla.server.contexts import datasets, search
 from argilla.server.database import get_async_db
@@ -28,8 +29,8 @@ from argilla.server.enums import MetadataPropertyType, RecordSortField, Response
 from argilla.server.models import Dataset as DatasetModel
 from argilla.server.models import Record, User
 from argilla.server.policies import DatasetPolicyV1, authorize
-from argilla.server.schemas.v1.datasets import (
-    Dataset,
+from argilla.server.schemas.v1.datasets import Dataset
+from argilla.server.schemas.v1.records import (
     Filters,
     FilterScope,
     MetadataFilterScope,
@@ -42,20 +43,20 @@ from argilla.server.schemas.v1.datasets import (
     Records,
     RecordsCreate,
     RecordsUpdate,
-    ResponseFilterScope,
     SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
+    TermsFilter,
+)
+from argilla.server.schemas.v1.records import Record as RecordSchema
+from argilla.server.schemas.v1.responses import ResponseFilterScope
+from argilla.server.schemas.v1.suggestions import (
     SearchSuggestionOptions,
     SearchSuggestionOptionsQuestion,
     SearchSuggestionsOptions,
     SuggestionFilterScope,
-    TermsFilter,
-    VectorSettings,
 )
-from argilla.server.schemas.v1.datasets import (
-    Record as RecordSchema,
-)
+from argilla.server.schemas.v1.vector_settings import VectorSettings
 from argilla.server.search_engine import (
     AndFilter,
     FloatMetadataFilter,
@@ -67,33 +68,6 @@ from argilla.server.search_engine import (
     TermsMetadataFilter,
     UserResponseStatusFilter,
     get_search_engine,
-)
-from argilla.server.search_engine import (
-    Filter as SearchEngineFilter,
-)
-from argilla.server.search_engine import (
-    FilterScope as SearchEngineFilterScope,
-)
-from argilla.server.search_engine import (
-    MetadataFilterScope as SearchEngineMetadataFilterScope,
-)
-from argilla.server.search_engine import (
-    Order as SearchEngineOrder,
-)
-from argilla.server.search_engine import (
-    RangeFilter as SearchEngineRangeFilter,
-)
-from argilla.server.search_engine import (
-    RecordFilterScope as SearchEngineRecordFilterScope,
-)
-from argilla.server.search_engine import (
-    ResponseFilterScope as SearchEngineResponseFilterScope,
-)
-from argilla.server.search_engine import (
-    SuggestionFilterScope as SearchEngineSuggestionFilterScope,
-)
-from argilla.server.search_engine import (
-    TermsFilter as SearchEngineTermsFilter,
 )
 from argilla.server.security import auth
 from argilla.server.telemetry import TelemetryClient, get_telemetry_client
@@ -166,29 +140,29 @@ async def _filter_records_using_search_engine(
     )
 
 
-def _to_search_engine_scope(scope: FilterScope, user: Optional[User]) -> SearchEngineFilterScope:
+def _to_search_engine_filter_scope(scope: FilterScope, user: Optional[User]) -> search_engine.FilterScope:
     if isinstance(scope, RecordFilterScope):
-        return SearchEngineRecordFilterScope(property=scope.property)
+        return search_engine.RecordFilterScope(property=scope.property)
     elif isinstance(scope, MetadataFilterScope):
-        return SearchEngineMetadataFilterScope(metadata_property=scope.metadata_property)
+        return search_engine.MetadataFilterScope(metadata_property=scope.metadata_property)
     elif isinstance(scope, SuggestionFilterScope):
-        return SearchEngineSuggestionFilterScope(question=scope.question, property=scope.property)
+        return search_engine.SuggestionFilterScope(question=scope.question, property=scope.property)
     elif isinstance(scope, ResponseFilterScope):
-        return SearchEngineResponseFilterScope(question=scope.question, property=scope.property, user=user)
+        return search_engine.ResponseFilterScope(question=scope.question, property=scope.property, user=user)
     else:
         raise Exception(f"Unknown scope type {type(scope)}")
 
 
-def _to_search_engine_filter(filters: Filters, user: Optional[User]) -> SearchEngineFilter:
+def _to_search_engine_filter(filters: Filters, user: Optional[User]) -> search_engine.Filter:
     engine_filters = []
 
     for filter in filters.and_:
-        engine_scope = _to_search_engine_scope(filter.scope, user=user)
+        engine_scope = _to_search_engine_filter_scope(filter.scope, user=user)
 
         if isinstance(filter, TermsFilter):
-            engine_filter = SearchEngineTermsFilter(scope=engine_scope, values=filter.values)
+            engine_filter = search_engine.TermsFilter(scope=engine_scope, values=filter.values)
         elif isinstance(filter, RangeFilter):
-            engine_filter = SearchEngineRangeFilter(scope=engine_scope, ge=filter.ge, le=filter.le)
+            engine_filter = search_engine.RangeFilter(scope=engine_scope, ge=filter.ge, le=filter.le)
         else:
             raise Exception(f"Unknown filter type {type(filter)}")
 
@@ -197,12 +171,12 @@ def _to_search_engine_filter(filters: Filters, user: Optional[User]) -> SearchEn
     return AndFilter(filters=engine_filters)
 
 
-def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[SearchEngineOrder]:
+def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[search_engine.Order]:
     engine_sort = []
 
     for order in sort:
-        engine_scope = _to_search_engine_scope(order.scope, user=user)
-        engine_sort.append(SearchEngineOrder(scope=engine_scope, order=order.order))
+        engine_scope = _to_search_engine_filter_scope(order.scope, user=user)
+        engine_sort.append(search_engine.Order(scope=engine_scope, order=order.order))
 
     return engine_sort
 

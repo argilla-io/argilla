@@ -13,13 +13,15 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from fastapi import Body
+from typing_extensions import Annotated
 
 from argilla.server.models import ResponseStatus
 from argilla.server.pydantic_v1 import BaseModel, Field
+from argilla.server.schemas.v1.questions import QuestionName
 
 try:
     from typing import Annotated
@@ -31,6 +33,10 @@ RESPONSES_BULK_CREATE_MAX_ITEMS = 100
 
 
 class ResponseValue(BaseModel):
+    value: Any
+
+
+class ResponseValueCreate(BaseModel):
     value: Any
 
 
@@ -49,6 +55,17 @@ class Response(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ResponseCreate(BaseModel):
+    values: Optional[Dict[str, ResponseValueCreate]]
+    status: ResponseStatus
+
+
+class ResponseFilterScope(BaseModel):
+    entity: Literal["response"]
+    question: Optional[QuestionName]
+    property: Optional[Literal["status"]]
 
 
 class SubmittedResponseUpdate(BaseModel):
@@ -115,3 +132,27 @@ class ResponseBulk(BaseModel):
 
 class ResponsesBulk(BaseModel):
     items: List[ResponseBulk]
+
+
+class UserDraftResponseCreate(BaseModel):
+    user_id: UUID
+    values: Dict[str, ResponseValueCreate]
+    status: Literal[ResponseStatus.draft]
+
+
+class UserDiscardedResponseCreate(BaseModel):
+    user_id: UUID
+    values: Optional[Dict[str, ResponseValueCreate]]
+    status: Literal[ResponseStatus.discarded]
+
+
+class UserSubmittedResponseCreate(BaseModel):
+    user_id: UUID
+    values: Dict[str, ResponseValueCreate]
+    status: Literal[ResponseStatus.submitted]
+
+
+UserResponseCreate = Annotated[
+    Union[UserSubmittedResponseCreate, UserDraftResponseCreate, UserDiscardedResponseCreate],
+    Field(discriminator="status"),
+]

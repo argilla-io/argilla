@@ -55,18 +55,29 @@ export class Records {
     if (this.hasRecordsToAnnotate) {
       const isMovingForward = page.client.page > this.lastRecord.page;
 
-      if (isMovingForward) {
-        const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
+      const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
 
+      if (isMovingForward) {
         return page.synchronizePagination({
           from: this.lastRecord.page + 1 - recordsAnnotated,
           many: page.client.many,
         });
-      } else if (this.firstRecord.page > page.client.page)
+      }
+
+      const isMovingBackward = this.firstRecord.page > page.client.page;
+
+      if (isMovingBackward) {
+        if (page.isBulkMode)
+          return page.synchronizePagination({
+            from: this.firstRecord.page - page.client.many,
+            many: page.client.many,
+          });
+
         return page.synchronizePagination({
           from: this.firstRecord.page - 1,
           many: 1,
         });
+      }
     }
 
     page.synchronizePagination({

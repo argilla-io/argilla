@@ -13,16 +13,27 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Generic, List, Literal, Optional, TypeVar, Union
+from typing import Annotated, Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 from uuid import UUID
 
+from typing_extensions import Annotated
+
 from argilla.server.enums import MetadataPropertyType
-from argilla.server.pydantic_v1 import BaseModel, Field, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
 from argilla.server.pydantic_v1.generics import GenericModel
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.datasets import MetadataPropertySettings, MetadataPropertyTitle
 
 FLOAT_METADATA_METRICS_PRECISION = 5
+
+METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
+
+METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH = 1
+METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH = 500
+
+TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS = 1
+TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS = 250
 
 try:
     from typing import Annotated
@@ -67,6 +78,82 @@ MetadataMetrics = Annotated[
 ]
 
 
+class TermsMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+    values: Optional[List[str]] = None
+
+
+class IntegerMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.integer]
+    min: Optional[int] = None
+    max: Optional[int] = None
+
+
+class FloatMetadataProperty(BaseModel):
+    type: Literal[MetadataPropertyType.float]
+    min: Optional[float] = None
+    max: Optional[float] = None
+
+
+MetadataPropertySettings = Annotated[
+    Union[TermsMetadataProperty, IntegerMetadataProperty, FloatMetadataProperty],
+    Field(..., discriminator="type"),
+]
+
+
+MetadataPropertyName = Annotated[
+    str,
+    Field(
+        ...,
+        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    ),
+]
+
+
+MetadataPropertyTitle = Annotated[
+    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    Field(..., description="The title of the metadata property"),
+]
+
+
+class NumericMetadataProperty(GenericModel, Generic[NT]):
+    min: Optional[NT] = None
+    max: Optional[NT] = None
+
+    @root_validator(skip_on_failure=True)
+    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        min = values.get("min")
+        max = values.get("max")
+
+        if min is not None and max is not None and min >= max:
+            raise ValueError(f"'min' ({min}) must be lower than 'max' ({max})")
+
+        return values
+
+
+class TermsMetadataPropertyCreate(BaseModel):
+    type: Literal[MetadataPropertyType.terms]
+    values: Optional[List[str]] = Field(
+        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+    )
+
+
+class IntegerMetadataPropertyCreate(NumericMetadataProperty[int]):
+    type: Literal[MetadataPropertyType.integer]
+
+
+class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
+    type: Literal[MetadataPropertyType.float]
+
+
+MetadataPropertySettingsCreate = Annotated[
+    Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
+    Field(..., discriminator="type"),
+]
+
+
 class MetadataProperty(BaseModel):
     id: UUID
     name: str
@@ -79,6 +166,17 @@ class MetadataProperty(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class MetadataProperties(BaseModel):
+    items: List[MetadataProperty]
+
+
+class MetadataPropertyCreate(BaseModel):
+    name: MetadataPropertyName
+    title: MetadataPropertyTitle
+    settings: MetadataPropertySettingsCreate
+    visible_for_annotators: bool = True
 
 
 class MetadataPropertyUpdate(UpdateSchema):

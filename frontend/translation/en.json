@@ -89,7 +89,7 @@
     "name": "✨ Suggestion"
   },
   "similarity": {
-    "records": "Records",
+    "record-number": "Record number",
     "findSimilar": "Find similar",
     "similarTo": "Similar to",
     "similarityScore": "Similarity Score",
@@ -97,6 +97,7 @@
     "expand": "Expand",
     "collapse": "Collapse"
   },
+  "status": "Status",
   "filters": "Filters",
   "filterBy": "Filter by...",
   "fields": "Fields",

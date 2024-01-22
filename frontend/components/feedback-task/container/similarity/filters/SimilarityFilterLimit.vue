@@ -1,6 +1,6 @@
 <template>
   <SimilarityConfigDropdown
-    :data-title="$t('similarity.records')"
+    :data-title="$t('similarity.record-number')"
     v-model="selected"
     :options="[10, 50, 100, 200]"
   />
@@ -38,5 +38,8 @@ export default {
   position: relative;
   overflow: visible;
   @include tooltip-mini("top");
+  &:after {
+    right: 0;
+  }
 }
 </style>
