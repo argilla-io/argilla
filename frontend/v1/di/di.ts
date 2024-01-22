@@ -3,6 +3,7 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
+import { SaveDraftBulkByCriteriaUseCase } from "../domain/usecases/save-draft-bulk-annotation-by-criteria-use-case";
 import {
   DatasetRepository,
   RecordRepository,
@@ -24,6 +25,7 @@ import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingSto
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
+import { GetRecordsByCriteriaUseCase } from "@/v1/domain/usecases/get-records-by-criteria-use-case";
 import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { SubmitBulkAnnotationUseCase } from "@/v1/domain/usecases/submit-bulk-annotation-use-case";
@@ -67,13 +69,17 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(DatasetRepository, useDataset)
       .build(),
 
-    register(LoadRecordsToAnnotateUseCase)
+    register(GetRecordsByCriteriaUseCase)
       .withDependencies(
         RecordRepository,
         QuestionRepository,
         FieldRepository,
         useRecords
       )
+      .build(),
+
+    register(LoadRecordsToAnnotateUseCase)
+      .withDependencies(GetRecordsByCriteriaUseCase, useRecords)
       .build(),
 
     register(DiscardRecordUseCase)
@@ -98,6 +104,14 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(SaveDraftBulkAnnotationUseCase)
       .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
+
+    register(SaveDraftBulkByCriteriaUseCase)
+      .withDependencies(
+        GetRecordsByCriteriaUseCase,
+        SaveDraftBulkAnnotationUseCase,
+        LoadRecordsToAnnotateUseCase
+      )
       .build(),
 
     register(GetUserMetricsUseCase)

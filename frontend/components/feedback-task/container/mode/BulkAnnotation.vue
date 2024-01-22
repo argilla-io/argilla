@@ -38,6 +38,17 @@
                 $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
               "
             />
+
+            <BaseCheckbox
+              :decoration-circle="true"
+              class="wrapper__records__header__checkbox"
+              :value="affectAllRecords"
+              @input="() => (affectAllRecords = !affectAllRecords)"
+            />
+            <span class="wrapper__records__header__selection-text">
+              Affect all records</span
+            >
+            <BaseCircleProgress v-if="progress" :value="progress" />
           </div>
           <RecordsViewConfig
             v-if="records.hasRecordsToAnnotate"
@@ -135,7 +146,7 @@ export default {
       return this.selectedRecords.length;
     },
     hasSelectedAtLeastOneRecord() {
-      return this.numberOfSelectedRecords > 0;
+      return this.numberOfSelectedRecords > 0 || this.affectAllRecords;
     },
     bulkActionsTooltip() {
       if (!this.hasSelectedAtLeastOneRecord)
@@ -175,6 +186,7 @@ export default {
     },
     async onSaveDraft() {
       const allSuccessful = await this.saveAsDraft(
+        this.recordCriteria,
         this.selectedRecords,
         this.record
       );

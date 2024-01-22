@@ -231,6 +231,20 @@ export class RecordCriteria implements IRecordCriteria {
     this.suggestion.reset();
   }
 
+  clone() {
+    return new RecordCriteria(
+      this.datasetId,
+      this.page.urlParams,
+      this.status,
+      this.searchText,
+      this.metadata.urlParams,
+      this.sortBy.urlParams,
+      this.response.urlParams,
+      this.suggestion.urlParams,
+      this.similaritySearch.urlParams
+    );
+  }
+
   get queuePage(): number {
     return this.isFilteringBySimilarity
       ? this.page.server.from
