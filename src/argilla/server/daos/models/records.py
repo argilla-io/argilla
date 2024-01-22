@@ -18,7 +18,7 @@ import warnings
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
 
-from argilla import _messages
+from argilla.server import _messages
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
 from argilla.server.constants import JS_MAX_SAFE_INTEGER, PROTECTED_METADATA_FIELD_PREFIX
 from argilla.server.daos.backend.search.model import BaseRecordsQuery, SortConfig
@@ -26,7 +26,7 @@ from argilla.server.helpers import flatten_dict
 from argilla.server.pydantic_v1 import BaseModel, Field, conint, constr, root_validator, validator
 from argilla.server.pydantic_v1.generics import GenericModel
 from argilla.server.settings import settings
-from argilla.utils import limit_value_length
+from argilla.server.utils import limit_value_length
 
 
 class DaoRecordsSearch(BaseModel):
