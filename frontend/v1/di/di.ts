@@ -3,7 +3,6 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
-import { SaveDraftBulkByCriteriaUseCase } from "../domain/usecases/save-draft-bulk-annotation-by-criteria-use-case";
 import {
   DatasetRepository,
   RecordRepository,
@@ -103,14 +102,11 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(SaveDraftBulkAnnotationUseCase)
-      .withDependencies(RecordRepository, useEventDispatcher)
-      .build(),
-
-    register(SaveDraftBulkByCriteriaUseCase)
       .withDependencies(
         GetRecordsByCriteriaUseCase,
-        SaveDraftBulkAnnotationUseCase,
-        LoadRecordsToAnnotateUseCase
+        LoadRecordsToAnnotateUseCase,
+        RecordRepository,
+        useEventDispatcher
       )
       .build(),
 

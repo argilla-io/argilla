@@ -4,7 +4,6 @@ import { Notification } from "~/models/Notifications";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
 import { DiscardBulkAnnotationUseCase } from "~/v1/domain/usecases/discard-bulk-annotation-use-case";
-import { SaveDraftBulkByCriteriaUseCase } from "~/v1/domain/usecases/save-draft-bulk-annotation-by-criteria-use-case";
 import { SaveDraftBulkAnnotationUseCase } from "~/v1/domain/usecases/save-draft-bulk-annotation-use-case";
 import { SubmitBulkAnnotationUseCase } from "~/v1/domain/usecases/submit-bulk-annotation-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
@@ -21,8 +20,6 @@ export const useBulkAnnotationViewModel = () => {
   const discardUseCase = useResolve(DiscardBulkAnnotationUseCase);
   const submitUseCase = useResolve(SubmitBulkAnnotationUseCase);
   const saveDraftUseCase = useResolve(SaveDraftBulkAnnotationUseCase);
-
-  const saveDraftByCriteriaUseCase = useResolve(SaveDraftBulkByCriteriaUseCase);
 
   const t = useTranslate();
 
@@ -88,19 +85,13 @@ export const useBulkAnnotationViewModel = () => {
     try {
       isDraftSaving.value = true;
 
-      let allSuccessful = false;
-
-      if (affectAllRecords.value)
-        allSuccessful = await saveDraftByCriteriaUseCase.execute(
-          criteria,
-          recordReference,
-          (value) => (progress.value = value * 100)
-        );
-      else
-        allSuccessful = await saveDraftUseCase.execute(
-          records,
-          recordReference
-        );
+      const allSuccessful = await saveDraftUseCase.execute(
+        criteria,
+        recordReference,
+        records,
+        affectAllRecords.value,
+        (value) => (progress.value = value)
+      );
 
       if (!allSuccessful) {
         Notification.dispatch("notify", {

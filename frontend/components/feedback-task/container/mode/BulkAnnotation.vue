@@ -28,7 +28,7 @@
               v-if="records.hasRecordsToAnnotate"
               :decoration-circle="true"
               class="wrapper__records__header__checkbox"
-              :value="selectedRecords.length === recordsOnPage.length"
+              :value="isSelectedAll"
               @input="toggleAllRecords"
             />
             <span
@@ -39,15 +39,17 @@
               "
             />
 
-            <BaseCheckbox
-              :decoration-circle="true"
-              class="wrapper__records__header__checkbox"
-              :value="affectAllRecords"
-              @input="() => (affectAllRecords = !affectAllRecords)"
-            />
-            <span class="wrapper__records__header__selection-text">
-              Affect all records</span
-            >
+            <div v-if="isSelectedAll">
+              <BaseCheckbox
+                :decoration-circle="true"
+                class="wrapper__records__header__checkbox"
+                :value="affectAllRecords"
+                @input="() => (affectAllRecords = !affectAllRecords)"
+              />
+              <span class="wrapper__records__header__selection-text">
+                Affect all records</span
+              >
+            </div>
             <BaseCircleProgress v-if="progress" :value="progress" />
           </div>
           <RecordsViewConfig
@@ -156,6 +158,9 @@ export default {
         "bulkAnnotation.recordsSelected",
         this.numberOfSelectedRecords
       );
+    },
+    isSelectedAll() {
+      return this.selectedRecords.length === this.recordsOnPage.length;
     },
   },
   methods: {
