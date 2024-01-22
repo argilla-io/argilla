@@ -46,9 +46,9 @@ export const useBulkAnnotationViewModel = () => {
         });
       }
 
-      await debounceForSubmit.wait();
-
       progress.value = 0;
+
+      await debounceForSubmit.wait();
 
       return allSuccessful;
     } catch {
@@ -111,6 +111,7 @@ export const useBulkAnnotationViewModel = () => {
       recordReference,
       records
     );
+
     isDraftSaving.value = false;
 
     return allSuccessful;

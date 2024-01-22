@@ -30,7 +30,6 @@ export class BulkAnnotationUseCase {
     affectAllRecords = false,
     progress: Progress = () => {}
   ) {
-    const results: boolean[] = [];
     const records = [...selectedRecords];
 
     if (affectAllRecords) {
@@ -42,52 +41,58 @@ export class BulkAnnotationUseCase {
       records.push(...allRecords.records);
     }
 
-    const chunks = this.chunk(records, CHUNK_SIZE);
-
-    for (const recordsToAnnotate of chunks) {
-      const allSuccessful = await this.save(
-        status,
-        recordsToAnnotate,
-        recordReference
-      );
-
-      results.push(allSuccessful);
-
-      progress(this.calculateProgress(results, records));
-    }
+    const allSuccessful = await this.save(
+      status,
+      recordReference,
+      records,
+      progress
+    );
 
     if (affectAllRecords) {
       await this.loadRecords.load(criteria);
     }
 
-    return results.every((r) => r);
-  }
-
-  private async save(
-    status: AvailableStatus,
-    records: Record[],
-    recordReference: Record
-  ) {
-    records.forEach((record) => record.answerWith(recordReference));
-
-    const responses = await this.recordRepository.annotateBulkRecords(
-      records,
-      status
-    );
-
-    responses
-      .filter((r) => r.success)
-      .forEach(({ recordId, response }) => {
-        const record = records.find((r) => r.id === recordId);
-
-        record.submit(response);
-      });
-
     this.eventDispatcher.dispatch(
       new RecordResponseUpdatedEvent(recordReference)
     );
 
-    return responses.every((r) => r.success);
+    return allSuccessful;
+  }
+
+  private async save(
+    status: AvailableStatus,
+    recordReference: Record,
+    selectedRecords: Record[],
+    progress: Progress = () => {}
+  ) {
+    const results: boolean[] = [];
+
+    const chunkOfRecords = this.chunk(selectedRecords, CHUNK_SIZE);
+
+    for (const records of chunkOfRecords) {
+      records.forEach((r) => r.answerWith(recordReference));
+
+      const responses = await this.recordRepository.annotateBulkRecords(
+        records,
+        status
+      );
+
+      responses
+        .filter((r) => r.success)
+        .forEach(({ recordId, response }) => {
+          const record = records.find((r) => r.id === recordId);
+
+          record.submit(response);
+        });
+
+      const allSuccessful = responses.every((r) => r.success);
+
+      progress(this.calculateProgress(results, selectedRecords));
+
+      results.push(allSuccessful);
+    }
+
+    return results.every((r) => r);
   }
 
   private chunk<T>(array: T[], size: number) {
