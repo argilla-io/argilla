@@ -208,6 +208,7 @@ const config: NuxtConfig = {
   },
 
   publicRuntimeConfig: {
+    backendURL: BASE_URL,
     clientVersion: pkg.version,
     slackCommunity:
       "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
