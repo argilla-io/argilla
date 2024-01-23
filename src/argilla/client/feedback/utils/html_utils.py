@@ -14,6 +14,7 @@
 
 
 import base64
+import re
 import warnings
 from pathlib import Path
 from typing import Callable, List, Optional, Union
@@ -29,169 +30,243 @@ SUPPORTED_MEDIA_TYPES = {
 }
 
 
-def media_to_html(media_type: str, media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
+def validate_media_type(media_type: str, file_type: str) -> None:
     """
-    Convert a media file to an HTML tag with embedded base64 data.
+    Utility function to validate if the given file type is supported by the given media type.
 
     Args:
-        media_type: The type of media to convert. Can be one of 'video', 'audio', or 'image'.
-        media_source: The path to the media file or a non-b64 encoded byte string.
-        file_type: The type of the media file. If not provided, it will be inferred from the file extension.
-
-    Returns:
-        HTML tag with embedded base64 data.
-
-    Raises:
-        FileNotFoundError: If the file does not exist or is empty.
-        ValueError: If no provided file type using bytes as input or the file type is not supported.
+        media_type: Type of media ('video', 'audio', or 'image').
+        file_type: The type of the media file.
     """
-
-    if isinstance(media_source, bytes):
-        if not file_type:
-            raise ValueError("File type must be provided if media source is a byte string.")
-
-        file_data = media_source
-
-    else:
-        file_path = Path(media_source)
-
-        if not file_path.exists() or file_path.stat().st_size == 0:
-            raise FileNotFoundError(f"File {file_path} does not exist or is empty.")
-
-        if not file_type:
-            file_type = file_path.suffix[1:].lower()
-
-        file_data = file_path.read_bytes()
-
-    if len(file_data) > 5000000:
-        raise ValueError(
-            f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
-        )
-
     if file_type not in SUPPORTED_MEDIA_TYPES[media_type]:
-        raise ValueError(
-            f"Unsupported {media_type} type: {file_type}. Supported types are {SUPPORTED_MEDIA_TYPES[media_type]}"
+        warnings.warn(
+            f"This {file_type} might not be supported. Supported types for {media_type} are {SUPPORTED_MEDIA_TYPES[media_type]}",
+            category=UserWarning,
         )
 
     if file_type == "ogg":
         warnings.warn("'ogg' files might not be supported in Safari.", category=UserWarning)
 
-    media_base64 = base64.b64encode(file_data).decode("utf-8")
 
+def get_file_data(
+    file_source: Union[str, bytes], file_type: Optional[str] = None, media_type: Optional[str] = None
+) -> bytes:
+    """
+    Utility function to check the input file and get the file data as bytes.
+
+    Args:
+        file_source: The path to the media file or a non-b64 encoded byte string.
+        file_type: The type of the video file. If not provided, it will be inferred from the file extension.
+        media_type: Type of media ('video', 'audio', or 'image').
+
+    Returns:
+        File data as bytes.
+
+    Raises:
+        FileNotFoundError: If the file does not exist or is empty.
+        ValueError: If no provided file type using bytes as input, the file type does not match the expected extension or the file size is too large (>5MB).
+    """
+    if isinstance(file_source, bytes):
+        if not file_type:
+            raise ValueError("File type must be provided if file source is a byte string.")
+        else:
+            file_type != "pdf" and validate_media_type(media_type, file_type)
+        file_data = file_source
+    else:
+        file_path = Path(file_source)
+        if not file_path.exists() or file_path.stat().st_size == 0:
+            raise FileNotFoundError(f"File {file_path} does not exist or is empty.")
+
+        file_type = file_type or file_path.suffix[1:].lower()
+        if file_path.suffix.lower() != f".{file_type}":
+            raise ValueError(f"Provided file is not a {file_type.upper()}.")
+
+        file_type != "pdf" and validate_media_type(media_type, file_type)
+
+        file_data = file_path.read_bytes()
+
+    if len(file_data) > 5_000_000:
+        raise ValueError(
+            f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
+        )
+
+    return file_data, file_type
+
+
+def is_valid_dimension(dim: Optional[str]) -> bool:
+    """
+    Utility function to validate if the given dimension is a pixel or percentage value.
+
+    Args:
+        dim: The dimension string to validate (e.g., '300px', '50%').
+
+    Returns:
+        True if valid, False otherwise.
+    """
+    if dim is None:
+        return True
+    return bool(re.match(r"^\d+(px|%)$", dim))
+
+
+def media_to_html(
+    media_type: str,
+    file_source: Union[str, bytes],
+    file_type: Optional[str] = None,
+    width: Optional[str] = None,
+    height: Optional[str] = None,
+    autoplay: Optional[bool] = False,
+    loop: Optional[bool] = False,
+) -> str:
+    """
+    Convert a media file to an HTML tag with embedded base64 data.
+
+    Args:
+        media_type: Type of media ('video', 'audio', or 'image').
+        file_source: The path to the media file or a non-b64 encoded byte string.
+        file_type: The type of the video file. If not provided, it will be inferred from the file extension.
+        width: Display width in HTML. Defaults to None.
+        height: Display height in HTML. Defaults to None.
+        autoplay: True to autoplay media. Defaults to False.
+        loop: True to loop media. Defaults to False.
+
+    Returns:
+        HTML tag with embedded base64 data.
+
+    Raises:
+        ValueError: If the width and height are not pixel or percentage.
+    """
+    if not is_valid_dimension(width) or not is_valid_dimension(height):
+        raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
+
+    file_data, file_type = get_file_data(file_source, file_type, media_type)
+    media_base64 = base64.b64encode(file_data).decode("utf-8")
     data_url = f"data:{media_type}/{file_type};base64,{media_base64}"
 
+    common_attrs = f"{f' width={width}' if width else ''}{f' height={height}' if height else ''}"
+    media_attrs = f"{' autoplay' if autoplay else ''}{' loop' if loop else ''}"
+
     if media_type == "video":
-        html = f"<video controls><source src='{data_url}' type='video/{file_type}'></video>"
+        return f"<video controls{common_attrs}{media_attrs}><source src='{data_url}' type='video/{file_type}'></video>"
     elif media_type == "audio":
-        html = f"<audio controls><source src='{data_url}' type='audio/{file_type}'></audio>"
+        return f"<audio controls{media_attrs}><source src='{data_url}' type='audio/{file_type}'></audio>"
     elif media_type == "image":
-        html = f'<img src="{data_url}">'
+        return f'<img src="{data_url}"{common_attrs}>'
     else:
-        raise ValueError(f"Unsupported media type: {media_type}")  # Technically unreachable
-
-    return html
+        raise ValueError(f"Unsupported media type: {media_type}")
 
 
-def video_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
+def video_to_html(
+    file_source: Union[str, bytes],
+    file_type: Optional[str] = None,
+    width: Optional[str] = None,
+    height: Optional[str] = None,
+    autoplay: bool = False,
+    loop: bool = False,
+) -> str:
     """
     Convert a video file to an HTML tag with embedded base64 data.
 
     Args:
-        media_source: The path to the media file or a non-b64 encoded byte string.
+        file_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the video file. If not provided, it will be inferred from the file extension.
+        width: Display width in HTML. Defaults to None.
+        height: Display height in HTML. Defaults to None.
+        autoplay: True to autoplay media. Defaults to False.
+        loop: True to loop media. Defaults to False.
 
     Returns:
         The HTML tag with embedded base64 data.
 
     Examples:
         >>> from argilla.client.feedback.utils import video_to_html
-        >>> html = video_to_html("my_video.mp4")
+        >>> html = video_to_html("my_video.mp4", width="300px", height="300px", autoplay=True, loop=True)
     """
-    return media_to_html("video", media_source, file_type)
+    return media_to_html("video", file_source, file_type, width, height, autoplay, loop)
 
 
-def audio_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
+def audio_to_html(
+    file_source: Union[str, bytes],
+    file_type: Optional[str] = None,
+    width: Optional[str] = None,
+    height: Optional[str] = None,
+    autoplay: bool = False,
+    loop: bool = False,
+) -> str:
     """
     Convert an audio file to an HTML tag with embedded base64 data.
 
     Args:
-        media_source: The path to the media file or a non-b64 encoded byte string.
+        file_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the audio file. If not provided, it will be inferred from the file extension.
+        width: Display width in HTML. Defaults to None.
+        height: Display height in HTML. Defaults to None.
+        autoplay: True to autoplay media. Defaults to False.
+        loop: True to loop media. Defaults to False.
 
     Returns:
         The HTML tag with embedded base64 data.
 
     Examples:
         >>> from argilla.client.feedback.utils import audio_to_html
-        >>> html = audio_to_html("my_audio.mp3")
+        >>> html = audio_to_html("my_audio.mp3", width="300px", height="300px", autoplay=True, loop=True)
     """
-    return media_to_html("audio", media_source, file_type)
+    return media_to_html("audio", file_source, file_type, width, height, autoplay, loop)
 
 
-def image_to_html(media_source: Union[str, bytes], file_type: Optional[str] = None) -> str:
+def image_to_html(
+    file_source: Union[str, bytes],
+    file_type: Optional[str] = None,
+    width: Optional[str] = None,
+    height: Optional[str] = None,
+) -> str:
     """
     Convert an image file to an HTML tag with embedded base64 data.
 
     Args:
-        media_source: The path to the media file or a non-b64 encoded byte string.
+        file_source: The path to the media file or a non-b64 encoded byte string.
         file_type: The type of the image file. If not provided, it will be inferred from the file extension.
+        width: Display width in HTML. Defaults to None.
+        height: Display height in HTML. Defaults to None.
 
     Returns:
         The HTML tag with embedded base64 data.
 
     Examples:
         >>> from argilla.client.feedback.utils import image_to_html
-        >>> html = image_to_html("my_image.png")
+        >>> html = image_to_html("my_image.png", width="300px", height="300px")
     """
-    return media_to_html("image", media_source, file_type)
+    return media_to_html("image", file_source, file_type, width, height)
 
 
-def pdf_to_html(input_file: Union[str, bytes]) -> str:
+def pdf_to_html(file_source: Union[str, bytes], width: Optional[str] = "700px", height: Optional[str] = "700px") -> str:
     """
-    Converts a PDF file to a base64-encoded data URL and embeds it in HTML.
+    Convert a pdf file to an HTML tag with embedded data.
 
     Args:
-        input_file: The path to the PDF file or a bytes object containing the PDF data.
+        file_source: The path to the PDF file, a bytes object with PDF data, or a URL.
+        width: Display width in HTML. Defaults to "700px".
+        height: Display height in HTML. Defaults to "700px".
 
     Returns:
-        HTML tag with embedded base64 data.
+        HTML string embedding the PDF.
 
     Raises:
-        FileNotFoundError: If the file does not exist or is empty.
-        ValueError: If the file does not exist, is not a PDF or larger than 5MB.
+        ValueError: If the width and height are not pixel or percentage.
 
     Examples:
         >>> from argilla.client.feedback.utils import pdf_to_html
-        >>> html = pdf_to_html("my_pdf.pdf")
-        >>> html = pdf_to_html(b"my_pdf.pdf")
-        >>> html = pdf_to_html("https://my_pdf.pdf")
+        >>> html = pdf_to_html("my_pdf.pdf", width="300px", height="300px")
     """
+    if not is_valid_dimension(width) or not is_valid_dimension(height):
+        raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
 
-    if isinstance(input_file, str) and urlparse(input_file).scheme in ["http", "https"]:
-        html = f'<embed src="{input_file}" type="application/pdf" width="700px" height="700px"/></embed>'
-        return html
+    if isinstance(file_source, str) and urlparse(file_source).scheme in ["http", "https"]:
+        return f'<embed src="{file_source}" type="application/pdf" width="{width}" height="{height}"></embed>'
 
-    if isinstance(input_file, bytes):
-        file_data = input_file
-    else:
-        pdf_path = Path(input_file)
-
-        if not pdf_path.exists() or pdf_path.stat().st_size == 0:
-            raise FileNotFoundError(f"File {input_file} does not exist or is empty.")
-        if pdf_path.suffix.lower() != ".pdf":
-            raise ValueError("Provided file is not a PDF.")
-        file_data = pdf_path.read_bytes()
-
-    if len(file_data) > 5000000:
-        raise ValueError(
-            f"File size is {len(file_data)} bytes. It is recommended to use files smaller than 5MB, as larger files might not render properly."
-        )
-
+    file_data, _ = get_file_data(file_source, "pdf")
     pdf_base64 = base64.b64encode(file_data).decode("utf-8")
     data_url = f"data:application/pdf;base64,{pdf_base64}"
-    html = f'<object id="pdf" data="{data_url}" type="application/pdf" width="700" height="700"><p>Unable to display PDF file.</p></object>'
-
-    return html
+    return f'<object id="pdf" data="{data_url}" type="application/pdf" width="{width}" height="{height}"><p>Unable to display PDF.</p></object>'
 
 
 def create_token_highlights(
