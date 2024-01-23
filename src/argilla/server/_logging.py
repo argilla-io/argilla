@@ -18,11 +18,11 @@ This module centralizes all configuration and logging management
 """
 
 import logging
-
 from typing import Type
 
 try:
     from logging import Logger, StreamHandler
+
     from rich.logging import RichHandler as ArgillaHandler
 except ModuleNotFoundError:
     ArgillaHandler = StreamHandler
