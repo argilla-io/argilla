@@ -1,6 +1,5 @@
-import { useRoute } from "@nuxtjs/composition-api";
+import { useFetch, useRoute } from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
-import { onMounted } from "vue-demi";
 import { ProviderType } from "~/v1/domain/entities/oauth/OAuthProvider";
 import { OAuthLoginUseCase } from "~/v1/domain/usecases/oauth-login-use-case";
 import { useRoutes } from "~/v1/infrastructure/services";
@@ -10,17 +9,17 @@ export const useOAuthViewModel = () => {
   const router = useRoutes();
   const oauthLoginUseCase = useResolve(OAuthLoginUseCase);
 
-  onMounted(async () => {
-    const provider = routes.value.params.provider as ProviderType;
+  useFetch(async () => {
+    await tryLogin();
+  });
 
-    const query = Object.keys(routes.value.query)
-      .map((key) => `${key}=${routes.value.query[key]}`)
-      .join("&");
+  const tryLogin = async () => {
+    const { params, query } = routes.value;
 
-    if (query) {
-      await oauthLoginUseCase.login(provider, query);
-    }
+    const provider = params.provider as ProviderType;
+
+    await oauthLoginUseCase.login(provider, query);
 
     router.go("/");
-  });
+  };
 };

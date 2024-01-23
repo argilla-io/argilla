@@ -22,6 +22,8 @@ export default ({ $auth, route, redirect }: Context) => {
     case "login":
       break;
     case "oauth-provider-callback":
+      if (!Object.keys(route.query).length) redirect("/");
+
       break;
 
     default:

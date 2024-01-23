@@ -1,7 +1,10 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { NuxtRuntimeConfig } from "@nuxt/types/config/runtime";
+import { AxiosError } from "axios";
+import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
 import {
+  OAuthParams,
   OAuthProvider,
   ProviderType,
 } from "~/v1/domain/entities/oauth/OAuthProvider";
@@ -22,17 +25,17 @@ export class OAuthRepository implements IOAuthRepository {
   constructor(
     axios: NuxtAxiosInstance,
     private readonly router: RouterService,
-    private readonly config: NuxtRuntimeConfig
+    private readonly config: NuxtRuntimeConfig,
+    private readonly auth: Auth
   ) {
     this.axios = axios.create({
-      baseURL: "api/oauth2",
       withCredentials: false,
     });
   }
 
   async getProviders(): Promise<OAuthProvider[]> {
     try {
-      const url = "providers";
+      const url = "oauth2/providers";
 
       const { data } = await this.axios.get<Response<BackendOAuthProvider[]>>(
         url
@@ -48,22 +51,40 @@ export class OAuthRepository implements IOAuthRepository {
 
   authorize(provider: ProviderType) {
     this.router.go(
-      `${this.config.backendURL}/oauth2/${provider}/authorize`,
+      `${this.config.backendURL}/api/oauth2/${provider}/authorize`,
       true
     );
   }
 
-  async login(provider: string, params: string): Promise<string> {
+  async login(provider: ProviderType, oauthParams: OAuthParams) {
     try {
-      const url = `${provider}/access-token?${params}`;
+      const url = `oauth2/${provider}/access-token`;
 
-      const { data } = await this.axios.get<{ access_token: string }>(url);
+      const params = this.createParams(oauthParams);
 
-      return data.access_token;
-    } catch {
+      const { data } = await this.axios.get<{ access_token: string }>(url, {
+        params,
+      });
+
+      await this.auth.setUserToken(data.access_token);
+    } catch (error) {
+      if (error instanceof AxiosError && error.code === "ERR_BAD_REQUEST") {
+        return this.authorize(provider);
+      }
+
       throw {
         response: OAUTH_API_ERRORS.ERROR_FETCHING_OAUTH_ACCESS_TOKEN,
       };
     }
+  }
+
+  private createParams(oauthParams: OAuthParams) {
+    const params = new URLSearchParams();
+
+    Object.entries(oauthParams).forEach(([key, value]) => {
+      params.append(key, value.toString());
+    });
+
+    return params;
   }
 }

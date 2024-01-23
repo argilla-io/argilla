@@ -1,12 +1,8 @@
-import { ProviderType } from "../entities/oauth/OAuthProvider";
-import { AuthenticationService } from "../services/AuthenticationService";
+import { OAuthParams, ProviderType } from "../entities/oauth/OAuthProvider";
 import { IOAuthRepository } from "../services/IOAuthRepository";
 
 export class OAuthLoginUseCase {
-  constructor(
-    private readonly oauthRepository: IOAuthRepository,
-    private readonly auth: AuthenticationService
-  ) {}
+  constructor(private readonly oauthRepository: IOAuthRepository) {}
 
   getProviders() {
     return this.oauthRepository.getProviders();
@@ -16,9 +12,7 @@ export class OAuthLoginUseCase {
     return this.oauthRepository.authorize(provider);
   }
 
-  async login(provider: ProviderType, code: string) {
-    const token = await this.oauthRepository.login(provider, code);
-
-    await this.auth.setUserToken(token);
+  login(provider: ProviderType, oauthParams: OAuthParams) {
+    return this.oauthRepository.login(provider, oauthParams);
   }
 }

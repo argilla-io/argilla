@@ -61,7 +61,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
     register(OAuthRepository)
-      .withDependencies(useAxios, useRoutes, useConfig)
+      .withDependencies(useAxios, useRoutes, useConfig, useAuth)
       .build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
@@ -153,9 +153,7 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(AgentRepository)
       .build(),
 
-    register(OAuthLoginUseCase)
-      .withDependencies(OAuthRepository, useAuth)
-      .build(),
+    register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),
   ];
 
   Container.register(dependencies);

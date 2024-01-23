@@ -135,10 +135,6 @@ const config: NuxtConfig = {
   },
 
   proxy: {
-    "/api/oauth2": {
-      target: BASE_URL,
-      pathRewrite: { "^/api/": "" },
-    },
     "/api/": {
       target: BASE_URL,
     },
