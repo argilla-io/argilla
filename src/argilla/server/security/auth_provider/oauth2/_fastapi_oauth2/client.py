@@ -20,6 +20,7 @@ from .claims import Claims
 
 BackendFactory = Callable[[], BaseOAuth2]
 
+
 class OAuth2Client:
     """OAuth2 client configuration for a single provider."""
 
