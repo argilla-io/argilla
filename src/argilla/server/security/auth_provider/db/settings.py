@@ -35,11 +35,18 @@ class Settings(BaseSettings):
 
     """
 
+    insecure_mode: bool = False
+
     secret_key: str = "secret"
     algorithm: str = "HS256"
-    token_expiration_in_minutes: int = 30000
+    token_expiration_in_minutes: int = 15
     token_api_url: str = "/api/security/token"
     users_db_file: str = ".users.yml"
+
+    @property
+    def token_expire_time(self):
+        """The token expiration time in seconds"""
+        return self.token_expiration_in_minutes * 60
 
     @property
     def public_oauth_token_url(self):
