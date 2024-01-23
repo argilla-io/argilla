@@ -18,12 +18,12 @@
 import { Context } from "@nuxt/types";
 
 export default ({ $auth, route, redirect }: Context) => {
-  debugger;
   switch (route.name) {
     case "login":
       break;
-    case "login-callback":
+    case "oauth-callback":
       break;
+
     default:
       if (!$auth.loggedIn) {
         let redirectURL = "/login";

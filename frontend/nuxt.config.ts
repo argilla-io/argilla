@@ -19,7 +19,7 @@ import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
 
-const LOCAL_ENVIRONMENT = "https://frascuchon-oauth2-app-test.hf.space";
+const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
@@ -177,7 +177,7 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      authProvider: {
+      basic: {
         scheme: "local",
         token: {
           property: "access_token",
@@ -197,9 +197,6 @@ const config: NuxtConfig = {
           user: { url: "/me", propertyName: false },
         },
       },
-      oauth: {
-        scheme: "local",
-      },
     },
     resetOnError: true,
     redirect: { login: "/login", logout: "/login" },
@@ -211,6 +208,7 @@ const config: NuxtConfig = {
   },
 
   publicRuntimeConfig: {
+    backendURL: BASE_URL,
     clientVersion: pkg.version,
     slackCommunity:
       "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",

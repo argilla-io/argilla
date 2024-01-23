@@ -1,11 +1,12 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Auth } from "@nuxtjs/auth-next";
+import { NuxtRuntimeConfig } from "@nuxt/types/config/runtime";
 import { Response } from "../types";
 import {
   OAuthProvider,
   ProviderType,
 } from "~/v1/domain/entities/oauth/OAuthProvider";
 import { IOAuthRepository } from "~/v1/domain/services/IOAuthRepository";
+import { RouterService } from "~/v1/domain/services/RouterService";
 
 const OAUTH_API_ERRORS = {
   ERROR_FETCHING_OAUTH_PROVIDERS: "ERROR_FETCHING_OAUTH_PROVIDERS",
@@ -17,7 +18,11 @@ interface BackendOAuthProvider {
 
 export class OAuthRepository implements IOAuthRepository {
   private readonly axios: NuxtAxiosInstance;
-  constructor(axios: NuxtAxiosInstance, private readonly auth: Auth) {
+  constructor(
+    axios: NuxtAxiosInstance,
+    private readonly router: RouterService,
+    private readonly config: NuxtRuntimeConfig
+  ) {
     this.axios = axios.create({
       baseURL: "api/oauth2",
       withCredentials: false,
@@ -40,12 +45,10 @@ export class OAuthRepository implements IOAuthRepository {
     }
   }
 
-  async authorize(provider: ProviderType) {
-    const url = `${provider}/authorize`;
-
-    const { data } = await this.axios.get<any>(url);
-
-    debugger;
-    // this.auth.loginWith(provider);
+  authorize(provider: ProviderType) {
+    this.router.go(
+      `${this.config.backendURL}/oauth2/${provider}/authorize`,
+      true
+    );
   }
 }

@@ -57,8 +57,6 @@ class OAuth2Provider(AuthProvider):
 
     @classmethod
     def new_instance(cls):
-        load_dotenv()
-
         oauth2_config = OAuth2Config(
             allow_http=settings.insecure_mode,
             jwt_secret=settings.secret_key,

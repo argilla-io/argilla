@@ -21,8 +21,7 @@ export const useOAuthLoginViewModel = () => {
   };
 
   const authorize = (provider: ProviderType) => {
-    window.location.href =
-      "https://frascuchon-oauth2-app-test.hf.space/oauth2/huggingface/authorize";
+    oauthLogin.authorize(provider);
   };
 
   return {
