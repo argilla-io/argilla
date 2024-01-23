@@ -33,6 +33,12 @@ async def token(request: Request, provider: str):
     return await request.auth.clients[provider].token_data(request)
 
 
+@router.get("/{provider}/access-token")
+async def token(request: Request, provider: str) -> dict:
+    access_token = await request.auth.clients[provider].fetch_access_token(request)
+    return {"access_token": access_token}
+
+
 @router.get("/logout")
 def logout(request: Request):
     response = RedirectResponse(request.base_url)

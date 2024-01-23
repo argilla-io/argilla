@@ -81,9 +81,9 @@ class OAuth2Core:
     def access_token(self) -> str:
         return self._oauth_client.access_token
 
-    def get_redirect_uri(self, request: Request) -> str:
-        base_url = request.base_url.replace(scheme="http" if request.auth.http else "https")
-        return urljoin(str(base_url), "/oauth2/%s/token" % self.provider)
+    def get_redirect_uri(self, _: Request) -> str:
+        # TODO check absolute url and prepend request base url
+        return self.redirect_uri
 
     def authorization_url(self, request: Request) -> str:
         redirect_uri = self.get_redirect_uri(request)
@@ -103,6 +103,10 @@ class OAuth2Core:
 
     def authorization_redirect(self, request: Request) -> RedirectResponse:
         return RedirectResponse(self.authorization_url(request), 303)
+
+    async def fetch_access_token(self, request: Request, **httpx_client_args) -> str:
+        await self.token_data(request, **httpx_client_args)
+        return self.access_token
 
     async def token_data(self, request: Request, **httpx_client_args) -> dict:
         if not request.query_params.get("code"):
