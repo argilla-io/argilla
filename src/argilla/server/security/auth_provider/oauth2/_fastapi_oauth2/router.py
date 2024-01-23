@@ -12,9 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
+
+from argilla.server.contexts import accounts
+from argilla.server.database import get_async_db
+from argilla.server.enums import UserRole
+from argilla.server.security.auth_provider.oauth2._fastapi_oauth2.middleware import Auth, User
+from argilla.server.security.model import UserCreate
 
 router = APIRouter(prefix="/oauth2")
 
@@ -34,9 +41,24 @@ async def token(request: Request, provider: str):
 
 
 @router.get("/{provider}/access-token")
-async def token(request: Request, provider: str) -> dict:
-    access_token = await request.auth.clients[provider].fetch_access_token(request)
-    return {"access_token": access_token}
+async def token(request: Request, provider: str, db: AsyncSession = Depends(get_async_db)) -> dict:
+    current_user = User(await request.auth.clients[provider].token_data(request))
+
+    claims = Auth.clients[provider].claims
+    current_user.use_claims(claims)
+    username = current_user.username
+
+    user = await accounts.get_user_by_username(db, username)
+    if not user:
+        user_create = UserCreate(
+            first_name=current_user.name,
+            username=username,
+            role=UserRole.annotator,
+            password="12345678",
+        )
+        await accounts.create_user(db, user_create)
+
+    return {"access_token": request.auth.jwt_create(current_user)}
 
 
 @router.get("/logout")
