@@ -10,6 +10,7 @@ import { RouterService } from "~/v1/domain/services/RouterService";
 
 const OAUTH_API_ERRORS = {
   ERROR_FETCHING_OAUTH_PROVIDERS: "ERROR_FETCHING_OAUTH_PROVIDERS",
+  ERROR_FETCHING_OAUTH_ACCESS_TOKEN: "ERROR_FETCHING_OAUTH_ACCESS_TOKEN",
 };
 
 interface BackendOAuthProvider {
@@ -50,5 +51,19 @@ export class OAuthRepository implements IOAuthRepository {
       `${this.config.backendURL}/oauth2/${provider}/authorize`,
       true
     );
+  }
+
+  async login(provider: string, params: string): Promise<string> {
+    try {
+      const url = `${provider}/access-token?${params}`;
+
+      const { data } = await this.axios.get<{ access_token: string }>(url);
+
+      return data.access_token;
+    } catch {
+      throw {
+        response: OAUTH_API_ERRORS.ERROR_FETCHING_OAUTH_ACCESS_TOKEN,
+      };
+    }
   }
 }
