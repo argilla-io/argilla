@@ -146,6 +146,7 @@ class OAuth2Core:
             expires=request.auth.expires,
             secure=not request.auth.http,
             httponly=True,
+            samesite="none",
         )
         return response
 
