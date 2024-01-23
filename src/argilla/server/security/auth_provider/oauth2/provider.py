@@ -34,6 +34,14 @@ from ._fastapi_oauth2.router import router as oauth2_router
 from ._fastapi_oauth2.security import OAuth2
 from .. import settings
 
+from .. import settings
+from ._fastapi_oauth2.claims import Claims
+from ._fastapi_oauth2.client import OAuth2Client
+from ._fastapi_oauth2.config import OAuth2Config
+from ._fastapi_oauth2.middleware import Auth, OAuth2Middleware, User
+from ._fastapi_oauth2.router import router as oauth2_router
+from ._fastapi_oauth2.security import OAuth2
+
 
 class HuggingfaceOpenId(OpenIdConnectAuth):
     """Huggingface OpenID Connect authentication backend."""

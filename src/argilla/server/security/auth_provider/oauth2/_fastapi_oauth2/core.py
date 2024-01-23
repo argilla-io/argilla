@@ -1,16 +1,26 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import json
 import random
 import re
 import string
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 import httpx
-from oauthlib.oauth2 import OAuth2Error
-from oauthlib.oauth2 import WebApplicationClient
+from oauthlib.oauth2 import OAuth2Error, WebApplicationClient
 from social_core.backends.oauth import BaseOAuth2
 from social_core.exceptions import AuthException
 from social_core.strategy import BaseStrategy
@@ -19,8 +29,7 @@ from starlette.responses import RedirectResponse
 
 from .claims import Claims
 from .client import OAuth2Client
-from .exceptions import OAuth2AuthenticationError
-from .exceptions import OAuth2InvalidRequestError
+from .exceptions import OAuth2AuthenticationError, OAuth2InvalidRequestError
 
 
 class OAuth2Strategy(BaseStrategy):
@@ -36,7 +45,7 @@ class OAuth2Strategy(BaseStrategy):
         """Mocked setting method."""
 
     @staticmethod
-    def get_json(url, method='GET', *args, **kwargs) -> httpx.Response:
+    def get_json(url, method="GET", *args, **kwargs) -> httpx.Response:
         return httpx.request(method, url, *args, **kwargs)
 
 
@@ -85,10 +94,12 @@ class OAuth2Core:
 
         self._state = oauth2_query_params.get("state")
 
-        return str(self._oauth_client.prepare_request_uri(
-            self._authorization_endpoint,
-            **oauth2_query_params,
-        ))
+        return str(
+            self._oauth_client.prepare_request_uri(
+                self._authorization_endpoint,
+                **oauth2_query_params,
+            )
+        )
 
     def authorization_redirect(self, request: Request) -> RedirectResponse:
         return RedirectResponse(self.authorization_url(request), 303)
@@ -135,6 +146,7 @@ class OAuth2Core:
             expires=request.auth.expires,
             secure=not request.auth.http,
             httponly=True,
+            samesite="none",
         )
         return response
 
