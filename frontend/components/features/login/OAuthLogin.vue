@@ -1,13 +1,24 @@
 <template>
-  <div class="oauth--container">
+  <div class="oauth--container" v-if="providers.length">
     <BaseSeparator />
 
-    <HuggingFaceButton />
+    <div v-for="provider in providers">
+      <HuggingFaceButton
+        v-if="provider.isHuggingFace"
+        @click="authorize(provider.name)"
+      />
+    </div>
   </div>
 </template>
+
 <script>
+import { useOAuthLoginViewModel } from "./useOAuthLoginViewModel";
+
 export default {
   name: "OAuthLogin",
+  setup() {
+    return useOAuthLoginViewModel();
+  },
 };
 </script>
 

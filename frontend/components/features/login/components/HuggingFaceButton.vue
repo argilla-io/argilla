@@ -1,5 +1,5 @@
 <template>
-  <button>
+  <button @click="$emit('click')">
     <img src="./hf-sign-in.svg" draggable="false" />
   </button>
 </template>
