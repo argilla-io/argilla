@@ -1,28 +1,29 @@
-from datetime import datetime
-from datetime import timedelta
-from typing import Any
-from typing import Awaitable
-from typing import Callable
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from datetime import datetime, timedelta
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, Union
 
 from fastapi.security.utils import get_authorization_scheme_param
 from jose.exceptions import JOSEError
 from jose.jwt import decode as jwt_decode
 from jose.jwt import encode as jwt_encode
-from starlette.authentication import AuthCredentials
-from starlette.authentication import AuthenticationBackend
-from starlette.authentication import BaseUser
+from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
-from starlette.types import ASGIApp
-from starlette.types import Receive
-from starlette.types import Scope
-from starlette.types import Send
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .claims import Claims
 from .config import OAuth2Config
@@ -81,19 +82,16 @@ class OAuth2Backend(AuthenticationBackend):
     """Authentication backend for AuthenticationMiddleware."""
 
     def __init__(
-            self,
-            config: OAuth2Config,
-            callback: Callable[[Auth, User], Union[Awaitable[None], None]] = None,
+        self,
+        config: OAuth2Config,
+        callback: Callable[[Auth, User], Union[Awaitable[None], None]] = None,
     ) -> None:
         Auth.ssr = config.enable_ssr
         Auth.http = config.allow_http
         Auth.secret = config.jwt_secret
         Auth.expires = config.jwt_expires
         Auth.algorithm = config.jwt_algorithm
-        Auth.clients = {
-            client.backend.name: OAuth2Core(client)
-            for client in config.clients
-        }
+        Auth.clients = {client.backend.name: OAuth2Core(client) for client in config.clients}
         self.callback = callback
 
     async def authenticate(self, request: Request) -> Optional[Tuple[Auth, User]]:
@@ -126,11 +124,11 @@ class OAuth2Middleware:
     auth_middleware: AuthenticationMiddleware = None
 
     def __init__(
-            self,
-            app: ASGIApp,
-            config: Union[OAuth2Config, dict],
-            callback: Callable[[Auth, User], Union[Awaitable[None], None]] = None,
-            **kwargs,  # AuthenticationMiddleware kwargs
+        self,
+        app: ASGIApp,
+        config: Union[OAuth2Config, dict],
+        callback: Callable[[Auth, User], Union[Awaitable[None], None]] = None,
+        **kwargs,  # AuthenticationMiddleware kwargs
     ) -> None:
         """Initiates the middleware with the given configuration.
 
