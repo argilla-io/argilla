@@ -65,11 +65,7 @@ export class RecordRepository {
     if (!record.answer) return;
 
     try {
-      const { data } = await this.axios.delete(
-        `/v1/responses/${record.answer.id}`
-      );
-
-      debugger;
+      await this.axios.delete(`/v1/responses/${record.answer.id}`);
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_DELETING_RECORD_RESPONSE,
