@@ -18,12 +18,6 @@ from typing import Optional
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Request
 from fastapi.security import SecurityScopes
-from fastapi_oauth2.claims import Claims
-from fastapi_oauth2.client import OAuth2Client
-from fastapi_oauth2.config import OAuth2Config
-from fastapi_oauth2.middleware import Auth, OAuth2Middleware, User
-from fastapi_oauth2.router import router as oauth2_router
-from fastapi_oauth2.security import OAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,6 +26,13 @@ from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
 from argilla.server.security.auth_provider.base import AuthProvider, api_key_header
+from ._fastapi_oauth2.claims import Claims
+from ._fastapi_oauth2.client import OAuth2Client
+from ._fastapi_oauth2.config import OAuth2Config
+from ._fastapi_oauth2.middleware import Auth, OAuth2Middleware, User
+from ._fastapi_oauth2.router import router as oauth2_router
+from ._fastapi_oauth2.security import OAuth2
+from .. import settings
 
 
 class HuggingfaceOpenId(OpenIdConnectAuth):
@@ -40,6 +41,8 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
     name = "huggingface"
 
     OIDC_ENDPOINT = "https://huggingface.co"
+    AUTHORIZATION_URL = "https://huggingface.co/oauth/authorize"
+    ACCESS_TOKEN_URL = "https://huggingface.co/oauth/token"
 
     def oidc_endpoint(self) -> str:
         return self.OIDC_ENDPOINT
@@ -53,13 +56,11 @@ class OAuth2Provider(AuthProvider):
 
     @classmethod
     def new_instance(cls):
-        load_dotenv()
-
         oauth2_config = OAuth2Config(
-            allow_http=True,
-            jwt_secret=os.getenv("JWT_SECRET"),
-            jwt_expires=os.getenv("JWT_EXPIRES"),
-            jwt_algorithm=os.getenv("JWT_ALGORITHM"),
+            allow_http=settings.insecure_mode,
+            jwt_secret=settings.secret_key,
+            jwt_expires=settings.token_expire_time,
+            jwt_algorithm=settings.algorithm,
             clients=[
                 OAuth2Client(
                     backend=HuggingfaceOpenId,
@@ -76,6 +77,7 @@ class OAuth2Provider(AuthProvider):
                 ),
             ],
         )
+        load_dotenv()
 
         return cls(oauth2_config)
 
@@ -84,6 +86,10 @@ class OAuth2Provider(AuthProvider):
         def providers(request: Request) -> dict:
             auth: Auth = request.auth
             return {"items": [{"name": name} for name in auth.clients.keys()]}
+
+        @oauth2_router.get("/me")
+        def me(request: Request) -> dict:
+            return request.user
 
         app.include_router(oauth2_router, tags=["security"])
         app.add_middleware(OAuth2Middleware, config=self.config)
