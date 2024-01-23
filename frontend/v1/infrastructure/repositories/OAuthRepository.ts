@@ -40,12 +40,7 @@ export class OAuthRepository implements IOAuthRepository {
     }
   }
 
-  async authorize(provider: ProviderType) {
-    const url = `${provider}/authorize`;
-
-    const { data } = await this.axios.get<any>(url);
-
-    debugger;
-    // this.auth.loginWith(provider);
+  authorize(provider: ProviderType) {
+    window.location.replace("http://0.0.0.0:6900/oauth2/huggingface/authorize");
   }
 }
