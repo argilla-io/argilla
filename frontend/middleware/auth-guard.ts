@@ -21,7 +21,7 @@ export default ({ $auth, route, redirect }: Context) => {
   switch (route.name) {
     case "login":
       break;
-    case "oauth-callback":
+    case "oauth-provider-callback":
       break;
 
     default:

@@ -49,6 +49,7 @@ export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
   const useConfig = () => context.$config;
+  const useAuth = () => context.$auth;
 
   const dependencies = [
     register(DatasetRepository).withDependencies(useAxios, useStore).build(),
@@ -152,7 +153,9 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(AgentRepository)
       .build(),
 
-    register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),
+    register(OAuthLoginUseCase)
+      .withDependencies(OAuthRepository, useAuth)
+      .build(),
   ];
 
   Container.register(dependencies);
