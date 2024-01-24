@@ -79,7 +79,7 @@ from argilla.server.schemas.v1.vector_settings import (
 )
 from argilla.server.schemas.v1.vectors import Vector as VectorSchema
 from argilla.server.search_engine import SearchEngine
-from argilla.server.security.model import User
+from argilla.server.schemas.v0.users import User
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

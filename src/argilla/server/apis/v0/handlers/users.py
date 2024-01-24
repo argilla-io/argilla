@@ -26,7 +26,7 @@ from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.pydantic_v1 import parse_obj_as
 from argilla.server.security import auth
-from argilla.server.security.model import User, UserCreate
+from argilla.server.schemas.v0.users import User, UserCreate
 
 router = APIRouter(tags=["users"])
 

@@ -20,11 +20,8 @@ from argilla.pydantic_v1 import constr
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
-from argilla.server.security.model import (
-    USER_PASSWORD_MIN_LENGTH,
-    UserCreate,
-    WorkspaceCreate,
-)
+from argilla.server.schemas.v0.workspaces import WorkspaceCreate
+from argilla.server.schemas.v0.users import USER_PASSWORD_MIN_LENGTH, UserCreate
 
 from .utils import get_or_new_workspace
 
