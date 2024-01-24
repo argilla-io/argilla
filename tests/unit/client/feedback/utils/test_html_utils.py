@@ -145,12 +145,12 @@ def test_media_to_html(
         (
             pdf_to_html,
             "test.pdf",
-            '<object id="pdf" data="data:application/pdf;base64,{}" type="application/pdf" width="700px" height="700px"><p>Unable to display PDF.</p></object>',
+            '<object id="pdf" data="data:application/pdf;base64,{}" type="application/pdf" width="1000px" height="1000px"><p>Unable to display PDF.</p></object>',
         ),
         (
             pdf_to_html,
             "https://my_pdf.pdf",
-            '<embed src="https://my_pdf.pdf" type="application/pdf" width="700px" height="700px"></embed>',
+            '<embed src="https://my_pdf.pdf" type="application/pdf" width="1000px" height="1000px"></embed>',
         ),
     ],
 )

@@ -238,14 +238,16 @@ def image_to_html(
     return media_to_html("image", file_source, file_type, width, height)
 
 
-def pdf_to_html(file_source: Union[str, bytes], width: Optional[str] = "700px", height: Optional[str] = "700px") -> str:
+def pdf_to_html(
+    file_source: Union[str, bytes], width: Optional[str] = "1000px", height: Optional[str] = "1000px"
+) -> str:
     """
     Convert a pdf file to an HTML tag with embedded data.
 
     Args:
         file_source: The path to the PDF file, a bytes object with PDF data, or a URL.
-        width: Display width in HTML. Defaults to "700px".
-        height: Display height in HTML. Defaults to "700px".
+        width: Display width in HTML. Defaults to "1000px".
+        height: Display height in HTML. Defaults to "1000px".
 
     Returns:
         HTML string embedding the PDF.
