@@ -184,9 +184,6 @@ export default {
         .slice(0, this.maxOptionsToShowBeforeCollapse)
         .concat(this.remainingVisibleOptions);
     },
-    noResultMessage() {
-      return `There is no result matching: ${this.searchInput}`;
-    },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
@@ -202,8 +199,9 @@ export default {
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
-        return "Less";
+        return this.$t("less");
       }
+
       return `+${this.numberToShowInTheCollapseButton}`;
     },
     iconToShowInTheCollapseButton() {
