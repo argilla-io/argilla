@@ -13,6 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import uuid4
+
 from argilla.server import helpers
 from argilla.server.pydantic_v1 import BaseSettings
 from argilla.server.settings import settings as server_settings
@@ -35,7 +37,7 @@ class Settings(BaseSettings):
 
     """
 
-    secret_key: str = "secret"
+    secret_key: str = uuid4().hex
     algorithm: str = "HS256"
     token_expiration_in_minutes: int = 30000
     token_api_url: str = "/api/security/token"

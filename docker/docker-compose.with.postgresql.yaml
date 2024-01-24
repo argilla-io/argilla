@@ -21,6 +21,7 @@ services:
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       ARGILLA_DATABASE_URL: postgresql://postgres:postgres@db:5432
+      ARGILLA_LOCAL_AUTH_SECRET_KEY: ${ARGILLA_LOCAL_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
       # ARGILLA_ENABLE_TELEMETRY: 0 # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
 
       # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/configurations/user_management.html
