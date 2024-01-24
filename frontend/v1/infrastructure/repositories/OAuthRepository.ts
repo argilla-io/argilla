@@ -35,7 +35,7 @@ export class OAuthRepository implements IOAuthRepository {
 
   async getProviders(): Promise<OAuthProvider[]> {
     try {
-      const url = "oauth2/providers";
+      const url = "security/oauth2/providers";
 
       const { data } = await this.axios.get<Response<BackendOAuthProvider[]>>(
         url
@@ -51,14 +51,14 @@ export class OAuthRepository implements IOAuthRepository {
 
   authorize(provider: ProviderType) {
     this.router.go(
-      `${this.config.backendURL}/api/oauth2/${provider}/authorize`,
+      `${this.config.backendURL}/api/security/oauth2/providers/${provider}/authentication`,
       true
     );
   }
 
   async login(provider: ProviderType, oauthParams: OAuthParams) {
     try {
-      const url = `oauth2/${provider}/access-token`;
+      const url = `security/oauth2/providers/${provider}/access-token`;
 
       const params = this.createParams(oauthParams);
 
