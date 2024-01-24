@@ -16,14 +16,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 from argilla.server.constants import DEFAULT_API_KEY
-from argilla.server.security.auth_provider.db import DBAuthProvider
 from fastapi.security import SecurityScopes
+
+from argilla.server.security.authentication import AuthenticationProvider
 
 if TYPE_CHECKING:
     from argilla.server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
 
-db_auth = DBAuthProvider.new_instance()
+db_auth = AuthenticationProvider.new_instance()
 security_Scopes = SecurityScopes()
 
 
