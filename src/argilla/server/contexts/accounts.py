@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from typing import TYPE_CHECKING, List, Union
 from uuid import UUID
 
@@ -20,7 +19,8 @@ from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.security.model import UserCreate, WorkspaceCreate, WorkspaceUserCreate
+from argilla.server.schemas.v0.users import UserCreate
+from argilla.server.schemas.v0.workspaces import WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession

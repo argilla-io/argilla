@@ -12,6 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from .auth_provider import DBAuthProvider
+from .auth_provider.base import AuthProvider, api_key_header
 
 from argilla.server.security.auth_provider import AuthProvider, DBAuthProvider, OAuth2Provider, api_key_header
 from argilla.server.settings import settings
