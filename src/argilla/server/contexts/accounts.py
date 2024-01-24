@@ -19,8 +19,8 @@ from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, selectinload
 
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.schemas.v0.workspaces import WorkspaceCreate, WorkspaceUserCreate
 from argilla.server.schemas.v0.users import UserCreate
+from argilla.server.schemas.v0.workspaces import WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
