@@ -13,7 +13,7 @@
 #  limitations under the License.
 import asyncio
 import os
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import typer
 import yaml
@@ -23,6 +23,7 @@ from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.schemas.v0.users import USER_USERNAME_REGEX
 from argilla.server.schemas.v0.workspaces import WORKSPACE_NAME_REGEX
+
 from .utils import get_or_new_workspace
 
 if TYPE_CHECKING:
