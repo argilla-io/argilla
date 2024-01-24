@@ -48,7 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          :data-keyboard="index + 1"
+          :data-keyboard="option.keyboard"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -72,7 +72,11 @@
           "
           :title="option.text"
         >
-          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
+          <span
+            class="key"
+            v-if="showShortcutsHelper"
+            v-text="option.keyboard"
+          />
           <span>{{ option.text }}</span>
         </label>
       </div>
@@ -82,8 +86,8 @@
 </template>
 
 <script>
-// NOTE - this threshold is used to show the search filter component for component from questionForm component
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
 export default {
@@ -300,6 +304,11 @@ export default {
     hasSuggestion(value) {
       return this.suggestions?.includes(value) || false;
     },
+  },
+  beforeMount() {
+    this.options.forEach((option, index) => {
+      option.keyboard = index + 1;
+    });
   },
 };
 </script>
