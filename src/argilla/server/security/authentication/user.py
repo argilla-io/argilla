@@ -16,7 +16,7 @@ from typing import Any
 
 from starlette.authentication import BaseUser
 
-from .claims import Claims
+from argilla.server.security.authentication.claims import Claims
 
 
 class User(BaseUser, dict):

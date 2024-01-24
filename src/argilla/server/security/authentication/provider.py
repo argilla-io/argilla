@@ -24,11 +24,10 @@ import argilla.server.schemas.v0.users
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
+from argilla.server.security.authentication import db, oauth2
 from argilla.server.security.authentication.db import APIKeyAuthenticationBackend, BearerTokenAuthenticationBackend
 from argilla.server.security.authentication.oauth2 import OAuth2AuthenticationBackend
-
-from ..settings import settings
-from . import db, oauth2
+from argilla.server.security.settings import settings
 
 
 class AuthenticationProvider:
