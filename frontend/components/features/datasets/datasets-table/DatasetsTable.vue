@@ -37,9 +37,7 @@ export default {
     },
   },
   created() {
-    this.datasets.forEach((dataset) => {
-      dataset.link = this.getDatasetLink(dataset);
-    });
+    this.setDatasetsLink();
   },
   data() {
     return {
@@ -216,6 +214,19 @@ export default {
     },
     copyName({ name }) {
       this.copy(name);
+    },
+    setDatasetsLink() {
+      this.datasets.forEach((dataset) => {
+        dataset.link = this.getDatasetLink(dataset);
+      });
+    },
+  },
+  watch: {
+    datasets: {
+      deep: true,
+      handler() {
+        this.setDatasetsLink();
+      },
     },
   },
   setup() {
