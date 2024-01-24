@@ -12,16 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import asyncio
+import os
 from typing import TYPE_CHECKING, List, Optional
 
 import typer
 import yaml
+from pydantic import BaseSettings
 
 from argilla.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.security.auth_provider.db.settings import settings
-from argilla.server.security.model import USER_USERNAME_REGEX, WORKSPACE_NAME_REGEX
+from argilla.server.schemas.v0.workspaces import WORKSPACE_NAME_REGEX
+from argilla.server.schemas.v0.users import USER_USERNAME_REGEX
 
 from .utils import get_or_new_workspace
 
@@ -107,7 +110,9 @@ class UsersMigrator:
 
 def migrate():
     """Migrate users defined in YAML file to database."""
-    asyncio.run(UsersMigrator(settings.users_db_file).migrate())
+
+    users_db_file: str = os.getenv("ARGILLA_LOCAL_AUTH_USERS_DB_FILE", ".users.yml")
+    asyncio.run(UsersMigrator(users_db_file).migrate())
 
 
 if __name__ == "__main__":

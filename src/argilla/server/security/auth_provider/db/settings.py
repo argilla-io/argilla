@@ -41,7 +41,6 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     token_expiration_in_minutes: int = 30000
     token_api_url: str = "/api/security/token"
-    users_db_file: str = ".users.yml"
 
     @property
     def public_oauth_token_url(self):
