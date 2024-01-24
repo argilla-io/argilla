@@ -16,9 +16,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 from argilla.server.constants import DEFAULT_API_KEY
-from fastapi.security import SecurityScopes
-
 from argilla.server.security.authentication import AuthenticationProvider
+from fastapi.security import SecurityScopes
 
 if TYPE_CHECKING:
     from argilla.server.models import User
