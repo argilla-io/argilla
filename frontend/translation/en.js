@@ -109,6 +109,7 @@ export default {
   responses: "Responses",
   "reset-all": "Reset all",
   reset: "Reset",
+  less: "Less",
   with: "with",
   find: "Find",
   cancel: "Cancel",
@@ -121,8 +122,5 @@ export default {
     api: {
       "errors::UnauthorizedError": "Could not validate credentials",
     },
-  },
-  cloud: {
-    title: "Cloud",
   },
 };
