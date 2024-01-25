@@ -12,10 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import TYPE_CHECKING
+import os
+from typing import Optional, TYPE_CHECKING
 from uuid import uuid4
 
-from argilla.server.pydantic_v1 import BaseSettings
+from argilla.server.pydantic_v1 import BaseSettings, PrivateAttr
 
 if TYPE_CHECKING:
     from argilla.server.security.authentication.oauth2 import OAuth2Settings
@@ -41,6 +42,13 @@ class Settings(BaseSettings):
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
     token_expiration_in_minutes: int = 15
+    oauth_file: str = ".oauth.yaml"
+
+    _oauth_settings: Optional["OAuth2Settings"] = PrivateAttr(None)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._oauth_settings = None
 
     @property
     def token_expire_time(self):
@@ -51,7 +59,15 @@ class Settings(BaseSettings):
     def oauth2(self):
         from argilla.server.security.authentication.oauth2 import OAuth2Settings
 
-        return OAuth2Settings.defaults()
+        if self._oauth_settings:
+            return self._oauth_settings
+
+        if not self._oauth_settings and os.path.exists(self.oauth_file):
+            self._oauth_settings = OAuth2Settings.from_yaml(self.oauth_file)
+        else:
+            self._oauth_settings = OAuth2Settings(enabled=False)
+
+        return self._oauth_settings
 
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"

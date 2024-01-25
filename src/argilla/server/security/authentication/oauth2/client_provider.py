@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 import json
+import os
 import random
 import re
 import string
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, ClassVar, Dict, List, Optional, Type, Union
+from urllib.parse import urljoin
 
 import httpx
 from fastapi import Request
@@ -47,39 +49,51 @@ class Strategy(BaseStrategy):
 
 
 class OAuth2ClientProvider:
-    """OAuth2 flow handler of a certain provider."""
+    """OAuth2 flow handler  of a certain provider."""
 
-    strategy = Strategy()
+    name: ClassVar[str]
+    backend_class: ClassVar[Type[BaseOAuth2]]
+    claims: ClassVar[Optional[Union[Claims, dict]]] = None
+    backend_strategy: ClassVar[BaseStrategy] = Strategy()
 
     def __init__(
         self,
-        name: str,
-        backend_class: Type[BaseOAuth2],
         client_id: str = None,
         client_secret: str = None,
         scope: Optional[List[str]] = None,
-        claims: Optional[Union[Claims, dict]] = None,
         redirect_uri: str = None,
     ) -> None:
-        self.name = name
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.scope = scope
-        self.claims = claims if isinstance(claims, Claims) else Claims(**claims)
-        self.redirect_uri = redirect_uri or f"/oauth/{self.name}/callback"
-        self.backend = backend_class(strategy=self.strategy)
 
-        self._authorization_endpoint = self.backend.authorization_url()
-        self._token_endpoint = self.backend.access_token_url()
+        self.client_id = client_id or self._environment_variable_for_property("client_id")
+        self.client_secret = client_secret or self._environment_variable_for_property("client_secret")
+        self.scope = scope or self._environment_variable_for_property("scope", "")
+        self.redirect_uri = redirect_uri or self._environment_variable_for_property("redirect_uri")
+        self.redirect_uri = self.redirect_uri or f"/oauth/{self.name}/callback"
 
-        self._state = None
+        self._backend = self.backend_class(strategy=self.backend_strategy)
+        self._authorization_endpoint = self._backend.authorization_url()
+        self._token_endpoint = self._backend.access_token_url()
+        self._state = None  # TODO !!!
+
+    def _environment_variable_for_property(self, property_name: str, default: str = None) -> str:
+        env_var_name = f"OAUTH2_{self.name.upper()}_{property_name.upper()}"
+
+        return os.getenv(env_var_name, default)
+
+    @classmethod
+    def from_dict(cls, provider: dict) -> "OAuth2ClientProvider":
+        return cls(**provider)
 
     def new_oauth_client(self) -> WebApplicationClient:
         return WebApplicationClient(self.client_id)
 
     def get_redirect_uri(self, request: Request) -> str:
-        # TODO check absolute url and prepend request base url
-        return self.redirect_uri
+        url = urljoin(str(request.base_url), self.redirect_uri)
+
+        if not settings.oauth2.allow_http:
+            url = url.replace("http://", "https://")
+
+        return url
 
     def authorization_url(self, request: Request) -> str:
         redirect_uri = self.get_redirect_uri(request)
@@ -122,7 +136,7 @@ class OAuth2ClientProvider:
                 response = await session.post(token_url, headers=headers, content=content)
                 oauth_client.parse_request_body_response(json.dumps(response.json()))
 
-                return self.standardize(self.backend.user_data(oauth_client.access_token))
+                return self.standardize(self._backend.user_data(oauth_client.access_token))
             except (OAuth2Error, httpx.HTTPError) as e:
                 raise OAuth2InvalidRequestError(400, str(e))
             except (AuthException, Exception) as e:

@@ -55,13 +55,17 @@ if settings.oauth2.enabled:
     async def get_access_token(request: Request, provider: str, db: AsyncSession = Depends(get_async_db)) -> Token:
         current_user = User(await settings.oauth2.providers[provider].token_data(request))
 
-        # TODO: Resolve providers initialization
         claims = settings.oauth2.providers[provider].claims
         current_user.use_claims(claims)
         username = current_user.username
 
         user = await accounts.get_user_by_username(db, username)
         if not user:
-            await accounts.create_oauth2_user(db, username=username, name=current_user.name)
+            await accounts.create_oauth2_user(
+                db,
+                username=username,
+                name=current_user.name,
+                workspaces=[workspace.name for workspace in settings.oauth2.workspaces],
+            )
 
         return Token(access_token=JWT.create(current_user))

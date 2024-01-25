@@ -11,27 +11,33 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import os
-from typing import List, Optional
+from typing import List
 
-from social_core.backends.open_id_connect import OpenIdConnectAuth
+import yaml
 
 from argilla.server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
+from argilla.server.security.authentication.oauth2.supported_providers import ALL_SUPPORTED_OAUTH2_PROVIDERS
 
 __all__ = ["OAuth2Settings"]
 
 
 class OAuth2Settings:
+    class Workspace:
+        def __init__(self, name: str):
+            self.name = name
+
     def __init__(
         self,
         enabled: bool = True,
         allow_http: bool = False,
         providers: List["OAuth2ClientProvider"] = None,
+        workspaces: List[Workspace] = None,
     ):
         self.enabled = enabled
         self.allow_http = allow_http
         self._providers = providers or []
+        self.workspaces = workspaces or []
 
         if self.allow_http:
             # See https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
@@ -42,43 +48,38 @@ class OAuth2Settings:
         return {provider.name: provider for provider in self._providers}
 
     @classmethod
-    def defaults(cls) -> "OAuth2Settings":
-        from dotenv import load_dotenv
+    def from_yaml(cls, yaml_file: str) -> "OAuth2Settings":
+        """Creates an instance of OAuth2Settings from a YAML file."""
 
-        load_dotenv()
-        return cls(providers=[HuggingfaceClientProvider()])
+        with open(yaml_file) as f:
+            return cls.from_dict(yaml.safe_load(f))
 
+    @classmethod
+    def from_dict(cls, settings: dict) -> "OAuth2Settings":
+        """Creates an instance of OAuth2Settings from a dictionary."""
 
-class HuggingfaceClientProvider(OAuth2ClientProvider):
-    """Specialized HuggingFace OAuth2 provider."""
+        settings["providers"] = cls._build_providers(settings)
+        settings["workspaces"] = cls._build_workspaces(settings)
 
-    class HuggingfaceOpenId(OpenIdConnectAuth):
-        """Huggingface OpenID Connect authentication backend."""
+        return cls(**settings)
 
-        name = "huggingface"
+    @classmethod
+    def _build_workspaces(cls, settings: dict) -> List[Workspace]:
+        return [cls.Workspace(**workspace) for workspace in settings.pop("workspaces", [])]
 
-        OIDC_ENDPOINT = "https://huggingface.co"
-        AUTHORIZATION_URL = "https://huggingface.co/oauth/authorize"
-        ACCESS_TOKEN_URL = "https://huggingface.co/oauth/token"
+    @classmethod
+    def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:
+        providers = []
 
-        def oidc_endpoint(self) -> str:
-            return self.OIDC_ENDPOINT
+        for provider in settings.pop("providers", []):
+            name = provider.pop("name")
 
-    def __init__(
-        self,
-        *,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        redirect_uri: Optional[str] = None,
-        **kwargs,
-    ):
-        super().__init__(
-            name=self.HuggingfaceOpenId.name,
-            backend_class=self.HuggingfaceOpenId,
-            client_id=client_id or os.getenv("OAUTH2_HF_CLIENT_ID", client_id),
-            client_secret=client_secret or os.getenv("OAUTH2_HF_CLIENT_SECRET", client_secret),
-            redirect_uri=redirect_uri
-            or os.getenv("OAUTH2_HF_REDIRECT_URI"),  # THis should be the same for all providers
-            scope=["openid", "profile"],
-            claims={"username": "preferred_username", "first_name": "name"},
-        )
+            provider_class = ALL_SUPPORTED_OAUTH2_PROVIDERS.get(name)
+            if not provider_class:
+                raise ValueError(
+                    f"Unsupported provider {name}. Supported providers are {ALL_SUPPORTED_OAUTH2_PROVIDERS.keys()}"
+                )
+
+            providers.append(provider_class.from_dict(provider))
+
+        return providers
