@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from typing import TYPE_CHECKING, List, Union
 from uuid import UUID
 
@@ -19,8 +18,10 @@ from passlib.context import CryptContext
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session, selectinload
 
+from argilla.server.enums import UserRole
 from argilla.server.models import User, Workspace, WorkspaceUser
-from argilla.server.security.model import UserCreate, WorkspaceCreate, WorkspaceUserCreate
+from argilla.server.schemas.v0.users import UserCreate
+from argilla.server.schemas.v0.workspaces import WorkspaceCreate, WorkspaceUserCreate
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -162,3 +163,26 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return _CRYPT_CONTEXT.verify(password, password_hash)
+
+
+async def create_oauth2_user(
+    db,
+    username: str,
+    name: str,
+    workspaces: List[str] = None,
+    role: UserRole = UserRole.annotator,
+    password_length: int = 32,
+) -> User:
+    password = generate_random_password(password_length)
+
+    user_create = UserCreate(first_name=name, username=username, role=role, password=password, workspaces=workspaces)
+    return await create_user(db, user_create)
+
+
+def generate_random_password(length: int) -> str:
+    import secrets
+    import string
+
+    alphabet = string.ascii_letters + string.digits
+
+    return "".join([secrets.choice(alphabet) for _ in range(length)])

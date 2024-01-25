@@ -12,16 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from starlette.exceptions import HTTPException
+from .api_key_backend import APIKeyAuthenticationBackend
+from .bearer_token_backend import BearerTokenAuthenticationBackend
+from .router import router
 
-
-class OAuth2Error(HTTPException):
-    """Base OAuth2 exception."""
-
-
-class OAuth2AuthenticationError(OAuth2Error):
-    """Raised when authentication fails."""
-
-
-class OAuth2InvalidRequestError(OAuth2Error):
-    """Raised when request is invalid."""
+__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend", "router"]

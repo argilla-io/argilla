@@ -369,6 +369,7 @@ Then open the provided `docker-compose.yaml` file and modify your Argilla instan
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      ARGILLA_LOCAL_AUTH_SECRET_KEY: ${ARGILLA_LOCAL_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
 +     ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /var/lib/argilla-migrate/users.yaml
     networks:
       - argilla

@@ -12,4 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .provider import OAuth2Provider  # noqa
+from .settings import OAuth2Settings  # noqa
+from .auth_backend import OAuth2AuthenticationBackend  # noqa
+from .client_provider import OAuth2ClientProvider  # noqa
+from .router import router  # noqa
+
+
+__all__ = ["OAuth2Settings", "OAuth2AuthenticationBackend", "OAuth2ClientProvider", "router"]

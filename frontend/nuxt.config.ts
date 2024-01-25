@@ -119,7 +119,7 @@ const config: NuxtConfig = {
     locales: [
       {
         code: "en",
-        file: "en.json",
+        file: "en.js",
       },
     ],
     lazy: true,

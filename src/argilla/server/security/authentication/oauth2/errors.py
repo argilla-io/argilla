@@ -12,11 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.errors import ForbiddenOperationError
-from argilla.server.security.model import User
+from fastapi import HTTPException
 
 
-def validate_is_super_user(user: User, message: str = None):
-    """Common validation to ensure the current user is a admin/superuser"""
-    if not user.is_superuser():
-        raise ForbiddenOperationError(message or "Only admin users can apply this change")
+class OAuth2Error(HTTPException):
+    """Base OAuth2 exception."""
+
+
+class OAuth2AuthenticationError(OAuth2Error):
+    """Raised when authentication fails."""
+
+
+class OAuth2InvalidRequestError(OAuth2Error):
+    """Raised when request is invalid."""

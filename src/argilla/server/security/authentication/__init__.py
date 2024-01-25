@@ -13,6 +13,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .base import AuthProvider, api_key_header  # noqa
-from .db import DBAuthProvider, settings  # noqa
-from .oauth2 import OAuth2Provider  # noqa
+from .claims import Claims  # noqa
+from .jwt import JWT  # noqa
+from .provider import AuthenticationProvider  # noqa
+from .user import User  # noqa
+
+
+auth = AuthenticationProvider.new_instance()

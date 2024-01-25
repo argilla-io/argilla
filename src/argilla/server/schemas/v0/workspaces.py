@@ -11,3 +11,30 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+from datetime import datetime
+from uuid import UUID
+
+from argilla.server.constants import ES_INDEX_REGEX_PATTERN
+from argilla.server.pydantic_v1 import BaseModel, Field
+
+WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
+
+
+class WorkspaceUserCreate(BaseModel):
+    user_id: UUID
+    workspace_id: UUID
+
+
+class Workspace(BaseModel):
+    id: UUID
+    name: str
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class WorkspaceCreate(BaseModel):
+    name: str = Field(..., regex=WORKSPACE_NAME_REGEX, min_length=1)

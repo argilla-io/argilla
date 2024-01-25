@@ -13,10 +13,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.security.auth_provider import AuthProvider, DBAuthProvider, OAuth2Provider, api_key_header
-from argilla.server.settings import settings
-
-if settings.oauth_enabled:
-    auth = OAuth2Provider.new_instance()
-else:
-    auth = DBAuthProvider.new_instance()
+from argilla.server.security.authentication import auth  # noqa

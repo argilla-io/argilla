@@ -12,10 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import TYPE_CHECKING
+from uuid import uuid4
 
-from argilla.server import helpers
 from argilla.server.pydantic_v1 import BaseSettings
-from argilla.server.settings import settings as server_settings
+
+if TYPE_CHECKING:
+    from argilla.server.security.authentication.oauth2 import OAuth2Settings
 
 
 class Settings(BaseSettings):
@@ -35,13 +38,9 @@ class Settings(BaseSettings):
 
     """
 
-    insecure_mode: bool = False
-
-    secret_key: str = "secret"
+    secret_key: str = uuid4().hex
     algorithm: str = "HS256"
     token_expiration_in_minutes: int = 15
-    token_api_url: str = "/api/security/token"
-    users_db_file: str = ".users.yml"
 
     @property
     def token_expire_time(self):
@@ -49,9 +48,10 @@ class Settings(BaseSettings):
         return self.token_expiration_in_minutes * 60
 
     @property
-    def public_oauth_token_url(self):
-        """The final public token url used for openapi doc setup"""
-        return f"{server_settings.base_url}{helpers.remove_prefix(self.token_api_url,'/')}"
+    def oauth2(self):
+        from argilla.server.security.authentication.oauth2 import OAuth2Settings
+
+        return OAuth2Settings.defaults()
 
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"
