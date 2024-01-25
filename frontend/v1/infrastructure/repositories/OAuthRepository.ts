@@ -1,5 +1,4 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { NuxtRuntimeConfig } from "@nuxt/types/config/runtime";
 import { AxiosError } from "axios";
 import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
