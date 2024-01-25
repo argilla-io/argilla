@@ -13,12 +13,12 @@
 #  limitations under the License.
 import asyncio
 import os
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import typer
 import yaml
 
-from argilla.pydantic_v1 import BaseModel, Field, constr
+from argilla.server.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole
 from argilla.server.schemas.v0.users import USER_USERNAME_REGEX

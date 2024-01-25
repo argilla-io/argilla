@@ -15,7 +15,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from argilla.server.pydantic_v1 import BaseModel, Field
 
 from argilla.server.constants import ES_INDEX_REGEX_PATTERN
 
