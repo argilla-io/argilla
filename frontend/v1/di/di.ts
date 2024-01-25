@@ -48,7 +48,6 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
-  const useConfig = () => context.$config;
   const useAuth = () => context.$auth;
 
   const dependencies = [
@@ -61,7 +60,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
     register(OAuthRepository)
-      .withDependencies(useAxios, useRoutes, useConfig, useAuth)
+      .withDependencies(useAxios, useRoutes, useAuth)
       .build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),

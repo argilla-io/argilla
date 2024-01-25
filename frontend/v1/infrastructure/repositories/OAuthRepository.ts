@@ -25,7 +25,6 @@ export class OAuthRepository implements IOAuthRepository {
   constructor(
     axios: NuxtAxiosInstance,
     private readonly router: RouterService,
-    private readonly config: NuxtRuntimeConfig,
     private readonly auth: Auth
   ) {
     this.axios = axios.create({
@@ -51,7 +50,7 @@ export class OAuthRepository implements IOAuthRepository {
 
   authorize(provider: ProviderType) {
     this.router.go(
-      `${this.config.backendURL}/api/security/oauth2/providers/${provider}/authentication`,
+      `api/security/oauth2/providers/${provider}/authentication`,
       true
     );
   }
