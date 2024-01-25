@@ -1,7 +1,8 @@
 <template>
-  <button @click="$emit('click')">
-    <img src="./hf-sign-in.svg" draggable="false" />
-  </button>
+  <BaseButton class="button-hf" @click="$emit('click')">
+    <HFLogo />
+    {{ $t("button.hf-login") }}
+  </BaseButton>
 </template>
 <script>
 export default {
@@ -10,11 +11,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-button {
-  border: 0;
-  background: none;
+.button-hf {
+  @extend %button !optional;
+  background: $black-87;
+  color: palette(white);
   width: 100%;
-  user-select: none;
-  cursor: pointer;
+  padding: calc($base-space / 2) $base-space * 4;
+  &:hover {
+    background: lighten($black-87, 10%);
+  }
+  svg {
+    width: 30px;
+    height: auto;
+  }
 }
 </style>
