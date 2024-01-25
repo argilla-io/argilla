@@ -16,8 +16,8 @@ from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, constr
-from pydantic.utils import GetterDict
+from argilla.server.pydantic_v1 import BaseModel, Field, constr
+from argilla.server.pydantic_v1.utils import GetterDict
 
 from argilla.server.constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.enums import UserRole
