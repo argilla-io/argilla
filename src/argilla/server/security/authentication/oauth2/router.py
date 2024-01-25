@@ -11,12 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
+from argilla.server.pydantic_v1 import BaseModel
 from argilla.server.security.authentication.jwt import JWT
 from argilla.server.security.authentication.user import User
 from argilla.server.security.model import Token
@@ -25,11 +27,22 @@ from argilla.server.security.settings import settings
 router = APIRouter(prefix="/oauth2/providers")
 
 
+class Provider(BaseModel):
+    name: str
+
+
+class Providers(BaseModel):
+    items: List[Provider]
+
+
 @router.get("")
-def list_providers(_: Request) -> dict:
-    if not settings.oauth2.enabled:
-        return {"items": []}
-    return {"items": [provider_name for provider_name in settings.oauth2.providers]}
+def list_providers(_: Request) -> Providers:
+    items = []
+
+    if settings.oauth2.enabled:
+        items = [Provider(name=provider_name) for provider_name in settings.oauth2.providers]
+
+    return Providers(items=items)
 
 
 if settings.oauth2.enabled:
