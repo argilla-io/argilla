@@ -16,11 +16,10 @@ from datetime import datetime
 from typing import Any, List, Optional
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel, Field, constr
-from argilla.server.pydantic_v1.utils import GetterDict
-
 from argilla.server.constants import ES_INDEX_REGEX_PATTERN
 from argilla.server.enums import UserRole
+from argilla.server.pydantic_v1 import BaseModel, Field, constr
+from argilla.server.pydantic_v1.utils import GetterDict
 
 USER_USERNAME_REGEX = ES_INDEX_REGEX_PATTERN
 USER_PASSWORD_MIN_LENGTH = 8
