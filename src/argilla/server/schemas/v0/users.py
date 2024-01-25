@@ -26,15 +26,6 @@ USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
 
 
-class UserCreate(BaseModel):
-    first_name: constr(min_length=1, strip_whitespace=True)
-    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: str = Field(regex=USER_USERNAME_REGEX, min_length=1)
-    role: Optional[UserRole]
-    password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
-    workspaces: Optional[List[str]]
-
-
 class UserGetter(GetterDict):
     def get(self, key: str, default: Any = None) -> Any:
         if key == "full_name":
@@ -46,7 +37,7 @@ class UserGetter(GetterDict):
 
 
 class User(BaseModel):
-    """Base user model"""
+    """Base user schema"""
 
     id: UUID
     first_name: str
@@ -62,3 +53,12 @@ class User(BaseModel):
     class Config:
         orm_mode = True
         getter_dict = UserGetter
+
+
+class UserCreate(BaseModel):
+    first_name: constr(min_length=1, strip_whitespace=True)
+    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
+    username: str = Field(regex=USER_USERNAME_REGEX, min_length=1)
+    role: Optional[UserRole]
+    password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
+    workspaces: Optional[List[str]]

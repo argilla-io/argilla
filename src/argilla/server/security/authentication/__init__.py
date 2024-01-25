@@ -20,3 +20,4 @@ from .user import User  # noqa
 
 
 auth = AuthenticationProvider.new_instance()
+

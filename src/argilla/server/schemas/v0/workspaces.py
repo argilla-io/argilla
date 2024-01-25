@@ -1,3 +1,4 @@
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +22,6 @@ from argilla.server.pydantic_v1 import BaseModel, Field
 WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
 
-class WorkspaceUserCreate(BaseModel):
-    user_id: UUID
-    workspace_id: UUID
-
-
 class Workspace(BaseModel):
     id: UUID
     name: str
@@ -34,6 +30,11 @@ class Workspace(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class WorkspaceUserCreate(BaseModel):
+    user_id: UUID
+    workspace_id: UUID
 
 
 class WorkspaceCreate(BaseModel):
