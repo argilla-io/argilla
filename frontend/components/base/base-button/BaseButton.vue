@@ -141,6 +141,7 @@ export default {
 .button {
   @extend %button;
   .spinner {
+    flex-shrink: 0;
     height: 20px;
     width: 20px;
     border: 3px solid #242323d8;
