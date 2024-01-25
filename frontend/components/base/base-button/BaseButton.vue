@@ -163,7 +163,8 @@ export default {
     fill: palette(white);
   }
   .spinner {
-    border-color: palette(white);
+    border: 3px solid #ffffff;
+    border-top-color: #ffffff3a;
   }
   &:hover,
   &:active,
@@ -177,6 +178,10 @@ export default {
     .svg-icon {
       fill: $primary-color;
     }
+    .spinner {
+      border: 3px solid $primary-color;
+      border-top-color: #2517f321;
+    }
     &:hover,
     &:active,
     &.active {
@@ -187,6 +192,10 @@ export default {
   &.light {
     background: lighten($black-4, 50%);
     color: $primary-color;
+    .spinner {
+      border: 3px solid $primary-color;
+      border-top-color: #2517f321;
+    }
     &:hover,
     &:active,
     &.active {
