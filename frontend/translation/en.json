@@ -43,7 +43,7 @@
   },
   "button": {
     "ignore_and_continue": "Ignore and continue",
-    "login": "Login",
+    "login": "Log in",
     "hf-login": "Log in with Hugging Face"
   },
   "to_submit_complete_required": "To submit complete \nrequired responses",
