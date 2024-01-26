@@ -12,11 +12,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.errors import ForbiddenOperationError
-from argilla.server.security.model import User
+from datetime import datetime
+from uuid import UUID
+
+from argilla.server.constants import ES_INDEX_REGEX_PATTERN
+from argilla.server.pydantic_v1 import BaseModel, Field
+
+WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
 
-def validate_is_super_user(user: User, message: str = None):
-    """Common validation to ensure the current user is a admin/superuser"""
-    if not user.is_superuser():
-        raise ForbiddenOperationError(message or "Only admin users can apply this change")
+class Workspace(BaseModel):
+    id: UUID
+    name: str
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class WorkspaceUserCreate(BaseModel):
+    user_id: UUID
+    workspace_id: UUID
+
+
+class WorkspaceCreate(BaseModel):
+    name: str = Field(..., regex=WORKSPACE_NAME_REGEX, min_length=1)

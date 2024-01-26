@@ -27,6 +27,8 @@ spec:
           env:
             - name: ARGILLA_ELASTICSEARCH
               value: "http://elasticsearch:9200"
+            - name: ARGILLA_LOCAL_AUTH_SECRET_KEY
+              value: "CHANGE_ME"
           ports:
             - containerPort: 6900
           resources:

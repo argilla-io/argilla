@@ -95,6 +95,7 @@ services:
      - "80:80"
    environment:
      ARGILLA_ELASTICSEARCH: <elasticsearch-host_and_port>
+     ARGILLA_LOCAL_AUTH_SECRET_KEY: Please generate a 32 character random string with: openssl rand -hex 32
    restart: unless-stopped
 ```""".format(
     myst_substitutions["dockertag"]
@@ -110,6 +111,7 @@ services:
       - "6900:80"
     environment:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      ARGILLA_LOCAL_AUTH_SECRET_KEY: Please generate a 32 character random string with: openssl rand -hex 32
       ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
 
     volumes:
