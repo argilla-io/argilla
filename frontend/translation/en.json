@@ -42,7 +42,9 @@
     "yesDelete": "Yes, delete"
   },
   "button": {
-    "ignore_and_continue": "Ignore and continue"
+    "ignore_and_continue": "Ignore and continue",
+    "cancel": "Cancel",
+    "continue": "Continue"
   },
   "to_submit_complete_required": "To submit complete \nrequired responses",
   "some_records_failed_to_annotate": "Some records failed to annotate",
@@ -54,7 +56,11 @@
     "defaultHeight": "Expand records",
     "to_annotate_record_bulk_required": "No record selected",
     "select_to_annotate": "Select all",
-    "pageSize": "Page size"
+    "pageSize": "Page size",
+    "selectAllResults": "Select all {total} results",
+    "haveSelectedRecords": "You have selected all {total} records",
+    "actionConfirmation": "Bulk action confirmation",
+    "actionConfirmationText": "This action will affect {total} records, do you want to continue? "
   },
   "shortcuts": {
     "label": "Shortcuts",

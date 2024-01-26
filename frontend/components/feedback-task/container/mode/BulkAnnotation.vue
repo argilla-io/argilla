@@ -33,24 +33,36 @@
             />
             <span
               class="wrapper__records__header__selection-text"
-              v-if="selectedRecords.length"
+              v-if="selectedRecords.length && !affectAllRecords"
               v-text="
                 $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
               "
             />
 
-            <div v-if="isSelectedAll">
-              <BaseCheckbox
-                :decoration-circle="true"
-                class="wrapper__records__header__checkbox"
-                :value="affectAllRecords"
-                @input="() => (affectAllRecords = !affectAllRecords)"
-              />
-              <span class="wrapper__records__header__selection-text">
-                Affect all records</span
+            <div v-if="isAffectAllRecordsAllowed" class="bulk-by-criteria">
+              <BaseButton
+                v-if="!affectAllRecords"
+                class="bulk-by-criteria__button primary text small"
+                @on-click="affectAllRecords = true"
+                >{{
+                  $t("bulkAnnotation.selectAllResults", {
+                    total: records.total,
+                  })
+                }}</BaseButton
               >
+              <template v-else>
+                <span class="wrapper__records__header__selection-text">{{
+                  $t("bulkAnnotation.haveSelectedRecords", {
+                    total: records.total,
+                  })
+                }}</span>
+                <BaseButton
+                  class="bulk-by-criteria__button primary text small"
+                  @on-click="resetAffectAllRecords"
+                  >{{ $t("button.cancel") }}</BaseButton
+                >
+              </template>
             </div>
-            <BaseCircleProgress v-if="progress" :value="progress" />
           </div>
           <RecordsViewConfig
             v-if="records.hasRecordsToAnnotate"
@@ -99,11 +111,35 @@
         :submit-tooltip="bulkActionsTooltip"
         :discard-tooltip="bulkActionsTooltip"
         :draft-saving-tooltip="bulkActionsTooltip"
-        @on-submit-responses="onSubmit"
-        @on-discard-responses="onDiscard"
-        @on-save-draft="onSaveDraft"
+        :progress="progress"
+        @on-submit-responses="onClickSubmit"
+        @on-discard-responses="onClickDiscard"
+        @on-save-draft="onClickSaveDraft"
       />
     </div>
+    <BaseModal
+      class="conformation-modal"
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      modal-class="modal-secondary"
+      :modal-title="$t('bulkAnnotation.actionConfirmation')"
+      :modal-visible="visibleConfirmationModal"
+      @close-modal="cancelAction"
+    >
+      <p
+        v-text="
+          $t('bulkAnnotation.actionConfirmationText', { total: records.total })
+        "
+      />
+      <div class="modal-buttons">
+        <BaseButton class="primary outline" @on-click="cancelAction">
+          {{ $t("button.cancel") }}
+        </BaseButton>
+        <BaseButton class="primary" @on-click="confirmateAction">
+          {{ $t("button.continue") }}
+        </BaseButton>
+      </div>
+    </BaseModal>
   </span>
 </template>
 <script>
@@ -138,6 +174,8 @@ export default {
     return {
       selectedRecords: [],
       recordHeight: "defaultHeight",
+      visibleConfirmationModal: false,
+      allowedAction: null,
     };
   },
   computed: {
@@ -162,6 +200,13 @@ export default {
     isSelectedAll() {
       return this.selectedRecords.length === this.recordsOnPage.length;
     },
+    isAffectAllRecordsAllowed() {
+      return (
+        this.isSelectedAll &&
+        this.checkIfSomeFilterIsActive(this.recordCriteria) &&
+        this.records.total > this.recordsOnPage.length
+      );
+    },
   },
   methods: {
     onSelectRecord(isSelected, record) {
@@ -172,6 +217,51 @@ export default {
       this.selectedRecords = this.selectedRecords.filter(
         (r) => r.id !== record.id
       );
+    },
+    showConfirmationModal(action) {
+      this.visibleConfirmationModal = true;
+      this.allowedAction = action;
+    },
+    cancelAction() {
+      this.visibleConfirmationModal = false;
+      this.resetAffectAllRecords();
+      this.allowedAction = null;
+    },
+    async confirmateAction() {
+      this.visibleConfirmationModal = false;
+      switch (this.allowedAction) {
+        case "submit":
+          await this.onSubmit();
+          break;
+        case "saveDraft":
+          await this.onSaveDraft();
+          break;
+        case "discard":
+          await this.onDiscard();
+          break;
+      }
+      this.allowedAction = null;
+    },
+    onClickSubmit() {
+      if (this.affectAllRecords) {
+        this.showConfirmationModal("submit");
+      } else {
+        this.onSubmit();
+      }
+    },
+    onClickSaveDraft() {
+      if (this.affectAllRecords) {
+        this.showConfirmationModal("saveDraft");
+      } else {
+        this.onSaveDraft();
+      }
+    },
+    onClickDiscard() {
+      if (this.affectAllRecords) {
+        this.showConfirmationModal("discard");
+      } else {
+        this.onDiscard();
+      }
     },
     async onSubmit() {
       const allSuccessful = await this.submit(
@@ -206,6 +296,10 @@ export default {
       } else {
         this.selectedRecords = [...this.recordsOnPage];
       }
+    },
+    resetAffectAllRecords() {
+      this.affectAllRecords = false;
+      this.selectedRecords = [];
     },
     resetScroll() {
       if (!this.$refs.bulkScrollableArea) return;
@@ -316,6 +410,15 @@ export default {
         height: 100%;
       }
     }
+  }
+}
+
+.bulk-by-criteria {
+  display: flex;
+  align-items: center;
+  gap: $base-space * 2;
+  &__button {
+    padding: 0;
   }
 }
 

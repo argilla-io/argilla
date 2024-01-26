@@ -23,6 +23,15 @@ export const useBulkAnnotationViewModel = () => {
 
   const t = useTranslate();
 
+  const checkIfSomeFilterIsActive = (criteria: RecordCriteria) => {
+    return (
+      criteria.isFilteringByText ||
+      criteria.isFilteringByResponse ||
+      criteria.isFilteredByMetadata ||
+      criteria.isFilteringBySuggestion
+    );
+  };
+
   const annotateBulk = async (
     status: AvailableStatus,
     criteria: RecordCriteria,
@@ -126,5 +135,6 @@ export const useBulkAnnotationViewModel = () => {
     submit,
     discard,
     saveAsDraft,
+    checkIfSomeFilterIsActive,
   };
 };
