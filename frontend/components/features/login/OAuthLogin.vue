@@ -1,8 +1,8 @@
 <template>
-  <div class="oauth--container" v-if="providers.length">
+  <div class="oauth__container" v-if="providers.length">
     <BaseSeparator />
 
-    <div v-for="provider in providers">
+    <div v-for="provider in providers" :key="provider.name">
       <HuggingFaceButton
         v-if="provider.isHuggingFace"
         @click="authorize(provider.name)"
@@ -24,12 +24,11 @@ export default {
 
 <style lang="scss" scoped>
 .oauth {
-  &--container {
-    margin-top: 1em;
-    height: fit-content;
+  &__container {
+    margin-top: $base-space * 3;
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: $base-space * 3;
   }
 }
 </style>

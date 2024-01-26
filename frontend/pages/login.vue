@@ -27,9 +27,9 @@
       <div class="login--left__form">
         <form class="form" @submit.prevent="onLoginUser">
           <div>
-            <p class="form__title">Welcome</p>
+            <p class="form__title" v-text="$t('login.title')" />
 
-            <p class="form__text">Please enter your details to login.</p>
+            <p class="form__text" v-text="$t('login.subtitle')" />
             <div class="form__input" :class="{ active: login.username }">
               <label class="form__label">Username</label>
               <input
@@ -46,16 +46,17 @@
                 placeholder="Enter your password"
               />
             </div>
-            <p v-if="deployment === 'quickstart'">
-              You are using the Quickstart version of Argilla. Check
-              <a :href="$config.documentationSiteQuickStart" target="_blank"
-                >this guide</a
-              >
-              to learn more about usage and configuration options.
-            </p>
-            <base-button type="submit" class="form__button primary"
-              >Enter</base-button
-            >
+            <p
+              v-if="deployment == 'quickstart'"
+              v-html="
+                $t('login.quickstart', {
+                  link: $config.documentationSiteQuickStart,
+                })
+              "
+            />
+            <base-button type="submit" class="form__button primary">{{
+              $t("button.login")
+            }}</base-button>
             <p class="form__error" v-if="error">{{ formattedError }}</p>
           </div>
         </form>
@@ -65,12 +66,12 @@
     </div>
 
     <div class="login--right">
-      <p class="login__claim">Build, improve, and monitor data for NLP</p>
+      <p class="login__claim" v-text="$t('login.claim')" />
       <geometric-shape-a />
-      <p class="login__text">
-        To get support from the community, join us on
-        <a :href="$config.slackCommunity" target="_blank">Slack</a>
-      </p>
+      <p
+        class="login__text"
+        v-html="$t('login.support', { link: $config.slackCommunity })"
+      />
     </div>
   </div>
 </template>
@@ -171,7 +172,8 @@ export default {
   background: $brand-secondary-color;
   display: flex;
   min-height: 100vh;
-  a {
+  a,
+  :deep(a) {
     outline: none;
     color: $brand-primary-color;
     text-decoration: none;
@@ -195,7 +197,7 @@ export default {
     font-weight: 500;
   }
   &__title {
-    @include font-size(40px);
+    @include font-size(36px);
     line-height: 1.2em;
     margin: 0 auto $base-space auto;
     color: $black-87;
