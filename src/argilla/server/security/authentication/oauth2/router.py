@@ -65,7 +65,7 @@ if settings.oauth2.enabled:
                 db,
                 username=username,
                 name=current_user.name,
-                workspaces=[workspace.name for workspace in settings.oauth2.workspaces],
+                workspaces=[workspace.name for workspace in settings.oauth2.allowed_workspaces],
             )
 
         return Token(access_token=JWT.create(current_user))

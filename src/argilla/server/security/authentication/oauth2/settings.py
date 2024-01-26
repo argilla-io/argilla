@@ -23,6 +23,9 @@ __all__ = ["OAuth2Settings"]
 
 
 class OAuth2Settings:
+    ALLOWED_WORKSPACES_KEY = "allowed_workspaces"
+    PROVIDERS_KEY = "providers"
+
     class Workspace:
         def __init__(self, name: str):
             self.name = name
@@ -30,16 +33,17 @@ class OAuth2Settings:
     def __init__(
         self,
         enabled: bool = True,
-        allow_http: bool = False,
+        allow_http_redirect: bool = False,
         providers: List["OAuth2ClientProvider"] = None,
-        workspaces: List[Workspace] = None,
+        allowed_workspaces: List[Workspace] = None,
     ):
         self.enabled = enabled
-        self.allow_http = allow_http
-        self._providers = providers or []
-        self.workspaces = workspaces or []
+        self.allow_http_redirect = allow_http_redirect
+        self.allowed_workspaces = allowed_workspaces or []
 
-        if self.allow_http:
+        self._providers = providers or []
+
+        if self.allow_http_redirect:
             # See https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
             os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -58,14 +62,14 @@ class OAuth2Settings:
     def from_dict(cls, settings: dict) -> "OAuth2Settings":
         """Creates an instance of OAuth2Settings from a dictionary."""
 
-        settings["providers"] = cls._build_providers(settings)
-        settings["workspaces"] = cls._build_workspaces(settings)
+        settings[cls.PROVIDERS_KEY] = cls._build_providers(settings)
+        settings[cls.ALLOWED_WORKSPACES_KEY] = cls._build_workspaces(settings)
 
         return cls(**settings)
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[Workspace]:
-        return [cls.Workspace(**workspace) for workspace in settings.pop("workspaces", [])]
+        return [cls.Workspace(**workspace) for workspace in settings.pop(cls.ALLOWED_WORKSPACES_KEY, [])]
 
     @classmethod
     def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:

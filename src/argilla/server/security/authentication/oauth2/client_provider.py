@@ -63,7 +63,6 @@ class OAuth2ClientProvider:
         scope: Optional[List[str]] = None,
         redirect_uri: str = None,
     ) -> None:
-
         self.client_id = client_id or self._environment_variable_for_property("client_id")
         self.client_secret = client_secret or self._environment_variable_for_property("client_secret")
         self.scope = scope or self._environment_variable_for_property("scope", "")
@@ -89,11 +88,7 @@ class OAuth2ClientProvider:
 
     def get_redirect_uri(self, request: Request) -> str:
         url = urljoin(str(request.base_url), self.redirect_uri)
-
-        if not settings.oauth2.allow_http:
-            url = url.replace("http://", "https://")
-
-        return url
+        return self._align_url_to_allow_http_redirect(url)
 
     def authorization_url(self, request: Request) -> str:
         redirect_uri = self.get_redirect_uri(request)
@@ -120,8 +115,7 @@ class OAuth2ClientProvider:
         # raise OAuth2InvalidRequestError(400, "'state' parameter does not match")
 
         redirect_uri = self.get_redirect_uri(request)
-        scheme = "http" if settings.oauth2.allow_http else "https"
-        authorization_response = re.sub(r"^https?", scheme, str(request.url))
+        authorization_response = self._align_url_to_allow_http_redirect(str(request.url))
 
         oauth2_query_params = dict(redirect_url=redirect_uri, authorization_response=authorization_response)
         oauth2_query_params.update(request.query_params)
@@ -141,6 +135,13 @@ class OAuth2ClientProvider:
                 raise OAuth2InvalidRequestError(400, str(e))
             except (AuthException, Exception) as e:
                 raise OAuth2AuthenticationError(401, str(e))
+
+    @staticmethod
+    def _align_url_to_allow_http_redirect(url: str) -> str:
+        """This method is used to align the URL to the HTTP/HTTPS scheme"""
+
+        scheme = "http" if settings.oauth2.allow_http_redirect else "https"
+        return re.sub(r"^https?", scheme, url)
 
     def standardize(self, data: Dict[str, Any]) -> Dict[str, Any]:
         data["provider"] = self.name
