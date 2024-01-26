@@ -26,7 +26,11 @@ These are the section headers that we use:
 - API v1 responses returning `VectorSettings` schema now always include `dataset_id` attribute. ([#4490](https://github.com/argilla-io/argilla/pull/4490))
 - Added `pdf_to_html` function to `.html_utils` module that convert PDFs to dataURL to be able to render them in tha Argilla UI. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
 
-### Fixed
+### Removed
+
+- Remove sending `Authorization` header from python SDK requests. ([#4535](https://github.com/argilla-io/argilla/pull/4535))
+
+### Fixed
 
 - Fixed keyboard shortcut for label questions ([#4530](https://github.com/argilla-io/argilla/pull/4530))
 
