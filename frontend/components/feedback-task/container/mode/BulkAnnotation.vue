@@ -291,7 +291,7 @@ export default {
       if (allSuccessful) this.selectedRecords = [];
     },
     toggleAllRecords() {
-      if (this.selectedRecords.length === this.recordsOnPage.length) {
+      if (this.isSelectedAll) {
         this.selectedRecords = [];
       } else {
         this.selectedRecords = [...this.recordsOnPage];
@@ -318,6 +318,11 @@ export default {
       this.recordCriteria.page.goToFirst();
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
+    },
+    isSelectedAll(value) {
+      if (!value) {
+        this.affectAllRecords = false;
+      }
     },
   },
   setup() {
