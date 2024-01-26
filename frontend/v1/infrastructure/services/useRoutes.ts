@@ -112,7 +112,7 @@ export const useRoutes = () => {
   };
 
   const go = (where: string, external?: boolean) => {
-    if (external) return window.location.replace(where);
+    if (external) return (window.location.href = where);
 
     router.push(where);
   };
