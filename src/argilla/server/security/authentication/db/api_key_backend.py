@@ -31,16 +31,14 @@ class APIKeyAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request: Request) -> Optional[Tuple[AuthCredentials, BaseUser]]:
         """Authenticate the user using the API Key header"""
         api_key: str = await self.scheme(request)
-
         if not api_key:
             return None
 
         db = request.state.db
         user = await accounts.get_user_by_api_key(db, api_key=api_key)
-
         if not user:
             return None
 
-        return AuthCredentials(["authenticated"]), UserInfo(
-            username=user.username, name=user.full_name, role=user.role, identity=str(user.id)
+        return AuthCredentials(), UserInfo(
+            username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
         )

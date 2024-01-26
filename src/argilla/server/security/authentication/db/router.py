@@ -44,6 +44,6 @@ async def create_access_token(
     if not user:
         raise UnauthorizedError()
 
-    token = JWT.create(UserInfo(username=user.username, name=user.full_name, role=user.role, identity=str(user.id)))
+    token = JWT.create(UserInfo(username=user.username, name=user.first_name, role=user.role, identity=str(user.id)))
 
     return Token(access_token=token)
