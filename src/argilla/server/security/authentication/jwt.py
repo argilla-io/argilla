@@ -24,7 +24,7 @@ from argilla.server.security.settings import settings
 class JWT:
     secret: str = settings.secret_key
     algorithm: str = settings.algorithm
-    expires: int = settings.token_expire_time
+    expires: int = settings.token_expiration
 
     @classmethod
     def encode(cls, data: dict) -> str:
