@@ -49,7 +49,12 @@
     :disabled="disabled"
     @click="onClick"
   >
-    <BaseSpinner class="spinner" v-if="loading" />
+    <BaseSpinner
+      class="spinner"
+      v-if="loading"
+      :size="20"
+      :progress="loadingProgress"
+    />
     <slot />
   </button>
 </template>
@@ -70,6 +75,10 @@ export default {
       default: "button",
     },
     loading: Boolean,
+    loadingProgress: {
+      type: Number,
+      default: 0,
+    },
     disabled: Boolean,
     centered: Boolean,
     to: { type: String | Object },
@@ -141,8 +150,6 @@ export default {
 .button {
   @extend %button;
   .spinner {
-    height: 20px;
-    width: 20px;
     border: 3px solid #242323d8;
     border-top-color: #00000021;
   }
@@ -198,6 +205,7 @@ export default {
     padding-right: 0;
     background: none;
     color: $primary-color;
+    border-radius: 0;
     &:hover {
       background: none;
       color: darken($primary-color, 10%);
@@ -250,6 +258,7 @@ export default {
     padding-right: 0;
     background: none;
     color: $black-54;
+    border-radius: 0;
     &:hover {
       background: none;
       color: $black-87;

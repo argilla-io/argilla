@@ -35,6 +35,7 @@
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
+          :loading-progress="progress"
           :disabled="isDiscardDisabled || isSaving"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onDiscard"
@@ -50,6 +51,7 @@
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
+          :loading-progress="progress"
           :disabled="isDraftSaveDisabled || isSaving"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onSaveDraft"
@@ -70,6 +72,7 @@
             isSubmitting ? '--button--submitting' : null,
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
+          :loading-progress="progress"
           :loading="isSubmitting"
           :disabled="
             !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
@@ -148,6 +151,10 @@ export default {
     draftSavingTooltip: {
       type: String,
       default: null,
+    },
+    progress: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
