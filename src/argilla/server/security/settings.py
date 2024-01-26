@@ -40,10 +40,10 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
 
     token_expiration_in_minutes: int = 15
-    token_expiration: int
+    token_expiration: Optional[int]
 
     @validator("token_expiration", always=True)
-    def set_token_expire_time(cls, v, values, **kwargs) -> int:
+    def default_token_expiration(cls, v, values, **kwargs) -> int:
         if v is not None:
             return v
         return values["token_expiration_in_minutes"] * 60
