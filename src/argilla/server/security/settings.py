@@ -39,14 +39,20 @@ class Settings(BaseSettings):
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
 
-    token_expiration_in_minutes: int = 15
-    token_expiration: Optional[int]
+    token_expiration: int = 120 * 60
 
     @validator("token_expiration", always=True)
     def default_token_expiration(cls, v, values, **kwargs) -> int:
-        if v is not None:
+        if "token_expiration" in values:
             return v
-        return values["token_expiration_in_minutes"] * 60
+
+        # This is a backwards compatibility hack to support the old env variable and
+        # it will be removed in version 1.25.0
+        expiration_in_minutes = os.getenv("ARGILLA_LOCAL_AUTH_TOKEN_EXPIRATION_IN_MINUTES")
+        if expiration_in_minutes is not None:
+            return int(expiration_in_minutes) * 60
+
+        return v
 
     class Config:
         env_prefix = "ARGILLA_AUTH_"
