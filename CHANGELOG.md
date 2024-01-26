@@ -24,6 +24,11 @@ These are the section headers that we use:
 - API v1 responses returning `Field` schema now always include `dataset_id` attribute. ([#4488](https://github.com/argilla-io/argilla/pull/4488))
 - API v1 responses returning `MetadataProperty` schema now always include `dataset_id` attribute. ([#4489](https://github.com/argilla-io/argilla/pull/4489))
 - API v1 responses returning `VectorSettings` schema now always include `dataset_id` attribute. ([#4490](https://github.com/argilla-io/argilla/pull/4490))
+- Added `pdf_to_html` function to `.html_utils` module that convert PDFs to dataURL to be able to render them in tha Argilla UI. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
+
+### Fixed
+
+- Fixed keyboard shortcut for label questions ([#4530](https://github.com/argilla-io/argilla/pull/4530))
 
 ## [1.22.0](https://github.com/argilla-io/argilla/compare/v1.21.0...v1.22.0)
 
@@ -43,6 +48,7 @@ These are the section headers that we use:
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+- Refactor and add `width`, `height`, `autoplay` and `loop` attributes as optional args in `to_html` functions. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
 
 ### Fixed
 

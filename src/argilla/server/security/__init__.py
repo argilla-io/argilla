@@ -14,6 +14,5 @@
 #  limitations under the License.
 from .auth_provider import DBAuthProvider
 from .auth_provider.base import AuthProvider, api_key_header
-from .model import User
 
 auth = DBAuthProvider.new_instance()
