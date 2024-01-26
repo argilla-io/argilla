@@ -19,10 +19,10 @@ from fastapi.security import SecurityScopes
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-import argilla.server.schemas.v0.users
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
+from argilla.server.models import User
 from argilla.server.security.authentication import db
 from argilla.server.security.authentication.db import APIKeyAuthenticationBackend, BearerTokenAuthenticationBackend
 
@@ -44,7 +44,7 @@ class AuthenticationProvider:
         db: AsyncSession = Depends(get_async_db),
         _api_key: Optional[str] = Depends(APIKeyAuthenticationBackend.scheme),
         _bearer: Optional[str] = Depends(BearerTokenAuthenticationBackend.scheme),
-    ) -> argilla.server.schemas.v0.users.User:
+    ) -> User:
         # This db will be used by the backends. Ideally this should be done as a global dependency
         # but is not working as expected. Sometimes the db is not available in the request state at the
         # middlewares level.
