@@ -56,7 +56,7 @@ config.mocks = {
   $t: (key) => `#${key}#`,
 };
 
-module.exports = async () => {
+export default async () => {
   const nuxt = await buildNuxt();
 
   process.env.buildDir = nuxt.options.buildDir;
