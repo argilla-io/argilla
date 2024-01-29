@@ -63,6 +63,7 @@ export default {
     actionConfirmation: "Bulk action confirmation",
     actionConfirmationText:
       "This action will affect {total} records, do you want to continue? ",
+    allRecordsAnnotated: "The {total} records have been {action}",
   },
   shortcuts: {
     label: "Shortcuts",

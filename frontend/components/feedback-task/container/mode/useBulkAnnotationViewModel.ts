@@ -53,6 +53,14 @@ export const useBulkAnnotationViewModel = () => {
           message: t("some_records_failed_to_annotate"),
           type: "error",
         });
+      } else if (affectAllRecords.value) {
+        Notification.dispatch("notify", {
+          message: t("bulkAnnotation.allRecordsAnnotated", {
+            total: records.length,
+            action: status === "draft" ? "save as draft" : status,
+          }),
+          type: "info",
+        });
       }
 
       progress.value = 0;
