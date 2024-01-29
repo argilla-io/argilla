@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     algorithm:
         Encryption algorithm for token data
 
-    token_expiration_in_minutes:
-        The session token expiration in minutes. Default=30000
+    token_expiration:
+        The session token expiration . Default=7200 (2 hours)
 
     """
 
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
             return v
 
         # This is a backwards compatibility hack to support the old env variable and
-        # it will be removed in version 1.25.0
+        # it will be removed in version 1.25.0. See https://github.com/argilla-io/argilla/issues/4542
         expiration_in_minutes = os.getenv("ARGILLA_LOCAL_AUTH_TOKEN_EXPIRATION_IN_MINUTES")
         if expiration_in_minutes is not None:
             return int(expiration_in_minutes) * 60
@@ -58,7 +58,8 @@ class Settings(BaseSettings):
         env_prefix = "ARGILLA_AUTH_"
 
         fields = {
-            # Support for old local auth env variables
+            # Support for old local auth env variables.
+            # It will be removed in version 1.25.0 (See https://github.com/argilla-io/argilla/issues/4542)
             "algorithm": {"env": ["ARGILLA_LOCAL_AUTH_ALGORITHM", f"{env_prefix}ALGORITHM"]},
             "secret_key": {"env": ["ARGILLA_LOCAL_AUTH_SECRET_KEY", f"{env_prefix}SECRET_KEY"]},
             "token_expiration_in_minutes": {
