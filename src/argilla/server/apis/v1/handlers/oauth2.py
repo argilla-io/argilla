@@ -41,7 +41,7 @@ def list_providers(_: Request) -> Providers:
 
 
 @router.get("/providers/{provider}/authentication")
-def authorize(request: Request, provider: str) -> RedirectResponse:
+def get_authentication(request: Request, provider: str) -> RedirectResponse:
     _check_oauth_enabled_or_raise()
 
     provider = _get_provider_by_name_or_raise(provider)
