@@ -13,4 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.security.authentication import auth  # noqa
+from .jwt import JWT  # noqa
+from .provider import AuthenticationProvider  # noqa
+from .userinfo import UserInfo  # noqa
+
+
+auth = AuthenticationProvider.new_instance()

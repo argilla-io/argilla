@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,4 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.security.authentication import auth  # noqa
+from typing import Any
+
+from starlette.authentication import BaseUser
+
+
+class UserInfo(BaseUser, dict):
+    """User info from a provider."""
+
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    def __getprop__(self, item, default="") -> Any:
+        if callable(item):
+            return item(self)
+        return self.get(item, default)
+
+    __getattr__ = __getprop__

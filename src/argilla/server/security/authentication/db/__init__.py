@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,4 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.security.authentication import auth  # noqa
+from .api_key_backend import APIKeyAuthenticationBackend
+from .bearer_token_backend import BearerTokenAuthenticationBackend
+from .router import router
+
+__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend", "router"]
