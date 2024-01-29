@@ -71,6 +71,9 @@ server = [
     "python-multipart ~= 0.0.5",
     "python-jose[cryptography] >= 3.2,< 3.4",
     "passlib[bcrypt] ~= 1.7.4",
+    # OAuth2 integration
+    "oauthlib ~= 3.2.0",
+    "social-auth-core ~= 4.5.0",
     # Info status
     "psutil >= 5.8, <5.10",
     # Telemetry
