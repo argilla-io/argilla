@@ -204,8 +204,7 @@ export default {
       return (
         this.isSelectedAll &&
         this.checkIfSomeFilterIsActive(this.recordCriteria) &&
-        this.records.total > this.recordsOnPage.length &&
-        this.records.total <= this.bulkRecordsLimit
+        this.records.total > this.recordsOnPage.length
       );
     },
   },
