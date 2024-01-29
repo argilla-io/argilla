@@ -42,7 +42,7 @@ class AuthenticationProvider:
         return AuthenticationProvider()
 
     def configure_app(self, app: FastAPI) -> None:
-        app.include_router(db.router, prefix="/api/security", tags=["security"])
+        pass
 
     async def get_current_user(
         self,

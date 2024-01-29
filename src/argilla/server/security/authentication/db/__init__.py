@@ -14,6 +14,5 @@
 
 from .api_key_backend import APIKeyAuthenticationBackend
 from .bearer_token_backend import BearerTokenAuthenticationBackend
-from .router import router
 
-__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend", "router"]
+__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend"]
