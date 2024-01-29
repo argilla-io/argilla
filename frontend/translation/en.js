@@ -46,6 +46,7 @@ export default {
     ignore_and_continue: "Ignore and continue",
     login: "Sign in",
     "hf-login": "Sign in with Hugging Face",
+    sign_in_with_username: "Sign in with username",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -107,6 +108,11 @@ export default {
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
+    hf: {
+      title: "Welcome to {space}",
+      subtitle:
+        "Join <strong>{user}</strong> to contribute to make better datasets for AI",
+    },
   },
   status: "Status",
   filters: "Filters",
