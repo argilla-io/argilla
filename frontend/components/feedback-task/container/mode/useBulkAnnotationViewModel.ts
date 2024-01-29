@@ -11,7 +11,6 @@ import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
 export const useBulkAnnotationViewModel = () => {
-  const bulkRecordsLimit = 1000;
   const debounceForSubmit = useDebounce(300);
 
   const affectAllRecords = ref(false);
@@ -137,6 +136,5 @@ export const useBulkAnnotationViewModel = () => {
     discard,
     saveAsDraft,
     checkIfSomeFilterIsActive,
-    bulkRecordsLimit,
   };
 };
