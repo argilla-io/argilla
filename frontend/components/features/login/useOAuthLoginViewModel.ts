@@ -15,9 +15,7 @@ export const useOAuthLoginViewModel = () => {
   });
 
   const loadProviders = async () => {
-    try {
-      providers.value = await oauthLogin.getProviders();
-    } catch (error) {}
+    providers.value = await oauthLogin.getProviders();
   };
 
   const authorize = (provider: ProviderType) => {

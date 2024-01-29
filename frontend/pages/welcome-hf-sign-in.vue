@@ -1,6 +1,7 @@
 <template>
   <main class="hf-login">
-    <div class="hf-login__hero">
+    <BaseLoading v-if="!isHuggingFaceConfigured" />
+    <div v-else class="hf-login__hero">
       <BrandLogo class="hf-login__logo" />
       <div class="hf-login__hero__content">
         <h1 class="hf-login__title" v-text="$t('login.hf.title', { space })" />
@@ -10,16 +11,9 @@
         />
         <div class="hf-login__buttons">
           <HuggingFaceButton class="hf-login__button--hugging-face" />
-          <BaseButton
-            class="hf-login__button"
-            @click="
-              $router.replace({
-                name: 'sign-in',
-                params: { omitCTA: true },
-              })
-            "
-            >{{ $t("button.sign_in_with_username") }}</BaseButton
-          >
+          <BaseButton class="hf-login__button" @click="goToLogin">{{
+            $t("button.sign_in_with_username")
+          }}</BaseButton>
         </div>
       </div>
     </div>
@@ -34,15 +28,32 @@
   </main>
 </template>
 <script>
+import BaseLoading from "~/components/base/base-loading/BaseLoading.vue";
 import { useHuggingFaceHost } from "~/v1/infrastructure/services/useHuggingFaceHost";
 
 export default {
   name: "hf-login",
   data() {
     return {
-      user: "user_1",
-      space: "space_1",
+      user: "",
+      space: "",
+      isHuggingFaceConfigured: false,
     };
+  },
+  methods: {
+    goToLogin() {
+      this.$router.replace({
+        name: "sign-in",
+        params: { omitCTA: true },
+      });
+    },
+  },
+  async beforeMount() {
+    this.isHuggingFaceConfigured = await this.hasHuggingFaceOAuthConfigured();
+    if (!this.isHuggingFaceConfigured) {
+      //TODO: Review if we must to redirect or just hide the HF Button
+      this.goToLogin();
+    }
   },
   mounted() {
     const space = this.isRunningOnHuggingFace();
@@ -52,6 +63,7 @@ export default {
   setup() {
     return useHuggingFaceHost();
   },
+  components: { BaseLoading },
 };
 </script>
 

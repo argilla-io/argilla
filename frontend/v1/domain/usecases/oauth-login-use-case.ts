@@ -1,11 +1,19 @@
-import { OAuthParams, ProviderType } from "../entities/oauth/OAuthProvider";
+import {
+  OAuthParams,
+  OAuthProvider,
+  ProviderType,
+} from "../entities/oauth/OAuthProvider";
 import { IOAuthRepository } from "../services/IOAuthRepository";
 
 export class OAuthLoginUseCase {
   constructor(private readonly oauthRepository: IOAuthRepository) {}
 
-  getProviders() {
-    return this.oauthRepository.getProviders();
+  async getProviders(): Promise<OAuthProvider[]> {
+    try {
+      return await this.oauthRepository.getProviders();
+    } catch {
+      return Promise.resolve([]);
+    }
   }
 
   authorize(provider: ProviderType) {

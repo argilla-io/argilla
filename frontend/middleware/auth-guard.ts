@@ -24,11 +24,8 @@ export default ({ $auth, route, redirect }: Context) => {
   switch (route.name) {
     case "sign-in":
       if ($auth.loggedIn) return redirect("/");
-
       if (route.params.omitCTA) return;
-
       if (isRunningOnHuggingFace()) return redirect("/welcome-hf-sign-in");
-
       break;
     case "oauth-provider-callback":
       if (!Object.keys(route.query).length) redirect("/");

@@ -1,50 +1,60 @@
+import { useResolve } from "ts-injecty";
+import { OAuthLoginUseCase } from "~/v1/domain/usecases/oauth-login-use-case";
+
 interface HFSpace {
   space: string;
   user: string;
 }
 
 const HUGGING_FACE_EMBEBED_URL = "huggingface.co";
-
 const HUGGING_FACE_DIRECT_URL = ".hf.space";
 
 export const useHuggingFaceHost = () => {
   const url = new URL(window.location.href);
 
+  const parseHuggingFaceData = (data: string[]) => {
+    const user = data[0];
+    const space = data[1];
+
+    if (data.length === 2 && user && space)
+      return {
+        space,
+        user,
+      };
+
+    return undefined;
+  };
+
   const isRunningOnHuggingFace = (): HFSpace | undefined => {
     if (url.host === HUGGING_FACE_EMBEBED_URL) {
-      const splittedPath = url.pathname
+      const paramsData = url.pathname
         .replace("/spaces", "")
         .split("/")
         .filter(Boolean);
 
-      const user = splittedPath[0];
-      const space = splittedPath[1];
-
-      if (splittedPath.length === 2 && user && space)
-        return {
-          space,
-          user,
-        };
+      return parseHuggingFaceData(paramsData);
     }
 
     if (url.host.endsWith(HUGGING_FACE_DIRECT_URL)) {
-      const splittedPath = url.host
+      const paramsData = url.host
         .replaceAll(HUGGING_FACE_DIRECT_URL, "")
         .split(/-(.*)/s)
         .filter(Boolean);
 
-      const user = splittedPath[0];
-      const space = splittedPath[1];
-
-      if (splittedPath.length === 2 && user && space)
-        return {
-          space,
-          user,
-        };
+      return parseHuggingFaceData(paramsData);
     }
+  };
+
+  const hasHuggingFaceOAuthConfigured = async (): Promise<boolean> => {
+    const oauthUseCase = useResolve(OAuthLoginUseCase);
+
+    const providers = await oauthUseCase.getProviders();
+
+    return providers.some((p) => p.isHuggingFace);
   };
 
   return {
     isRunningOnHuggingFace,
+    hasHuggingFaceOAuthConfigured,
   };
 };
