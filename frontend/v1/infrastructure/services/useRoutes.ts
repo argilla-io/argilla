@@ -111,7 +111,9 @@ export const useRoutes = () => {
     return decodeURIComponent(value) as T;
   };
 
-  const go = (where: string) => {
+  const go = (where: string, external?: boolean) => {
+    if (external) return (window.location.href = where);
+
     router.push(where);
   };
 

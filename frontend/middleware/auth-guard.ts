@@ -21,11 +21,19 @@ export default ({ $auth, route, redirect }: Context) => {
   switch (route.name) {
     case "login":
       break;
+    case "oauth-provider-callback":
+      if (!Object.keys(route.query).length) redirect("/");
+
+      break;
+
     default:
       if (!$auth.loggedIn) {
-        const REDIRECT_URL =
-          "/login?redirect=" + encodeURIComponent(route.fullPath);
-        redirect(REDIRECT_URL);
+        let redirectURL = "/login";
+
+        if (route.path !== route.fullPath)
+          redirectURL += encodeURIComponent(route.fullPath);
+
+        redirect(redirectURL);
       }
   }
 };

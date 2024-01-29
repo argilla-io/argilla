@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,5 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .provider import DBAuthProvider
-from .settings import settings
+from fastapi import HTTPException
+
+
+class OAuth2Error(HTTPException):
+    """Base OAuth2 exception."""
+
+
+class OAuth2AuthenticationError(OAuth2Error):
+    """Raised when authentication fails."""
+
+
+class OAuth2InvalidRequestError(OAuth2Error):
+    """Raised when request is invalid."""

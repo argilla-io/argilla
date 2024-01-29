@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,29 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from uuid import UUID
+from .api_key_backend import APIKeyAuthenticationBackend
+from .bearer_token_backend import BearerTokenAuthenticationBackend
+from .router import router
 
-from argilla.server.constants import ES_INDEX_REGEX_PATTERN
-from argilla.server.pydantic_v1 import BaseModel, Field
-
-WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
-
-
-class Workspace(BaseModel):
-    id: UUID
-    name: str
-    inserted_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class WorkspaceUserCreate(BaseModel):
-    user_id: UUID
-    workspace_id: UUID
-
-
-class WorkspaceCreate(BaseModel):
-    name: str = Field(..., regex=WORKSPACE_NAME_REGEX, min_length=1)
+__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend", "router"]

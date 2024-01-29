@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,4 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .db import DBAuthProvider, settings  # noqa
+from .settings import OAuth2Settings  # noqa
+from .auth_backend import OAuth2AuthenticationBackend  # noqa
+from .client_provider import OAuth2ClientProvider  # noqa
+from .router import router  # noqa
+
+
+__all__ = ["OAuth2Settings", "OAuth2AuthenticationBackend", "OAuth2ClientProvider", "router"]

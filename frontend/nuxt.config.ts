@@ -173,7 +173,7 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      authProvider: {
+      basic: {
         scheme: "local",
         token: {
           property: "access_token",

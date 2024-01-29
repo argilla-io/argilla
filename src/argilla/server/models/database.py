@@ -430,6 +430,10 @@ class User(DatabaseModel):
     )
 
     @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name or ''}".strip()
+
+    @property
     def is_owner(self):
         return self.role == UserRole.owner
 

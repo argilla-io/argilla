@@ -12,12 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import os
+from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from argilla.server import helpers
-from argilla.server.pydantic_v1 import BaseSettings
-from argilla.server.settings import settings as server_settings
+from argilla.server.pydantic_v1 import BaseSettings, PrivateAttr
+
+if TYPE_CHECKING:
+    from argilla.server.security.authentication.oauth2 import OAuth2Settings
 
 
 class Settings(BaseSettings):
@@ -39,13 +41,33 @@ class Settings(BaseSettings):
 
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
-    token_expiration_in_minutes: int = 30000
-    token_api_url: str = "/api/security/token"
+    token_expiration_in_minutes: int = 15
+    oauth_file: str = ".oauth.yaml"
+
+    _oauth_settings: Optional["OAuth2Settings"] = PrivateAttr(None)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._oauth_settings = None
 
     @property
-    def public_oauth_token_url(self):
-        """The final public token url used for openapi doc setup"""
-        return f"{server_settings.base_url}{helpers.remove_prefix(self.token_api_url,'/')}"
+    def token_expire_time(self):
+        """The token expiration time in seconds"""
+        return self.token_expiration_in_minutes * 60
+
+    @property
+    def oauth2(self):
+        from argilla.server.security.authentication.oauth2 import OAuth2Settings
+
+        if self._oauth_settings:
+            return self._oauth_settings
+
+        if not self._oauth_settings and os.path.exists(self.oauth_file):
+            self._oauth_settings = OAuth2Settings.from_yaml(self.oauth_file)
+        else:
+            self._oauth_settings = OAuth2Settings(enabled=False)
+
+        return self._oauth_settings
 
     class Config:
         env_prefix = "ARGILLA_LOCAL_AUTH_"
