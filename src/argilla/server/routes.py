@@ -21,6 +21,7 @@ set the required security dependencies if api security is enabled
 from fastapi import APIRouter, HTTPException, Request
 
 from argilla.server.apis.v0.handlers import (
+    authentication,
     datasets,
     info,
     metrics,
@@ -51,6 +52,7 @@ api_router = APIRouter(responses={error.HTTP_STATUS: error.api_documentation() f
 dependencies = []
 
 for router in [
+    authentication.router,
     users.router,
     workspaces.router,
     datasets.router,

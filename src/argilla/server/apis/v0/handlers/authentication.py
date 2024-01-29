@@ -12,30 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
+from argilla.server.schemas.v0.authentication import Token, UserPasswordRequestForm
 from argilla.server.security.authentication.jwt import JWT
 from argilla.server.security.authentication.userinfo import UserInfo
-from argilla.server.security.model import Token
 
-router = APIRouter()
-
-
-class UserPasswordRequestForm:
-    """User password request form."""
-
-    def __init__(self, *, username: Annotated[str, Form()], password: Annotated[str, Form()]):
-        self.username = username
-        self.password = password
+router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/token", response_model=Token)
+@router.post("/security/token", response_model=Token)
 async def create_access_token(
     db: AsyncSession = Depends(get_async_db), form: UserPasswordRequestForm = Depends()
 ) -> Token:
