@@ -13,10 +13,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import os
-from typing import TYPE_CHECKING, Optional
+from typing import Optional, TYPE_CHECKING
 from uuid import uuid4
 
-from argilla.server.pydantic_v1 import BaseSettings, validator
+from argilla.server.pydantic_v1 import BaseSettings, PrivateAttr, validator
+
+if TYPE_CHECKING:
+    from argilla.server.security.authentication.oauth2 import OAuth2Settings
 
 
 class Settings(BaseSettings):
@@ -34,11 +37,21 @@ class Settings(BaseSettings):
     token_expiration:
         The session token expiration . Default=86400 (1 day)
 
+    oauth_cfg:
+        The path to the oauth yaml configuration file. Default=.oauth.yaml
+
     """
 
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
     token_expiration: int = 24 * 60 * 60  # 1 day
+    oauth_cfg: str = ".oauth.yaml"
+
+    _oauth_settings: Optional["OAuth2Settings"] = PrivateAttr(None)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._oauth_settings = None
 
     @validator("token_expiration", always=True)
     def default_token_expiration(cls, v, values, **kwargs) -> int:
@@ -52,6 +65,21 @@ class Settings(BaseSettings):
             return int(expiration_in_minutes) * 60
 
         return v
+
+    @property
+    def oauth(self) -> "OAuth2Settings":
+        """Return the oauth settings"""
+        from argilla.server.security.authentication.oauth2.settings import OAuth2Settings
+
+        if self._oauth_settings:
+            return self._oauth_settings
+
+        if not self._oauth_settings and os.path.exists(self.oauth_cfg):
+            self._oauth_settings = OAuth2Settings.from_yaml(self.oauth_cfg)
+        else:
+            self._oauth_settings = OAuth2Settings(enabled=False)
+
+        return self._oauth_settings
 
     class Config:
         env_prefix = "ARGILLA_AUTH_"
