@@ -16,14 +16,23 @@
  */
 
 import { Context } from "@nuxt/types";
+import { useHuggingFaceHost } from "~/v1/infrastructure/services/useHuggingFaceHost";
 
 export default ({ $auth, route, redirect }: Context) => {
+  const { isRunningOnHuggingFace } = useHuggingFaceHost();
+
   switch (route.name) {
     case "login":
+      if ($auth.loggedIn) return redirect("/");
+
+      if (isRunningOnHuggingFace()) return redirect("/hf-login");
+
       break;
     case "oauth-provider-callback":
       if (!Object.keys(route.query).length) redirect("/");
-
+      break;
+    case "hf-login":
+      if (!isRunningOnHuggingFace()) redirect("/");
       break;
 
     default:
