@@ -20,7 +20,6 @@ from argilla.server.enums import UserRole
 from argilla.server.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.pydantic_v1.utils import GetterDict
 
-
 USER_USERNAME_REGEX = "^(?!-|_)[A-za-z0-9-_]+$"
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
