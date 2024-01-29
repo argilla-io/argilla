@@ -23,6 +23,8 @@ def test_default_security_settings():
 
     assert settings.algorithm == "HS256"
     assert settings.token_expiration == 86400
+    assert settings.oauth_cfg == ".oauth.yaml"
+
     assert len(settings.secret_key) == 32
 
 
@@ -48,6 +50,14 @@ def test_configure_secret_key():
         settings = Settings()
 
         assert settings.secret_key == secret_key
+
+
+def test_configure_oauth_cfg():
+    oauth_cfg = "mock-oauth-cfg"
+    with mock.patch.dict(os.environ, {"ARGILLA_AUTH_OAUTH_CFG": oauth_cfg}):
+        settings = Settings()
+
+        assert settings.oauth_cfg == oauth_cfg
 
 
 def test_configure_algorithm_with_old_env_name():
