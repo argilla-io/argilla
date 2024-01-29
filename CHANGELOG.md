@@ -33,6 +33,10 @@ These are the section headers that we use:
 
 - Deprecated `ARGILLA_LOCAL_AUTH_*` environment variables. Will be removed in the release v1.25.0. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
 
+### Changed
+
+- Changed regex pattern for `username` attribute in `UserCreate`. Now uppercase letters are allowed. ([#4544](https://github.com/argilla-io/argilla/pull/4544))
+
 ### Removed
 
 - Remove sending `Authorization` header from python SDK requests. ([#4535](https://github.com/argilla-io/argilla/pull/4535))
