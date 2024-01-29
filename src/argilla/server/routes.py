@@ -33,7 +33,6 @@ from argilla.server.apis.v0.handlers import (
     token_classification,
     users,
     workspaces,
-
 )
 from argilla.server.apis.v1.handlers import datasets as datasets_v1
 from argilla.server.apis.v1.handlers import fields as fields_v1
