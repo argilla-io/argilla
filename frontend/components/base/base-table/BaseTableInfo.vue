@@ -53,7 +53,10 @@
       <template v-else>
         <div class="table-info__body">
           <ul>
-            <li v-for="item in filteredResults" :key="String(item.id)">
+            <li
+              v-for="item in filteredResults"
+              :key="itemValue(item, sortedByField)"
+            >
               <div class="table-info__item">
                 <base-checkbox
                   v-if="globalActions"
@@ -329,7 +332,9 @@ export default {
       if (column.subfield) {
         return item[column.field][column.subfield];
       }
-      return item[column.field];
+      if (column.field) return item[column.field];
+
+      return item[column];
     },
     onActionClicked(action, item) {
       this.$emit("onActionClicked", action, item);
