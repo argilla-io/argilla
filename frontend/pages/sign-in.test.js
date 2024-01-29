@@ -1,12 +1,18 @@
 import { shallowMount } from "@vue/test-utils";
-import Login from "./login.vue";
+import SignIn from "./sign-in.vue";
 
-const stubs = ["BaseLoading", "brand-logo", "geometric-shape-a", "base-button"];
+const stubs = [
+  "BaseLoading",
+  "brand-logo",
+  "geometric-shape-a",
+  "base-button",
+  "OAuthLogin",
+];
 
 const validAuthToken = btoa("USERNAME:PASSWORD");
 
 const mountLoginPage = ({ auth } = {}) => {
-  return shallowMount(Login, {
+  return shallowMount(SignIn, {
     stubs,
     mocks: {
       $config: {},
@@ -21,7 +27,7 @@ const mountLoginPage = ({ auth } = {}) => {
 
 describe("Login page should", () => {
   it("still in the same page if the auth token is not valid", () => {
-    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
+    const loginUserSpy = jest.spyOn(SignIn.methods, "loginUser");
 
     mountLoginPage({ auth: "INVALID" });
 
@@ -29,7 +35,7 @@ describe("Login page should", () => {
   });
 
   it("still in the same page if the auth token query params is empty", () => {
-    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
+    const loginUserSpy = jest.spyOn(SignIn.methods, "loginUser");
 
     mountLoginPage();
 
@@ -37,7 +43,7 @@ describe("Login page should", () => {
   });
 
   it("try to login user when the auth token is valid", () => {
-    const loginUserSpy = jest.spyOn(Login.methods, "loginUser");
+    const loginUserSpy = jest.spyOn(SignIn.methods, "loginUser");
 
     mountLoginPage({ auth: validAuthToken });
 

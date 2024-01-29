@@ -22,7 +22,7 @@ export const loginUserAndWaitFor = async (
     });
   });
 
-  await page.goto("/login");
+  await page.goto("/sign-in");
 
   await page.getByPlaceholder("Enter your username").fill("damian");
 

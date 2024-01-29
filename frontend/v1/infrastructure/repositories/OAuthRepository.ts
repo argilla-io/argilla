@@ -36,7 +36,8 @@ export class OAuthRepository implements IOAuthRepository {
       const url = "security/oauth2/providers";
 
       const { data } = await this.axios.get<Response<BackendOAuthProvider[]>>(
-        url
+        url,
+        { headers: { "cache-control": "max-age=240" } }
       );
 
       return data.items.map((i) => new OAuthProvider(i.name));

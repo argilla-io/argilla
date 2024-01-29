@@ -3,19 +3,23 @@
     <div class="hf-login__hero">
       <BrandLogo class="hf-login__logo" />
       <div class="hf-login__hero__content">
-        <h1
-          class="hf-login__title"
-          v-text="$t('login.hf.title', { space: space })"
-        />
+        <h1 class="hf-login__title" v-text="$t('login.hf.title', { space })" />
         <h2
           class="hf-login__subtitle"
-          v-html="$t('login.hf.subtitle', { user: user })"
+          v-html="$t('login.hf.subtitle', { user })"
         />
         <div class="hf-login__buttons">
           <HuggingFaceButton class="hf-login__button--hugging-face" />
-          <BaseButton class="hf-login__button">{{
-            $t("button.sign_in_with_username")
-          }}</BaseButton>
+          <BaseButton
+            class="hf-login__button"
+            @click="
+              $router.replace({
+                name: 'sign-in',
+                params: { omitCTA: true },
+              })
+            "
+            >{{ $t("button.sign_in_with_username") }}</BaseButton
+          >
         </div>
       </div>
     </div>
@@ -40,14 +44,14 @@ export default {
       space: "space_1",
     };
   },
-  //   mounted() {
-  //     const space = this.isRunningOnHuggingFace();
-  //     this.user = space.user;
-  //     this.space = space.space;
-  //   },
-  //   setup() {
-  //     return useHuggingFaceHost();
-  //   },
+  mounted() {
+    const space = this.isRunningOnHuggingFace();
+    this.user = space.user;
+    this.space = space.space;
+  },
+  setup() {
+    return useHuggingFaceHost();
+  },
 };
 </script>
 

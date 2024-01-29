@@ -22,22 +22,24 @@ export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useHuggingFaceHost();
 
   switch (route.name) {
-    case "login":
+    case "sign-in":
       if ($auth.loggedIn) return redirect("/");
 
-      if (isRunningOnHuggingFace()) return redirect("/hf-login");
+      if (route.params.omitCTA) return;
+
+      if (isRunningOnHuggingFace()) return redirect("/welcome-hf-sign-in");
 
       break;
     case "oauth-provider-callback":
       if (!Object.keys(route.query).length) redirect("/");
       break;
-    case "hf-login":
+    case "welcome-hf-sign-in":
       if (!isRunningOnHuggingFace()) redirect("/");
       break;
 
     default:
       if (!$auth.loggedIn) {
-        let redirectURL = "/login";
+        let redirectURL = "/sign-in";
 
         if (route.path !== route.fullPath)
           redirectURL += encodeURIComponent(route.fullPath);
