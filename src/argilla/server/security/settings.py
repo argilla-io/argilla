@@ -38,7 +38,6 @@ class Settings(BaseSettings):
 
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
-
     token_expiration: int = 120 * 60
 
     @validator("token_expiration", always=True)
