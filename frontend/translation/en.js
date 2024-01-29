@@ -102,7 +102,6 @@ export default {
   },
   login: {
     title: "Log in to Argilla",
-    subtitle: "Log in to Argilla to start annotating",
     claim: "Build, improve, and monitor data for NLP",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
