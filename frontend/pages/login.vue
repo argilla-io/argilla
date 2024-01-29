@@ -28,8 +28,6 @@
         <form class="form" @submit.prevent="onLoginUser">
           <div>
             <p class="form__title" v-text="$t('login.title')" />
-
-            <p class="form__text" v-text="$t('login.subtitle')" />
             <div class="form__input" :class="{ active: login.username }">
               <label class="form__label">Username</label>
               <input
@@ -199,18 +197,11 @@ export default {
   &__title {
     @include font-size(36px);
     line-height: 1.2em;
-    margin: 0 auto $base-space auto;
+    margin: 0 auto $base-space * 5 auto;
     color: $black-87;
     font-weight: 500;
     letter-spacing: 0.03em;
     font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
-  }
-  &__text {
-    margin-top: 0;
-    margin-bottom: $base-space * 6;
-    @include font-size(18px);
-    line-height: 1.4em;
-    font-weight: 400;
   }
   &__button {
     margin: 2em auto 0 auto;
