@@ -44,8 +44,8 @@ export default {
   },
   button: {
     ignore_and_continue: "Ignore and continue",
-    login: "Log in",
-    "hf-login": "Log in with Hugging Face",
+    login: "Sign in",
+    "hf-login": "Sign in with Hugging Face",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -101,7 +101,7 @@ export default {
     collapse: "Collapse",
   },
   login: {
-    title: "Log in to Argilla",
+    title: "Sign in to Argilla",
     claim: "Build, improve, and monitor data for NLP",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
