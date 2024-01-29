@@ -135,7 +135,7 @@
         <BaseButton class="primary outline" @on-click="cancelAction">
           {{ $t("button.cancel") }}
         </BaseButton>
-        <BaseButton class="primary" @on-click="confirmateAction">
+        <BaseButton class="primary" @on-click="confirmAction">
           {{ $t("button.continue") }}
         </BaseButton>
       </div>
@@ -227,7 +227,7 @@ export default {
       this.resetAffectAllRecords();
       this.allowedAction = null;
     },
-    async confirmateAction() {
+    async confirmAction() {
       this.visibleConfirmationModal = false;
       switch (this.allowedAction) {
         case "submit":
