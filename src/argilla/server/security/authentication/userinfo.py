@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any
+from typing import Any, Optional
 
 from starlette.authentication import BaseUser
+
+from argilla.server.security.authentication.claims import Claims
 
 
 class UserInfo(BaseUser, dict):
@@ -23,6 +25,14 @@ class UserInfo(BaseUser, dict):
     @property
     def is_authenticated(self) -> bool:
         return True
+
+    def use_claims(self, claims: Optional[Claims]) -> "UserInfo":
+        claims = claims or {}
+
+        for attr, item in claims.items():
+            self[attr] = self.__getprop__(item)
+
+        return self
 
     def __getprop__(self, item, default="") -> Any:
         if callable(item):
