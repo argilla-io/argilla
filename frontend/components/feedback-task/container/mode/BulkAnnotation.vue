@@ -46,14 +46,14 @@
                 @on-click="affectAllRecords = true"
                 >{{
                   $t("bulkAnnotation.selectAllResults", {
-                    total: records.total,
+                    total: selectedRecordsNumberInAffectedAllRecords,
                   })
                 }}</BaseButton
               >
               <template v-else>
                 <span class="wrapper__records__header__selection-text">{{
                   $t("bulkAnnotation.haveSelectedRecords", {
-                    total: records.total,
+                    total: selectedRecordsNumberInAffectedAllRecords,
                   })
                 }}</span>
                 <BaseButton
@@ -206,6 +206,11 @@ export default {
         this.checkIfSomeFilterIsActive(this.recordCriteria) &&
         this.records.total > this.recordsOnPage.length
       );
+    },
+    selectedRecordsNumberInAffectedAllRecords() {
+      return this.records.total <= this.bulkRecordsLimit
+        ? this.records.total
+        : this.bulkRecordsLimit;
     },
   },
   methods: {
@@ -422,8 +427,12 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space * 2;
-  &__button {
-    padding: 0;
+  &__button.button {
+    padding: 6px;
+    border-radius: $border-radius;
+    &:hover {
+      background: #edf0fa;
+    }
   }
 }
 
