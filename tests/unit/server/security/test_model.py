@@ -28,7 +28,27 @@ def test_workspace_create_invalid_name(invalid_name: str):
         WorkspaceCreate(name=invalid_name)
 
 
-@pytest.mark.parametrize("invalid_username", ["user name", "user/name", "user.name", "UserName", "userName"])
+@pytest.mark.parametrize(
+    "username",
+    [
+        "user-name",
+        "user_name",
+        "user123",
+        "user-123",
+        "user_123",
+        "user-123_abc",
+        "user_123-abc",
+        "0033_user",
+        "12-user",
+    ],
+)
+def test_user_create(username: str):
+    assert UserCreate(first_name="first-name", username=username, password="12345678")
+
+
+@pytest.mark.parametrize(
+    "invalid_username", ["user name", "user/name", "user.name", "_", "-", "123_", "1234-", "---32", "_mark", "-mark"]
+)
 def test_user_create_invalid_username(invalid_username: str):
     with pytest.raises(ValidationError):
         UserCreate(first_name="first-name", username=invalid_username, password="12345678")
