@@ -40,7 +40,6 @@ async def create_access_token(
     db: AsyncSession = Depends(get_async_db), form: UserPasswordRequestForm = Depends()
 ) -> Token:
     user = await accounts.authenticate_user(db, form.username, form.password)
-
     if not user:
         raise UnauthorizedError()
 

@@ -34,7 +34,6 @@ class JWT:
     def decode(cls, token: str) -> dict:
         try:
             return jwt.decode(token, cls.secret, algorithms=[cls.algorithm])
-
         except JWTError:
             raise UnauthorizedError("Invalid token")
 
