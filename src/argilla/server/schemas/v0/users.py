@@ -17,10 +17,11 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from argilla.server.enums import UserRole
-from argilla.server.pydantic_v1 import BaseModel, Field, constr, validator
+from argilla.server.pydantic_v1 import BaseModel, Field, constr
 from argilla.server.pydantic_v1.utils import GetterDict
 
-USER_USERNAME_REGEX = "^([A-Za-z0-9]([-_]{1})?)*[A-Za-z0-9]+$"
+
+USER_USERNAME_REGEX = "^(?!-|_)[A-za-z0-9-_]+$"
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
 
@@ -61,10 +62,3 @@ class UserCreate(BaseModel):
     role: Optional[UserRole]
     password: constr(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
     workspaces: Optional[List[str]]
-
-    @validator("username")
-    @classmethod
-    def check_username_has_no_only_numbers(cls, value: str) -> str:
-        if value.isnumeric():
-            raise ValueError("Username cannot be only numbers")
-        return value
