@@ -45,7 +45,9 @@ export const useBulkAnnotationViewModel = () => {
         recordReference,
         records,
         affectAllRecords.value,
-        (value) => (progress.value = value)
+        (value) => {
+          progress.value = value;
+        }
       );
 
       if (!allSuccessful) {
