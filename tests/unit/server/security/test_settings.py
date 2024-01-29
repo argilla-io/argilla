@@ -8,7 +8,7 @@ def test_default_security_settings():
     settings = Settings()
 
     assert settings.algorithm == "HS256"
-    assert settings.token_expiration == 7200
+    assert settings.token_expiration == 86400
     assert len(settings.secret_key) == 32
 
 

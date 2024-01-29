@@ -32,13 +32,13 @@ class Settings(BaseSettings):
         Encryption algorithm for token data
 
     token_expiration:
-        The session token expiration . Default=7200 (2 hours)
+        The session token expiration . Default=86400 (1 day)
 
     """
 
     secret_key: str = uuid4().hex
     algorithm: str = "HS256"
-    token_expiration: int = 120 * 60
+    token_expiration: int = 24 * 60 * 60  # 1 day
 
     @validator("token_expiration", always=True)
     def default_token_expiration(cls, v, values, **kwargs) -> int:
