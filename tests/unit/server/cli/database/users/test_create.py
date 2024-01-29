@@ -134,7 +134,7 @@ def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, c
 def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
-        "database users create --first-name first-name --username Invalid-Username --password 12345678 --role owner",
+        "database users create --first-name first-name --username -Invalid-Username --password 12345678 --role owner",
     )
 
     assert result.exit_code == 1
