@@ -21,7 +21,7 @@ from tests.factories import UserFactory
 
 @pytest.mark.asyncio
 class TestsAuthentication:
-    async def authenticate(self, async_client: "AsyncClient"):
+    async def authenticate(self, async_client: AsyncClient):
         user = await UserFactory.create()
 
         response = await async_client.post(
@@ -32,7 +32,7 @@ class TestsAuthentication:
         assert response.json()["access_token"]
         assert response.json()["token_type"] == "bearer"
 
-    async def test_invalid_credentials(self, async_client: "AsyncClient", owner: User):
+    async def test_invalid_credentials(self, async_client: AsyncClient, owner: User):
         response = await async_client.post(
             "/api/security/token", data={"username": owner.username, "password": "invalid"}
         )
