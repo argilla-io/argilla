@@ -1075,7 +1075,6 @@ class TestBaseElasticAndOpenSearchEngine:
 
         await search_engine.delete_record_response(response)
 
-
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}
 
