@@ -6,10 +6,8 @@ interface HFSpace {
   user: string;
 }
 
-const HUGGING_FACE_URLS = [
-  { url: "huggingface.co", embebed: true },
-  { url: ".hf.space", embebed: false },
-];
+const HUGGING_FACE_EMBEBED_URL = "huggingface.co";
+const HUGGING_FACE_DIRECT_URL = ".hf.space";
 
 export const useRunningEnvironment = () => {
   const url = new URL(window.location.href);
@@ -28,21 +26,11 @@ export const useRunningEnvironment = () => {
   };
 
   const isEmbebed = () => {
-    const match = HUGGING_FACE_URLS.find(
-      (h) => url.host === h.url || url.host.endsWith(h.url)
-    );
-
-    return match?.embebed;
+    return window.self !== window.top;
   };
 
   const isRunningOnHuggingFace = (): HFSpace | undefined => {
-    const match = HUGGING_FACE_URLS.find(
-      (h) => url.host === h.url || url.host.endsWith(h.url)
-    );
-
-    if (!match) return undefined;
-
-    if (match.embebed) {
+    if (url.host === HUGGING_FACE_EMBEBED_URL) {
       const paramsData = url.pathname
         .replace("/spaces", "")
         .split("/")
@@ -51,12 +39,14 @@ export const useRunningEnvironment = () => {
       return parseHuggingFaceData(paramsData);
     }
 
-    const paramsData = url.host
-      .replaceAll(match.url, "")
-      .split(/-(.*)/s)
-      .filter(Boolean);
+    if (url.host.endsWith(HUGGING_FACE_DIRECT_URL)) {
+      const paramsData = url.host
+        .replaceAll(HUGGING_FACE_DIRECT_URL, "")
+        .split(/-(.*)/s)
+        .filter(Boolean);
 
-    return parseHuggingFaceData(paramsData);
+      return parseHuggingFaceData(paramsData);
+    }
   };
 
   const hasHuggingFaceOAuthConfigured = async (): Promise<boolean> => {
