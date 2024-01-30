@@ -41,7 +41,6 @@ export class BulkAnnotationUseCase {
       records.push(...allRecords.records);
     }
 
-    debugger;
     const allSuccessful = await this.save(
       status,
       recordReference,
