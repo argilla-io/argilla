@@ -51,7 +51,6 @@ export default {
   async beforeMount() {
     this.isHuggingFaceConfigured = await this.hasHuggingFaceOAuthConfigured();
     if (!this.isHuggingFaceConfigured) {
-      //TODO: Review if we must to redirect or just hide the HF Button
       this.goToLogin();
     }
   },
