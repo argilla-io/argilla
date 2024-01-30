@@ -10,7 +10,10 @@
           v-html="$t('login.hf.subtitle', { user })"
         />
         <div class="hf-login__buttons">
-          <HuggingFaceButton class="hf-login__button--hugging-face" />
+          <HuggingFaceButton
+            class="hf-login__button--hugging-face"
+            @click="authorize"
+          />
           <BaseButton class="hf-login__button" @click="goToLogin">{{
             $t("button.sign_in_with_username")
           }}</BaseButton>
@@ -30,6 +33,7 @@
 <script>
 import BaseLoading from "~/components/base/base-loading/BaseLoading.vue";
 import { useHuggingFaceHost } from "~/v1/infrastructure/services/useHuggingFaceHost";
+import { useWelcomeHFViewModel } from "./useWelcomeHFViewModel";
 
 export default {
   name: "hf-login",
@@ -50,6 +54,7 @@ export default {
   },
   async beforeMount() {
     this.isHuggingFaceConfigured = await this.hasHuggingFaceOAuthConfigured();
+
     if (!this.isHuggingFaceConfigured) {
       this.goToLogin();
     }
@@ -60,9 +65,8 @@ export default {
     this.space = space.space;
   },
   setup() {
-    return useHuggingFaceHost();
+    return useWelcomeHFViewModel();
   },
-  components: { BaseLoading },
 };
 </script>
 
