@@ -91,7 +91,7 @@ $gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
     height: auto;
     line-height: 1.3;
     @include media(">tablet") {
-      max-width: 180px;
+      max-width: 200px;
     }
   }
   &__title {
