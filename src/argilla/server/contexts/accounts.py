@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import secrets
-from typing import List, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Union
 from uuid import UUID
 
 from passlib.context import CryptContext
