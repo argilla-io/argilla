@@ -146,11 +146,12 @@ $gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
   }
   &__button.button {
     justify-content: center;
-    transition: color 0.2s ease-in;
+    transition: opacity 0.2s ease-in;
     @include font-size(16px);
+    color: $black-87;
     &:hover {
-      color: palette(orange-red-crayola);
-      transition: color 0.2s ease-in;
+      opacity: 0.8;
+      transition: opacity 0.2s ease-in;
     }
   }
   &__button--hugging-face {
