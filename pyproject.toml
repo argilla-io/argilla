@@ -23,7 +23,7 @@ authors = [{ name = "argilla", email = "contact@argilla.io" }]
 maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Client
-    "httpx >= 0.15,<= 0.25",
+    "httpx >= 0.15,<= 0.26",
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
