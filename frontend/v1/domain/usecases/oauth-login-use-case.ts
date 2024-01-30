@@ -21,6 +21,8 @@ export class OAuthLoginUseCase {
   }
 
   login(provider: ProviderType, oauthParams: OAuthParams) {
-    return this.oauthRepository.login(provider, oauthParams);
+    try {
+      return this.oauthRepository.login(provider, oauthParams);
+    } catch {}
   }
 }
