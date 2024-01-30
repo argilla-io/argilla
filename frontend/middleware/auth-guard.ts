@@ -16,10 +16,10 @@
  */
 
 import { Context } from "@nuxt/types";
-import { useHuggingFaceHost } from "~/v1/infrastructure/services/useHuggingFaceHost";
+import { useRunningEnvironment } from "~/v1/infrastructure/services/useRunningEnvironment";
 
 export default ({ $auth, route, redirect }: Context) => {
-  const { isRunningOnHuggingFace } = useHuggingFaceHost();
+  const { isRunningOnHuggingFace } = useRunningEnvironment();
 
   switch (route.name) {
     case "sign-in":

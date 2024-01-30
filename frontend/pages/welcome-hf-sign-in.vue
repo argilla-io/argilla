@@ -31,8 +31,6 @@
   </main>
 </template>
 <script>
-import BaseLoading from "~/components/base/base-loading/BaseLoading.vue";
-import { useHuggingFaceHost } from "~/v1/infrastructure/services/useHuggingFaceHost";
 import { useWelcomeHFViewModel } from "./useWelcomeHFViewModel";
 
 export default {

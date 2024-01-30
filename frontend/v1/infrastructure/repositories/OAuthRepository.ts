@@ -1,6 +1,7 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
+import { useRunningEnvironment } from "../services/useRunningEnvironment";
 import {
   OAuthParams,
   OAuthProvider,
@@ -48,7 +49,12 @@ export class OAuthRepository implements IOAuthRepository {
   }
 
   authorize(provider: ProviderType) {
-    this.router.go(`api/v1/oauth2/providers/${provider}/authentication`, true);
+    const { isEmbebed } = useRunningEnvironment();
+
+    this.router.go(`api/v1/oauth2/providers/${provider}/authentication`, {
+      external: true,
+      newWindow: isEmbebed(),
+    });
   }
 
   async login(provider: ProviderType, oauthParams: OAuthParams) {
