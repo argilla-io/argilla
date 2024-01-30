@@ -302,6 +302,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
 
         await self._bulk_op_request(bulk_actions)
+        await self._refresh_index_request(index_name)
 
     async def update_record_response(self, response: Response):
         record = response.record
@@ -310,6 +311,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         es_responses = self._map_record_responses_to_es([response])
 
         await self._update_document_request(index_name, id=record.id, body={"doc": {"responses": es_responses}})
+        await self._refresh_index_request(index_name)
 
     async def delete_record_response(self, response: Response):
         record = response.record
@@ -318,6 +320,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._update_document_request(
             index_name, id=record.id, body={"script": f'ctx._source["responses"].remove("{response.user.username}")'}
         )
+        await self._refresh_index_request(index_name)
 
     async def update_record_suggestion(self, suggestion: Suggestion):
         index_name = await self._get_dataset_index(suggestion.record.dataset)
@@ -329,6 +332,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             id=suggestion.record_id,
             body={"doc": {"suggestions": es_suggestions}},
         )
+        await self._refresh_index_request(index_name)
 
     async def delete_record_suggestion(self, suggestion: Suggestion):
         index_name = await self._get_dataset_index(suggestion.record.dataset)
