@@ -110,15 +110,15 @@ export class PageCriteria extends Criteria {
     };
   }
 
-  goTo(page: number) {
+  goTo(page: number, many: number = this.client.many) {
     this.client = {
-      ...this.client,
       page,
+      many,
     };
   }
 
-  goToFirst() {
-    this.goTo(1);
+  goToFirst(many?: number) {
+    this.goTo(1, many);
   }
 
   isFirstPage() {

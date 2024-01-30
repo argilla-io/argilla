@@ -44,6 +44,8 @@ export default {
   },
   button: {
     ignore_and_continue: "Ignore and continue",
+    cancel: "Cancel",
+    continue: "Continue",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -56,6 +58,17 @@ export default {
     to_annotate_record_bulk_required: "No record selected",
     select_to_annotate: "Select all",
     pageSize: "Page size",
+    selectAllResults: "Select all {total} results",
+    haveSelectedRecords: "You have selected all {total} records",
+    actionConfirmation: "Bulk action confirmation",
+    actionConfirmationText:
+      "This action will affect {total} records, do you want to continue? ",
+    allRecordsAnnotated: "The {total} records have been {action}",
+    affectedAll: {
+      submitted: "submitted",
+      discarded: "discarded",
+      draft: "saved as draft",
+    },
   },
   shortcuts: {
     label: "Shortcuts",
