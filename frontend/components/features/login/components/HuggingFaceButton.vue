@@ -17,6 +17,7 @@ export default {
   color: palette(white);
   width: 100%;
   padding: calc($base-space / 2) $base-space * 4;
+  justify-content: center;
   &:hover {
     background: lighten($black-87, 10%);
   }
