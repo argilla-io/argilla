@@ -67,7 +67,7 @@
     </div>
 
     <div class="login--right">
-      <p class="login__claim" v-text="$t('login.claim')" />
+      <p class="login__claim" v-html="$t('login.claim')" />
       <geometric-shape-a />
       <p
         class="login__text"
@@ -277,13 +277,13 @@ input:-webkit-autofill {
   }
   &__claim {
     margin: auto auto;
-    max-width: 400px;
+    max-width: 460px;
     z-index: 1;
     @include font-size(40px);
     line-height: 1.3em;
     color: palette(white);
     font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
-    transform: translateX(-0.85em);
+    transform: translateX(-1.5em);
     padding-top: 1em;
   }
   &__text {
