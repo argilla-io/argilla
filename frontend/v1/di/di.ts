@@ -3,6 +3,7 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
+import { OAuthRepository } from "../infrastructure/repositories/OAuthRepository";
 import {
   DatasetRepository,
   RecordRepository,
@@ -14,7 +15,7 @@ import {
   AgentRepository,
 } from "@/v1/infrastructure/repositories";
 
-import { useRole } from "@/v1/infrastructure/services";
+import { useRole, useRoutes } from "@/v1/infrastructure/services";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
@@ -42,10 +43,12 @@ import { UpdateVectorSettingUseCase } from "@/v1/domain/usecases/dataset-setting
 import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
 import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
+import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
+  const useAuth = () => context.$auth;
 
   const dependencies = [
     register(DatasetRepository).withDependencies(useAxios, useStore).build(),
@@ -56,6 +59,9 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
+    register(OAuthRepository)
+      .withDependencies(useAxios, useRoutes, useAuth)
+      .build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -145,6 +151,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(GetDatasetSuggestionsAgentsUseCase)
       .withDependency(AgentRepository)
       .build(),
+
+    register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),
   ];
 
   Container.register(dependencies);
