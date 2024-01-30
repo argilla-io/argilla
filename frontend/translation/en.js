@@ -48,7 +48,7 @@ export default {
     "hf-login": "Sign in with Hugging Face",
     sign_in_with_username: "Sign in with username",
     cancel: "Cancel",
-    continue: "Continue"
+    continue: "Continue",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
