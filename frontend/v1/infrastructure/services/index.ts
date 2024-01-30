@@ -1,6 +1,7 @@
 export * from "./useBeforeUnload";
 export * from "./useDebounce";
 export * from "./useFeatureToggle";
+export * from "./useFocusTab";
 export * from "./useLocalStorage";
 export * from "./usePlatform";
 export * from "./useQueue";

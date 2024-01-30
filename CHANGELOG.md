@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Automatically fetch new datasets on focus tab ([#4514](https://github.com/argilla-io/argilla/pull/4514))
 - API v1 responses returning `Record` schema now always include `dataset_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Response` schema now always include `record_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Question` schema now always include `dataset_id` attribute. ([#4487](https://github.com/argilla-io/argilla/pull/4487))
