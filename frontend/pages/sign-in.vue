@@ -18,47 +18,61 @@
 <template>
   <div class="container">
     <BaseLoading v-if="hasAuthToken" />
-    <form class="form" @submit.prevent="onLoginUser">
-      <brand-logo class="form__logo" />
-      <div class="form__content">
-        <p class="form__title">Welcome</p>
-        <p class="form__text">Please enter your details to login.</p>
-        <div class="form__input" :class="{ active: login.username }">
-          <label class="form__label">Username</label>
-          <input
-            v-model="login.username"
-            type="text"
-            placeholder="Enter your username"
-          />
-        </div>
-        <div class="form__input" :class="{ active: login.password }">
-          <label class="form__label">Password</label>
-          <input
-            v-model="login.password"
-            type="password"
-            placeholder="Enter your password"
-          />
-        </div>
-        <p v-if="deployment === 'quickstart'">
-          You are using the Quickstart version of Argilla. Check
-          <a :href="$config.documentationSiteQuickStart" target="_blank"
-            >this guide</a
-          >
-          to learn more about usage and configuration options.
-        </p>
-        <base-button type="submit" class="form__button primary"
-          >Enter</base-button
-        >
-        <p class="form__error" v-if="error">{{ formattedError }}</p>
+
+    <div class="login--left">
+      <div class="login--left__header">
+        <brand-logo class="form__logo" />
       </div>
-    </form>
+
+      <div class="login--left__form">
+        <form class="form" @submit.prevent="onLoginUser">
+          <div>
+            <p class="form__title" v-text="$t('login.title')" />
+            <div class="form__input" :class="{ active: login.username }">
+              <label class="form__label">Username</label>
+              <input
+                v-model="login.username"
+                type="text"
+                placeholder="Enter your username"
+              />
+            </div>
+            <div class="form__input" :class="{ active: login.password }">
+              <label class="form__label">Password</label>
+              <input
+                v-model="login.password"
+                type="password"
+                placeholder="Enter your password"
+              />
+            </div>
+            <p
+              v-if="deployment == 'quickstart'"
+              v-html="
+                $t('login.quickstart', {
+                  link: $config.documentationSiteQuickStart,
+                })
+              "
+            />
+            <base-button
+              type="submit"
+              :disabled="!isButtonEnabled"
+              class="form__button primary"
+              >{{ $t("button.login") }}</base-button
+            >
+            <p class="form__error" v-if="error">{{ formattedError }}</p>
+          </div>
+        </form>
+
+        <OAuthLogin />
+      </div>
+    </div>
+
     <div class="login--right">
-      <p class="login__claim">Build, improve, and monitor data for NLP</p>
+      <p class="login__claim" v-html="$t('login.claim')" />
       <geometric-shape-a />
-      <p class="login__text">
-        To get support from the community, join us on
-        <a :href="$config.slackCommunity" target="_blank">Slack</a>
-      </p>
+      <p
+        class="login__text"
+        v-html="$t('login.support', { link: $config.slackCommunity })"
+      />
     </div>
   </div>
 </template>
@@ -119,6 +133,9 @@ export default {
           : this.error;
       }
     },
+    isButtonEnabled() {
+      return !!this.login.username && !!this.login.password;
+    },
   },
   methods: {
     nextRedirect() {
@@ -130,7 +147,7 @@ export default {
     async loginUser(authData) {
       await this.$auth.logout();
       await this.$store.dispatch("entities/deleteAll");
-      await this.$auth.loginWith("authProvider", {
+      await this.$auth.loginWith("basic", {
         data: this.encodedLoginData(authData),
       });
 
@@ -156,10 +173,11 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  min-height: 100vh;
   background: $brand-secondary-color;
   display: flex;
-  a {
+  min-height: 100vh;
+  a,
+  :deep(a) {
     outline: none;
     color: $brand-primary-color;
     text-decoration: none;
@@ -169,17 +187,9 @@ export default {
   }
 }
 .form {
-  background: palette(white);
   display: flex;
-  padding: $base-space * 5;
-  z-index: 1;
-  min-height: 100vh;
-  width: 50vw;
   flex-flow: column;
-  &__content {
-    max-width: 300px;
-    margin: auto;
-  }
+
   &__logo {
     text-align: left;
     max-width: 120px;
@@ -191,20 +201,13 @@ export default {
     font-weight: 500;
   }
   &__title {
-    @include font-size(40px);
+    @include font-size(36px);
     line-height: 1.2em;
-    margin: 0 auto $base-space auto;
+    margin: 0 auto $base-space * 5 auto;
     color: $black-87;
     font-weight: 500;
     letter-spacing: 0.03em;
     font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
-  }
-  &__text {
-    margin-top: 0;
-    margin-bottom: $base-space * 6;
-    @include font-size(18px);
-    line-height: 1.4em;
-    font-weight: 400;
   }
   &__button {
     margin: 2em auto 0 auto;
@@ -229,10 +232,34 @@ export default {
     color: #ff4f46;
   }
 }
+
 input:-webkit-autofill {
   box-shadow: 0 0 0px 1000px palette(white) inset;
 }
 .login {
+  &--left {
+    background: palette(white);
+    padding: $base-space * 5;
+    z-index: 1;
+    width: 50vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &__header {
+      height: 10%;
+    }
+
+    &__form {
+      width: 340px;
+      margin: auto;
+      height: 90%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
   &--right {
     display: flex;
     flex-flow: column;
@@ -250,13 +277,13 @@ input:-webkit-autofill {
   }
   &__claim {
     margin: auto auto;
-    max-width: 400px;
+    max-width: 460px;
     z-index: 1;
     @include font-size(40px);
     line-height: 1.3em;
     color: palette(white);
     font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
-    transform: translateX(-0.85em);
+    transform: translateX(-1.5em);
     padding-top: 1em;
   }
   &__text {

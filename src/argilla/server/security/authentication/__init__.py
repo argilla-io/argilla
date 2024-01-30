@@ -13,11 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.server.pydantic_v1 import BaseModel
+from .jwt import JWT  # noqa
+from .provider import AuthenticationProvider  # noqa
+from .userinfo import UserInfo  # noqa
 
 
-class Token(BaseModel):
-    """Token response model"""
-
-    access_token: str
-    token_type: str = "bearer"
+auth = AuthenticationProvider.new_instance()
