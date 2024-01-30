@@ -25,7 +25,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import AdminFactory
+from tests.factories import AdminFactory, AnnotatorFactory
 
 
 @pytest.fixture
@@ -236,3 +236,26 @@ class TestOauth2:
                 )
                 assert response.status_code == 401
                 assert response.json() == {"detail": "Could not authenticate user"}
+
+    async def test_provider_access_token_with_same_username(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        user = await AnnotatorFactory.create()
+
+        with mock.patch("argilla.server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla.server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"preferred_username": user.username, "name": user.first_name},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"oauth2_state": "valid"},
+                )
+                # This will throw an error once we detect users created by OAuth2
+                assert response.status_code == 200
