@@ -46,7 +46,7 @@ export default {
     ignore_and_continue: "Ignore and continue",
     login: "Sign in",
     "hf-login": "Sign in with Hugging Face",
-    sign_in_with_username: "Sign in with username ",
+    sign_in_with_username: "Sign in with username",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
