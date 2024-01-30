@@ -91,6 +91,6 @@ def _get_provider_by_name_or_raise(provider_name: str) -> OAuth2ClientProvider:
 
 
 def _is_user_created_by_oauth_provider(user: User) -> bool:
-    # TODO: This should be stored in DB somehow
-    #  For now, we can just validate the user role.
+    # TODO: We must link the created user with the provider, and base this check on that.
+    #  For now, we just validate the user role on creation.
     return user.role == _USER_ROLE_ON_CREATION
