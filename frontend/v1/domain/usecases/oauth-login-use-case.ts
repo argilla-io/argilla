@@ -20,9 +20,9 @@ export class OAuthLoginUseCase {
     return this.oauthRepository.authorize(provider);
   }
 
-  login(provider: ProviderType, oauthParams: OAuthParams) {
+  async login(provider: ProviderType, oauthParams: OAuthParams) {
     try {
-      return this.oauthRepository.login(provider, oauthParams);
+      await this.oauthRepository.login(provider, oauthParams);
     } catch {}
   }
 }
