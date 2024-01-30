@@ -12,16 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "AuthenticationError"]
+from typing import Annotated
+
+from fastapi import Form
+
+from argilla.server.pydantic_v1 import BaseModel
 
 
-class NotFoundError(Exception):
-    """Custom Argilla not found error. Use it for situations where an Argilla domain entity has not be found on the system."""
+class UserPasswordRequestForm:
+    """User password request form."""
 
-    pass
+    def __init__(self, *, username: Annotated[str, Form()], password: Annotated[str, Form()]):
+        self.username = username
+        self.password = password
 
 
-class AuthenticationError(Exception):
-    """Custom Argilla unauthorized error. Use it for situations where an request is not authorized to perform an action."""
+class Token(BaseModel):
+    """Token response model"""
 
-    pass
+    access_token: str
+    token_type: str = "bearer"

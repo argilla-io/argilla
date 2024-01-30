@@ -1,3 +1,4 @@
+#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "AuthenticationError"]
+from .jwt import JWT  # noqa
+from .provider import AuthenticationProvider  # noqa
+from .userinfo import UserInfo  # noqa
 
 
-class NotFoundError(Exception):
-    """Custom Argilla not found error. Use it for situations where an Argilla domain entity has not be found on the system."""
-
-    pass
-
-
-class AuthenticationError(Exception):
-    """Custom Argilla unauthorized error. Use it for situations where an request is not authorized to perform an action."""
-
-    pass
+auth = AuthenticationProvider.new_instance()

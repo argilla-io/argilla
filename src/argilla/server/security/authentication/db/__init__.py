@@ -12,16 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "AuthenticationError"]
+from .api_key_backend import APIKeyAuthenticationBackend
+from .bearer_token_backend import BearerTokenAuthenticationBackend
 
-
-class NotFoundError(Exception):
-    """Custom Argilla not found error. Use it for situations where an Argilla domain entity has not be found on the system."""
-
-    pass
-
-
-class AuthenticationError(Exception):
-    """Custom Argilla unauthorized error. Use it for situations where an request is not authorized to perform an action."""
-
-    pass
+__all__ = ["BearerTokenAuthenticationBackend", "APIKeyAuthenticationBackend"]
