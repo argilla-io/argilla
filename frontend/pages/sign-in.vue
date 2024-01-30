@@ -52,9 +52,12 @@
                 })
               "
             />
-            <base-button type="submit" class="form__button primary">{{
-              $t("button.login")
-            }}</base-button>
+            <base-button
+              type="submit"
+              :disabled="!isButtonEnabled"
+              class="form__button primary"
+              >{{ $t("button.login") }}</base-button
+            >
             <p class="form__error" v-if="error">{{ formattedError }}</p>
           </div>
         </form>
@@ -129,6 +132,9 @@ export default {
           ? "Wrong username or password. Try again"
           : this.error;
       }
+    },
+    isButtonEnabled() {
+      return !!this.login.username && !!this.login.password;
     },
   },
   methods: {
