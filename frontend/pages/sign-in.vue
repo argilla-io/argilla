@@ -245,7 +245,7 @@ input:-webkit-autofill {
     }
 
     &__form {
-      max-width: 340px;
+      width: 340px;
       margin: auto;
       height: 90%;
       display: flex;
