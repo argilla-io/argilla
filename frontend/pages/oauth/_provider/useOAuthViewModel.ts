@@ -18,8 +18,11 @@ export const useOAuthViewModel = () => {
 
     const provider = params.provider as ProviderType;
 
-    await oauthLoginUseCase.login(provider, query);
-
-    router.go("/");
+    try {
+      await oauthLoginUseCase.login(provider, query);
+    } catch {
+    } finally {
+      router.go("/");
+    }
   };
 };

@@ -64,7 +64,7 @@ export class OAuthRepository implements IOAuthRepository {
         params,
       });
 
-      await this.auth.setUserToken(data.access_token);
+      if (data.access_token) await this.auth.setUserToken(data.access_token);
     } catch (error) {
       throw {
         response: OAUTH_API_ERRORS.ERROR_FETCHING_OAUTH_ACCESS_TOKEN,
