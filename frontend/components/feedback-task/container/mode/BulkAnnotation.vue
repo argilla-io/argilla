@@ -183,10 +183,12 @@ export default {
       return this.records.getRecordsOn(this.recordCriteria.committed.page);
     },
     numberOfSelectedRecords() {
+      if (this.affectAllRecords) return this.records.total;
+
       return this.selectedRecords.length;
     },
     hasSelectedAtLeastOneRecord() {
-      return this.numberOfSelectedRecords > 0 || this.affectAllRecords;
+      return this.numberOfSelectedRecords > 0;
     },
     bulkActionsTooltip() {
       if (!this.hasSelectedAtLeastOneRecord)
@@ -204,8 +206,12 @@ export default {
       return (
         this.isSelectedAll &&
         this.checkIfSomeFilterIsActive(this.recordCriteria) &&
-        this.records.total > this.recordsOnPage.length
+        this.records.total > this.recordsOnPage.length &&
+        this.records.total <= 1000
       );
+    },
+    shouldShowModalToConfirm() {
+      return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
   },
   methods: {
@@ -224,7 +230,6 @@ export default {
     },
     cancelAction() {
       this.visibleConfirmationModal = false;
-      this.resetAffectAllRecords();
       this.allowedAction = null;
     },
     async confirmAction() {
@@ -243,21 +248,21 @@ export default {
       this.allowedAction = null;
     },
     onClickSubmit() {
-      if (this.affectAllRecords) {
+      if (this.shouldShowModalToConfirm) {
         this.showConfirmationModal("submit");
       } else {
         this.onSubmit();
       }
     },
     onClickSaveDraft() {
-      if (this.affectAllRecords) {
+      if (this.shouldShowModalToConfirm) {
         this.showConfirmationModal("saveDraft");
       } else {
         this.onSaveDraft();
       }
     },
     onClickDiscard() {
-      if (this.affectAllRecords) {
+      if (this.shouldShowModalToConfirm) {
         this.showConfirmationModal("discard");
       } else {
         this.onDiscard();
@@ -325,8 +330,8 @@ export default {
       }
     },
   },
-  setup() {
-    return useBulkAnnotationViewModel();
+  setup(props) {
+    return useBulkAnnotationViewModel(props);
   },
 };
 </script>

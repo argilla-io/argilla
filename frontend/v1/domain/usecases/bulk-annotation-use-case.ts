@@ -11,8 +11,8 @@ export type AvailableStatus = Exclude<RecordStatus, "pending">;
 
 type Progress = (value: number) => void;
 
-const RECORDS_TO_AFFECT = 20;
-const CHUNK_SIZE = 5;
+const RECORDS_TO_AFFECT = 1000;
+const CHUNK_SIZE = 10;
 
 export class BulkAnnotationUseCase {
   constructor(
@@ -41,6 +41,7 @@ export class BulkAnnotationUseCase {
       records.push(...allRecords.records);
     }
 
+    debugger;
     const allSuccessful = await this.save(
       status,
       recordReference,

@@ -64,6 +64,11 @@ export default {
     actionConfirmationText:
       "This action will affect {total} records, do you want to continue? ",
     allRecordsAnnotated: "The {total} records have been {action}",
+    affectedAll: {
+      submitted: "submitted",
+      discarded: "discarded",
+      draft: "saved as draft",
+    },
   },
   shortcuts: {
     label: "Shortcuts",

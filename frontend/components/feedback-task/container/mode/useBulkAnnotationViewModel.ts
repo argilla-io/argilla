@@ -3,6 +3,7 @@ import { ref } from "vue-demi";
 import { Notification } from "~/models/Notifications";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
+import { Records } from "~/v1/domain/entities/record/Records";
 import {
   AvailableStatus,
   BulkAnnotationUseCase,
@@ -10,7 +11,11 @@ import {
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
-export const useBulkAnnotationViewModel = () => {
+export const useBulkAnnotationViewModel = ({
+  records,
+}: {
+  records: Records;
+}) => {
   const debounceForSubmit = useDebounce(300);
 
   const affectAllRecords = ref(false);
@@ -25,10 +30,10 @@ export const useBulkAnnotationViewModel = () => {
 
   const checkIfSomeFilterIsActive = (criteria: RecordCriteria) => {
     return (
-      criteria.isFilteringByText ||
-      criteria.isFilteringByResponse ||
+      criteria.isFilteredByText ||
+      criteria.isFilteredByResponse ||
       criteria.isFilteredByMetadata ||
-      criteria.isFilteringBySuggestion
+      criteria.isFilteredBySuggestion
     );
   };
 
@@ -36,15 +41,18 @@ export const useBulkAnnotationViewModel = () => {
     status: AvailableStatus,
     criteria: RecordCriteria,
     recordReference: Record,
-    records: Record[]
+    selectedRecords: Record[]
   ) => {
     try {
+      const totalRecords = records.total;
+      const isAffectingAllRecords = affectAllRecords.value;
+
       const allSuccessful = await bulkAnnotationUseCase.execute(
         status,
         criteria,
         recordReference,
-        records,
-        affectAllRecords.value,
+        selectedRecords,
+        isAffectingAllRecords,
         (value) => {
           progress.value = value;
         }
@@ -55,11 +63,11 @@ export const useBulkAnnotationViewModel = () => {
           message: t("some_records_failed_to_annotate"),
           type: "error",
         });
-      } else if (affectAllRecords.value) {
+      } else if (isAffectingAllRecords) {
         Notification.dispatch("notify", {
           message: t("bulkAnnotation.allRecordsAnnotated", {
-            total: records.length,
-            action: status === "draft" ? "save as draft" : status,
+            total: totalRecords,
+            action: t(`bulkAnnotation.affectedAll.${status}`).toLowerCase(),
           }),
           type: "info",
         });
