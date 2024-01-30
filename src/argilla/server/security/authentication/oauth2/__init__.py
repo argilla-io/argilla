@@ -12,16 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "AuthenticationError"]
+from .client_provider import OAuth2ClientProvider  # noqa
+from .settings import OAuth2Settings  # noqa
 
-
-class NotFoundError(Exception):
-    """Custom Argilla not found error. Use it for situations where an Argilla domain entity has not be found on the system."""
-
-    pass
-
-
-class AuthenticationError(Exception):
-    """Custom Argilla unauthorized error. Use it for situations where an request is not authorized to perform an action."""
-
-    pass
+__all__ = ["OAuth2Settings", "OAuth2ClientProvider"]

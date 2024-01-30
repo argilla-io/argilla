@@ -24,7 +24,6 @@ from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import UnauthorizedError
 from argilla.server.models import User
-from argilla.server.security.authentication import db
 from argilla.server.security.authentication.db import APIKeyAuthenticationBackend, BearerTokenAuthenticationBackend
 from argilla.server.security.authentication.userinfo import UserInfo
 
