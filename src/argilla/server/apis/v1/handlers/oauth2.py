@@ -33,8 +33,8 @@ router = APIRouter(prefix="/oauth2", tags=["Authentication"])
 _USER_ROLE_ON_CREATION = UserRole.annotator
 
 
-@router.get("/providers")
-def list_providers(_: Request) -> Providers:
+@router.get("/providers", response_model=Providers)
+def list_providers(_request: Request) -> Providers:
     items = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
 
     return Providers(items=items)
@@ -48,23 +48,23 @@ def get_authentication(request: Request, provider: str) -> RedirectResponse:
     return provider.authorization_redirect(request)
 
 
-@router.get("/providers/{provider}/access-token")
+@router.get("/providers/{provider}/access-token", response_model=Token)
 async def get_access_token(request: Request, provider: str, db: AsyncSession = Depends(get_async_db)) -> Token:
     _check_oauth_enabled_or_raise()
 
     try:
         provider = _get_provider_by_name_or_raise(provider)
-        current_user = UserInfo(await provider.get_user_data(request))
+        user_info = UserInfo(await provider.get_user_data(request))
 
-        current_user.use_claims(provider.claims)
-        username = current_user.username
+        user_info.use_claims(provider.claims)
+        username = user_info.username
 
         user = await accounts.get_user_by_username(db, username)
         if user is None:
             await accounts.create_user_with_random_password(
                 db,
                 username=username,
-                first_name=current_user.name,
+                first_name=user_info.name,
                 role=_USER_ROLE_ON_CREATION,
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
@@ -72,7 +72,7 @@ async def get_access_token(request: Request, provider: str, db: AsyncSession = D
             # User should sign in using username/password workflow
             raise AuthenticationError("Could not authenticate user")
 
-        return Token(access_token=JWT.create(current_user))
+        return Token(access_token=JWT.create(user_info))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except AuthenticationError as e:
