@@ -67,10 +67,6 @@ export class OAuthRepository implements IOAuthRepository {
 
       await this.auth.setUserToken(data.access_token);
     } catch (error) {
-      if (error instanceof AxiosError && error.code === "ERR_BAD_REQUEST") {
-        return this.authorize(provider);
-      }
-
       throw {
         response: OAUTH_API_ERRORS.ERROR_FETCHING_OAUTH_ACCESS_TOKEN,
       };
