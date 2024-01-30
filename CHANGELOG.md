@@ -29,6 +29,7 @@ These are the section headers that we use:
 - Added `ARGILLA_AUTH_SECRET_KEY` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
 - Added `ARGILLA_AUTH_ALGORITHM` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
 - Added `ARGILLA_AUTH_TOKEN_EXPIRATION` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
+- Added OAuth2 support for HuggingFace Hub. ([#4546](https://github.com/argilla-io/argilla/pull/4546))
 
 ### Deprecated
 

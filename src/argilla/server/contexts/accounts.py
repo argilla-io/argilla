@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import secrets
 from typing import TYPE_CHECKING, List, Union
 from uuid import UUID
 
@@ -148,23 +149,13 @@ async def create_user_with_random_password(
     first_name: str,
     workspaces: List[str] = None,
     role: UserRole = UserRole.annotator,
-    password_length: int = 32,
 ) -> User:
-    password = generate_random_password(password_length)
+    password = _generate_random_password()
 
     user_create = UserCreate(
         first_name=first_name, username=username, role=role, password=password, workspaces=workspaces
     )
     return await create_user(db, user_create)
-
-
-def generate_random_password(length: int) -> str:
-    import secrets
-    import string
-
-    alphabet = string.ascii_letters + string.digits
-
-    return "".join([secrets.choice(alphabet) for _ in range(length)])
 
 
 async def delete_user(db: "AsyncSession", user: User) -> User:
@@ -188,3 +179,7 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return _CRYPT_CONTEXT.verify(password, password_hash)
+
+
+def _generate_random_password() -> str:
+    return secrets.token_urlsafe()
