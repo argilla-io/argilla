@@ -21,7 +21,7 @@
     <div class="hf-login__img-container">
       <img
         class="hf-login__img"
-        src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-submitted.png"
+        src="images/welcome-hf-sign-in-ss.png"
         alt="argilla UI"
       />
     </div>
@@ -68,8 +68,10 @@ export default {
 
 <style lang="scss" scoped>
 $bg-color: #f5e3db;
-$gradient-bg-color: linear-gradient(178.31deg, #f6d8ca 1.36%, #fbc5ac 109.14%);
+$gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
 .hf-login {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   background: $bg-color;
   &:before {
@@ -97,38 +99,41 @@ $gradient-bg-color: linear-gradient(178.31deg, #f6d8ca 1.36%, #fbc5ac 109.14%);
     font-family: $secondary-font-family;
     text-align: center;
     @include font-size(30px);
-    line-height: 1.3;
+    line-height: 1.2;
     @include media(">tablet") {
-      @include font-size(40px);
+      @include font-size(46px);
     }
   }
   &__subtitle {
     margin: 0;
     text-align: center;
     font-weight: 400;
-    @include font-size(22px);
-    line-height: 1.3;
+    @include font-size(20px);
+    line-height: 1.2;
     @include media(">tablet") {
-      @include font-size(26px);
+      @include font-size(24px);
     }
   }
   &__hero {
     position: relative;
     display: flex;
+    height: 100%;
     flex-direction: column;
     padding: $base-space * 2;
     gap: $base-space * 2;
     @include media(">tablet") {
-      padding: $base-space * 5;
+      padding: $base-space * 5 $base-space * 5 $base-space * 2 $base-space * 5;
     }
     &__content {
       display: flex;
+      height: 80%;
       flex-direction: column;
-      gap: $base-space * 3;
+      justify-content: center;
+      gap: $base-space * 2;
       align-items: center;
-      margin-top: 10vh;
-      @include media(">tablet") {
-        margin-top: 3vh;
+      @include media(">desktop") {
+        gap: $base-space * 3;
+        height: 100%;
       }
     }
   }
@@ -159,21 +164,20 @@ $gradient-bg-color: linear-gradient(178.31deg, #f6d8ca 1.36%, #fbc5ac 109.14%);
     bottom: -24px;
     left: 0;
     right: 0;
-    display: flex;
     max-width: min(400px, calc(100% - $base-space * 4));
-    padding: $base-space * 2;
-    margin: auto;
+    padding: $base-space;
+    margin-inline: auto;
     background: palette(white);
-    border-radius: $border-radius-l;
-    box-shadow: 0px 4px 25px rgba(200, 167, 167, 0.5);
+    border-radius: 18px;
     @include media(">tablet") {
       position: relative;
-      max-width: min(74%, 1400px);
+      padding: $base-space * 2;
+      max-width: min(74%, 1240px);
     }
   }
   &__img {
     width: 100%;
-    border-radius: $border-radius;
+    border-radius: 8px;
   }
 }
 </style>
