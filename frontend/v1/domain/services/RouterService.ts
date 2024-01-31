@@ -1,3 +1,6 @@
+import { Dictionary } from "../entities/common/Params";
+
 export interface RouterService {
-  go(where: string, params: { external: boolean; newWindow: boolean }): void;
+  getQuery(): Dictionary<string | (string | null)[]>;
+  go(where: string, external: boolean): void;
 }
