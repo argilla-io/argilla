@@ -16,6 +16,7 @@
 import concurrent.futures
 import datetime
 import re
+import warnings
 from pathlib import Path
 from time import sleep
 from typing import Iterable
@@ -1054,7 +1055,7 @@ def test_list_datasets_only_feedback_datasets(argilla_user: User):
 
 
 def test_aligned_argilla_versions(mock_init_ok):
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings(record=True) as record:
         Argilla()
         for warning in record:
             assert "You're connecting to Argilla Server" not in str(warning.message)
