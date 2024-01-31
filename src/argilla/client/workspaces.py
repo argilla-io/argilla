@@ -386,7 +386,10 @@ class Workspace:
         """
         client = cls.__active_client()
         try:
-            return workspaces_api_v1.list_workspaces_me(client).parsed
+            return [
+                cls.__new_instance(client, workspace)
+                for workspace in workspaces_api_v1.list_workspaces_me(client).parsed
+            ]
 
         except Exception as e:
             raise RuntimeError("Error while retrieving the list of workspaces from Argilla.") from e
