@@ -387,7 +387,7 @@ class Workspace:
         client = cls.__active_client()
         try:
             return [
-                cls.__new_instance(client, workspace)
+                cls._new_instance(client, workspace)
                 for workspace in workspaces_api_v1.list_workspaces_me(client).parsed
             ]
 
