@@ -109,7 +109,7 @@ integrations = [
     "evaluate",
     "seqeval",
     "sentence-transformers",
-    "setfit>=0.7.0,<1.0.0",
+    "setfit>=1.0.0",
     "span_marker",
     "sentence-transformers>=2.0.0,<3.0.0",
     "textdescriptives>=2.7.0,<3.0.0",
