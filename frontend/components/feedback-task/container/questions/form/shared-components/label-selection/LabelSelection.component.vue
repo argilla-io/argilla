@@ -48,7 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          :data-keyboard="option.keyboard"
+          :data-keyboard="keyboards[option.id]"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -75,7 +75,7 @@
           <span
             class="key"
             v-if="showShortcutsHelper"
-            v-text="option.keyboard"
+            v-text="keyboards[option.id]"
           />
           <span>{{ option.text }}</span>
         </label>
@@ -135,7 +135,14 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
+      keyboards: {},
     };
+  },
+  mounted() {
+    this.keyboards = this.options.reduce((acc, option, index) => {
+      acc[option.id] = index + 1;
+      return acc;
+    }, {});
   },
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
@@ -165,16 +172,11 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options
-        .map((option, i) => ({
-          ...option,
-          keyboard: i + 1,
-        }))
-        .filter((option) =>
-          String(option.text)
-            .toLowerCase()
-            .includes(this.searchInput.toLowerCase())
-        );
+      return this.options.filter((option) =>
+        String(option.text)
+          .toLowerCase()
+          .includes(this.searchInput.toLowerCase())
+      );
     },
     remainingVisibleOptions() {
       return this.filteredOptions
