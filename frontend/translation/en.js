@@ -116,7 +116,7 @@ export default {
   },
   login: {
     title: "Sign in",
-    claim: "Work on data together,</br>make models better",
+    claim: "Work on data together.</br>Make models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
