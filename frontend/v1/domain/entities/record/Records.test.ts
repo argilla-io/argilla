@@ -1,4 +1,5 @@
 import { PageCriteria } from "../page/PageCriteria";
+import { SimilarityCriteria } from "../similarity/SimilarityCriteria";
 import { Record } from "./Record";
 import { RecordCriteria } from "./RecordCriteria";
 import { Records } from "./Records";
@@ -437,6 +438,36 @@ describe("Records", () => {
       records.synchronizeQueuePagination(criteria);
 
       expect(criteria.page.server).toEqual({ from: 1, many: 10 });
+    });
+
+    test("when the user was in bulk mode but is in focus mode the page should be from 1 and many 200 if the user is searching by similarity", () => {
+      const criteria = new RecordCriteria(
+        "1",
+        "55",
+        "pending",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      );
+      const records = new Records([
+        new Record("1", "1", [], [], null, [], 1, 55),
+      ]);
+
+      const similarityCriteria = new SimilarityCriteria();
+      similarityCriteria.complete("record.1.vector.2.limit.200.order.most");
+
+      criteria.page.bulkMode();
+      criteria.similaritySearch.withValue(similarityCriteria);
+      criteria.commit();
+
+      criteria.page.focusMode();
+
+      records.synchronizeQueuePagination(criteria);
+
+      expect(criteria.page.server).toEqual({ from: 1, many: 200 });
     });
 
     test("when te user is in bulk mode and is paginating backward the page should be from 1 and many 10 when the user is in page 11", () => {

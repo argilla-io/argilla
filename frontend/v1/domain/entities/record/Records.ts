@@ -42,15 +42,15 @@ export class Records {
       committed,
     } = criteria;
 
-    if (page.isBulkMode && committed.page.isFocusMode) return;
-    if (page.isFocusMode && committed.page.isBulkMode) return;
-
     if (isFilteringBySimilarity) {
       return page.synchronizePagination({
         from: 1,
         many: similaritySearch.limit,
       });
     }
+
+    if (page.isBulkMode && committed.page.isFocusMode) return;
+    if (page.isFocusMode && committed.page.isBulkMode) return;
 
     if (this.hasRecordsToAnnotate) {
       const isMovingForward = page.client.page > this.lastRecord.page;
