@@ -1,7 +1,12 @@
 <template>
   <HeaderAndTopAndTwoColumns>
     <template v-slot:header>
-      <HeaderUserSettingsContent />
+      <HeaderFeedbackTaskComponent
+        :breadcrumbs="[
+          { link: { name: 'datasets' }, name: $t('breadcrumbs.home') },
+          { link: {}, name: $t('breadcrumbs.userSettings') },
+        ]"
+      />
     </template>
     <template v-slot:top>
       <TopUserSettingsContent />

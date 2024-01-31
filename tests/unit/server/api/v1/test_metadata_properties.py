@@ -17,10 +17,10 @@ from typing import TYPE_CHECKING, Type
 from uuid import uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.enums import MetadataPropertyType, UserRole
 from argilla.server.models import MetadataProperty, UserRole
-from argilla.server.schemas.v1.datasets import METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.metadata_properties import METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH
 from argilla.server.search_engine import FloatMetadataMetrics, IntegerMetadataMetrics, TermsMetadataMetrics
 from sqlalchemy import func, select
 

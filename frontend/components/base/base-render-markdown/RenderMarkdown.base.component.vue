@@ -11,7 +11,11 @@ const preprocess = (html) => {
   return html.replace(/[^\S\r\n]+$/gm, "");
 };
 const postprocess = (html) => {
-  return DOMPurify.sanitize(html);
+  return DOMPurify.sanitize(html, {
+    ADD_TAGS: ["embed", "object"],
+    ADD_ATTR: ["data"],
+    ADD_URI_SAFE_ATTR: ["data"],
+  });
 };
 
 DOMPurify.addHook("beforeSanitizeAttributes", (node) => {

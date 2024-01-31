@@ -1,9 +1,9 @@
 <template>
   <div class="top-content">
-    <h1>My settings</h1>
+    <h1 v-text="$t('userSettings.title')" />
     <BaseButton :to="datasetsURL" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
-      Home
+      {{ $t("breadcrumbs.home") }}
     </BaseButton>
   </div>
 </template>

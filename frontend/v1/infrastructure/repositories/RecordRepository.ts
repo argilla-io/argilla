@@ -2,7 +2,7 @@ import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import {
   BackedRecord,
   BackendAnswerCombinations,
-  BackendResponse,
+  BackendResponseResponse,
   BackendSearchRecords,
   BackendAdvanceSearchQuery,
   ResponseWithTotal,
@@ -10,12 +10,14 @@ import {
   BackendRecordStatus,
   BackendSimilaritySearchOrder,
   BackendSort,
+  BackendResponseBulkRequest,
+  BackendResponseRequest,
+  BackendResponseBulkResponse,
 } from "../types";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
-import { Pagination } from "@/v1/domain/entities/Pagination";
 import { SimilarityOrder } from "@/v1/domain/entities/similarity/SimilarityCriteria";
 import { RangeValue, ValuesOption } from "~/v1/domain/entities/common/Filter";
 
@@ -25,6 +27,7 @@ const RECORD_API_ERRORS = {
   ERROR_DELETING_RECORD_RESPONSE: "ERROR_DELETING_RECORD_RESPONSE",
   ERROR_UPDATING_RECORD_RESPONSE: "ERROR_UPDATING_RECORD_RESPONSE",
   ERROR_CREATING_RECORD_RESPONSE: "ERROR_CREATING_RECORD_RESPONSE",
+  ERROR_CREATING_RECORD_RESPONSE_BULK: "ERROR_CREATING_RECORD_RESPONSE_BULK",
 };
 
 const BACKEND_ORDER: {
@@ -37,14 +40,11 @@ const BACKEND_ORDER: {
 export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  getRecords(
-    criteria: RecordCriteria,
-    pagination: Pagination
-  ): Promise<BackedRecords> {
+  getRecords(criteria: RecordCriteria): Promise<BackedRecords> {
     if (criteria.isFilteringByAdvanceSearch)
-      return this.getRecordsByAdvanceSearch(criteria, pagination);
+      return this.getRecordsByAdvanceSearch(criteria);
 
-    return this.getRecordsByDatasetId(criteria, pagination);
+    return this.getRecordsByDatasetId(criteria);
   }
 
   async getRecord(recordId: string): Promise<BackedRecord> {
@@ -79,7 +79,7 @@ export class RecordRepository {
     return this.createRecordResponse(record, "discarded");
   }
 
-  submitNewRecordResponse(record: Record): Promise<RecordAnswer> {
+  submitRecordResponse(record: Record): Promise<RecordAnswer> {
     if (record.answer) return this.updateRecordResponse(record, "submitted");
 
     return this.createRecordResponse(record, "submitted");
@@ -91,6 +91,41 @@ export class RecordRepository {
     return this.createRecordResponse(record, "draft");
   }
 
+  async annotateBulkRecords(records: Record[], status: BackendRecordStatus) {
+    try {
+      const request = this.createRequestForBulk(status, records);
+
+      const { data } = await this.axios.post<BackendResponseBulkResponse>(
+        "/v1/me/responses/bulk",
+        request
+      );
+
+      return data.items.map(({ item, error }) => {
+        if (item) {
+          return {
+            success: true,
+            recordId: item.record_id,
+            response: new RecordAnswer(
+              item.id,
+              item.status,
+              item.values,
+              item.updated_at
+            ),
+          };
+        }
+
+        return {
+          success: false,
+          error: error.detail,
+        };
+      });
+    } catch (error) {
+      throw {
+        response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE_BULK,
+      };
+    }
+  }
+
   private async updateRecordResponse(
     record: Record,
     status: BackendRecordStatus
@@ -98,7 +133,7 @@ export class RecordRepository {
     try {
       const request = this.createRequest(status, record.questions);
 
-      const { data } = await this.axios.put<BackendResponse>(
+      const { data } = await this.axios.put<BackendResponseResponse>(
         `/v1/responses/${record.answer.id}`,
         request
       );
@@ -118,7 +153,7 @@ export class RecordRepository {
     try {
       const request = this.createRequest(status, record.questions);
 
-      const { data } = await this.axios.post<BackendResponse>(
+      const { data } = await this.axios.post<BackendResponseResponse>(
         `/v1/records/${record.id}/responses`,
         request
       );
@@ -137,11 +172,10 @@ export class RecordRepository {
   }
 
   private async getRecordsByDatasetId(
-    criteria: RecordCriteria,
-    pagination: Pagination
+    criteria: RecordCriteria
   ): Promise<BackedRecords> {
-    const { datasetId, status } = criteria;
-    const { from, many } = pagination;
+    const { datasetId, status, page } = criteria;
+    const { from, many } = page.server;
     try {
       const url = `/v1/me/datasets/${datasetId}/records`;
 
@@ -167,11 +201,11 @@ export class RecordRepository {
   }
 
   private async getRecordsByAdvanceSearch(
-    criteria: RecordCriteria,
-    pagination: Pagination
+    criteria: RecordCriteria
   ): Promise<BackedRecords> {
     const {
       datasetId,
+      page,
       status,
       searchText,
       metadata,
@@ -186,7 +220,7 @@ export class RecordRepository {
       isFilteringBySuggestion,
       isSortingBy,
     } = criteria;
-    const { from, many } = pagination;
+    const { from, many } = page.server;
 
     try {
       const url = `/v1/me/datasets/${datasetId}/records/search`;
@@ -374,9 +408,11 @@ export class RecordRepository {
             order: sort.order,
           };
 
-          if (sort.entity === "suggestion") {
+          if (sort.property) {
             backendSort.scope.question = sort.name;
             backendSort.scope.property = sort.property;
+          } else if (sort.entity === "response") {
+            backendSort.scope.question = sort.name;
           } else if (sort.entity === "metadata") {
             backendSort.scope.metadata_property = sort.name;
           } else if (sort.entity === "record") {
@@ -413,10 +449,28 @@ export class RecordRepository {
     }
   }
 
+  private createRequestForBulk(
+    status: BackendRecordStatus,
+    records: Record[]
+  ): BackendResponseBulkRequest {
+    const request: BackendResponseBulkRequest = {
+      items: [],
+    };
+
+    records.forEach(({ id, questions }) => {
+      request.items.push({
+        ...this.createRequest(status, questions),
+        record_id: id,
+      });
+    });
+
+    return request;
+  }
+
   private createRequest(
     status: BackendRecordStatus,
     questions: Question[]
-  ): Omit<BackendResponse, "id" | "updated_at"> {
+  ): BackendResponseRequest {
     const values = {} as BackendAnswerCombinations;
 
     questions

@@ -258,7 +258,6 @@ class AuthenticatedClient(Client, _ClientCommonDefaults, _AuthenticatedClient):
     def get_headers(self) -> Dict[str, str]:
         """Get headers to be used in authenticated endpoints"""
         return {
-            "Authorization": f"Bearer {self.token}",  # Backward compatibility
             API_KEY_HEADER_NAME: self.token,
             **super().get_headers(),
         }

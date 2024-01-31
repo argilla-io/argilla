@@ -68,15 +68,15 @@ export default {
 </script>
 <style lang="scss" scoped>
 .record-reference {
-  &.record {
-    max-height: 30vh;
-    overflow: auto;
-    border: 1px solid $similarity-color;
-  }
+  max-height: 30vh;
+  overflow: auto;
+  border: 1px solid $similarity-color;
+  background: palette(white);
+  border-radius: $border-radius-m;
+  padding: $base-space * 2;
   &__wrapper {
     display: flex;
     flex-direction: column;
-    gap: $base-space;
     &--expanded {
       @extend .record-reference__wrapper;
       .record-reference {

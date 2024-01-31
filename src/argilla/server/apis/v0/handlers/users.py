@@ -19,15 +19,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla.server import models
+from argilla.server import models, telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla.server.policies import UserPolicy, authorize
 from argilla.server.pydantic_v1 import parse_obj_as
+from argilla.server.schemas.v0.users import User, UserCreate
 from argilla.server.security import auth
-from argilla.server.security.model import User, UserCreate
-from argilla.utils import telemetry
 
 router = APIRouter(tags=["users"])
 

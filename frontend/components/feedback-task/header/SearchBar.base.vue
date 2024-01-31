@@ -20,7 +20,11 @@
     class="search-area"
     :class="{ active: isSearchActive, expanded: isExpanded }"
   >
-    <BaseButton @on-click="applySearch" class="search-area__icon --search">
+    <BaseButton
+      @on-click="applySearch"
+      class="search-area__icon --search"
+      :data-title="$t('search')"
+    >
       <svgicon name="search" width="16" height="16" />
     </BaseButton>
     <input
@@ -165,5 +169,9 @@ $searchBarSize: $base-space * 4;
       color: $black-37;
     }
   }
+}
+.button[data-title] {
+  overflow: visible;
+  @include tooltip-mini("top", 16px);
 }
 </style>

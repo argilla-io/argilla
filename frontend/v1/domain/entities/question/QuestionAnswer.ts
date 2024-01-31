@@ -7,25 +7,10 @@ export type QuestionType =
   | "ranking"
   | "label_selection"
   | "multi_label_selection";
+
 export abstract class QuestionAnswer {
-  private answer: Answer;
+  private _answer: Answer;
   constructor(public readonly type: QuestionType) {}
-
-  complete(answer: Answer) {
-    if (this.answer) return;
-
-    this.answer = answer;
-    this.fill(answer);
-  }
-
-  forceComplete(answer: Answer) {
-    this.answer = answer;
-    this.fill(answer);
-  }
-
-  protected abstract fill(answer: Answer);
-  abstract clear();
-  abstract get isValid(): boolean;
 
   get isPartiallyValid(): boolean {
     return false;
@@ -35,6 +20,24 @@ export abstract class QuestionAnswer {
     return true;
   }
 
+  get answer() {
+    return this._answer;
+  }
+
+  responseIfUnanswered(answer: Answer) {
+    if (this._answer) return;
+
+    this.response(answer);
+  }
+
+  response(answer: Answer) {
+    this._answer = answer;
+    this.fill(this._answer);
+  }
+
+  protected abstract fill(answer: Answer);
+  abstract clear();
+  abstract get isValid(): boolean;
   abstract get valuesAnswered();
 
   abstract matchSuggestion(suggestion: Suggestion): boolean;

@@ -1,6 +1,6 @@
 {
   "name": "argilla",
-  "version": "1.22.0-dev",
+  "version": "1.24.0-dev",
   "private": true,
   "scripts": {
     "dev": "nuxt",
@@ -43,7 +43,7 @@
     "pinia": "^2.1.4",
     "sass": "^1.49.9",
     "stringz": "^2.1.0",
-    "ts-injecty": "^0.0.18",
+    "ts-injecty": "^0.0.22",
     "v-click-outside": "^3.1.2",
     "vue": "^2.7.14",
     "vue-demi": "^0.14.5",
@@ -59,6 +59,7 @@
     "@babel/eslint-parser": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.22.5",
+    "@intlify/eslint-plugin-vue-i18n": "^2.0.0",
     "@nuxt/types": "^2.15.8",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/eslint-config-typescript": "^12.0.0",

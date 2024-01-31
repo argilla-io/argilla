@@ -22,9 +22,7 @@ from argilla.server.database import get_async_db
 from argilla.server.models import Question, User
 from argilla.server.policies import QuestionPolicyV1, authorize
 from argilla.server.schemas.v1.questions import Question as QuestionSchema
-from argilla.server.schemas.v1.questions import (
-    QuestionUpdate,
-)
+from argilla.server.schemas.v1.questions import QuestionUpdate
 from argilla.server.security import auth
 
 router = APIRouter(tags=["questions"])

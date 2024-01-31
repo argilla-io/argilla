@@ -26,23 +26,12 @@ from argilla.client.feedback.dataset.mixins import MetricsMixin, UnificationMixi
 from argilla.client.feedback.dataset.remote.mixins import ArgillaRecordsMixin
 from argilla.client.feedback.mixins import ArgillaMetadataPropertiesMixin
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-from argilla.client.feedback.schemas.questions import (
-    LabelQuestion,
-    MultiLabelQuestion,
-    RatingQuestion,
-)
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas.base import (
     TrainingTaskTypes,
-)
-from argilla.client.feedback.unification import (
-    LabelQuestionStrategy,
-    MultiLabelQuestionStrategy,
-    RankingQuestionStrategy,
-    RatingQuestionStrategy,
 )
 from argilla.client.models import Framework
 from argilla.client.sdk.commons.errors import AlreadyExistsApiError
@@ -520,14 +509,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMi
 
         return [RemoteVectorSettings.from_api(vector_settings) for vector_settings in response.parsed.items]
 
-    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
-        # TODO: Maybe make sense to have a query param in api.list_vector_settings to filter by name
-        for vector_settings in self.vector_settings:
-            if vector_settings.name == name:
-                return vector_settings
-
-        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
-
     def __repr__(self) -> str:
         """Returns a string representation of the dataset."""
         indent = "   "
@@ -541,6 +522,7 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMi
             + textwrap.indent(f"\nquestions={self.questions}", indent)
             + textwrap.indent(f"\nguidelines={self.guidelines}", indent)
             + textwrap.indent(f"\nmetadata_properties={self.metadata_properties}", indent)
+            + textwrap.indent(f"\nvectors_settings={self.vectors_settings}", indent)
             + "\n)"
         )
 
@@ -813,25 +795,6 @@ class RemoteFeedbackDataset(FeedbackDatasetBase[RemoteFeedbackRecord], MetricsMi
                 metadata_properties.remove(metadata_property.name)
                 deleted_metadata_properties.append(metadata_property)
         return deleted_metadata_properties if len(deleted_metadata_properties) > 1 else deleted_metadata_properties[0]
-
-    def vector_settings_by_name(self, name: str) -> RemoteVectorSettings:
-        """Returns the vector settings with the given name from the current dataset in Argilla.
-
-        Args:
-            name: the name of the vector settings to retrieve.
-
-        Returns:
-            The vector settings with the given name from the current dataset in Argilla.
-
-        Raises:
-            KeyError: if the vector settings with the given name does not exist in the
-                current dataset in Argilla.
-        """
-        for vector_settings in self.vectors_settings:
-            if vector_settings.name == name:
-                return vector_settings
-
-        raise KeyError(f"Vector settings with name {name!r} does not exist in the dataset.")
 
     @allowed_for_roles(roles=[UserRole.owner, UserRole.admin])
     def add_vector_settings(self, vector_settings: VectorSettings) -> RemoteVectorSettings:

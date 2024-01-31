@@ -49,8 +49,8 @@ export class ResponseCriteria extends Criteria {
     });
   }
 
-  withValue(value: ResponseSearch[]) {
-    this.value = value.map((v) => {
+  withValue(responseCriteria: ResponseCriteria) {
+    this.value = responseCriteria.value.map((v) => {
       return {
         name: v.name,
         value: v.value,

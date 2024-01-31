@@ -15,7 +15,7 @@
 from uuid import UUID, uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from httpx import AsyncClient
 
 from tests.factories import (

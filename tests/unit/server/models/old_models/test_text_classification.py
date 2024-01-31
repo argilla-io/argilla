@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.apis.v0.models.text_classification import (
     TextClassificationAnnotation,
     TextClassificationQuery,
@@ -156,7 +155,7 @@ def test_too_long_metadata():
         }
     )
 
-    assert len(record.metadata["too_long"]) == DEFAULT_MAX_KEYWORD_LENGTH
+    assert len(record.metadata["too_long"]) == 128
 
 
 def test_too_long_label():

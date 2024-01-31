@@ -16,7 +16,7 @@ from dataclasses import dataclass
 
 from fastapi import Header, Path, Query
 
-from argilla._constants import ES_INDEX_REGEX_PATTERN, WORKSPACE_HEADER_NAME
+from argilla.server.constants import ES_INDEX_REGEX_PATTERN, WORKSPACE_HEADER_NAME
 from argilla.server.errors import BadRequestError, MissingInputParamError
 
 DATASET_NAME_PATH_PARAM = Path(..., regex=ES_INDEX_REGEX_PATTERN, description="The dataset name")

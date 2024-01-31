@@ -16,8 +16,8 @@
 from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
-from argilla._constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.commons.models import PredictionStatus, TaskStatus, TaskType
+from argilla.server.constants import DEFAULT_MAX_KEYWORD_LENGTH
 from argilla.server.helpers import flatten_dict
 from argilla.server.pydantic_v1 import BaseModel, Field, root_validator, validator
 from argilla.server.services.datasets import ServiceBaseDataset

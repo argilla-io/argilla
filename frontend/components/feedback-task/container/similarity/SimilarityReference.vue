@@ -12,7 +12,7 @@
         class="similarity-reference__dropdown"
         v-model="recordCriteria.similaritySearch.order"
       />
-      <p>{{ $t("similarTo") }}</p>
+      <p>{{ $t("similarity.similarTo") }}</p>
       <span class="similarity-reference__preview">
         <span
           v-for="text in preview"
@@ -37,6 +37,11 @@
 
     <div class="similarity-reference__right">
       <BaseButton
+        :data-title="
+          !visibleReferenceRecord
+            ? $t('similarity.expand')
+            : $t('similarity.collapse')
+        "
         class="similarity-reference__button-icon"
         :title="visibleReferenceRecord ? $t('minimize') : $t('expand')"
         @on-click="
@@ -89,7 +94,7 @@ export default {
     },
     filterChanged() {
       if (!this.recordCriteria.hasChanges) return;
-      this.recordCriteria.page = 1;
+      this.recordCriteria.page.goToFirst();
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
@@ -124,7 +129,7 @@ export default {
     flex-shrink: 0;
     min-width: 0;
   }
-  &__button-icon {
+  &__button-icon.button {
     padding: 0;
     color: $black-54;
   }
@@ -148,7 +153,7 @@ export default {
       line-height: 1rem;
       color: $similarity-color;
     }
-    &__button-close {
+    &__button-close.button {
       padding: 0;
       color: $similarity-color;
       &:hover {
@@ -163,7 +168,6 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
   }
   :deep(.dropdown__content) {
     left: -$base-space;
@@ -175,5 +179,10 @@ export default {
     white-space: nowrap;
     font-weight: 500;
   }
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top");
 }
 </style>

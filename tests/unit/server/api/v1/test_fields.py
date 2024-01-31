@@ -17,9 +17,9 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Field, UserRole
-from argilla.server.schemas.v1.datasets import FIELD_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.fields import FIELD_CREATE_TITLE_MAX_LENGTH
 from sqlalchemy import func, select
 
 from tests.factories import (

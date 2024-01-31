@@ -31,8 +31,8 @@ export class MetadataCriteria extends Criteria {
     });
   }
 
-  withValue(value: MetadataSearch[]) {
-    this.value = value.map((v) => {
+  withValue(metadataCriteria: MetadataCriteria) {
+    this.value = metadataCriteria.value.map((v) => {
       return {
         name: v.name,
         value: v.value,

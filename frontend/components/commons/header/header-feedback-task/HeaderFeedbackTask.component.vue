@@ -3,7 +3,7 @@
     <BaseBreadcrumbs
       v-if="breadcrumbs.length"
       :breadcrumbs="breadcrumbs"
-      :copy-button="true"
+      :copy-button="showCopyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId">
@@ -19,10 +19,7 @@
         v-if="showSettingButton"
         :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
       >
-        <DatasetSettingsIconFeedbackTaskComponent
-          v-if="datasetId"
-          :datasetId="datasetId"
-        />
+        <DatasetSettingsIconFeedbackTaskComponent v-if="datasetId" />
       </NuxtLink>
     </template>
     <user-avatar-tooltip />
@@ -37,7 +34,6 @@ export default {
   props: {
     datasetId: {
       type: String,
-      required: true,
     },
     breadcrumbs: {
       type: Array,
@@ -48,6 +44,10 @@ export default {
       default: false,
     },
     showSettingButton: {
+      type: Boolean,
+      default: false,
+    },
+    showCopyButton: {
       type: Boolean,
       default: false,
     },

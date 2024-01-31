@@ -1,7 +1,7 @@
 <template>
   <base-checkbox
     @change="changeUncoveredByRules"
-    class="re-checkbox--dark"
+    class="checkbox--dark"
     :value="filter.selected"
   >
     Only records not covered by rules
@@ -31,7 +31,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.re-checkbox {
+.checkbox {
   flex-direction: row-reverse;
   margin-left: 2em;
   @include font-size(13px);

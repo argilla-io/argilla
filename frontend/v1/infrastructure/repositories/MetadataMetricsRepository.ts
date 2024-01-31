@@ -10,9 +10,10 @@ export class MetadataMetricsRepository {
 
   async getMetric(metadataId: string): Promise<BackendMetadataMetric> {
     try {
-      const url = `/v1/metadata-properties/${metadataId}/metrics`;
-
-      const { data } = await this.axios.get<BackendMetadataMetric>(url);
+      const { data } = await this.axios.get<BackendMetadataMetric>(
+        `/v1/metadata-properties/${metadataId}/metrics`,
+        { headers: { "cache-control": "max-age=120" } }
+      );
 
       return {
         id: metadataId,

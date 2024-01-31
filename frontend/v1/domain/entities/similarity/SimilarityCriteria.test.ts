@@ -4,7 +4,10 @@ describe("SimilarityCriteria ", () => {
   describe("reset should", () => {
     test("set default criteria values", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
 
       criteria.reset();
 
@@ -18,21 +21,30 @@ describe("SimilarityCriteria ", () => {
   describe("isCompleted should", () => {
     test("return true when all criteria are defined", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
 
       expect(criteria.isCompleted).toBe(true);
     });
 
     test("return false when recordId is undefined", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue(undefined, "vectorName", 50, "least");
+      criteria.recordId = undefined;
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
 
       expect(criteria.isCompleted).toBe(false);
     });
 
     test("return false when vectorName is undefined", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", undefined, 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = undefined;
+      criteria.limit = 50;
+      criteria.order = "least";
 
       expect(criteria.isCompleted).toBe(false);
     });
@@ -41,45 +53,80 @@ describe("SimilarityCriteria ", () => {
   describe("isEqual should", () => {
     test("return true when all criteria are equal", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
+
       const other = new SimilarityCriteria();
-      other.withValue("recordId", "vectorName", 50, "least");
+      other.recordId = "recordId";
+      other.vectorName = "vectorName";
+      other.limit = 50;
+      other.order = "least";
 
       expect(criteria.isEqual(other)).toBe(true);
     });
 
     test("return false when recordId is different", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
+
       const other = new SimilarityCriteria();
-      other.withValue("otherRecordId", "vectorName", 50, "least");
+      other.recordId = "otherRecordId";
+      other.vectorName = "vectorName";
+      other.limit = 50;
+      other.order = "least";
 
       expect(criteria.isEqual(other)).toBe(false);
     });
 
     test("return false when vectorName is different", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
+
       const other = new SimilarityCriteria();
-      other.withValue("recordId", "othervectorName", 50, "least");
+      other.recordId = "recordId";
+      other.vectorName = "otherVectorName";
+      other.limit = 50;
+      other.order = "least";
 
       expect(criteria.isEqual(other)).toBe(false);
     });
 
     test("return false when limit is different", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
+
       const other = new SimilarityCriteria();
-      other.withValue("recordId", "vectorName", 100, "least");
+      other.recordId = "recordId";
+      other.vectorName = "vectorName";
+      other.limit = 100;
+      other.order = "least";
 
       expect(criteria.isEqual(other)).toBe(false);
     });
 
     test("return false when order is different", () => {
       const criteria = new SimilarityCriteria();
-      criteria.withValue("recordId", "vectorName", 50, "least");
+      criteria.recordId = "recordId";
+      criteria.vectorName = "vectorName";
+      criteria.limit = 50;
+      criteria.order = "least";
+
       const other = new SimilarityCriteria();
-      other.withValue("recordId", "vectorName", 50, "most");
+      other.recordId = "recordId";
+      other.vectorName = "vectorName";
+      other.limit = 50;
+      other.order = "most";
 
       expect(criteria.isEqual(other)).toBe(false);
     });

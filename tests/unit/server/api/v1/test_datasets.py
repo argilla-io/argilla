@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import math
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
@@ -18,8 +19,8 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v1.handlers.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.enums import (
     DatasetStatus,
     RecordInclude,
@@ -43,22 +44,26 @@ from argilla.server.models import (
 from argilla.server.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
-    FIELD_CREATE_NAME_MAX_LENGTH,
-    FIELD_CREATE_TITLE_MAX_LENGTH,
+)
+from argilla.server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.metadata_properties import (
     METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
+)
+from argilla.server.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
     RANKING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MAX_ITEMS,
     RATING_OPTIONS_MIN_ITEMS,
-    RECORDS_CREATE_MAX_ITEMS,
-    RECORDS_CREATE_MIN_ITEMS,
-    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
+)
+from argilla.server.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
+from argilla.server.schemas.v1.vector_settings import (
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
@@ -99,7 +104,6 @@ from tests.factories import (
     VectorSettingsFactory,
     WorkspaceFactory,
 )
-from tests.unit.server.api.v1.test_list_dataset_records import TestSuiteListDatasetRecords
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -223,6 +227,7 @@ class TestSuiteDatasets:
                     "title": "Text Field A",
                     "required": True,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(dataset.id),
                     "inserted_at": text_field_a.inserted_at.isoformat(),
                     "updated_at": text_field_a.updated_at.isoformat(),
                 },
@@ -232,6 +237,7 @@ class TestSuiteDatasets:
                     "title": "Text Field B",
                     "required": False,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(dataset.id),
                     "inserted_at": text_field_b.inserted_at.isoformat(),
                     "updated_at": text_field_b.updated_at.isoformat(),
                 },
@@ -316,6 +322,7 @@ class TestSuiteDatasets:
                     "description": "Question Description",
                     "required": True,
                     "settings": {"type": "text", "use_markdown": False},
+                    "dataset_id": str(text_question.dataset_id),
                     "inserted_at": text_question.inserted_at.isoformat(),
                     "updated_at": text_question.updated_at.isoformat(),
                 },
@@ -340,6 +347,7 @@ class TestSuiteDatasets:
                             {"value": 10},
                         ],
                     },
+                    "dataset_id": str(rating_question.dataset_id),
                     "inserted_at": rating_question.inserted_at.isoformat(),
                     "updated_at": rating_question.updated_at.isoformat(),
                 },
@@ -395,6 +403,7 @@ class TestSuiteDatasets:
                     "description": question.description,
                     "required": question.required,
                     "settings": {"type": QuestionFactory.settings["type"], **settings},
+                    "dataset_id": str(question.dataset_id),
                     "inserted_at": question.inserted_at.isoformat(),
                     "updated_at": question.updated_at.isoformat(),
                 }
@@ -475,6 +484,7 @@ class TestSuiteDatasets:
                     "title": terms_property.title,
                     "settings": {"type": "terms", "values": ["a", "b", "c"]},
                     "visible_for_annotators": True,
+                    "dataset_id": str(terms_property.dataset_id),
                     "inserted_at": terms_property.inserted_at.isoformat(),
                     "updated_at": terms_property.updated_at.isoformat(),
                 },
@@ -484,6 +494,7 @@ class TestSuiteDatasets:
                     "title": integer_property.title,
                     "settings": {"type": "integer", "min": None, "max": None},
                     "visible_for_annotators": True,
+                    "dataset_id": str(integer_property.dataset_id),
                     "inserted_at": integer_property.inserted_at.isoformat(),
                     "updated_at": integer_property.updated_at.isoformat(),
                 },
@@ -493,6 +504,7 @@ class TestSuiteDatasets:
                     "title": float_property.title,
                     "settings": {"type": "float", "min": None, "max": None},
                     "visible_for_annotators": True,
+                    "dataset_id": str(float_property.dataset_id),
                     "inserted_at": float_property.inserted_at.isoformat(),
                     "updated_at": float_property.updated_at.isoformat(),
                 },
@@ -607,6 +619,7 @@ class TestSuiteDatasets:
                     "name": vector_settings.name,
                     "title": vector_settings.title,
                     "dimensions": vector_settings.dimensions,
+                    "dataset_id": str(vector_settings.dataset_id),
                     "inserted_at": vector_settings.inserted_at.isoformat(),
                     "updated_at": vector_settings.updated_at.isoformat(),
                 }
@@ -949,6 +962,7 @@ class TestSuiteDatasets:
             "title": "title",
             "required": False,
             "settings": expected_settings,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -1264,6 +1278,7 @@ class TestSuiteDatasets:
             "description": None,
             "required": False,
             "settings": expected_settings,
+            "dataset_id": str(UUID(response_body["dataset_id"])),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -1681,6 +1696,7 @@ class TestSuiteDatasets:
             "title": "title",
             "settings": expected_settings,
             "visible_for_annotators": True,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
@@ -1713,6 +1729,7 @@ class TestSuiteDatasets:
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "visible_for_annotators": True,
+            "dataset_id": str(dataset.id),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             **metadata_property_json,
@@ -2000,6 +2017,7 @@ class TestSuiteDatasets:
             "name": "vectors-for-semantic-search",
             "title": "Vectors generated with sentence-transformers/all-MiniLM-L6-v2",
             "dimensions": 384,
+            "dataset_id": str(vector_settings.dataset_id),
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
@@ -2212,7 +2230,7 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.assert_called_once_with(
+        test_telemetry.track_data.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
         )
 
@@ -2541,15 +2559,20 @@ class TestSuiteDatasets:
         [
             (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, "c"),
             (TermsMetadataPropertyFactory, {"values": None}, "c"),
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, None),
+            (TermsMetadataPropertyFactory, {"values": None}, None),
             (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, 5),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}, None),
             (FloatMetadataPropertyFactory, {"min": 0.0, "max": 1}, 0.5),
             (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.5}, 0.35),
             (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, 0.89),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}, None),
         ],
     )
     async def test_create_dataset_records_with_metadata_values(
         self,
         async_client: "AsyncClient",
+        db: "AsyncSession",
         owner_auth_header: dict,
         MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
         settings: Dict[str, Any],
@@ -2574,6 +2597,45 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 204
+
+        record = (await db.execute(select(Record))).scalar()
+        assert record.metadata_ == {"metadata-property": value}
+
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings",
+        [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}),
+            (IntegerMetadataPropertyFactory, {"min": 0, "max": 10}),
+            (FloatMetadataPropertyFactory, {"min": 0.3, "max": 0.9}),
+        ],
+    )
+    async def test_create_dataset_records_with_metadata_nan_values(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": math.nan},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 422
 
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
@@ -2835,7 +2897,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
@@ -2927,7 +2989,7 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.assert_called_once_with(
+        test_telemetry.track_data.assert_called_once_with(
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
         )
 
@@ -2937,7 +2999,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {
@@ -2966,7 +3028,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
                         "values": {
@@ -3030,7 +3092,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
                             "user_id": str(owner.id),
@@ -3138,7 +3200,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
                             "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
@@ -3200,7 +3262,7 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.draft)
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": "1"},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": "1"},
             ],
         }
 
@@ -3220,7 +3282,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": str(external_id),
                 }
                 for external_id in range(0, RECORDS_CREATE_MIN_ITEMS - 1)
@@ -3242,7 +3304,7 @@ class TestSuiteDatasets:
         records_json = {
             "items": [
                 {
-                    "fields": {"input": "Say Hello", "ouput": "Hello"},
+                    "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": str(external_id),
                 }
                 for external_id in range(0, RECORDS_CREATE_MAX_ITEMS + 1)
@@ -3263,9 +3325,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 1},
                 {"fields": "invalid", "external_id": 2},
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 3},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 3},
             ]
         }
 
@@ -3283,8 +3345,8 @@ class TestSuiteDatasets:
         await DatasetFactory.create()
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 1},
-                {"fields": {"input": "Say Hello", "ouput": "Hello"}, "external_id": 2},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 1},
+                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 2},
             ]
         }
 
@@ -3319,17 +3381,17 @@ class TestSuiteDatasets:
                     {
                         "id": str(records[0].id),
                         "metadata": {
-                            "terms-metadata-property": "a",
+                            "terms-metadata-property": None,
                             "integer-metadata-property": 0,
                             "float-metadata-property": 0.0,
-                            "extra-metadata": "yes",
+                            "extra-metadata": None,
                         },
                     },
                     {
                         "id": str(records[1].id),
                         "metadata": {
                             "terms-metadata-property": "b",
-                            "integer-metadata-property": 1,
+                            "integer-metadata-property": None,
                             "float-metadata-property": 1.0,
                             "extra-metadata": "yes",
                         },
@@ -3339,7 +3401,7 @@ class TestSuiteDatasets:
                         "metadata": {
                             "terms-metadata-property": "c",
                             "integer-metadata-property": 2,
-                            "float-metadata-property": 2.0,
+                            "float-metadata-property": None,
                             "extra-metadata": "yes",
                         },
                     },
@@ -3354,16 +3416,16 @@ class TestSuiteDatasets:
 
         # Record 0
         assert records[0].metadata_ == {
-            "terms-metadata-property": "a",
+            "terms-metadata-property": None,
             "integer-metadata-property": 0,
             "float-metadata-property": 0.0,
-            "extra-metadata": "yes",
+            "extra-metadata": None,
         }
 
         # Record 1
         assert records[1].metadata_ == {
             "terms-metadata-property": "b",
-            "integer-metadata-property": 1,
+            "integer-metadata-property": None,
             "float-metadata-property": 1.0,
             "extra-metadata": "yes",
         }
@@ -3372,7 +3434,7 @@ class TestSuiteDatasets:
         assert records[2].metadata_ == {
             "terms-metadata-property": "c",
             "integer-metadata-property": 2,
-            "float-metadata-property": 2.0,
+            "float-metadata-property": None,
             "extra-metadata": "yes",
         }
 
@@ -3625,6 +3687,37 @@ class TestSuiteDatasets:
             "detail": "Record at position 1 is not valid because metadata is not valid: 'terms' metadata property "
             "validation failed because 'i was not declared' is not an allowed term."
         }
+
+    async def test_update_dataset_records_with_metadata_nan_value(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TermsMetadataPropertyFactory.create(dataset=dataset, name="terms")
+        await FloatMetadataPropertyFactory.create(dataset=dataset, name="float")
+        records = await RecordFactory.create_batch(3, dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {"terms": math.nan},
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {"float": math.nan},
+                    },
+                    {
+                        "id": str(records[2].id),
+                        "metadata": {"terms": "a"},
+                    },
+                ]
+            },
+        )
+
+        assert response.status_code == 422
 
     async def test_update_dataset_records_with_invalid_suggestions(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -3982,6 +4075,7 @@ class TestSuiteDatasets:
                         "fields": {"input": "input_a", "output": "output_a"},
                         "metadata": None,
                         "external_id": records[0].external_id,
+                        "dataset_id": str(records[0].dataset_id),
                         "inserted_at": records[0].inserted_at.isoformat(),
                         "updated_at": records[0].updated_at.isoformat(),
                     },
@@ -3993,6 +4087,7 @@ class TestSuiteDatasets:
                         "fields": {"input": "input_b", "output": "output_b"},
                         "metadata": {"unit": "test"},
                         "external_id": records[1].external_id,
+                        "dataset_id": str(records[1].dataset_id),
                         "inserted_at": records[1].inserted_at.isoformat(),
                         "updated_at": records[1].updated_at.isoformat(),
                     },
@@ -4335,6 +4430,7 @@ class TestSuiteDatasets:
                         },
                         "metadata": None,
                         "external_id": records[0].external_id,
+                        "dataset_id": str(records[0].dataset_id),
                         "inserted_at": records[0].inserted_at.isoformat(),
                         "updated_at": records[0].updated_at.isoformat(),
                     },
@@ -4349,6 +4445,7 @@ class TestSuiteDatasets:
                         },
                         "metadata": {"unit": "test"},
                         "external_id": records[1].external_id,
+                        "dataset_id": str(records[1].dataset_id),
                         "inserted_at": records[1].inserted_at.isoformat(),
                         "updated_at": records[1].updated_at.isoformat(),
                     },
@@ -4367,6 +4464,7 @@ class TestSuiteDatasets:
                     "id": str(first_owner_response.id),
                     "values": None,
                     "status": "discarded",
+                    "record_id": str(records[0].id),
                     "user_id": str(owner.id),
                     "inserted_at": first_owner_response.inserted_at.isoformat(),
                     "updated_at": first_owner_response.updated_at.isoformat(),
@@ -4380,6 +4478,7 @@ class TestSuiteDatasets:
                         "output_ok": {"value": "no"},
                     },
                     "status": "submitted",
+                    "record_id": str(records[1].id),
                     "user_id": str(owner.id),
                     "inserted_at": second_owner_response.inserted_at.isoformat(),
                     "updated_at": second_owner_response.updated_at.isoformat(),
@@ -4481,6 +4580,7 @@ class TestSuiteDatasets:
                             "vector-a": [1.0, 2.0, 3.0],
                             "vector-b": [4.0, 5.0],
                         },
+                        "dataset_id": str(record_a.dataset_id),
                         "inserted_at": record_a.inserted_at.isoformat(),
                         "updated_at": record_a.updated_at.isoformat(),
                     },
@@ -4495,6 +4595,7 @@ class TestSuiteDatasets:
                         "vectors": {
                             "vector-b": [1.0, 2.0],
                         },
+                        "dataset_id": str(record_b.dataset_id),
                         "inserted_at": record_b.inserted_at.isoformat(),
                         "updated_at": record_b.updated_at.isoformat(),
                     },
@@ -4507,6 +4608,7 @@ class TestSuiteDatasets:
                         "metadata": None,
                         "external_id": record_c.external_id,
                         "vectors": {},
+                        "dataset_id": str(record_c.dataset_id),
                         "inserted_at": record_c.inserted_at.isoformat(),
                         "updated_at": record_c.updated_at.isoformat(),
                     },
@@ -4572,6 +4674,7 @@ class TestSuiteDatasets:
                             "vector-a": [1.0, 2.0, 3.0],
                             "vector-b": [4.0, 5.0],
                         },
+                        "dataset_id": str(record_a.dataset_id),
                         "inserted_at": record_a.inserted_at.isoformat(),
                         "updated_at": record_a.updated_at.isoformat(),
                     },
@@ -4586,6 +4689,7 @@ class TestSuiteDatasets:
                         "vectors": {
                             "vector-b": [1.0, 2.0],
                         },
+                        "dataset_id": str(record_b.dataset_id),
                         "inserted_at": record_b.inserted_at.isoformat(),
                         "updated_at": record_b.updated_at.isoformat(),
                     },
@@ -4598,6 +4702,7 @@ class TestSuiteDatasets:
                         "metadata": None,
                         "external_id": record_c.external_id,
                         "vectors": {},
+                        "dataset_id": str(record_c.dataset_id),
                         "inserted_at": record_c.inserted_at.isoformat(),
                         "updated_at": record_c.updated_at.isoformat(),
                     },
@@ -4929,7 +5034,7 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_with_error_on_index_creation(

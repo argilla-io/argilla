@@ -2,10 +2,12 @@ import { ref, useRoute } from "@nuxtjs/composition-api";
 import { Notification } from "@/models/Notifications";
 import { DATASET_API_ERRORS } from "@/v1/infrastructure/repositories/DatasetRepository";
 import { Dataset } from "@/v1/domain/entities/Dataset";
+import { useTranslate } from "~/v1/infrastructure/services";
 
 export const useDatasetViewModel = () => {
   const isLoadingDataset = ref(false);
   const route = useRoute();
+  const t = useTranslate();
   const datasetId = route.value.params.id;
 
   const handleError = (response: string) => {
@@ -33,7 +35,7 @@ export const useDatasetViewModel = () => {
 
   const createRootBreadCrumbs = (dataset: Dataset) => {
     return [
-      { link: { name: "datasets" }, name: "Home" },
+      { link: { name: "datasets" }, name: t("breadcrumbs.home") },
       {
         link: { path: `/datasets?workspaces=${dataset.workspace}` },
         name: dataset.workspace,

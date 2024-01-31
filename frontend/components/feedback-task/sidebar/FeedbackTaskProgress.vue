@@ -17,7 +17,7 @@
 
 <template>
   <SidebarFeedbackTaskProgress
-    v-if="datasetMetrics.total"
+    v-if="datasetMetrics.hasMetrics"
     :metrics="datasetMetrics"
   />
 </template>

@@ -14,11 +14,11 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._constants import API_KEY_HEADER_NAME
 from argilla.server.apis.v0.models.text2text import Text2TextBulkRequest, Text2TextRecord, Text2TextRecordInputs
 from argilla.server.apis.v0.models.text_classification import TextClassificationBulkRequest, TextClassificationRecord
 from argilla.server.apis.v0.models.token_classification import TokenClassificationBulkRequest, TokenClassificationRecord
 from argilla.server.commons.models import TaskType
+from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import User, UserRole
 
 from tests.factories import UserFactory, WorkspaceFactory

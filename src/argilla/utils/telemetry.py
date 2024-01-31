@@ -18,13 +18,9 @@ import platform
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from argilla._constants import DEFAULT_TELEMETRY_KEY
 from argilla.pydantic_v1 import BaseSettings
 
-if TYPE_CHECKING:
-    from fastapi import Request
-
-    from argilla.server.commons.models import TaskType
+_DEFAULT_TELEMETRY_KEY = "C6FkcaoCbt78rACAgvyBxGBcMB3dM3nn"
 
 
 class TelemetrySettings(BaseSettings):
@@ -35,7 +31,7 @@ class TelemetrySettings(BaseSettings):
     """
 
     enable_telemetry: bool = True
-    telemetry_key: str = DEFAULT_TELEMETRY_KEY
+    telemetry_key: str = _DEFAULT_TELEMETRY_KEY
 
     class Config:
         env_prefix = "ARGILLA_"
@@ -62,11 +58,11 @@ class TelemetryClient:
     api_key: dataclasses.InitVar[str] = telemetry_settings.telemetry_key
     host: dataclasses.InitVar[str] = "https://api.segment.io"
 
-    _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
+    _machine_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
 
     @property
-    def server_id(self) -> uuid.UUID:
-        return self._server_id
+    def machine_id(self) -> uuid.UUID:
+        return self._machine_id
 
     def __post_init__(self, enable_telemetry: bool, disable_send: bool, api_key: str, host: str):
         from argilla import __version__
@@ -78,7 +74,7 @@ class TelemetryClient:
             except Exception as err:
                 _LOGGER.warning(f"Cannot initialize telemetry. Error: {err}. Disabling...")
 
-        self._server_id = uuid.UUID(int=uuid.getnode())
+        self._machine_id = uuid.UUID(int=uuid.getnode())
         self._system_info = {
             "system": platform.system(),
             "machine": platform.machine(),
@@ -94,7 +90,7 @@ class TelemetryClient:
 
         event_data = data.copy()
         self.client.track(
-            user_id=str(self._server_id),
+            user_id=str(self._machine_id),
             event=action,
             properties=event_data,
             context=self._system_info if include_system_info else {},
@@ -102,25 +98,6 @@ class TelemetryClient:
 
 
 _CLIENT = TelemetryClient()
-
-
-def _process_request_info(request: "Request"):
-    return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
-
-
-async def track_bulk(task: "TaskType", records: int):
-    _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
-
-
-async def track_login(request: "Request", username: str):
-    _CLIENT.track_data(
-        action="UserInfoRequested",
-        data={
-            "is_default_user": username == "argilla",
-            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=username)),
-            **_process_request_info(request),
-        },
-    )
 
 
 def get_current_filename() -> Optional[str]:

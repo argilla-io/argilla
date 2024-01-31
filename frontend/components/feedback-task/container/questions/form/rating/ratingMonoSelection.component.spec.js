@@ -2,7 +2,9 @@ import { shallowMount } from "@vue/test-utils";
 import RatingMonoSelectionComponent from "./RatingMonoSelection.component";
 
 let wrapper = null;
+const $t = () => {};
 const options = {
+  mocks: { $t },
   propsData: {
     options: [
       { id: "helpfulness_reply_1_1", value: 1, text: 1, isSelected: false },

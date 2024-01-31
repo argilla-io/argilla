@@ -69,7 +69,7 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space;
-  @include font-size(14px);
+  @include font-size(13px);
   font-weight: 500;
 
   &.--discarded {

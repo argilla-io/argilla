@@ -1,41 +1,41 @@
 export class Metrics {
+  public readonly percentage: {
+    draft: number;
+    submitted: number;
+    discarded: number;
+  };
+
   constructor(
-    public readonly records: number,
+    private readonly records: number,
     public readonly responses: number,
     public readonly submitted: number,
     public readonly discarded: number,
     public readonly draft: number
-  ) {}
+  ) {
+    this.percentage = {
+      draft: (this.draft * 100) / this.total,
+      submitted: (this.submitted * 100) / this.total,
+      discarded: (this.discarded * 100) / this.total,
+    };
+  }
 
-  public get total(): number {
+  get hasMetrics() {
+    return this.records > 0;
+  }
+
+  get total() {
     return this.records;
   }
 
-  public get pending(): number {
-    return this.records - this.responded;
+  get responded() {
+    return this.submitted + this.discarded + this.draft;
   }
 
-  public get pendingProgress(): number {
-    return Math.round((this.pending / this.total) * 100 * 10) / 10;
+  get pending() {
+    return this.total - this.responded;
   }
 
-  public get draftProgress(): number {
-    return Math.round((this.draft / this.total) * 100 * 10) / 10;
-  }
-
-  public get submittedProgress(): number {
-    return Math.round((this.submitted / this.total) * 100 * 10) / 10;
-  }
-
-  public get discardedProgress(): number {
-    return Math.round((this.discarded / this.total) * 100 * 10) / 10;
-  }
-
-  public get responded(): number {
-    return this.submitted + this.draft + this.discarded;
-  }
-
-  public get respondedProgress(): number {
-    return Math.round((this.responded / this.total) * 100 * 10) / 10;
+  get progress() {
+    return this.responded / this.total;
   }
 }

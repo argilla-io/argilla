@@ -49,6 +49,12 @@
     :disabled="disabled"
     @click="onClick"
   >
+    <BaseSpinner
+      class="spinner"
+      v-if="loading"
+      :size="20"
+      :progress="loadingProgress"
+    />
     <slot />
   </button>
 </template>
@@ -69,6 +75,10 @@ export default {
       default: "button",
     },
     loading: Boolean,
+    loadingProgress: {
+      type: Number,
+      default: 0,
+    },
     disabled: Boolean,
     centered: Boolean,
     to: { type: String | Object },
@@ -139,6 +149,11 @@ export default {
 }
 .button {
   @extend %button;
+  .spinner {
+    flex-shrink: 0;
+    border: 3px solid #242323d8;
+    border-top-color: #00000021;
+  }
 }
 .small {
   @include font-size(13px);
@@ -154,6 +169,9 @@ export default {
   color: palette(white);
   .svg-icon {
     fill: palette(white);
+  }
+  .spinner {
+    border-color: palette(white);
   }
   &:hover,
   &:active,
@@ -188,6 +206,7 @@ export default {
     padding-right: 0;
     background: none;
     color: $primary-color;
+    border-radius: 0;
     &:hover {
       background: none;
       color: darken($primary-color, 10%);
@@ -208,6 +227,9 @@ export default {
   color: palette(grey, 200);
   .svg-icon {
     fill: palette(grey, 200);
+  }
+  .spinner {
+    border-color: palette(grey, 200);
   }
   &:hover,
   &:active,
@@ -237,6 +259,7 @@ export default {
     padding-right: 0;
     background: none;
     color: $black-54;
+    border-radius: 0;
     &:hover {
       background: none;
       color: $black-87;

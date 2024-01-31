@@ -14,8 +14,8 @@ export class SortCriteria extends Criteria {
     });
   }
 
-  witValue(value: SortSearch[]) {
-    this.value = value.map((v) => ({ ...v }));
+  withValue(sortCriteria: SortCriteria) {
+    this.value = sortCriteria.value.map((v) => ({ ...v }));
   }
 
   reset() {
@@ -30,12 +30,12 @@ export class SortCriteria extends Criteria {
     if (!this.isCompleted) return "";
 
     return this.value
-      .map((sort) => {
-        if (sort.property) {
-          return `${sort.entity}.${sort.name}.${sort.property}.${sort.order}`;
+      .map(({ property, entity, name, order }) => {
+        if (property) {
+          return `${entity}.${name}.${property}.${order}`;
         }
 
-        return `${sort.entity}.${sort.name}.${sort.order}`;
+        return `${entity}.${name}.${order}`;
       })
       .join("~");
   }

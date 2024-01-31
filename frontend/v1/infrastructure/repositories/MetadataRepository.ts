@@ -16,11 +16,9 @@ export class MetadataRepository {
 
   async getMetadataFilters(datasetId: string) {
     try {
-      const url = `/v1/me/datasets/${datasetId}/metadata-properties`;
+      const items = await this.getMetadataProperties(datasetId);
 
-      const { data } = await this.axios.get<Response<BackendMetadata[]>>(url);
-
-      return this.completeEmptyMetadataFilters(data.items);
+      return this.completeEmptyMetadataFilters(items);
     } catch (err) {
       throw {
         response: METADATA_API_ERRORS.ERROR_FETCHING_METADATA,
@@ -31,8 +29,10 @@ export class MetadataRepository {
   async getMetadataProperties(datasetId: string) {
     try {
       // TODO: Review this endpoint, for admin should be /v1/datasets/${datasetId}/metadata-properties without ME.
-      const url = `/v1/me/datasets/${datasetId}/metadata-properties`;
-      const { data } = await this.axios.get<Response<BackendMetadata[]>>(url);
+      const { data } = await this.axios.get<Response<BackendMetadata[]>>(
+        `/v1/me/datasets/${datasetId}/metadata-properties`,
+        { headers: { "cache-control": "max-age=120" } }
+      );
 
       return data.items;
     } catch (err) {

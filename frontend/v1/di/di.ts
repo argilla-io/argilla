@@ -3,6 +3,7 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
+import { OAuthRepository } from "../infrastructure/repositories/OAuthRepository";
 import {
   DatasetRepository,
   RecordRepository,
@@ -14,7 +15,7 @@ import {
   AgentRepository,
 } from "@/v1/infrastructure/repositories";
 
-import { useRole } from "@/v1/infrastructure/services";
+import { useRole, useRoutes } from "@/v1/infrastructure/services";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
@@ -24,10 +25,11 @@ import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingSto
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
+import { GetRecordsByCriteriaUseCase } from "@/v1/domain/usecases/get-records-by-criteria-use-case";
 import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
-import { SaveDraftRecord } from "@/v1/domain/usecases/save-draft-use-case";
-import { ClearRecordUseCase } from "@/v1/domain/usecases/clear-record-use-case";
+import { SaveDraftUseCase } from "@/v1/domain/usecases/save-draft-use-case";
+import { BulkAnnotationUseCase } from "@/v1/domain/usecases/bulk-annotation-use-case";
 import { DiscardRecordUseCase } from "@/v1/domain/usecases/discard-record-use-case";
 import { GetUserMetricsUseCase } from "@/v1/domain/usecases/get-user-metrics-use-case";
 import { GetDatasetSettingsUseCase } from "@/v1/domain/usecases/dataset-setting/get-dataset-settings-use-case";
@@ -40,10 +42,12 @@ import { UpdateVectorSettingUseCase } from "@/v1/domain/usecases/dataset-setting
 import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
 import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
+import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
   const useStore = () => context.store;
+  const useAuth = () => context.$auth;
 
   const dependencies = [
     register(DatasetRepository).withDependencies(useAxios, useStore).build(),
@@ -54,6 +58,9 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
+    register(OAuthRepository)
+      .withDependencies(useAxios, useRoutes, useAuth)
+      .build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -65,13 +72,17 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(DatasetRepository, useDataset)
       .build(),
 
-    register(LoadRecordsToAnnotateUseCase)
+    register(GetRecordsByCriteriaUseCase)
       .withDependencies(
         RecordRepository,
         QuestionRepository,
         FieldRepository,
         useRecords
       )
+      .build(),
+
+    register(LoadRecordsToAnnotateUseCase)
+      .withDependencies(GetRecordsByCriteriaUseCase, useRecords)
       .build(),
 
     register(DiscardRecordUseCase)
@@ -82,16 +93,21 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
-    register(ClearRecordUseCase)
+    register(SaveDraftUseCase)
       .withDependencies(RecordRepository, useEventDispatcher)
+      .build(),
+
+    register(BulkAnnotationUseCase)
+      .withDependencies(
+        GetRecordsByCriteriaUseCase,
+        LoadRecordsToAnnotateUseCase,
+        RecordRepository,
+        useEventDispatcher
+      )
       .build(),
 
     register(GetUserMetricsUseCase)
       .withDependencies(MetricsRepository, useMetrics)
-      .build(),
-
-    register(SaveDraftRecord)
-      .withDependencies(RecordRepository, useEventDispatcher)
       .build(),
 
     register(GetDatasetSettingsUseCase)
@@ -135,6 +151,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(GetDatasetSuggestionsAgentsUseCase)
       .withDependency(AgentRepository)
       .build(),
+
+    register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),
   ];
 
   Container.register(dependencies);

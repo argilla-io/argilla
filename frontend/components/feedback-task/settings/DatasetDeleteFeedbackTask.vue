@@ -31,7 +31,7 @@
             {{ $t("cancel") }}
           </BaseButton>
           <BaseButton class="primary" @click="deleteDataset(dataset)">
-            {{ $t("yesDelete") }}
+            {{ $t("settings.yesDelete") }}
           </BaseButton>
         </div>
       </div>
