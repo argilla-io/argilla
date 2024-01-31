@@ -47,6 +47,7 @@ export default {
       this.$router.replace({
         name: "sign-in",
         params: { omitCTA: true },
+        query: this.$route.query,
       });
     },
   },
