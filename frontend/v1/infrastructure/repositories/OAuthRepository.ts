@@ -48,7 +48,10 @@ export class OAuthRepository implements IOAuthRepository {
   }
 
   authorize(provider: ProviderType) {
-    this.router.go(`api/v1/oauth2/providers/${provider}/authentication`, true);
+    this.router.go(`api/v1/oauth2/providers/${provider}/authentication`, {
+      external: true,
+      newWindow: false,
+    });
   }
 
   async login(provider: ProviderType, oauthParams: OAuthParams) {
