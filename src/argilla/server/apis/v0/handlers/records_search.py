@@ -16,11 +16,11 @@ from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends, Query, Security
 
-from argilla.client.sdk.token_classification.models import TokenClassificationQuery
 from argilla.server.apis.v0.models.commons.model import SortableField
 from argilla.server.apis.v0.models.commons.params import CommonTaskHandlerDependencies
 from argilla.server.apis.v0.models.text2text import Text2TextQuery
 from argilla.server.apis.v0.models.text_classification import TextClassificationQuery
+from argilla.server.apis.v0.models.token_classification import TokenClassificationQuery
 from argilla.server.daos.backend import GenericElasticEngineBackend
 from argilla.server.daos.backend.generic_elastic import PaginatedSortInfo
 from argilla.server.models import User

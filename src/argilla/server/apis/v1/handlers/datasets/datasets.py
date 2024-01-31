@@ -27,22 +27,14 @@ from argilla.server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, a
 from argilla.server.schemas.v1.datasets import (
     Dataset,
     DatasetCreate,
+    DatasetMetrics,
     Datasets,
     DatasetUpdate,
-    Field,
-    FieldCreate,
-    Fields,
-    MetadataProperties,
-    MetadataProperty,
-    MetadataPropertyCreate,
-    Metrics,
-    Question,
-    QuestionCreate,
-    Questions,
-    VectorSettings,
-    VectorSettingsCreate,
-    VectorsSettings,
 )
+from argilla.server.schemas.v1.fields import Field, FieldCreate, Fields
+from argilla.server.schemas.v1.metadata_properties import MetadataProperties, MetadataProperty, MetadataPropertyCreate
+from argilla.server.schemas.v1.questions import Question, QuestionCreate, Questions
+from argilla.server.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla.server.search_engine import (
     SearchEngine,
     get_search_engine,
@@ -175,7 +167,7 @@ async def get_dataset(
     return dataset
 
 
-@router.get("/me/datasets/{dataset_id}/metrics", response_model=Metrics)
+@router.get("/me/datasets/{dataset_id}/metrics", response_model=DatasetMetrics)
 async def get_current_user_dataset_metrics(
     *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):

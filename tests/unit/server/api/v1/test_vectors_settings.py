@@ -18,7 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.enums import UserRole
-from argilla.server.schemas.v1.datasets import VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.vector_settings import VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH
 
 from tests.factories import AdminFactory, AnnotatorFactory, UserFactory, VectorSettingsFactory
 

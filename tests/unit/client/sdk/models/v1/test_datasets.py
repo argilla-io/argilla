@@ -15,7 +15,7 @@
 from argilla.client.sdk.v1.datasets.models import FeedbackDatasetModel as ClientSchema
 from argilla.client.sdk.v1.datasets.models import FeedbackQuestionModel as ClientQuestionSchema
 from argilla.server.schemas.v1.datasets import Dataset as ServerSchema
-from argilla.server.schemas.v1.datasets import Question as ServerQuestionSchema
+from argilla.server.schemas.v1.questions import Question as ServerQuestionSchema
 
 
 def test_feedback_dataset_schema(helpers) -> None:

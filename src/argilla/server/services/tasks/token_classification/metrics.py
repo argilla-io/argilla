@@ -23,7 +23,7 @@ from argilla.server.services.tasks.token_classification.model import (
     ServiceTokenClassificationAnnotation,
     ServiceTokenClassificationRecord,
 )
-from argilla.utils import SpanUtils
+from argilla.server.utils import SpanUtils
 
 
 class F1Metric(ServicePythonMetric[ServiceTokenClassificationRecord]):

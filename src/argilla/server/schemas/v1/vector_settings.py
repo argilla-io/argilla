@@ -13,12 +13,29 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Optional
+from typing import Annotated, List, Optional
 from uuid import UUID
 
-from argilla.server.pydantic_v1 import BaseModel
+from typing_extensions import Annotated
+
+from argilla.server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
 from argilla.server.schemas.base import UpdateSchema
-from argilla.server.schemas.v1.datasets import VectorSettingsTitle
+
+VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
+
+VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH = 1
+VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
+
+
+VectorSettingsTitle = Annotated[
+    constr(
+        min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+    ),
+    Field(..., description="The title of the vector settings"),
+]
 
 
 class VectorSettings(BaseModel):
@@ -32,6 +49,28 @@ class VectorSettings(BaseModel):
 
     class Config:
         orm_mode = True
+
+    def check_vector(self, value: List[float]) -> None:
+        num_elements = len(value)
+
+        if num_elements != self.dimensions:
+            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+
+
+class VectorsSettings(BaseModel):
+    items: List[VectorSettings]
+
+
+class VectorSettingsCreate(BaseModel):
+    name: str = Field(
+        ...,
+        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
+        max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+        description="The title of the vector settings",
+    )
+    title: VectorSettingsTitle
+    dimensions: PositiveInt
 
 
 class VectorSettingsUpdate(UpdateSchema):

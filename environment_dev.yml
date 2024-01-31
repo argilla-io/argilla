@@ -61,5 +61,6 @@ dependencies:
       - rich!=13.1.0
       - textdescriptives>=2.7.0,<3.0.0
       - ipynbname>=2023.2.0.0
+      - httpx~=0.26.0
       # install Argilla in editable mode
       - -e .[server,listeners]

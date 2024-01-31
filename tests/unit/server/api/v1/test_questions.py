@@ -18,7 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla.server.constants import API_KEY_HEADER_NAME
 from argilla.server.models import DatasetStatus, Question, UserRole
-from argilla.server.schemas.v1.datasets import QUESTION_CREATE_DESCRIPTION_MAX_LENGTH, QUESTION_CREATE_TITLE_MAX_LENGTH
+from argilla.server.schemas.v1.questions import QUESTION_CREATE_DESCRIPTION_MAX_LENGTH, QUESTION_CREATE_TITLE_MAX_LENGTH
 from sqlalchemy import func, select
 
 from tests.factories import (
