@@ -235,8 +235,6 @@ async def test_banking_sentiment_dataset_with_vectors(
 
     await search_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
 
-    opensearch.indices.refresh(index=es_index_name_for_dataset(test_banking_sentiment_dataset))
-
     await refresh_dataset(test_banking_sentiment_dataset)
     await test_banking_sentiment_dataset.awaitable_attrs.records
 
@@ -824,7 +822,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.index_records(dataset, records)
 
         index_name = es_index_name_for_dataset(dataset)
-        opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
@@ -883,7 +880,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.index_records(dataset, records)
 
         index_name = es_index_name_for_dataset(dataset)
-        opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
@@ -925,7 +921,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.index_records(dataset, records)
 
         index_name = es_index_name_for_dataset(dataset)
-        opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
@@ -965,7 +960,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.index_records(dataset, records)
 
         index_name = es_index_name_for_dataset(dataset)
-        opensearch.indices.refresh(index=index_name)
 
         es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
@@ -999,7 +993,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.delete_records(dataset, records_to_delete)
 
         index_name = es_index_name_for_dataset(dataset)
-        opensearch.indices.refresh(index=index_name)
 
         deleted_docs = [
             hit["_source"]
@@ -1032,7 +1025,6 @@ class TestBaseElasticAndOpenSearchEngine:
         await search_engine.update_record_response(response)
 
         index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
-        opensearch.indices.refresh(index=index_name)
 
         results = opensearch.get(index=index_name, id=record.id)
 
@@ -1073,8 +1065,6 @@ class TestBaseElasticAndOpenSearchEngine:
 
         index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
 
-        opensearch.indices.refresh(index=index_name)
-
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {
             response.user.username: {
@@ -1084,8 +1074,6 @@ class TestBaseElasticAndOpenSearchEngine:
         }
 
         await search_engine.delete_record_response(response)
-
-        opensearch.indices.refresh(index=index_name)
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == {}

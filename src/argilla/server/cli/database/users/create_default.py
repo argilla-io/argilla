@@ -15,7 +15,7 @@ import asyncio
 
 import typer
 
-from argilla._constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
+from argilla.server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla.server.contexts import accounts
 from argilla.server.database import AsyncSessionLocal
 from argilla.server.models import User, UserRole, Workspace

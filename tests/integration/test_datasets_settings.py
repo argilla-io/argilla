@@ -30,7 +30,7 @@ from argilla.datasets import (
     load_dataset_settings,
 )
 from argilla.server.contexts import accounts
-from argilla.server.security.model import WorkspaceUserCreate
+from argilla.server.schemas.v0.workspaces import WorkspaceUserCreate
 
 from tests.integration.utils import delete_ignoring_errors
 

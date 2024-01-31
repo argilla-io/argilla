@@ -124,6 +124,11 @@ Learn how to set up a project to curate a public dataset that can be used to fin
 
 Learn how to apply multimodality (video, audio and images) to your FeedbackDataset using the Argilla TextFields.
 ```
+```{grid-item-card} 👀 Monitoring Ethics and Bias in LLMs: Giskard and DPO
+:link: feedback/monitoring-bias-ethics-dpo.html
+
+Learn how to monitor bias and ethics in LLMs detecting them with Giskard and fine-tuning with DPO.
+```
 ````
 
 **Other datasets**

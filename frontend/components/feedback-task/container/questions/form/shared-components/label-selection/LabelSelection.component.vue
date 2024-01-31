@@ -48,7 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          :data-keyboard="index + 1"
+          :data-keyboard="option.keyboard"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -72,7 +72,11 @@
           "
           :title="option.text"
         >
-          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
+          <span
+            class="key"
+            v-if="showShortcutsHelper"
+            v-text="option.keyboard"
+          />
           <span>{{ option.text }}</span>
         </label>
       </div>
@@ -82,8 +86,8 @@
 </template>
 
 <script>
-// NOTE - this threshold is used to show the search filter component for component from questionForm component
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
 export default {
@@ -180,9 +184,6 @@ export default {
         .slice(0, this.maxOptionsToShowBeforeCollapse)
         .concat(this.remainingVisibleOptions);
     },
-    noResultMessage() {
-      return `There is no result matching: ${this.searchInput}`;
-    },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
@@ -198,8 +199,9 @@ export default {
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
-        return "Less";
+        return this.$t("less");
       }
+
       return `+${this.numberToShowInTheCollapseButton}`;
     },
     iconToShowInTheCollapseButton() {
@@ -300,6 +302,11 @@ export default {
     hasSuggestion(value) {
       return this.suggestions?.includes(value) || false;
     },
+  },
+  beforeMount() {
+    this.options.forEach((option, index) => {
+      option.keyboard = index + 1;
+    });
   },
 };
 </script>

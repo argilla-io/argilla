@@ -294,7 +294,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
-        await self._refresh_index_request(index_name)
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_dataset_index(dataset)
@@ -353,7 +352,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         ]
 
         await self._bulk_op_request(bulk_actions)
-        await self._refresh_index_request(index_name)
 
     async def similarity_search(
         self,
