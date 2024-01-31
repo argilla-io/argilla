@@ -25,10 +25,6 @@ export const useRunningEnvironment = () => {
     return undefined;
   };
 
-  const isEmbebed = () => {
-    return window.self !== window.top;
-  };
-
   const isRunningOnHuggingFace = (): HFSpace | undefined => {
     if (url.host === HUGGING_FACE_EMBEBED_URL) {
       const paramsData = url.pathname
@@ -58,7 +54,6 @@ export const useRunningEnvironment = () => {
   };
 
   return {
-    isEmbebed,
     isRunningOnHuggingFace,
     hasHuggingFaceOAuthConfigured,
   };
