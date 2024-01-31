@@ -1,4 +1,3 @@
-#  coding=utf-8
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,4 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from .db import DBAuthProvider, settings  # noqa
+from typing import Annotated
+
+from fastapi import Form
+
+from argilla.server.pydantic_v1 import BaseModel
+
+
+class UserPasswordRequestForm:
+    """User password request form."""
+
+    def __init__(self, *, username: Annotated[str, Form()], password: Annotated[str, Form()]):
+        self.username = username
+        self.password = password
+
+
+class Token(BaseModel):
+    """Token response model"""
+
+    access_token: str
+    token_type: str = "bearer"

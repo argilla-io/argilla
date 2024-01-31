@@ -21,7 +21,7 @@ services:
     environment:
       ARGILLA_ENABLE_TELEMETRY: 0
       ARGILLA_BASE_URL: /argilla
-      ARGILLA_LOCAL_AUTH_SECRET_KEY: ${ARGILLA_LOCAL_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
+      ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.argilla.rule=PathPrefix(`/argilla/`)"
