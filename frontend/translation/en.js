@@ -61,7 +61,7 @@ export default {
     to_annotate_record_bulk_required: "No record selected",
     select_to_annotate: "Select all",
     pageSize: "Page size",
-    selectAllResults: "Select all {total} results",
+    selectAllResults: "Select all {total} matched records",
     haveSelectedRecords: "You have selected all {total} records",
     actionConfirmation: "Bulk action confirmation",
     actionConfirmationText:
