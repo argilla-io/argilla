@@ -165,11 +165,16 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options.filter((option) =>
-        String(option.text)
-          .toLowerCase()
-          .includes(this.searchInput.toLowerCase())
-      );
+      return this.options
+        .map((option, i) => ({
+          ...option,
+          keyboard: i + 1,
+        }))
+        .filter((option) =>
+          String(option.text)
+            .toLowerCase()
+            .includes(this.searchInput.toLowerCase())
+        );
     },
     remainingVisibleOptions() {
       return this.filteredOptions
@@ -302,11 +307,6 @@ export default {
     hasSuggestion(value) {
       return this.suggestions?.includes(value) || false;
     },
-  },
-  beforeMount() {
-    this.options.forEach((option, index) => {
-      option.keyboard = index + 1;
-    });
   },
 };
 </script>
