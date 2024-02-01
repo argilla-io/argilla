@@ -10,7 +10,6 @@ export default {
   expand: "Expand",
   copied: "Copied",
   title: "Title",
-  annotation: "Annotation",
   description: "Description",
   useMarkdown: "Use Markdown",
   visibleForAnnotators: "Visible for annotators",

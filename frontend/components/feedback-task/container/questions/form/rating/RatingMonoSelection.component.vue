@@ -7,11 +7,7 @@
         :key="option.id"
         @keydown.enter.prevent
         :data-title="
-          suggestions === option.value
-            ? $t('suggestion.name')
-            : option.isSelected
-            ? $t('annotation')
-            : null
+          suggestions === option.value ? $t('suggestion.name') : null
         "
       >
         <input

@@ -66,8 +66,6 @@
           :data-title="
             hasSuggestion(option.text)
               ? `${$t('suggestion.name')}: ${option.text}`
-              : option.isSelected
-              ? $t('annotation')
               : null
           "
           :title="option.text"
@@ -135,14 +133,7 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
-      keyboards: {},
     };
-  },
-  mounted() {
-    this.keyboards = this.options.reduce((acc, option, index) => {
-      acc[option.id] = index + 1;
-      return acc;
-    }, {});
   },
   created() {
     this.searchRef = `${this.componentId}SearchFilterRef`;
@@ -171,6 +162,12 @@ export default {
     },
   },
   computed: {
+    keyboards() {
+      return this.options.reduce((acc, option, index) => {
+        acc[option.id] = index + 1;
+        return acc;
+      }, {});
+    },
     filteredOptions() {
       return this.options.filter((option) =>
         String(option.text)

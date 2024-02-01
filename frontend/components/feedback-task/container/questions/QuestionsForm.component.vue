@@ -156,6 +156,10 @@ export default {
       type: Number,
       default: 0,
     },
+    enableAutoSubmitWithKeyboard: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -208,6 +212,7 @@ export default {
   },
   methods: {
     async autoSubmitWithKeyboard() {
+      if (!this.enableAutoSubmitWithKeyboard) return;
       if (!this.record.isModified) return;
       if (this.record.questions.length > 1) return;
 
