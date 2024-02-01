@@ -115,15 +115,14 @@ export default {
   },
   login: {
     title: "Sign in",
-    claim: "Work on data together.</br>Make models better.",
+    claim: "Work on data together.</br>Make your models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
       title: "Welcome to {space}",
-      subtitle:
-        "Join <strong>{user}</strong> to contribute to make better datasets for AI",
+      subtitle: "Join <strong>{user}</strong> to build better datasets for AI",
     },
   },
   status: "Status",
