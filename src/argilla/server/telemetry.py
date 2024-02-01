@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import json
 import logging
 import platform
 import uuid
@@ -21,7 +22,9 @@ from typing import Any, Dict, Optional
 from fastapi import Request
 
 from argilla.server.commons.models import TaskType
+from argilla.server.models import User
 from argilla.server.settings import settings
+from argilla.server.utils._telemetry import is_quickstart_server, is_running_on_docker_container
 
 try:
     from analytics import Client  # This import works only for version 2.2.0
@@ -64,8 +67,13 @@ class TelemetryClient:
             "platform": platform.platform(),
             "python_version": platform.python_version(),
             "sys_version": platform.version(),
+            "deployment": "quickstart" if is_quickstart_server() else "server",
+            "docker": "yes" if is_running_on_docker_container() else "no",
             "version": __version__,
         }
+
+        _LOGGER.info("System Info:")
+        _LOGGER.info(json.dumps(self._system_info, indent=2))
 
     def track_data(self, action: str, data: Dict[str, Any], include_system_info: bool = True):
         if not self.client:
@@ -91,13 +99,26 @@ async def track_bulk(task: TaskType, records: int):
     _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 
-async def track_login(request: Request, username: str):
+async def track_login(request: Request, user: User):
     _CLIENT.track_data(
         action="UserInfoRequested",
         data={
-            "is_default_user": username == "argilla",
-            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=username)),
+            "is_default_user": user.username == "argilla",
+            "user_id": str(user.id),
+            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=user.username)),
             **_process_request_info(request),
+        },
+    )
+
+
+def track_user_created(user: User, is_oauth: bool = False):
+    _CLIENT.track_data(
+        action="UserCreated",
+        data={
+            "user_id": str(user.id),
+            "role": user.role,
+            "is_default_user": user.username == "argilla",
+            "is_oauth": is_oauth,
         },
     )
 
