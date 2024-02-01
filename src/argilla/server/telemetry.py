@@ -22,6 +22,7 @@ from typing import Any, Dict, Optional
 from fastapi import Request
 
 from argilla.server.commons.models import TaskType
+from argilla.server.constants import DEFAULT_USERNAME
 from argilla.server.models import User
 from argilla.server.settings import settings
 from argilla.server.utils._telemetry import is_running_on_docker_container, server_deployment_type
@@ -103,7 +104,7 @@ async def track_login(request: Request, user: User):
     _CLIENT.track_data(
         action="UserInfoRequested",
         data={
-            "is_default_user": user.username == "argilla",
+            "is_default_user": user.username == DEFAULT_USERNAME,
             "user_id": str(user.id),
             "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=user.username)),
             **_process_request_info(request),
@@ -117,7 +118,7 @@ def track_user_created(user: User, is_oauth: bool = False):
         data={
             "user_id": str(user.id),
             "role": user.role,
-            "is_default_user": user.username == "argilla",
+            "is_default_user": user.username == DEFAULT_USERNAME,
             "is_oauth": is_oauth,
         },
     )
