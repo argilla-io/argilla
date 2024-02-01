@@ -189,3 +189,39 @@ Additionally, the `LOAD_DATASETS` will let you configure the sample datasets tha
     1. `single`: Load single datasets for TextClassification task.
     2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets being loaded.
+
+## Setting up HF Authentication
+
+From version 1.23.0 you can enable Hugging Face authentication for your Argilla Space. This feature allows you to give access to your Argilla Space to users that are logged in to the Hugging Face Hub. 
+
+To enable this feature, you need change the `.oauth.yaml` file in your Argilla Space. The file should look like this:
+
+```yaml
+# This attribute will enable or disable the Hugging Face authentication
+enabled: true
+
+providers:
+# The OAuth provider setup
+# For now, only Hugging Face is supported
+  - name: huggingface 
+    # This is the client ID of the OAuth app. You can find it in your Hugging Face settings.
+    # see https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.
+    # You can also provide it by using the env variable `OAUTH2_HUGINGFACE_CLIENT_ID` 
+    client_id: d662060f-05ae-495b-8d85-c91beb825ec0
+    
+    # This is the client secret of the OAuth app. You can find it in your Hugging Face settings.
+    # See https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.
+    # We encourage you to provide it by using thethe env variable `OAUTH2_HUGINGFACE_CLIENT_SECRET`   
+    client_secret: 83c688e9-1429-4b0f-911b-dc145db70f34
+    
+    # The scope of the OAuth app. At least `openid` and `profile` are required.
+    scope: openid profile
+
+
+# This section defines the allowed workspaces for the oauth users.
+# Workspaces defined here must exist in Argilla. 
+allowed_workspaces:
+    - name: admin
+```
+
+You would like also to take a look into the official Huggingface docs about ([OAuth](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app)).
