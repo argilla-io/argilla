@@ -59,9 +59,11 @@ export default {
     }
   },
   mounted() {
-    const space = this.isRunningOnHuggingFace();
-    this.user = space.user;
-    this.space = space.space;
+    const space = this.getHuggingFaceInfo();
+    if (space) {
+      this.user = space.user;
+      this.space = space.space;
+    }
   },
   setup() {
     return useWelcomeHFViewModel();

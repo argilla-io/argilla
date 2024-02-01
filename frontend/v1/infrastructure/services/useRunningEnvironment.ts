@@ -8,45 +8,55 @@ interface HFSpace {
 
 const HUGGING_FACE_EMBEBED_URL = "huggingface.co";
 const HUGGING_FACE_DIRECT_URL = ".hf.space";
+const HUGGING_FACE_TOKEN_COOKIE = "spaces-jwt";
+
+const parseJwt = (token: string) => {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
+  }
+};
 
 export const useRunningEnvironment = () => {
   const url = new URL(window.location.href);
-
-  const parseHuggingFaceData = (data: string[]) => {
-    const user = data[0];
-    const space = data[1];
-
-    if (data.length === 2 && user && space)
-      return {
-        space,
-        user,
-      };
-
-    return undefined;
-  };
 
   const isEmbebed = () => {
     return window.self !== window.top;
   };
 
-  const isRunningOnHuggingFace = (): HFSpace | undefined => {
-    if (url.host === HUGGING_FACE_EMBEBED_URL) {
-      const paramsData = url.pathname
-        .replace("/spaces", "")
-        .split("/")
-        .filter(Boolean);
+  const getHuggingFaceInfo = (): HFSpace | null => {
+    if (!isRunningOnHuggingFace()) return null;
 
-      return parseHuggingFaceData(paramsData);
-    }
+    const splitted = document.cookie.split(";");
+    const hfCookie = splitted.find((c) => {
+      return c.includes(HUGGING_FACE_TOKEN_COOKIE);
+    });
 
-    if (url.host.endsWith(HUGGING_FACE_DIRECT_URL)) {
-      const paramsData = url.host
-        .replaceAll(HUGGING_FACE_DIRECT_URL, "")
-        .split(/-(.*)/s)
-        .filter(Boolean);
+    if (!hfCookie) return null;
 
-      return parseHuggingFaceData(paramsData);
-    }
+    const token = hfCookie.split("=")[1];
+
+    const parsed = parseJwt(token);
+
+    if (!parsed) return null;
+
+    const [user, space] = parsed.sub
+      .replace("/spaces/", "")
+      .split("/")
+      .filter(Boolean);
+
+    return {
+      user,
+      space,
+    };
+  };
+
+  const isRunningOnHuggingFace = (): boolean => {
+    return (
+      url.host === HUGGING_FACE_EMBEBED_URL ||
+      url.host.endsWith(HUGGING_FACE_DIRECT_URL)
+    );
   };
 
   const hasHuggingFaceOAuthConfigured = async (): Promise<boolean> => {
@@ -61,5 +71,6 @@ export const useRunningEnvironment = () => {
     isEmbebed,
     isRunningOnHuggingFace,
     hasHuggingFaceOAuthConfigured,
+    getHuggingFaceInfo,
   };
 };
