@@ -17,7 +17,7 @@ import os
 import psutil
 
 
-def is_quickstart_server():
+def is_quickstart_server() -> bool:
     """Returns True if the current process is running on the Quickstart server, False otherwise."""
     global _is_quickstart_server
 
@@ -26,7 +26,7 @@ def is_quickstart_server():
     return _is_quickstart_server
 
 
-def is_running_on_docker_container():
+def is_running_on_docker_container() -> bool:
     """Returns True if the current process is running inside a Docker container, False otherwise."""
     global _in_docker_container
 

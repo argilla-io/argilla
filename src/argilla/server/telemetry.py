@@ -68,7 +68,7 @@ class TelemetryClient:
             "python_version": platform.python_version(),
             "sys_version": platform.version(),
             "deployment": "quickstart" if is_quickstart_server() else "server",
-            "docker": "yes" if is_running_on_docker_container() else "no",
+            "docker": is_running_on_docker_container(),
             "version": __version__,
         }
 
