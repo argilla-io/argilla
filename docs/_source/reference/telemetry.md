@@ -40,12 +40,14 @@ The following usage and error information is reported:
 * The system’s release version, e.g. `Darwin Kernel Version 21.5.0: Tue Apr 26 21:08:22 PDT 2022; root:xnu-8020`
 * The machine type, e.g. `AMD64`
 * The underlying platform spec with as much useful information as possible. (eg. `macOS-10.16-x86_64-i386-64bit`)
-
+* The type of deployment: `quickstart` or `server`
+* The dockerized deployment flag: `True` or `False`
 
 This is performed by registering information from the following API methods:
 
-* `/api/me`
-* `/api/dataset/{name}/{task}:bulk`
+* `GET /api/me`
+* `POST /api/dataset/{name}/{task}:bulk`
+* `POST /api/users`
 * Raised server API errors
 
 Additionally, we report the usage of integration for our Python library:

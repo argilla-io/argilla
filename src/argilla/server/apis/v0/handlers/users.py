@@ -53,7 +53,7 @@ async def whoami(
 
     """
 
-    await telemetry.track_login(request, username=current_user.username)
+    await telemetry.track_login(request, current_user)
 
     user = User.from_orm(current_user)
     # TODO: The current client checks if a user can work on a specific workspace
@@ -96,6 +96,7 @@ async def create_user(
 
     try:
         user = await accounts.create_user(db, user_create)
+        telemetry.track_user_created(user)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
