@@ -45,8 +45,8 @@ The following usage and error information is reported:
 
 This is performed by registering information from the following API methods:
 
-* `/api/me`
-* `/api/dataset/{name}/{task}:bulk`
+* `GET /api/me`
+* `POST /api/dataset/{name}/{task}:bulk`
 * `POST /api/users`
 * Raised server API errors
 
