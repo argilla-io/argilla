@@ -60,7 +60,7 @@ async def test_track_bulk(test_telemetry):
 
 @pytest.mark.parametrize("is_oauth", [True, False])
 @pytest.mark.parametrize("username", ["argilla", "john"])
-def test_default_user_created(test_telemetry, username: str, is_oauth: bool):
+def test_user_created(test_telemetry, username: str, is_oauth: bool):
     user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
 
     telemetry.track_user_created(user=user, is_oauth=is_oauth)
