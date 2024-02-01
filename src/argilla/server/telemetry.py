@@ -24,7 +24,7 @@ from fastapi import Request
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 from argilla.server.settings import settings
-from argilla.server.utils._telemetry import server_deployment_type, is_running_on_docker_container
+from argilla.server.utils._telemetry import is_running_on_docker_container, server_deployment_type
 
 try:
     from analytics import Client  # This import works only for version 2.2.0
