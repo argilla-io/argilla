@@ -17,13 +17,17 @@ import os
 import psutil
 
 
-def is_quickstart_server() -> bool:
-    """Returns True if the current process is running on the Quickstart server, False otherwise."""
-    global _is_quickstart_server
+def server_deployment_type() -> str:
+    """Returns the type of deployment of the server."""
+    global _server_deployment_type
 
-    if _is_quickstart_server is None:
-        _is_quickstart_server = is_running_on_docker_container() and _is_quickstart_env()
-    return _is_quickstart_server
+    if _server_deployment_type is None:
+        _server_deployment_type = "server"
+
+        if is_running_on_docker_container() and _is_quickstart_env():
+            _server_deployment_type = "quickstart"
+
+    return _server_deployment_type
 
 
 def is_running_on_docker_container() -> bool:
@@ -89,4 +93,4 @@ def _is_quickstart_env():
 
 # Private global variables section
 _in_docker_container = None
-_is_quickstart_server = None
+_server_deployment_type = None

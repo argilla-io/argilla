@@ -24,7 +24,7 @@ from fastapi import Request
 from argilla.server.commons.models import TaskType
 from argilla.server.models import User
 from argilla.server.settings import settings
-from argilla.server.utils._telemetry import is_quickstart_server, is_running_on_docker_container
+from argilla.server.utils._telemetry import server_deployment_type, is_running_on_docker_container
 
 try:
     from analytics import Client  # This import works only for version 2.2.0
@@ -67,7 +67,7 @@ class TelemetryClient:
             "platform": platform.platform(),
             "python_version": platform.python_version(),
             "sys_version": platform.version(),
-            "deployment": "quickstart" if is_quickstart_server() else "server",
+            "deployment": server_deployment_type(),
             "docker": is_running_on_docker_container(),
             "version": __version__,
         }
