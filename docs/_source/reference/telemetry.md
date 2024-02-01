@@ -41,7 +41,7 @@ The following usage and error information is reported:
 * The machine type, e.g. `AMD64`
 * The underlying platform spec with as much useful information as possible. (eg. `macOS-10.16-x86_64-i386-64bit`)
 * The type of deployment: `quickstart` or `server`
-* The dockerized deployment flag: `true` or `false`
+* The dockerized deployment flag: `True` or `False`
 
 This is performed by registering information from the following API methods:
 
