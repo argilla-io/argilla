@@ -207,12 +207,12 @@ providers:
     # This is the client ID of the OAuth app. You can find it in your Hugging Face settings.
     # see https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.
     # You can also provide it by using the env variable `OAUTH2_HUGINGFACE_CLIENT_ID`
-    client_id: d662060f-05ae-495b-8d85-c91beb825ec0
+    client_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX
 
     # This is the client secret of the OAuth app. You can find it in your Hugging Face settings.
     # See https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.
-    # We encourage you to provide it by using thethe env variable `OAUTH2_HUGINGFACE_CLIENT_SECRET`
-    client_secret: 83c688e9-1429-4b0f-911b-dc145db70f34
+    # We encourage you to provide it by using the env variable `OAUTH2_HUGINGFACE_CLIENT_SECRET`
+    client_secret: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX
 
     # The scope of the OAuth app. At least `openid` and `profile` are required.
     scope: openid profile
