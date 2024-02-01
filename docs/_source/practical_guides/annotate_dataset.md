@@ -92,7 +92,7 @@ Use the **Find Similar** feature, other filters (Suggestions, Metadata, etc.) an
 
 In the queue of **Pending** records, you can change from _Focus_ to _Bulk_ view. Once in the _Bulk view_, you can expand or collapse records --i.e. see the full length of all records in the page or set a fixed height-- and select the number of records you want to see per page.
 
-To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card. When you use filters inside the bulk view and the results are higher than 100 records but lower than 1000, you will also have the option to select all of the results after you click on the checkbox. You can cancel this selection clicking on the _Cancel_ button.
+To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card. When you use filters inside the bulk view and the results are higher than the records visible in the page but lower than 1000, you will also have the option to select all of the results after you click on the checkbox. You can cancel this selection clicking on the _Cancel_ button.
 
 Once records are selected, choose the responses that apply to all selected records (if any) and do the desired action: _Discard_, _Save as draft_ or even _Submit_. Note that you can only submit the records if all required questions have been answered.
 
