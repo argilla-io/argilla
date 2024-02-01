@@ -224,4 +224,4 @@ allowed_workspaces:
     - name: admin
 ```
 
-You would like also to take a look into the official Huggingface docs about ([OAuth](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app)).
+Check also the official Huggingface docs about ([OAuth](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app)).
