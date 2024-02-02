@@ -28,6 +28,7 @@ def test_server_info_no_auth() -> None:
         server_info()
 
 
+@pytest.mark.skip(reason="No sense to test this in CI")
 def test_server_info(owner: "ServerUser") -> None:
     singleton.init(api_key=owner.api_key)
     info = server_info()

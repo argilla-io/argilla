@@ -130,13 +130,13 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 
 @pytest.fixture(scope="function")
 def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
-    from argilla_server.app import app
+    from argilla_server import app
 
     async def override_get_async_db():
         session = TestSession()
         yield session
 
-    mocker.patch("argilla.server.app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     app.dependency_overrides[get_async_db] = override_get_async_db
 
