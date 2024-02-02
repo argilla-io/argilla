@@ -67,6 +67,15 @@ class TestOauth2:
             assert response.status_code == 200
             assert response.json() == {"items": []}
 
+    async def test_list_provider_with_oauth_disabled_from_settings(
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
+    ):
+        default_oauth_settings.enabled = False
+        with mock.patch("argilla.server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
+            assert response.status_code == 200
+            assert response.json() == {"items": []}
+
     async def test_list_providers(
         self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
