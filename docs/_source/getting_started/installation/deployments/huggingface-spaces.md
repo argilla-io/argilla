@@ -207,8 +207,8 @@ To enable this feature, you will first need to [create an OAuth App in Hugging F
 
 This will create a Client ID and an App Secret that you will need to add as variables of your Space. To do this, go to the Space *Settings* > *Variables and Secrets* and save the Client ID and App Secret as environment secrets like so:
 
-1. Name: `OAUTH2_HUGGINGFACE_CLIENT_ID` - Value: [Your Client ID]
-2. Name: `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - Value: [Your App Secret]
+1. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_ID` - **Value:** [Your Client ID]
+2. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - **Value:** [Your App Secret]
 
 Alternatively, you can provide the environment variables in the `.oauth.yaml` file like so:
 
