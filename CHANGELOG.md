@@ -14,12 +14,14 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [1.23.0-Unreleased]()
+## [Unreleased]()
+
+## [1.23.0](https://github.com/argilla-io/argilla/compare/v1.22.0...v1.23.0)
 
 ### Added
 
-- Added bulk annotation by filter criteria ([#4516](https://github.com/argilla-io/argilla/pull/4516))
-- Automatically fetch new datasets on focus tab ([#4514](https://github.com/argilla-io/argilla/pull/4514))
+- Added bulk annotation by filter criteria. ([#4516](https://github.com/argilla-io/argilla/pull/4516))
+- Automatically fetch new datasets on focus tab. ([#4514](https://github.com/argilla-io/argilla/pull/4514))
 - API v1 responses returning `Record` schema now always include `dataset_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Response` schema now always include `record_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Question` schema now always include `dataset_id` attribute. ([#4487](https://github.com/argilla-io/argilla/pull/4487))
@@ -47,7 +49,7 @@ These are the section headers that we use:
 
 ### Fixed
 
-- Fixed keyboard shortcut for label questions ([#4530](https://github.com/argilla-io/argilla/pull/4530))
+- Fixed keyboard shortcut for label questions. ([#4530](https://github.com/argilla-io/argilla/pull/4530))
 
 ## [1.22.0](https://github.com/argilla-io/argilla/compare/v1.21.0...v1.22.0)
 
