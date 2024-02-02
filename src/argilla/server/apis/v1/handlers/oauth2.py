@@ -36,8 +36,10 @@ _USER_ROLE_ON_CREATION = UserRole.annotator
 
 @router.get("/providers", response_model=Providers)
 def list_providers(_request: Request) -> Providers:
-    items = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
+    if not settings.oauth.enabled:
+        return Providers(items=[])
 
+    items = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
     return Providers(items=items)
 
 
