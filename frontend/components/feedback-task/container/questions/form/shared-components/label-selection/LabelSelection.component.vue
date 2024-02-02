@@ -48,7 +48,7 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          :data-keyboard="option.keyboard"
+          :data-keyboard="keyboards[option.id]"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
@@ -66,8 +66,6 @@
           :data-title="
             hasSuggestion(option.text)
               ? `${$t('suggestion.name')}: ${option.text}`
-              : option.isSelected
-              ? $t('annotation')
               : null
           "
           :title="option.text"
@@ -75,7 +73,7 @@
           <span
             class="key"
             v-if="showShortcutsHelper"
-            v-text="option.keyboard"
+            v-text="keyboards[option.id]"
           />
           <span>{{ option.text }}</span>
         </label>
@@ -164,6 +162,12 @@ export default {
     },
   },
   computed: {
+    keyboards() {
+      return this.options.reduce((acc, option, index) => {
+        acc[option.id] = index + 1;
+        return acc;
+      }, {});
+    },
     filteredOptions() {
       return this.options.filter((option) =>
         String(option.text)
@@ -302,11 +306,6 @@ export default {
     hasSuggestion(value) {
       return this.suggestions?.includes(value) || false;
     },
-  },
-  beforeMount() {
-    this.options.forEach((option, index) => {
-      option.keyboard = index + 1;
-    });
   },
 };
 </script>

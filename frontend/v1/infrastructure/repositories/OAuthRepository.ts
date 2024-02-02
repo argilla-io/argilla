@@ -51,7 +51,13 @@ export class OAuthRepository implements IOAuthRepository {
   authorize(provider: ProviderType) {
     const { isEmbebed } = useRunningEnvironment();
 
-    this.router.go(`api/v1/oauth2/providers/${provider}/authentication`, {
+    const oauthParams = this.router.getQuery();
+    const params = this.createParams(oauthParams);
+    let urlToRedirect = `api/v1/oauth2/providers/${provider}/authentication`;
+
+    if (params.size) urlToRedirect += `?${params.toString()}`;
+
+    this.router.go(urlToRedirect, {
       external: true,
       newWindow: isEmbebed(),
     });

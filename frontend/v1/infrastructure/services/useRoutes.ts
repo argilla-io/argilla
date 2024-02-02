@@ -129,6 +129,10 @@ export const useRoutes = () => {
     router.push(where);
   };
 
+  const getQuery = () => {
+    return route.value.query;
+  };
+
   const goBack = () => {
     router.go(-1);
   };
@@ -136,6 +140,7 @@ export const useRoutes = () => {
   return {
     go,
     goBack,
+    getQuery,
     goToFeedbackTaskAnnotationPage,
     goToDatasetsList,
     goToSetting,
