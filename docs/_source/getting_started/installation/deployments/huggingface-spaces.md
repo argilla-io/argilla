@@ -217,11 +217,13 @@ providers:
     # The scope of the OAuth app. At least `openid` and `profile` are required.
     scope: openid profile
 
-
 # This section defines the allowed workspaces for the oauth users.
 # Workspaces defined here must exist in Argilla.
 allowed_workspaces:
     - name: admin
 ```
+
+When configuring the oauth app, you need to provide the following redirect URL in order to make the authentication work: 
+`https://[your_space_hostname]/oauth/huggingface/callback`.
 
 Check also the official Huggingface docs about ([OAuth](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app)).
