@@ -2,30 +2,60 @@ import { useResolve } from "ts-injecty";
 import { ref } from "vue-demi";
 import { Notification } from "~/models/Notifications";
 import { Record } from "~/v1/domain/entities/record/Record";
-import { DiscardBulkAnnotationUseCase } from "~/v1/domain/usecases/discard-bulk-annotation-use-case";
-import { SaveDraftBulkAnnotationUseCase } from "~/v1/domain/usecases/save-draft-bulk-annotation-use-case";
-import { SubmitBulkAnnotationUseCase } from "~/v1/domain/usecases/submit-bulk-annotation-use-case";
+import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
+import { Records } from "~/v1/domain/entities/record/Records";
+import {
+  AvailableStatus,
+  BulkAnnotationUseCase,
+} from "~/v1/domain/usecases/bulk-annotation-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
-export const useBulkAnnotationViewModel = () => {
+export const useBulkAnnotationViewModel = ({
+  records,
+}: {
+  records: Records;
+}) => {
   const debounceForSubmit = useDebounce(300);
+
+  const affectAllRecords = ref(false);
+  const progress = ref(0);
 
   const isDraftSaving = ref(false);
   const isDiscarding = ref(false);
   const isSubmitting = ref(false);
-  const discardUseCase = useResolve(DiscardBulkAnnotationUseCase);
-  const submitUseCase = useResolve(SubmitBulkAnnotationUseCase);
-  const saveDraftUseCase = useResolve(SaveDraftBulkAnnotationUseCase);
+  const bulkAnnotationUseCase = useResolve(BulkAnnotationUseCase);
+
   const t = useTranslate();
 
-  const discard = async (records: Record[], recordReference: Record) => {
-    try {
-      isDiscarding.value = true;
+  const checkIfSomeFilterIsActive = (criteria: RecordCriteria) => {
+    return (
+      criteria.isFilteredByText ||
+      criteria.isFilteredByResponse ||
+      criteria.isFilteredByMetadata ||
+      criteria.isFilteredBySuggestion
+    );
+  };
 
-      const allSuccessful = await discardUseCase.execute(
-        records,
-        recordReference
+  const annotateBulk = async (
+    status: AvailableStatus,
+    criteria: RecordCriteria,
+    recordReference: Record,
+    selectedRecords: Record[]
+  ) => {
+    try {
+      const totalRecords = records.total;
+      const isAffectingAllRecords = affectAllRecords.value;
+
+      const allSuccessful = await bulkAnnotationUseCase.execute(
+        status,
+        criteria,
+        recordReference,
+        selectedRecords,
+        isAffectingAllRecords,
+        (value) => {
+          progress.value = value;
+        }
       );
 
       if (!allSuccessful) {
@@ -33,79 +63,96 @@ export const useBulkAnnotationViewModel = () => {
           message: t("some_records_failed_to_annotate"),
           type: "error",
         });
+      } else if (isAffectingAllRecords) {
+        Notification.dispatch("notify", {
+          message: t("bulkAnnotation.allRecordsAnnotated", {
+            total: totalRecords,
+            action: t(`bulkAnnotation.affectedAll.${status}`).toLowerCase(),
+          }),
+          type: "info",
+        });
       }
+
+      progress.value = 0;
 
       await debounceForSubmit.wait();
 
       return allSuccessful;
-    } catch (error) {
+    } catch {
     } finally {
-      isDiscarding.value = false;
+      affectAllRecords.value = false;
+      progress.value = 0;
     }
 
     return false;
   };
 
-  const submit = async (records: Record[], recordReference: Record) => {
-    try {
-      isSubmitting.value = true;
+  const discard = async (
+    criteria: RecordCriteria,
+    recordReference: Record,
+    records: Record[]
+  ) => {
+    isDiscarding.value = true;
 
-      const allSuccessful = await submitUseCase.execute(
-        records,
-        recordReference
-      );
+    const allSuccessful = await annotateBulk(
+      "discarded",
+      criteria,
+      recordReference,
+      records
+    );
 
-      if (!allSuccessful) {
-        Notification.dispatch("notify", {
-          message: t("some_records_failed_to_annotate"),
-          type: "error",
-        });
-      }
+    isDiscarding.value = false;
 
-      await debounceForSubmit.wait();
-
-      return allSuccessful;
-    } catch (error) {
-    } finally {
-      isSubmitting.value = false;
-    }
-
-    return false;
+    return allSuccessful;
   };
 
-  const saveAsDraft = async (records: Record[], recordReference: Record) => {
-    try {
-      isDraftSaving.value = true;
+  const submit = async (
+    criteria: RecordCriteria,
+    recordReference: Record,
+    records: Record[]
+  ) => {
+    isSubmitting.value = true;
 
-      const allSuccessful = await saveDraftUseCase.execute(
-        records,
-        recordReference
-      );
+    const allSuccessful = await annotateBulk(
+      "submitted",
+      criteria,
+      recordReference,
+      records
+    );
 
-      if (!allSuccessful) {
-        Notification.dispatch("notify", {
-          message: t("some_records_failed_to_annotate"),
-          type: "error",
-        });
-      }
+    isSubmitting.value = false;
 
-      await debounceForSubmit.wait();
+    return allSuccessful;
+  };
 
-      return allSuccessful;
-    } catch (error) {
-    } finally {
-      isDraftSaving.value = false;
-    }
+  const saveAsDraft = async (
+    criteria: RecordCriteria,
+    recordReference: Record,
+    records: Record[]
+  ) => {
+    isDraftSaving.value = true;
 
-    return false;
+    const allSuccessful = await annotateBulk(
+      "draft",
+      criteria,
+      recordReference,
+      records
+    );
+
+    isDraftSaving.value = false;
+
+    return allSuccessful;
   };
 
   return {
+    affectAllRecords,
+    progress,
     isDraftSaving,
     isDiscarding,
     isSubmitting,
     submit,
     discard,
     saveAsDraft,
+    checkIfSomeFilterIsActive,
   };
 };

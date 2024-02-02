@@ -379,8 +379,6 @@ class User:
         """
         client = cls.__active_client()
         try:
-            users = users_api.list_users(client).parsed
-            for user in users:
-                yield cls.__new_instance(client, user)
+            return [cls.__new_instance(client, user) for user in users_api.list_users(client).parsed]
         except Exception as e:
             raise RuntimeError("Error while listing the users from Argilla.") from e

@@ -173,7 +173,7 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      authProvider: {
+      basic: {
         scheme: "local",
         token: {
           property: "access_token",
@@ -195,7 +195,7 @@ const config: NuxtConfig = {
       },
     },
     resetOnError: true,
-    redirect: { login: "/login", logout: "/login" },
+    redirect: { login: "/sign-in", logout: "/sign-in" },
   },
 
   router: {
