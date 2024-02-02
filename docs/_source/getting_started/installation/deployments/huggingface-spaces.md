@@ -223,7 +223,8 @@ allowed_workspaces:
     - name: admin
 ```
 
-When configuring the oauth app, you need to provide the **Logo URL** and the **Redirect URL** to make the authentication flow work:
+When configuring the oauth app, you need to provide the following redirect URL in order to make the authentication work:
+`https://[your_space_hostname]/oauth/huggingface/callback`.
 
 - **Logo URL:** `https://[your_space_hostname]/favicon.ico`
 - **Redirect URL:** `https://[your_space_hostname]/oauth/huggingface/callback`
