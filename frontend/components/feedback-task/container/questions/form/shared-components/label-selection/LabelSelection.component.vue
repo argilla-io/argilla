@@ -388,6 +388,9 @@ $label-dark-color: palette(purple, 200);
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
+    &:hover {
+      direction: rtl;
+    }
   }
   &.--suggestion {
     background: $suggestion-color;
