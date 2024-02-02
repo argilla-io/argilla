@@ -29,11 +29,11 @@ from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
-from argilla.server import telemetry as server_telemetry
-from argilla.server.cli.database.migrate import migrate_db
-from argilla.server.database import get_async_db
-from argilla.server.models import User, UserRole, Workspace
-from argilla.server.settings import settings
+from argilla_server import telemetry as server_telemetry
+from argilla_server.cli.database.migrate import migrate_db
+from argilla_server.database import get_async_db
+from argilla_server.models import User, UserRole, Workspace
+from argilla_server.settings import settings
 from argilla.utils import telemetry as client_telemetry
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -130,7 +130,7 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 
 @pytest.fixture(scope="function")
 def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
-    from argilla.server.app import app
+    from argilla_server.app import app
 
     async def override_get_async_db():
         session = TestSession()

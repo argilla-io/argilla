@@ -16,7 +16,7 @@ from argilla._constants import (
     API_KEY_HEADER_NAME,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.server.models import User
+from argilla_server.models import User
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 

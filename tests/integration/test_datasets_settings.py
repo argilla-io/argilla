@@ -29,14 +29,14 @@ from argilla.datasets import (
     configure_dataset_settings,
     load_dataset_settings,
 )
-from argilla.server.contexts import accounts
-from argilla.server.schemas.v0.workspaces import WorkspaceUserCreate
+from argilla_server.contexts import accounts
+from argilla_server.schemas.v0.workspaces import WorkspaceUserCreate
 
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
     from argilla.client.apis.datasets import LabelsSchemaSettings
-    from argilla.server.models import User
+    from argilla_server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from .helpers import SecuredClient

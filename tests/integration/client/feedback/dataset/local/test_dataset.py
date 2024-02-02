@@ -36,7 +36,7 @@ from argilla.client.models import Framework
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.server.models import User as ServerUser
+    from argilla_server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.integration.helpers import SecuredClient

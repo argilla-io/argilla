@@ -15,7 +15,7 @@
 import warnings
 
 import argilla
-from argilla.server.models import User
+from argilla_server.models import User
 
 
 class MockModel:

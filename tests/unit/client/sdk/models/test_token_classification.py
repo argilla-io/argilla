@@ -25,10 +25,10 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
-from argilla.server.apis.v0.models.token_classification import (
+from argilla_server.apis.v0.models.token_classification import (
     TokenClassificationBulkRequest as ServerTokenClassificationBulkData,
 )
-from argilla.server.apis.v0.models.token_classification import (
+from argilla_server.apis.v0.models.token_classification import (
     TokenClassificationQuery as ServerTokenClassificationQuery,
 )
 

@@ -16,8 +16,8 @@ import inspect
 import random
 
 import factory
-from argilla.server.enums import FieldType, MetadataPropertyType
-from argilla.server.models import (
+from argilla_server.enums import FieldType, MetadataPropertyType
+from argilla_server.models import (
     Dataset,
     Field,
     MetadataProperty,
@@ -33,7 +33,7 @@ from argilla.server.models import (
     Workspace,
     WorkspaceUser,
 )
-from argilla.server.models.base import DatabaseModel
+from argilla_server.models.base import DatabaseModel
 from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUSH
 from factory.builder import BuildStep, StepBuilder, parse_declarations
 from sqlalchemy.ext.asyncio import async_object_session

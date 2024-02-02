@@ -20,7 +20,7 @@ from argilla.client import singleton
 from argilla.client.utils import ServerInfo, server_info
 
 if TYPE_CHECKING:
-    from argilla.server.models import User as ServerUser
+    from argilla_server.models import User as ServerUser
 
 
 def test_server_info_no_auth() -> None:
