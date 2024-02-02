@@ -48,7 +48,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 server = [
-    "argilla-server==1.23.0-dev4"
+    "argilla-server",
 ]
 postgresql = [
     "psycopg2 ~= 2.9.5; sys_platform != 'darwin'",
