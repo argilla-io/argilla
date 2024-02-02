@@ -29,12 +29,12 @@ from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
+from argilla.utils import telemetry as client_telemetry
 from argilla_server import telemetry as server_telemetry
 from argilla_server.cli.database.migrate import migrate_db
 from argilla_server.database import get_async_db
 from argilla_server.models import User, UserRole, Workspace
 from argilla_server.settings import settings
-from argilla.utils import telemetry as client_telemetry
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
