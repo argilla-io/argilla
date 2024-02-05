@@ -76,18 +76,11 @@
             <span
               class="key"
               v-if="showShortcutsHelper"
-              v-text="option.keyboard"
+              v-text="keyboards[option.id]"
             />
             <span>{{ option.text }}</span>
           </label></BaseTooltip
         >
-          <span
-            class="key"
-            v-if="showShortcutsHelper"
-            v-text="keyboards[option.id]"
-          />
-          <span>{{ option.text }}</span>
-        </label>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
