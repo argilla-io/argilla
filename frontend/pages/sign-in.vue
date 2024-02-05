@@ -277,7 +277,7 @@ input:-webkit-autofill {
   }
   &__claim {
     margin: auto auto;
-    max-width: 460px;
+    max-width: 500px;
     z-index: 1;
     @include font-size(40px);
     line-height: 1.3em;

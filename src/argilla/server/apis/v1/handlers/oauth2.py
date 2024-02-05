@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla.server import telemetry
 from argilla.server.contexts import accounts
 from argilla.server.database import get_async_db
 from argilla.server.enums import UserRole
@@ -35,8 +36,10 @@ _USER_ROLE_ON_CREATION = UserRole.annotator
 
 @router.get("/providers", response_model=Providers)
 def list_providers(_request: Request) -> Providers:
-    items = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
+    if not settings.oauth.enabled:
+        return Providers(items=[])
 
+    items = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
     return Providers(items=items)
 
 
@@ -49,7 +52,11 @@ def get_authentication(request: Request, provider: str) -> RedirectResponse:
 
 
 @router.get("/providers/{provider}/access-token", response_model=Token)
-async def get_access_token(request: Request, provider: str, db: AsyncSession = Depends(get_async_db)) -> Token:
+async def get_access_token(
+    request: Request,
+    provider: str,
+    db: AsyncSession = Depends(get_async_db),
+) -> Token:
     _check_oauth_enabled_or_raise()
 
     try:
@@ -61,13 +68,14 @@ async def get_access_token(request: Request, provider: str, db: AsyncSession = D
 
         user = await accounts.get_user_by_username(db, username)
         if user is None:
-            await accounts.create_user_with_random_password(
+            user = await accounts.create_user_with_random_password(
                 db,
                 username=username,
                 first_name=user_info.name,
                 role=_USER_ROLE_ON_CREATION,
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
+            telemetry.track_user_created(user, is_oauth=True)
         elif not _is_user_created_by_oauth_provider(user):
             # User should sign in using username/password workflow
             raise AuthenticationError("Could not authenticate user")

@@ -10,7 +10,6 @@ export default {
   expand: "Expand",
   copied: "Copied",
   title: "Title",
-  annotation: "Annotation",
   description: "Description",
   useMarkdown: "Use Markdown",
   visibleForAnnotators: "Visible for annotators",
@@ -61,7 +60,7 @@ export default {
     to_annotate_record_bulk_required: "No record selected",
     select_to_annotate: "Select all",
     pageSize: "Page size",
-    selectAllResults: "Select all {total} results",
+    selectAllResults: "Select all {total} matched records",
     haveSelectedRecords: "You have selected all {total} records",
     actionConfirmation: "Bulk action confirmation",
     actionConfirmationText:
@@ -116,15 +115,14 @@ export default {
   },
   login: {
     title: "Sign in",
-    claim: "Work on data together,</br>make models better",
+    claim: "Work on data together.</br>Make your models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
       title: "Welcome to {space}",
-      subtitle:
-        "Join <strong>{user}</strong> to contribute to make better datasets for AI",
+      subtitle: "Join <strong>{user}</strong> to build better datasets for AI",
     },
   },
   status: "Status",

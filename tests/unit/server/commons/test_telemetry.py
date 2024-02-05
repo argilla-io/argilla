@@ -18,6 +18,8 @@ from unittest.mock import MagicMock
 import pytest
 from argilla.server import telemetry
 from argilla.server.commons.models import TaskType
+from argilla.server.enums import UserRole
+from argilla.server.models import User
 from argilla.server.telemetry import TelemetryClient, get_telemetry_client
 from fastapi import Request
 
@@ -32,12 +34,14 @@ def test_disable_telemetry():
 
 @pytest.mark.asyncio
 async def test_track_login(test_telemetry: MagicMock):
-    await telemetry.track_login(request=mock_request, username="argilla")
+    user = User(id=uuid.uuid4(), username="argilla")
+    await telemetry.track_login(request=mock_request, user=user)
 
     current_server_id = get_telemetry_client().server_id
     expected_event_data = {
         "accept-language": None,
         "is_default_user": True,
+        "user_id": str(user.id),
         "user-agent": None,
         "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
@@ -51,4 +55,21 @@ async def test_track_bulk(test_telemetry):
     await telemetry.track_bulk(task=task, records=records)
     test_telemetry.track_data.assert_called_once_with(
         action="LogRecordsRequested", data={"task": task, "records": records}
+    )
+
+
+@pytest.mark.parametrize("is_oauth", [True, False])
+@pytest.mark.parametrize("username", ["argilla", "john"])
+def test_user_created(test_telemetry, username: str, is_oauth: bool):
+    user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
+
+    telemetry.track_user_created(user=user, is_oauth=is_oauth)
+    test_telemetry.track_data.assert_called_once_with(
+        action="UserCreated",
+        data={
+            "is_default_user": username == "argilla",
+            "is_oauth": is_oauth,
+            "role": user.role,
+            "user_id": str(user.id),
+        },
     )

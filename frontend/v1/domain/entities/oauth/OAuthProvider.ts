@@ -1,6 +1,6 @@
-export type ProviderType = "huggingface";
+import { Dictionary } from "../common/Params";
 
-type Dictionary<T> = { [key: string]: T };
+export type ProviderType = "huggingface";
 export type OAuthParams = Dictionary<string | (string | null)[]>;
 export class OAuthProvider {
   constructor(public readonly name: ProviderType) {}

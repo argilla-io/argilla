@@ -40,6 +40,7 @@
       :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
+      :enableAutoSubmitWithKeyboard="true"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
       @on-save-draft="onSaveDraft"
