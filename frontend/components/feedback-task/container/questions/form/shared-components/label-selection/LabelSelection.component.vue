@@ -334,6 +334,10 @@ $label-dark-color: palette(purple, 200);
       border-color: darken($label-color, 12%);
     }
   }
+
+  .input-button {
+    max-width: 100%;
+  }
 }
 
 .show-less-button {
@@ -367,9 +371,8 @@ $label-dark-color: palette(purple, 200);
   justify-content: center;
   gap: $base-space;
   width: 100%;
-  height: 32px;
+  min-height: $base-space * 4;
   min-width: 50px;
-  max-width: 200px;
   text-align: center;
   padding-inline: $base-space;
   background: $label-color;
@@ -384,6 +387,9 @@ $label-dark-color: palette(purple, 200);
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
+    &:hover {
+      direction: rtl;
+    }
   }
   &.--suggestion {
     background: $suggestion-color;
