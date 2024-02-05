@@ -6,10 +6,7 @@
       position="left"
       minimalist
     >
-      <span
-        class="title-area__suggestion-icon"
-        v-html="$t('suggestion.icon')"
-      />
+      <span class="title-area__suggestion-icon" v-html="$suggestionIcon" />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -37,6 +34,7 @@
 
 <script>
 import "assets/icons/info";
+
 export default {
   name: "QuestionHeader",
   props: {

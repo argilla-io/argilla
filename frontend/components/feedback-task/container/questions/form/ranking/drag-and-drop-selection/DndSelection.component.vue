@@ -26,7 +26,7 @@
         <BaseTooltip
           v-if="findRankSuggestion(item.value)"
           class="draggable__suggestion"
-          :text="`${$t('suggestion.icon')} ${$t('suggestion.suggested-rank')}`"
+          :text="`${$suggestionIcon} ${$t('suggestion.suggested-rank')}`"
           minimalist
         >
           <span v-text="findRankSuggestion(item.value).rank" />

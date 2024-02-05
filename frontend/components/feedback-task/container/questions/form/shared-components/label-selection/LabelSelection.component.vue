@@ -57,9 +57,7 @@
         <BaseTooltip
           :text="
             hasSuggestion(option.text)
-              ? `${$t('suggestion.icon')} ${$t('suggestion.name')}: ${
-                  option.text
-                }`
+              ? `${$suggestionIcon} ${$t('suggestion.name')}: ${option.text}`
               : null
           "
           minimalist
