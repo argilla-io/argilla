@@ -47,14 +47,12 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
+
 server = [
-    # TODO: Fix the versions when publishing a new release
-    "argilla-server,
+    "argilla-server", # TODO: Fix the versions when publishing a new release
 ]
-# Do make sense to have this here?
 server-postgresql = [
-    # TODO: Fix the versions when publishing a new release
-    "argilla-server[postgresql]",
+    "argilla-server[postgresql]", # TODO: Fix the versions when publishing a new release
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
