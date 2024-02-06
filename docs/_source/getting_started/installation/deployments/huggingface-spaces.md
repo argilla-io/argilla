@@ -57,84 +57,66 @@ Once Argilla is running, you can use the UI with the Direct URL. This URL gives 
 
 If everything goes well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 
-If you want a quick step-by-step example, keep reading. If you want an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/tutorials/notebooks/training-textclassification-setfit-fewshot.html).
+If you want a quick step-by-step example, keep reading. If you prefer an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/getting_started/quickstart_workflow_feedback.html).
 
-First, we need to pip install `datasets` and `argilla` on Colab or your local machine:
+First, we need to pip install `argilla` on Colab or your local machine:
 
 ```bash
-pip install datasets argilla
+pip install argilla -U
 ```
 
-Then, you can read the example dataset using the `datasets` library. This dataset is a CSV file uploaded to the Hub using the drag-and-drop feature.
-
-```python
-from datasets import load_dataset
-
-dataset = load_dataset("dvilasuero/banking_app", split="train").shuffle()
-```
-
-You can create your first dataset by logging it into Argilla using your endpoint URL:
+Then, you can connect to Argilla using your endpoint URL.
 
 ```python
 import argilla as rg
 
-# if you connect to your public app endpoint (uses default API key)
+# If you connect to your public app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey")
 
-# if you connect to your private app endpoint (uses default API key)
+# If you connect to your private app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey", extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"})
-
-# transform dataset into Argilla's format and log it
-rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you read hundreds of datasets available on the Hub.
+So let's create a Dataset with two labels ("sadness" and "joy"). Don't forget to replace "your-workspace" where the dataset will be created.
 
-### Data labeling and model training
-
-At this point, you can label your data directly using your Argilla Space and read the training data to train your model of choice.
-
-```python
-# this will read our current dataset and turn it into a clean dataset for training
-dataset = rg.load("bankingapp_sentiment").prepare_for_training()
-```
-
-You can also get the full dataset and push it to the Hub for reproducibility and versioning:
+> To check your workspaces, go to "My settings" on the UI. If you need to create a new one, consult the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
+> Here, we are using a task template, see the docs to [create a fully custom dataset](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html).
 
 ```python
-# save full argilla dataset for reproducibility
-rg.load("bankingapp_sentiment").to_datasets().push_to_hub("bankingapp_sentiment")
-```
-
-Finally, this is how you can train a SetFit model using data from your Argilla Space:
-
-```python
-from sentence_transformers.losses import CosineSimilarityLoss
-
-from setfit import SetFitModel, SetFitTrainer
-
-# Create train test split
-dataset = dataset.train_test_split()
-
-# Load SetFit model from Hub
-model = SetFitModel.from_pretrained("sentence-transformers/paraphrase-mpnet-base-v2")
-
-# Create trainer
-trainer = SetFitTrainer(
-    model=model,
-    train_dataset=dataset["train"],
-    eval_dataset=dataset["test"],
-    loss_class=CosineSimilarityLoss,
-    batch_size=8,
-    num_iterations=20,
+dataset = rg.FeedbackDataset.for_text_classification(
+    labels=["sadness", "joy"],
+    multi_label=False,
+    use_markdown=True,
+    guidelines=None,
+    metadata_properties=None,
+    vectors_settings=None,
 )
-
-# Train and evaluate
-trainer.train()
-metrics = trainer.evaluate()
+dataset.push_to_argilla(name="my-first-dataset", workspace="<your-workspace>")
 ```
 
-As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
+Now, we will add the records. Create a list with the records you want to add and ensure that you match the fields with the ones specified in the previous step.
+
+> You can also use `pandas` or `load_dataset` to [read an existing dataset and create records from it](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/records.html#add-records).
+
+```python
+records = [
+    rg.FeedbackRecord(
+        fields={
+            "text": "I am so happy today",
+        },
+    ),
+    rg.FeedbackRecord(
+        fields={
+            "text": "I feel sad today",
+        },
+    )
+]
+dataset.add_records(records)
+```
+
+Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. I
+
+As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
 
 ## Feedback and support
 
