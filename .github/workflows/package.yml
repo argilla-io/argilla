@@ -159,7 +159,6 @@ jobs:
         ARGILLA_SERVER_TAG=main
     secrets: inherit
 
-
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
