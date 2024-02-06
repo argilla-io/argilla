@@ -6,7 +6,7 @@
       position="left"
       minimalist
     >
-      <span class="title-area__suggestion-icon" v-html="$suggestionIcon" />
+      <img class="title-area__suggestion-icon" :src="suggestionIcon" />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -34,6 +34,7 @@
 
 <script>
 import "assets/icons/info";
+import suggestionIcon from "@/static/icons/suggestion.svg";
 
 export default {
   name: "QuestionHeader",
@@ -48,6 +49,7 @@ export default {
       tooltipMessage: this.question.description,
       openTooltip: false,
       timer: null,
+      suggestionIcon,
     };
   },
   computed: {
@@ -80,9 +82,7 @@ export default {
   font-weight: 500;
   &__suggestion-icon {
     cursor: default;
-    :deep(svg) {
-      width: 20px;
-    }
+    width: 20px;
   }
 }
 

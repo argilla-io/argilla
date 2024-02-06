@@ -57,7 +57,9 @@
         <BaseTooltip
           :text="
             hasSuggestion(option.text)
-              ? `${$suggestionIcon} ${$t('suggestion.name')}: ${option.text}`
+              ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
+                  option.text
+                }`
               : null
           "
           minimalist
@@ -89,7 +91,7 @@
 
 <script>
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
-
+import suggestionIcon from "@/static/icons/suggestion.svg";
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
 export default {
@@ -137,6 +139,7 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
+      suggestionIcon,
     };
   },
   created() {
