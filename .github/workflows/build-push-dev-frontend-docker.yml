@@ -74,7 +74,7 @@ jobs:
         id: generate-docker-tags
         run: |
           GCP_REGISTRY_TAG="europe-docker.pkg.dev/argilla-ci/$IMAGE_NAME:$DOCKER_IMAGE_TAG"
-          
+
           echo "tags=$GCP_REGISTRY_TAG" >> $GITHUB_OUTPUT
         env:
           IMAGE_NAME: ${{ inputs.image-name }}
