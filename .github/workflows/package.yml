@@ -155,7 +155,6 @@ jobs:
       image-name: argilla/argilla-quickstart-for-dev
       dockerfile: frontend/dev.frontend.Dockerfile
       platforms: linux/amd64
-      context: frontend
       build-args: |
         ARGILLA_SERVER_TAG=main
     secrets: inherit

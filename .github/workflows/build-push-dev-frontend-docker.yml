@@ -19,11 +19,6 @@ on:
         description: "Platforms to build for"
         required: true
         type: string
-      context:
-        description: "Docker build context"
-        required: false
-        type: string
-        default: "docker"
       build-args:
         description: "Build arguments"
         required: false
@@ -110,7 +105,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ${{ inputs.context }}
+          context: frontend
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           tags: ${{ steps.generate-docker-tags.outputs.tags }}
