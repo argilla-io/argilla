@@ -40,6 +40,8 @@ jobs:
               - 'setup.py'
               - 'scripts/end2end_examples.py'
               - 'docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples/**'
+            frontendChanges:
+              - 'frontend/**'
             buildChanges:
               - 'src/**'
               - 'frontend/**'
