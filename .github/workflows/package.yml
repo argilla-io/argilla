@@ -69,6 +69,7 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
             runsOn: extended-runner
+
     name: Run end2end tests
     uses: ./.github/workflows/end2end-examples.yml
     needs: check_repo_files
@@ -158,6 +159,7 @@ jobs:
       build-args: |
         ARGILLA_SERVER_TAG=main
     secrets: inherit
+
 
   deploy_environment:
     name: Deploy branch environment
