@@ -28,6 +28,7 @@
         <form class="form" @submit.prevent="onLoginUser">
           <div>
             <p class="form__title" v-text="$t('login.title')" />
+            <p class="form__title" v-text="$t('login.title')" />
             <div class="form__input" :class="{ active: login.username }">
               <label class="form__label">Username</label>
               <input
