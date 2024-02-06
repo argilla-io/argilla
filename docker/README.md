@@ -1,5 +1,5 @@
 
-## 📣 Important Note 
+## 📣 Important Note
 The content in this folder might be outdated. We've moved to a new and improved location. 🆕
 
 ### 🌐 New Repository
