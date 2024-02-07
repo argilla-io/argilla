@@ -61,7 +61,7 @@ app.add_typer(whoami_app, name="whoami")
 app.add_typer(workspaces_app, name="workspaces")
 
 if is_package_with_extras_installed("argilla", ["server"]):
-    from argilla.server.cli import app as server_app
+    from argilla_server.cli import app as server_app
 
     app.add_typer(server_app, name="server")
 

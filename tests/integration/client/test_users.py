@@ -23,7 +23,7 @@ from argilla.client.singleton import ArgillaSingleton
 from argilla.client.users import User
 
 if TYPE_CHECKING:
-    from argilla.server.models import User as ServerUser
+    from argilla_server.models import User as ServerUser
 
 from tests.factories import UserFactory, WorkspaceFactory
 

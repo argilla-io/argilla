@@ -29,12 +29,12 @@ from argilla.client.models import Text2TextRecord, TextClassificationRecord
 from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
-from argilla.server import telemetry as server_telemetry
-from argilla.server.cli.database.migrate import migrate_db
-from argilla.server.database import get_async_db
-from argilla.server.models import User, UserRole, Workspace
-from argilla.server.settings import settings
 from argilla.utils import telemetry as client_telemetry
+from argilla_server import telemetry as server_telemetry
+from argilla_server.cli.database.migrate import migrate_db
+from argilla_server.database import get_async_db
+from argilla_server.models import User, UserRole, Workspace
+from argilla_server.settings import settings
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -130,13 +130,13 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 
 @pytest.fixture(scope="function")
 def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
-    from argilla.server.app import app
+    from argilla_server import app
 
     async def override_get_async_db():
         session = TestSession()
         yield session
 
-    mocker.patch("argilla.server.app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
     app.dependency_overrides[get_async_db] = override_get_async_db
 

@@ -23,7 +23,7 @@ from argilla.client.sdk.workspaces.api import (
 )
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.client.singleton import ArgillaSingleton
-from argilla.server.models import User
+from argilla_server.models import User
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 

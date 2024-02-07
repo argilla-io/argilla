@@ -16,7 +16,7 @@ import pytest
 from argilla.client import api
 from argilla.client.models import TextClassificationRecord
 from argilla.client.singleton import active_api, active_client
-from argilla.server.models import User
+from argilla_server.models import User
 
 from tests.factories import UserFactory, WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors

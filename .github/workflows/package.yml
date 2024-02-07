@@ -51,26 +51,13 @@ jobs:
           echo "is_deployable=$IS_DEPLOYABLE" >> $GITHUB_OUTPUT
 
   run_unit_tests:
-    strategy:
-      matrix:
-        include:
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.8.2
-            runsOn: extended-runner
-          - searchEngineDockerImage: opensearchproject/opensearch:2.4.1
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-2.4.1
-            runsOn: ubuntu-latest
     name: Run unit tests
     uses: ./.github/workflows/run-python-tests.yml
     needs: check_repo_files
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
-      searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
-      searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
       coverageReport: coverage
-      runsOn: ${{ matrix.runsOn }}
+      runsOn: extended-runner
       pytestArgs: tests/unit
     secrets: inherit
 
@@ -82,6 +69,7 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
             coverageReport: coverage-elasticsearch-8.8.2
             runsOn: extended-runner
+
     name: Run end2end tests
     uses: ./.github/workflows/end2end-examples.yml
     needs: check_repo_files
@@ -90,36 +78,6 @@ jobs:
       runsOn: ${{ matrix.runsOn }}
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
       searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
-    secrets: inherit
-
-  run_unit_test_with_extra_engines:
-    strategy:
-      matrix:
-        include:
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.8.0
-            runsOn: extended-runner
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.6.0
-            runsOn: extended-runner
-          - searchEngineDockerImage: opensearchproject/opensearch:2.8.0
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
-            coverageReport: coverage-opensearch-2.8.0
-            runsOn: extended-runner
-    name: Run unit tests with extra engines
-    uses: ./.github/workflows/run-python-tests.yml
-    needs: check_repo_files
-    if: |
-      needs.check_repo_files.outputs.pythonChanges == 'true' &&
-      startsWith(github.event.ref, 'refs/tags/v')
-    with:
-      searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
-      searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
-      coverageReport: coverage
-      runsOn: ${{ matrix.runsOn }}
-      pytestArgs: tests/unit
     secrets: inherit
 
   run_integration_tests:
@@ -144,68 +102,74 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+
       - name: Copy all reports
         run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
+
       - name: Display current files structure
         run: ls -R
+
       - name: Upload Coverage reports to Codecov 📦
         uses: codecov/codecov-action@v2
+
+  run_frontend_test:
+    name: Run Argilla Frontend tests
+    runs-on: ubuntu-latest
+    needs: check_repo_files
+    if: needs.check_repo_files.outputs.frontendChanges == 'true'
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Run Frontend tests
+        working-directory: frontend
+        run: |
+          npm install
+          npm run lint
+          npm run test
 
   build_python_package:
     name: Build Argilla python package
     uses: ./.github/workflows/build-python-package.yml
+    needs:
+      - run_unit_tests
+      - run_integration_tests
+      - check_repo_files
+    if: needs.check_repo_files.outputs.pythonChanges == 'true'
+    secrets: inherit
+
+  build_quickstart_for_develop_docker_image:
+    name: Build Quickstart For Develop docker image
+    uses: ./.github/workflows/build-push-dev-frontend-docker.yml
     needs: deployable_check
     if: needs.deployable_check.outputs.isDeployable == 'true'
-    secrets: inherit
-
-  build_server_docker_image:
-    name: Build Argilla server docker image
-    uses: ./.github/workflows/build-push-docker.yml
-    needs:
-      - build_python_package
-      - run_unit_tests
-    if: |
-      !cancelled() &&
-      needs.build_python_package.result == 'success' &&
-      !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'cancelled')
     with:
-      download-python-package: true
-      image-name: argilla/argilla-server
-      dockerfile: docker/Dockerfile
-      readme: README.md
-      platforms: linux/amd64,linux/arm64
-    secrets: inherit
-
-  build_quickstart_docker_image:
-    name: Build Argilla quickstart docker image
-    uses: ./.github/workflows/build-push-docker.yml
-    needs: build_server_docker_image
-    if: |
-      !cancelled() &&
-      needs.build_server_docker_image.result == 'success'
-    with:
-      download-python-package: false
-      image-name: argilla/argilla-quickstart
-      dockerfile: docker/quickstart.Dockerfile
-      readme: docker/quickstart.README.md
-      platforms: linux/amd64,linux/arm64
+      image-name: argilla/argilla-quickstart-for-dev
+      dockerfile: frontend/dev.frontend.Dockerfile
+      platforms: linux/amd64
       build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+        ARGILLA_SERVER_TAG=main
     secrets: inherit
 
   deploy_environment:
     name: Deploy branch environment
     uses: ./.github/workflows/deploy-environment.yml
-    needs: build_quickstart_docker_image
+    needs: build_quickstart_for_develop_docker_image
     if: |
       !cancelled() &&
-      needs.build_quickstart_docker_image.result == 'success' &&
+      needs.build_quickstart_for_develop_docker_image.result == 'success' &&
       github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
-      image-name: argilla/argilla-quickstart
-      image-version: ${{ needs.build_quickstart_docker_image.outputs.version }}
+      image-name: argilla/argilla-quickstart-for-dev
+      image-version: ${{ needs.build_quickstart_for_develop_docker_image.outputs.version }}
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
@@ -217,26 +181,29 @@ jobs:
     if: ${{ github.event_name == 'release' }}
     needs:
       - run_integration_tests
-      - build_quickstart_docker_image
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Download python package
         uses: actions/download-artifact@v2
         with:
           name: python-package
           path: dist
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.AR_TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+
       - name: Test Installing 🍿
         run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
+
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@master
         with:

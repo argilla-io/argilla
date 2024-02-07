@@ -75,12 +75,12 @@ from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.client.singleton import active_client, init
-from argilla.server.apis.v0.models.text_classification import (
+from argilla_server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecordInputs,
 )
-from argilla.server.commons.models import TaskStatus
-from argilla.server.models import User, UserRole
+from argilla_server.commons.models import TaskStatus
+from argilla_server.models import User, UserRole
 from httpx import ConnectError
 
 from tests.factories import UserFactory, WorkspaceFactory
