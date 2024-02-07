@@ -101,8 +101,8 @@ export default {
       agent: "Agent",
     },
     plural: "Suggestions",
-    "suggested-rank": "✨ Suggested rank",
-    name: "✨ Suggestion",
+    "suggested-rank": `Suggested rank`,
+    name: `Suggestion`,
   },
   similarity: {
     "record-number": "Record number",

@@ -23,12 +23,16 @@
           v-text="item.text"
           :id="`${item.value}-span`"
         />
-        <span
-          :title="$t('suggestion.suggested-rank')"
-          class="draggable__suggestion"
+        <BaseTooltip
           v-if="findRankSuggestion(item.value)"
-          >{{ findRankSuggestion(item.value).rank }}</span
+          class="draggable__suggestion"
+          :text="`<img src=${suggestionIcon} /> ${$t(
+            'suggestion.suggested-rank'
+          )}`"
+          minimalist
         >
+          <span v-text="findRankSuggestion(item.value).rank" />
+        </BaseTooltip>
       </div>
     </draggable>
 
@@ -80,6 +84,7 @@
 
 <script>
 import "assets/icons/draggable";
+import suggestionIcon from "@/static/icons/suggestion.svg";
 
 export default {
   name: "DndSelectionComponent",
@@ -100,6 +105,7 @@ export default {
     return {
       timer: null,
       keyCode: "",
+      suggestionIcon,
     };
   },
   watch: {

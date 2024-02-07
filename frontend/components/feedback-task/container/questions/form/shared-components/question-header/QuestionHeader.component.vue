@@ -3,11 +3,15 @@
     <BaseTooltip
       v-if="question.suggestion"
       :text="suggestionTooltipText"
-      :offset="4"
       position="left"
       minimalist
     >
-      <span class="title-area__suggestion-icon" v-text="`✨ `" />
+      <img
+        class="title-area__suggestion-icon"
+        src="@/static/icons/suggestion.svg"
+        :alt="$t('suggestion.name')"
+        draggable="false"
+      />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -35,6 +39,7 @@
 
 <script>
 import "assets/icons/info";
+
 export default {
   name: "QuestionHeader",
   props: {
@@ -79,8 +84,8 @@ export default {
   color: $black-87;
   font-weight: 500;
   &__suggestion-icon {
-    font-size: 1.2em;
     cursor: default;
+    width: 20px;
   }
 }
 

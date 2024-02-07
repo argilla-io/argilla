@@ -54,29 +54,35 @@
           @focus="onFocus"
           @keydown.tab="expandLabelsOnTab(index)"
         />
-        <label
-          class="label-text"
-          :class="{
-            'label-active': option.isSelected,
-            '--suggestion': hasSuggestion(option.text),
-            square: multiple,
-            round: !multiple,
-          }"
-          :for="option.id"
-          :data-title="
+        <BaseTooltip
+          :text="
             hasSuggestion(option.text)
-              ? `${$t('suggestion.name')}: ${option.text}`
+              ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
+                  option.text
+                }`
               : null
           "
-          :title="option.text"
+          minimalist
         >
-          <span
-            class="key"
-            v-if="showShortcutsHelper"
-            v-text="keyboards[option.id]"
-          />
-          <span>{{ option.text }}</span>
-        </label>
+          <label
+            class="label-text"
+            :class="{
+              'label-active': option.isSelected,
+              '--suggestion': hasSuggestion(option.text),
+              square: multiple,
+              round: !multiple,
+            }"
+            :for="option.id"
+            :title="option.text"
+          >
+            <span
+              class="key"
+              v-if="showShortcutsHelper"
+              v-text="keyboards[option.id]"
+            />
+            <span>{{ option.text }}</span>
+          </label></BaseTooltip
+        >
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -85,7 +91,7 @@
 
 <script>
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
-
+import suggestionIcon from "@/static/icons/suggestion.svg";
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
 export default {
@@ -133,6 +139,7 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
+      suggestionIcon,
     };
   },
   created() {
@@ -456,12 +463,6 @@ input[type="checkbox"] {
 .no-result {
   display: block;
   height: $base-space * 4;
-}
-
-[data-title] {
-  position: relative;
-  overflow: visible;
-  @include tooltip-mini("top");
 }
 
 .shuffle-move {

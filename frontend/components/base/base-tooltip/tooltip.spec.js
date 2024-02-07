@@ -24,13 +24,14 @@ describe("BaseTooltip", () => {
     expect(wrapper.text()).toBe("this is a  tooltip message");
   });
   it("on mouse enter show the tooltip", async () => {
-    await wrapper.trigger("mouseenter");
+    const tooltipTrigger = wrapper.findComponent({ ref: "tooltipWrapper" });
+    await tooltipTrigger.trigger("mouseenter");
     const tooltipContent = wrapper.find(".tooltip-content");
     expect(tooltipContent.classes()).toContain("tooltip-content--show");
   });
-
   it("on mouse leave hide the tooltip", async () => {
-    await wrapper.trigger("mouseleave");
+    const tooltipTrigger = wrapper.findComponent({ ref: "tooltipWrapper" });
+    await tooltipTrigger.trigger("mouseleave");
     const tooltipContent = wrapper.find(".tooltip-content");
     expect(tooltipContent.classes()).toContain("tooltip-content--hide");
   });
