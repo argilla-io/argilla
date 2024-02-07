@@ -75,6 +75,9 @@ export default {
   margin-left: 1em;
   display: flex;
   align-items: center;
+  @include media("<=tablet") {
+    flex-wrap: wrap;
+  }
   ul {
     display: flex;
     padding-left: 0;
@@ -101,6 +104,9 @@ export default {
   &__copy {
     user-select: none;
     cursor: pointer;
+    @include media("<=tablet") {
+      display: none;
+    }
     &:hover {
       .svg-icon {
         fill: darken(palette(white), 10%);

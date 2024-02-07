@@ -176,6 +176,9 @@ export default {
   background: $brand-secondary-color;
   display: flex;
   min-height: 100vh;
+  @include media("<=tablet") {
+    flex-direction: column;
+  }
   a,
   :deep(a) {
     outline: none;
@@ -245,6 +248,11 @@ input:-webkit-autofill {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    @include media("<=tablet") {
+      width: 100%;
+      padding: $base-space * 2;
+      min-height: 100vh;
+    }
 
     &__header {
       height: 10%;
@@ -257,6 +265,10 @@ input:-webkit-autofill {
       display: flex;
       flex-direction: column;
       justify-content: center;
+      @include media("<=tablet") {
+        width: 100%;
+        margin: auto 0;
+      }
     }
   }
 
@@ -265,6 +277,9 @@ input:-webkit-autofill {
     flex-flow: column;
     position: relative;
     width: 50vw;
+    @include media("<=tablet") {
+      display: none;
+    }
     svg {
       position: absolute;
       max-width: 380px;

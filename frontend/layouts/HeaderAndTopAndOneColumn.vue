@@ -49,6 +49,11 @@ $gap-width: $base-space * 2;
     "center sidebar";
   height: 100vh;
   transition: 0.4s ease-in-out;
+  @include media("<=tablet") {
+    grid-template-areas:
+      "header header"
+      "center center";
+  }
   &.--panel {
     @include media(">desktop") {
       grid-template-columns: 1fr $sidebarWidth;

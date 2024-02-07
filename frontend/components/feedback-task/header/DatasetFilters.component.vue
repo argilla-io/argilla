@@ -132,6 +132,9 @@ export default {
   display: flex;
   gap: $base-space;
   align-items: center;
+  @include media("<=tablet") {
+    flex-wrap: wrap;
+  }
   &__wrapper {
     width: 100%;
   }

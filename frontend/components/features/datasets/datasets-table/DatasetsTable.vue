@@ -242,6 +242,9 @@ export default {
   padding: 0.2em calc($sidebarMenuWidth + 4em) 0 4em;
   flex-grow: 1;
   overflow: auto;
+  @include media("<=tablet") {
+    padding: 0 $base-space * 2;
+  }
 }
 .dataset {
   &__table {
@@ -256,5 +259,11 @@ export default {
 
 .search-area {
   width: clamp(300px, 30vw, 800px);
+}
+
+:deep(.table-info__item__col:nth-last-of-type(-n + 5)) {
+  @include media("<=tablet") {
+    display: none;
+  }
 }
 </style>

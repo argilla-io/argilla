@@ -111,7 +111,7 @@ export default {
   &__form {
     @include media("<desktop") {
       overflow: visible;
-      height: auto;
+      height: auto !important;
       max-height: none !important;
     }
   }
