@@ -57,7 +57,7 @@ Once Argilla is running, you can use the UI with the Direct URL. This URL gives 
 
 If everything goes well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 
-If you want a quick step-by-step example, keep reading. If you prefer an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/getting_started/quickstart_workflow_feedback.html).
+If you want a quick step-by-step example, keep reading. If you prefer an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](/getting_started/quickstart_workflow_feedback.ipynb).
 
 First, we need to pip install `argilla` on Colab or your local machine:
 
@@ -79,8 +79,8 @@ rg.init(api_url="[your_space_url]", api_key="admin.apikey", extra_headers={"Auth
 
 So let's create a Dataset with two labels ("sadness" and "joy"). Don't forget to replace "your-workspace" where the dataset will be created.
 
-> To check your workspaces, go to "My settings" on the UI. If you need to create a new one, consult the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
-> Here, we are using a task template, see the docs to [create a fully custom dataset](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html).
+> To check your workspaces, go to "My settings" on the UI. If you need to create a new one, consult the [docs](/getting_started/installation/configurations/workspace_management.md).
+> Here, we are using a task template, see the docs to [create a fully custom dataset](/practical_guides/create_update_dataset/create_dataset.md).
 
 ```python
 dataset = rg.FeedbackDataset.for_text_classification(
@@ -96,7 +96,7 @@ dataset.push_to_argilla(name="my-first-dataset", workspace="<your-workspace>")
 
 Now, we will add the records. Create a list with the records you want to add and ensure that you match the fields with the ones specified in the previous step.
 
-> You can also use `pandas` or `load_dataset` to [read an existing dataset and create records from it](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/records.html#add-records).
+> You can also use `pandas` or `load_dataset` to [read an existing dataset and create records from it](/practical_guides/create_update_dataset/records.md#add-records).
 
 ```python
 records = [
@@ -114,9 +114,9 @@ records = [
 dataset.add_records(records)
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. I
+Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling.
 
-As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en/latest/tutorials_and_integrations/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
+As a next step, you can check the [Argilla Tutorials](/tutorials_and_integrations/tutorials/tutorials.md) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
 
 ## Feedback and support
 
