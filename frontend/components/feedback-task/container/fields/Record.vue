@@ -67,6 +67,9 @@ export default {
     min-width: 0;
     height: 100%;
     min-height: 0;
+    @include media("<=tablet") {
+      height: auto;
+    }
   }
   &__content {
     display: flex;
