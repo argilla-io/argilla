@@ -19,11 +19,11 @@ COPY --chown=argilla:argilla nuxt.config.ts ./nuxt.config.ts
 RUN npm install \
 && echo \
 'quickstart: /bin/bash /home/argilla/start_quickstart_argilla.sh\n\
-frontend: cd /home/argilla/frontend && HOST=0.0.0.0 PORT=5100 npm run start\n' > /home/argilla/Procfile
+frontend: cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile
 
 WORKDIR /home/argilla/
 
-EXPOSE 5100
+EXPOSE 3000
 EXPOSE 6900
 EXPOSE 9200
 
