@@ -51,7 +51,7 @@ dynamic = ["version"]
 server = [
     "argilla-server ~= 1.24.0.rc", # TODO: Fix the versions when publishing a new release
 ]
-server-postgresql = [
+postgresql = [
     "argilla-server[postgresql] ~= 1.24.0.rc", # TODO: Fix the versions when publishing a new release
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
