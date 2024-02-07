@@ -328,6 +328,20 @@ docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_
 
 You will also need the vector database set up, as we show in the [Vector Database](#vector-database ) section.
 
+#### Install Argilla Server from source
+
+To install the Argilla server from source, you need to clone the repository and install the server package. You can do so by following the steps below:
+
+```sh
+mkdir -p libs && cd libs
+git clone https://github.com/argilla-io/argilla-server.git
+cd argilla-server
+pip install -e .
+```
+
+By installing this in the same python environment as the Argilla package, you will be able to use the server package in your development environment.
+
+For more information about the Argilla server, you can check the [Argilla Server Repository] (https://github.com/argilla-io/argilla-server/blob/main/README.md) page.
 
 #### Launch Argilla Server
 
@@ -340,7 +354,7 @@ argilla server start ARGILLA_ENABLE_TELEMETRY=0
 Or you can start the server through uvicorn, with the following command:
 
 ```sh
-ARGILLA_ENABLE_TELEMETRY=0 uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 --reload
+ARGILLA_ENABLE_TELEMETRY=0 uvicorn argilla_server:app --port 6900 --host 0.0.0.0 --reload
 ```
 
 With this command, you will activate reloading the backend files after every change. This way, whenever you make a change and save it, it will automatically be reflected in your server.
