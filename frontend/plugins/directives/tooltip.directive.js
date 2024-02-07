@@ -21,7 +21,7 @@ Vue.directive("tooltip", {
       backgroundColor,
       borderColor,
       color,
-      width = 400,
+      width = content.length < 40 ? 100 : 400,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
     } = binding.value;
 
@@ -60,12 +60,7 @@ Vue.directive("tooltip", {
       tooltip = initTooltipStyle(tooltip, backgroundColor, borderColor, width);
 
       // NOTE - init tooltip position
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
 
       // NOTE - add the tooltip to the element and add event listener to the close icon
       element.appendChild(tooltip);
@@ -77,12 +72,7 @@ Vue.directive("tooltip", {
       tooltip.style.display = "flex";
       tooltip.setAttribute("tooltip-visible", "true");
       elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
     };
 
     element.closeTooltip = () => {
@@ -120,22 +110,12 @@ Vue.directive("tooltip", {
         tooltip.style.visibility = "visible";
       }
       elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
     };
 
     element.resize = function () {
       elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
     };
 
     // NOTE - init all eventListeners
@@ -255,12 +235,7 @@ const initTooltipTriangleInnerStyle = (tooltipTriangleInner) => {
   return tooltipTriangleInner;
 };
 
-const initTooltipPosition = (
-  tooltip,
-  tooltipPosition,
-  elementOffset,
-  width
-) => {
+const initTooltipPosition = (tooltip, tooltipPosition, elementOffset) => {
   const tooltipOffset = initElementOffset(tooltip);
   const tooltipTriangle = tooltip.querySelector(".triangle");
   const tooltipTriangleOffset = initElementOffset(tooltipTriangle);
@@ -269,18 +244,20 @@ const initTooltipPosition = (
     window.innerWidth <= elementOffset.right + tooltipOffset.width / 2;
   const bottomSideoutOfViewport =
     window.innerHeight <= elementOffset.bottom + tooltipOffset.height;
-
   switch (tooltipPosition.toUpperCase()) {
     case TOOLTIP_DIRECTION.BOTTOM:
       tooltip.style.left = rightSideOutOfViewport
         ? `${
             elementOffset.left -
-            width +
+            tooltipOffset.width +
             elementOffset.width +
             tooltipTriangleOffset.width
           }px`
-        : `${elementOffset.left - width / 2 + elementOffset.width / 2}px`;
-
+        : `${
+            elementOffset.left -
+            tooltipOffset.width / 2 +
+            elementOffset.width / 2
+          }px`;
       tooltipTriangle.style.left = rightSideOutOfViewport ? "100%" : "50%";
       tooltipTriangle.style.marginLeft = rightSideOutOfViewport
         ? `-${tooltipTriangleOffset.width * 2}px`
