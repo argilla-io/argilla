@@ -141,9 +141,9 @@ az container show --resource-group <resource-group> --name argilla --query "{FQD
 
 Argilla should now be accessible at the FQDN provided in the output, on the port `6900`.
 
-## Google Cloud Platform (GCP)
+## Google Cloud Platform (GCP) via Cloud Run
 
-To deploy Argilla on GCP, you can use Cloud Run, a managed platform that scales stateless containers. This guide will take you through deploying Argilla using the `gcloud` CLI tool, and is based on the [GCP documentation](https://cloud.google.com/run/docs/quickstarts/deploy-container).
+First, we will deploy Argilla using Cloud Run, a managed platform that scales stateless containers. To deploy Argilla on GCP, you can use Cloud Run, a managed platform that scales stateless containers. This guide will take you through deploying Argilla using the `gcloud` CLI tool, and is based on the [GCP documentation](https://cloud.google.com/run/docs/quickstarts/deploy-container).
 
 > 🚒 **We will deploy the Argilla quickstart image for simplicity which means we have a pre-packaged storage layer, and cannot use Cloud Run's horizontal scaling features.**
 
@@ -178,7 +178,10 @@ gcloud run services describe <deployment-name> \
 --region <region> \
 --format 'value(status.url)'
 ```
-Deploying Argilla Server to Google Cloud Platform involves creating a compute instance, setting up Docker and Docker Compose, and configuring network settings for external traffic. Follow these steps:
+
+## Google Cloud Platform (GCP) on a Dedicated Virtual Machine
+
+If [deploying via Cloud Run](#google-cloud-platform-gcp-via-cloud-run) is not suitable for your use case, you can deploy Argilla on a dedicated virtual machine via Cloud Compute. Deploying Argilla Server to Cloud Compute involves creating a compute instance, setting up Docker and Docker Compose, and configuring network settings for external traffic. Follow these steps:
 
 ### 1. Create an Instance
 
@@ -277,3 +280,4 @@ curl -vI $STATIC_IP:6900
 
 Now you can access the Argilla instance in your browser using the URL `http://[STATIC_IP]:6900`.
 
+> 🚒 **If you'd like support with this and/or want to contribute this guide, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
