@@ -6,7 +6,12 @@
       position="left"
       minimalist
     >
-      <img class="title-area__suggestion-icon" :src="suggestionIcon" />
+      <img
+        class="title-area__suggestion-icon"
+        src="@/static/icons/suggestion.svg"
+        :alt="$t('suggestion.name')"
+        draggable="false"
+      />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -34,7 +39,6 @@
 
 <script>
 import "assets/icons/info";
-import suggestionIcon from "@/static/icons/suggestion.svg";
 
 export default {
   name: "QuestionHeader",
@@ -49,7 +53,6 @@ export default {
       tooltipMessage: this.question.description,
       openTooltip: false,
       timer: null,
-      suggestionIcon,
     };
   },
   computed: {
