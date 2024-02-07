@@ -2,12 +2,13 @@ name: Close Pull Request
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
 
 jobs:
   teardown_pr_environment:
     name: Teardown Cloud Run PR environment
     runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
 
     # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
     permissions:
@@ -15,18 +16,18 @@ jobs:
       id-token: write
 
     steps:
-      - uses: 'actions/checkout@v3'
+      - uses: "actions/checkout@v3"
 
       - name: Authenticate to Google Cloud
-        uses: 'google-github-actions/auth@v1'
+        uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
-        uses: 'google-github-actions/setup-gcloud@v1'
+        uses: "google-github-actions/setup-gcloud@v1"
         with:
-          version: '>= 435.0.0'
+          version: ">= 435.0.0"
 
       - name: Remove PR environment if exists
         run: |
