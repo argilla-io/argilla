@@ -42,6 +42,7 @@ export default {
   border: 1px solid $black-37;
   border-radius: $border-radius-rounded;
   margin: 0;
+  color: $black-54;
   @include font-size(12px);
   @include line-height(12px);
   &.--clickable {
