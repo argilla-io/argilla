@@ -75,18 +75,21 @@ export default {
   margin-left: 1em;
   display: flex;
   align-items: center;
-  @include media("<=tablet") {
-    flex-wrap: wrap;
-  }
   ul {
     display: flex;
     padding-left: 0;
     font-weight: normal;
     list-style: none;
+    @include media("<=tablet") {
+      flex-wrap: wrap;
+    }
   }
   li {
     margin: auto 0.5em auto auto;
     white-space: nowrap;
+    @include media("<=tablet") {
+      margin: 0;
+    }
     &:not(:last-child):after {
       content: "/";
       margin-left: 0.5em;

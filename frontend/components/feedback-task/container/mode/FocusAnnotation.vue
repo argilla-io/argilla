@@ -122,6 +122,10 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
+    @include media("<desktop") {
+      flex: 0;
+      height: auto;
+    }
     &__header {
       display: flex;
       justify-content: flex-end;

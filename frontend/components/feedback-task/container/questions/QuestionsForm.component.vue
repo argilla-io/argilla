@@ -317,8 +317,8 @@ export default {
   min-width: 0;
   justify-content: space-between;
   margin-bottom: auto;
-  @include media("<=tablet") {
-    justify-content: flex-end;
+  @include media("<desktop") {
+    justify-content: flex-start;
   }
   &__header {
     display: flex;

@@ -120,6 +120,7 @@ export default {
 .tooltip {
   position: relative;
   display: inline-block;
+  max-width: 100%;
 }
 
 .tooltip-content {
