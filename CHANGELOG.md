@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.23.1](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.23.1)
+
+### Fixed
+
+- Fixed Responsive view for Feedback Datasets. ([#4579](https://github.com/argilla-io/argilla/pull/4579))
+
 ## [1.23.0](https://github.com/argilla-io/argilla/compare/v1.22.0...v1.23.0)
 
 ### Added
