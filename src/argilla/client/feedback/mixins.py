@@ -102,3 +102,5 @@ class ArgillaMetadataPropertiesMixin:
         )
         if response.status_code == 200:
             return ArgillaMetadataPropertiesMixin.parse_payload(client=client, payload=response.parsed)[0]
+
+print("test")
