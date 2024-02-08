@@ -317,6 +317,9 @@ export default {
   min-width: 0;
   justify-content: space-between;
   margin-bottom: auto;
+  @include media("<desktop") {
+    justify-content: flex-start;
+  }
   &__header {
     display: flex;
     justify-content: right;

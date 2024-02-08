@@ -71,6 +71,7 @@ export default {
     display: flex;
     align-items: center;
     gap: $base-space * 3;
+    flex-wrap: wrap;
   }
 
   &__dataset-name {

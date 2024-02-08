@@ -43,6 +43,9 @@ export default {
   padding-left: $base-space * 2;
   a {
     text-decoration: none;
+    @include media("<=tablet") {
+      flex-shrink: 0;
+    }
   }
 }
 .brand-icon {
