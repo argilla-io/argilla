@@ -71,5 +71,8 @@ $gap-width: $base-space * 2;
 .center-area {
   grid-area: center;
   min-width: 0;
+  @include media("<=tablet") {
+    min-height: 0;
+  }
 }
 </style>
