@@ -74,6 +74,9 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    @include media("<=tablet") {
+      max-height: 100svh;
+    }
   }
 
   &__sidebar.sidebar {
