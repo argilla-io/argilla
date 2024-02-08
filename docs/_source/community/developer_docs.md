@@ -341,7 +341,7 @@ pip install -e .
 
 By installing this in the same python environment as the Argilla package, you will be able to use the server package in your development environment.
 
-For more information about the Argilla server, you can check the [Argilla Server Repository] (https://github.com/argilla-io/argilla-server/blob/main/README.md) page.
+For more information about the Argilla server, you can check the [Argilla Server Repository](https://github.com/argilla-io/argilla-server/blob/main/README.md) page.
 
 #### Launch Argilla Server
 
