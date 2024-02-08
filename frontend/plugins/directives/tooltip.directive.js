@@ -276,7 +276,7 @@ const initTextStyle = (textWrapper, color = "rgba(0, 0, 0, 0.87)") => {
   textWrapper.style.lineHeight = "18px";
   textWrapper.style.whiteSpace = "pre-wrap";
   textWrapper.style.overflow = "auto";
-  textWrapper.style.maxHeight = "250px";
+  textWrapper.style.maxHeight = "360px";
   textWrapper.style.color = `${color}`;
   return textWrapper;
 };

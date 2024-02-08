@@ -117,6 +117,9 @@ export default {
     right: 0;
     z-index: 1;
     pointer-events: none;
+    @include media("<=tablet") {
+      display: none;
+    }
   }
 }
 </style>
