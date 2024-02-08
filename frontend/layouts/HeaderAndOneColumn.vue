@@ -29,7 +29,7 @@ export default {
   overflow: auto;
   height: calc(100vh - $topbarHeight);
   background: palette(white);
-  @include media("<=tablet") {
+  @include media("<desktop") {
     grid-template-columns: 16px 1fr 1fr 1fr 16px;
   }
 }

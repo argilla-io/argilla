@@ -49,7 +49,7 @@ $gap-width: $base-space * 2;
     "center sidebar";
   height: 100vh;
   transition: 0.4s ease-in-out;
-  @include media("<=tablet") {
+  @include media("<desktop") {
     height: 100svh;
     grid-template-areas:
       "header header"
@@ -72,7 +72,7 @@ $gap-width: $base-space * 2;
 .center-area {
   grid-area: center;
   min-width: 0;
-  @include media("<=tablet") {
+  @include media("<desktop") {
     min-height: 0;
   }
 }

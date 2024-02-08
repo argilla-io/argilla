@@ -74,7 +74,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       max-height: 100svh;
     }
   }

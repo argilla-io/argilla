@@ -45,7 +45,7 @@ body {
   max-height: 100vh;
   overflow: hidden;
   color: $black-87;
-  @include media("<=tablet") {
+  @include media("<desktop") {
     min-height: 100svh;
     max-height: 100svh;
   }
