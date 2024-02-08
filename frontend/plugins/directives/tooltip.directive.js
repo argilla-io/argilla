@@ -21,7 +21,7 @@ Vue.directive("tooltip", {
       backgroundColor,
       borderColor,
       color,
-      width = 208,
+      width = content.length < 40 ? 100 : 400,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
     } = binding.value;
 
@@ -60,12 +60,7 @@ Vue.directive("tooltip", {
       tooltip = initTooltipStyle(tooltip, backgroundColor, borderColor, width);
 
       // NOTE - init tooltip position
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
 
       // NOTE - add the tooltip to the element and add event listener to the close icon
       element.appendChild(tooltip);
@@ -77,12 +72,7 @@ Vue.directive("tooltip", {
       tooltip.style.display = "flex";
       tooltip.setAttribute("tooltip-visible", "true");
       elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
     };
 
     element.closeTooltip = () => {
@@ -120,12 +110,12 @@ Vue.directive("tooltip", {
         tooltip.style.visibility = "visible";
       }
       elementOffset = initElementOffset(element);
-      tooltip = initTooltipPosition(
-        tooltip,
-        tooltipPosition,
-        elementOffset,
-        width
-      );
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
+    };
+
+    element.resize = function () {
+      elementOffset = initElementOffset(element);
+      tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
     };
 
     // NOTE - init all eventListeners
@@ -177,6 +167,7 @@ const initEventsListener = (element, closeIcon) => {
       "scroll",
       element.scrollInParent
     );
+    window.addEventListener("resize", element.resize);
   }
 };
 
@@ -197,6 +188,7 @@ const destroyEventsListener = (element) => {
     "scroll",
     element.scrollInParent
   );
+  window.removeEventListener("resize", element.resize);
 };
 
 const initTooltipStyle = (
@@ -212,7 +204,7 @@ const initTooltipStyle = (
   tooltip.style.zIndex = "99999";
   tooltip.style.backgroundColor = backgroundColor;
   tooltip.style.borderRadius = "5px";
-  tooltip.style.padding = "16px";
+  tooltip.style.padding = "20px 8px 8px 8px";
   tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
   tooltip.style.border = `2px ${borderColor} solid`;
@@ -220,51 +212,72 @@ const initTooltipStyle = (
   return tooltip;
 };
 const initTooltipHeaderStyle = (tooltipHeader) => {
-  tooltipHeader.style.display = "flex";
-  tooltipHeader.style.justifyContent = "flex-end";
-  tooltipHeader.style.marginBottom = "8px";
+  tooltipHeader.style.position = "absolute";
+  tooltipHeader.style.top = "4px";
+  tooltipHeader.style.right = "4px";
   tooltipHeader.innerHTML =
-    '<svg width="20" height="20" viewBox="0 0 41 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer; width: 14px; height: 14px;"><path d="M8.9225 5.58721C8.13956 4.80426 6.87015 4.80426 6.08721 5.58721C5.30426 6.37015 5.30426 7.63956 6.08721 8.4225L17.6647 20L6.08733 31.5774C5.30438 32.3603 5.30438 33.6297 6.08733 34.4127C6.87027 35.1956 8.13968 35.1956 8.92262 34.4127L20.5 22.8353L32.0774 34.4127C32.8603 35.1956 34.1297 35.1956 34.9127 34.4127C35.6956 33.6297 35.6956 32.3603 34.9127 31.5774L23.3353 20L34.9128 8.4225C35.6957 7.63956 35.6957 6.37015 34.9128 5.58721C34.1298 4.80426 32.8604 4.80426 32.0775 5.58721L20.5 17.1647L8.9225 5.58721Z" fill="#9a9a9a"/></svg>';
+    '<svg width="12" height="12" viewBox="0 0 41 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer"><path d="M8.9225 5.58721C8.13956 4.80426 6.87015 4.80426 6.08721 5.58721C5.30426 6.37015 5.30426 7.63956 6.08721 8.4225L17.6647 20L6.08733 31.5774C5.30438 32.3603 5.30438 33.6297 6.08733 34.4127C6.87027 35.1956 8.13968 35.1956 8.92262 34.4127L20.5 22.8353L32.0774 34.4127C32.8603 35.1956 34.1297 35.1956 34.9127 34.4127C35.6956 33.6297 35.6956 32.3603 34.9127 31.5774L23.3353 20L34.9128 8.4225C35.6957 7.63956 35.6957 6.37015 34.9128 5.58721C34.1298 4.80426 32.8604 4.80426 32.0775 5.58721L20.5 17.1647L8.9225 5.58721Z" fill="#9a9a9a"/></svg>';
   return tooltipHeader;
 };
 
 const initTooltipTriangleStyle = (tooltipTriangle) => {
+  tooltipTriangle.setAttribute("class", "triangle");
   tooltipTriangle.style.position = "absolute";
-  tooltipTriangle.style.left = "50%";
-  tooltipTriangle.style.transform = "translateX(-50%)";
-  tooltipTriangle.style.top = "0";
   return tooltipTriangle;
 };
 const initTooltipTriangleInnerStyle = (tooltipTriangleInner) => {
   tooltipTriangleInner.style.position = "relative";
   tooltipTriangleInner.style.width = "0";
   tooltipTriangleInner.style.height = "0";
-  tooltipTriangleInner.style.top = "-10px";
   tooltipTriangleInner.style.borderBottom = "10px solid white";
   tooltipTriangleInner.style.borderRight = "10px solid transparent";
   tooltipTriangleInner.style.borderLeft = "10px solid transparent";
   return tooltipTriangleInner;
 };
 
-const initTooltipPosition = (
-  tooltip,
-  tooltipPosition,
-  elementOffset,
-  width
-) => {
+const initTooltipPosition = (tooltip, tooltipPosition, elementOffset) => {
+  const tooltipOffset = initElementOffset(tooltip);
+  const tooltipTriangle = tooltip.querySelector(".triangle");
+  const tooltipTriangleOffset = initElementOffset(tooltipTriangle);
   const margin = 8;
+  const rightSideOutOfViewport =
+    window.innerWidth <= elementOffset.right + tooltipOffset.width / 2;
+  const bottomSideoutOfViewport =
+    window.innerHeight <= elementOffset.bottom + tooltipOffset.height;
   switch (tooltipPosition.toUpperCase()) {
     case TOOLTIP_DIRECTION.BOTTOM:
-      tooltip.style.top = `${
-        elementOffset.y + elementOffset.height + margin
-      }px`;
-      tooltip.style.left = `${
-        elementOffset.left - width / 2 + elementOffset.width / 2
-      }px`;
+      tooltip.style.left = rightSideOutOfViewport
+        ? `${
+            elementOffset.left -
+            tooltipOffset.width +
+            elementOffset.width +
+            tooltipTriangleOffset.width
+          }px`
+        : `${
+            elementOffset.left -
+            tooltipOffset.width / 2 +
+            elementOffset.width / 2
+          }px`;
+      tooltipTriangle.style.left = rightSideOutOfViewport ? "100%" : "50%";
+      tooltipTriangle.style.marginLeft = rightSideOutOfViewport
+        ? `-${tooltipTriangleOffset.width * 2}px`
+        : `-${tooltipTriangleOffset.width / 2}px`;
+
+      tooltip.style.top = bottomSideoutOfViewport
+        ? `${elementOffset.y - tooltipOffset.height - margin}px`
+        : `${elementOffset.y + elementOffset.height + margin}px`;
+
+      tooltipTriangle.style.transform = bottomSideoutOfViewport
+        ? "rotateX(180deg)"
+        : "";
+      tooltipTriangle.style.top = bottomSideoutOfViewport
+        ? "100%"
+        : `-${tooltipTriangleOffset.height}px`;
       break;
     default:
     // tooltip direction is unknown
   }
+
   return tooltip;
 };
 
