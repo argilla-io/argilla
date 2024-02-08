@@ -35,7 +35,7 @@
 - Azure
 - Google Cloud Platform (GCP)
 ```
-```{grid-item-card} HugginFace Spaces
+```{grid-item-card} Hugging Face Spaces
 :link: huggingface-spaces.md
 
 - Your first Argilla Hugging Face Space
