@@ -22,10 +22,6 @@ These are the section headers that we use:
 
 - The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
 
-### Fixed 
-
-- **[server]** Fixed problems using `ARGILLA_BASE_URL` environment variable. ([#14](https://github.com/argilla-io/argilla-server/pull/14))
-
 ## [1.23.1](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.23.1)
 
 ### Fixed
