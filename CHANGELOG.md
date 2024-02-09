@@ -16,6 +16,16 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
+
+>[!NOTE]
+> This release does not contain any new features, but it includes a major change in the `argilla-server` dependency. 
+> The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
+### Changed
+
+- The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
 ## [1.23.1](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.23.1)
 
 ### Fixed
