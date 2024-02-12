@@ -147,9 +147,11 @@ export default {
   update: "Update",
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
-  argilla: {
-    api: {
-      "errors::UnauthorizedError": "Could not validate credentials",
+
+  validations: {
+    type: {
+      warning: "Warning",
     },
+    unauthorized: "Could not validate credentials",
   },
 };
