@@ -48,7 +48,7 @@ export default ({ $axios, app }) => {
   });
 
   $axios.onError((error: AxiosError<BackendError>) => {
-    const { data, status } = error.response ?? {};
+    const { status } = error.response ?? {};
     const t = (key: string) => app.i18n.t(key);
 
     Notification.dispatch("clear");

@@ -159,6 +159,9 @@ export default {
       429: {
         message: "Please wait a few seconds before trying again",
       },
+      500: {
+        message: "An error occurred, please try again later",
+      },
     },
   },
 };
