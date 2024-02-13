@@ -280,4 +280,3 @@ curl -vI $STATIC_IP:6900
 
 Now you can access the Argilla instance in your browser using the URL `http://[STATIC_IP]:6900`.
 
-> 🚒 **If you'd like support with this and/or want to contribute this guide, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
