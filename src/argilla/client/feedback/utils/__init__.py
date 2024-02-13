@@ -24,8 +24,12 @@ from argilla.client.feedback.utils.assignment import (
 from argilla.client.feedback.utils.html_utils import (
     audio_to_html,
     create_token_highlights,
+    get_file_data,
     image_to_html,
+    is_valid_dimension,
     media_to_html,
+    pdf_to_html,
+    validate_media_type,
     video_to_html,
 )
 
@@ -33,6 +37,7 @@ __all__ = [
     "audio_to_html",
     "video_to_html",
     "image_to_html",
+    "pdf_to_html",
     "create_token_highlights",
     "assign_records",
     "assign_workspaces",

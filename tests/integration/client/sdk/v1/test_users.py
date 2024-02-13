@@ -20,7 +20,7 @@ from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.singleton import ArgillaSingleton
 
 if TYPE_CHECKING:
-    from argilla.server.models import User as ServerUser
+    from argilla_server.models import User as ServerUser
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 

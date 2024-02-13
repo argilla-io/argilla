@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Cache pip 👜
         uses: actions/cache@v3
         env:
@@ -18,14 +19,12 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+
       - name: Build Package 🍟
         run: |
           pip install -U build
-          scripts/build_distribution.sh
+          rm -rf dist && python -m build
+
       - name: Upload package artifact
         uses: actions/upload-artifact@v3
         with:

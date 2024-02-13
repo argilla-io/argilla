@@ -17,69 +17,96 @@
 
 // Visually hide an element
 %visuallyhidden {
-    margin: -1px;
-    padding: 0;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip: rect(0, 0, 0, 0);
-    position: absolute;
+  margin: -1px;
+  padding: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
 }
 
 // Linear gradient using $primary-color
 %primary-color-gradient {
-    background: $primary-color;
-    background: -moz-linear-gradient( top, $primary-color 0%, $primary-lighten-color 100%);
-    background: -webkit-linear-gradient( top, $primary-color 0%, $primary-lighten-color 100%);
-    background: linear-gradient( to bottom, $primary-color 0%, $primary-lighten-color 100%);
+  background: $primary-color;
+  background: -moz-linear-gradient(
+    top,
+    $primary-color 0%,
+    $primary-lighten-color 100%
+  );
+  background: -webkit-linear-gradient(
+    top,
+    $primary-color 0%,
+    $primary-lighten-color 100%
+  );
+  background: linear-gradient(
+    to bottom,
+    $primary-color 0%,
+    $primary-lighten-color 100%
+  );
 }
 
 // Linear gradient using palette(blue, 300)
 %secondary-color-gradient {
-    background: palette(blue, 300);
-    background: -moz-linear-gradient( top, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
-    background: -webkit-linear-gradient( top, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
-    background: linear-gradient( to bottom, palette(blue, 300) 0%, $secondary-darken-color 55%, palette(blue, 300) 100%);
+  background: palette(blue, 300);
+  background: -moz-linear-gradient(
+    top,
+    palette(blue, 300) 0%,
+    $secondary-darken-color 55%,
+    palette(blue, 300) 100%
+  );
+  background: -webkit-linear-gradient(
+    top,
+    palette(blue, 300) 0%,
+    $secondary-darken-color 55%,
+    palette(blue, 300) 100%
+  );
+  background: linear-gradient(
+    to bottom,
+    palette(blue, 300) 0%,
+    $secondary-darken-color 55%,
+    palette(blue, 300) 100%
+  );
 }
 
 // Align center block element
 %center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 %vertical-center {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 // Clearfix
 %clearfix {
-    &:before,
-    &:after {
-        content: ' ';
-        display: table;
-    }
-    &:after {
-        clear: both;
-    }
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
 }
 
 // Input
 %clear-input {
-    width: 100%;
-    background: none;
-    outline: none;
-    box-shadow: none;
-    border: 0;
+  width: 100%;
+  background: none;
+  outline: none;
+  box-shadow: none;
+  border: 0;
 }
 
 %container {
-    margin: 0 auto;
-    padding: 4em;
+  margin: 0 auto;
+  padding: 4em;
 }
 %collapsable-if-metrics {
   padding-right: calc($sidebarMenuWidth + 56px);
@@ -104,14 +131,14 @@
   border: 0;
   &:hover,
   &:focus {
-      text-decoration: none;
-      background: none;
+    text-decoration: none;
+    background: none;
   }
 }
 %hide-scrollbar {
   /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
   /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     display: none;

@@ -73,6 +73,9 @@ $header-button-color: #262a2e;
   font-weight: 600;
   @include font-size(14px);
   box-shadow: $shadow-200;
+  @include media("<=tablet") {
+    display: none;
+  }
   &:hover {
     background: lighten($header-button-color, 3%);
   }

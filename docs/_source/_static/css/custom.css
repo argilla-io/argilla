@@ -58,10 +58,12 @@ h2 {
 .content {
   width: 50em;
   margin-top: 1.5em;
+  flex-shrink: 0;
 }
 
 .content--no-toc {
   width: calc(50em + 15em);
+  flex-shrink: 0;
 }
 
 .content .section h1 {
@@ -666,16 +668,20 @@ a.back-to-top.muted-link {
 }
 
 .toc-tree .reference {
+  display: inline-block;
   font-size: 14px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  display: block;
+  max-width: 15em;
 }
 
 .toc-tree .reference:hover {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-toc-item-text--active);
+}
+
+@media (min-width: 82em) {
+.toc-drawer {
+    width: 100%;
+  }
 }
 
 /* typography */

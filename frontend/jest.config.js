@@ -13,6 +13,7 @@ module.exports = {
     "^.+\\.js$": "babel-jest",
     "^.+\\.ts$": "babel-jest",
     ".*\\.(vue)$": "vue-jest",
+    "^.+\\.svg$": "jest-transform-stub",
   },
   snapshotSerializers: ["<rootDir>/node_modules/jest-serializer-vue"],
   testEnvironment: "jsdom",

@@ -55,7 +55,7 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationBulkData,
 )
 from argilla.client.singleton import init
-from argilla.server.models import User
+from argilla_server.models import User
 from datasets import Dataset
 
 from tests.integration.utils import delete_ignoring_errors

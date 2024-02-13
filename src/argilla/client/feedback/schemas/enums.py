@@ -53,4 +53,5 @@ class ResponseStatusFilter(str, Enum):
     draft = "draft"
     submitted = "submitted"
     discarded = "discarded"
-    missing = "missing"
+    missing = "missing"  # Deprecated. User "pending" instead
+    pending = "pending"

@@ -122,7 +122,7 @@ filtered_dataset = dataset.filter_by(response_status=["submitted", "draft"])
 
 ### Sort
 
-You may also order your records according to one or several attributes, including insertion and last update time, suggestion scores and metadata properties. In the UI, you can easily do this using the `Sort` menu.
+You may also order your records according to one or several attributes, including insertion and last update time, suggestion scores, response and suggestion values for Rating questions and metadata properties. In the UI, you can easily do this using the `Sort` menu.
 
 In the Python SDK, you can do this sorting with the `sort_by` method using the following arguments:
 

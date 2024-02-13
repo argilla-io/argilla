@@ -26,13 +26,13 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.singleton import init
-from argilla.server.settings import settings
+from argilla_server.settings import settings
 
 from tests.factories import WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
-    from argilla.server.models import User
+    from argilla_server.models import User
 
 
 def test_log_records_with_multi_and_single_label_task(api: Argilla):

@@ -16,16 +16,44 @@
  */
 
 import { Context } from "@nuxt/types";
+import { useRunningEnvironment } from "~/v1/infrastructure/services/useRunningEnvironment";
 
 export default ({ $auth, route, redirect }: Context) => {
+  const { isRunningOnHuggingFace } = useRunningEnvironment();
+
   switch (route.name) {
-    case "login":
+    case "sign-in":
+      if ($auth.loggedIn) return redirect("/");
+      if (route.params.omitCTA) return;
+      if (isRunningOnHuggingFace()) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { redirect: _, ...query } = route.query;
+
+        return redirect({
+          name: "welcome-hf-sign-in",
+          query,
+        });
+      }
       break;
+    case "oauth-provider-callback":
+      if (!Object.keys(route.query).length) redirect("/");
+      break;
+    case "welcome-hf-sign-in":
+      if (!isRunningOnHuggingFace()) redirect("/");
+      break;
+
     default:
       if (!$auth.loggedIn) {
-        const REDIRECT_URL =
-          "/login?redirect=" + encodeURIComponent(route.fullPath);
-        redirect(REDIRECT_URL);
+        if (route.path !== "/") {
+          route.query.redirect = route.fullPath;
+        }
+
+        redirect({
+          name: "sign-in",
+          query: {
+            ...route.query,
+          },
+        });
       }
   }
 };

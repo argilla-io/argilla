@@ -51,7 +51,7 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 
 | Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
 |-------------------------------	|-----------------	|-------------------|
-| bulk annotation           	|                	| ✔️                  |
+| bulk annotation           	|✔️                	| ✔️                  |
 | vector search          	|✔️                 	| ✔️                  |
 | active learning                     	|                	| ✔️                   |
 | weak supervision               	|                	| ✔️                             	|

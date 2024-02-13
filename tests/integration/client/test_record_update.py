@@ -15,7 +15,7 @@
 import pytest
 from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.client.singleton import active_api, init
-from argilla.server.models import User
+from argilla_server.models import User
 
 
 def test_partial_update_with_not_found(argilla_user: User, gutenberg_spacy_ner: str):

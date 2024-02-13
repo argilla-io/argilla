@@ -27,7 +27,7 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
     _logger.setLevel(logging.INFO)
 
     def __init__(self, *args, **kwargs):
-        require_dependencies(["torch", "datasets", "transformers", "setfit>=0.6"])
+        require_dependencies(["torch", "datasets", "transformers", "setfit>=1.0.0"])
         if kwargs.get("model") is None and "model" in kwargs:
             kwargs["model"] = "all-MiniLM-L6-v2"
             self._logger.warning(f"No model defined. Using the default model {kwargs['model']}.")
@@ -39,6 +39,11 @@ class ArgillaSetFitTrainer(ArgillaTransformersTrainer):
             raise NotImplementedError("SetFit only supports the `TextClassification` task.")
 
         if self._multi_label:
+            # We shall rename binarized_label as label, we need to remove the column that was previously called label.
+            # This change is due to SetFit version >=1.0.0
+            self._dataset = self._dataset.remove_columns("label")
+            self._eval_dataset = self._eval_dataset.remove_columns("label")
+            self._train_dataset = self._train_dataset.remove_columns("label")
             self._column_mapping = {"text": "text", "binarized_label": "label"}
             self.multi_target_strategy = "one-vs-rest"
         else:

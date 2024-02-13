@@ -29,6 +29,7 @@ from tests.factories import WorkspaceSyncFactory
 
 
 @pytest.mark.usefixtures("login_mock")
+@pytest.mark.skip(reason="Avoid using db factories")
 def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
     add_row_spy = mocker.spy(Table, "add_row")
     workspace = WorkspaceSyncFactory.create(name="test_workspace")

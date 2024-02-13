@@ -2,9 +2,7 @@ import { shallowMount } from "@vue/test-utils";
 import LabelSelectionComponent from "./LabelSelection.component";
 
 let wrapper = null;
-const $t = () => {};
 const options = {
-  mocks: { $t },
   stubs: ["SearchLabelComponent"],
   propsData: {
     componentId: `componentId`,
@@ -490,7 +488,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await showLessButtonWrapper.trigger("click");
     expect(wrapper.vm.isExpanded).toBe(true);
-    expect(showLessButtonWrapper.text()).toBe("Less");
+    expect(showLessButtonWrapper.text()).toBe("#less#");
     expect(wrapper.vm.visibleOptions).toStrictEqual([
       {
         id: "sentiment_positive",
@@ -887,7 +885,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
 
     await showLessButtonWrapper.trigger("click");
     expect(wrapper.vm.isExpanded).toBe(true);
-    expect(showLessButtonWrapper.text()).toBe("Less");
+    expect(showLessButtonWrapper.text()).toBe("#less#");
     expect(wrapper.vm.visibleOptions).toStrictEqual([
       {
         id: "sentiment_positive",

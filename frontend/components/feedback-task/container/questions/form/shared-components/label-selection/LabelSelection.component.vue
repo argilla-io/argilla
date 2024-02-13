@@ -48,33 +48,41 @@
           type="checkbox"
           :name="option.text"
           :id="option.id"
-          :data-keyboard="index + 1"
+          :data-keyboard="keyboards[option.id]"
           v-model="option.isSelected"
           @change="onSelect(option)"
           @focus="onFocus"
           @keydown.tab="expandLabelsOnTab(index)"
         />
-        <label
-          class="label-text"
-          :class="{
-            'label-active': option.isSelected,
-            '--suggestion': hasSuggestion(option.text),
-            square: multiple,
-            round: !multiple,
-          }"
-          :for="option.id"
-          :data-title="
+        <BaseTooltip
+          :text="
             hasSuggestion(option.text)
-              ? `${$t('suggestion.name')}: ${option.text}`
-              : option.isSelected
-              ? $t('annotation')
+              ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
+                  option.text
+                }`
               : null
           "
-          :title="option.text"
+          minimalist
         >
-          <span class="key" v-if="showShortcutsHelper" v-text="index + 1" />
-          <span>{{ option.text }}</span>
-        </label>
+          <label
+            class="label-text"
+            :class="{
+              'label-active': option.isSelected,
+              '--suggestion': hasSuggestion(option.text),
+              square: multiple,
+              round: !multiple,
+            }"
+            :for="option.id"
+            :title="option.text"
+          >
+            <span
+              class="key"
+              v-if="showShortcutsHelper"
+              v-text="keyboards[option.id]"
+            />
+            <span>{{ option.text }}</span>
+          </label></BaseTooltip
+        >
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -82,8 +90,8 @@
 </template>
 
 <script>
-// NOTE - this threshold is used to show the search filter component for component from questionForm component
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+import suggestionIcon from "@/static/icons/suggestion.svg";
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
 export default {
@@ -131,6 +139,7 @@ export default {
       isExpanded: false,
       timer: null,
       keyCode: "",
+      suggestionIcon,
     };
   },
   created() {
@@ -160,6 +169,12 @@ export default {
     },
   },
   computed: {
+    keyboards() {
+      return this.options.reduce((acc, option, index) => {
+        acc[option.id] = index + 1;
+        return acc;
+      }, {});
+    },
     filteredOptions() {
       return this.options.filter((option) =>
         String(option.text)
@@ -180,9 +195,6 @@ export default {
         .slice(0, this.maxOptionsToShowBeforeCollapse)
         .concat(this.remainingVisibleOptions);
     },
-    noResultMessage() {
-      return `There is no result matching: ${this.searchInput}`;
-    },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
@@ -198,8 +210,9 @@ export default {
     },
     textToShowInTheCollapseButton() {
       if (this.isExpanded) {
-        return "Less";
+        return this.$t("less");
       }
+
       return `+${this.numberToShowInTheCollapseButton}`;
     },
     iconToShowInTheCollapseButton() {
@@ -328,6 +341,10 @@ $label-dark-color: palette(purple, 200);
       border-color: darken($label-color, 12%);
     }
   }
+
+  .input-button {
+    max-width: 100%;
+  }
 }
 
 .show-less-button {
@@ -361,9 +378,8 @@ $label-dark-color: palette(purple, 200);
   justify-content: center;
   gap: $base-space;
   width: 100%;
-  height: 32px;
+  min-height: $base-space * 4;
   min-width: 50px;
-  max-width: 200px;
   text-align: center;
   padding-inline: $base-space;
   background: $label-color;
@@ -378,6 +394,9 @@ $label-dark-color: palette(purple, 200);
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
+    &:hover {
+      direction: rtl;
+    }
   }
   &.--suggestion {
     background: $suggestion-color;
@@ -444,12 +463,6 @@ input[type="checkbox"] {
 .no-result {
   display: block;
   height: $base-space * 4;
-}
-
-[data-title] {
-  position: relative;
-  overflow: visible;
-  @include tooltip-mini("top");
 }
 
 .shuffle-move {

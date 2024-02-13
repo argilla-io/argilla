@@ -44,7 +44,7 @@ jobs:
           service: argilla-quickstart-${{ inputs.image-version }}
           image: europe-docker.pkg.dev/argilla-ci/${{ inputs.image-name}}:${{ inputs.image-version }}
           region: europe-southwest1
-          flags: "--min-instances=1 --max-instances=1 --port=6900 --cpu=2000m --memory=4096Mi --no-cpu-throttling --allow-unauthenticated"
+          flags: "--min-instances=1 --max-instances=1 --port=3000 --cpu=2000m --memory=4096Mi --no-cpu-throttling --allow-unauthenticated"
           env_vars: |
             OWNER_PASSWORD=${{ steps.credentials.outputs.owner }}
             OWNER_API_KEY=${{ steps.credentials.outputs.owner }}
@@ -53,6 +53,7 @@ jobs:
             ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
             ARGILLA_ENABLE_TELEMETRY=0
+            API_BASE_URL=https://dev.argilla.io/
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials

@@ -1,27 +1,26 @@
 <template>
-  <div
-    v-if="text"
-    ref="tooltipWrapper"
-    class="tooltip"
-    @mouseenter="show"
-    @mouseleave="hide"
-  >
-    <slot></slot>
+  <div class="tooltip">
+    <div v-if="text" ref="tooltipWrapper" @mouseenter="show" @mouseleave="hide">
+      <slot></slot>
 
-    <div
-      ref="tooltipText"
-      :class="[
-        'tooltip-content',
-        positionClass,
-        minimalist ? 'tooltip-content--minimalist' : null,
-        showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
-      ]"
-      :style="{
-        top: tooltipPosition.top + 'px',
-        left: tooltipPosition.left + 'px',
-      }"
-      v-text="text"
-    />
+      <div
+        ref="tooltipText"
+        :class="[
+          'tooltip-content',
+          positionClass,
+          minimalist ? 'tooltip-content--minimalist' : null,
+          showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
+        ]"
+        :style="{
+          top: tooltipPosition.top + 'px',
+          left: tooltipPosition.left + 'px',
+        }"
+        v-html="text"
+      />
+    </div>
+    <div v-else>
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -39,7 +38,6 @@ export default {
   props: {
     text: {
       type: String,
-      required: true,
     },
     position: {
       type: String,
@@ -47,7 +45,7 @@ export default {
     },
     offset: {
       type: Number,
-      default: 8,
+      default: 4,
     },
     minimalist: {
       type: Boolean,
@@ -122,6 +120,7 @@ export default {
 .tooltip {
   position: relative;
   display: inline-block;
+  max-width: 100%;
 }
 
 .tooltip-content {
