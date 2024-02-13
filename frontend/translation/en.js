@@ -149,9 +149,16 @@ export default {
   youAreOffline: "You are offline",
 
   validations: {
-    type: {
-      warning: "Warning",
+    http: {
+      401: {
+        message: "Could not validate credentials",
+      },
+      404: {
+        message: "Could not find the requested resource",
+      },
+      429: {
+        message: "Please wait a few seconds before trying again",
+      },
     },
-    unauthorized: "Could not validate credentials",
   },
 };

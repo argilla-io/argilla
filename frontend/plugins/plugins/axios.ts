@@ -54,24 +54,19 @@ export default ({ $axios, app }) => {
     Notification.dispatch("clear");
 
     switch (status) {
-      case 404:
-        Notification.dispatch("notify", {
-          message: `${t("validations.type.warning")}: ${
-            data.detail.params.detail
-          }`,
-          type: "warning",
-        });
-        break;
       case 401: {
-        Notification.dispatch("notify", {
-          message: t("validations.unauthorized"),
-          type: "error",
-        });
-
         if (error instanceof ExpiredAuthSessionError) app.$auth.logout();
-
-        break;
       }
+    }
+
+    const errorHandledKey = `validations.http.${status}.message`;
+    const handledTranslatedError = t(errorHandledKey);
+
+    if (handledTranslatedError !== errorHandledKey) {
+      Notification.dispatch("notify", {
+        message: handledTranslatedError,
+        type: "error",
+      });
     }
 
     throw error;
