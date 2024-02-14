@@ -10,7 +10,7 @@ In this guide, you'll learn to deploy your own Argilla app and use it for data l
 
 ## Your first Argilla Space
 
-In this section, you'll learn to deploy an Argilla Space and use it for data annotation and training a sentiment classifier with [SetFit](https://github.com/huggingface/setfit/), an amazing few-shot learning library.
+In this section, you'll learn to deploy an Argilla Space and use it for human feedback collection.
 
 ### Deploy Argilla on Spaces
 
@@ -172,15 +172,18 @@ Additionally, the `LOAD_DATASETS` will let you configure the sample datasets tha
     2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets being loaded.
 
-## Setting up HF Authentication
+## Setting up sign in with Hugging Face
 
 From version `1.23.0` you can enable Hugging Face authentication for your Argilla Space. This feature allows you to give access to your Argilla Space to users that are logged in to the Hugging Face Hub.
 
 ```{note}
 This feature is specially useful for public crowdsourcing projects. If you would like to have more control over who can log in to the Space, you can set this up on a private space so that only members of your Organization can sign in. Alternatively, you may want to [create users](/getting_started/installation/configurations/user_management.md#create-a-user) and use their credentials instead.
 ```
+```{warning}
+For working with stable datasets and keep all the contributions, we highly recommend using the persistent storage layer offered by Hugging Face. For more info check the ["Setting up persistent storage"](#setting-up-persistent-storage) section.
+```
 
-To enable this feature, you will first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select *Connected Apps* > *Create App*. Once inside, choose a name for your app and complete the form with the following information:
+To set up the sign-in page, you first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select *Connected Apps* > *Create App*. Once inside, choose a name for your app and complete the form with the following information:
 
 * **Homepage URL:** [Your Argilla Space Direct URL](/getting_started/installation/deployments/huggingface-spaces.md#your-argilla-space-url).
 * **Logo URL:** `[Your Argilla Space Direct URL]/favicon.ico`
@@ -191,8 +194,8 @@ This will create a Client ID and an App Secret that you will need to add as vari
 
 1. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_ID` - **Value:** [Your Client ID]
 2. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - **Value:** [Your App Secret]
-
-Alternatively, you can provide the environment variables in the `.oauth.yaml` file like so:
+   
+Finally, you need to change `.oauth.yaml` located in the files page of your Space. Then go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
 
 ```yaml
 # This attribute will enable or disable the Hugging Face authentication
@@ -220,11 +223,3 @@ providers:
 allowed_workspaces:
     - name: admin
 ```
-
-```{warning}
-Be aware that the `.oauth.yaml` file is public in the case of public spaces or may be accesible by other members of your organization if it is a private space.
-
-Therefore, we recommend setting these variables as enviroment secrets.
-```
-
-Now check that the `enabled` parameter is set to `true` in your `.oauth.yaml` file and go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
