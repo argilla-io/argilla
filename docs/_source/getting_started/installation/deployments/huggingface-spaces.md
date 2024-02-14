@@ -10,7 +10,7 @@ In this guide, you'll learn to deploy your own Argilla app and use it for data l
 
 ## Your first Argilla Space
 
-In this section, you'll learn to deploy an Argilla Space and use it for data annotation and training a sentiment classifier with [SetFit](https://github.com/huggingface/setfit/), an amazing few-shot learning library.
+In this section, you'll learn to deploy an Argilla Space and use it for human feedback collection.
 
 ### Deploy Argilla on Spaces
 
@@ -57,84 +57,66 @@ Once Argilla is running, you can use the UI with the Direct URL. This URL gives 
 
 If everything goes well, you are ready to use the Argilla Python client from an IDE such as Colab, Jupyter, or VS Code.
 
-If you want a quick step-by-step example, keep reading. If you want an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](https://docs.argilla.io/en/latest/tutorials/notebooks/training-textclassification-setfit-fewshot.html).
+If you want a quick step-by-step example, keep reading. If you prefer an end-to-end tutorial, go to this [tutorial and use Colab or Jupyter](/getting_started/quickstart_workflow_feedback.ipynb).
 
-First, we need to pip install `datasets` and `argilla` on Colab or your local machine:
+First, we need to pip install `argilla` on Colab or your local machine:
 
 ```bash
-pip install datasets argilla
+pip install argilla -U
 ```
 
-Then, you can read the example dataset using the `datasets` library. This dataset is a CSV file uploaded to the Hub using the drag-and-drop feature.
-
-```python
-from datasets import load_dataset
-
-dataset = load_dataset("dvilasuero/banking_app", split="train").shuffle()
-```
-
-You can create your first dataset by logging it into Argilla using your endpoint URL:
+Then, you can connect to Argilla using your endpoint URL.
 
 ```python
 import argilla as rg
 
-# if you connect to your public app endpoint (uses default API key)
+# If you connect to your public app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey")
 
-# if you connect to your private app endpoint (uses default API key)
+# If you connect to your private app endpoint (uses default API key)
 rg.init(api_url="[your_space_url]", api_key="admin.apikey", extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"})
-
-# transform dataset into Argilla's format and log it
-rg.log(rg.read_datasets(dataset, task="TextClassification"), name="bankingapp_sentiment")
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling. In the code above, we've used one of the many integrations with Hugging Face libraries, which let you read hundreds of datasets available on the Hub.
+So let's create a Dataset with two labels ("sadness" and "joy"). Don't forget to replace "your-workspace" where the dataset will be created.
 
-### Data labeling and model training
-
-At this point, you can label your data directly using your Argilla Space and read the training data to train your model of choice.
-
-```python
-# this will read our current dataset and turn it into a clean dataset for training
-dataset = rg.load("bankingapp_sentiment").prepare_for_training()
-```
-
-You can also get the full dataset and push it to the Hub for reproducibility and versioning:
+> To check your workspaces, go to "My settings" on the UI. If you need to create a new one, consult the [docs](/getting_started/installation/configurations/workspace_management.md).
+> Here, we are using a task template, see the docs to [create a fully custom dataset](/practical_guides/create_update_dataset/create_dataset.md).
 
 ```python
-# save full argilla dataset for reproducibility
-rg.load("bankingapp_sentiment").to_datasets().push_to_hub("bankingapp_sentiment")
-```
-
-Finally, this is how you can train a SetFit model using data from your Argilla Space:
-
-```python
-from sentence_transformers.losses import CosineSimilarityLoss
-
-from setfit import SetFitModel, SetFitTrainer
-
-# Create train test split
-dataset = dataset.train_test_split()
-
-# Load SetFit model from Hub
-model = SetFitModel.from_pretrained("sentence-transformers/paraphrase-mpnet-base-v2")
-
-# Create trainer
-trainer = SetFitTrainer(
-    model=model,
-    train_dataset=dataset["train"],
-    eval_dataset=dataset["test"],
-    loss_class=CosineSimilarityLoss,
-    batch_size=8,
-    num_iterations=20,
+dataset = rg.FeedbackDataset.for_text_classification(
+    labels=["sadness", "joy"],
+    multi_label=False,
+    use_markdown=True,
+    guidelines=None,
+    metadata_properties=None,
+    vectors_settings=None,
 )
-
-# Train and evaluate
-trainer.train()
-metrics = trainer.evaluate()
+dataset.push_to_argilla(name="my-first-dataset", workspace="<your-workspace>")
 ```
 
-As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
+Now, we will add the records. Create a list with the records you want to add and ensure that you match the fields with the ones specified in the previous step.
+
+> You can also use `pandas` or `load_dataset` to [read an existing dataset and create records from it](/practical_guides/create_update_dataset/records.md#add-records).
+
+```python
+records = [
+    rg.FeedbackRecord(
+        fields={
+            "text": "I am so happy today",
+        },
+    ),
+    rg.FeedbackRecord(
+        fields={
+            "text": "I feel sad today",
+        },
+    )
+]
+dataset.add_records(records)
+```
+
+Congrats! You now have a dataset available in Argilla to start browsing and labeling.
+
+As a next step, you can check the [Argilla Tutorials](/tutorials_and_integrations/tutorials/tutorials.md) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
 
 ## Feedback and support
 
@@ -190,15 +172,18 @@ Additionally, the `LOAD_DATASETS` will let you configure the sample datasets tha
     2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets being loaded.
 
-## Setting up HF Authentication
+## Setting up sign in with Hugging Face
 
 From version `1.23.0` you can enable Hugging Face authentication for your Argilla Space. This feature allows you to give access to your Argilla Space to users that are logged in to the Hugging Face Hub.
 
 ```{note}
 This feature is specially useful for public crowdsourcing projects. If you would like to have more control over who can log in to the Space, you can set this up on a private space so that only members of your Organization can sign in. Alternatively, you may want to [create users](/getting_started/installation/configurations/user_management.md#create-a-user) and use their credentials instead.
 ```
+```{warning}
+For working with stable datasets and keep all the contributions, we highly recommend using the persistent storage layer offered by Hugging Face. For more info check the ["Setting up persistent storage"](#setting-up-persistent-storage) section.
+```
 
-To enable this feature, you will first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select *Connected Apps* > *Create App*. Once inside, choose a name for your app and complete the form with the following information:
+To set up the sign-in page, you first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select *Connected Apps* > *Create App*. Once inside, choose a name for your app and complete the form with the following information:
 
 * **Homepage URL:** [Your Argilla Space Direct URL](/getting_started/installation/deployments/huggingface-spaces.md#your-argilla-space-url).
 * **Logo URL:** `[Your Argilla Space Direct URL]/favicon.ico`
@@ -209,8 +194,8 @@ This will create a Client ID and an App Secret that you will need to add as vari
 
 1. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_ID` - **Value:** [Your Client ID]
 2. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - **Value:** [Your App Secret]
-
-Alternatively, you can provide the environment variables in the `.oauth.yaml` file like so:
+   
+Finally, you need to change the `.oauth.yaml` file located in the Files page of your Space (see below how this file looks like). Once you have merged the change, go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
 
 ```yaml
 # This attribute will enable or disable the Hugging Face authentication
@@ -238,11 +223,3 @@ providers:
 allowed_workspaces:
     - name: admin
 ```
-
-```{warning}
-Be aware that the `.oauth.yaml` file is public in the case of public spaces or may be accesible by other members of your organization if it is a private space.
-
-Therefore, we recommend setting these variables as enviroment secrets.
-```
-
-Now check that the `enabled` parameter is set to `true` in your `.oauth.yaml` file and go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
