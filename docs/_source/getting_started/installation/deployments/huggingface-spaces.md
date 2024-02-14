@@ -195,7 +195,7 @@ This will create a Client ID and an App Secret that you will need to add as vari
 1. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_ID` - **Value:** [Your Client ID]
 2. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - **Value:** [Your App Secret]
    
-Finally, you need to change `.oauth.yaml` located in the files page of your Space. Then go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
+Finally, you need to change the `.oauth.yaml` file located in the Files page of your Space (see below how this file looks like). Once you have merged the change, go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
 
 ```yaml
 # This attribute will enable or disable the Hugging Face authentication
