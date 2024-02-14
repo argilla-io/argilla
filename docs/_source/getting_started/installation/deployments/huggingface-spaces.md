@@ -114,7 +114,7 @@ records = [
 dataset.add_records(records)
 ```
 
-Congrats! You now have a dataset available from the Argilla UI to start browsing and labeling.
+Congrats! You now have a dataset available in Argilla to start browsing and labeling.
 
 As a next step, you can check the [Argilla Tutorials](/tutorials_and_integrations/tutorials/tutorials.md) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
 
