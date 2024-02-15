@@ -171,7 +171,8 @@ export default {
     fill: palette(white);
   }
   .spinner {
-    border-color: palette(white);
+    border-color: #ffffff40;
+    border-top-color: palette(white);
   }
   &:hover,
   &:active,
