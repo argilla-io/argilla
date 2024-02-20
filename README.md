@@ -41,7 +41,7 @@
 </p>
 </h3>
 
-Argilla is a **collaboration platform for AI engineers and domain experts**. We focus on quality, time-to-value, and ownership.
+Argilla is a **collaboration platform for AI engineers and domain experts** that values **quality, time-to-value, and ownership**.
 
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
