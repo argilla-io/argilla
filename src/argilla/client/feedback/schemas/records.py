@@ -89,9 +89,11 @@ class ResponseSchema(BaseModel):
         return {
             # UUID is not json serializable!!!
             "user_id": self.user_id,
-            "values": {question_name: value.dict() for question_name, value in self.values.items()}
-            if self.values is not None
-            else None,
+            "values": (
+                {question_name: value.dict() for question_name, value in self.values.items()}
+                if self.values is not None
+                else None
+            ),
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
 
