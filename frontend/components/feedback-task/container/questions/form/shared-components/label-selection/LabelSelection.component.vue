@@ -31,7 +31,6 @@
       </div>
     </div>
     <transition-group
-      ref="inputsAreaRef"
       :key="searchInput"
       name="shuffle"
       class="inputs-area"
@@ -389,6 +388,7 @@ $label-dark-color: palette(purple, 200);
   border: 2px solid transparent;
   border-radius: $border-radius-rounded;
   cursor: pointer;
+  user-select: none;
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -458,7 +458,7 @@ input[type="checkbox"] {
   color: $black-87;
   background: palette(grey, 700);
   @include font-size(11px);
-  font-family: monospace, monospace;
+  font-family: monospace;
 }
 .no-result {
   display: block;
