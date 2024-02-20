@@ -30,10 +30,10 @@ export class Question {
     public readonly isRequired: boolean,
     public settings: any
   ) {
-    this.answer = this.createEmptyAnswers();
     this.description = description;
     this.title = title;
 
+    this.initializeAnswers();
     this.initializeOriginal();
   }
 
@@ -96,7 +96,10 @@ export class Question {
       this.title !== this.original.title ||
       this.description !== this.original.description ||
       this.settings.use_markdown !== this.original.settings.use_markdown ||
-      this.settings.visible_options !== this.original.settings.visible_options
+      this.settings.visible_options !==
+        this.original.settings.visible_options ||
+      JSON.stringify(this.settings.options) !==
+        JSON.stringify(this.original.settings.options)
     );
   }
 
@@ -137,9 +140,12 @@ export class Question {
   restore() {
     this.title = this.original.title;
     this.description = this.original.description;
+
+    const { options, ...rest } = this.original.settings;
+
     this.settings = {
-      ...this.settings,
-      ...this.original.settings,
+      ...rest,
+      options: options ? options.map((option: string) => option) : [],
     };
   }
 
@@ -171,17 +177,13 @@ export class Question {
     this.suggestion = suggestion;
   }
 
+  initializeAnswers() {
+    this.answer = this.createEmptyAnswers();
+  }
+
   private createEmptyAnswers(): QuestionAnswer {
     if (this.isTextType) {
       return new TextQuestionAnswer(this.type, "");
-    }
-
-    if (this.isSingleLabelType) {
-      return new SingleLabelQuestionAnswer(
-        this.type,
-        this.name,
-        this.settings.options
-      );
     }
 
     if (this.isRatingType) {
@@ -200,6 +202,14 @@ export class Question {
       );
     }
 
+    if (this.isSingleLabelType) {
+      return new SingleLabelQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
     if (this.isRankingType) {
       return new RankingQuestionAnswer(
         this.type,
@@ -210,12 +220,15 @@ export class Question {
   }
 
   private initializeOriginal() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { options, ...rest } = this.settings;
+
     this.original = {
       title: this.title,
       description: this.description,
-      settings: rest,
+      settings: {
+        ...rest,
+        options: options ? options.map((option: string) => option) : [],
+      },
     };
   }
 }

@@ -39,6 +39,30 @@
               />
             </Validation>
 
+            <draggable
+              v-if="question.isMultiLabelType || question.isSingleLabelType"
+              class="label__container"
+              ghost-class="label__item__ghost"
+              :list="question.settings.options"
+              :group="{ name: question.name }"
+              @end="question.initializeAnswers()"
+            >
+              <div
+                v-for="option in question.settings.options"
+                :key="option.value"
+              >
+                <label
+                  class="label__item"
+                  :class="{
+                    square: question.isMultiLabelType,
+                    round: !question.isMultiLabelType,
+                  }"
+                >
+                  <span>{{ option.text }}</span>
+                </label>
+              </div>
+            </draggable>
+
             <BaseSwitch
               v-if="question.isTextType"
               :id="`use-markdown-${question.id}`"
@@ -185,7 +209,7 @@ export default {
 
       & textarea {
         resize: vertical;
-        min-height: 100px;
+        min-height: 50px;
         max-height: 300px;
         padding: 16px;
         background: palette(white);
@@ -223,5 +247,53 @@ export default {
       margin: $base-space 0;
     }
   }
+}
+
+$label-color: palette(purple, 800);
+$label-dark-color: palette(purple, 200);
+
+.label__container {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $base-space;
+  border-radius: 5em;
+  background: transparent;
+
+  &:hover {
+    border-color: darken($label-color, 12%);
+  }
+}
+
+.label__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $base-space;
+  width: 100%;
+  min-height: $base-space * 4;
+  min-width: 50px;
+  text-align: center;
+  padding-inline: $base-space;
+  background: $label-color;
+  color: $label-dark-color;
+  font-weight: 500;
+  outline: none;
+  border: 2px solid transparent;
+  border-radius: $border-radius-rounded;
+  cursor: grab;
+  user-select: none;
+
+  &__ghost {
+    opacity: 0.5;
+    background: #c8ebfb;
+  }
+}
+
+.round {
+  border-radius: $border-radius-rounded;
+}
+.square {
+  border-radius: $border-radius-s;
 }
 </style>
