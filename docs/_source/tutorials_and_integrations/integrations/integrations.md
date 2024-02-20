@@ -30,6 +30,11 @@ Add text descriptives to your metadata to simplify the data annotation and filte
 
 Add semantic representations to your records using vector embeddings to simplify the data annotation and search process.
 ```
+```{grid-item-card} Haystack: Monitoring LLMs for Agents
+:link: use_argilla_callback_in_haystack-v1.html
+
+Learn how to use Argilla to monitor LLMs with Haystack Agents.
+```
 ````
 
 ```{toctree}
@@ -40,4 +45,5 @@ process_documents_with_unstructured
 monitor_endpoints with_fastapi
 add_text_descriptives_as_metadata
 add_sentence_transformers_embeddings_as_vectors
+use_argilla_callback_in_haystack-v1
 ```
