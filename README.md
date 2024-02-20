@@ -35,9 +35,9 @@
 <p align="center">
 <a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 Demo</a> | </span>
 <a href="https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces">🚀 Deploy</a> <span> | </span>
-<a href="#-contribute">👨‍💻 Getting started</a> <span> | </span>
-<a href="#-contribute">📺 Demo video</a> <span> | </span>
-<a href="#-contribute">🏘️ Community meetup</a>
+<a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#">👨‍💻 Getting started</a> <span> | </span>
+<a href="https://www.youtube.com/watch?v=FlJ6hrBB2bU">📺 Feature video</a> <span> | </span>
+<a href="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB">🏘️ Community meetup</a>
 </p>
 </h3>
 
@@ -49,9 +49,9 @@ If you just want to get started, great!
 
 2. 🚀 Deploy Argilla for free using [three clicks](https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces).
 
-3. 👨‍💻 Gettin started with our [unique features](https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces).
+3. 👨‍💻 Get started with our [cheat sheet](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#).
 
-4. 📺 Watch our [demo video](https://www.youtube.com/watch?v=FlJ6hrBB2bU).
+4. 📺 Watch our [feature video](https://www.youtube.com/watch?v=FlJ6hrBB2bU).
 
 5. 🏘️ Attend our [online community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
