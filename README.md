@@ -33,9 +33,9 @@
 
 <h3>
 <p align="center">
-<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 Demo</a> | </span>
+<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 UI Demo</a> | </span>
 <a href="https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces">🚀 Deploy</a> <span> | </span>
-<a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#">👨‍💻 Getting started</a> <span> | </span>
+<a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html">👨‍💻 Getting started</a> <span> | </span>
 <a href="https://www.youtube.com/watch?v=FlJ6hrBB2bU">📺 Feature video</a> <span> | </span>
 <a href="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB">🏘️ Community meetup</a>
 </p>
@@ -43,23 +43,13 @@
 
 Argilla is a **collaboration platform for AI engineers and domain experts**. We focus on quality, time-to-value, and ownership.
 
-If you just want to get started, great!
-
-1. 🛝 Try Argilla in our [demo environment](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D).
-
-2. 🚀 Deploy Argilla for free using [three clicks](https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces).
-
-3. 👨‍💻 Get started with our [cheat sheet](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#).
-
-4. 📺 Watch our [feature video](https://www.youtube.com/watch?v=FlJ6hrBB2bU).
-
-5. 🏘️ Attend our [online community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html).
 
 Want to know more? Read our [documentation](https://docs.argilla.io/).
 
 ## Why use Argilla?
 
-We designed Argilla to help you create the **highest quality AI through the least required effort**. Here are some of the benefits we offer:
+We designed Argilla to help you create the **highest quality AI through the least required effort**.
 
 <details>
 <summary>Improve your AI output quality through data quality.</summary>
@@ -74,18 +64,18 @@ Gathering data is a time-consuming process. Argilla helps you to reduce the time
 Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner your data and your models. That's why we provide you with all the tools your team needs to manage your data and models in a way that suits you best.
 </details>
 
-## What can you build with Argilla?
+## What can your team build with Argilla?
 
-Argilla is a tool that can be used for high-quality data with a focus on NLP and LLMs. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel) on Hugging Face. We also lead by example:
+Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a focus on NLP and LLMs. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel) but we also love to contribute:
 
-- Our [UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data.
-- Our [Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), where we managed to improve model performance by filtering out 50% of the original dataset.
+- Our [cleaned UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data using human feedback.
+- Our [distilabeled Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [improved OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), show how we improve model performance by filtering out 50% of the original dataset through AI feedback and human curation.
 
-Additionally, AI experts and domain experts from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to improve the quality and efficiency of their AI projects. They shared their experiences with our community in our [online community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
+AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to improve the quality and efficiency of their AI projects. They shared their experiences in our [AI community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
 - AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases how their team collaborates by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
 - Customer support: during [the Loris meetup](https://youtu.be/jWrtgf2w4VU?feature=shared) they showed how their AI team uses unsupervised and few-shot contrastive learning to help them quickly validate and gain labelled samples for a huge amount of multi-label classifiers.
-- Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively distribute data collection projects among their annotating workforce. This allows them to quickly and efficiently collect high quality data for their research studies.
+- Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively distribute data collection projects among their annotating workforce. This allows them to quickly and efficiently collect high-quality data for their research studies.
 
 ## 👨‍💻 Getting started
 
