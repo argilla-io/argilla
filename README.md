@@ -43,9 +43,7 @@
 
 Argilla is a **collaboration platform for AI engineers and domain experts**. We focus on quality, time-to-value, and ownership.
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html).
-
-Want to know more? Read our [documentation](https://docs.argilla.io/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
 ## Why use Argilla?
 
@@ -72,7 +70,7 @@ Most AI platforms are black boxes. Argilla is different. We believe that you sho
 
 ## What can your team build with Argilla?
 
-Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a focus on NLP and LLMs. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel) but we also love to contribute:
+Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a focus on NLP and LLMs. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel) but we also love to contribute ourselves.
 
 - Our [cleaned UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data using human feedback.
 - Our [distilabeled Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [improved OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), show how we improve model performance by filtering out 50% of the original dataset through AI feedback and human curation.
