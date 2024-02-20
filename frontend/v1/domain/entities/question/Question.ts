@@ -147,6 +147,8 @@ export class Question {
       ...rest,
       options: options ? options.map((option: string) => option) : [],
     };
+
+    this.initializeAnswers();
   }
 
   update() {
