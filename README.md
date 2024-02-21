@@ -38,7 +38,7 @@ If you just want to get started, we recommend our [UI demo](https://demo.argilla
 
 ## Why use Argilla?
 
-We help you ensure **your data work pays off**.
+Whether you are working on monitoring and improving **generative tasks** involving complex LLM pipelines using RAG, or you are working on a **predictive task** with span- or text-classification task, We help you ensure **your data work pays off**.
 
 ### Improve your AI output quality through data quality
 
