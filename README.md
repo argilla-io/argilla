@@ -33,15 +33,15 @@
 
 <h3>
 <p align="center">
-<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 UI Demo</a> | </span>
+<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 UI</a> | </span>
 <a href="https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces">🚀 Deploy</a> <span> | </span>
 <a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html">👨‍💻 Getting started</a> <span> | </span>
-<a href="https://www.youtube.com/watch?v=FlJ6hrBB2bU">📺 Feature video</a> <span> | </span>
+<a href="https://www.youtube.com/watch?v=FlJ6hrBB2bU">📺 Intro video</a> <span> | </span>
 <a href="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB">🏘️ Community meetup</a>
 </p>
 </h3>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that values **quality, time-to-value, and ownership**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that strives for **quality, time-to-value, and ownership**.
 
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
@@ -80,6 +80,19 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 - AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases **how their experts and AI team collaborate** by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
 - Customer support: during [the Loris meetup](https://youtu.be/jWrtgf2w4VU?feature=shared) they showed how their AI team uses unsupervised and few-shot contrastive learning to help them **quickly validate and gain labelled samples for a huge amount of multi-label classifiers**.
 - Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively **distribute data collection projects** among their annotating workforce. This allows them to quickly and **efficiently collect high-quality data** for their research studies.
+
+## 🏘️ Community
+
+🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
+
+🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
+
+🗺️ We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
+
+⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
+
+🎁 We've just printed stickers! Would you like some? [Order stickers for free](https://tally.so/r/nr5gg2).
+
 
 ## 👨‍💻 Getting started
 
@@ -302,16 +315,6 @@ records = trainer.predict(["my-text"], as_argilla_records=True)
 </p>
 </details>
 
-## 🏘️ Community
-
-🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
-
-🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
-
-⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
-
-🎁 We've just printed stickers! Would you like some? [Order stickers for free](https://tally.so/r/nr5gg2).
-
 ## 🥇 Contributors
 
 We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
@@ -321,8 +324,4 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 <img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
 
 </a>
-
-## 🗺️ Roadmap
-
-We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
 
