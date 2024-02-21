@@ -62,6 +62,11 @@
                       round: !question.isMultiLabelType,
                     }"
                   >
+                    <svgicon
+                      width="6"
+                      name="draggable"
+                      :id="`${option.value}-icon`"
+                    />
                     <span>{{ option.text }}</span>
                   </label>
                 </div>
