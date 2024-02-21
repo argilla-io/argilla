@@ -9,6 +9,9 @@
 <a  href="https://pypi.org/project/argilla/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
+<!--a  href="https://anaconda.org/conda-forge/rubrix">
+<img  alt="CI"  src="https://img.shields.io/conda/vn/conda-forge/rubrix?logo=anaconda&style=flat&color=orange">
+</!a-->
 <img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
@@ -17,6 +20,11 @@
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
 </a>
 </p>
+
+<h2 align="center">Open-source feedback layer for LLMs</h2>
+<br>
+
+
 <p align="center">
 <a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
 <img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
@@ -29,64 +37,42 @@
 </a>
 </p>
 
-<h3 align="center">Work on data together, make your AI better!</h2>
+<br>
 
 <h3>
 <p align="center">
-<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 Demo</a> | </span>
-<a href="https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces">🚀 Deploy</a> <span> | </span>
-<a href="#-contribute">👨‍💻 Features</a>
+<a href="https://docs.argilla.io">📄 Documentation</a> | </span>
+<a href="#-quickstart">🚀 Quickstart</a> <span> | </span>
+<a href="#-cheatsheet">🎼 Cheatsheet</a> <span> | </span>
+<a href="#-project-architecture">🛠️ Architecture</a> <span> | </span>
 <a href="#-contribute">🤝 Contribute</a>
 </p>
 </h3>
 
-Argilla is a **collaboration platform for AI engineers and domain experts**. We focus on quality, time-to-value, and ownership.
+## What is Argilla?
 
-If you just want to get started, great!
+Argilla is an open-source platform for data-centric LLM development. Integrates human and model feedback loops for continuous LLM refinement and oversight.
 
-1. 🛝 Try Argilla in our [demo environment](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D).
+With Argilla's Python SDK and adaptable UI, you can create human and model-in-the-loop workflows for:
 
-2. 🚀 Deploy Argilla for free using [three clicks](https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces).
-
-3. 👨‍💻 Explore our [unique features](https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces).
-
-4. 📺 Watch our [demo video](https://www.youtube.com/watch?v=FlJ6hrBB2bU).
-
-5. 🏘️ Attend our [online community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB)
-
-Want to know more? Read our [documentation](https://docs.argilla.io/).
-
-## Why use Argilla?
-
-We designed Argilla to help you create the **highest quality AI through the least required effort**. Here are some of the benefits we offer:
-
-<details>
-<summary>Improve your AI output quality through data quality.</summary>
-<p>
-Compute is expensive and output quality is important. By focusing on data you can tackle the root cause of both of these problems.
-</p>
-</details>
-<details>
-<summary>Reduce the time-to-value for AI projects with engaging data interaction.</summary>
-</details>
-<details>
-<summary>Take control by owning your data and models.</summary>
-</details>
-
-## What can you build with Argilla?
-
-Argilla is a tool that can be used for high-quality data with a focus on NLP and LLMs. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel) on Hugging Face. We also lead by example:
-
-- Our [UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data.
-- Our [Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), where we managed to improve model performance by filtering out 50% of the original dataset.
-
-Additionally, AI experts and domain experts from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to improve the quality and efficiency of their AI projects. They shared their experiences with our community in our [online community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
-
-- AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases how their team collaborates by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
-- Customer support: [Loris showed](https://youtu.be/jWrtgf2w4VU?feature=shared) how their AI team uses unsupervised and few-shot contrastive learning to help them quickly validate and gain labelled samples for a huge amount of multi-label classifiers.
-- Research studies: [Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) is actively distributing data collection projects among its annotating workforce. They do this through an integration with our platform.
+* Supervised fine-tuning
+* Preference tuning (RLHF, DPO, RLAIF, and more)
+* Small, specialized NLP models
+* Scalable evaluation.
 
 ## 🚀 Quickstart
+
+There are different options to get started:
+
+1. Take a look at our [quickstart page](https://docs.argilla.io/en/latest/getting_started/quickstart.html) 🚀
+
+2. Start contributing by looking at our [contributor guidelines](##🤝-contribute) 🤝
+
+3. Skip some steps with our [cheatsheet](##🎼-cheatsheet) 🎼
+
+## 🎼 Cheatsheet
+
+This cheatsheet is a quick reference to the most common commands and workflows. For more detailed information, please refer to our [documentation](https://docs.argilla.io/en/latest/getting_started/quickstart.html).
 
 <details>
 <summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
