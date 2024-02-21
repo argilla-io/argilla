@@ -2,9 +2,11 @@
 <h1 align="center">
   <a href=""><img src="https://github.com/dvsrepo/imgs/raw/main/rg.svg" alt="Argilla" width="150"></a>
   <br>
-  ✨ Argilla ✨
+  Argilla
   <br>
 </h1>
+<h3 align="center">Work on data together, make your AI better!</h2>
+
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
 <img  alt="CI"  src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
@@ -13,33 +15,22 @@
 <a href="https://pepy.tech/project/argilla">
 <img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
-<a  href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
-<img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg" />
-</a>
-</p>
-<p align="center">
-<a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-<img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
-</a>
-<a href="https://linkedin.com/company/argilla-io">
-<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
-</a>
-<a  href="https://twitter.com/argilla_io">
-<img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
+<a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
+<img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg"/>
 </a>
 </p>
 
-<h3 align="center">Work on data together, make your AI better!</h2>
-
-<h3>
 <p align="center">
-<a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D">🛝 UI</a> | </span>
-<a href="https://docs.argilla.io/en/latest/getting_started/quickstart_installation.html#%F0%9F%91%A9%F0%9F%8F%BD%E2%80%8D%F0%9F%9A%80-Argilla-on-Hugging-Face-Spaces">🚀 Deploy</a> <span> | </span>
-<a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html">👨‍💻 Getting started</a> <span> | </span>
-<a href="https://www.youtube.com/watch?v=FlJ6hrBB2bU">📺 Intro video</a> <span> | </span>
-<a href="https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB">🏘️ Community meetup</a>
+<a href="hhttps://twitter.com/argilla_io">
+    <img src="https://img.shields.io/badge/twitter-black?logo=x" />
+</a>
+<a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
+    <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin" />
+</a>
+<a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
+    <img src="https://img.shields.io/badge/slack-purple?logo=slack" />
+</a>
 </p>
-</h3>
 
 Argilla is a **collaboration platform for AI engineers and domain experts** that strives for **quality, time-to-value, and ownership**.
 
@@ -56,43 +47,48 @@ Compute is expensive and output quality is important. By focusing on data you ca
 </p>
 </details>
 <details>
-<summary>Reduce the time-to-value for AI projects with engaging data interaction.</summary>
-<p>
-Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
-</p>
-</details>
-<details>
 <summary>Take control by owning your data and models.</summary>
 <p>
 Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to manage your data and models in a way that suits you best.
 </p>
 </details>
+<details>
+<summary>Reduce the time-to-value for AI projects with engaging data interaction.</summary>
+<p>
+Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
+</p>
+</details>
 
 ## What can your team build with Argilla?
 
-Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a **focus on NLP and LLMs**. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel), and **we love contributions to open-source** too.
+## 🏘️ Community
+
+We are an open-source community-driven project and we love to hear from you. Here are some ways to get involved:
+
+- [Community Meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB): listen in or present during one of our bi-weekly events.
+
+- [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g): get direct support from the community.
+
+- [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
+
+- [Stickers](https://tally.so/r/nr5gg2): show your support in the physical world with our free stickers.
+
+## What do people build with Argilla?
+
+### Open-source datasets and models
+
+Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a **focus on NLP and LLMs**. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel), and **we love contributions to open-source** ourselves too.
 
 - Our [cleaned UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data using **human feedback**.
 - Our [distilabeled Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [improved OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), show how we improve model performance by filtering out 50% of the original dataset through **human and AI feedback**.
+
+### Internal Use cases
 
 AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to **improve the quality and efficiency of AI** projects. They shared their experiences in our [AI community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
 - AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases **how their experts and AI team collaborate** by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
 - Customer support: during [the Loris meetup](https://youtu.be/jWrtgf2w4VU?feature=shared) they showed how their AI team uses unsupervised and few-shot contrastive learning to help them **quickly validate and gain labelled samples for a huge amount of multi-label classifiers**.
 - Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively **distribute data collection projects** among their annotating workforce. This allows them to quickly and **efficiently collect high-quality data** for their research studies.
-
-## 🏘️ Community
-
-🏘️ Attend our [online bi-weekly community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
-
-🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
-
-🗺️ We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
-
-⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
-
-🎁 We've just printed stickers! Would you like some? [Order stickers for free](https://tally.so/r/nr5gg2).
-
 
 ## 👨‍💻 Getting started
 
