@@ -31,6 +31,7 @@
       </div>
     </div>
     <transition-group
+      ref="inputsAreaRef"
       :key="searchInput"
       name="shuffle"
       class="inputs-area"
