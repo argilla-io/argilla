@@ -32,7 +32,7 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that strive for **quality, time-to-value, and ownership**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that strive for **quality, ownership, and efficiency**.
 
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
@@ -51,10 +51,10 @@ Compute is expensive and output quality is important. By focusing on data you ca
 Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to manage your data and models in a way that suits you best.
 </p>
 
-### Improve time-to-value by quickly iterating on the right data and models
+### Improve efficiency by quickly iterating on the right data and models
 
 <p>
-Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
+Gathering data is a time-consuming process. Argilla helps you to reduce the efficiency for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
 </p>
 
 ## 🏘️ Community
