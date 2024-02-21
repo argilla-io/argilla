@@ -57,8 +57,6 @@ Most AI platforms are black boxes. Argilla is different. We believe that you sho
 Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
 </p>
 
-
-
 ## 🏘️ Community
 
 We are an open-source community-driven project and we love to hear from you. Here are some ways to get involved:
@@ -68,8 +66,6 @@ We are an open-source community-driven project and we love to hear from you. Her
 - [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g): get direct support from the community.
 
 - [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
-
-- [Stickers](https://tally.so/r/nr5gg2): show your support in the physical world with our free stickers.
 
 ## Use Cases
 
