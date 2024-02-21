@@ -38,20 +38,20 @@ If you just want to get started, we recommend our [UI demo](https://demo.argilla
 
 ## Why use Argilla?
 
-We help you ensure **your hard data work pays off**.
+We help you ensure **your data work pays off**.
 
 ### Improve your AI output quality through data quality
 <p>
 Compute is expensive and output quality is important. By focusing on data you can tackle the root cause of both of these problems at once. Argilla helps you to create achieve and keep high-quality standards for your data. This means you can improve the quality of your AI output and reduce the time and cost of your AI projects.
 </p>
 
-### Take control by owning your data and models
+### Take control of your data and models
 
 <p>
 Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to manage your data and models in a way that suits you best.
 </p>
 
-### Better time-to-value by quickly iterating on the right data and models
+### Improve time-to-value by quickly iterating on the right data and models
 
 <p>
 Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
@@ -67,7 +67,7 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 - [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
 
-## Use Cases
+## What do people build with Argilla?
 
 ### Open-source datasets and models
 
