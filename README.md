@@ -32,34 +32,32 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that strives for **quality, time-to-value, and ownership**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that strive for **quality, time-to-value, and ownership**.
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
 ## Why use Argilla?
 
-We designed Argilla to help you create the **highest quality AI through the least required effort**.
+We help you ensure **your hard data work pays off**.
 
-<details>
-<summary>Improve your AI output quality through data quality.</summary>
+### Improve your AI output quality through data quality
 <p>
 Compute is expensive and output quality is important. By focusing on data you can tackle the root cause of both of these problems at once. Argilla helps you to create achieve and keep high-quality standards for your data. This means you can improve the quality of your AI output and reduce the time and cost of your AI projects.
 </p>
-</details>
-<details>
-<summary>Take control by owning your data and models.</summary>
+
+### Take control by owning your data and models
+
 <p>
 Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to manage your data and models in a way that suits you best.
 </p>
-</details>
-<details>
-<summary>Reduce the time-to-value for AI projects with engaging data interaction.</summary>
+
+### Better time-to-value by quickly iterating on the right data and models
+
 <p>
 Gathering data is a time-consuming process. Argilla helps you to reduce the time-to-value for AI projects by providing a platform that allows you to interact with your data in a more engaging way. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
 </p>
-</details>
 
-## What can your team build with Argilla?
+
 
 ## 🏘️ Community
 
@@ -73,7 +71,7 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 - [Stickers](https://tally.so/r/nr5gg2): show your support in the physical world with our free stickers.
 
-## What do people build with Argilla?
+## Use Cases
 
 ### Open-source datasets and models
 
