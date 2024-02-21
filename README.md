@@ -9,11 +9,11 @@
 
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
-<img  alt="CI"  src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
+<img  alt="CI" src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
 </a>
 <img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
 <a href="https://pepy.tech/project/argilla">
-<img  alt="CI"  src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
+<img  alt="CI" src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
 <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg"/>
@@ -22,10 +22,10 @@
 
 <p align="center">
 <a href="hhttps://twitter.com/argilla_io">
-    <img src="https://img.shields.io/badge/twitter-black?logo=x" />
+<img src="https://img.shields.io/badge/twitter-black?logo=x" />
 </a>
 <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-    <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin" />
+    <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin"/>
 </a>
 <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
     <img src="https://img.shields.io/badge/slack-purple?logo=slack" />
@@ -40,17 +40,24 @@ If you just want to get started, we recommend our [UI demo](https://demo.argilla
 
 Whether you are working on monitoring and improving complex **generative tasks** involving LLM pipelines with RAG, or you are working on a **predictive task** for things like AB-testing of span- and text-classification models. Our versatile platform helps you ensure **your data work pays off**.
 
-### Improve your AI output quality through data quality
-
-Compute is expensive and output quality is important. We help you focus on data, which tackles the root cause of both of these problems at once. Argilla helps you to **achieve and keep high-quality standards** for your data. This means you can improve the quality of your AI output.
-
-### Take control of your data and models
-
-Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
-
-### Improve efficiency by quickly iterating on the right data and models
-
-Gathering data is a time-consuming process. Argilla helps by providing a platform that allows you to **interact with your data in a more engaging way**. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
+<details>
+<summary>Improve your AI output quality through data quality</summary>
+<p>
+Compute is expensive and output quality is important. We help you focus on data, which tackles the root cause of both of these problems at once. Argilla helps you to <b>achieve and keep high-quality standards</b> for your data. This means you can improve the quality of your AI output.
+</p>
+</details>
+<details>
+<summary>Take control of your data and models</summary>
+<p>
+Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to <b>manage your data and models in a way that suits you best</b>.
+</p>
+</details>
+<details>
+<summary>Improve efficiency by quickly iterating on the right data and models</summary>
+<p>
+Gathering data is a time-consuming process. Argilla helps by providing a platform that allows you to <b>interact with your data in a more engaging way</b>. This means you can quickly and easily label your data with filters, AI feedback suggestions and semantic search. So you can focus on training your models and monitoring their performance.
+</p>
+</details>
 
 ## 🏘️ Community
 
