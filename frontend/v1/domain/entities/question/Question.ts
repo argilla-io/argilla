@@ -141,17 +141,12 @@ export class Question {
     this.title = this.original.title;
     this.description = this.original.description;
 
-    const { options, ...rest } = this.original.settings;
-
-    this.settings = {
-      ...rest,
-      options: options ? options.map((option: string) => option) : [],
-    };
-
+    this.restoreOriginal();
     this.initializeAnswers();
   }
 
   update() {
+    this.initializeAnswers();
     this.initializeOriginal();
   }
 
@@ -229,8 +224,17 @@ export class Question {
       description: this.description,
       settings: {
         ...rest,
-        options: options ? options.map((option: string) => option) : [],
+        options: options?.map((option: string) => option),
       },
+    };
+  }
+
+  private restoreOriginal() {
+    const { options, ...rest } = this.original.settings;
+
+    this.settings = {
+      ...rest,
+      options: options?.map((option: string) => option),
     };
   }
 }

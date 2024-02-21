@@ -39,29 +39,34 @@
               />
             </Validation>
 
-            <draggable
+            <div
+              class="settings__edition-form__group"
               v-if="question.isMultiLabelType || question.isSingleLabelType"
-              class="label__container"
-              ghost-class="label__item__ghost"
-              :list="question.settings.options"
-              :group="{ name: question.name }"
-              @end="question.initializeAnswers()"
             >
-              <div
-                v-for="option in question.settings.options"
-                :key="option.value"
+              <label :for="`options-${question.id}`" v-text="$t('options')" />
+              <draggable
+                class="label__container"
+                ghost-class="label__item__ghost"
+                :list="question.settings.options"
+                :group="{ name: question.name }"
+                @end="question.initializeAnswers()"
               >
-                <label
-                  class="label__item"
-                  :class="{
-                    square: question.isMultiLabelType,
-                    round: !question.isMultiLabelType,
-                  }"
+                <div
+                  v-for="option in question.settings.options"
+                  :key="option.value"
                 >
-                  <span>{{ option.text }}</span>
-                </label>
-              </div>
-            </draggable>
+                  <label
+                    class="label__item"
+                    :class="{
+                      square: question.isMultiLabelType,
+                      round: !question.isMultiLabelType,
+                    }"
+                  >
+                    <span>{{ option.text }}</span>
+                  </label>
+                </div>
+              </draggable>
+            </div>
 
             <BaseSwitch
               v-if="question.isTextType"
@@ -185,7 +190,7 @@ export default {
       width: 100%;
       gap: $base-space;
 
-      & label {
+      & > label {
         width: fit-content;
         height: 14px;
         color: $black-54;
