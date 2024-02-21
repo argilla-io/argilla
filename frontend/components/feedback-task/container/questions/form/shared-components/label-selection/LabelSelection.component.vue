@@ -458,7 +458,7 @@ input[type="checkbox"] {
   color: $black-87;
   background: palette(grey, 700);
   @include font-size(11px);
-  font-family: monospace;
+  font-family: monospace, monospace;
 }
 .no-result {
   display: block;
