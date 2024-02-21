@@ -9,7 +9,7 @@
 
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
-<img  alt="CI" src="https://img.shields.io/pypi/v/argilla.svg?style=flat-square&logo=pypi&logoColor=white">
+<img  alt="CI" src="https://img.shields.io/pypi/v/argilla.svg?style=flat-rounded&logo=pypi&logoColor=white">
 </a>
 <img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
 <a href="https://pepy.tech/project/argilla">
