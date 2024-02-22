@@ -22,6 +22,11 @@ import numpy
 import pytest
 from argilla import (
     FeedbackRecord,
+    LabelQuestion,
+    ResponseSchema,
+    TextField,
+    TextQuestion,
+    ValueSchema,
 )
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -761,6 +766,26 @@ class TestRemoteFeedbackDataset:
         assert isinstance(remote_dataset.url, str)
         assert isinstance(remote_dataset.created_at, datetime)
         assert isinstance(remote_dataset.updated_at, datetime)
+
+    def test_create_dataset_with_responses_with_error(self, owner: "User"):
+        api.init(api_key=owner.api_key)
+        ws = Workspace.create("test_workspace")
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text"), TextField(name="optional", required=False)],
+            questions=[
+                TextQuestion(name="question", required=False),
+                LabelQuestion(name="label", labels=["label1", "label2"]),
+            ],
+        )
+        record = FeedbackRecord(
+            fields={"text": "text field value"},
+            responses=[ResponseSchema(values={"label": ValueSchema(value="wrong_label")})],
+        )
+
+        # Here should fail because the label is not in the list of labels
+        dataset.add_records(record)
+        # The server will raise an error here
+        dataset.push_to_argilla(name="test_dataset", workspace=ws)
 
     async def test_pull_without_results(
         self,
