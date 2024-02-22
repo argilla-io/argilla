@@ -55,6 +55,14 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />
+
+        <SpanComponent
+          v-if="question.isSpanType"
+          :question="question"
+          :isFocused="checkIfQuestionIsFocused(index)"
+          @on-focus="updateQuestionAutofocus(index)"
+          @on-user-answer="focusNext(index)"
+        />
       </div>
     </div>
   </div>

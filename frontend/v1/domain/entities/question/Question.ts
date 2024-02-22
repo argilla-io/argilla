@@ -7,6 +7,7 @@ import {
   RatingLabelQuestionAnswer,
   MultiLabelQuestionAnswer,
   RankingQuestionAnswer,
+  SpanQuestionAnswer,
 } from "./QuestionAnswer";
 import { Suggestion } from "./Suggestion";
 
@@ -81,6 +82,10 @@ export class Question {
 
   public get isTextType(): boolean {
     return this.type === "text";
+  }
+
+  public get isSpanType(): boolean {
+    return this.type === "span";
   }
 
   public get isRatingType(): boolean {
@@ -174,6 +179,10 @@ export class Question {
   private createEmptyAnswers(): QuestionAnswer {
     if (this.isTextType) {
       return new TextQuestionAnswer(this.type, "");
+    }
+
+    if (this.isSpanType) {
+      return new SpanQuestionAnswer(this.type, this.settings.entities);
     }
 
     if (this.isSingleLabelType) {

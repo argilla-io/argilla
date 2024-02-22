@@ -6,7 +6,8 @@ export type QuestionType =
   | "rating"
   | "ranking"
   | "label_selection"
-  | "multi_label_selection";
+  | "multi_label_selection"
+  | "span";
 
 export abstract class QuestionAnswer {
   private _answer: Answer;
@@ -68,6 +69,56 @@ export class TextQuestionAnswer extends QuestionAnswer {
     return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
+
+type Span = {
+  from: string;
+  to: string;
+  field: string;
+};
+
+type Entity = {
+  id: string;
+  name: string;
+  color: string;
+  isSelected: boolean;
+};
+
+type SpanLabelValue = Record<Entity["name"], Span[]>;
+
+export class SpanQuestionAnswer extends QuestionAnswer {
+  public readonly entities: Entity[] = [];
+  public readonly values: SpanLabelValue = {};
+
+  constructor(public readonly type: QuestionType, value: Entity[]) {
+    super(type);
+
+    value.forEach((e) => {
+      this.values[e.name] = [];
+    });
+
+    this.entities = value.map((e) => ({
+      ...e,
+      isSelected: false,
+    }));
+  }
+
+  protected fill(answer: Answer) {}
+
+  clear() {}
+
+  get isValid(): boolean {
+    return true;
+  }
+
+  get valuesAnswered(): any {
+    return this.values;
+  }
+
+  matchSuggestion(suggestion: Suggestion): boolean {
+    return false;
+  }
+}
+
 type SingleLabelValue = {
   id: string;
   text: string;

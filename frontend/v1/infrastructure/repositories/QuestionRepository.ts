@@ -17,7 +17,29 @@ export class QuestionRepository {
         { headers: { "cache-control": "max-age=120" } }
       );
 
-      return data.items;
+      return [
+        ...data.items,
+        {
+          id: "1",
+          name: "name",
+          title: "Span question dummy",
+          description: "Span question description dummy",
+          required: true,
+          settings: {
+            type: "span",
+            entities: [
+              { id: "1", name: "Entity 1", color: "red" },
+              { id: "2", name: "Entity 2", color: "blue" },
+            ],
+            values: {
+              "prompt 1": [
+                { from: "1", to: "2", entity: "Entity 1" },
+                { from: "3", to: "4", entity: "Entity 2" },
+              ],
+            },
+          },
+        },
+      ];
     } catch (err) {
       throw {
         response: QUESTION_API_ERRORS.GET_QUESTIONS,

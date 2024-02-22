@@ -4,12 +4,11 @@
       v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
     >
-      <TextFieldComponent
+      <SpanAnnotationTextFieldComponent
         v-if="isTextType"
         :title="title"
         :fieldText="content"
-        :useMarkdown="settings.use_markdown"
-        :stringToHighlight="searchValue"
+        :spanQuestion="spanQuestion"
       />
     </div>
   </div>
@@ -20,6 +19,9 @@ export default {
     fields: {
       type: Array,
       required: true,
+    },
+    spanQuestion: {
+      type: Object,
     },
   },
   computed: {
