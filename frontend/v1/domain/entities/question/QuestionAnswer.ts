@@ -1,4 +1,5 @@
-import { Answer, RankingAnswer } from "../IAnswer";
+import { isValid } from "js-base64";
+import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
 import { Suggestion } from "./Suggestion";
 
 export type QuestionType =
@@ -71,9 +72,9 @@ export class TextQuestionAnswer extends QuestionAnswer {
 }
 
 type Span = {
-  from: string;
-  to: string;
-  field: string;
+  from: number;
+  to: number;
+  entity: string;
 };
 
 type Entity = {
@@ -83,31 +84,37 @@ type Entity = {
   isSelected: boolean;
 };
 
-type SpanLabelValue = Record<Entity["name"], Span[]>;
+type SpanLabelValue = Record<string, Span[]>;
 
 export class SpanQuestionAnswer extends QuestionAnswer {
   public readonly entities: Entity[] = [];
-  public readonly values: SpanLabelValue = {};
+  public values: SpanLabelValue = {};
 
   constructor(public readonly type: QuestionType, value: Entity[]) {
     super(type);
-
-    value.forEach((e) => {
-      this.values[e.name] = [];
-    });
 
     this.entities = value.map((e) => ({
       ...e,
       isSelected: false,
     }));
+
+    this.clear();
   }
 
-  protected fill(answer: Answer) {}
+  protected fill(answer: Answer) {
+    this.clear();
 
-  clear() {}
+    Object.entries(answer.value).forEach(([field, spans]) => {
+      this.values[field] = spans;
+    });
+  }
+
+  clear() {
+    this.values = {};
+  }
 
   get isValid(): boolean {
-    return true;
+    return Object.keys(this.values).length > 0;
   }
 
   get valuesAnswered(): any {

@@ -1,6 +1,7 @@
 import { onMounted, ref, watch } from "vue-demi";
 import { Highlighting } from "../../questions/form/span/components/highlighting";
 import { Question } from "~/v1/domain/entities/question/Question";
+import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
@@ -9,7 +10,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion: Question;
   title: string;
 }) => {
-  const classByGroup = spanQuestion.answer.entities.reduce((acc, entity, i) => {
+  const answer = spanQuestion.answer as SpanQuestionAnswer;
+
+  const classByGroup = answer.entities.reduce((acc, entity, i) => {
     acc[entity.name] = `hl-${i + 1}`;
     return acc;
   }, {} as Record<string, string>);
@@ -23,18 +26,44 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   watch(
-    () => spanQuestion.answer.entities,
+    () => answer.entities,
     () => {
-      highlighting.value.entity = spanQuestion.answer.entities.find(
+      highlighting.value.entity = answer.entities.find(
         (e) => e.isSelected
       )?.name;
     },
     { deep: true }
   );
 
+  watch(
+    () => highlighting.value.spans,
+    (spans) => {
+      const response = spans.reduce((acc, span) => {
+        acc[span.node.id] = acc[span.node.id] || [];
+
+        acc[span.node.id].push({
+          from: span.from,
+          to: span.to,
+          entity: span.entity,
+        });
+
+        return acc;
+      }, {});
+
+      spanQuestion.answer.response({
+        value: response,
+      });
+    }
+  );
+
   onMounted(() => {
     highlighting.value.mount();
-    highlighting.value.entity = spanQuestion.answer.entities[0].name;
+    const firstEntity = answer.entities[0];
+
+    if (!firstEntity) return;
+
+    firstEntity.isSelected = true;
+    highlighting.value.entity = firstEntity.name;
   });
 
   return {

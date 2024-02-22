@@ -1,9 +1,4 @@
-import {
-  SpanSelection,
-  type Span,
-  type TextSelection,
-  SpanSelection,
-} from "./span-selection";
+import { type Span, type TextSelection, SpanSelection } from "./span-selection";
 
 type Dictionary<V> = {
   [key: string]: V;
