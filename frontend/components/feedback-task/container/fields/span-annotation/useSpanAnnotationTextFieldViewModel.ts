@@ -12,8 +12,8 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const answer = spanQuestion.answer as SpanQuestionAnswer;
 
-  const classByGroup = answer.entities.reduce((acc, entity, i) => {
-    acc[entity.name] = `hl-${i + 1}`;
+  const classByGroup = answer.entities.reduce((acc, entity) => {
+    acc[entity.name] = `hl-${entity.id}`;
     return acc;
   }, {} as Record<string, string>);
 
