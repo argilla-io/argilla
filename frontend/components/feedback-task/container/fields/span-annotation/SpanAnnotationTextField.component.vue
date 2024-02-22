@@ -39,6 +39,11 @@ export default {
       type: Object,
     },
   },
+  computed: {
+    selectedEntityColorVar() {
+      return this.spanQuestion.answer.selectedEntityColor;
+    },
+  },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);
   },
@@ -94,13 +99,12 @@ export default {
 }
 
 ::selection {
-  background-color: #f06;
+  background-color: v-bind("selectedEntityColorVar");
   color: white;
 }
 
 ::highlight(hl-1) {
   background-color: yellow;
-
   -webkit-text-decoration: darkturquoise solid underline;
   text-decoration: darkturquoise solid underline 3px;
   -webkit-text-decoration-skip: ink;

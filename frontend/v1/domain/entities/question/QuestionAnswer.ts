@@ -113,6 +113,14 @@ export class SpanQuestionAnswer extends QuestionAnswer {
     this.values = {};
   }
 
+  get selectedEntity(): Entity {
+    return this.entities.find((e) => e.isSelected);
+  }
+
+  get selectedEntityColor(): string {
+    return this.selectedEntity.color;
+  }
+
   get isValid(): boolean {
     return Object.keys(this.values).length > 0;
   }
