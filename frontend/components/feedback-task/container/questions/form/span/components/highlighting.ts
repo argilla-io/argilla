@@ -209,20 +209,21 @@ export class Highlighting {
     const text = selection.toString();
     const from = selection.anchorOffset;
     const to = selection.focusOffset;
-    const nodeText = selection.focusNode.textContent;
 
-    selection.empty();
-
-    return {
+    const textSelection = {
       from: Math.min(from, to),
       to: Math.max(from, to),
       text,
       entity: this.entity,
       node: {
         id: this.nodeId,
-        element: this.node.firstChild as Node,
-        text: nodeText,
+        element: selection.focusNode,
+        text: selection.focusNode.textContent,
       },
     };
+
+    selection.empty();
+
+    return textSelection;
   }
 }

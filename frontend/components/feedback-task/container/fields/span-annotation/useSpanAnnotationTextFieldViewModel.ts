@@ -10,7 +10,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   title: string;
 }) => {
   const classByGroup = spanQuestion.answer.entities.reduce((acc, entity, i) => {
-    acc[entity.id] = `hl-${i + 1}`;
+    acc[entity.name] = `hl-${i + 1}`;
     return acc;
   }, {} as Record<string, string>);
 
@@ -27,14 +27,14 @@ export const useSpanAnnotationTextFieldViewModel = ({
     () => {
       highlighting.value.entity = spanQuestion.answer.entities.find(
         (e) => e.isSelected
-      )?.id;
+      )?.name;
     },
     { deep: true }
   );
 
   onMounted(() => {
     highlighting.value.mount();
-    highlighting.value.entity = spanQuestion.answer.entities[0].id;
+    highlighting.value.entity = spanQuestion.answer.entities[0].name;
   });
 
   return {
