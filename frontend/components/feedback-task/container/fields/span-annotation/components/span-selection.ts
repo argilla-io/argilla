@@ -1,7 +1,12 @@
+export type Entity = {
+  id: string;
+  text: string;
+};
+
 export type TextSelection = {
   from: number;
   to: number;
-  entity: string;
+  entity: Entity;
   text: string;
   node: {
     element: Node;
@@ -13,7 +18,7 @@ export type TextSelection = {
 export type Span = {
   from: number;
   to: number;
-  entity: string;
+  entity: Entity;
   text: string;
   node: {
     element: Node;
@@ -106,10 +111,11 @@ export class SpanSelection {
     selections.forEach((s) => this.select(s));
   }
 
-  replaceEntity(span: Span, entity: string) {
+  replaceEntity(span: Span, entity: Entity) {
     const found = this.selections.find(
       (s) => this.createId(s) === this.createId(span)
     );
+
     if (!found) return;
 
     found.entity = entity;
@@ -199,6 +205,6 @@ export class SpanSelection {
   }
 
   private createId(span: Span | TextSelection) {
-    return `${span.from}-${span.to}-${span.entity}-${span.node.id}`;
+    return `${span.from}-${span.to}-${span.entity.id}-${span.node.id}`;
   }
 }

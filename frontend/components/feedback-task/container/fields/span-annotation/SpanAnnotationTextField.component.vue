@@ -18,9 +18,9 @@
     </div>
     <div class="content-area --body1">
       <p :id="title" v-html="fieldText" />
-      <template v-for="{ name, color } in spanQuestion.answer.entities">
-        <style :key="name">
-          ::highlight(hl-{{name}}) {
+      <template v-for="{ id, color } in spanQuestion.answer.entities">
+        <style :key="id">
+          ::highlight(hl-{{id}}) {
             background-color: {{color}};
             text-decoration: {{color}} solid underline 8px;
           }

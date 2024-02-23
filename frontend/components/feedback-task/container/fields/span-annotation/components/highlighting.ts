@@ -1,4 +1,9 @@
-import { type Span, type TextSelection, SpanSelection } from "./span-selection";
+import {
+  type Span,
+  type TextSelection,
+  type Entity,
+  SpanSelection,
+} from "./span-selection";
 
 declare class Highlight {
   constructor(...ranges: Range[]);
@@ -33,15 +38,17 @@ export class Highlighting {
   private readonly spanSelection = SpanSelection.getInstance();
   private node: HTMLElement | undefined;
   private readonly styles: Required<Styles>;
-  entity = "";
+  private entity: Entity = null;
+
+  private scrollingElement: HTMLElement;
 
   constructor(
     private readonly nodeId: string,
-    private readonly entities: string[],
+    private readonly entities: Entity[],
     styles: Styles
   ) {
     const entitiesCSS = entities.reduce((acc, entity) => {
-      acc[entity] = `hl-${entity}`;
+      acc[entity.id] = `hl-${entity.id}`;
 
       return acc;
     }, {});
@@ -75,37 +82,6 @@ export class Highlighting {
     return node;
   }
 
-  private attachNode(node: HTMLElement) {
-    this.node = node;
-    document.body.appendChild(this.entitySpanContainer);
-
-    this.node.addEventListener("mouseup", () => {
-      this.highlightUserSelection();
-
-      this.applyStyles();
-    });
-
-    window.addEventListener("resize", () => {
-      this.applyEntityStyle();
-
-      this.applyStylesOnScroll();
-    });
-
-    this.applyStylesOnScroll();
-  }
-
-  private applyStylesOnScroll() {
-    const scroll = this.getScrollParent(this.node);
-
-    scroll?.removeEventListener("scroll", () => {
-      this.applyEntityStyle();
-    });
-
-    scroll?.addEventListener("scroll", () => {
-      this.applyEntityStyle();
-    });
-  }
-
   mount() {
     const node = document.getElementById(this.nodeId)!;
 
@@ -116,6 +92,10 @@ export class Highlighting {
 
   unmount() {
     this.removeAllHighlights();
+  }
+
+  changeEntity(entity: Entity) {
+    this.entity = entity;
   }
 
   loadHighlights(selections: Span[] = []) {
@@ -136,7 +116,7 @@ export class Highlighting {
     this.applyStyles();
   }
 
-  replaceEntity(span: Span, entity: string) {
+  replaceEntity(span: Span, entity: Entity) {
     this.spanSelection.replaceEntity(span, entity);
     this.applyStyles();
   }
@@ -144,6 +124,41 @@ export class Highlighting {
   removeAllHighlights() {
     this.spanSelection.clear();
     this.applyStyles();
+  }
+
+  private attachNode(node: HTMLElement) {
+    this.node = node;
+    document.body.appendChild(this.entitySpanContainer);
+
+    this.node.addEventListener("mouseup", () => {
+      this.highlightUserSelection();
+
+      this.applyStyles();
+    });
+
+    window.addEventListener("resize", () => {
+      this.applyEntityStyle();
+
+      this.applyStylesOnScroll();
+    });
+
+    this.applyStylesOnScroll();
+  }
+
+  private scroll = () => {
+    this.applyEntityStyle();
+  };
+
+  private applyStylesOnScroll() {
+    if (this.scrollingElement) {
+      this.scrollingElement.removeEventListener("scroll", this.scroll);
+    }
+
+    this.scrollingElement = this.getScrollParent(this.node);
+
+    this.scrollingElement.removeEventListener("scroll", this.scroll);
+
+    this.scrollingElement?.addEventListener("scroll", this.scroll);
   }
 
   private highlightUserSelection() {
@@ -167,11 +182,11 @@ export class Highlighting {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      if (!highlights[span.entity]) highlights[span.entity] = [];
+      if (!highlights[span.entity.id]) highlights[span.entity.id] = [];
 
       const range = this.createRange(span);
 
-      highlights[span.entity].push(range);
+      highlights[span.entity.id].push(range);
     }
 
     for (const highlight of Object.entries(highlights)) {
@@ -210,7 +225,7 @@ export class Highlighting {
       entityElement.style.left = `${position.left}px`;
       entityElement.style.top = `${position.top}px`;
 
-      entityElement.innerText = entity;
+      entityElement.innerText = entity.text;
 
       const button = document.createElement("span");
       button.innerText = " - X ";

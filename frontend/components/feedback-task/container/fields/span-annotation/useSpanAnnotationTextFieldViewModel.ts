@@ -1,8 +1,8 @@
 import { onBeforeMount, onMounted, ref, watch } from "vue-demi";
-import { Highlighting } from "../../questions/form/span/components/highlighting";
+import { Highlighting } from "./components/highlighting";
+import { colorGenerator } from "./components/color-generator";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
-import { stringToColor } from "./spanColorGenerator";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
@@ -13,23 +13,29 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const answer = spanQuestion.answer as SpanQuestionAnswer;
 
+  answer.entities
+    .filter((e) => !e.color)
+    .forEach((e) => {
+      e.color = colorGenerator(e.id);
+    });
+
+  const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
+
   const highlighting = ref<Highlighting>(
-    new Highlighting(
-      title,
-      answer.entities.map((e) => e.name),
-      {
-        entityClassName: "highlight__entity",
-        entitiesGap: 9,
-      }
-    )
+    new Highlighting(title, answer.entities.map(mapEntitiesForHighlighting), {
+      entityClassName: "highlight__entity",
+      entitiesGap: 9,
+    })
   );
 
   watch(
     () => answer.entities,
     () => {
-      highlighting.value.entity = answer.entities.find(
-        (e) => e.isSelected
-      )?.name;
+      highlighting.value.changeEntity(
+        answer.entities
+          .filter((e) => e.isSelected)
+          .map(mapEntitiesForHighlighting)[0]
+      );
     },
     { deep: true }
   );
@@ -56,19 +62,12 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   onMounted(() => {
-    highlighting.value.mount();
     const firstEntity = answer.entities[0];
-
-    if (!firstEntity) return;
-
     firstEntity.isSelected = true;
-    highlighting.value.entity = firstEntity.name;
 
-    answer.entities
-      .filter((e) => !e.color)
-      .forEach((e) => {
-        e.color = stringToColor(e.id);
-      });
+    highlighting.value.changeEntity(mapEntitiesForHighlighting(firstEntity));
+
+    highlighting.value.mount();
   });
 
   onBeforeMount(() => {
