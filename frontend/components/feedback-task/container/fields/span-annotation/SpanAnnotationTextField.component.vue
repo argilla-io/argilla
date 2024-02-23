@@ -17,7 +17,7 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <div :id="`span-${title}`" v-html="fieldText" />
+      <div :id="title" v-html="fieldText" />
     </div>
   </div>
 </template>

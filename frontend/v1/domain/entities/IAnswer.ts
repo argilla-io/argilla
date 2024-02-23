@@ -1,8 +1,8 @@
 export type RankingAnswer = { value: string; rank: number };
 
-// The key represents the entity name.
+type Field = string;
 export type SpanAnswer = Record<
-  string,
+  Field,
   { from: number; to: number; entity: string }[]
 >;
 export type AnswerCombinations =

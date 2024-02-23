@@ -1,4 +1,4 @@
-import { onMounted, ref, watch } from "vue-demi";
+import { onBeforeMount, onMounted, ref, watch } from "vue-demi";
 import { Highlighting } from "../../questions/form/span/components/highlighting";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
@@ -12,17 +12,15 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const answer = spanQuestion.answer as SpanQuestionAnswer;
 
-  const classByGroup = answer.entities.reduce((acc, entity, i) => {
-    acc[entity.name] = `hl-${i + 1}`;
-    return acc;
-  }, {} as Record<string, string>);
-
   const highlighting = ref<Highlighting>(
-    new Highlighting(title, {
-      entitiesCSS: classByGroup,
-      entityClassName: "highlight__entity",
-      entitiesGap: 9,
-    })
+    new Highlighting(
+      title,
+      answer.entities.map((e) => e.name),
+      {
+        entityClassName: "highlight__entity",
+        entitiesGap: 9,
+      }
+    )
   );
 
   watch(
@@ -64,6 +62,10 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
     firstEntity.isSelected = true;
     highlighting.value.entity = firstEntity.name;
+  });
+
+  onBeforeMount(() => {
+    highlighting.value.unmount();
   });
 
   return {
