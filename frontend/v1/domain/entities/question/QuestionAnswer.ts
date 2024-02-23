@@ -1,5 +1,4 @@
-import { isValid } from "js-base64";
-import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
+import { Answer, RankingAnswer } from "../IAnswer";
 import { Suggestion } from "./Suggestion";
 
 export type QuestionType =
@@ -120,7 +119,7 @@ export class SpanQuestionAnswer extends QuestionAnswer {
     return this.values;
   }
 
-  matchSuggestion(suggestion: Suggestion): boolean {
+  matchSuggestion(_: Suggestion): boolean {
     return false;
   }
 }
