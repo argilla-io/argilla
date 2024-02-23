@@ -1,5 +1,4 @@
-import { isValid } from "js-base64";
-import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
+import { Answer, RankingAnswer } from "../IAnswer";
 import { Suggestion } from "./Suggestion";
 
 export type QuestionType =
@@ -90,10 +89,13 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   public readonly entities: Entity[] = [];
   public values: SpanLabelValue = {};
 
-  constructor(public readonly type: QuestionType, value: Entity[]) {
+  constructor(
+    public readonly type: QuestionType,
+    entities: Omit<Entity, "isSelected">[]
+  ) {
     super(type);
 
-    this.entities = value.map((e) => ({
+    this.entities = entities.map((e) => ({
       ...e,
       isSelected: false,
     }));
@@ -102,23 +104,11 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   }
 
   protected fill(answer: Answer) {
-    this.clear();
-
-    Object.entries(answer.value).forEach(([field, spans]) => {
-      this.values[field] = spans;
-    });
+    this.values = answer.value as SpanLabelValue;
   }
 
   clear() {
     this.values = {};
-  }
-
-  get selectedEntity(): Entity {
-    return this.entities.find((e) => e.isSelected);
-  }
-
-  get selectedEntityColor(): string {
-    return this.selectedEntity.color;
   }
 
   get isValid(): boolean {
@@ -129,7 +119,7 @@ export class SpanQuestionAnswer extends QuestionAnswer {
     return this.values;
   }
 
-  matchSuggestion(suggestion: Suggestion): boolean {
+  matchSuggestion(_: Suggestion): boolean {
     return false;
   }
 }

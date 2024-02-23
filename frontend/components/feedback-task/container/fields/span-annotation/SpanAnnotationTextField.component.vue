@@ -17,10 +17,10 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <p :id="`span-${title}`" v-html="fieldText" />
-      <template v-for="{ id, color } in spanQuestion.answer.entities">
-        <style :key="id">
-          ::highlight(hl-{{id}}) {
+      <p :id="title" v-html="fieldText" />
+      <template v-for="{ name, color } in spanQuestion.answer.entities">
+        <style :key="name">
+          ::highlight(hl-{{name}}) {
             background-color: {{color}};
             text-decoration: {{color}} solid underline 8px;
           }
@@ -48,8 +48,11 @@ export default {
     },
   },
   computed: {
-    selectedEntityColorVar() {
-      return this.spanQuestion.answer.selectedEntityColor;
+    selectedEntity() {
+      return this.spanQuestion.answer.entities.find((e) => e.isSelected);
+    },
+    selectedEntityColor() {
+      return this.selectedEntity?.color;
     },
   },
   setup(props) {
@@ -107,6 +110,6 @@ export default {
 }
 
 ::selection {
-  background-color: v-bind("selectedEntityColorVar");
+  background-color: v-bind("selectedEntityColor");
 }
 </style>

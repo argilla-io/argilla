@@ -34,11 +34,11 @@ export class SpanSelection {
   // eslint-disable-next-line no-use-before-define
   private static instance: SpanSelection;
   public static getInstance() {
-    if (!SpanSelection.instance) {
-      SpanSelection.instance = new SpanSelection();
+    if (!this.instance) {
+      this.instance = new SpanSelection();
     }
 
-    return SpanSelection.instance;
+    return this.instance;
   }
 
   get spans() {

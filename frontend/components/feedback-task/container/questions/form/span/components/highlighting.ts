@@ -6,7 +6,7 @@ type Dictionary<V> = {
 
 type Styles = {
   /** Is the Highlight CSS class name for each entity */
-  entitiesCSS: Dictionary<string>;
+  entitiesCSS?: Dictionary<string>;
 
   /** This gap is used to separate spans vertically when allow overlap is true */
   entitiesGap?: number;
@@ -24,11 +24,22 @@ export class Highlighting {
   private readonly styles: Required<Styles>;
   entity = "";
 
-  constructor(private readonly nodeId: string, styles: Styles) {
+  constructor(
+    private readonly nodeId: string,
+    private readonly entities: string[],
+    styles: Styles
+  ) {
+    const entitiesCSS = entities.reduce((acc, entity) => {
+      acc[entity] = `hl-${entity}`;
+
+      return acc;
+    }, {});
+
     this.styles = {
       entitiesGap: 8,
       entityClassName: "",
       spanContainerId: "entity-span-container",
+      entitiesCSS,
       ...styles,
     };
   }
@@ -65,13 +76,35 @@ export class Highlighting {
 
     window.addEventListener("resize", () => {
       this.applyEntityStyle();
+
+      this.applyStylesOnScroll();
+    });
+
+    this.applyStylesOnScroll();
+  }
+
+  private applyStylesOnScroll() {
+    const scroll = this.getScrollParent(this.node);
+
+    scroll?.removeEventListener("scroll", () => {
+      this.applyEntityStyle();
+    });
+
+    scroll?.addEventListener("scroll", () => {
+      this.applyEntityStyle();
     });
   }
 
   mount() {
-    const node = document.getElementById(`span-${this.nodeId}`)!;
+    const node = document.getElementById(this.nodeId)!;
+
+    if (!node) throw new Error(`Node with id ${this.nodeId} not found`);
 
     this.attachNode(node);
+  }
+
+  unmount() {
+    this.removeAllHighlights();
   }
 
   loadHighlights(selections: Span[] = []) {
@@ -220,5 +253,15 @@ export class Highlighting {
     selection.empty();
 
     return textSelection;
+  }
+
+  private getScrollParent(node) {
+    if (node == null) {
+      return null;
+    }
+
+    if (node.scrollHeight > node.clientHeight) return node;
+
+    return this.getScrollParent(node.parentNode);
   }
 }
