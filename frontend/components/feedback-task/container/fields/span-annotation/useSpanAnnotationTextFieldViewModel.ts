@@ -31,11 +31,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
   watch(
     () => answer.entities,
     () => {
-      highlighting.value.changeEntity(
-        answer.entities
-          .filter((e) => e.isSelected)
-          .map(mapEntitiesForHighlighting)[0]
-      );
+      const selected = answer.entities.find((e) => e.isSelected);
+
+      highlighting.value.changeEntity(mapEntitiesForHighlighting(selected));
     },
     { deep: true }
   );
@@ -49,7 +47,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
         acc[span.node.id].push({
           from: span.from,
           to: span.to,
-          entity: span.entity,
+          entity: span.entity.id,
         });
 
         return acc;
