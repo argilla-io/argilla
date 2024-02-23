@@ -2,6 +2,7 @@ import { onMounted, ref, watch } from "vue-demi";
 import { Highlighting } from "../../questions/form/span/components/highlighting";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
+import { stringToColor } from "./spanColorGenerator";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
@@ -64,6 +65,12 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
     firstEntity.isSelected = true;
     highlighting.value.entity = firstEntity.name;
+
+    answer.entities
+      .filter((e) => !e.color)
+      .forEach((e) => {
+        e.color = stringToColor(e.id);
+      });
   });
 
   return {

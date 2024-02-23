@@ -28,13 +28,15 @@ export class QuestionRepository {
           settings: {
             type: "span",
             entities: [
-              { id: "1", name: "Entity 1", color: "red" },
-              { id: "2", name: "Entity 2", color: "blue" },
+              { id: "name", name: "Name", color: undefined },
+              { id: "country", name: "Country", color: undefined },
+              { id: "company", name: "Company", color: undefined },
+              { id: "animal", name: "Animal", color: "coral" },
             ],
             values: {
               "prompt 1": [
-                { from: "1", to: "2", entity: "Entity 1" },
-                { from: "3", to: "4", entity: "Entity 2" },
+                { from: "1", to: "2", entity: "Name" },
+                { from: "3", to: "4", entity: "Animal" },
               ],
             },
           },

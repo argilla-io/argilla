@@ -17,15 +17,12 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <div :id="`span-${title}`" v-html="fieldText" />
+      <p :id="`span-${title}`" v-html="fieldText" />
       <template v-for="{ id, color } in spanQuestion.answer.entities">
         <style :key="id">
           ::highlight(hl-{{id}}) {
             background-color: {{color}};
-            -webkit-text-decoration: rgb(185, 0, 209) solid underline;
-            text-decoration: rgb(185, 0, 209) solid underline 3px;
-            -webkit-text-decoration-skip: ink;
-            text-decoration-skip-ink: auto;
+            text-decoration: {{color}} solid underline 8px;
           }
         </style>
       </template>
@@ -111,6 +108,5 @@ export default {
 
 ::selection {
   background-color: v-bind("selectedEntityColorVar");
-  color: white;
 }
 </style>
