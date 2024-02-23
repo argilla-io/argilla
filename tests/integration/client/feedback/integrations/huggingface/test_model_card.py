@@ -111,7 +111,7 @@ def test_model_card_with_defaults(
         model = "prajjwal1/bert-tiny"
 
     if framework == Framework("span_marker"):
-        with pytest.raises(NotImplementedError, match=f"^Framework span_marker is not supported for this"):
+        with pytest.raises(NotImplementedError, match="^Framework span_marker is not supported for this"):
             trainer = ArgillaTrainer(
                 dataset=dataset,
                 task=task,
@@ -289,9 +289,11 @@ def test_model_card_trl(
         from trl import PPOConfig
 
         reward_model = pipeline("sentiment-analysis", model="lvwerra/distilbert-imdb")
-        trainer.update_config(config=PPOConfig(batch_size=1, ppo_epochs=2), reward_model=reward_model)
+        trainer.update_config(
+            config=PPOConfig(batch_size=1, ppo_epochs=2), reward_model=reward_model, gradient_accumulation_steps=1
+        )
     else:
-        trainer.update_config(max_steps=1)
+        trainer.update_config(max_steps=1, gradient_accumulation_steps=1)
 
     with TemporaryDirectory() as tmpdirname:
         model_card = trainer.generate_model_card(tmpdirname)
