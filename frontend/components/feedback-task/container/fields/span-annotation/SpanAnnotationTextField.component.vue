@@ -18,6 +18,17 @@
     </div>
     <div class="content-area --body1">
       <div :id="title" v-html="fieldText" />
+      <template v-for="{ id, color } in spanQuestion.answer.entities">
+        <style :key="id">
+          ::highlight(hl-{{id}}) {
+            background-color: {{color}};
+            -webkit-text-decoration: rgb(185, 0, 209) solid underline;
+            text-decoration: rgb(185, 0, 209) solid underline 3px;
+            -webkit-text-decoration-skip: ink;
+            text-decoration-skip-ink: auto;
+          }
+        </style>
+      </template>
     </div>
   </div>
 </template>
@@ -37,6 +48,14 @@ export default {
     },
     spanQuestion: {
       type: Object,
+    },
+  },
+  computed: {
+    selectedEntity() {
+      return this.spanQuestion.answer.entities.find((e) => e.isSelected);
+    },
+    selectedEntityColor() {
+      return this.selectedEntity?.color;
     },
   },
   setup(props) {
@@ -94,43 +113,7 @@ export default {
 }
 
 ::selection {
-  background-color: #f06;
+  background-color: v-bind("selectedEntityColor");
   color: white;
-}
-
-::highlight(hl-1) {
-  background-color: yellow;
-
-  -webkit-text-decoration: darkturquoise solid underline;
-  text-decoration: darkturquoise solid underline 3px;
-  -webkit-text-decoration-skip: ink;
-  text-decoration-skip-ink: auto;
-}
-
-::highlight(hl-2) {
-  background-color: yellow;
-
-  -webkit-text-decoration: rgb(185, 0, 209) solid underline;
-  text-decoration: rgb(185, 0, 209) solid underline 3px;
-  -webkit-text-decoration-skip: ink;
-  text-decoration-skip-ink: auto;
-}
-
-::highlight(hl-3) {
-  background-color: yellow;
-
-  -webkit-text-decoration: #f60b26 solid underline;
-  text-decoration: #f60b26 solid underline 3px;
-  -webkit-text-decoration-skip: ink;
-  text-decoration-skip-ink: auto;
-}
-
-::highlight(hl-4) {
-  background-color: yellow;
-
-  -webkit-text-decoration: #19eec0 solid underline;
-  text-decoration: #19eec0 solid underline 3px;
-  -webkit-text-decoration-skip: ink;
-  text-decoration-skip-ink: auto;
 }
 </style>
