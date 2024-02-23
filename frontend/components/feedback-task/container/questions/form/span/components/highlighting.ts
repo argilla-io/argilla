@@ -1,5 +1,16 @@
 import { type Span, type TextSelection, SpanSelection } from "./span-selection";
 
+declare class Highlight {
+  constructor(...ranges: Range[]);
+}
+
+declare namespace CSS {
+  const highlights: {
+    set(className: string, highlight: Highlight): void;
+    clear(): void;
+  };
+}
+
 type Dictionary<V> = {
   [key: string]: V;
 };
