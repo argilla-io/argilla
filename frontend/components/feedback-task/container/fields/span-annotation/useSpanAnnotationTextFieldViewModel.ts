@@ -1,6 +1,9 @@
+import Vue from "vue";
 import { onMounted, onUnmounted, ref, watch } from "vue-demi";
 import { Highlighting } from "./components/highlighting";
 import { colorGenerator } from "./components/color-generator";
+import EntityComponent from "./components/EntityComponent.vue";
+import { Entity } from "./components/span-selection";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 
@@ -21,11 +24,28 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
   const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
 
+  const entityComponentFactory = (selectedEntity: Entity) => {
+    const EntityComponentReference = Vue.extend(EntityComponent);
+
+    const instance = new EntityComponentReference({
+      propsData: { selectedEntity },
+    });
+
+    instance.$mount();
+
+    return instance.$el;
+  };
+
   const highlighting = ref<Highlighting>(
-    new Highlighting(title, answer.entities.map(mapEntitiesForHighlighting), {
-      entityClassName: "highlight__entity",
-      entitiesGap: 9,
-    })
+    new Highlighting(
+      title,
+      answer.entities.map(mapEntitiesForHighlighting),
+      entityComponentFactory,
+      {
+        entityClassName: "highlight__entity",
+        entitiesGap: 9,
+      }
+    )
   );
 
   watch(

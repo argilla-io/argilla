@@ -45,6 +45,9 @@ export class Highlighting {
   constructor(
     private readonly nodeId: string,
     private readonly entities: Entity[],
+    private readonly EntityComponentConstructor: (
+      selectedEntity: Entity
+    ) => Element,
     styles: Styles
   ) {
     const entitiesCSS = entities.reduce((acc, entity) => {
@@ -221,13 +224,12 @@ export class Highlighting {
         position.top += this.styles.entitiesGap;
       }
 
-      const entityElement = document.createElement("span");
+      const entityElement = this.EntityComponentConstructor(entity);
+
       entityElement.className = this.styles.entityClassName;
 
       entityElement.style.left = `${position.left}px`;
       entityElement.style.top = `${position.top}px`;
-
-      entityElement.innerText = entity.text;
 
       const button = document.createElement("span");
       button.innerText = " - X ";
