@@ -3,7 +3,7 @@ import LabelSelectionComponent from "./LabelSelection.component";
 
 let wrapper = null;
 const options = {
-  stubs: ["SearchLabelComponent"],
+  stubs: ["SearchLabelComponent", "BaseTooltip"],
   propsData: {
     componentId: `componentId`,
     options: [],
