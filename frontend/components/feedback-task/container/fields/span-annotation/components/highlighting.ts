@@ -156,6 +156,8 @@ export class Highlighting {
 
     this.scrollingElement = this.getScrollParent(this.node);
 
+    if (!this.scrollingElement) return;
+
     this.scrollingElement.removeEventListener("scroll", this.scroll);
 
     this.scrollingElement?.addEventListener("scroll", this.scroll);

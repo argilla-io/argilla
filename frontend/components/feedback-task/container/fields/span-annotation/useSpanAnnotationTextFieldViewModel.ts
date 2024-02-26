@@ -1,4 +1,4 @@
-import { onBeforeMount, onMounted, ref, watch } from "vue-demi";
+import { onMounted, onUnmounted, ref, watch } from "vue-demi";
 import { Highlighting } from "./components/highlighting";
 import { colorGenerator } from "./components/color-generator";
 import { Question } from "~/v1/domain/entities/question/Question";
@@ -68,7 +68,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
     highlighting.value.mount();
   });
 
-  onBeforeMount(() => {
+  onUnmounted(() => {
     highlighting.value.unmount();
   });
 
