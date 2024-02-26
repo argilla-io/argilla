@@ -43,6 +43,8 @@ dependencies = [
     "rich != 13.1.0",
     # for CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
+    # metrics
+    "nltk < 4.0.0"
 ]
 dynamic = ["version"]
 
