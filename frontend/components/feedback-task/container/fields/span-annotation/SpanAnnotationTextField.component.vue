@@ -120,12 +120,3 @@ export default {
   background-color: v-bind("selectedEntityColor");
 }
 </style>
-
-<style>
-.highlight__entity {
-  display: block;
-  margin-top: 14px;
-  font-size: 10px;
-  position: absolute;
-}
-</style>

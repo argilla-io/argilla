@@ -46,7 +46,8 @@ export class Highlighting {
     private readonly nodeId: string,
     private readonly entities: Entity[],
     private readonly EntityComponentConstructor: (
-      selectedEntity: Entity
+      selectedEntity: Entity,
+      entityPosition: { left: string; top: string }
     ) => Element,
     styles: Styles
   ) {
@@ -224,12 +225,17 @@ export class Highlighting {
         position.top += this.styles.entitiesGap;
       }
 
-      const entityElement = this.EntityComponentConstructor(entity);
+      const entityPosition = {
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+      };
+
+      const entityElement = this.EntityComponentConstructor(
+        entity,
+        entityPosition
+      );
 
       entityElement.className = this.styles.entityClassName;
-
-      entityElement.style.left = `${position.left}px`;
-      entityElement.style.top = `${position.top}px`;
 
       this.entitySpanContainer.appendChild(entityElement);
 

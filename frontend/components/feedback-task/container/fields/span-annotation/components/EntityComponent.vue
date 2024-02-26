@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{ left: entityPosition.left, top: entityPosition.top }">
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
       {{ selectedEntity.text }}
     </div>
@@ -55,6 +55,16 @@ export default {
     },
     spanQuestion: {
       type: Object,
+    },
+    entityPosition: {
+      left: {
+        type: String,
+        required: true,
+      },
+      top: {
+        type: String,
+        required: true,
+      },
     },
   },
   data() {
@@ -165,4 +175,11 @@ export default {
     }
   }
 }
+.highlight__entity {
+  display: block;
+  margin-top: 14px;
+  font-size: 10px;
+  position: absolute;
+}
 </style>
+

@@ -24,11 +24,14 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
   const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
 
-  const entityComponentFactory = (selectedEntity: Entity) => {
+  const entityComponentFactory = (
+    selectedEntity: Entity,
+    entityPosition: Object
+  ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
 
     const instance = new EntityComponentReference({
-      propsData: { selectedEntity, spanQuestion },
+      propsData: { selectedEntity, entityPosition, spanQuestion },
     });
 
     instance.$mount();
