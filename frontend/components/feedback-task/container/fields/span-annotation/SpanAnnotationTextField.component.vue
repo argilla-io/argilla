@@ -17,12 +17,13 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <p :id="title" v-html="fieldText" />
+      <p class="span-annotation__field" :id="title" v-html="fieldText" />
       <template v-for="{ id, color } in spanQuestion.answer.entities">
-        <style :key="id">
+        <style :key="id" scoped>
           ::highlight(hl-{{id}}) {
             background-color: {{color}};
-            text-decoration: {{color}} solid underline 8px;
+            text-decoration: {{color}} solid underline 10px;
+            text-underline-offset: 4px;
           }
         </style>
       </template>
@@ -100,6 +101,12 @@ export default {
     opacity: 0;
   }
 }
+
+.span-annotation {
+  &__field {
+    line-height: 1.9em;
+  }
+}
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.25s;
@@ -111,5 +118,14 @@ export default {
 
 ::selection {
   background-color: v-bind("selectedEntityColor");
+}
+</style>
+
+<style>
+.highlight__entity {
+  display: block;
+  margin-top: 14px;
+  font-size: 10px;
+  position: absolute;
 }
 </style>

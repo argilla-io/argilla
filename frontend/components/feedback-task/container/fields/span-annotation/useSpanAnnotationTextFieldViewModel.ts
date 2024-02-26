@@ -28,7 +28,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
     const EntityComponentReference = Vue.extend(EntityComponent);
 
     const instance = new EntityComponentReference({
-      propsData: { selectedEntity },
+      propsData: { selectedEntity, spanQuestion },
     });
 
     instance.$mount();

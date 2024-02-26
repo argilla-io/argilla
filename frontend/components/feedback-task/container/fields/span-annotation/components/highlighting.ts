@@ -231,15 +231,6 @@ export class Highlighting {
       entityElement.style.left = `${position.left}px`;
       entityElement.style.top = `${position.top}px`;
 
-      const button = document.createElement("span");
-      button.innerText = " - X ";
-      button.style.cursor = "pointer";
-      button.onclick = () => {
-        this.removeSpan(span);
-      };
-
-      entityElement.appendChild(button);
-
       this.entitySpanContainer.appendChild(entityElement);
 
       overlappedSpans.push(position);
