@@ -131,14 +131,17 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 @pytest.fixture(scope="function")
 def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     from argilla_server import app
+    from argilla_server.apis.routes import api_v0, api_v1
 
     async def override_get_async_db():
         session = TestSession()
         yield session
 
     mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
-
-    app.dependency_overrides[get_async_db] = override_get_async_db
+    # Here, we need to override the dependency for both versions of the API. This behavior changed from pull request #28
+    # https://github.com/argilla-io/argilla-server/pull/28/files#diff-0cae8a7ee2d37098b1ad84b543d17cfc1e8535eed5fd6abac88c668bfe354cbbR98
+    for api_app in [api_v0, api_v1]:
+        api_app.dependency_overrides[get_async_db] = override_get_async_db
 
     raise_server_exceptions = request.param if hasattr(request, "param") else False
     with TestClient(app, raise_server_exceptions=raise_server_exceptions) as client:
