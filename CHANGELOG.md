@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Removed
+
+- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
+
 ## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
 >[!NOTE]
