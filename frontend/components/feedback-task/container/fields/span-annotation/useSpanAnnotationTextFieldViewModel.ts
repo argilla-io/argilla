@@ -1,6 +1,6 @@
 import Vue from "vue";
 import { onMounted, onUnmounted, ref, watch } from "vue-demi";
-import { Highlighting } from "./components/highlighting";
+import { Highlighting, Position } from "./components/highlighting";
 import { colorGenerator } from "./components/color-generator";
 import EntityComponent from "./components/EntityComponent.vue";
 import { Entity } from "./components/span-selection";
@@ -25,14 +25,25 @@ export const useSpanAnnotationTextFieldViewModel = ({
   const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
 
   const entityComponentFactory = (
-    selectedEntity: Entity,
-    entityPosition: Object
+    entity: Entity,
+    entityPosition: Position,
+    removeSpan: () => void,
+    replaceEntity: (entity: Entity) => void
   ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
 
     const instance = new EntityComponentReference({
-      propsData: { selectedEntity, entityPosition, spanQuestion },
+      propsData: {
+        entity,
+        spanQuestion,
+        entityPosition,
+      },
     });
+
+    instance.$on("on-remove-entity", removeSpan);
+    instance.$on("on-replace-entity", (newEntity) =>
+      replaceEntity(mapEntitiesForHighlighting(newEntity))
+    );
 
     instance.$mount();
 
@@ -56,7 +67,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
     () => {
       const selected = answer.entities.find((e) => e.isSelected);
 
-      highlighting.value.changeEntity(mapEntitiesForHighlighting(selected));
+      highlighting.value.changeSelectedEntity(
+        mapEntitiesForHighlighting(selected)
+      );
     },
     { deep: true }
   );
@@ -86,7 +99,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
     const firstEntity = answer.entities[0];
     firstEntity.isSelected = true;
 
-    highlighting.value.changeEntity(mapEntitiesForHighlighting(firstEntity));
+    highlighting.value.changeSelectedEntity(
+      mapEntitiesForHighlighting(firstEntity)
+    );
 
     highlighting.value.mount();
   });

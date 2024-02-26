@@ -5,6 +5,8 @@ import {
   SpanSelection,
 } from "./span-selection";
 
+export type Position = { top: string; left: string };
+
 declare class Highlight {
   constructor(...ranges: Range[]);
 }
@@ -47,7 +49,9 @@ export class Highlighting {
     private readonly entities: Entity[],
     private readonly EntityComponentConstructor: (
       selectedEntity: Entity,
-      entityPosition: { left: string; top: string }
+      entityPosition: Position,
+      removeSpan: () => void,
+      replaceEntity: (entity: Entity) => void
     ) => Element,
     styles: Styles
   ) {
@@ -98,7 +102,7 @@ export class Highlighting {
     this.removeAllHighlights();
   }
 
-  changeEntity(entity: Entity) {
+  changeSelectedEntity(entity: Entity) {
     this.entity = entity;
   }
 
@@ -232,7 +236,9 @@ export class Highlighting {
 
       const entityElement = this.EntityComponentConstructor(
         entity,
-        entityPosition
+        entityPosition,
+        () => this.removeSpan(span),
+        (newEntity: Entity) => this.replaceEntity(span, newEntity)
       );
 
       entityElement.className = this.styles.entityClassName;

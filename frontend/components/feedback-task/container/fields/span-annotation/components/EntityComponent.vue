@@ -1,14 +1,14 @@
 <template>
   <div :style="{ left: entityPosition.left, top: entityPosition.top }">
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
-      {{ selectedEntity.text }}
+      {{ selectedEntity.name }}
     </div>
     <div v-else class="span-entity__dropdown" v-click-outside="hideDropdown">
       <div class="span-entity__dropdown__header">
         <EntityBadge
           class="span-entity__badge--active"
-          :color="selectedEntityColor"
-          :text="selectedEntity.text"
+          :color="selectedEntity.color"
+          :text="selectedEntity.name"
           @on-clear="removeSelectedOption(selectedEntity)"
         ></EntityBadge>
         <input
@@ -49,7 +49,7 @@
 export default {
   name: "EntityComponent",
   props: {
-    selectedEntity: {
+    entity: {
       type: Object,
       required: true,
     },
@@ -57,14 +57,8 @@ export default {
       type: Object,
     },
     entityPosition: {
-      left: {
-        type: String,
-        required: true,
-      },
-      top: {
-        type: String,
-        required: true,
-      },
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -74,8 +68,8 @@ export default {
     };
   },
   computed: {
-    selectedEntityColor() {
-      return this.entities.find((e) => e.id === this.selectedEntity.id).color;
+    selectedEntity() {
+      return this.entities.find((e) => e.id === this.entity.id);
     },
     filteredEntities() {
       return this.availableEntities.filter((entity) =>
@@ -83,9 +77,7 @@ export default {
       );
     },
     availableEntities() {
-      return this.entities.filter(
-        (entity) => entity.id !== this.selectedEntity.id
-      );
+      return this.entities.filter((entity) => entity.id !== this.entity.id);
     },
     entities() {
       return this.spanQuestion.answer.entities;
@@ -93,15 +85,11 @@ export default {
   },
   methods: {
     selectEntity(entity) {
-      this.selectEntityGlobally(entity);
+      this.$emit("on-replace-entity", entity);
       this.hideDropdown();
     },
-    selectEntityGlobally(entity) {
-      this.entities.find((e) => e.isSelected).isSelected = false;
-      this.entities.find((e) => e.id === entity.id).isSelected = true;
-    },
-    removeSelectedOption(entity) {
-      console.log("remove entity", entity);
+    removeSelectedOption() {
+      this.$emit("on-remove-entity");
       this.hideDropdown();
     },
     toggleDropdown() {
@@ -113,7 +101,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.$refs.search && this.$refs.search.focus();
+      this.$refs.search?.focus();
     });
   },
 };
@@ -182,4 +170,3 @@ export default {
   position: absolute;
 }
 </style>
-
