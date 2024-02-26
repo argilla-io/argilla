@@ -63,6 +63,6 @@ dependencies:
       - ipynbname>=2023.2.0.0
       - httpx~=0.26.0
       # For now we can just install argilla-server from the GitHub repo
-      - git+https://github.com/argilla-io/argilla-server.git@5e964bcc4af96e91e255e4082a741b4d71063761
+      - git+https://github.com/argilla-io/argilla-server.git@main
       # install Argilla in editable mode
       - -e .[listeners]
