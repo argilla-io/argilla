@@ -289,14 +289,16 @@ def test_model_card_trl(
         from trl import PPOConfig
 
         reward_model = pipeline("sentiment-analysis", model="lvwerra/distilbert-imdb")
-        trainer.update_config(
-            config=PPOConfig(batch_size=1, ppo_epochs=2), reward_model=reward_model, gradient_accumulation_steps=1
-        )
+        trainer.update_config(config=PPOConfig(batch_size=128, ppo_epochs=2), reward_model=reward_model)
     else:
-        trainer.update_config(max_steps=1, gradient_accumulation_steps=1)
+        trainer.update_config(max_steps=1)
 
     with TemporaryDirectory() as tmpdirname:
         model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
+
         pattern = model_card_pattern(Framework("trl"), training_task)
+        import pdb
+
+        pdb.set_trace()
         assert model_card.content.find(pattern) > -1
