@@ -298,7 +298,4 @@ def test_model_card_trl(
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
 
         pattern = model_card_pattern(Framework("trl"), training_task)
-        import pdb
-
-        pdb.set_trace()
         assert model_card.content.find(pattern) > -1
