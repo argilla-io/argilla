@@ -16,13 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Removed
-
-- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
-
 ### Added
 
 - Reorder labels in `dataset settings page` for single/multi label questions ([#4598](https://github.com/argilla-io/argilla/pull/4598))
+- Added pandas v2 support using the python SDK. ([#4600](https://github.com/argilla-io/argilla/pull/4600))
+
+### Removed
+
+- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
 
 ### Fixed
 

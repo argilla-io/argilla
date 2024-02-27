@@ -111,7 +111,7 @@ def test_model_card_with_defaults(
         model = "prajjwal1/bert-tiny"
 
     if framework == Framework("span_marker"):
-        with pytest.raises(NotImplementedError, match=f"^Framework span_marker is not supported for this"):
+        with pytest.raises(NotImplementedError, match="^Framework span_marker is not supported for this"):
             trainer = ArgillaTrainer(
                 dataset=dataset,
                 task=task,
@@ -296,5 +296,6 @@ def test_model_card_trl(
     with TemporaryDirectory() as tmpdirname:
         model_card = trainer.generate_model_card(tmpdirname)
         assert (Path(tmpdirname) / MODEL_CARD_NAME).exists()
+
         pattern = model_card_pattern(Framework("trl"), training_task)
         assert model_card.content.find(pattern) > -1
