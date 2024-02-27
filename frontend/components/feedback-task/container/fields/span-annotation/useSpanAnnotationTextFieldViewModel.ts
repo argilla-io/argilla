@@ -24,6 +24,12 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
   const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
 
+  const selectEntity = (entity) => {
+    answer.entities.forEach((e) => {
+      e.isSelected = e.id === entity.id;
+    });
+  };
+
   const entityComponentFactory = (
     entity: Entity,
     entityPosition: Position,
@@ -41,9 +47,11 @@ export const useSpanAnnotationTextFieldViewModel = ({
     });
 
     instance.$on("on-remove-entity", removeSpan);
-    instance.$on("on-replace-entity", (newEntity) =>
-      replaceEntity(mapEntitiesForHighlighting(newEntity))
-    );
+    instance.$on("on-replace-entity", (newEntity) => {
+      selectEntity(newEntity);
+
+      replaceEntity(mapEntitiesForHighlighting(newEntity));
+    });
 
     instance.$mount();
 
@@ -96,12 +104,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   onMounted(() => {
-    const firstEntity = answer.entities[0];
-    firstEntity.isSelected = true;
-
-    highlighting.value.changeSelectedEntity(
-      mapEntitiesForHighlighting(firstEntity)
-    );
+    selectEntity(answer.entities[0]);
 
     highlighting.value.mount();
   });
