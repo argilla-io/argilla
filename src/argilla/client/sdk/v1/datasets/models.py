@@ -49,13 +49,6 @@ class FeedbackResponseStatus(str, Enum):
     discarded = "discarded"
 
 
-class FeedbackResponseStatusFilter(str, Enum):
-    draft = "draft"
-    missing = "missing"  # not a status as-is, used as a filter to indicate no response
-    submitted = "submitted"
-    discarded = "discarded"
-
-
 # TODO: these models shouldn't transform the payload from the server to not JSON serializable types (UUID, datetime, etc)
 
 
