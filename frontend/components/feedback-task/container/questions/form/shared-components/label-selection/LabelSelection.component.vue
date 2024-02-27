@@ -389,6 +389,7 @@ $label-dark-color: palette(purple, 200);
   border: 2px solid transparent;
   border-radius: $border-radius-rounded;
   cursor: pointer;
+  user-select: none;
   span {
     white-space: nowrap;
     overflow: hidden;
