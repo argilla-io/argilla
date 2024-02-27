@@ -165,7 +165,7 @@ export default {
 }
 .highlight__entity {
   display: block;
-  margin-top: 14px;
+  margin-top: 15px;
   font-size: 10px;
   position: absolute;
 }

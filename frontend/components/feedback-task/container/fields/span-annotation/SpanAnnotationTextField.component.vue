@@ -20,7 +20,7 @@
       <p class="span-annotation__field" :id="title" v-html="fieldText" />
       <template v-for="{ id, color } in spanQuestion.answer.entities">
         <style :key="id" scoped>
-          ::highlight(hl-{{id}}) {
+          .span-annotation__field::highlight(hl-{{id}}) {
             background-color: {{color}};
             text-decoration: {{color}} solid underline 10px;
             text-underline-offset: 4px;
@@ -104,7 +104,7 @@ export default {
 
 .span-annotation {
   &__field {
-    line-height: 1.9em;
+    line-height: 2em;
   }
 }
 .fade-enter-active,
