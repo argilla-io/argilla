@@ -104,7 +104,7 @@ export class SpanSelection {
   }
 
   isOutOfRange(selection: TextSelection) {
-    return selection.from <= 0 || selection.to <= 0;
+    return selection.from < 0 || selection.to < 0;
   }
 
   loadSpans(selections: Span[]) {
