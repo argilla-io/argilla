@@ -78,8 +78,8 @@ In the UI, you can find a status selector that will let you choose a queue of re
 
 In the Python SDK, the `filter_by` method allows you to filter the records in a dataset based on the `response_status` of the responses given by **all users**. The `response_status` of an annotation can be one of the following:
 
-- `missing`: The records with this status have no responses. In the UI, they will appear under the `Pending` queue.
-- `draft`: The records with this status have responses but have not been submitted or discarded. In the UI, they will appear under the `Pending` queue.
+- `pending`: The records with this status have no responses. In the UI, they will appear under the `Pending` queue.
+- `draft`: The records with this status have responses that have been saved as a draft, not yet submitted or discarded. In the UI, they will appear under the `Draft` queue.
 - `discarded`: The records with this status may or may not have responses but have been discarded by the annotator. In the UI, they will appear under the `Discarded` queue.
 - `submitted`: The records with this status have responses already submitted by the annotator. In the UI, they will appear under the `Submitted` queue.
 
