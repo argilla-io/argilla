@@ -28,8 +28,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
-- Fixed redirect to `user-settings` instead of 404 `user_settings`  ([#4570](https://github.com/argilla-io/argilla/pull/4605))
-
+- Fixed redirect to `user-settings` instead of 404 `user_settings`  ([#4609](https://github.com/argilla-io/argilla/pull/4609))
 
 ## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
