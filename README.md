@@ -5,7 +5,7 @@
   Argilla
   <br>
 </h1>
-<h3 align="center">Work on data together, make your AI better!</h2>
+<h3 align="center">Work on data together, make your model outputs better!</h2>
 
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
@@ -32,7 +32,7 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that strive for **quality, ownership, and efficiency**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
 
