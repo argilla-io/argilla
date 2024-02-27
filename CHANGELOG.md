@@ -16,9 +16,23 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Reorder labels in `dataset settings page` for single/multi label questions ([#4598](https://github.com/argilla-io/argilla/pull/4598))
+- Added pandas v2 support using the python SDK. ([#4600](https://github.com/argilla-io/argilla/pull/4600))
+
+### Removed
+
+- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
+
+### Fixed
+
+- Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
+- Fixed redirect to `user-settings` instead of 404 `user_settings`  ([#4609](https://github.com/argilla-io/argilla/pull/4609))
+
 ## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
->[!NOTE]
+> [!NOTE]
 > This release does not contain any new features, but it includes a major change in the `argilla-server` dependency.
 > The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
 
