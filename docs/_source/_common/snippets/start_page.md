@@ -47,7 +47,7 @@ rg.init(
 
 ### 4. Create your first dataset
 
-Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user_settings). To create a new workspace, check the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
+Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user-settings). To create a new workspace, check the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
 
 Create a Dataset with two labels ("sadness" and "joy"). Don't forget to replace "<your-workspace>". Here, we are using a task template, check the docs to [create a fully custom dataset](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html).
 
