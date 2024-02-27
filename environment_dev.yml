@@ -34,6 +34,9 @@ dependencies:
       - sphinx-notfound-page==0.8.3
       # code formatting
       - pre-commit~=3.2.0
+      # v1,v2 transition, updated to v2 in run-python-tests.yml
+      - pydantic>=1.10.7,<2
+      - pandas>=1.0.0,<2
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
