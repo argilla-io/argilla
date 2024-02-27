@@ -43,7 +43,7 @@
               class="settings__edition-form__group"
               v-if="question.isMultiLabelType || question.isSingleLabelType"
             >
-              <label :for="`options-${question.id}`" v-text="$t('options')" />
+              <label :for="`options-${question.id}`" v-text="$t('labels')" />
               <draggable
                 class="label__container"
                 ghost-class="label__item__ghost"

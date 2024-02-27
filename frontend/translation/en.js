@@ -11,7 +11,7 @@ export default {
   copied: "Copied",
   title: "Title",
   description: "Description",
-  options: "Options",
+  labels: "Labels",
   useMarkdown: "Use Markdown",
   visibleForAnnotators: "Visible for annotators",
   allowExtraMetadata: "Allow extra metadata",
