@@ -17,7 +17,16 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <p class="span-annotation__field" :id="title" v-html="fieldText" />
+      <p
+        class="span-annotation__field"
+        ref="spanAnnotationField"
+        :id="title"
+        v-html="fieldText"
+      />
+      <SpanAnnotationCursor
+        cursor-area-ref="spanAnnotationField"
+        :cursor-color="selectedEntityColor"
+      />
       <template v-for="{ id, color } in spanQuestion.answer.entities">
         <style :key="id" scoped>
           .span-annotation__field::highlight(hl-{{id}}) {
@@ -104,7 +113,8 @@ export default {
 
 .span-annotation {
   &__field {
-    line-height: 2em;
+    line-height: 32px;
+    cursor: none;
   }
 }
 .fade-enter-active,
