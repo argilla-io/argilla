@@ -302,10 +302,6 @@ class TextDescriptivesExtractor:
             )
             for record, metrics in zip(records, df.to_dict("records")):
                 filtered_metrics = {key: value for key, value in metrics.items() if not pd.isna(value)}
-                filtered_metrics = {
-                    key: int(value) if isinstance(value, float) and value.is_integer() else value
-                    for key, value in filtered_metrics.items()
-                }
                 record.metadata.update(filtered_metrics)
                 modified_records.append(record)
                 progress_bar.update(task, advance=1)
