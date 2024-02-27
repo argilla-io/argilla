@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Reorder labels in `dataset settings page` for single/multi label questions ([#4598](https://github.com/argilla-io/argilla/pull/4598))
 
+### Fixed
+
+- Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
+
 ## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
 > [!NOTE]
