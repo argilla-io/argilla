@@ -427,7 +427,7 @@ $label-dark-color: palette(purple, 200);
 input[type="checkbox"] {
   @extend %visuallyhidden;
   &:focus {
-    & + .label-text {
+    & + div .label-text {
       outline: 2px solid $primary-color;
     }
   }
@@ -435,7 +435,7 @@ input[type="checkbox"] {
 .input-button:not(:first-of-type) {
   input[type="checkbox"] {
     &:focus:not(:focus-visible) {
-      & + .label-text {
+      & + div .label-text {
         outline: none;
         &.label-active {
           outline: none;
