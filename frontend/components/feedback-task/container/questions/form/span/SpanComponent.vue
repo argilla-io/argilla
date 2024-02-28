@@ -1,16 +1,15 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent :question="question" />
-    <div v-for="entity in question.answer.entities">
-      <span
-        v-text="entity.name"
-        :style="{
-          color: entity.color,
-          backgroundColor: entity.isSelected ? 'lightgray' : 'white',
-        }"
-        @click="select(entity)"
-      />
-    </div>
+    <EntityLabelSelectionComponent
+      v-model="question.answer.entities"
+      :componentId="question.id"
+      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :isFocused="isFocused"
+      :showShortcutsHelper="showShortcutsHelper"
+      @on-focus="onFocus"
+      @on-selected="onSelected"
+    />
     <div>
       <p>Values</p>
       {{ JSON.stringify(question.answer.valuesAnswered) }}
@@ -26,12 +25,26 @@ export default {
       type: Object,
       required: true,
     },
+    isFocused: {
+      type: Boolean,
+      default: () => false,
+    },
+    showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
+  },
+  computed: {
+    maxOptionsToShowBeforeCollapse() {
+      return this.question.settings.visible_options ?? -1;
+    },
   },
   methods: {
-    select(entity) {
-      this.question.answer.entities.forEach((e) => {
-        e.isSelected = e.id === entity.id;
-      });
+    onFocus() {
+      this.$emit("on-focus");
+    },
+    onSelected() {
+      this.$emit("on-user-answer");
     },
   },
 };
