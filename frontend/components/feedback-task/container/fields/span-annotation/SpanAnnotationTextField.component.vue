@@ -31,8 +31,6 @@
         <style :key="id" scoped>
           .span-annotation__field::highlight(hl-{{id}}) {
             background-color: {{color}};
-            text-decoration: {{color}} solid underline 10px;
-            text-underline-offset: 4px;
           }
         </style>
       </template>

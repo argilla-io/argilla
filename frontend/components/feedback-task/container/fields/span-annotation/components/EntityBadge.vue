@@ -79,8 +79,8 @@ export default {
   color: $black-87;
   font-family: "Roboto Condensed", sans-serif;
   font-weight: 500;
-  @include font-size(10px);
-  @include line-height(10px);
+  @include font-size(12px);
+  @include line-height(12px);
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {

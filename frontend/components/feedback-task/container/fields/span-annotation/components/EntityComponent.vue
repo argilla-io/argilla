@@ -67,13 +67,13 @@ export default {
 .span-entity {
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
-  margin-left: 2px;
   cursor: pointer;
 }
 .highlight__entity {
-  display: block;
-  margin-top: 15px;
-  font-size: 10px;
   position: absolute;
+  display: block;
+  margin-top: 20px;
+  line-height: 1;
+  @include font-size(11px);
 }
 </style>

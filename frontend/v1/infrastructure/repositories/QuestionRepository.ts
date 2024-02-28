@@ -31,7 +31,7 @@ export class QuestionRepository {
               { id: "name", name: "Name", color: undefined },
               { id: "country", name: "Country", color: undefined },
               { id: "company", name: "Company", color: undefined },
-              { id: "animal", name: "Animal", color: "coral" },
+              { id: "animal", name: "Animal", color: "hsl(10, 80%, 70%)" },
             ],
             values: {
               "prompt 1": [

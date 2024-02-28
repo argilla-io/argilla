@@ -148,7 +148,7 @@ export default {
     &__item.button {
       display: flex;
       width: 100%;
-      padding: calc($base-space / 4);
+      padding: calc($base-space / 2);
       border-radius: 4px;
       &.--preselected {
         background-color: $black-4;
