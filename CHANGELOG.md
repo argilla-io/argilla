@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
+
 ## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
 
 > [!NOTE]
