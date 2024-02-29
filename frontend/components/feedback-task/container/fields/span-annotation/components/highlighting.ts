@@ -29,9 +29,6 @@ type Styles = {
   /** This gap is used to separate spans vertically when allow overlap is true */
   entitiesGap?: number;
 
-  /** This class name is used to style the entity span */
-  entityClassName?: string;
-
   /** Span container ID */
   spanContainerId?: string;
 };
@@ -63,7 +60,6 @@ export class Highlighting {
 
     this.styles = {
       entitiesGap: 8,
-      entityClassName: "",
       spanContainerId: "entity-span-container",
       entitiesCSS,
       ...styles,
@@ -240,8 +236,6 @@ export class Highlighting {
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)
       );
-
-      entityElement.className = this.styles.entityClassName;
 
       this.entitySpanContainer.appendChild(entityElement);
 
