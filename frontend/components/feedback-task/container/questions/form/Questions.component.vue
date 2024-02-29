@@ -58,8 +58,10 @@
 
         <SpanComponent
           v-if="question.isSpanType"
+          ref="span"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :showShortcutsHelper="showShortcutsHelper"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
         />
@@ -86,7 +88,7 @@ export default {
   },
   computed: {
     questionsWithLoopMovement() {
-      return ["singleLabel", "multiLabel", "rating", "ranking"]
+      return ["singleLabel", "multiLabel", "rating", "ranking", "span"]
         .filter((componentType) => this.$refs[componentType])
         .map((componentType) => this.$refs[componentType][0].$el);
     },
