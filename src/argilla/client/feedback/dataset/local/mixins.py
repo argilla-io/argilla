@@ -34,8 +34,8 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.remote.questions import (
-    AllowedRemoteQuestionTypes,
     QUESTION_TYPE_TO_QUESTION,
+    AllowedRemoteQuestionTypes,
 )
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
