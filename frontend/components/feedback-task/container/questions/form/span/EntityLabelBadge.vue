@@ -50,13 +50,13 @@ export default {
   },
   computed: {
     getHSLValues() {
-      const [hue = 0, saturation = 0, lightness = 0] = this.optionColor
+      const [hue, saturation, lightness] = this.optionColor
         .match(/\d+/g)
         .map(Number);
       return { hue, saturation, lightness };
     },
     optionColor() {
-      return this.option.color;
+      return this.option.color || "hsl(0, 0%, 0%)";
     },
     optionDarkColor() {
       const { hue, saturation, lightness } = this.getHSLValues;
