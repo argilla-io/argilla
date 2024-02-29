@@ -21,6 +21,7 @@ from argilla.client.feedback.schemas.questions import (
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
+    SpanLabelOption,
     SpanQuestion,
     TextQuestion,
     _LabelQuestion,
@@ -470,4 +471,14 @@ def test_span_question_with_no_labels() -> None:
             title="Question",
             description="Description",
             labels=[],
+        )
+
+
+def test_span_question_with_duplicated_labels() -> None:
+    with pytest.raises(ValidationError, match="the list has duplicated items"):
+        SpanQuestion(
+            name="question",
+            title="Question",
+            description="Description",
+            labels=[SpanLabelOption(value="a", text="A text"), SpanLabelOption(value="a", text="Text for A")],
         )
