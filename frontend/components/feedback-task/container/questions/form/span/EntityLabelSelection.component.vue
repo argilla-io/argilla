@@ -222,8 +222,9 @@ export default {
     },
     hasJustOneCoincidence(keyCode) {
       return (
-        this.$refs.options.filter((o) => o.dataset.keyboard.startsWith(keyCode))
-          .length == 1
+        this.$refs.options.filter((o) =>
+          o.$refs.inputRef.dataset.keyboard.startsWith(keyCode)
+        ).length == 1
       );
     },
     reset() {
@@ -232,8 +233,8 @@ export default {
     },
     selectByKeyCode($event, keyCode) {
       const match = this.$refs.options.find(
-        (option) => option.dataset.keyboard === keyCode
-      );
+        (option) => option.$refs.inputRef.dataset.keyboard === keyCode
+      ).$refs.inputRef;
 
       if (match) {
         $event.preventDefault();

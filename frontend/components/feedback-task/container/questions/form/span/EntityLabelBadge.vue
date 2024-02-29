@@ -1,7 +1,7 @@
 <template>
   <div class="input-button">
     <input
-      ref="options"
+      ref="inputRef"
       type="checkbox"
       :name="option.name"
       :id="option.id"
@@ -27,7 +27,7 @@
         v-if="showShortcutsHelper"
         v-text="keyboards[option.id]"
       />
-      <span>{{ option.name }}{{ getHSLValues.hue }}</span>
+      <span>{{ option.name }}</span>
     </label>
   </div>
 </template>
@@ -50,7 +50,7 @@ export default {
   },
   computed: {
     getHSLValues() {
-      const [hue, saturation, lightness] = this.option.color
+      const [hue = 0, saturation = 0, lightness = 0] = this.optionColor
         .match(/\d+/g)
         .map(Number);
       return { hue, saturation, lightness };
