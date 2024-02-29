@@ -27,7 +27,7 @@ from argilla.client.feedback.schemas.metadata import (
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
@@ -62,6 +62,21 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     assert remote_dataset.records[0].id is not None
     assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
     assert remote_dataset.records[0].suggestions[0].question_id == remote_dataset.question_by_name("text").id
+
+
+def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    ds = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", labels=["label1", "label2"])],
+    )
+
+    rg_dataset = ds.push_to_argilla(name="new_dataset")
+
+    assert rg_dataset.id
+    assert rg_dataset.questions[0].name == "spans"
+    assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
 
 
 @pytest.mark.asyncio
