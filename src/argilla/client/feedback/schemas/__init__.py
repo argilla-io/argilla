@@ -34,6 +34,8 @@ from argilla.client.feedback.schemas.questions import (
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
+    SpanQuestion,
+    SpanLabelOption,
 )
 from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
@@ -62,6 +64,8 @@ __all__ = [
     "RankingQuestion",
     "RatingQuestion",
     "TextQuestion",
+    "SpanQuestion",
+    "SpanLabelOption",
     "FeedbackRecord",
     "RankingValueSchema",
     "ResponseSchema",
