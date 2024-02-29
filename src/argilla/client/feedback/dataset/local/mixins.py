@@ -34,11 +34,8 @@ from argilla.client.feedback.schemas.remote.metadata import (
     RemoteTermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.remote.questions import (
-    RemoteLabelQuestion,
-    RemoteMultiLabelQuestion,
-    RemoteRankingQuestion,
-    RemoteRatingQuestion,
-    RemoteTextQuestion,
+    AllowedRemoteQuestionTypes,
+    QUESTION_TYPE_TO_QUESTION,
 )
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
@@ -125,20 +122,13 @@ class ArgillaMixin:
 
     @staticmethod
     def _parse_to_remote_question(question: "FeedbackQuestionModel") -> "AllowedRemoteQuestionTypes":
-        if question.settings["type"] == QuestionTypes.rating:
-            question = RemoteRatingQuestion.from_api(question)
-        elif question.settings["type"] == QuestionTypes.text:
-            question = RemoteTextQuestion.from_api(question)
-        elif question.settings["type"] == QuestionTypes.label_selection:
-            question = RemoteLabelQuestion.from_api(question)
-        elif question.settings["type"] == QuestionTypes.multi_label_selection:
-            question = RemoteMultiLabelQuestion.from_api(question)
-        elif question.settings["type"] == QuestionTypes.ranking:
-            question = RemoteRankingQuestion.from_api(question)
+        question_type = question.settings["type"]
+        if question_type in QUESTION_TYPE_TO_QUESTION:
+            question = QUESTION_TYPE_TO_QUESTION[question_type].from_api(question)
         else:
             raise ValueError(
                 f"Question '{question.name}' is not a supported question in the current Python package"
-                f" version, supported question types are: `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
+                f" version, supported question types are: `{'`, `'.join(QuestionTypes.values())}`."
             )
 
         return question
