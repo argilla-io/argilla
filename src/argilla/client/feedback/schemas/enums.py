@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List
 
 from enum import Enum
 
@@ -25,6 +26,11 @@ class QuestionTypes(str, Enum):
     label_selection = "label_selection"
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
+    span = "span"
+
+    @classmethod
+    def values(cls) -> List[str]:
+        return [_type.value for _type in cls]
 
 
 class MetadataPropertyTypes(str, Enum):
