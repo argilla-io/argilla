@@ -74,30 +74,7 @@ if _TYPE_CHECKING:
         configure_dataset_settings,
         load_dataset_settings,
     )
-    from argilla.feedback import (
-        FeedbackDataset,
-        FeedbackRecord,
-        FloatMetadataFilter,
-        FloatMetadataProperty,
-        IntegerMetadataFilter,
-        IntegerMetadataProperty,
-        LabelQuestion,
-        MultiLabelQuestion,
-        RankingQuestion,
-        RatingQuestion,
-        RecordSortField,
-        ResponseSchema,
-        ResponseStatusFilter,
-        SortBy,
-        SortOrder,
-        SuggestionSchema,
-        TermsMetadataFilter,
-        TermsMetadataProperty,
-        TextField,
-        TextQuestion,
-        ValueSchema,
-        VectorSettings,
-    )
+    from argilla.feedback import * # noqa
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
 
@@ -115,6 +92,8 @@ _import_structure = {
         "MultiLabelQuestion",
         "RatingQuestion",
         "RankingQuestion",
+        "SpanQuestion",
+        "SpanLabel",
         "ResponseSchema",
         "ResponseStatusFilter",
         "TextField",
