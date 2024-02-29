@@ -33,9 +33,9 @@ from argilla.client.feedback.schemas.questions import (
     QuestionSchema,
     RankingQuestion,
     RatingQuestion,
-    TextQuestion,
-    SpanQuestion,
     SpanLabelOption,
+    SpanQuestion,
+    TextQuestion,
 )
 from argilla.client.feedback.schemas.records import (
     FeedbackRecord,

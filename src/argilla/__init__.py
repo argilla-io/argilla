@@ -74,7 +74,7 @@ if _TYPE_CHECKING:
         configure_dataset_settings,
         load_dataset_settings,
     )
-    from argilla.feedback import * # noqa
+    from argilla.feedback import *  # noqa
     from argilla.listeners import Metrics, RGListenerContext, Search, listener
     from argilla.monitoring.model_monitor import monitor
 
