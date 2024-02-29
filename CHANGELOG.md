@@ -19,8 +19,7 @@ These are the section headers that we use:
 ## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
 
 > [!NOTE]
-> For changes in the argilla-server module, visit the [argilla-server changelog](https://github.com/argilla-io/argilla/blob/v1.25.0/CHANGELOG.md)
-
+> For changes in the argilla-server module, visit the argilla-server [release notes](https://github.com/argilla-io/argilla-server/releases/tag/v1.25.0)
 
 ### Added
 
