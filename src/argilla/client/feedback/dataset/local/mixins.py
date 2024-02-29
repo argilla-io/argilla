@@ -259,8 +259,8 @@ class ArgillaMixin:
 
             # TODO: Remote dataset should connect all settings by API calls requested on demand.
             #  Once is done, this prefetch info should be removed.
-            fields = ArgillaMixin.__get_fields(client=httpx_client, id=created_dataset.id)
-            questions = ArgillaMixin.__get_questions(client=httpx_client, id=created_dataset.id)
+            fields = ArgillaMixin.get_fields(client=httpx_client, id=created_dataset.id)
+            questions = ArgillaMixin.get_questions(client=httpx_client, id=created_dataset.id)
 
             remote_dataset = RemoteFeedbackDataset(
                 client=httpx_client,
@@ -287,14 +287,14 @@ class ArgillaMixin:
             raise ex
 
     @staticmethod
-    def __get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
+    def get_fields(client: "httpx.Client", id: UUID) -> List["AllowedRemoteFieldTypes"]:
         fields = []
         for field in datasets_api_v1.get_fields(client=client, id=id).parsed:
             fields.append(ArgillaMixin._parse_to_remote_field(field))
         return fields
 
     @staticmethod
-    def __get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
+    def get_questions(client: "httpx.Client", id: UUID) -> List["AllowedRemoteQuestionTypes"]:
         questions = []
         for question in datasets_api_v1.get_questions(client=client, id=id).parsed:
             questions.append(ArgillaMixin._parse_to_remote_question(question))
@@ -356,8 +356,8 @@ class ArgillaMixin:
                 )
             )
 
-        fields = ArgillaMixin.__get_fields(client=httpx_client, id=existing_dataset.id)
-        questions = ArgillaMixin.__get_questions(client=httpx_client, id=existing_dataset.id)
+        fields = ArgillaMixin.get_fields(client=httpx_client, id=existing_dataset.id)
+        questions = ArgillaMixin.get_questions(client=httpx_client, id=existing_dataset.id)
 
         return RemoteFeedbackDataset(
             client=httpx_client,
@@ -414,8 +414,8 @@ class ArgillaMixin:
                 workspace=workspace if workspace is not None else Workspace.from_id(dataset.workspace_id),
                 created_at=dataset.inserted_at,
                 updated_at=dataset.updated_at,
-                fields=ArgillaMixin.__get_fields(client=httpx_client, id=dataset.id),
-                questions=ArgillaMixin.__get_questions(client=httpx_client, id=dataset.id),
+                fields=ArgillaMixin.get_fields(client=httpx_client, id=dataset.id),
+                questions=ArgillaMixin.get_questions(client=httpx_client, id=dataset.id),
                 guidelines=dataset.guidelines or None,
             )
             for dataset in datasets
