@@ -93,7 +93,7 @@ _import_structure = {
         "RatingQuestion",
         "RankingQuestion",
         "SpanQuestion",
-        "SpanLabel",
+        "SpanLabelOption",
         "ResponseSchema",
         "ResponseStatusFilter",
         "TextField",
