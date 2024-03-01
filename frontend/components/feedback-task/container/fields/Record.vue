@@ -53,6 +53,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .record {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;

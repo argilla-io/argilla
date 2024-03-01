@@ -344,6 +344,7 @@ export default {
   scroll-snap-align: start;
 }
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   height: 100%;

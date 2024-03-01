@@ -136,7 +136,7 @@ export class Highlighting {
 
   private attachNode(node: HTMLElement) {
     this.node = node;
-    document.body.appendChild(this.entitySpanContainer);
+    this.getScrollParent(node).appendChild(this.entitySpanContainer);
 
     this.node.addEventListener("mouseup", () => {
       this.highlightUserSelection();
@@ -162,7 +162,7 @@ export class Highlighting {
       this.scrollingElement.removeEventListener("scroll", this.scroll);
     }
 
-    this.scrollingElement = this.getScrollParent(this.node);
+    this.scrollingElement = this.getScrollParent(this.entitySpanContainer);
 
     if (!this.scrollingElement) return;
 
@@ -218,18 +218,26 @@ export class Highlighting {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
 
+    const scrollableParent = this.getScrollParent(this.entitySpanContainer);
+
     for (const span of this.spans) {
       const { entity } = span;
-      const rangePosition = this.createRange({
+      const rangeGhostPosition = this.createRange({
         ...span,
         to: span.from + 1,
       }).getBoundingClientRect();
       const rangeWidth = this.createRange(span).getBoundingClientRect();
+      const parentOffset = scrollableParent.getBoundingClientRect();
+      const parentScrollTop = scrollableParent.scrollTop;
 
-      const { left, top } = rangePosition;
+      const { left, top } = rangeGhostPosition;
       const { width } = rangeWidth;
 
-      const position = { left, top: top + window.scrollY, width };
+      const position = {
+        left: left - parentOffset.left,
+        top: top + window.scrollY - parentOffset.top + parentScrollTop,
+        width,
+      };
 
       if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
         position.top += this.styles.entitiesGap;

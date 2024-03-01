@@ -135,6 +135,7 @@ export default {
 
 .span-annotation {
   &__field {
+    position: relative;
     line-height: 32px;
     cursor: none;
   }
@@ -150,5 +151,11 @@ export default {
 
 ::selection {
   background-color: v-bind("selectedEntityColor");
+}
+
+:deep(#entity-span-container) {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 </style>
