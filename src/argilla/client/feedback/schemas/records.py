@@ -13,27 +13,18 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
-from argilla.pydantic_v1 import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, conint, validator
+from argilla.client.feedback.schemas.suggestions import SuggestionValue, SuggestionSchema
+
+# Support backward compatibility for import of RankingValueSchema from records module
+from argilla.client.feedback.schemas.suggestions import RankingValueSchema  # noqa
+from argilla.pydantic_v1 import BaseModel, Extra, Field, StrictInt, StrictStr, PrivateAttr, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
-
-
-class RankingValueSchema(BaseModel):
-    """Schema for the `RankingQuestion` response value for a `RankingQuestion`. Note that
-    we may have more than one record in the same rank.
-
-    Args:
-        value: The value of the record.
-        rank: The rank of the record.
-    """
-
-    value: StrictStr
-    rank: Optional[conint(ge=1)] = None
 
 
 class ValueSchema(BaseModel):
@@ -43,6 +34,7 @@ class ValueSchema(BaseModel):
         value: The value of the record.
     """
 
+    # TODO: Align this definition with the one in the suggestions module to include span.
     value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
 
 
@@ -94,52 +86,6 @@ class ResponseSchema(BaseModel):
             else None,
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
-
-
-class SuggestionSchema(BaseModel):
-    """Schema for the suggestions for the questions related to the record.
-
-    Args:
-        question_name: name of the question in the `FeedbackDataset`.
-        type: type of the question. Defaults to None. Possible values are `model` or `human`.
-        score: score of the suggestion. Defaults to None.
-        value: value of the suggestion, which should match the type of the question.
-        agent: agent that generated the suggestion. Defaults to None.
-
-    Examples:
-        >>> from argilla.client.feedback.schemas.records import SuggestionSchema
-        >>> SuggestionSchema(
-        ...     question_name="question-1",
-        ...     type="model",
-        ...     score=0.9,
-        ...     value="This is the first suggestion",
-        ...     agent="agent-1",
-        ... )
-    """
-
-    question_name: str
-    type: Optional[Literal["model", "human"]] = None
-    score: Optional[float] = None
-    value: Any
-    agent: Optional[str] = None
-
-    class Config:
-        extra = Extra.forbid
-        validate_assignment = True
-
-    def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:
-        """Method that will be used to create the payload that will be sent to Argilla
-        to create a `SuggestionSchema` for a `FeedbackRecord`."""
-        payload = {}
-        payload["question_id"] = str(question_name_to_id[self.question_name])
-        payload["value"] = self.value
-        if self.type:
-            payload["type"] = self.type
-        if self.score:
-            payload["score"] = self.score
-        if self.agent:
-            payload["agent"] = self.agent
-        return payload
 
 
 class FeedbackRecord(BaseModel):
