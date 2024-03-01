@@ -83,7 +83,7 @@ class SuggestionSchema(BaseModel):
     def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
-        payload = self.dict(exclude_none=True, include={"type", "score", "value", "agent"})
+        payload = self.dict(exclude_unset=True, include={"type", "score", "value", "agent"})
         payload["question_id"] = str(question_name_to_id[self.question_name])
 
         return payload
