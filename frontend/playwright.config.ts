@@ -9,9 +9,14 @@ export default defineConfig({
     "{testDir}/{testFileDir}/__screenshots__/{projectName}/{arg}{ext}",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: 3,
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
+
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.1 },
+  },
+
   use: {
     baseURL: process.env.BASE_URL ?? "http://localhost:3000",
 

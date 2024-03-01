@@ -11,6 +11,7 @@ export default {
   copied: "Copied",
   title: "Title",
   description: "Description",
+  labels: "Labels",
   useMarkdown: "Use Markdown",
   visibleForAnnotators: "Visible for annotators",
   allowExtraMetadata: "Allow extra metadata",
@@ -145,9 +146,21 @@ export default {
   update: "Update",
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
-  argilla: {
-    api: {
-      "errors::UnauthorizedError": "Could not validate credentials",
+
+  validations: {
+    http: {
+      401: {
+        message: "Could not validate credentials",
+      },
+      404: {
+        message: "Could not find the requested resource",
+      },
+      429: {
+        message: "Please wait a few seconds before trying again",
+      },
+      500: {
+        message: "An error occurred, please try again later",
+      },
     },
   },
 };

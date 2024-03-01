@@ -111,6 +111,10 @@ export const useRoutes = () => {
     return decodeURIComponent(value) as T;
   };
 
+  const getParams = () => {
+    return route.value.params;
+  };
+
   const go = (
     where: string,
     params: { external: boolean; newWindow: boolean } = {
@@ -147,6 +151,7 @@ export const useRoutes = () => {
     getDatasetLink,
     setQueryParams,
     getQueryParams,
+    getParams,
     getPreviousRoute,
     previousRouteMatchWith,
     watchBrowserNavigation: (callBack: () => void) => {

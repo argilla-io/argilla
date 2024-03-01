@@ -27,7 +27,7 @@ dependencies = [
     "deprecated ~= 1.2.0",
     "packaging >= 20.0",
     # pandas -> For data loading
-    "pandas >=1.0.0,<2.0.0",
+    "pandas >=1.0.0",
     # Aligned pydantic version with server fastAPI
     "pydantic >= 1.10.7",
     # monitoring
@@ -43,16 +43,18 @@ dependencies = [
     "rich != 13.1.0",
     # for CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
+    # metrics
+    "nltk < 4.0.0"
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 
 server = [
-    "argilla-server", # TODO: Fix the versions when publishing a new release
+    "argilla-server ~= 1.25.0", # TODO: Fix the versions when publishing a new release
 ]
 server-postgresql = [
-    "argilla-server[postgresql]", # TODO: Fix the versions when publishing a new release
+    "argilla-server[postgresql] ~= 1.25.0", # TODO: Fix the versions when publishing a new release
 ]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [

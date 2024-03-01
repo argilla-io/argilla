@@ -17,9 +17,18 @@
 
 import { Model } from "@vuex-orm/core";
 import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
+import { AxiosError } from "axios";
 import { Notification } from "@/models/Notifications";
 
 import { currentWorkspace } from "@/models/Workspace";
+
+type BackendError = {
+  detail: {
+    params: {
+      detail: string;
+    };
+  };
+};
 
 export default ({ $axios, app }) => {
   Model.setAxios($axios);
@@ -38,64 +47,26 @@ export default ({ $axios, app }) => {
     return config;
   });
 
-  $axios.onError((error) => {
-    const code = parseInt(error.response && error.response.status);
-    if (error instanceof ExpiredAuthSessionError || code === 401) {
-      app.$auth.logout();
-    }
-
-    const detail = error.response.data.detail || {
-      code: undefined,
-      params: {},
-    };
+  $axios.onError((error: AxiosError<BackendError>) => {
+    const { status } = error.response ?? {};
+    const t = (key: string) => app.i18n.t(key);
 
     Notification.dispatch("clear");
 
-    switch (code) {
-      case 400:
-        Notification.dispatch("notify", {
-          message: Object.entries(detail.params)
-            .map(([k, v]) => `Error ${k}: ${v}`)
-            .join("\n"),
-          type: "error",
-        });
-        break;
-      case 422: {
-        if (typeof detail === "string") {
-          Notification.dispatch("notify", {
-            message: `Error: ${detail}`,
-            type: "error",
-          });
-        } else {
-          (detail.params.errors || [undefined]).forEach(({ msg }) => {
-            Notification.dispatch("notify", {
-              message: "Error: " + (msg || "Unknown"),
-              type: "error",
-            });
-          });
-        }
-
-        break;
-      }
-      case 404:
-        Notification.dispatch("notify", {
-          message: `Warning: ${detail.params.detail}`,
-          type: "warning",
-        });
-        break;
+    switch (status) {
       case 401: {
-        Notification.dispatch("notify", {
-          message: app.i18n.t(detail.code),
-          type: "error",
-        });
-        break;
+        if (error instanceof ExpiredAuthSessionError) app.$auth.logout();
       }
-      default: {
-        Notification.dispatch("notify", {
-          message: `Error: ${detail.params.details ?? detail.params.message}`,
-          type: "error",
-        });
-      }
+    }
+
+    const errorHandledKey = `validations.http.${status}.message`;
+    const handledTranslatedError = t(errorHandledKey);
+
+    if (handledTranslatedError !== errorHandledKey) {
+      Notification.dispatch("notify", {
+        message: handledTranslatedError,
+        type: "error",
+      });
     }
 
     throw error;

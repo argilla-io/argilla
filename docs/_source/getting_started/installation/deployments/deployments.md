@@ -16,7 +16,7 @@
 - Argilla Server and UI
 ```
 ```{grid-item-card} Docker Quickstart
-:link: docker.md
+:link: docker-quickstart.md
 
 - A combined Docker image
 - Environment Variables
