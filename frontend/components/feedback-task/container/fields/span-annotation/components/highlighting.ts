@@ -216,9 +216,14 @@ export class Highlighting {
 
     for (const span of this.spans) {
       const { entity } = span;
-      const range = this.createRange(span);
+      const rangePosition = this.createRange({
+        ...span,
+        to: span.from + 1,
+      }).getBoundingClientRect();
+      const rangeWidth = this.createRange(span).getBoundingClientRect();
 
-      const { left, top, width } = range.getBoundingClientRect();
+      const { left, top } = rangePosition;
+      const { width } = rangeWidth;
 
       const position = { left, top: top + window.scrollY, width };
 

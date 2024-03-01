@@ -70,7 +70,7 @@ export default {
 .span-entity {
   margin-top: -1px;
   max-width: v-bind("entityPosition.width");
-  min-width: 20px;
+  min-width: 10px;
   background: palette(grey, 800);
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
