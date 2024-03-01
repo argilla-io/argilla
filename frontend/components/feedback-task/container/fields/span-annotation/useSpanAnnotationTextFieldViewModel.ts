@@ -64,7 +64,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
       answer.entities.map(mapEntitiesForHighlighting),
       entityComponentFactory,
       {
-        entityClassName: "highlight__entity",
         entitiesGap: 9,
       }
     )
