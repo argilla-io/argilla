@@ -216,10 +216,11 @@ export class Highlighting {
 
     for (const span of this.spans) {
       const { entity } = span;
-      const range = this.createRange({ ...span, to: span.from + 1 });
-      const { left, top } = range.getBoundingClientRect();
+      const range = this.createRange(span);
 
-      const position = { left, top: top + window.scrollY };
+      const { left, top, width } = range.getBoundingClientRect();
+
+      const position = { left, top: top + window.scrollY, width };
 
       if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
         position.top += this.styles.entitiesGap;
@@ -228,6 +229,7 @@ export class Highlighting {
       const entityPosition = {
         top: `${position.top}px`,
         left: `${position.left}px`,
+        width: `${position.width}px`,
       };
 
       const entityElement = this.EntityComponentConstructor(

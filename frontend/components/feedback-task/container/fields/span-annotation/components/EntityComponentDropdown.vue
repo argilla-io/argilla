@@ -131,7 +131,6 @@ export default {
     background-color: palette(white);
     box-shadow: $shadow;
     z-index: 100;
-    margin-top: 5px;
     &__header {
       display: flex;
       gap: $base-space;
