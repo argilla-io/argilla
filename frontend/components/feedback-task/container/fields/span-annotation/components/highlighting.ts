@@ -136,7 +136,8 @@ export class Highlighting {
 
   private attachNode(node: HTMLElement) {
     this.node = node;
-    this.getScrollParent(node).appendChild(this.entitySpanContainer);
+    const nodeParent = this.getScrollParent(node) || node.parentNode;
+    nodeParent.appendChild(this.entitySpanContainer);
 
     this.node.addEventListener("mouseup", () => {
       this.highlightUserSelection();
@@ -218,34 +219,32 @@ export class Highlighting {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
 
-    const scrollableParent = this.getScrollParent(this.entitySpanContainer);
+    const parent =
+      this.getScrollParent(this.entitySpanContainer) ||
+      this.entitySpanContainer.parentNode;
 
     for (const span of this.spans) {
       const { entity } = span;
-      const rangeGhostPosition = this.createRange({
+      const rangePosition = this.createRange({
         ...span,
         to: span.from + 1,
       }).getBoundingClientRect();
       const rangeWidth = this.createRange(span).getBoundingClientRect();
-      const parentOffset = scrollableParent.getBoundingClientRect();
-      const parentScrollTop = scrollableParent.scrollTop;
+      const parentOffset = parent.getBoundingClientRect();
+      const parentScrollTop = parent.scrollTop;
 
-      const { left, top } = rangeGhostPosition;
+      const { left, top } = rangePosition;
       const { width } = rangeWidth;
 
-      const position = {
-        left: left - parentOffset.left,
-        top: top + window.scrollY - parentOffset.top + parentScrollTop,
-        width,
-      };
+      const position = { left, top: top + window.scrollY, width };
 
       if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
         position.top += this.styles.entitiesGap;
       }
 
       const entityPosition = {
-        top: `${position.top}px`,
-        left: `${position.left}px`,
+        top: `${position.top - parentOffset.top + parentScrollTop}px`,
+        left: `${position.left - parentOffset.left}px`,
         width: `${position.width}px`,
       };
 

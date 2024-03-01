@@ -115,6 +115,7 @@ export default {
     color: $black-87;
   }
   .content-area {
+    position: relative;
     white-space: pre-wrap;
     word-break: break-word;
   }
