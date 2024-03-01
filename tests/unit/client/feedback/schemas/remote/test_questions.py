@@ -448,7 +448,14 @@ def test_span_questions_from_api():
         required=True,
         settings={
             "type": "span",
-            "options": [{"text": "Span label a", "value": "a"}, {"text": "Span label b", "value": "b"}],
+            "options": [
+                {"text": "Span label a", "value": "a", "description": None},
+                {
+                    "text": "Span label b",
+                    "value": "b",
+                    "description": None,
+                },
+            ],
         },
         inserted_at=datetime.now(),
         updated_at=datetime.now(),
