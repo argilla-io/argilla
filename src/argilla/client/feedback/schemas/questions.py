@@ -315,6 +315,7 @@ class SpanLabelOption(BaseModel):
 
     value: str
     text: Optional[str]
+    description: Optional[str]
 
     def __eq__(self, other):
         return other and self.value == other.value
@@ -348,7 +349,7 @@ class SpanQuestion(QuestionSchema):
     def server_settings(self) -> Dict[str, Any]:
         return {
             "type": self.type,
-            "options": [{"value": label.value, "text": label.text} for label in self.labels],
+            "options": [label.dict() for label in self.labels],
         }
 
 
