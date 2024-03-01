@@ -63,6 +63,30 @@ export default {
       return this.selectedEntity?.color;
     },
   },
+  methods: {
+    allowCharacterAnnotation(allow) {
+      this.highlighting.allowCharacterAnnotation(allow);
+    },
+    keyPressing(event, isDown) {
+      if (event.key == "Shift") {
+        this.allowCharacterAnnotation(isDown);
+      }
+    },
+  },
+  mounted() {
+    window.addEventListener("keydown", (event) =>
+      this.keyPressing(event, true)
+    );
+    window.addEventListener("keyup", (event) => this.keyPressing(event, false));
+  },
+  destroyed() {
+    window.removeEventListener("keydown", (event) =>
+      this.keyPressing(event, true)
+    );
+    window.removeEventListener("keyup", (event) =>
+      this.keyPressing(event, false)
+    );
+  },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);
   },

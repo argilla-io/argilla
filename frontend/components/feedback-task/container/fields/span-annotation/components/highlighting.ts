@@ -120,6 +120,10 @@ export class Highlighting {
     this.applyStyles();
   }
 
+  allowCharacterAnnotation(value: boolean) {
+    this.spanSelection.config.allowCharacter = value;
+  }
+
   replaceEntity(span: Span, entity: Entity) {
     this.spanSelection.replaceEntity(span, entity);
     this.applyStyles();
