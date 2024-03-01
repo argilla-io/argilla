@@ -13,15 +13,18 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
-from argilla.client.feedback.schemas.suggestions import SuggestionValue, SuggestionSchema
 
 # Support backward compatibility for import of RankingValueSchema from records module
-from argilla.client.feedback.schemas.suggestions import RankingValueSchema  # noqa
-from argilla.pydantic_v1 import BaseModel, Extra, Field, StrictInt, StrictStr, PrivateAttr, validator
+from argilla.client.feedback.schemas.suggestions import (
+    RankingValueSchema,  # noqa
+    SuggestionSchema,
+    SuggestionValue,
+)
+from argilla.pydantic_v1 import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
