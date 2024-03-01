@@ -460,7 +460,7 @@ def test_span_question() -> None:
     assert question.type == QuestionTypes.span
     assert question.server_settings == {
         "type": "span",
-        "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
+        "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
     }
 
 
