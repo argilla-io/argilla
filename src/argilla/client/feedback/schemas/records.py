@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
