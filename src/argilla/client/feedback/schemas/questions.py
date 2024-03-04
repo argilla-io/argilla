@@ -334,11 +334,12 @@ class SpanQuestion(QuestionSchema):
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import SpanQuestion
-        >>> SpanQuestion(name="span_question", title="Span Question", labels=["person", "org"])
+        >>> SpanQuestion(name="span_question", field="prompt", title="Span Question", labels=["person", "org"])
     """
 
     type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
 
+    field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
     labels: conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)
 
     @validator("labels", always=True)
@@ -349,6 +350,7 @@ class SpanQuestion(QuestionSchema):
     def server_settings(self) -> Dict[str, Any]:
         return {
             "type": self.type,
+            "field": self.field,
             "options": [label.dict() for label in self.labels],
         }
 
