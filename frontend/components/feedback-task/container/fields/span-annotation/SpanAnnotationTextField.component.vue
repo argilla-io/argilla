@@ -27,7 +27,7 @@
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
       />
-      <template v-for="{ id, color } in spanQuestion.answer.entities">
+      <template v-for="{ id, color } in spanQuestion.answer.options">
         <style :key="id" scoped>
           .span-annotation__field::highlight(hl-{{id}}) {
             background-color: {{color}};
@@ -57,7 +57,7 @@ export default {
   },
   computed: {
     selectedEntity() {
-      return this.spanQuestion.answer.entities.find((e) => e.isSelected);
+      return this.spanQuestion.answer.options.find((e) => e.isSelected);
     },
     selectedEntityColor() {
       return this.selectedEntity?.color;

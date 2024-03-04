@@ -2,7 +2,7 @@
   <div class="wrapper">
     <QuestionHeaderComponent :question="question" />
     <EntityLabelSelectionComponent
-      v-model="question.answer.entities"
+      v-model="question.answer.options"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :isFocused="isFocused"

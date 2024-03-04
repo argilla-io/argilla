@@ -6,6 +6,7 @@ import EntityComponent from "./components/EntityComponent.vue";
 import { Entity } from "./components/span-selection";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
+import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
@@ -16,20 +17,18 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const answer = spanQuestion.answer as SpanQuestionAnswer;
 
-  answer.entities
+  answer.options
     .filter((e) => !e.color)
     .forEach((e) => {
-      e.color = colorGenerator(e.id);
+      e.color = colorGenerator(e.value);
     });
 
-  const mapEntitiesForHighlighting = (e) => ({ id: e.id, text: e.name });
-
   const selectEntity = (entity) => {
-    answer.entities.forEach((e) => {
+    answer.options.forEach((e) => {
       e.isSelected = e.id === entity.id;
     });
 
-    highlighting.value.changeSelectedEntity(mapEntitiesForHighlighting(entity));
+    highlighting.value.changeSelectedEntity(entity);
   };
 
   const entityComponentFactory = (
@@ -48,11 +47,11 @@ export const useSpanAnnotationTextFieldViewModel = ({
       },
     });
 
-    instance.$on("on-remove-entity", removeSpan);
-    instance.$on("on-replace-entity", (newEntity) => {
+    instance.$on("on-remove-option", removeSpan);
+    instance.$on("on-replace-option", (newEntity) => {
       selectEntity(newEntity);
 
-      replaceEntity(mapEntitiesForHighlighting(newEntity));
+      replaceEntity(newEntity);
     });
 
     instance.$mount();
@@ -61,20 +60,15 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(
-      title,
-      answer.entities.map(mapEntitiesForHighlighting),
-      entityComponentFactory,
-      {
-        entitiesGap: 9,
-      }
-    )
+    new Highlighting(title, answer.options, entityComponentFactory, {
+      entitiesGap: 9,
+    })
   );
 
   watch(
-    () => answer.entities,
+    () => answer.options,
     () => {
-      const selected = answer.entities.find((e) => e.isSelected);
+      const selected = answer.options.find((e) => e.isSelected);
 
       selectEntity(selected);
     },
@@ -84,28 +78,28 @@ export const useSpanAnnotationTextFieldViewModel = ({
   watch(
     () => highlighting.value.spans,
     (spans) => {
-      const response = spans.reduce((acc, span) => {
-        acc[span.node.id] = acc[span.node.id] || [];
+      const response: SpanAnswer[] = spans.map((s) => ({
+        start: s.from,
+        end: s.to,
+        label: s.entity.value,
+      }));
 
-        acc[span.node.id].push({
-          from: span.from,
-          to: span.to,
-          entity: span.entity.id,
-        });
-
-        return acc;
-      }, {});
-
-      spanQuestion.answer.response({
+      spanQuestion.response({
         value: response,
       });
     }
   );
 
   onMounted(() => {
-    selectEntity(answer.entities[0]);
+    selectEntity(answer.options[0]);
 
-    highlighting.value.mount();
+    const spansToLoad = answer.valuesAnswered.map((v) => ({
+      entity: answer.options.find((e) => e.value === v.label),
+      from: v.start,
+      to: v.end,
+    }));
+
+    highlighting.value.mount(spansToLoad);
   });
 
   onUnmounted(() => {

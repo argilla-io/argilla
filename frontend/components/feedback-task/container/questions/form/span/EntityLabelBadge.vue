@@ -3,7 +3,7 @@
     <input
       ref="inputRef"
       type="checkbox"
-      :name="option.name"
+      :name="option.text"
       :id="option.id"
       :data-keyboard="keyboards[option.id]"
       v-model="option.isSelected"
@@ -20,14 +20,14 @@
         `label-${option.id}`,
       ]"
       :for="option.id"
-      :title="option.name"
+      :title="option.text"
     >
       <span
         class="key"
         v-if="showShortcutsHelper"
         v-text="keyboards[option.id]"
       />
-      <span>{{ option.name }}</span>
+      <span>{{ option.text }}</span>
     </label>
   </div>
 </template>

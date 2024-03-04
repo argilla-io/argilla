@@ -37,33 +37,33 @@ export default {
   created() {
     this.area = this.$parent.$refs[this.cursorAreaRef];
   },
-  mounted() {
-    if (!this.area) {
-      return;
-    }
-    this.area.addEventListener("mouseover", () => {
+  methods: {
+    addCursorClass() {
       this.cursorClass = "textual";
-    });
-    this.area.addEventListener("mouseleave", () => {
+    },
+    removeCursorClass() {
       this.cursorClass = "";
-    });
-    document.addEventListener("mousemove", (e) => {
-      var x = e.clientX;
-      var y = e.clientY;
-      this.cursorPosition.left = x + "px";
-      this.cursorPosition.top = y + "px";
-    });
+    },
+    updateCursorPosition(e) {
+      this.cursorPosition.left = e.clientX + "px";
+      this.cursorPosition.top = e.clientY + "px";
+    },
+  },
+  mounted() {
+    if (!this.area) return;
+
+    this.area.addEventListener("mouseover", this.addCursorClass);
+    this.area.addEventListener("mouseleave", this.removeCursorClass);
+
+    document.addEventListener("mousemove", this.updateCursorPosition);
   },
   destroyed() {
-    if (!this.area) {
-      return;
-    }
-    this.area.removeEventListener("mouseover", () => {
-      this.cursorClass = "";
-    });
-    this.area.removeEventListener("mouseleave", () => {
-      this.cursorClass = "";
-    });
+    if (!this.area) return;
+
+    this.area.removeEventListener("mouseover", this.addCursorClass);
+    this.area.removeEventListener("mouseleave", this.removeCursorClass);
+
+    document.removeEventListener("mousemove", this.updateCursorPosition);
   },
 };
 </script>

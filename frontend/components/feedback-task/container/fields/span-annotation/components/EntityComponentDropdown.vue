@@ -8,9 +8,9 @@
     <div class="span-entity__dropdown__header">
       <EntityBadge
         class="span-entity__badge--active"
-        :color="selectedEntity.color"
-        :text="selectedEntity.name"
-        @on-clear="removeSelectedOption(selectedEntity)"
+        :color="selectedOption.color"
+        :text="selectedOption.text"
+        @on-clear="removeSelectedOption(selectedOption)"
       ></EntityBadge>
       <input
         ref="search"
@@ -31,17 +31,17 @@
     <ul class="span-entity__dropdown__content">
       <li>
         <BaseButton
-          v-for="(entity, index) in filteredEntities"
-          :key="entity.id"
+          v-for="(option, index) in filteredOptions"
+          :key="option.id"
           class="span-entity__dropdown__item"
           :class="{ '--preselected': preSelectionIndex === index }"
-          @click="selectEntity(entity)"
+          @click="selectOption(option)"
           @mouseover.native="preSelectionIndex = index"
         >
           <EntityBadge
             class="span-entity__badge"
-            :color="entity.color"
-            :text="entity.name"
+            :color="option.color"
+            :text="option.text"
           ></EntityBadge>
         </BaseButton>
       </li>
@@ -53,11 +53,11 @@
 export default {
   name: "EntityComponent",
   props: {
-    selectedEntity: {
+    selectedOption: {
       type: Object,
       required: true,
     },
-    entities: {
+    options: {
       type: Array,
       required: true,
     },
@@ -69,30 +69,30 @@ export default {
     };
   },
   computed: {
-    filteredEntities() {
-      return this.availableEntities.filter((entity) =>
-        entity.name.toLowerCase().includes(this.searchText.toLowerCase())
+    filteredOptions() {
+      return this.availableOptions.filter((entity) =>
+        entity.text.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
-    availableEntities() {
-      return this.entities.filter(
-        (entity) => entity.id !== this.selectedEntity.id
+    availableOptions() {
+      return this.options.filter(
+        (entity) => entity.id !== this.selectedOption.id
       );
     },
     optionsLength() {
-      return this.filteredEntities.length;
+      return this.filteredOptions.length;
     },
   },
   methods: {
-    selectEntity(entity) {
-      this.$emit("on-replace-entity", entity);
+    selectOption(option) {
+      this.$emit("on-replace-option", option);
     },
     removeSelectedOption() {
-      this.$emit("on-remove-entity");
+      this.$emit("on-remove-option");
     },
     includePreselectedOption() {
-      if (!this.filteredEntities.length) return;
-      this.selectEntity(this.filteredEntities[this.preSelectionIndex]);
+      if (!this.filteredOptions.length) return;
+      this.selectOption(this.filteredOptions[this.preSelectionIndex]);
       this.preSelectionIndex = 0;
     },
     preselectNextOption() {
@@ -115,7 +115,7 @@ export default {
     this.$nextTick(() => {
       this.$refs.search?.focus();
     });
-    this.preselectedEntity = this.filteredEntities[0];
+    this.preselectedEntity = this.filteredOptions[0];
   },
 };
 </script>

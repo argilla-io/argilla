@@ -135,7 +135,7 @@ export default {
     },
     filteredOptions() {
       return this.options.filter((option) =>
-        String(option.name)
+        String(option.text)
           .toLowerCase()
           .includes(this.searchInput.toLowerCase())
       );

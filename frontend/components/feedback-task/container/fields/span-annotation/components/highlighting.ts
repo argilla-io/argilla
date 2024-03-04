@@ -86,12 +86,14 @@ export class Highlighting {
     return node;
   }
 
-  mount() {
+  mount(selections: Omit<Span, "text" | "node">[] = []) {
     const node = document.getElementById(this.nodeId)!;
 
     if (!node) throw new Error(`Node with id ${this.nodeId} not found`);
 
     this.attachNode(node);
+
+    this.loadHighlights(selections);
   }
 
   unmount() {
@@ -102,7 +104,7 @@ export class Highlighting {
     this.entity = entity;
   }
 
-  loadHighlights(selections: Span[] = []) {
+  private loadHighlights(selections: Omit<Span, "text" | "node">[] = []) {
     if (!CSS.highlights) {
       throw new Error(
         "The CSS Custom Highlight API is not supported in this browser!"
@@ -115,7 +117,16 @@ export class Highlighting {
       );
     }
 
-    this.spanSelection.loadSpans(selections);
+    const loaded: Span[] = selections.map((s) => ({
+      ...s,
+      text: "",
+      node: {
+        element: this.node.firstChild,
+        id: this.nodeId,
+      },
+    }));
+
+    this.spanSelection.loadSpans(loaded);
 
     this.applyStyles();
   }

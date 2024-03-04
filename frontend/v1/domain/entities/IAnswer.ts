@@ -1,16 +1,17 @@
 export type RankingAnswer = { value: string; rank: number };
 
-type Field = string;
-export type SpanAnswer = Record<
-  Field,
-  { from: number; to: number; entity: string }[]
->;
+export type SpanAnswer = {
+  start: number;
+  end: number;
+  label: string;
+};
+
 export type AnswerCombinations =
   | string
   | string[]
   | number
   | RankingAnswer[]
-  | SpanAnswer;
+  | SpanAnswer[];
 
 export interface Answer {
   value: AnswerCombinations;

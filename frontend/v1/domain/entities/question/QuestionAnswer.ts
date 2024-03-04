@@ -1,4 +1,4 @@
-import { Answer, RankingAnswer } from "../IAnswer";
+import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
 import { Suggestion } from "./Suggestion";
 
 export type QuestionType =
@@ -70,33 +70,31 @@ export class TextQuestionAnswer extends QuestionAnswer {
   }
 }
 
-type Span = {
-  from: number;
-  to: number;
-  entity: string;
-};
-
-type Entity = {
+type Option = {
   id: string;
-  name: string;
+  value: string;
+  text: string;
   color: string;
   isSelected: boolean;
 };
 
-type SpanLabelValue = Record<string, Span[]>;
+type SpanLabelValue = Record<string, SpanAnswer[]>;
 
 export class SpanQuestionAnswer extends QuestionAnswer {
-  public readonly entities: Entity[] = [];
-  public values: SpanLabelValue = {};
+  public readonly options: Option[] = [];
+  public readonly values: SpanLabelValue = {};
 
   constructor(
     public readonly type: QuestionType,
-    entities: Omit<Entity, "isSelected">[]
+    private readonly fieldName: string,
+    questionName: string,
+    options: Omit<Option, "isSelected" | "id">[]
   ) {
     super(type);
 
-    this.entities = entities.map((e) => ({
+    this.options = options.map((e) => ({
       ...e,
+      id: `${questionName}-${e.value}`,
       isSelected: false,
     }));
 
@@ -104,19 +102,19 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   }
 
   protected fill(answer: Answer) {
-    this.values = answer.value as SpanLabelValue;
+    this.values[this.fieldName] = answer.value as SpanAnswer[];
   }
 
   clear() {
-    this.values = {};
+    this.values[this.fieldName] = [];
   }
 
   get isValid(): boolean {
-    return Object.keys(this.values).length > 0;
+    return this.values[this.fieldName].length > 0;
   }
 
-  get valuesAnswered(): any {
-    return this.values;
+  get valuesAnswered(): SpanAnswer[] {
+    return this.values[this.fieldName];
   }
 
   matchSuggestion(_: Suggestion): boolean {

@@ -4,14 +4,14 @@
     :style="{ left: entityPosition.left, top: entityPosition.top }"
   >
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
-      {{ selectedEntity.name }}
+      {{ selectedOption.text }}
     </div>
     <EntityComponentDropdown
       v-if="visibleDropdown"
-      :selectedEntity="selectedEntity"
-      :entities="entities"
-      @on-replace-entity="selectEntity"
-      @on-remove-entity="removeSelectedOption"
+      :selectedOption="selectedOption"
+      :options="options"
+      @on-replace-option="selectOption"
+      @on-remove-option="removeSelectedOption"
       v-click-outside="hideDropdown"
     />
   </div>
@@ -39,20 +39,20 @@ export default {
     };
   },
   computed: {
-    selectedEntity() {
-      return this.entities.find((e) => e.id === this.entity.id);
+    selectedOption() {
+      return this.options.find((e) => e.id === this.entity.id);
     },
-    entities() {
-      return this.spanQuestion.answer.entities;
+    options() {
+      return this.spanQuestion.answer.options;
     },
   },
   methods: {
-    selectEntity(entity) {
-      this.$emit("on-replace-entity", entity);
+    selectOption(option) {
+      this.$emit("on-replace-option", option);
       this.hideDropdown();
     },
     removeSelectedOption() {
-      this.$emit("on-remove-entity");
+      this.$emit("on-remove-option");
       this.hideDropdown();
     },
     toggleDropdown() {
@@ -88,7 +88,7 @@ export default {
     position: relative;
     max-width: none;
     z-index: 1;
-    background: v-bind("selectedEntity.color");
+    background: v-bind("selectedOption.color");
     transition: background 0.3s;
   }
 }
