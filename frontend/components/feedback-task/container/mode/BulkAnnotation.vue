@@ -407,6 +407,7 @@ export default {
 }
 .bulk {
   &__records {
+  position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space;
