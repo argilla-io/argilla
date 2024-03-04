@@ -12,54 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional
 from uuid import UUID
 
-from argilla.pydantic_v1 import BaseModel, Extra, StrictInt, StrictStr, confloat, conint, constr, root_validator
-
-
-class RankingValueSchema(BaseModel):
-    """Schema for the `RankingQuestion` response value for a `RankingQuestion`. Note that
-    we may have more than one record in the same rank.
-
-    Args:
-        value: The value of the record.
-        rank: The rank of the record.
-    """
-
-    value: StrictStr
-    rank: Optional[conint(ge=1)] = None
-
-
-class SpanSuggestion(BaseModel):
-    """Schema for the `SpanQuestion` response value for a `SpanQuestion`.
-
-    Args:
-        value: The label value of the span.
-        start: The start of the span.
-        end: The end of the span.
-        score: The score of the span.
-    """
-
-    value: constr(min_length=1)
-    start: conint(ge=0)
-    end: conint(ge=0)
-    score: Optional[confloat(ge=0.0, le=1.0)] = None
-
-    @root_validator
-    def check_span(cls, values):
-        if values["start"] > values["end"]:
-            raise ValueError("The start of the span must be less than the end.")
-        return values
-
-
-SuggestionValue = Union[
-    StrictStr,
-    StrictInt,
-    List[str],
-    List[RankingValueSchema],
-    List[SpanSuggestion],
-]
+from argilla.client.feedback.schemas.response_values import ResponseValue, normalize_response_value
+from argilla.pydantic_v1 import BaseModel, Extra, confloat, validator
 
 
 class SuggestionSchema(BaseModel):
@@ -86,8 +43,10 @@ class SuggestionSchema(BaseModel):
     question_name: str
     type: Optional[Literal["model", "human"]] = None
     score: Optional[confloat(ge=0, le=1)] = None
-    value: SuggestionValue
+    value: ResponseValue
     agent: Optional[str] = None
+
+    _normalize_value = validator("value", allow_reuse=True, always=True)(normalize_response_value)
 
     class Config:
         extra = Extra.forbid
