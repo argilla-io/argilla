@@ -13,82 +13,19 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
 from uuid import UUID
 
-from argilla.client.feedback.schemas.enums import RecordSortField, ResponseStatus, SortOrder
+from argilla.client.feedback.schemas.enums import RecordSortField, SortOrder
 
 # Support backward compatibility for import of RankingValueSchema from records module
-from argilla.client.feedback.schemas.suggestions import (
-    RankingValueSchema,  # noqa
-    SuggestionSchema,
-    SuggestionValue,
-)
-from argilla.pydantic_v1 import BaseModel, Extra, Field, PrivateAttr, StrictInt, StrictStr, validator
+from argilla.client.feedback.schemas.response_values import RankingValueSchema  # noqa
+from argilla.client.feedback.schemas.responses import ResponseSchema, ValueSchema  # noqa
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
+from argilla.pydantic_v1 import BaseModel, Extra, Field, PrivateAttr, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.unification import UnifiedValueSchema
-
-
-class ValueSchema(BaseModel):
-    """Schema for any `FeedbackRecord` response value.
-
-    Args:
-        value: The value of the record.
-    """
-
-    # TODO: Align this definition with the one in the suggestions module to include span.
-    value: Union[StrictStr, StrictInt, List[str], List[RankingValueSchema]]
-
-
-class ResponseSchema(BaseModel):
-    """Schema for the `FeedbackRecord` response.
-
-    Args:
-        user_id: ID of the user that provided the response. Defaults to None, and is
-            automatically fulfilled internally once the question is pushed to Argilla.
-        values: Values of the response, should match the questions in the record.
-        status: Status of the response. Defaults to `submitted`.
-
-    Examples:
-        >>> from argilla.client.feedback.schemas.records import ResponseSchema
-        >>> ResponseSchema(
-        ...     values={
-        ...         "question_1": {"value": "answer_1"},
-        ...         "question_2": {"value": "answer_2"},
-        ...     }
-        ... )
-    """
-
-    user_id: Optional[UUID] = None
-    values: Union[Dict[str, ValueSchema], None]
-    status: ResponseStatus = ResponseStatus.submitted
-
-    class Config:
-        extra = Extra.forbid
-        validate_assignment = True
-
-    @validator("user_id", always=True)
-    def user_id_must_have_value(cls, v):
-        if not v:
-            warnings.warn(
-                "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as"
-                " it will be automatically set to the active `user_id`.",
-            )
-        return v
-
-    def to_server_payload(self) -> Dict[str, Any]:
-        """Method that will be used to create the payload that will be sent to Argilla
-        to create a `ResponseSchema` for a `FeedbackRecord`."""
-        return {
-            # UUID is not json serializable!!!
-            "user_id": self.user_id,
-            "values": {question_name: value.dict() for question_name, value in self.values.items()}
-            if self.values is not None
-            else None,
-            "status": self.status.value if hasattr(self.status, "value") else self.status,
-        }
 
 
 class FeedbackRecord(BaseModel):
