@@ -21,6 +21,8 @@ from argilla.client.feedback.schemas.questions import (
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
+    SpanLabelOption,
+    SpanQuestion,
     TextQuestion,
     _LabelQuestion,
 )
@@ -444,3 +446,39 @@ def test_ranking_question(schema_kwargs: Dict[str, Any], server_payload: Dict[st
 def test_ranking_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
     with pytest.raises(exception_cls, match=exception_message):
         RankingQuestion(**schema_kwargs)
+
+
+def test_span_question() -> None:
+    question = SpanQuestion(
+        name="question",
+        title="Question",
+        description="Description",
+        required=True,
+        labels=["a", "b"],
+    )
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == {
+        "type": "span",
+        "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
+    }
+
+
+def test_span_question_with_no_labels() -> None:
+    with pytest.raises(ValidationError, match="ensure this value has at least 1 items"):
+        SpanQuestion(
+            name="question",
+            title="Question",
+            description="Description",
+            labels=[],
+        )
+
+
+def test_span_question_with_duplicated_labels() -> None:
+    with pytest.raises(ValidationError, match="the list has duplicated items"):
+        SpanQuestion(
+            name="question",
+            title="Question",
+            description="Description",
+            labels=[SpanLabelOption(value="a", text="A text"), SpanLabelOption(value="a", text="Text for A")],
+        )

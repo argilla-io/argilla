@@ -93,7 +93,7 @@ class TextQuestion(QuestionSchema):
         >>> TextQuestion(name="text_question", title="Text Question")
     """
 
-    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text.value, allow_mutation=False)
+    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text.value, allow_mutation=False, const=True)
     use_markdown: bool = False
 
     @property
@@ -120,7 +120,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RatingQuestion(name="rating_question", title="Rating Question", values=[1, 2, 3, 4, 5])
     """
 
-    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating.value, allow_mutation=False)
+    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating.value, allow_mutation=False, const=True)
     values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
     @property
@@ -230,7 +230,9 @@ class LabelQuestion(_LabelQuestion):
         >>> LabelQuestion(name="label_question", title="Label Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.label_selection] = Field(QuestionTypes.label_selection.value, allow_mutation=False)
+    type: Literal[QuestionTypes.label_selection] = Field(
+        QuestionTypes.label_selection.value, allow_mutation=False, const=True
+    )
 
 
 class MultiLabelQuestion(_LabelQuestion):
@@ -254,7 +256,7 @@ class MultiLabelQuestion(_LabelQuestion):
     """
 
     type: Literal[QuestionTypes.multi_label_selection] = Field(
-        QuestionTypes.multi_label_selection.value, allow_mutation=False
+        QuestionTypes.multi_label_selection.value, allow_mutation=False, const=True
     )
 
 
@@ -277,7 +279,7 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RankingQuestion(name="ranking_question", title="Ranking Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False)
+    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False, const=True)
     values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
     @validator("values", always=True)
@@ -296,3 +298,66 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
         elif isinstance(self.values, list):
             settings["options"] = [{"value": label, "text": label} for label in self.values]
         return settings
+
+
+class SpanLabelOption(BaseModel):
+    """Schema for the `FeedbackDataset` span label options, which are the ones that will be
+    used in the `SpanQuestion` to define the labels that the user can select.
+
+    Args:
+        value: The value of the span label. This is the value that will be shown in the UI.
+        text: The text of the span label. This is the text that will be shown in the UI.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.questions import SpanLabelOption
+        >>> SpanLabelOption(value="span_label_1", text="Span Label 1")
+    """
+
+    value: str
+    text: Optional[str]
+    description: Optional[str]
+
+    def __eq__(self, other):
+        return other and self.value == other.value
+
+    @validator("text", pre=True, always=True)
+    def default_text_value(cls, v: str, values: Dict[str, Any]) -> str:
+        if v is None:
+            return values["value"]
+        return v
+
+
+class SpanQuestion(QuestionSchema):
+    """Schema for the `FeedbackDataset` span questions, which are the ones that will
+    require a span response from the user. More specifically, the user will be asked
+    to select a span of text from the input.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.questions import SpanQuestion
+        >>> SpanQuestion(name="span_question", title="Span Question", labels=["person", "org"])
+    """
+
+    type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
+
+    labels: conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)
+
+    @validator("labels", always=True)
+    def normalize_labels(cls, v: List[Union[str, SpanLabelOption]]) -> List[SpanLabelOption]:
+        return [SpanLabelOption(value=label, text=label) if isinstance(label, str) else label for label in v]
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "options": [label.dict() for label in self.labels],
+        }
+
+
+AllowedQuestionTypes = Union[
+    TextQuestion,
+    RatingQuestion,
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    SpanQuestion,
+]
