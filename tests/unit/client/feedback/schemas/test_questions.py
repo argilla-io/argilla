@@ -451,6 +451,7 @@ def test_ranking_question_errors(schema_kwargs: Dict[str, Any], exception_cls: A
 def test_span_question() -> None:
     question = SpanQuestion(
         name="question",
+        field="field",
         title="Question",
         description="Description",
         required=True,
@@ -460,6 +461,7 @@ def test_span_question() -> None:
     assert question.type == QuestionTypes.span
     assert question.server_settings == {
         "type": "span",
+        "field": "field",
         "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
     }
 
@@ -468,6 +470,7 @@ def test_span_question_with_no_labels() -> None:
     with pytest.raises(ValidationError, match="ensure this value has at least 1 items"):
         SpanQuestion(
             name="question",
+            field="field",
             title="Question",
             description="Description",
             labels=[],

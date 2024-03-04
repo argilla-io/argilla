@@ -448,6 +448,7 @@ def test_span_questions_from_api():
         required=True,
         settings={
             "type": "span",
+            "field": "field",
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {
