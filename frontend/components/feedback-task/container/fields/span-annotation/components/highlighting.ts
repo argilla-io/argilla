@@ -60,7 +60,7 @@ export class Highlighting {
 
     this.styles = {
       entitiesGap: 8,
-      spanContainerId: "entity-span-container",
+      spanContainerId: `entity-span-container-${nodeId}`,
       entitiesCSS,
       ...styles,
     };
@@ -147,8 +147,8 @@ export class Highlighting {
 
   private attachNode(node: HTMLElement) {
     this.node = node;
-    const nodeParent = this.getScrollParent(node) || node.parentNode;
-    nodeParent.appendChild(this.entitySpanContainer);
+    const nodeParent = node.parentNode;
+    nodeParent.appendChild(this.entitySpanContainer.cloneNode(true));
 
     this.node.addEventListener("mouseup", () => {
       this.highlightUserSelection();
@@ -231,10 +231,6 @@ export class Highlighting {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
 
-    const parent =
-      this.getScrollParent(this.entitySpanContainer) ||
-      this.entitySpanContainer.parentNode;
-
     for (const span of this.spans) {
       const { entity } = span;
       const rangePosition = this.createRange({
@@ -242,8 +238,8 @@ export class Highlighting {
         to: span.from + 1,
       }).getBoundingClientRect();
       const rangeWidth = this.createRange(span).getBoundingClientRect();
-      const parentOffset = parent.getBoundingClientRect();
-      const parentScrollTop = parent.scrollTop;
+      const offset = this.entitySpanContainer.getBoundingClientRect();
+      const scrollTop = this.entitySpanContainer.scrollTop;
 
       const { left, top } = rangePosition;
       const { width } = rangeWidth;
@@ -255,8 +251,8 @@ export class Highlighting {
       }
 
       const entityPosition = {
-        top: `${position.top - parentOffset.top + parentScrollTop}px`,
-        left: `${position.left - parentOffset.left}px`,
+        top: `${position.top - offset.top + scrollTop}px`,
+        left: `${position.left - offset.left}px`,
         width: `${position.width}px`,
       };
 

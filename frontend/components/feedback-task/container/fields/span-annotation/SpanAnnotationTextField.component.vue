@@ -74,6 +74,7 @@ export default {
     },
   },
   mounted() {
+    console.log(this.highlighting);
     window.addEventListener("keydown", (event) =>
       this.keyPressing(event, true)
     );
@@ -154,7 +155,7 @@ export default {
   background-color: v-bind("selectedEntityColor");
 }
 
-:deep(#entity-span-container) {
+:deep([id^="entity-span-container"]) {
   position: absolute;
   top: 0;
   left: 0;
