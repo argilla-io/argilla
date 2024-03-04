@@ -28,6 +28,8 @@ export const useSpanAnnotationTextFieldViewModel = ({
     answer.entities.forEach((e) => {
       e.isSelected = e.id === entity.id;
     });
+
+    highlighting.value.changeSelectedEntity(mapEntitiesForHighlighting(entity));
   };
 
   const entityComponentFactory = (
@@ -74,9 +76,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
     () => {
       const selected = answer.entities.find((e) => e.isSelected);
 
-      highlighting.value.changeSelectedEntity(
-        mapEntitiesForHighlighting(selected)
-      );
+      selectEntity(selected);
     },
     { deep: true }
   );
