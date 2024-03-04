@@ -40,7 +40,7 @@ class FeedbackRankingValueModel(BaseModel):
 
 
 class FeedbackValueModel(BaseModel):
-    value: Union[StrictStr, StrictInt, List[str], List[FeedbackRankingValueModel]]
+    value: Any
 
 
 class FeedbackResponseStatus(str, Enum):
