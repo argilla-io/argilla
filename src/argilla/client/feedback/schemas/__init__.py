@@ -43,12 +43,8 @@ from argilla.client.feedback.schemas.records import (
     SortBy,
     ValueSchema,
 )
-from argilla.client.feedback.schemas.suggestions import (
-    RankingValueSchema,
-    SpanSuggestion,
-    SuggestionSchema,
-    SuggestionValue,
-)
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
+from argilla.client.feedback.schemas.response_values import RankingValueSchema, SpanValueSchema, ResponseValue
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 __all__ = [
@@ -74,9 +70,9 @@ __all__ = [
     "RankingValueSchema",
     "ResponseSchema",
     "SuggestionSchema",
-    "SuggestionValue",
+    "ResponseValue",
     "RankingValueSchema",
-    "SpanSuggestion",
+    "SpanValueSchema",
     "ValueSchema",
     "SortOrder",
     "SortBy",
