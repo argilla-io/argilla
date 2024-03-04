@@ -145,11 +145,12 @@ export class Highlighting {
       this.applyStyles();
     });
 
-    window.addEventListener("resize", () => {
-      this.applyEntityStyle();
+    new ResizeObserver(() => updateStyles()).observe(node);
 
+    const updateStyles = () => {
+      this.applyEntityStyle();
       this.applyStylesOnScroll();
-    });
+    };
 
     this.applyStylesOnScroll();
   }
