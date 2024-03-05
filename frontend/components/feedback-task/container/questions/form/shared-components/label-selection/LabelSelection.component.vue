@@ -94,6 +94,9 @@ const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
 import suggestionIcon from "@/static/icons/suggestion.svg";
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
+
+import { useLabelSelectionViewModel } from "./useLabelSelectionViewModel";
+
 export default {
   name: "LabelSelectionComponent",
   props: {
@@ -136,7 +139,6 @@ export default {
   data() {
     return {
       searchInput: "",
-      isExpanded: false,
       timer: null,
       keyCode: "",
       suggestionIcon,
@@ -313,6 +315,9 @@ export default {
     hasSuggestion(value) {
       return this.suggestions?.includes(value) || false;
     },
+  },
+  setup(props) {
+    return useLabelSelectionViewModel(props);
   },
 };
 </script>

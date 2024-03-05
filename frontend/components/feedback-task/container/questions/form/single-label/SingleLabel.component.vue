@@ -3,13 +3,13 @@
     <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
-      v-model="question.answer.values"
       :componentId="question.id"
       :suggestions="question.suggestion?.suggestedAnswer"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="false"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
+      v-model="question.answer.values"
       @on-focus="onFocus"
       @on-selected="onSelected"
     />
