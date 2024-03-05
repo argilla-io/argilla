@@ -4,8 +4,15 @@
       v-for="{ id, title, content, isTextType, settings } in fields"
       :key="id"
     >
+      <TextFieldComponent
+        v-if="isTextType && !spanQuestion"
+        :title="title"
+        :fieldText="content"
+        :useMarkdown="settings.use_markdown"
+        :stringToHighlight="searchValue"
+      />
       <SpanAnnotationTextFieldComponent
-        v-if="isTextType"
+        v-else
         :title="title"
         :fieldText="content"
         :spanQuestion="spanQuestion"
