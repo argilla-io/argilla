@@ -3,6 +3,7 @@
     class="span-entity__wrapper"
     :style="{ left: entityPosition.left, top: entityPosition.top }"
     ref="spanEntityRef"
+    id="spanEntity"
   >
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
       {{ selectedOption.text }}
@@ -72,20 +73,42 @@ export default {
       this.visibleDropdown = false;
     },
     getPosition() {
-      return this.$nextTick(() => {
-        const position = this.$refs.spanEntityRef.getBoundingClientRect();
-        this.spanEntityPosition.left = `${position.left}px`;
-        this.spanEntityPosition.top = `${
-          position.top + this.$refs.spanEntityRef.scrollTop
-        }px`;
-      });
+      const position = this.$refs.spanEntityRef.getBoundingClientRect();
+      this.spanEntityPosition.left = `${position.left}px`;
+      this.spanEntityPosition.top = `${
+        position.top + this.$refs.spanEntityRef.scrollTop
+      }px`;
+    },
+
+    getScrollParent(element) {
+      if (!element) {
+        return undefined;
+      }
+
+      let parent = element.parentElement;
+      while (parent) {
+        const { overflow } = window.getComputedStyle(parent);
+        if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
+          return parent;
+        }
+        parent = parent.parentElement;
+      }
+
+      return document.documentElement;
     },
   },
   mounted() {
-    window.addEventListener("scroll", this.getPosition());
+    if (this.scroll) {
+      this.scroll.addEventListener("scroll", this.getPosition);
+    }
   },
   beforeDestroy() {
-    window.removeEventListener("scroll", this.getPosition());
+    if (this.scroll) {
+      this.scroll.removeEventListener("scroll", this.getPosition);
+    }
+  },
+  created() {
+    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
   },
 };
 </script>
