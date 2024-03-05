@@ -56,7 +56,8 @@ export default {
       return { hue, saturation, lightness };
     },
     optionColor() {
-      return this.option.color || "hsl(0, 0%, 0%)";
+      debugger;
+      return this.option.color;
     },
     optionDarkColor() {
       const { hue, saturation, lightness } = this.getHSLValues;
