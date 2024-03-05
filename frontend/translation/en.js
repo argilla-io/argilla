@@ -114,6 +114,9 @@ export default {
     expand: "Expand",
     collapse: "Collapse",
   },
+  spanAnnotation: {
+    shortcutHelper: "Hold 'Shift' to select character level",
+  },
   login: {
     title: "Sign in",
     claim: "Work on data together.</br>Make your models better.",

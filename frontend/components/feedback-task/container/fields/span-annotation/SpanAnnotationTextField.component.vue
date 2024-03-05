@@ -21,11 +21,17 @@
         class="span-annotation__field"
         ref="spanAnnotationField"
         :id="title"
-        v-html="fieldText"
+        v-text="fieldText"
+        @mousedown="drag = mouseDown = true"
+        @mouseup="mouseDown = false"
+        @mousemove="showShortcutsHelper(mouseDown)"
       />
       <SpanAnnotationCursor
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
+        :show-helper-message="
+          visibleShortcutsHelper ? $t('spanAnnotation.shortcutHelper') : ''
+        "
       />
       <template v-for="{ id, color } in spanQuestion.answer.options">
         <style :key="id" scoped>
@@ -55,6 +61,13 @@ export default {
       type: Object,
     },
   },
+  data() {
+    return {
+      visibleShortcutsHelper: false,
+      usedCharacterAnnotation: false,
+      mouseDown: false,
+    };
+  },
   computed: {
     selectedEntity() {
       return this.spanQuestion.answer.options.find((e) => e.isSelected);
@@ -70,11 +83,16 @@ export default {
     keyPressing(event, isDown) {
       if (event.key == "Shift") {
         this.allowCharacterAnnotation(isDown);
+        this.usedCharacterAnnotation = true;
+        this.visibleShortcutsHelper = false;
       }
+    },
+    showShortcutsHelper(value) {
+      if (this.usedCharacterAnnotation) return;
+      this.visibleShortcutsHelper = value;
     },
   },
   mounted() {
-    console.log(this.highlighting);
     window.addEventListener("keydown", (event) =>
       this.keyPressing(event, true)
     );
