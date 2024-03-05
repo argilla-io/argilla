@@ -25,7 +25,8 @@ from argilla.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
-    RankingValueSchema, RatingQuestion,
+    RankingValueSchema,
+    RatingQuestion,
     TextField,
     TextQuestion,
 )
@@ -481,7 +482,9 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-2": {"value": 2},
                         "question-3": {"value": "b"},
                         "question-4": {"value": ["b", "c"]},
-                        "question-5": {"value": [RankingValueSchema(rank=1, value="a"), RankingValueSchema(rank= 2, value="b")]},
+                        "question-5": {
+                            "value": [RankingValueSchema(rank=1, value="a"), RankingValueSchema(rank=2, value="b")]
+                        },
                     },
                     "status": "submitted",
                 }
@@ -517,7 +520,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                 },
                 {
                     "question_name": "question-5",
-                    "value": [RankingValueSchema(rank=1, value="a"), RankingValueSchema(rank= 2, value="b")],
+                    "value": [RankingValueSchema(rank=1, value="a"), RankingValueSchema(rank=2, value="b")],
                     "type": "human",
                     "score": 0.0,
                     "agent": "agent-1",
