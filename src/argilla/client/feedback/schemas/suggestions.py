@@ -12,11 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Literal, Optional, TYPE_CHECKING
 from uuid import UUID
 
-from argilla.client.feedback.schemas.response_values import ResponseValue, normalize_response_value
+from argilla.client.feedback.schemas.response_values import (
+    ResponseValue,
+    normalize_response_value,
+    parse_value_response_for_question,
+)
 from argilla.pydantic_v1 import BaseModel, Extra, confloat, validator
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.questions import QuestionSchema
 
 
 class SuggestionSchema(BaseModel):
@@ -41,9 +48,9 @@ class SuggestionSchema(BaseModel):
     """
 
     question_name: str
-    type: Optional[Literal["model", "human"]] = None
-    score: Optional[confloat(ge=0, le=1)] = None
     value: ResponseValue
+    score: Optional[confloat(ge=0, le=1)] = None
+    type: Optional[Literal["model", "human"]] = None
     agent: Optional[str] = None
 
     _normalize_value = validator("value", allow_reuse=True, always=True)(normalize_response_value)
@@ -59,3 +66,48 @@ class SuggestionSchema(BaseModel):
         payload["question_id"] = str(question_name_to_id[self.question_name])
 
         return payload
+
+
+class SuggestionBuilder:
+    """Builder class to create a `SuggestionSchema` instance."""
+
+    def __init__(self):
+        self._data = {}
+
+    @classmethod
+    def from_suggestion(cls, suggestion: SuggestionSchema) -> "SuggestionBuilder":
+        """Method to create a `SuggestionBuilder` from a `SuggestionSchema` instance."""
+
+        builder = cls()
+        builder._data = suggestion.dict(exclude_unset=True)
+
+        return builder
+
+    def type(self, type: Literal["model", "human"]) -> "SuggestionBuilder":
+        """Method to set the type of the suggestion. Possible values are `model` or `human`."""
+        self._data["type"] = type
+        return self
+
+    def agent(self, agent: str) -> "SuggestionBuilder":
+        """Method to set the agent that generated the suggestion."""
+
+        self._data["agent"] = agent
+        return self
+
+    def score(self, score: float) -> "SuggestionBuilder":
+        """Method to set the score of the suggestion. It should be a float between 0 and 1."""
+
+        self._data["score"] = score
+        return self
+
+    def question_value(self, question: "QuestionSchema", value: ResponseValue) -> "SuggestionBuilder":
+        """Method to set the value of the suggestion. It should match the type of the question."""
+
+        value = parse_value_response_for_question(question, value)
+        self._data.update({"question_name": question.name, "value": value})
+
+        return self
+
+    def build(self) -> SuggestionSchema:
+        """Method to create a `SuggestionSchema` instance."""
+        return SuggestionSchema(**self._data)
