@@ -28,9 +28,9 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion
-from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.models import Framework

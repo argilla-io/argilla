@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import ResponseStatus
@@ -26,7 +26,6 @@ from argilla.pydantic_v1 import BaseModel, Extra, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.questions import QuestionSchema
-
 
 
 class ValueSchema(BaseModel):
