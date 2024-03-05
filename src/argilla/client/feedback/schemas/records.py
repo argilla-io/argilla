@@ -50,7 +50,7 @@ class FeedbackRecord(BaseModel):
             Defaults to None.
 
     Examples:
-        >>> from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema, ValueSchema
+        >>> from argilla.feedback import FeedbackRecord, ResponseSchema, SuggestionSchema, ValueSchema
         >>> FeedbackRecord(
         ...     fields={"text": "This is the first record", "label": "positive"},
         ...     metadata={"first": True, "nested": {"more": "stuff"}},
@@ -72,6 +72,7 @@ class FeedbackRecord(BaseModel):
         ...            value="This is the first suggestion",
         ...            agent="agent-1",
         ...         ),
+        ...     ],
         ...     external_id="entry-1",
         ... )
 
