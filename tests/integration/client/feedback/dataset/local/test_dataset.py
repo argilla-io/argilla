@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List, Type, Union
 import argilla.client.singleton
 import datasets
 import pytest
-from argilla import User, Workspace
+from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -28,6 +28,7 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataProperty,
 )
 from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
@@ -51,7 +52,9 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
         records=[
             FeedbackRecord(
                 fields={"text": "this is a text"},
-                suggestions=[{"question_name": "text", "value": "This is a suggestion"}],
+                suggestions=[
+                    SuggestionSchema.with_question_value(ds.question_by_name("text"), value="This is a suggestion")
+                ],
             )
         ]
     )
@@ -69,7 +72,7 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
-        questions=[SpanQuestion(name="spans", labels=["label1", "label2"])],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"])],
     )
 
     rg_dataset = ds.push_to_argilla(name="new_dataset")
@@ -93,7 +96,9 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     assert remote_dataset.records[0].id is not None
     assert remote_dataset.records[0].suggestions == ()
 
-    remote_dataset.records[0].update(suggestions=[{"question_name": "text", "value": "This is a suggestion"}])
+    remote_dataset.records[0].update(
+        suggestions=[SuggestionSchema.with_question_value(ds.question_by_name("text"), value="This is a suggestion")]
+    )
 
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -139,6 +144,11 @@ def test_add_records(
     assert not dataset.records[0].responses
     assert not dataset.records[0].suggestions
 
+    question_1 = dataset.question_by_name("question-1")
+    question_2 = dataset.question_by_name("question-2")
+    question_3 = dataset.question_by_name("question-3")
+    question_4 = dataset.question_by_name("question-4")
+    question_5 = dataset.question_by_name("question-5")
     dataset.add_records(
         [
             FeedbackRecord(
@@ -148,38 +158,24 @@ def test_add_records(
                 },
                 metadata={"unit": "test"},
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(status="submitted")
+                    .with_question_value(question_1, value="answer")
+                    .with_question_value(question_2, value=0)
+                    .with_question_value(question_3, value="a")
+                    .with_question_value(question_4, value=["a", "b"])
+                    .with_question_value(
+                        question_5,
+                        value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
+                    )
                 ],
                 suggestions=[
-                    {
-                        "question_name": "question-1",
-                        "value": "answer",
-                    },
-                    {
-                        "question_name": "question-2",
-                        "value": 0,
-                    },
-                    {
-                        "question_name": "question-3",
-                        "value": "a",
-                    },
-                    {
-                        "question_name": "question-4",
-                        "value": ["a", "b"],
-                    },
-                    {
-                        "question_name": "question-5",
-                        "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
-                    },
+                    SuggestionSchema.with_question_value(question_1, value="answer"),
+                    SuggestionSchema.with_question_value(question_2, value=0),
+                    SuggestionSchema.with_question_value(question_3, value="a"),
+                    SuggestionSchema.with_question_value(question_4, value=["a", "b"]),
+                    SuggestionSchema.with_question_value(
+                        question_5, value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
+                    ),
                 ],
                 external_id="test-id",
             ),

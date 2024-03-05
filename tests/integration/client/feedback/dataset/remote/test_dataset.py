@@ -11,21 +11,18 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import pytest
 import random
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Tuple, Type
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, List, TYPE_CHECKING, Tuple, Type
 from uuid import UUID
 
 import argilla as rg
 import argilla.client.singleton
-import numpy
-import pytest
-from argilla import (
-    FeedbackRecord,
-)
+from argilla import FeedbackRecord, SuggestionSchema
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas import SuggestionSchema
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
@@ -51,8 +48,6 @@ from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
 from argilla_server.models import User as ServerUser
 from argilla_server.settings import settings
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
@@ -166,11 +161,12 @@ class TestRemoteFeedbackDataset:
         )
 
         remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
+        question = remote.question_by_name("question")
 
         records = []
         for record in remote:
             record.suggestions = [
-                SuggestionSchema(question_name="question", value=f"Hello world! for {record.fields['text']}")
+                SuggestionSchema.with_question_value(question, value=f"Hello world! for {record.fields['text']}")
             ]
             records.append(record)
 
@@ -192,14 +188,17 @@ class TestRemoteFeedbackDataset:
         ws = rg.Workspace.create(name="test-workspace")
 
         remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
+        question = remote.question_by_name("question")
 
         remote.add_records(
             [
                 FeedbackRecord(
-                    fields={"text": "Hello world!"}, suggestions=[{"question_name": "question", "value": "test"}]
+                    fields={"text": "Hello world!"},
+                    suggestions=[SuggestionSchema.with_question_value(question, value="test")],
                 ),
                 FeedbackRecord(
-                    fields={"text": "Another record"}, suggestions=[{"question_name": "question", "value": "test"}]
+                    fields={"text": "Another record"},
+                    suggestions=[SuggestionSchema.with_question_value(question, value="test")],
                 ),
             ]
         )
