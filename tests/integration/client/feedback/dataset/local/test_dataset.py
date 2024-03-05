@@ -69,13 +69,14 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
-        questions=[SpanQuestion(name="spans", labels=["label1", "label2"])],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"])],
     )
 
     rg_dataset = ds.push_to_argilla(name="new_dataset")
 
     assert rg_dataset.id
     assert rg_dataset.questions[0].name == "spans"
+    assert rg_dataset.questions[0].field == "text"
     assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
 
 
