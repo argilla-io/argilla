@@ -1,7 +1,6 @@
 import Vue from "vue";
 import { onMounted, onUnmounted, ref, watch } from "vue-demi";
 import { Highlighting, Position } from "./components/highlighting";
-import { colorGenerator } from "./components/color-generator";
 import EntityComponent from "./components/EntityComponent.vue";
 import { Entity } from "./components/span-selection";
 import { Question } from "~/v1/domain/entities/question/Question";
@@ -16,12 +15,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
   title: string;
 }) => {
   const answer = spanQuestion.answer as SpanQuestionAnswer;
-
-  answer.options
-    .filter((e) => !e.color)
-    .forEach((e) => {
-      e.color = colorGenerator(e.value);
-    });
 
   const selectEntity = (entity) => {
     answer.options.forEach((e) => {
