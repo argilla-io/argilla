@@ -28,7 +28,7 @@ from argilla.pydantic_v1 import BaseModel, Extra, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.questions import QuestionSchema
-    from argilla.client.feedback.schemas.records import FeedbackRecord
+    from argilla.client.users import User
 
 
 class ValueSchema(BaseModel):
@@ -102,3 +102,46 @@ class ResponseSchema(BaseModel):
             else None,
             "status": self.status.value if hasattr(self.status, "value") else self.status,
         }
+
+
+class ResponseBuilder:
+    """Builder class to create a `ResponseSchema` instance."""
+
+    def __init__(self):
+        self._data = {}
+
+    @classmethod
+    def from_response(cls, response: ResponseSchema) -> "ResponseBuilder":
+        """Method to create a `ResponseBuilder` from a `ResponseSchema` instance."""
+
+        builder = cls()
+        builder._data = response.dict(exclude_unset=True)
+
+        return builder
+
+    def user(self, user: "User") -> "ResponseBuilder":
+        """Method to set the user that provided the response."""
+
+        self._data["user_id"] = user.id
+        return self
+
+    def status(self, status: Union[ResponseStatus, str]) -> "ResponseBuilder":
+        """Method to set the status of the response. Possible values are `submitted` or `discarded`."""
+
+        self._data["status"] = status
+        return self
+
+    def question_value(self, question: "QuestionSchema", value: ResponseValue) -> "ResponseBuilder":
+        """Method to set the value of the response for a given question. It should match the type of the question."""
+
+        value = parse_value_response_for_question(question, value)
+        values = self._data.get("values", {})
+
+        values[question.name] = ValueSchema(value=value)
+        self._data["values"] = values
+
+        return self
+
+    def build(self) -> ResponseSchema:
+        """Method to create a `ResponseSchema` instance."""
+        return ResponseSchema(**self._data)
