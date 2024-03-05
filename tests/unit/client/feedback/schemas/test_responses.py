@@ -12,12 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from datetime import datetime
 from uuid import uuid4
 
-from argilla import ValueSchema
-from argilla.client.sdk.users.models import UserModel, UserRole
-from argilla.feedback import ResponseBuilder, ResponseSchema, ResponseStatus, SpanValueSchema, TextQuestion
+from argilla.feedback import (
+    FeedbackDataset,
+    ResponseSchema,
+    ResponseStatus,
+    SpanValueSchema,
+    TextQuestion,
+    ValueSchema,
+)
 
 
 def test_create_span_response_wrong_limits():
@@ -25,44 +29,31 @@ def test_create_span_response_wrong_limits():
         SpanValueSchema(start=10, end=8, label="test")
 
 
-def test_create_response_from_builder():
+def test_create_response():
     question = TextQuestion(name="text")
-    user = UserModel(
-        id=uuid4(),
-        api_key="test",
-        username="test",
-        role=UserRole.annotator,
-        first_name="test",
-        last_name="test",
-        inserted_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
+    response = ResponseSchema(status="draft").with_question_value(question, "Value for text")
 
-    response = ResponseBuilder().status("draft").question_value(question, "Value for text").user(user).build()
-
-    assert response.user_id == user.id
     assert response.status == ResponseStatus.draft
     assert question.name in response.values
     assert response.values[question.name].value == "Value for text"
 
 
-def test_create_response_with_wrong_value():
-    with pytest.raises(ValueError, match="Value 10 is not valid for question type text. Expected <class 'str'>."):
-        ResponseBuilder().status("draft").question_value(TextQuestion(name="text"), 10).build()
-
-
-def test_create_response_builder_from_response():
-    response = ResponseSchema(
-        user_id=uuid4(), status=ResponseStatus.draft, values={"text": ValueSchema(value="Value for text")}
+def test_create_responses_with_multiple_questions():
+    question1 = TextQuestion(name="text")
+    question2 = TextQuestion(name="text2")
+    response = (
+        ResponseSchema(status="draft")
+        .with_question_value(question1, "Value for text")
+        .with_question_value(question2, "Value for text2")
     )
 
-    builder = ResponseBuilder.from_response(response)
+    assert response.status == ResponseStatus.draft
+    assert question1.name in response.values
+    assert response.values[question1.name].value == "Value for text"
+    assert question2.name in response.values
+    assert response.values[question2.name].value == "Value for text2"
 
-    new_response = builder.question_value(TextQuestion(name="other-text"), "Value for other text").build()
 
-    assert new_response.user_id == response.user_id
-    assert new_response.status == response.status
-    assert "text" in new_response.values
-    assert "other-text" in new_response.values
-    assert new_response.values["text"].value == "Value for text"
-    assert new_response.values["other-text"].value == "Value for other text"
+def test_create_response_with_wrong_value():
+    with pytest.raises(ValueError, match="Value 10 is not valid for question type text. Expected <class 'str'>."):
+        ResponseSchema(status="draft").with_question_value(TextQuestion(name="text"), 10)
