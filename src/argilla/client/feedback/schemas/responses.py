@@ -94,14 +94,9 @@ class ResponseSchema(BaseModel):
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
-        return {
-            # UUID is not json serializable!!!
-            "user_id": self.user_id,
-            "values": {question_name: value.dict(exclude_unset=True) for question_name, value in self.values.items()}
-            if self.values is not None
-            else None,
-            "status": self.status.value if hasattr(self.status, "value") else self.status,
-        }
+
+        return self.dict(include={"user_id", "values", "status"})
+
 
 
 class ResponseBuilder:
