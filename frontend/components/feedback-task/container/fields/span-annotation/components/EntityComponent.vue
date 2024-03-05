@@ -2,12 +2,17 @@
   <div
     class="span-entity__wrapper"
     :style="{ left: entityPosition.left, top: entityPosition.top }"
+    ref="spanEntityRef"
   >
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
       {{ selectedOption.text }}
     </div>
     <EntityComponentDropdown
-      v-if="visibleDropdown"
+      v-else
+      :style="{
+        left: spanEntityPosition.left,
+        top: spanEntityPosition.top,
+      }"
       :selectedOption="selectedOption"
       :options="options"
       @on-replace-option="selectOption"
@@ -36,6 +41,10 @@ export default {
   data() {
     return {
       visibleDropdown: false,
+      spanEntityPosition: {
+        left: "0px",
+        top: "0px",
+      },
     };
   },
   computed: {
@@ -57,10 +66,26 @@ export default {
     },
     toggleDropdown() {
       this.visibleDropdown = !this.visibleDropdown;
+      this.getPosition();
     },
     hideDropdown() {
       this.visibleDropdown = false;
     },
+    getPosition() {
+      return this.$nextTick(() => {
+        const position = this.$refs.spanEntityRef.getBoundingClientRect();
+        this.spanEntityPosition.left = `${position.left}px`;
+        this.spanEntityPosition.top = `${
+          position.top + this.$refs.spanEntityRef.scrollTop
+        }px`;
+      });
+    },
+  },
+  mounted() {
+    window.addEventListener("scroll", this.getPosition());
+  },
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.getPosition());
   },
 };
 </script>

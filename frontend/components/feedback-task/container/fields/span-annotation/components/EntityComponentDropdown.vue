@@ -124,7 +124,7 @@ export default {
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
 .span-entity {
   &__dropdown {
-    position: relative;
+    position: fixed;
     display: flex;
     flex-direction: column;
     border-radius: $border-radius;
