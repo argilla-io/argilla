@@ -67,47 +67,10 @@ class SuggestionSchema(BaseModel):
 
         return payload
 
-
-class SuggestionBuilder:
-    """Builder class to create a `SuggestionSchema` instance."""
-
-    def __init__(self):
-        self._data = {}
-
     @classmethod
-    def from_suggestion(cls, suggestion: SuggestionSchema) -> "SuggestionBuilder":
-        """Method to create a `SuggestionBuilder` from a `SuggestionSchema` instance."""
-
-        builder = cls()
-        builder._data = suggestion.dict(exclude_unset=True)
-
-        return builder
-
-    def type(self, type: Literal["model", "human"]) -> "SuggestionBuilder":
-        """Method to set the type of the suggestion. Possible values are `model` or `human`."""
-        self._data["type"] = type
-        return self
-
-    def agent(self, agent: str) -> "SuggestionBuilder":
-        """Method to set the agent that generated the suggestion."""
-
-        self._data["agent"] = agent
-        return self
-
-    def score(self, score: float) -> "SuggestionBuilder":
-        """Method to set the score of the suggestion. It should be a float between 0 and 1."""
-
-        self._data["score"] = score
-        return self
-
-    def question_value(self, question: "QuestionSchema", value: ResponseValue) -> "SuggestionBuilder":
-        """Method to set the value of the suggestion. It should match the type of the question."""
-
+    def with_question_value(cls, question: "QuestionSchema", value: ResponseValue, **kwargs) -> "SuggestionSchema":
+        """Method to create a `SuggestionBuilder` from a `QuestionSchema` instance."""
         value = parse_value_response_for_question(question, value)
-        self._data.update({"question_name": question.name, "value": value})
+        question_name = question.name
 
-        return self
-
-    def build(self) -> SuggestionSchema:
-        """Method to create a `SuggestionSchema` instance."""
-        return SuggestionSchema(**self._data)
+        return cls(question_name=question_name, value=value, **kwargs)

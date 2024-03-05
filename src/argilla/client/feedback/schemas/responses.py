@@ -13,14 +13,12 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 from uuid import UUID
 
-from argilla.client.feedback.schemas.enums import QuestionTypes, ResponseStatus
+from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.response_values import (
-    RankingValueSchema,
     ResponseValue,
-    SpanValueSchema,
     normalize_response_value,
     parse_value_response_for_question,
 )
@@ -28,7 +26,7 @@ from argilla.pydantic_v1 import BaseModel, Extra, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.questions import QuestionSchema
-    from argilla.client.users import User
+
 
 
 class ValueSchema(BaseModel):
@@ -64,7 +62,13 @@ class ResponseSchema(BaseModel):
 
     user_id: Optional[UUID] = None
     values: Union[Dict[str, ValueSchema], None]
-    status: ResponseStatus = ResponseStatus.submitted
+    status: Union[ResponseStatus, str] = ResponseStatus.submitted
+
+    @validator("status")
+    def normalize_status(cls, v) -> ResponseStatus:
+        if isinstance(v, str):
+            return ResponseStatus(v)
+        return v
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
@@ -96,47 +100,3 @@ class ResponseSchema(BaseModel):
         to create a `ResponseSchema` for a `FeedbackRecord`."""
 
         return self.dict(include={"user_id", "values", "status"})
-
-
-
-class ResponseBuilder:
-    """Builder class to create a `ResponseSchema` instance."""
-
-    def __init__(self):
-        self._data = {}
-
-    @classmethod
-    def from_response(cls, response: ResponseSchema) -> "ResponseBuilder":
-        """Method to create a `ResponseBuilder` from a `ResponseSchema` instance."""
-
-        builder = cls()
-        builder._data = response.dict(exclude_unset=True)
-
-        return builder
-
-    def user(self, user: "User") -> "ResponseBuilder":
-        """Method to set the user that provided the response."""
-
-        self._data["user_id"] = user.id
-        return self
-
-    def status(self, status: Union[ResponseStatus, str]) -> "ResponseBuilder":
-        """Method to set the status of the response. Possible values are `submitted` or `discarded`."""
-
-        self._data["status"] = status
-        return self
-
-    def question_value(self, question: "QuestionSchema", value: ResponseValue) -> "ResponseBuilder":
-        """Method to set the value of the response for a given question. It should match the type of the question."""
-
-        value = parse_value_response_for_question(question, value)
-        values = self._data.get("values", {})
-
-        values[question.name] = ValueSchema(value=value)
-        self._data["values"] = values
-
-        return self
-
-    def build(self) -> ResponseSchema:
-        """Method to create a `ResponseSchema` instance."""
-        return ResponseSchema(**self._data)
