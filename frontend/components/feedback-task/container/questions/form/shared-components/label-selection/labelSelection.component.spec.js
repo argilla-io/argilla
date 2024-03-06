@@ -15,6 +15,7 @@ beforeEach(() => {
 
 afterEach(() => {
   wrapper.destroy();
+  window.questionSettings["componentId"].isExpandedLabelQuestions = false;
 });
 
 describe("LabelSelectionComponent in Single Selection mode", () => {
