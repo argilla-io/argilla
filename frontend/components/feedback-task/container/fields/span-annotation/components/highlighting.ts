@@ -150,18 +150,13 @@ export class Highlighting {
     const nodeParent = node.parentNode;
     nodeParent.appendChild(this.entitySpanContainer.cloneNode(true));
 
-    this.node.addEventListener("mouseup", () => {
+    this.node.addEventListener("click", () => {
       this.highlightUserSelection();
 
       this.applyStyles();
     });
 
-    new ResizeObserver(() => updateStyles()).observe(node);
-
-    const updateStyles = () => {
-      this.applyEntityStyle();
-      this.applyStylesOnScroll();
-    };
+    new ResizeObserver(() => this.applyStyles()).observe(node);
 
     this.applyStylesOnScroll();
   }
