@@ -35,7 +35,7 @@ type Configuration = {
 export class SpanSelection {
   private selections: Span[] = [];
 
-  private constructor() {}
+  protected constructor() {}
 
   // eslint-disable-next-line no-use-before-define
   private static instance: SpanSelection;
