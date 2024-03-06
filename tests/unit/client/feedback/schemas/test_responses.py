@@ -31,7 +31,7 @@ def test_create_span_response_wrong_limits():
 
 def test_create_response():
     question = TextQuestion(name="text")
-    response = ResponseSchema(status="draft").with_question_value(question, "Value for text")
+    response = ResponseSchema(status="draft", values=[question.response("Value for text")])
 
     assert response.status == ResponseStatus.draft
     assert question.name in response.values
@@ -41,10 +41,12 @@ def test_create_response():
 def test_create_responses_with_multiple_questions():
     question1 = TextQuestion(name="text")
     question2 = TextQuestion(name="text2")
-    response = (
-        ResponseSchema(status="draft")
-        .with_question_value(question1, "Value for text")
-        .with_question_value(question2, "Value for text2")
+    response = ResponseSchema(
+        status="draft",
+        values=[
+            question1.response("Value for text"),
+            question2.response("Value for text2"),
+        ],
     )
 
     assert response.status == ResponseStatus.draft
@@ -56,4 +58,4 @@ def test_create_responses_with_multiple_questions():
 
 def test_create_response_with_wrong_value():
     with pytest.raises(ValueError, match="Value 10 is not valid for question type text. Expected <class 'str'>."):
-        ResponseSchema(status="draft").with_question_value(TextQuestion(name="text"), 10)
+        ResponseSchema(status="draft", values=[TextQuestion(name="text").response(10)])

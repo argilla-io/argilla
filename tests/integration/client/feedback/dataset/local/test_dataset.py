@@ -52,9 +52,7 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
         records=[
             FeedbackRecord(
                 fields={"text": "this is a text"},
-                suggestions=[
-                    SuggestionSchema.with_question_value(ds.question_by_name("text"), value="This is a suggestion")
-                ],
+                suggestions=[ds.question_by_name("text").suggestion(value="This is a suggestion")],
             )
         ]
     )
@@ -97,9 +95,7 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     assert remote_dataset.records[0].id is not None
     assert remote_dataset.records[0].suggestions == ()
 
-    remote_dataset.records[0].update(
-        suggestions=[SuggestionSchema.with_question_value(ds.question_by_name("text"), value="This is a suggestion")]
-    )
+    remote_dataset.records[0].update(suggestions=[ds.question_by_name("text").suggestion(value="This is a suggestion")])
 
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -159,24 +155,23 @@ def test_add_records(
                 },
                 metadata={"unit": "test"},
                 responses=[
-                    ResponseSchema(status="submitted")
-                    .with_question_value(question_1, value="answer")
-                    .with_question_value(question_2, value=0)
-                    .with_question_value(question_3, value="a")
-                    .with_question_value(question_4, value=["a", "b"])
-                    .with_question_value(
-                        question_5,
-                        value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
-                    )
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=0),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                        ],
+                    ),
                 ],
                 suggestions=[
-                    SuggestionSchema.with_question_value(question_1, value="answer"),
-                    SuggestionSchema.with_question_value(question_2, value=0),
-                    SuggestionSchema.with_question_value(question_3, value="a"),
-                    SuggestionSchema.with_question_value(question_4, value=["a", "b"]),
-                    SuggestionSchema.with_question_value(
-                        question_5, value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
-                    ),
+                    question_1.suggestion(value="answer"),
+                    question_2.suggestion(value=0),
+                    question_3.suggestion(value="a"),
+                    question_4.suggestion(value=["a", "b"]),
+                    question_5.suggestion(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
                 ],
                 external_id="test-id",
             ),

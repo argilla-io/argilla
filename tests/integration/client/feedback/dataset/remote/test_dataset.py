@@ -166,9 +166,7 @@ class TestRemoteFeedbackDataset:
 
         records = []
         for record in remote:
-            record.suggestions = [
-                SuggestionSchema.with_question_value(question, value=f"Hello world! for {record.fields['text']}")
-            ]
+            record.suggestions = [question.suggestion(f"Hello world! for {record.fields['text']}")]
             records.append(record)
 
         remote.update_records(records)
@@ -195,11 +193,11 @@ class TestRemoteFeedbackDataset:
             [
                 FeedbackRecord(
                     fields={"text": "Hello world!"},
-                    suggestions=[SuggestionSchema.with_question_value(question, value="test")],
+                    suggestions=[question.suggestion("test")],
                 ),
                 FeedbackRecord(
                     fields={"text": "Another record"},
-                    suggestions=[SuggestionSchema.with_question_value(question, value="test")],
+                    suggestions=[question.suggestion(value="test")],
                 ),
             ]
         )
