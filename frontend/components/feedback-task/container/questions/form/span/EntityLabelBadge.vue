@@ -56,7 +56,6 @@ export default {
       return { hue, saturation, lightness };
     },
     optionColor() {
-      debugger;
       return this.option.color;
     },
     optionDarkColor() {
