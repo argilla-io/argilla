@@ -59,22 +59,29 @@ export default {
       return this.option.color;
     },
     optionDarkColor() {
-      const { hue, saturation, lightness } = this.getHSLValues;
-      return `hsl(${hue}, ${saturation - 20}%, ${lightness - 20}%)`;
+      const { hue } = this.getHSLValues;
+      return `hsl(${hue}, 60%, 60%)`;
+    },
+    optionLightColor() {
+      const { hue } = this.getHSLValues;
+      return `hsl(${hue}, 80%, 92%)`;
+    },
+    optionVeryLightColor() {
+      const { hue } = this.getHSLValues;
+      return `hsl(${hue}, 30%, 96%)`;
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$label-color: palette(purple, 900);
-$label-dark-color: palette(purple, 200);
+$label-color: palette(grey, 700);
 
 input[type="checkbox"] {
   @extend %visuallyhidden;
   &:focus {
     & + .label-text {
-      outline: 2px solid v-bind("option.color");
+      outline: 2px solid v-bind("optionDarkColor");
     }
   }
 }
@@ -101,7 +108,7 @@ input[type="checkbox"] {
   min-width: 50px;
   text-align: center;
   padding-inline: $base-space;
-  background: $label-color;
+  background: v-bind(optionVeryLightColor);
   color: v-bind(optionDarkColor);
   font-weight: 500;
   outline: none;
@@ -118,7 +125,7 @@ input[type="checkbox"] {
     }
   }
   &:not(.label-active):hover {
-    background: darken($label-color, 2%);
+    background: v-bind(optionLightColor);
   }
   &.label-active {
     background: v-bind(optionColor);
