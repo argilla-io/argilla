@@ -79,11 +79,8 @@ export default {
         position.top + this.$refs.spanEntityRef.scrollTop
       }px`;
     },
-
     getScrollParent(element) {
-      if (!element) {
-        return undefined;
-      }
+      if (!element) return;
 
       let parent = element.parentElement;
       while (parent) {
@@ -91,6 +88,7 @@ export default {
         if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
           return parent;
         }
+
         parent = parent.parentElement;
       }
 
