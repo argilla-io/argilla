@@ -131,7 +131,7 @@ class SuggestionSchema(BaseModel):
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `SuggestionSchema` for a `FeedbackRecord`."""
         # We can do this because there is no default values for the fields
-        payload = self.dict(exclude_unset=True, include={"type", "score", "value", "agent "})
+        payload = self.dict(exclude_unset=True, include={"type", "score", "value", "agent"})
         payload["question_id"] = str(question_name_to_id[self.question_name])
 
         return payload
