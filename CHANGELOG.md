@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
+- Added support for spans values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
 
 ### Fixed
 
