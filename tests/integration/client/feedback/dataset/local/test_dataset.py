@@ -34,7 +34,6 @@ from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.models import Framework
 from argilla.client.sdk.commons.errors import ValidationApiError
-
 from argilla.feedback import SpanValueSchema
 
 if TYPE_CHECKING:
