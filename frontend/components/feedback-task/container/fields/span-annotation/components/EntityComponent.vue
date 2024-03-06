@@ -96,6 +96,8 @@ export default {
     },
   },
   mounted() {
+    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
+
     if (this.scroll) {
       this.scroll.addEventListener("scroll", this.getPosition);
     }
@@ -104,9 +106,6 @@ export default {
     if (this.scroll) {
       this.scroll.removeEventListener("scroll", this.getPosition);
     }
-  },
-  created() {
-    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
   },
 };
 </script>
