@@ -92,5 +92,9 @@ class ResponseSchema(BaseModel):
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
-
-        return self.dict(include={"user_id", "values", "status"})
+        payload = {
+            "user_id": self.user_id,
+            "status": self.status,
+            **self.dict(exclude_unset=True, include={"values"})
+        }
+        return payload
