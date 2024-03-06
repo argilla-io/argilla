@@ -116,6 +116,7 @@ export default {
   },
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
+    notSupported: "Span annotation is not supported for your browser",
   },
   login: {
     title: "Sign in",

@@ -191,6 +191,7 @@ export class Highlighting {
   }
 
   private applyStyles() {
+    if (!CSS.highlights) return;
     this.applyHighlightStyle();
     this.applyEntityStyle();
   }

@@ -14,6 +14,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion: Question;
   title: string;
 }) => {
+  const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
 
   const selectEntity = (entity) => {
@@ -92,7 +93,11 @@ export const useSpanAnnotationTextFieldViewModel = ({
       to: v.end,
     }));
 
-    highlighting.value.mount(spansToLoad);
+    try {
+      highlighting.value.mount(spansToLoad);
+    } catch {
+      spanAnnotationSupported.value = false;
+    }
   });
 
   onUnmounted(() => {
@@ -100,6 +105,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   });
 
   return {
+    spanAnnotationSupported,
     highlighting,
   };
 };
