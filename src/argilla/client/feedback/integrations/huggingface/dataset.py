@@ -148,10 +148,7 @@ class HuggingFaceDatasetMixin:
                 if record.suggestions:
                     for suggestion in record.suggestions:
                         if question.name == suggestion.question_name:
-                            if question.type == QuestionTypes.ranking:
-                                suggestion_value = [r.dict() for r in suggestion.value]
-                            else:
-                                suggestion_value = suggestion.value
+                            suggestion_value = suggestion.dict(include={"value"})["value"]
                             suggestion_metadata = {
                                 "type": suggestion.type,
                                 "score": suggestion.score,

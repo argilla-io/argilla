@@ -72,6 +72,7 @@ class FeedbackRecord(BaseModel):
         ...            value="This is the first suggestion",
         ...            agent="agent-1",
         ...         ),
+        ...     ]
         ...     external_id="entry-1",
         ... )
 
