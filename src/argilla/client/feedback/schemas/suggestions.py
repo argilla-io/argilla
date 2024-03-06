@@ -12,11 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Literal, Optional
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
 from uuid import UUID
 
-from argilla.client.feedback.schemas.response_values import ResponseValue, normalize_response_value
+from argilla.client.feedback.schemas.response_values import (
+    ResponseValue,
+    normalize_response_value,
+    parse_value_response_for_question,
+)
 from argilla.pydantic_v1 import BaseModel, Extra, confloat, validator
+
+if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.questions import QuestionSchema
 
 
 class SuggestionSchema(BaseModel):
@@ -41,9 +48,9 @@ class SuggestionSchema(BaseModel):
     """
 
     question_name: str
-    type: Optional[Literal["model", "human"]] = None
-    score: Optional[confloat(ge=0, le=1)] = None
     value: ResponseValue
+    score: Optional[confloat(ge=0, le=1)] = None
+    type: Optional[Literal["model", "human"]] = None
     agent: Optional[str] = None
 
     _normalize_value = validator("value", allow_reuse=True, always=True)(normalize_response_value)

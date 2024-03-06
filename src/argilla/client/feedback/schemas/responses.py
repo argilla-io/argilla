@@ -16,11 +16,9 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from argilla.client.feedback.schemas.enums import QuestionTypes, ResponseStatus
+from argilla.client.feedback.schemas.enums import ResponseStatus
 from argilla.client.feedback.schemas.response_values import (
-    RankingValueSchema,
     ResponseValue,
-    SpanValueSchema,
     normalize_response_value,
     parse_value_response_for_question,
 )
@@ -28,7 +26,6 @@ from argilla.pydantic_v1 import BaseModel, Extra, validator
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.questions import QuestionSchema
-    from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
 class ValueSchema(BaseModel):
@@ -63,8 +60,20 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Union[Dict[str, ValueSchema], None]
-    status: ResponseStatus = ResponseStatus.submitted
+    values: Union[List[Dict[str, ValueSchema]], Dict[str, ValueSchema], None]
+    status: Union[ResponseStatus, str] = ResponseStatus.submitted
+
+    @validator("values", always=True)
+    def normalize_values(cls, values):
+        if isinstance(values, list) and all(isinstance(value, dict) for value in values):
+            return {k: v for value in values for k, v in value.items()}
+        return values
+
+    @validator("status")
+    def normalize_status(cls, v) -> ResponseStatus:
+        if isinstance(v, str):
+            return ResponseStatus(v)
+        return v
 
     @validator("user_id", always=True)
     def user_id_must_have_value(cls, v):
@@ -80,25 +89,8 @@ class ResponseSchema(BaseModel):
         extra = Extra.forbid
         validate_assignment = True
 
-    def with_question_value(self, question: "QuestionSchema", value: ResponseValue) -> "ResponseSchema":
-        """Returns the response value for the given record."""
-        value = parse_value_response_for_question(question, value)
-
-        values = self.values or {}
-        values[question.name] = ValueSchema(value=value)
-
-        self.values = values
-
-        return self
-
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
-        return {
-            # UUID is not json serializable!!!
-            "user_id": self.user_id,
-            "values": {question_name: value.dict(exclude_unset=True) for question_name, value in self.values.items()}
-            if self.values is not None
-            else None,
-            "status": self.status.value if hasattr(self.status, "value") else self.status,
-        }
+        payload = {"user_id": self.user_id, "status": self.status, **self.dict(exclude_unset=True, include={"values"})}
+        return payload

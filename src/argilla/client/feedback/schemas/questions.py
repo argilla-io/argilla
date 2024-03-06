@@ -17,6 +17,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.response_values import parse_value_response_for_question
+from argilla.client.feedback.schemas.responses import ResponseValue, ValueSchema
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
 from argilla.pydantic_v1 import BaseModel, Extra, Field, conint, conlist, root_validator, validator
@@ -76,6 +79,16 @@ class QuestionSchema(BaseModel, ABC):
             "required": self.required,
             "settings": self.server_settings,
         }
+
+    def suggestion(self, value: ResponseValue, **kwargs) -> SuggestionSchema:
+        """Method that will be used to create a `SuggestionSchema` from the question and a suggested value."""
+        value = parse_value_response_for_question(self, value)
+        return SuggestionSchema(question_name=self.name, value=value, **kwargs)
+
+    def response(self, value: ResponseValue) -> Dict[str, ValueSchema]:
+        """Method that will be used to create a response from the question and a value."""
+        value = parse_value_response_for_question(self, value)
+        return {self.name: ValueSchema(value=value)}
 
 
 class TextQuestion(QuestionSchema):
