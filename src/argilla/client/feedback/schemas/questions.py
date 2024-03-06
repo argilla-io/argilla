@@ -274,7 +274,7 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import RankingQuestion
-        >>> RankingQuestion(name="ranking_question", title="Ranking Question", labels=["label_1", "label_2"])
+        >>> RankingQuestion(name="ranking_question", title="Ranking Question", values=["label_1", "label_2"])
     """
 
     type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False)
