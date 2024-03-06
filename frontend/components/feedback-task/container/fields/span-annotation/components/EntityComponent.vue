@@ -79,11 +79,8 @@ export default {
         position.top + this.$refs.spanEntityRef.scrollTop
       }px`;
     },
-
     getScrollParent(element) {
-      if (!element) {
-        return undefined;
-      }
+      if (!element) return;
 
       let parent = element.parentElement;
       while (parent) {
@@ -91,6 +88,7 @@ export default {
         if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
           return parent;
         }
+
         parent = parent.parentElement;
       }
 
@@ -98,6 +96,8 @@ export default {
     },
   },
   mounted() {
+    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
+
     if (this.scroll) {
       this.scroll.addEventListener("scroll", this.getPosition);
     }
@@ -106,9 +106,6 @@ export default {
     if (this.scroll) {
       this.scroll.removeEventListener("scroll", this.getPosition);
     }
-  },
-  created() {
-    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
   },
 };
 </script>

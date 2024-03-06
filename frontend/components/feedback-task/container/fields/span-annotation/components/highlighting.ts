@@ -87,6 +87,12 @@ export class Highlighting {
   }
 
   mount(selections: Omit<Span, "text" | "node">[] = []) {
+    if (!CSS.highlights) {
+      throw new Error(
+        "The CSS Custom Highlight API is not supported in this browser!"
+      );
+    }
+
     const node = document.getElementById(this.nodeId)!;
 
     if (!node) throw new Error(`Node with id ${this.nodeId} not found`);
@@ -105,12 +111,6 @@ export class Highlighting {
   }
 
   private loadHighlights(selections: Omit<Span, "text" | "node">[] = []) {
-    if (!CSS.highlights) {
-      throw new Error(
-        "The CSS Custom Highlight API is not supported in this browser!"
-      );
-    }
-
     if (!this.node) {
       throw new Error(
         "Node not attached, use `attachNode` method with HTMLElement that contains the text to select"
@@ -150,18 +150,13 @@ export class Highlighting {
     const nodeParent = node.parentNode;
     nodeParent.appendChild(this.entitySpanContainer.cloneNode(true));
 
-    this.node.addEventListener("mouseup", () => {
+    this.node.addEventListener("click", () => {
       this.highlightUserSelection();
 
       this.applyStyles();
     });
 
-    new ResizeObserver(() => updateStyles()).observe(node);
-
-    const updateStyles = () => {
-      this.applyEntityStyle();
-      this.applyStylesOnScroll();
-    };
+    new ResizeObserver(() => this.applyStyles()).observe(node);
 
     this.applyStylesOnScroll();
   }

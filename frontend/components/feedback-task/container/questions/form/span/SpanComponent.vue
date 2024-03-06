@@ -10,10 +10,6 @@
       @on-focus="onFocus"
       @on-selected="onSelected"
     />
-    <div>
-      <p>Values</p>
-      {{ JSON.stringify(question.answer.valuesAnswered) }}
-    </div>
   </div>
 </template>
 
