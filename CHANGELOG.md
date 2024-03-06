@@ -20,6 +20,11 @@ These are the section headers that we use:
 
 -If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process ([#4630](https://github.com/argilla-io/argilla/pull/4630))
 
+### Fixed
+
+- Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
+- Fixed parsing ranking values in suggestions from HF datasets. ([#4629](https://github.com/argilla-io/argilla/pull/4629))
+
 ## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
 
 > [!NOTE]
