@@ -59,3 +59,14 @@ def test_create_responses_with_multiple_questions():
 def test_create_response_with_wrong_value():
     with pytest.raises(ValueError, match="Value 10 is not valid for question type text. Expected <class 'str'>."):
         ResponseSchema(status="draft", values=[TextQuestion(name="text").response(10)])
+
+
+def test_response_to_server_payload_with_string_status():
+    assert ResponseSchema(status="draft").to_server_payload() == {"user_id": None, "status": "draft"}
+
+
+def test_response_to_server_payload_with_no_values():
+    assert ResponseSchema().to_server_payload() == {"user_id": None, "status": "submitted"}
+    assert ResponseSchema(values=None).to_server_payload() == {"user_id": None, "status": "submitted", "values": None}
+    assert ResponseSchema(values=[]).to_server_payload() == {"user_id": None, "status": "submitted", "values": {}}
+    assert ResponseSchema(values={}).to_server_payload() == {"user_id": None, "status": "submitted", "values": {}}
