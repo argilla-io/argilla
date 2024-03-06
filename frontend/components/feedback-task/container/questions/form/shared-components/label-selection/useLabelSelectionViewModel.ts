@@ -1,5 +1,11 @@
 import { watch, ref } from "vue-demi";
 
+declare global {
+  interface Window {
+    questionSettings: Record<string, { isExpandedLabelQuestions: boolean }>;
+  }
+}
+
 const getQuestionSetting = (id: string) => {
   if (!window.questionSettings) {
     window.questionSettings = {};
@@ -14,7 +20,7 @@ const getQuestionSetting = (id: string) => {
   return window.questionSettings[id].isExpandedLabelQuestions;
 };
 
-const setQuestionSetting = (id: string, value: unknown) => {
+const setQuestionSetting = (id: string, value: boolean) => {
   window.questionSettings[id].isExpandedLabelQuestions = value;
 };
 
