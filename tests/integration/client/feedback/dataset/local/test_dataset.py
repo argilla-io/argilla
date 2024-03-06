@@ -79,6 +79,7 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
 
     assert rg_dataset.id
     assert rg_dataset.questions[0].name == "spans"
+    assert rg_dataset.questions[0].field == "text"
     assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
 
 
@@ -577,6 +578,10 @@ def test_push_to_huggingface_and_from_huggingface(
             hf_response.dict() == response.dict()
             for hf_response, response in zip(hf_record.responses, record.responses)
         )
+        assert all(
+            hf_suggestion.dict() == suggestion.dict()
+            for hf_suggestion, suggestion in zip(hf_record.suggestions, record.suggestions)
+        ), f"{[s.dict() for s in hf_record.suggestions]} != {[s.dict() for s in record.suggestions]}"
 
     dataset.add_records(
         records=[
