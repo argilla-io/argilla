@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import List, TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import ResponseStatus
