@@ -66,11 +66,3 @@ class SuggestionSchema(BaseModel):
         payload["question_id"] = str(question_name_to_id[self.question_name])
 
         return payload
-
-    @classmethod
-    def with_question_value(cls, question: "QuestionSchema", value: ResponseValue, **kwargs) -> "SuggestionSchema":
-        """Method to create a `SuggestionBuilder` from a `QuestionSchema` instance."""
-        value = parse_value_response_for_question(question, value)
-        question_name = question.name
-
-        return cls(question_name=question_name, value=value, **kwargs)

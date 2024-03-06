@@ -89,17 +89,6 @@ class ResponseSchema(BaseModel):
         extra = Extra.forbid
         validate_assignment = True
 
-    def with_question_value(self, question: "QuestionSchema", value: ResponseValue) -> "ResponseSchema":
-        """Returns the response value for the given record."""
-        value = parse_value_response_for_question(question, value)
-
-        values = self.values or {}
-        values[question.name] = ValueSchema(value=value)
-
-        self.values = values
-
-        return self
-
     def to_server_payload(self) -> Dict[str, Any]:
         """Method that will be used to create the payload that will be sent to Argilla
         to create a `ResponseSchema` for a `FeedbackRecord`."""
