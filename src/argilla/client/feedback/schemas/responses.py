@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import List, TYPE_CHECKING, Any, Dict, Optional, Union
 from uuid import UUID
 
 from argilla.client.feedback.schemas.enums import ResponseStatus
@@ -60,8 +60,14 @@ class ResponseSchema(BaseModel):
     """
 
     user_id: Optional[UUID] = None
-    values: Union[Dict[str, ValueSchema], None]
+    values: Union[List[Dict[str, ValueSchema]], Dict[str, ValueSchema], None]
     status: Union[ResponseStatus, str] = ResponseStatus.submitted
+
+    @validator("values", always=True)
+    def normalize_values(cls, values):
+        if isinstance(values, list) and all(isinstance(value, dict) for value in values):
+            return {k: v for value in values for k, v in value.items()}
+        return values
 
     @validator("status")
     def normalize_status(cls, v) -> ResponseStatus:
