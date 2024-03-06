@@ -125,7 +125,7 @@ export default {
     position: absolute;
     display: block;
     margin-top: 20px;
-    line-height: 1;
+    line-height: 1.2;
     @include font-size(11px);
   }
   &:hover {
