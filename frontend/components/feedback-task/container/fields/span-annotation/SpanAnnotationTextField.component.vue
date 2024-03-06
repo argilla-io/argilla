@@ -21,7 +21,7 @@
         class="span-annotation__field"
         ref="spanAnnotationField"
         :id="title"
-        v-text="fieldText"
+        v-html="fieldText"
         @mousedown="drag = mouseDown = true"
         @mouseup="mouseDown = false"
         @mousemove="showShortcutsHelper(mouseDown)"
@@ -169,7 +169,7 @@ export default {
   opacity: 0;
 }
 
-::selection {
+.span-annotation__field::selection {
   background-color: v-bind("selectedEntityColor");
 }
 
