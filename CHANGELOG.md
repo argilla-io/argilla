@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
 
+### Fixed
+
+- Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
+
 ## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
 
 > [!NOTE]

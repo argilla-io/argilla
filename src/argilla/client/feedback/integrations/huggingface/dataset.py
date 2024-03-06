@@ -148,7 +148,7 @@ class HuggingFaceDatasetMixin:
                 if record.suggestions:
                     for suggestion in record.suggestions:
                         if question.name == suggestion.question_name:
-                            suggestion_value = suggestion.value
+                            suggestion_value = suggestion.dict(include={"value"})["value"]
                             suggestion_metadata = {
                                 "type": suggestion.type,
                                 "score": suggestion.score,
