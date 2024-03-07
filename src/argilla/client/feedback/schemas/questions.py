@@ -353,7 +353,13 @@ class SpanQuestion(QuestionSchema):
     type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
 
     field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
-    labels: conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)
+    labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
+
+    @validator("labels", pre=True)
+    def parse_labels_dict(cls, labels) -> List[SpanLabelOption]:
+        if isinstance(labels, dict):
+            return [SpanLabelOption(value=label, text=text) for label, text in labels.items()]
+        return labels
 
     @validator("labels", always=True)
     def normalize_labels(cls, v: List[Union[str, SpanLabelOption]]) -> List[SpanLabelOption]:
