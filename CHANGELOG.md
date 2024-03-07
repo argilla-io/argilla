@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+-If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process ([#4630](https://github.com/argilla-io/argilla/pull/4630))
+
 ### Fixed
 
 - Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
@@ -39,7 +43,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
-- Fixed redirect to `user-settings` instead of 404 `user_settings`  ([#4609](https://github.com/argilla-io/argilla/pull/4609))
+- Fixed redirect to `user-settings` instead of 404 `user_settings` ([#4609](https://github.com/argilla-io/argilla/pull/4609))
 
 ## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
