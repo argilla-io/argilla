@@ -85,8 +85,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   onMounted(() => {
-    selectEntity(answer.options[0]);
-
     const spansToLoad = answer.valuesAnswered.map((v) => ({
       entity: answer.options.find((e) => e.value === v.label),
       from: v.start,
