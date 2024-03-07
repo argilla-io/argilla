@@ -97,7 +97,6 @@ export default {
     fill: black;
     stroke: v-bind(cursorColor);
     filter: drop-shadow(0 0 1px white);
-    // box-shadow: 0 0 0 2px v-bind(cursorColor);
   }
   &.message {
     z-index: 200;
@@ -113,7 +112,7 @@ export default {
       padding: 0 calc($base-space / 2);
       border-radius: $border-radius;
       box-shadow: $shadow;
-      background: palette(grey, 600);
+      background: palette(white);
       @include font-size(12px);
     }
   }

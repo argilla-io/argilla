@@ -22,9 +22,9 @@
         ref="spanAnnotationField"
         :id="title"
         v-html="fieldText"
-        @mousedown="drag = mouseDown = true"
-        @mouseup="mouseDown = false"
-        @mousemove="showShortcutsHelper(mouseDown)"
+        @mousedown="mouseDown = true"
+        @mouseup="onMouseUp(false)"
+        @mousemove="onMouseMove(mouseDown)"
       />
       <SpanAnnotationCursor
         cursor-area-ref="spanAnnotationField"
@@ -65,6 +65,7 @@ export default {
       visibleShortcutsHelper: false,
       usedCharacterAnnotation: false,
       mouseDown: false,
+      mouseTimeout: null,
     };
   },
   computed: {
@@ -97,6 +98,16 @@ export default {
     showShortcutsHelper(value) {
       if (this.usedCharacterAnnotation) return;
       this.visibleShortcutsHelper = value;
+    },
+    onMouseUp(value) {
+      this.mouseDown = value;
+      if (this.mouseTimeout) clearTimeout(this.mouseTimeout);
+      this.showShortcutsHelper(value);
+    },
+    onMouseMove(value) {
+      this.mouseTimeout = setTimeout(() => {
+        if (this.mouseDown) this.showShortcutsHelper(value);
+      }, 500);
     },
   },
   mounted() {
