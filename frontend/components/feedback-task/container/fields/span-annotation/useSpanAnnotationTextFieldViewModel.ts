@@ -59,12 +59,16 @@ export const useSpanAnnotationTextFieldViewModel = ({
     })
   );
 
+  const updateSelectedEntity = () => {
+    const selected = answer.options.find((e) => e.isSelected);
+
+    selectEntity(selected);
+  };
+
   watch(
     () => answer.options,
     () => {
-      const selected = answer.options.find((e) => e.isSelected);
-
-      selectEntity(selected);
+      updateSelectedEntity();
     },
     { deep: true }
   );
@@ -85,6 +89,8 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   onMounted(() => {
+    updateSelectedEntity();
+
     const spansToLoad = answer.valuesAnswered.map((v) => ({
       entity: answer.options.find((e) => e.value === v.label),
       from: v.start,

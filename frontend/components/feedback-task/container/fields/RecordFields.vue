@@ -1,21 +1,18 @@
 <template>
   <div class="fields">
-    <div
-      v-for="{ id, title, content, isTextType, settings } in fields"
-      :key="id"
-    >
+    <div v-for="{ id, name, title, content, settings } in fields" :key="id">
+      <SpanAnnotationTextFieldComponent
+        v-if="hasSpanQuestion(name)"
+        :title="title"
+        :fieldText="content"
+        :spanQuestion="getSpanQuestion(name)"
+      />
       <TextFieldComponent
-        v-if="isTextType && !spanQuestion"
+        v-else
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :stringToHighlight="searchValue"
-      />
-      <SpanAnnotationTextFieldComponent
-        v-else
-        :title="title"
-        :fieldText="content"
-        :spanQuestion="spanQuestion"
       />
     </div>
   </div>
@@ -27,8 +24,17 @@ export default {
       type: Array,
       required: true,
     },
-    spanQuestion: {
-      type: Object,
+    spanQuestions: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  methods: {
+    getSpanQuestion(fieldName) {
+      return this.spanQuestions.find((q) => q.settings.field === fieldName);
+    },
+    hasSpanQuestion(fieldName) {
+      return !!this.getSpanQuestion(fieldName);
     },
   },
   computed: {
