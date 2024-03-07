@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 import datetime
-import random
-from typing import TYPE_CHECKING, Generator, List
-
 import pytest
+import random
+from datasets import Dataset
+from typing import Generator, List, TYPE_CHECKING
+
+from argilla import SpanQuestion
 from argilla.client.api import log
 from argilla.client.datasets import read_datasets
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
@@ -57,8 +59,6 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.singleton import init
 from argilla_server.models import User
-from datasets import Dataset
-
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
@@ -416,6 +416,7 @@ def feedback_dataset_questions() -> List["AllowedQuestionTypes"]:
         LabelQuestion(name="question-3", labels=["a", "b", "c"], required=True),
         MultiLabelQuestion(name="question-4", labels=["a", "b", "c"], required=True),
         RankingQuestion(name="question-5", values=["a", "b"], required=True),
+        SpanQuestion(name="question-6", field="text", labels=["a", "b"], required=False),
     ]
 
 
@@ -461,6 +462,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-3": {"value": "a"},
                         "question-4": {"value": ["a", "b"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        "question-6": {"value": [{"start": 0, "end": 4, "label": "a"}]},
                     },
                     "status": "submitted",
                 },
@@ -485,6 +487,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-5": {
                             "value": [RankingValueSchema(rank=1, value="a"), RankingValueSchema(rank=2, value="b")]
                         },
+                        "question-6": {"value": [{"start": 0, "end": 4, "label": "a"}]},
                     },
                     "status": "submitted",
                 }
@@ -525,6 +528,13 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "score": 0.0,
                     "agent": "agent-1",
                 },
+                {
+                    "question_name": "question-6",
+                    "value": [{"start": 0, "end": 4, "label": "a"}],
+                    "type": "human",
+                    "score": 0.0,
+                    "agent": "agent-1",
+                }
             ],
             external_id="3",
         ),
@@ -538,6 +548,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                         "question-3": {"value": "c"},
                         "question-4": {"value": ["a", "c"]},
                         "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+                        "question-6": {"value": [{"start": 0, "end": 4, "label": "a"}]},
                     },
                     "status": "submitted",
                 }
