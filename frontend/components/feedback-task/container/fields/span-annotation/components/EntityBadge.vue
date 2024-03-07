@@ -7,22 +7,10 @@
     :is="renderComponent"
     @click="onClick($event)"
     ><span class="badge__text">{{ text }}</span>
-    <BaseButton
-      v-if="clearable"
-      class="badge__close-button"
-      @click="onClear($event)"
-    >
-      <svgicon
-        class="badge__close-button__icon"
-        name="close"
-        width="10"
-        height="10"
-    /></BaseButton>
   </component>
 </template>
 
 <script>
-import "assets/icons/close";
 export default {
   props: {
     text: {
@@ -96,18 +84,6 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     text-transform: uppercase;
-  }
-  &__close-button {
-    padding: 0;
-    flex-shrink: 0;
-    border-radius: 0;
-    &__icon {
-      min-width: 10px;
-      color: $black-54;
-      &:hover {
-        color: $black-87;
-      }
-    }
   }
 }
 </style>

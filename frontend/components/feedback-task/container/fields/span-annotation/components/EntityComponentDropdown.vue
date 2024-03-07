@@ -10,7 +10,6 @@
         class="span-entity__badge--active"
         :color="selectedOption.color"
         :text="selectedOption.text"
-        @on-clear="removeSelectedOption(selectedOption)"
       ></EntityBadge>
       <input
         ref="search"
@@ -86,9 +85,6 @@ export default {
   methods: {
     selectOption(option) {
       this.$emit("on-replace-option", option);
-    },
-    removeSelectedOption() {
-      this.$emit("on-remove-option");
     },
     includePreselectedOption() {
       if (!this.filteredOptions.length) return;

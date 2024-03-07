@@ -7,6 +7,16 @@
   >
     <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
       {{ selectedOption.text }}
+      <BaseButton
+        class="span-entity__close-button"
+        @click="removeSelectedOption"
+      >
+        <svgicon
+          class="span-entity__close-button__icon"
+          name="close"
+          width="10"
+          height="10"
+      /></BaseButton>
     </div>
     <EntityComponentDropdown
       v-else
@@ -24,6 +34,8 @@
 </template>
 
 <script>
+import "assets/icons/close";
+
 export default {
   name: "EntityComponent",
   props: {
@@ -113,6 +125,8 @@ export default {
 <style lang="scss" scoped>
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
 .span-entity {
+  display: flex;
+  gap: 2px;
   margin-top: -1px;
   max-width: v-bind("entityPosition.width");
   min-width: 10px;
@@ -134,6 +148,23 @@ export default {
     z-index: 1;
     background: v-bind("selectedOption.color");
     transition: background 0.3s;
+
+    > button {
+      opacity: 1;
+    }
+  }
+  &__close-button {
+    opacity: 0;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 0;
+    &__icon {
+      min-width: 10px;
+      color: $black-54;
+      &:hover {
+        color: $black-87;
+      }
+    }
   }
 }
 </style>
