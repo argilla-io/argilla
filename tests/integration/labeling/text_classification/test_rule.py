@@ -30,7 +30,7 @@ from argilla.labeling.text_classification import (
     update_rules,
 )
 from argilla.labeling.text_classification.rule import RuleNotAppliedError
-from argilla.server.errors import EntityNotFoundError
+from argilla_server.errors import EntityNotFoundError
 
 from tests.integration.helpers import SecuredClient
 from tests.integration.utils import delete_ignoring_errors

@@ -124,9 +124,6 @@ export default {
       h4 {
         margin: 0;
       }
-      p {
-        color: $black-54;
-      }
       .badge {
         margin-inline: 0 auto;
       }

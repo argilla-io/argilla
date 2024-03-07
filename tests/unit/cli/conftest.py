@@ -18,7 +18,7 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from argilla.__main__ import app
+from argilla.cli.app import app
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User

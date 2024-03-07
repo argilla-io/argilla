@@ -14,86 +14,126 @@
 
 
 import base64
+from unittest import mock
 
 import pytest
 from argilla.client.feedback.utils import (
     audio_to_html,
     create_token_highlights,
+    get_file_data,
     image_to_html,
+    is_valid_dimension,
     media_to_html,
+    pdf_to_html,
+    validate_media_type,
     video_to_html,
 )
 
 
 @pytest.mark.parametrize(
-    "media_type, source, file_type, expected",
+    "file_source, file_type, media_type, file_exists, file_size, expected_output, expected_exception",
     [
-        (
-            "audio",
-            "test.mp3",
-            None,
-            "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
-        ),
-        (
-            "video",
-            "test with space.mp4",
-            None,
-            "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>",
-        ),
-        (
-            "video",
-            "test.mp4",
-            "mp4",
-            "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>",
-        ),
-        ("video", "test.mp4", None, "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>"),
-        ("image", "test.png", None, '<img src="data:image/png;base64,{}">'),
-        ("video", "test.MP4", None, "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>"),
-        ("video", "test.avi", None, "Unsupported video type"),
-        ("audio", "test.aac", None, "Unsupported audio type"),
-        ("image", "test.bmp", None, "Unsupported image type"),
-        ("video", "non_existent.mp4", None, "non_existent.mp4 does not exist or is empty."),
-        ("video", "empty.mp4", None, "empty.mp4 does not exist or is empty."),
-        (
-            "video",
-            b"dummy_data",
-            "mp4",
-            "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>",
-        ),
-        (
-            "audio",
-            b"dummy_data",
-            "mp3",
-            "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
-        ),
-        ("video", b"dummy_data", "mp4", "It is recommended to use files smaller than 5MB,"),
+        ("path/to/image.jpg", "jpg", "image", True, 1000, (b"sample_data", "jpg"), None),
+        (b"image_data", "jpg", "image", None, None, (b"image_data", "jpg"), None),
+        ("path/to/video.mp4", "mp4", "video", True, 2000, (b"sample_data", "mp4"), None),
+        (b"video_data", None, "video", None, None, None, ValueError),
+        ("path/to/nonexistent.jpg", "jpg", "image", False, 0, None, FileNotFoundError),
+        ("path/to/large_file.mp4", "mp4", "video", True, 6_000_000, None, ValueError),
+        ("path/to/wrong_extension.txt", "jpg", "image", True, 1000, None, ValueError),
     ],
 )
-def test_media_to_html(media_type, source, file_type, expected, tmp_path):
-    if isinstance(source, bytes):
-        media_source = source
-        if "It is recommended" in expected:
-            media_source = media_source * 5000000
+@mock.patch("pathlib.Path.exists")
+@mock.patch("pathlib.Path.stat")
+@mock.patch("pathlib.Path.read_bytes")
+def test_get_file_data(
+    mock_read_bytes,
+    mock_stat,
+    mock_exists,
+    file_source,
+    file_type,
+    media_type,
+    file_exists,
+    file_size,
+    expected_output,
+    expected_exception,
+):
+    if isinstance(file_source, str):
+        mock_exists.return_value = file_exists
+        mock_stat.return_value = mock.Mock(st_size=file_size)
+        if expected_exception == ValueError and file_size > 5_000_000:
+            mock_read_bytes.return_value = b"a" * file_size
+        else:
+            mock_read_bytes.return_value = b"sample_data"
+
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            get_file_data(file_source, file_type, media_type)
     else:
-        temp_file = tmp_path / source
-        if "does not exist" not in expected:
-            temp_file.write_bytes(b"dummy_data" if not source.endswith("empty.mp4") else b"")
-        media_source = str(temp_file)
-
-    encoded_data = base64.b64encode(b"dummy_data").decode("utf-8")
-
-    if expected.startswith("<"):
-        expected = expected.format(encoded_data)
-
-    try:
-        result = media_to_html(media_type, media_source, file_type)
-        assert result == expected
-    except (ValueError, FileNotFoundError) as e:
-        assert expected in str(e)
+        assert get_file_data(file_source, file_type, media_type) == expected_output
 
 
 @pytest.mark.parametrize(
-    "func, path, expected",
+    "media_type, file_source, file_type, width, height, autoplay, loop, is_valid_dim, file_data, expected_output, expected_exception",
+    [
+        (
+            "image",
+            "path/to/image.jpg",
+            "jpeg",
+            "300px",
+            "200px",
+            False,
+            False,
+            True,
+            b"image_data",
+            '<img src="data:image/jpeg;base64,aW1hZ2VfZGF0YQ==" width=300px height=200px>',
+            None,
+        ),
+        (
+            "video",
+            b"video_data",
+            "mp4",
+            None,
+            None,
+            True,
+            True,
+            True,
+            b"video_data",
+            "<video controls autoplay loop><source src='data:video/mp4;base64,dmlkZW9fZGF0YQ==' type='video/mp4'></video>",
+            None,
+        ),
+        ("audio", "path/to/audio.mp3", "mp3", "100%", "invalid", False, False, False, b"audio_data", None, ValueError),
+        ("document", "path/to/doc.txt", "txt", None, None, False, False, True, b"doc_data", None, ValueError),
+    ],
+)
+@mock.patch("argilla.client.feedback.utils.html_utils.get_file_data")
+@mock.patch("argilla.client.feedback.utils.html_utils.is_valid_dimension")
+def test_media_to_html(
+    mock_is_valid_dimension,
+    mock_get_file_data,
+    media_type,
+    file_source,
+    file_type,
+    width,
+    height,
+    autoplay,
+    loop,
+    is_valid_dim,
+    file_data,
+    expected_output,
+    expected_exception,
+):
+    mock_is_valid_dimension.return_value = is_valid_dim
+    mock_get_file_data.return_value = (file_data, file_type)
+
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            media_to_html(media_type, file_source, file_type, width, height, autoplay, loop)
+    else:
+        assert media_to_html(media_type, file_source, file_type, width, height, autoplay, loop) == expected_output
+
+
+@pytest.mark.parametrize(
+    "func, input_file, expected",
     [
         (video_to_html, "test.mp4", "<video controls><source src='data:video/mp4;base64,{}' type='video/mp4'></video>"),
         (
@@ -102,15 +142,28 @@ def test_media_to_html(media_type, source, file_type, expected, tmp_path):
             "<audio controls><source src='data:audio/mp3;base64,{}' type='audio/mp3'></audio>",
         ),
         (image_to_html, "test.png", '<img src="data:image/png;base64,{}">'),
+        (
+            pdf_to_html,
+            "test.pdf",
+            '<object id="pdf" data="data:application/pdf;base64,{}" type="application/pdf" width="1000px" height="1000px"><p>Unable to display PDF.</p></object>',
+        ),
+        (
+            pdf_to_html,
+            "https://my_pdf.pdf",
+            '<embed src="https://my_pdf.pdf" type="application/pdf" width="1000px" height="1000px"></embed>',
+        ),
     ],
 )
-def test_wrappers(func, path, expected, tmp_path):
-    temp_file = tmp_path / path
-    temp_file.write_bytes(b"dummy_data")
-    encoded_data = base64.b64encode(b"dummy_data").decode("utf-8")
-    expected_html = expected.format(encoded_data)
-
-    assert func(str(temp_file)) == expected_html
+def test_wrappers(func, input_file, expected, tmp_path):
+    if "https://" in input_file:
+        encoded_data = input_file
+        assert func(encoded_data) == expected.format(encoded_data)
+    else:
+        temp_file = tmp_path / input_file
+        temp_file.write_bytes(b"dummy_data")
+        encoded_data = base64.b64encode(b"dummy_data").decode("utf-8")
+        expected_html = expected.format(encoded_data)
+        assert func(str(temp_file)) == expected_html
 
 
 @pytest.mark.parametrize(

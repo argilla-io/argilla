@@ -105,6 +105,9 @@ export default {
   box-shadow: none;
   pointer-events: all;
   transition: box-shadow 0.2s ease-in-out 0.4s;
+  @include media("<=tablet") {
+    display: none;
+  }
   .--metrics & {
     box-shadow: inset 1px 1px 5px -2px #c7c7c7;
     transition: box-shadow 0.2s ease-in-out;

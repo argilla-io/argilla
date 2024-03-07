@@ -94,7 +94,7 @@ export default {
 .similarity__progress {
   &[data-title] {
     position: relative;
-    @include tooltip-mini("top", 2px);
+    @include tooltip-mini("bottom");
     cursor: default;
   }
 }

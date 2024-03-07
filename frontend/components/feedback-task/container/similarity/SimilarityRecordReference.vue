@@ -77,7 +77,6 @@ export default {
   &__wrapper {
     display: flex;
     flex-direction: column;
-    gap: $base-space;
     &--expanded {
       @extend .record-reference__wrapper;
       .record-reference {

@@ -8,9 +8,6 @@
           "
           :recordCriteria="recordCriteria"
       /></DatasetFiltersComponent>
-      <div class="wrapper__records__header">
-        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
-      </div>
       <SimilarityRecordReference
         v-show="recordCriteria.isFilteringBySimilarity"
         v-if="!!records.reference"
@@ -18,6 +15,9 @@
         :recordCriteria="recordCriteria"
         :availableVectors="datasetVectors"
       />
+      <div class="wrapper__records__header">
+        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+      </div>
       <Record
         v-if="records.hasRecordsToAnnotate"
         :datasetVectors="datasetVectors"
@@ -40,6 +40,7 @@
       :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
+      :enableAutoSubmitWithKeyboard="true"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
       @on-save-draft="onSaveDraft"
@@ -110,7 +111,7 @@ export default {
   &__form {
     @include media("<desktop") {
       overflow: visible;
-      height: auto;
+      height: auto !important;
       max-height: none !important;
     }
   }
@@ -121,6 +122,10 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
+    @include media("<desktop") {
+      flex: 0;
+      height: auto;
+    }
     &__header {
       display: flex;
       justify-content: flex-end;

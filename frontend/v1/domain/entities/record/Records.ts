@@ -50,9 +50,6 @@ export class Records {
       committed,
     } = criteria;
 
-    if (page.isBulkMode && committed.page.isFocusMode) return;
-    if (page.isFocusMode && committed.page.isBulkMode) return;
-
     if (isFilteringBySimilarity) {
       return page.synchronizePagination({
         from: 1,
@@ -60,12 +57,15 @@ export class Records {
       });
     }
 
+    if (page.isBulkMode && committed.page.isFocusMode) return;
+    if (page.isFocusMode && committed.page.isBulkMode) return;
+
     if (this.hasRecordsToAnnotate) {
       const isMovingForward = page.client.page > this.lastRecord.page;
 
-      if (isMovingForward) {
-        const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
+      const recordsAnnotated = this.recordsAnnotatedOnQueue(status);
 
+      if (isMovingForward) {
         return page.synchronizePagination({
           from: this.lastRecord.page + 1 - recordsAnnotated,
           many: page.client.many,

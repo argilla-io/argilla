@@ -43,3 +43,7 @@ This will run the latest quickstart docker image with 3 users `owner`, `admin` a
     1. `single`: Load single datasets for Feedback task.
     2. `full`: Load all the sample datasets for NLP tasks (Feedback, TokenClassification, TextClassification, Text2Text)
     3. `none`: No datasets are loaded.
+- `REINDEX_DATASETS`: This variable will allow you to reindex the datasets. This must be done when a new version includes changes in the search index definition.
+  The default value will be `false`. The supported values for this variable are as follows:
+    1. `true`: Reindex the datasets.
+    2. `false`: Do not reindex the datasets.

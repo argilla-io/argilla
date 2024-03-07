@@ -34,12 +34,12 @@ const actions = {
         onClick() {
           actions.clear();
 
-          onClick();
+          if (onClick) onClick();
         },
         onClose() {
           actions.clear();
 
-          onClose();
+          if (onClose) onClose();
         },
         type: type || "default",
       });
