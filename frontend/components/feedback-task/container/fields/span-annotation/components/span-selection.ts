@@ -2,6 +2,7 @@ export type Entity = {
   id: string;
   value: string;
   text: string;
+  className: string;
 };
 
 export type TextSelection = {
@@ -27,7 +28,7 @@ export type Span = {
   };
 };
 
-type Configuration = {
+export type Configuration = {
   allowOverlap: boolean;
   allowCharacter: boolean;
 };
@@ -51,12 +52,7 @@ export class SpanSelection {
     return [...this.selections];
   }
 
-  config: Configuration = {
-    allowOverlap: false,
-    allowCharacter: false,
-  };
-
-  public addSpan(selection?: TextSelection) {
+  public addSpan(selection?: TextSelection, config?: Configuration) {
     if (!selection) return;
     if (this.isOutOfRange(selection)) return;
 
@@ -64,7 +60,7 @@ export class SpanSelection {
       (s) => s.node.id === selection.node.id
     );
 
-    if (!this.config.allowCharacter) {
+    if (!config?.allowCharacter) {
       if (this.isEmpty(selection.text)) return;
 
       this.completeLeftSide(selection);
@@ -72,7 +68,7 @@ export class SpanSelection {
       this.completeRightSide(selection);
     }
 
-    if (!this.config.allowOverlap) {
+    if (!config?.allowOverlap) {
       const overlaps = this.selections.filter((s) => {
         return (
           (selection.from <= s.from && selection.to >= s.to) ||

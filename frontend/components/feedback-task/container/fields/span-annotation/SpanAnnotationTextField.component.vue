@@ -1,5 +1,5 @@
 <template>
-  <div class="text_field_component" :key="fieldText">
+  <div class="text_field_component" :key="name">
     <div class="title-area --body2">
       <span class="text_field_component__title-content" v-text="title" />
       <BaseActionTooltip
@@ -20,7 +20,7 @@
       <p
         class="span-annotation__field"
         ref="spanAnnotationField"
-        :id="title"
+        :id="name"
         v-html="fieldText"
         @mousedown="mouseDown = true"
         @mouseup="onMouseUp(false)"
@@ -48,6 +48,10 @@ import { useSpanAnnotationTextFieldViewModel } from "./useSpanAnnotationTextFiel
 export default {
   name: "SpanAnnotationTextFieldComponent",
   props: {
+    name: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -96,6 +100,8 @@ export default {
       }
     },
     showShortcutsHelper(value) {
+      if (!this.spanQuestion.settings.allow_character_annotation) return;
+
       if (this.usedCharacterAnnotation) return;
       this.visibleShortcutsHelper = value;
     },
@@ -109,20 +115,24 @@ export default {
         if (this.mouseDown) this.showShortcutsHelper(value);
       }, 500);
     },
+    onKeyDown(event) {
+      if (!this.spanQuestion.settings.allow_character_annotation) return;
+
+      this.keyPressing(event, true);
+    },
+    onKeyUp(event) {
+      if (!this.spanQuestion.settings.allow_character_annotation) return;
+
+      this.keyPressing(event, false);
+    },
   },
   mounted() {
-    window.addEventListener("keydown", (event) =>
-      this.keyPressing(event, true)
-    );
-    window.addEventListener("keyup", (event) => this.keyPressing(event, false));
+    window.addEventListener("keydown", this.onKeyDown);
+    window.addEventListener("keyup", this.onKeyUp);
   },
   destroyed() {
-    window.removeEventListener("keydown", (event) =>
-      this.keyPressing(event, true)
-    );
-    window.removeEventListener("keyup", (event) =>
-      this.keyPressing(event, false)
-    );
+    window.removeEventListener("keydown", this.onKeyDown);
+    window.removeEventListener("keyup", this.onKeyUp);
   },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);

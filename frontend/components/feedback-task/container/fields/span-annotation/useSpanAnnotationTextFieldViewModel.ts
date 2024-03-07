@@ -9,10 +9,10 @@ import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
-  title,
+  name,
 }: {
   spanQuestion: Question;
-  title: string;
+  name: string;
 }) => {
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
@@ -54,7 +54,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(title, answer.options, entityComponentFactory, {
+    new Highlighting(name, answer.options, entityComponentFactory, {
       entitiesGap: 9,
     })
   );
@@ -76,11 +76,13 @@ export const useSpanAnnotationTextFieldViewModel = ({
   watch(
     () => highlighting.value.spans,
     (spans) => {
-      const response: SpanAnswer[] = spans.map((s) => ({
-        start: s.from,
-        end: s.to,
-        label: s.entity.value,
-      }));
+      const response: SpanAnswer[] = spans
+        .filter((s) => answer.options.some((o) => o.id === s.entity.id))
+        .map((s) => ({
+          start: s.from,
+          end: s.to,
+          label: s.entity.value,
+        }));
 
       spanQuestion.response({
         value: response,

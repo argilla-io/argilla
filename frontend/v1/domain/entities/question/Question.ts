@@ -191,7 +191,6 @@ export class Question {
     if (this.isSpanType) {
       return new SpanQuestionAnswer(
         this.type,
-        this.settings.field,
         this.name,
         this.settings.options
       );

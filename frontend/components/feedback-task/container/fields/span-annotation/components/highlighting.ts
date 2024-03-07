@@ -3,6 +3,7 @@ import {
   type TextSelection,
   type Entity,
   SpanSelection,
+  Configuration,
 } from "./span-selection";
 
 export type Position = { top: string; left: string };
@@ -23,9 +24,6 @@ type Dictionary<V> = {
 };
 
 type Styles = {
-  /** Is the Highlight CSS class name for each entity */
-  entitiesCSS?: Dictionary<string>;
-
   /** This gap is used to separate spans vertically when allow overlap is true */
   entitiesGap?: number;
 
@@ -40,38 +38,41 @@ export class Highlighting {
   private entity: Entity = null;
 
   private scrollingElement: HTMLElement;
+  private readonly entitiesCSS: {};
 
   constructor(
     private readonly nodeId: string,
-    private readonly entities: Entity[],
+    entities: Omit<Entity, "className">[],
     private readonly EntityComponentConstructor: (
       selectedEntity: Entity,
       entityPosition: Position,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
-    styles: Styles
+    styles: Styles & { entitiesCSS?: Dictionary<string> }
   ) {
-    const entitiesCSS = entities.reduce((acc, entity) => {
-      acc[entity.id] = `hl-${entity.id}`;
+    this.entitiesCSS =
+      styles.entitiesCSS ??
+      entities.reduce((acc, entity) => {
+        acc[entity.id] = `hl-${entity.id}`;
 
-      return acc;
-    }, {});
+        return acc;
+      }, {});
 
     this.styles = {
       entitiesGap: 8,
       spanContainerId: `entity-span-container-${nodeId}`,
-      entitiesCSS,
       ...styles,
     };
   }
 
+  config: Configuration = {
+    allowOverlap: false,
+    allowCharacter: false,
+  };
+
   get spans() {
     return [...this.spanSelection.spans];
-  }
-
-  get config() {
-    return this.spanSelection.config;
   }
 
   private get entitySpanContainer() {
@@ -86,7 +87,7 @@ export class Highlighting {
     return node;
   }
 
-  mount(selections: Omit<Span, "text" | "node">[] = []) {
+  mount(selections: any[] = []) {
     if (!CSS.highlights) {
       throw new Error(
         "The CSS Custom Highlight API is not supported in this browser!"
@@ -119,6 +120,10 @@ export class Highlighting {
 
     const loaded: Span[] = selections.map((s) => ({
       ...s,
+      entity: {
+        ...s.entity,
+        className: this.entitiesCSS[s.entity.id],
+      },
       text: "",
       node: {
         element: this.node.firstChild,
@@ -132,11 +137,14 @@ export class Highlighting {
   }
 
   allowCharacterAnnotation(value: boolean) {
-    this.spanSelection.config.allowCharacter = value;
+    this.config.allowCharacter = value;
   }
 
   replaceEntity(span: Span, entity: Entity) {
-    this.spanSelection.replaceEntity(span, entity);
+    this.spanSelection.replaceEntity(span, {
+      ...entity,
+      className: this.entitiesCSS[entity.id],
+    });
     this.applyStyles();
   }
 
@@ -181,7 +189,7 @@ export class Highlighting {
 
   private highlightUserSelection() {
     const textSelection = this.createTextSelection();
-    this.spanSelection.addSpan(textSelection);
+    this.spanSelection.addSpan(textSelection, this.config);
   }
 
   private getSelectedText() {
@@ -192,6 +200,7 @@ export class Highlighting {
 
   private applyStyles() {
     if (!CSS.highlights) return;
+
     this.applyHighlightStyle();
     this.applyEntityStyle();
   }
@@ -201,19 +210,17 @@ export class Highlighting {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      if (!highlights[span.entity.id]) highlights[span.entity.id] = [];
+      const className = span.entity.className;
+
+      if (!highlights[className]) highlights[className] = [];
 
       const range = this.createRange(span);
 
-      highlights[span.entity.id].push(range);
+      highlights[className].push(range);
     }
 
-    for (const highlight of Object.entries(highlights)) {
-      const [entity, selections] = highlight;
-      const { entitiesCSS } = this.styles;
-      const className = entitiesCSS[entity as keyof typeof entitiesCSS];
-
-      CSS.highlights.set(className, new Highlight(...selections.flat()));
+    for (const [entity, selections] of Object.entries(highlights)) {
+      CSS.highlights.set(entity, new Highlight(...selections.flat()));
     }
   }
 
@@ -228,7 +235,10 @@ export class Highlighting {
     }
 
     for (const span of this.spans) {
-      const { entity } = span;
+      const { entity, node } = span;
+
+      if (node.id !== this.nodeId) continue;
+
       const rangePosition = this.createRange({
         ...span,
         to: span.from + 1,
@@ -291,7 +301,10 @@ export class Highlighting {
       from: Math.min(from, to),
       to: Math.max(from, to),
       text,
-      entity: this.entity,
+      entity: {
+        ...this.entity,
+        className: this.entitiesCSS[this.entity.id],
+      },
       node: {
         id: this.nodeId,
         element: selection.focusNode,

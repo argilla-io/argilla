@@ -78,16 +78,13 @@ type Option = {
   isSelected: boolean;
 };
 
-type SpanLabelValue = Record<string, SpanAnswer[]>;
-
 export class SpanQuestionAnswer extends QuestionAnswer {
   public readonly options: Option[] = [];
-  public readonly values: SpanLabelValue = {};
+  public values: SpanAnswer[] = [];
 
   constructor(
     public readonly type: QuestionType,
-    private readonly fieldName: string,
-    questionName: string,
+    private questionName: string,
     options: Omit<Option, "isSelected" | "id">[]
   ) {
     super(type);
@@ -103,19 +100,19 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   }
 
   protected fill(answer: Answer) {
-    this.values[this.fieldName] = answer.value as SpanAnswer[];
+    this.values = answer.value as SpanAnswer[];
   }
 
   clear() {
-    this.values[this.fieldName] = [];
+    this.values = [];
   }
 
   get isValid(): boolean {
-    return this.values[this.fieldName].length > 0;
+    return this.values.length > 0;
   }
 
   get valuesAnswered(): SpanAnswer[] {
-    return this.values[this.fieldName];
+    return this.values;
   }
 
   matchSuggestion(_: Suggestion): boolean {

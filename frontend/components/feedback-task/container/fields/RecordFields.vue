@@ -3,6 +3,7 @@
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
       <SpanAnnotationTextFieldComponent
         v-if="hasSpanQuestion(name)"
+        :name="name"
         :title="title"
         :fieldText="content"
         :spanQuestion="getSpanQuestion(name)"
