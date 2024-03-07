@@ -5,11 +5,11 @@
     <LabelSelectionComponent
       :componentId="question.id"
       :suggestions="question.suggestion?.suggestedAnswer"
-      v-model="question.answer.values"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="true"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
+      v-model="question.answer.values"
       @on-focus="onFocus"
     />
   </div>
