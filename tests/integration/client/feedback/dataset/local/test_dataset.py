@@ -115,11 +115,7 @@ def test_add_records(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
     dataset = FeedbackDataset(
-        guidelines=feedback_dataset_guidelines,
-        fields=feedback_dataset_fields,
-        questions=feedback_dataset_questions
-        # fixtures are used in many tests, so we cannot add span questions without changing all those tests
-        + [SpanQuestion(name="question-6", field="text", labels=["a", "b"], required=False)],
+        guidelines=feedback_dataset_guidelines, fields=feedback_dataset_fields, questions=feedback_dataset_questions
     )
 
     assert dataset.records == []
@@ -404,6 +400,13 @@ async def test_push_to_argilla_and_from_argilla(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
+
+    question_1 = dataset.question_by_name("question-1")
+    question_2 = dataset.question_by_name("question-2")
+    question_3 = dataset.question_by_name("question-3")
+    question_4 = dataset.question_by_name("question-4")
+    question_5 = dataset.question_by_name("question-5")
+    question_6 = dataset.question_by_name("question-6")
     # Make sure UUID in `user_id` is pushed to Argilla with no issues as it should be
     # converted to a string
     dataset.add_records(
@@ -414,26 +417,28 @@ async def test_push_to_argilla_and_from_argilla(
                     "label": "F",
                 },
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 1},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 1},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=1),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                            question_6.response(value=[SpanValueSchema(start=0, end=1, label="a")]),
+                        ],
+                    ),
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=1),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                            question_6.response(value=[SpanValueSchema(start=0, end=1, label="a")]),
+                        ],
+                    ),
                 ],
             ),
         ]
@@ -630,26 +635,36 @@ def test_push_to_huggingface_and_from_huggingface(
             FeedbackRecord(
                 fields={"text": "This is a negative example", "label": "negative"},
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "This is a response to question 1"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "b"},
-                            "question-4": {"value": ["b", "c"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
-                    {
-                        "values": {
-                            "question-1": {"value": "This is a response to question 1"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "b"},
-                            "question-4": {"value": ["b", "c"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            dataset.question_by_name("question-1").response(value="This is a response to question 1"),
+                            dataset.question_by_name("question-2").response(value=0),
+                            dataset.question_by_name("question-3").response(value="b"),
+                            dataset.question_by_name("question-4").response(value=["b", "c"]),
+                            dataset.question_by_name("question-5").response(
+                                value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
+                            ),
+                            dataset.question_by_name("question-6").response(
+                                value=[SpanValueSchema(start=0, end=4, label="a")]
+                            ),
+                        ],
+                    ),
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            dataset.question_by_name("question-1").response(value="This is a response to question 1"),
+                            dataset.question_by_name("question-2").response(value=0),
+                            dataset.question_by_name("question-3").response(value="b"),
+                            dataset.question_by_name("question-4").response(value=["b", "c"]),
+                            dataset.question_by_name("question-5").response(
+                                value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
+                            ),
+                            dataset.question_by_name("question-6").response(
+                                value=[SpanValueSchema(start=0, end=4, label="a")]
+                            ),
+                        ],
+                    ),
                 ],
             ),
         ],
