@@ -11,12 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from copy import copy
-
 import json
 import logging
 import tempfile
 import warnings
+from copy import copy
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 
 from packaging.version import parse as parse_version

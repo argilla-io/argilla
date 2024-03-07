@@ -13,11 +13,10 @@
 #  limitations under the License.
 
 import datetime
-import pytest
 import random
-from datasets import Dataset
-from typing import Generator, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, List
 
+import pytest
 from argilla import SpanQuestion
 from argilla.client.api import log
 from argilla.client.datasets import read_datasets
@@ -59,6 +58,8 @@ from argilla.client.sdk.token_classification.models import (
 )
 from argilla.client.singleton import init
 from argilla_server.models import User
+from datasets import Dataset
+
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
@@ -534,7 +535,7 @@ def feedback_dataset_records() -> List[FeedbackRecord]:
                     "type": "human",
                     "score": 0.0,
                     "agent": "agent-1",
-                }
+                },
             ],
             external_id="3",
         ),
