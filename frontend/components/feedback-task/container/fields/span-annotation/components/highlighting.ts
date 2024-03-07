@@ -6,6 +6,8 @@ import {
   Configuration,
 } from "./span-selection";
 
+export type LoadedSpan = Omit<Span, "text" | "node">;
+
 export type Position = { top: string; left: string };
 
 declare class Highlight {
@@ -24,6 +26,9 @@ type Dictionary<V> = {
 };
 
 type Styles = {
+  /** Is the Highlight CSS class name for each entity, commonly would be 'hl' */
+  entityCssKey?: string;
+
   /** This gap is used to separate spans vertically when allow overlap is true */
   entitiesGap?: number;
 
@@ -36,40 +41,29 @@ export class Highlighting {
   private node: HTMLElement | undefined;
   private readonly styles: Required<Styles>;
   private entity: Entity = null;
-
   private scrollingElement: HTMLElement;
-  private readonly entitiesCSS: {};
+  private config: Configuration = {
+    allowOverlap: false,
+    allowCharacter: false,
+  };
 
   constructor(
     private readonly nodeId: string,
-    entities: Omit<Entity, "className">[],
     private readonly EntityComponentConstructor: (
-      selectedEntity: Entity,
+      entityId: string,
       entityPosition: Position,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
-    styles: Styles & { entitiesCSS?: Dictionary<string> }
+    styles?: Styles
   ) {
-    this.entitiesCSS =
-      styles.entitiesCSS ??
-      entities.reduce((acc, entity) => {
-        acc[entity.id] = `hl-${entity.id}`;
-
-        return acc;
-      }, {});
-
     this.styles = {
-      entitiesGap: 8,
+      entitiesGap: 9,
       spanContainerId: `entity-span-container-${nodeId}`,
+      entityCssKey: "hl",
       ...styles,
     };
   }
-
-  config: Configuration = {
-    allowOverlap: false,
-    allowCharacter: false,
-  };
 
   get spans() {
     return [...this.spanSelection.spans];
@@ -87,7 +81,7 @@ export class Highlighting {
     return node;
   }
 
-  mount(selections: any[] = []) {
+  mount(selections: LoadedSpan[] = []) {
     if (!CSS.highlights) {
       throw new Error(
         "The CSS Custom Highlight API is not supported in this browser!"
@@ -111,7 +105,7 @@ export class Highlighting {
     this.entity = entity;
   }
 
-  private loadHighlights(selections: Omit<Span, "text" | "node">[] = []) {
+  private loadHighlights(selections: LoadedSpan[]) {
     if (!this.node) {
       throw new Error(
         "Node not attached, use `attachNode` method with HTMLElement that contains the text to select"
@@ -120,10 +114,6 @@ export class Highlighting {
 
     const loaded: Span[] = selections.map((s) => ({
       ...s,
-      entity: {
-        ...s.entity,
-        className: this.entitiesCSS[s.entity.id],
-      },
       text: "",
       node: {
         element: this.node.firstChild,
@@ -136,15 +126,12 @@ export class Highlighting {
     this.applyStyles();
   }
 
-  allowCharacterAnnotation(value: boolean) {
-    this.config.allowCharacter = value;
+  allowCharacterAnnotation(allow: boolean) {
+    this.config.allowCharacter = allow;
   }
 
   replaceEntity(span: Span, entity: Entity) {
-    this.spanSelection.replaceEntity(span, {
-      ...entity,
-      className: this.entitiesCSS[entity.id],
-    });
+    this.spanSelection.replaceEntity(span, entity);
     this.applyStyles();
   }
 
@@ -210,7 +197,7 @@ export class Highlighting {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      const className = span.entity.className;
+      const className = `${this.styles.entityCssKey}-${span.entity.id}`;
 
       if (!highlights[className]) highlights[className] = [];
 
@@ -263,7 +250,7 @@ export class Highlighting {
       };
 
       const entityElement = this.EntityComponentConstructor(
-        entity,
+        entity.id,
         entityPosition,
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)
@@ -301,10 +288,7 @@ export class Highlighting {
       from: Math.min(from, to),
       to: Math.max(from, to),
       text,
-      entity: {
-        ...this.entity,
-        className: this.entitiesCSS[this.entity.id],
-      },
+      entity: this.entity,
       node: {
         id: this.nodeId,
         element: selection.focusNode,

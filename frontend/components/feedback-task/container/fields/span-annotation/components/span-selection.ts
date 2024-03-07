@@ -1,8 +1,5 @@
 export type Entity = {
   id: string;
-  value: string;
-  text: string;
-  className: string;
 };
 
 export type TextSelection = {

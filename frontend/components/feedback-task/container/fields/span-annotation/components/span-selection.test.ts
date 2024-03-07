@@ -1,13 +1,23 @@
 /* eslint-disable quotes */
 import {
+  Configuration,
   Span,
   SpanSelection as SpanSelectionBase,
   TextSelection,
 } from "./span-selection";
 
 class SpanSelection extends SpanSelectionBase {
+  config: Configuration = {
+    allowCharacter: false,
+    allowOverlap: false,
+  };
+
   public constructor() {
     super();
+  }
+
+  public addSpan(span: TextSelection): void {
+    super.addSpan(span, this.config);
   }
 }
 
@@ -58,9 +68,6 @@ const createTextSelection = (selection: TestSelection): TextSelection => {
     text: selection.text,
     entity: {
       id: selection.entity,
-      text: selection.entity,
-      value: selection.entity,
-      className: "hl-TOKEN",
     },
     node: {
       element: {} as HTMLElement,
@@ -77,9 +84,6 @@ const createSpan = (selection: TestSelection): Span => {
     text: selection.text,
     entity: {
       id: selection.entity,
-      text: selection.entity,
-      value: selection.entity,
-      className: "hl-TOKEN",
     },
     node: {
       element: {} as HTMLElement,
@@ -189,13 +193,11 @@ describe("Span Selection", () => {
       ],
     ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
       const spanSelection = new SpanSelection();
+      spanSelection.config.allowCharacter = true;
 
       const textSelection = createTextSelection(actual);
 
-      spanSelection.addSpan(textSelection, {
-        allowCharacter: true,
-        allowOverlap: false,
-      });
+      spanSelection.addSpan(textSelection);
 
       expect(spanSelection.spans[0]).toEqual(createSpan(expected));
     });
@@ -243,14 +245,12 @@ describe("Span Selection", () => {
       ],
     ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
       const spanSelection = new SpanSelection();
+      spanSelection.config.allowOverlap = true;
 
       actual.forEach((span) => {
         const textSelection = createTextSelection(span);
 
-        spanSelection.addSpan(textSelection, {
-          allowOverlap: true,
-          allowCharacter: false,
-        });
+        spanSelection.addSpan(textSelection);
       });
 
       expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
@@ -284,14 +284,13 @@ describe("Span Selection", () => {
       ],
     ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
       const spanSelection = new SpanSelection();
+      spanSelection.config.allowOverlap = true;
+      spanSelection.config.allowCharacter = true;
 
       actual.forEach((span) => {
         const textSelection = createTextSelection(span);
 
-        spanSelection.addSpan(textSelection, {
-          allowOverlap: true,
-          allowCharacter: true,
-        });
+        spanSelection.addSpan(textSelection);
       });
 
       expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
@@ -341,13 +340,10 @@ describe("Span Selection", () => {
       "%o %o",
       (actual: TestSelection) => {
         const spanSelection = new SpanSelection();
+        spanSelection.config.allowCharacter = false;
 
         const textSelection = createTextSelection(actual);
-
-        spanSelection.addSpan(textSelection, {
-          allowCharacter: false,
-          allowOverlap: false,
-        });
+        spanSelection.addSpan(textSelection);
 
         expect(spanSelection.spans).toEqual([]);
       }
@@ -402,7 +398,6 @@ describe("Span Selection", () => {
         id: "TOKEN-2",
         text: "TOKEN-2",
         value: "TOKEN-2",
-        className: "hl-TOKEN",
       };
 
       spanSelection.addSpan(textSelection);
@@ -442,9 +437,6 @@ describe("Span Selection", () => {
 
       spanSelection.replaceEntity(noExisting, {
         id: "TOKEN-2",
-        text: "TOKEN-2",
-        value: "TOKEN-2",
-        className: "hl-TOKEN",
       });
 
       expect(spanSelection.spans[0].entity.id).toEqual("TOKEN");
