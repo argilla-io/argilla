@@ -7,28 +7,37 @@
       <BaseBadge class="--capitalized" :text="userInfo.role" />
     </div>
 
-    <div class="form-group user-first_name">
-      <h2 class="--heading5 --medium description__title">Username</h2>
+    <ExtraUserInfo :userInfo="userInfo" />
+
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.fields.userName')"
+      />
       <p class="--body1 description__text" v-text="userInfo.username" />
     </div>
 
-    <div class="form-group user-first_name">
-      <h2 class="--heading5 --medium description__title">Name</h2>
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.fields.firstName')"
+      />
       <p class="--body1 description__text" v-text="userInfo.first_name" />
     </div>
 
-    <div class="form-group user-last_name">
-      <h2 class="--heading5 --medium description__title">Surname</h2>
-      <p
-        class="--body1 description__text"
-        v-if="userInfo.last_name"
-        v-text="userInfo.last_name"
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.fields.lastName')"
       />
-      <p class="--body1 description__text" v-else>-</p>
+      <p class="--body1 description__text" v-text="userInfo.last_name" />
     </div>
 
     <div class="form-group">
-      <h2 class="--heading5 --medium description__title">Workspaces</h2>
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.fields.workspaces')"
+      />
       <div class="workspaces" v-if="userInfo.workspaces.length">
         <BaseBadge
           v-for="workspace in userInfo.workspaces"
@@ -80,20 +89,6 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   padding-bottom: 0;
-}
-
-.user-first_name {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-last_name {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-username {
-  @include font-size(16px);
 }
 
 .description {
