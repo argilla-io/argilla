@@ -365,6 +365,12 @@ class SpanQuestion(QuestionSchema):
     def normalize_labels(cls, v: List[Union[str, SpanLabelOption]]) -> List[SpanLabelOption]:
         return [SpanLabelOption(value=label, text=label) if isinstance(label, str) else label for label in v]
 
+    @validator("labels")
+    def labels_must_be_valid(cls, labels: List[SpanLabelOption]) -> List[SpanLabelOption]:
+        # This validator is needed since the conlist constraint does not work.
+        assert len(labels) > 0, "At least one label must be provided"
+        return labels
+
     @property
     def server_settings(self) -> Dict[str, Any]:
         return {
