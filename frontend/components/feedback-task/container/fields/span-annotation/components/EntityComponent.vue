@@ -5,7 +5,11 @@
     ref="spanEntityRef"
     id="spanEntity"
   >
-    <div @click="toggleDropdown()" class="span-entity" v-if="!visibleDropdown">
+    <div
+      @click="singleOption && toggleDropdown()"
+      class="span-entity"
+      v-if="!visibleDropdown"
+    >
       {{ selectedOption.text }}
       <BaseButton
         class="span-entity__close-button"
@@ -66,6 +70,9 @@ export default {
     },
     options() {
       return this.spanQuestion.answer.options;
+    },
+    singleOption() {
+      return this.options.length === 1;
     },
   },
   methods: {
