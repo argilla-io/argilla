@@ -138,7 +138,7 @@ export default {
       this.showCursorWithEntity = true;
       setTimeout(() => {
         this.showCursorWithEntity = false;
-      }, 4000);
+      }, 3000);
     },
     onFieldMouseLeave() {
       this.showCursorWithEntity = false;
