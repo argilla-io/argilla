@@ -118,8 +118,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
   );
 
   onMounted(() => {
-    updateSelectedEntity();
-
     const spans = convertResponseToSpans(spanQuestion.answer.valuesAnswered);
 
     try {
