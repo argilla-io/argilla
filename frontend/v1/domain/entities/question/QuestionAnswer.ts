@@ -89,11 +89,11 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   ) {
     super(type);
 
-    this.options = options.map((e, i) => ({
+    this.options = options.map((e) => ({
       ...e,
       id: `${questionName}-${e.value}`,
       color: e.color ?? this.colorGenerator(e.value),
-      isSelected: i === 0,
+      isSelected: false,
     }));
 
     this.clear();

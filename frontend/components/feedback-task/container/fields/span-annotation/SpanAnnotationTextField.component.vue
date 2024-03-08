@@ -19,6 +19,7 @@
     <div class="content-area --body1">
       <p
         class="span-annotation__field"
+        :class="hasSelectedEntity ? 'span-annotation__field--active' : null"
         ref="spanAnnotationField"
         :id="name"
         v-html="fieldText"
@@ -27,6 +28,7 @@
         @mousemove="onMouseMove(mouseDown)"
       />
       <SpanAnnotationCursor
+        v-if="hasSelectedEntity"
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
         :show-message="cursorMessage"
@@ -77,6 +79,9 @@ export default {
     },
     selectedEntityColor() {
       return this.selectedEntity?.color;
+    },
+    hasSelectedEntity() {
+      return !!this.selectedEntity;
     },
     cursorMessage() {
       return this.visibleShortcutsHelper
@@ -181,7 +186,6 @@ export default {
   &__field {
     position: relative;
     line-height: 32px;
-    cursor: none;
   }
 }
 .fade-enter-active,
@@ -193,8 +197,12 @@ export default {
   opacity: 0;
 }
 
-.span-annotation__field::selection {
-  background-color: v-bind("selectedEntityColor");
+.span-annotation__field--active {
+  &::selection {
+    background-color: v-bind("selectedEntityColor");
+  }
+
+  cursor: none;
 }
 
 :deep([id^="entity-span-container"]) {
