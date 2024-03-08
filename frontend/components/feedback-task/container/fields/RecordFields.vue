@@ -2,7 +2,7 @@
   <div class="fields">
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
       <SpanAnnotationTextFieldComponent
-        v-if="hasSpanQuestion(name)"
+        v-if="hasSpanQuestion(name) && supportedSpanAnnotation && isFocusMode"
         :name="name"
         :title="title"
         :fieldText="content"
@@ -29,6 +29,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    recordCriteria: {
+      type: Object,
+      required: true,
+    },
   },
   methods: {
     getSpanQuestion(fieldName) {
@@ -41,6 +45,12 @@ export default {
   computed: {
     searchValue() {
       return this.$route.query?._search ?? "";
+    },
+    supportedSpanAnnotation() {
+      return !!CSS.highlights;
+    },
+    isFocusMode() {
+      return this.recordCriteria.committed.page.isFocusMode;
     },
   },
 };

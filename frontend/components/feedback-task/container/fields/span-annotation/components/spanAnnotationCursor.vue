@@ -1,11 +1,7 @@
 <template>
   <span
     class="custom-cursor"
-    :class="[
-      cursorClass,
-      { message: showMessage },
-      { 'not-allowed': !allowAnnotation },
-    ]"
+    :class="[cursorClass, { message: showMessage }]"
     :data-title="showMessage"
     ref="cursor"
     :style="{ left: cursorPosition.left, top: cursorPosition.top }"
@@ -28,10 +24,6 @@ export default {
     cursorColor: {
       type: String,
       default: "black",
-    },
-    allowAnnotation: {
-      type: Boolean,
-      default: true,
     },
     showMessage: {
       type: String,
@@ -114,16 +106,6 @@ export default {
       box-shadow: $shadow;
       background: palette(white);
       @include font-size(12px);
-    }
-  }
-  &.not-allowed {
-    height: 0;
-    width: 0;
-    &:after {
-      top: 0;
-      left: 0;
-      @include font-size(13px);
-      background: v-bind(cursorColor);
     }
   }
 }

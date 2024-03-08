@@ -117,6 +117,7 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
+    bulkMode: "Span annotation is not supported in Bulk view",
   },
   login: {
     title: "Sign in",

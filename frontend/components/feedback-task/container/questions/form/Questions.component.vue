@@ -61,6 +61,7 @@
           ref="span"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
+          :is-bulk-mode="isBulkMode"
           :showShortcutsHelper="showShortcutsHelper"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
@@ -84,6 +85,10 @@ export default {
     },
     autofocusPosition: {
       type: Number,
+    },
+    isBulkMode: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

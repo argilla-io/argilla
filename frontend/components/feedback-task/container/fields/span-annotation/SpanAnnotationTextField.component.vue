@@ -29,7 +29,6 @@
       <SpanAnnotationCursor
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
-        :allow-annotation="spanAnnotationSupported"
         :show-message="cursorMessage"
       />
       <template v-for="{ id, color } in spanQuestion.answer.options">
@@ -80,9 +79,6 @@ export default {
       return this.selectedEntity?.color;
     },
     cursorMessage() {
-      if (!this.spanAnnotationSupported) {
-        return this.$t("spanAnnotation.notSupported");
-      }
       return this.visibleShortcutsHelper
         ? this.$t("spanAnnotation.shortcutHelper")
         : "";
@@ -93,7 +89,7 @@ export default {
       this.highlighting.allowCharacterAnnotation(allow);
     },
     keyPressing(event, isDown) {
-      if (event.key == "Shift") {
+      if (event.key == "Shift" && this.highlighting.allowCharacterAnnotation) {
         this.allowCharacterAnnotation(isDown);
         this.usedCharacterAnnotation = true;
         this.visibleShortcutsHelper = false;

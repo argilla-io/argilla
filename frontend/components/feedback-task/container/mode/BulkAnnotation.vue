@@ -101,6 +101,7 @@
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
         :record="record"
+        :is-bulk-mode="true"
         :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
         :is-submitting="isSubmitting"
         :is-discarding="isDiscarding"

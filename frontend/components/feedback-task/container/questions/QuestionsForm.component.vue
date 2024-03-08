@@ -24,6 +24,7 @@
       <QuestionsComponent
         :questions="record.questions"
         :autofocusPosition="autofocusPosition"
+        :is-bulk-mode="isBulkMode"
         @on-focus="updateQuestionAutofocus"
       />
     </div>
@@ -157,6 +158,10 @@ export default {
       default: 0,
     },
     enableAutoSubmitWithKeyboard: {
+      type: Boolean,
+      default: false,
+    },
+    isBulkMode: {
       type: Boolean,
       default: false,
     },
