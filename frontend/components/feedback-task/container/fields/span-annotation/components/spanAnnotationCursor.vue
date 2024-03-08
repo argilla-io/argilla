@@ -1,8 +1,9 @@
 <template>
   <span
     class="custom-cursor"
-    :class="[cursorClass, { message: showMessage }]"
-    :data-title="showMessage"
+    :class="[cursorClass, { message: showMessage }, { entity: showEntity }]"
+    :data-message="showMessage"
+    :data-entity-name="entityName"
     ref="cursor"
     :style="{ left: cursorPosition.left, top: cursorPosition.top }"
   >
@@ -28,6 +29,14 @@ export default {
     showMessage: {
       type: String,
       default: false,
+    },
+    showEntity: {
+      type: Boolean,
+      default: false,
+    },
+    entityName: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -90,6 +99,27 @@ export default {
     stroke: v-bind(cursorColor);
     filter: drop-shadow(0 0 1px white);
   }
+  &.entity {
+    z-index: 200;
+    &:before {
+      position: absolute;
+      height: auto;
+      margin: 0;
+      white-space: nowrap;
+      content: attr(data-entity-name);
+      bottom: $base-space * 2;
+      transform: translate(-50%, -50%);
+      left: 50%;
+      color: $black-87;
+      padding: calc($base-space / 2);
+      border-radius: $border-radius;
+      box-shadow: $shadow;
+      background: v-bind(cursorColor);
+      @include font-size(10px);
+      text-transform: uppercase;
+      line-height: 1em;
+    }
+  }
   &.message {
     z-index: 200;
     &:after {
@@ -97,15 +127,16 @@ export default {
       height: auto;
       margin: 0;
       white-space: nowrap;
-      content: attr(data-title);
+      content: attr(data-message);
       top: $base-space * 3;
       left: $base-space * 3;
       color: $black-87;
-      padding: 0 calc($base-space / 2);
+      padding: calc($base-space / 2);
       border-radius: $border-radius;
       box-shadow: $shadow;
       background: palette(white);
       @include font-size(12px);
+      line-height: 1em;
     }
   }
 }

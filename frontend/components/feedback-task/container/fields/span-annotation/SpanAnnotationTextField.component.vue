@@ -1,5 +1,10 @@
 <template>
-  <div class="text_field_component" :key="name">
+  <div
+    @mouseenter="onFieldMouseEnter"
+    @mouseleave="onFieldMouseLeave"
+    class="text_field_component"
+    :key="name"
+  >
     <div class="title-area --body2">
       <span class="text_field_component__title-content" v-text="title" />
       <BaseActionTooltip
@@ -32,6 +37,8 @@
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
         :show-message="cursorMessage"
+        :show-entity="showCursorWithEntity"
+        :entity-name="selectedEntity.text"
       />
       <template v-for="{ id, color } in spanQuestion.answer.options">
         <style :key="id" scoped>
@@ -71,6 +78,7 @@ export default {
       usedCharacterAnnotation: false,
       mouseDown: false,
       mouseTimeout: null,
+      showCursorWithEntity: false,
     };
   },
   computed: {
@@ -125,6 +133,15 @@ export default {
       if (!this.spanQuestion.settings.allow_character_annotation) return;
 
       this.keyPressing(event, false);
+    },
+    onFieldMouseEnter() {
+      this.showCursorWithEntity = true;
+      setTimeout(() => {
+        this.showCursorWithEntity = false;
+      }, 4000);
+    },
+    onFieldMouseLeave() {
+      this.showCursorWithEntity = false;
     },
   },
   mounted() {
