@@ -6,7 +6,7 @@
     id="spanEntity"
   >
     <div
-      @click="singleOption && toggleDropdown()"
+      @click="!singleOption && toggleDropdown()"
       class="span-entity"
       v-if="!visibleDropdown"
     >

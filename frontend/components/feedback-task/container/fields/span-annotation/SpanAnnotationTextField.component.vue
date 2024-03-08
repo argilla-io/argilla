@@ -36,9 +36,10 @@
         v-if="hasSelectedEntity"
         cursor-area-ref="spanAnnotationField"
         :cursor-color="selectedEntityColor"
-        :show-message="cursorMessage"
+        :show-message="visibleShortcutsHelper"
         :show-entity="showCursorWithEntity"
         :entity-name="selectedEntity.text"
+        :message="$t('spanAnnotation.shortcutHelper')"
       />
       <template v-for="{ id, color } in spanQuestion.answer.options">
         <style :key="id" scoped>
@@ -90,11 +91,6 @@ export default {
     },
     hasSelectedEntity() {
       return !!this.selectedEntity;
-    },
-    cursorMessage() {
-      return this.visibleShortcutsHelper
-        ? this.$t("spanAnnotation.shortcutHelper")
-        : "";
     },
   },
   methods: {

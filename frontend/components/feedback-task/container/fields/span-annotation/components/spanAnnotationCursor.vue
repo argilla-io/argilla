@@ -1,17 +1,25 @@
 <template>
-  <span
-    class="custom-cursor"
-    :class="[cursorClass, { message: showMessage }, { entity: showEntity }]"
-    :data-message="showMessage"
-    :data-entity-name="entityName"
-    ref="cursor"
-    :style="{ left: cursorPosition.left, top: cursorPosition.top }"
-  >
-    <svg viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M7.195 14.3707C7.195 14.7183 6.93012 15 6.6063 15H5.33909C4.7769 15 4.26895 14.7545 3.90102 14.358C3.53292 14.7545 3.02513 15 2.46278 15H1.19557C0.871757 15 0.606873 14.7183 0.606873 14.3707C0.606873 14.023 0.871757 13.7413 1.19557 13.7413H2.46278C2.93081 13.7413 3.312 13.3338 3.312 12.8335V2.16667C3.312 1.66633 2.93081 1.25883 2.46278 1.25883H1.19557C0.871757 1.25883 0.606873 0.977167 0.606873 0.6295C0.606717 0.281667 0.871757 0 1.19557 0H2.46278C3.02513 0 3.53292 0.2455 3.90086 0.642C4.2688 0.2455 4.77658 0 5.33894 0H6.60614C6.92996 0 7.19485 0.281667 7.19485 0.629333C7.19485 0.977 6.92996 1.25867 6.60614 1.25867H5.33894C4.87091 1.25867 4.48972 1.66617 4.48972 2.1665V12.8332C4.48972 13.3335 4.87091 13.741 5.33894 13.741H6.60614C6.92996 13.7412 7.195 14.0228 7.195 14.3707Z"
-      />
-    </svg>
+  <span>
+    <span
+      v-if="showMessage"
+      class="custom-cursor__message"
+      :style="{ left: messagePosition.left, top: messagePosition.top }"
+      v-text="message"
+    />
+    <span
+      class="custom-cursor"
+      :class="[cursorClass, { entity: showEntity }]"
+      :data-message="message"
+      :data-entity-name="entityName"
+      ref="cursor"
+      :style="{ left: cursorPosition.left, top: cursorPosition.top }"
+    >
+      <svg viewBox="0 0 8 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M7.195 14.3707C7.195 14.7183 6.93012 15 6.6063 15H5.33909C4.7769 15 4.26895 14.7545 3.90102 14.358C3.53292 14.7545 3.02513 15 2.46278 15H1.19557C0.871757 15 0.606873 14.7183 0.606873 14.3707C0.606873 14.023 0.871757 13.7413 1.19557 13.7413H2.46278C2.93081 13.7413 3.312 13.3338 3.312 12.8335V2.16667C3.312 1.66633 2.93081 1.25883 2.46278 1.25883H1.19557C0.871757 1.25883 0.606873 0.977167 0.606873 0.6295C0.606717 0.281667 0.871757 0 1.19557 0H2.46278C3.02513 0 3.53292 0.2455 3.90086 0.642C4.2688 0.2455 4.77658 0 5.33894 0H6.60614C6.92996 0 7.19485 0.281667 7.19485 0.629333C7.19485 0.977 6.92996 1.25867 6.60614 1.25867H5.33894C4.87091 1.25867 4.48972 1.66617 4.48972 2.1665V12.8332C4.48972 13.3335 4.87091 13.741 5.33894 13.741H6.60614C6.92996 13.7412 7.195 14.0228 7.195 14.3707Z"
+        />
+      </svg>
+    </span>
   </span>
 </template>
 
@@ -27,7 +35,7 @@ export default {
       default: "black",
     },
     showMessage: {
-      type: String,
+      type: Boolean,
       default: false,
     },
     showEntity: {
@@ -38,10 +46,18 @@ export default {
       type: String,
       required: true,
     },
+    message: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       cursorPosition: {
+        left: 0,
+        top: 0,
+      },
+      messagePosition: {
         left: 0,
         top: 0,
       },
@@ -50,6 +66,13 @@ export default {
   },
   created() {
     this.area = this.$parent.$refs[this.cursorAreaRef];
+  },
+  watch: {
+    showMessage: {
+      handler(n, o) {
+        if (n) this.messagePosition = { ...this.cursorPosition };
+      },
+    },
   },
   methods: {
     addCursorClass() {
@@ -87,6 +110,18 @@ export default {
   position: fixed;
   transform: translate(-50%, -50%);
   cursor: pointer;
+  &__message {
+    z-index: 1;
+    position: fixed;
+    transform: translate(-50%, calc(-50% - 30px));
+    color: $black-87;
+    padding: calc($base-space / 2);
+    border-radius: $border-radius;
+    box-shadow: $shadow;
+    background: palette(white);
+    @include font-size(12px);
+    line-height: 1;
+  }
 }
 
 .textual {
@@ -117,25 +152,6 @@ export default {
       background: v-bind(cursorColor);
       @include font-size(10px);
       text-transform: uppercase;
-      line-height: 1em;
-    }
-  }
-  &.message {
-    z-index: 200;
-    &:after {
-      position: absolute;
-      height: auto;
-      margin: 0;
-      white-space: nowrap;
-      content: attr(data-message);
-      top: $base-space * 3;
-      left: $base-space * 3;
-      color: $black-87;
-      padding: calc($base-space / 2);
-      border-radius: $border-radius;
-      box-shadow: $shadow;
-      background: palette(white);
-      @include font-size(12px);
       line-height: 1em;
     }
   }
