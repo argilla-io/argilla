@@ -16,7 +16,7 @@
         class="span-entity__input"
         type="text"
         autocomplete="off"
-        autofocus
+        placeholder="Search"
         v-model="searchText"
         @keydown.arrow-up.stop=""
         @keydown.arrow-down.stop=""
@@ -108,9 +108,6 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(() => {
-      this.$refs.search?.focus();
-    });
     this.preselectedEntity = this.filteredOptions[0];
   },
 };
