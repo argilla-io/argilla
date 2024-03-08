@@ -487,7 +487,7 @@ def test_span_question_with_labels_dict() -> None:
 
 
 def test_span_question_with_no_labels() -> None:
-    with pytest.raises(ValidationError, match="ensure this value has at least 1 items"):
+    with pytest.raises(ValidationError, match="At least one label must be provided"):
         SpanQuestion(
             name="question",
             field="field",
