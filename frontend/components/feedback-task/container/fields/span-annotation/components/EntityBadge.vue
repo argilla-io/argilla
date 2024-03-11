@@ -69,6 +69,7 @@ export default {
   font-weight: 500;
   @include font-size(12px);
   @include line-height(12px);
+  text-transform: uppercase;
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {
@@ -80,10 +81,7 @@ export default {
     opacity: 0.8;
   }
   &__text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
+    @include truncate;
   }
 }
 </style>
