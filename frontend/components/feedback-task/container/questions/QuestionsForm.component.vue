@@ -22,6 +22,7 @@
       </div>
 
       <QuestionsComponent
+        :record="record"
         :questions="record.questions"
         :autofocusPosition="autofocusPosition"
         :is-bulk-mode="isBulkMode"
