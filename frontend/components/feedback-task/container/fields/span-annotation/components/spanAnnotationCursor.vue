@@ -68,10 +68,8 @@ export default {
     this.area = this.$parent.$refs[this.cursorAreaRef];
   },
   watch: {
-    showMessage: {
-      handler(n) {
-        if (n) this.messagePosition = { ...this.cursorPosition };
-      },
+    showMessage() {
+      if (this.showMessage) this.messagePosition = { ...this.cursorPosition };
     },
   },
   methods: {

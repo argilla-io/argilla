@@ -13,11 +13,7 @@
         @on-select-record="onSelectedRecord"
       />
       <div class="record__content">
-        <RecordFields
-          :recordCriteria="recordCriteria"
-          :fields="record.fields"
-          :spanQuestions="spanQuestions"
-        />
+        <RecordFields :record="record" :fields="record.fields" />
       </div>
     </div>
   </div>
@@ -43,9 +39,6 @@ export default {
   computed: {
     searchValue() {
       return this.$route.query?._search ?? "";
-    },
-    spanQuestions() {
-      return this.record.questions.filter((q) => q.isSpanType);
     },
   },
   methods: {

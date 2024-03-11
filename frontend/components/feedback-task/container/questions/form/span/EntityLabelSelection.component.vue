@@ -231,7 +231,7 @@ export default {
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
-        option.isSelected = option.id === id;
+        option.isSelected = option.id === id ? isSelected : false;
       });
 
       if (isSelected) {
@@ -254,10 +254,14 @@ export default {
     },
   },
   mounted() {
-    document.addEventListener("keydown", this.keyboardHandler);
+    if (this.enableShortcuts) {
+      document.addEventListener("keydown", this.keyboardHandler);
+    }
   },
   destroyed() {
-    document.removeEventListener("keydown", this.keyboardHandler);
+    if (this.enableShortcuts) {
+      document.removeEventListener("keydown", this.keyboardHandler);
+    }
   },
 };
 </script>

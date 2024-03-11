@@ -26,7 +26,7 @@
         class="span-annotation__field"
         :class="hasSelectedEntity ? 'span-annotation__field--active' : null"
         ref="spanAnnotationField"
-        :id="name"
+        :id="id"
         v-html="fieldText"
         @mousedown="mouseDown = true"
         @mouseup="onMouseUp(false)"
@@ -57,6 +57,10 @@ import { useSpanAnnotationTextFieldViewModel } from "./useSpanAnnotationTextFiel
 export default {
   name: "SpanAnnotationTextFieldComponent",
   props: {
+    id: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -71,6 +75,7 @@ export default {
     },
     spanQuestion: {
       type: Object,
+      required: true,
     },
   },
   data() {

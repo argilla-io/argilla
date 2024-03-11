@@ -77,10 +77,6 @@ import { useQuestionsViewModel } from "./useQuestionsViewModel";
 export default {
   name: "QuestionsComponent",
   props: {
-    record: {
-      type: Object,
-      required: true,
-    },
     questions: {
       type: Array,
       required: true,
