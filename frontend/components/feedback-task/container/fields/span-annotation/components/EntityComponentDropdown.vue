@@ -17,6 +17,7 @@
         type="text"
         autocomplete="off"
         :placeholder="$nuxt.$t('search')"
+        autofocus
         v-model="searchText"
         @keydown.arrow-up.stop=""
         @keydown.arrow-down.stop=""
@@ -109,6 +110,7 @@ export default {
   },
   mounted() {
     this.preselectedEntity = this.filteredOptions[0];
+    this.$refs.search.focus();
   },
 };
 </script>
@@ -126,6 +128,7 @@ export default {
     z-index: 100;
     &__header {
       display: flex;
+      flex-direction: column;
       gap: $base-space;
       background: $black-4;
       padding: calc($base-space / 2);
@@ -152,7 +155,7 @@ export default {
   }
   &__input {
     height: $base-space * 2;
-    width: 100px;
+    width: 160px;
     background: transparent;
     border: none;
     @include font-size(12px);
