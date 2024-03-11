@@ -46,6 +46,7 @@ class RemoteTextQuestion(TextQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             use_markdown=payload.settings["use_markdown"],
         )
@@ -67,6 +68,7 @@ class RemoteRatingQuestion(RatingQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             values=[option["value"] for option in payload.settings["options"]],
         )
@@ -96,6 +98,7 @@ class RemoteLabelQuestion(LabelQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             labels=_parse_options_from_api(payload),
             visible_labels=payload.settings["visible_options"],
@@ -119,6 +122,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             labels=_parse_options_from_api(payload),
             visible_labels=payload.settings["visible_options"],
@@ -141,6 +145,7 @@ class RemoteRankingQuestion(RankingQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             values=_parse_options_from_api(payload),
         )

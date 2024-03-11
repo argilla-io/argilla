@@ -81,6 +81,7 @@ def test_remote_text_question(schema_kwargs: Dict[str, Any], server_payload: Dic
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={"type": "text", "use_markdown": False},
             inserted_at=datetime.now(),
@@ -90,6 +91,7 @@ def test_remote_text_question(schema_kwargs: Dict[str, Any], server_payload: Dic
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={"type": "text", "use_markdown": True},
             inserted_at=datetime.now(),
@@ -149,6 +151,7 @@ def test_remote_rating_question(schema_kwargs: Dict[str, Any], server_payload: D
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
             inserted_at=datetime.now(),
@@ -158,6 +161,7 @@ def test_remote_rating_question(schema_kwargs: Dict[str, Any], server_payload: D
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
             inserted_at=datetime.now(),
@@ -233,6 +237,7 @@ def test_remote_label_question(schema_kwargs: Dict[str, Any], server_payload: Di
             name="a",
             title="A",
             required=True,
+            description="Description",
             settings={
                 "type": "label_selection",
                 "options": [{"text": "a", "value": "a"}, {"text": "b", "value": "b"}, {"text": "c", "value": "c"}],
@@ -245,6 +250,7 @@ def test_remote_label_question(schema_kwargs: Dict[str, Any], server_payload: Di
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "label_selection",
@@ -323,6 +329,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={
                 "type": "multi_label_selection",
@@ -336,6 +343,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "multi_label_selection",
@@ -411,6 +419,7 @@ def test_remote_ranking_question(schema_kwargs: Dict[str, Any], server_payload: 
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={
                 "type": "ranking",
@@ -423,6 +432,7 @@ def test_remote_ranking_question(schema_kwargs: Dict[str, Any], server_payload: 
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "ranking",
