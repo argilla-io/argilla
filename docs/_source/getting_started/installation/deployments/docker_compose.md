@@ -14,7 +14,7 @@ Then, create a folder:
 mkdir argilla && cd argilla
 ```
 
-and launch the docker-contained web app with the following command:
+and launch the docker-contained web app with the following command, after having set a value for the environment variable `ARGILLA_AUTH_SECRET_KEY`, which can be generated with `openssl rand -hex 32`:
 
 ```bash
 wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml && docker-compose up -d
