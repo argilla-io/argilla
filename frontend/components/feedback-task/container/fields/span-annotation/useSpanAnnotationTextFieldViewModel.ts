@@ -19,7 +19,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
 
   const selectEntity = (entity: Entity) => {
     answer.options.forEach((e) => {
-      e.isSelected = e.id === entity.id;
+      e.isSelected = e.id === entity?.id;
     });
 
     highlighting.value.changeSelectedEntity(entity);

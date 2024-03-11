@@ -231,7 +231,7 @@ export default {
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
-        option.isSelected = option.id === id;
+        option.isSelected = option.id === id ? isSelected : false;
       });
 
       if (isSelected) {
