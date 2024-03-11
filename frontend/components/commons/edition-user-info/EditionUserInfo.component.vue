@@ -7,8 +7,6 @@
       <BaseBadge class="--capitalized" :text="userInfo.role" />
     </div>
 
-    <ExtraUserInfo :userInfo="userInfo" />
-
     <div class="form-group">
       <h2
         class="--heading5 --medium description__title"
