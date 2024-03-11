@@ -167,7 +167,7 @@ class HuggingFaceDatasetMixin:
                                     "start": span.start,
                                     "end": span.end,
                                     "label": span.label,
-                                    "text": record.fields[question.field][span.start: span.end],
+                                    "text": record.fields[question.field][span.start : span.end],
                                 }
                                 for span in response.values[question.name].value
                             ]
@@ -188,7 +188,7 @@ class HuggingFaceDatasetMixin:
                                         "end": span.end,
                                         "label": span.label,
                                         "score": span.score,
-                                        "text": record.fields[question.field][span.start: span.end],
+                                        "text": record.fields[question.field][span.start : span.end],
                                     }
                                     for span in suggestion.value
                                 ]
