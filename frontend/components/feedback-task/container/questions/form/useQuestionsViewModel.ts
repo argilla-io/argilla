@@ -1,13 +1,17 @@
 import { onBeforeMount, onBeforeUnmount, ref } from "vue-demi";
+import { Record } from "~/v1/domain/entities/record/Record";
 import { usePlatform } from "~/v1/infrastructure/services";
 import { useLocalStorage } from "~/v1/infrastructure/services/useLocalStorage";
 
 const KEY_PRESSED_TIMEOUT_IN_MS = 350;
 
-export const useQuestionsViewModel = () => {
+export const useQuestionsViewModel = ({ record }: { record: Record }) => {
   const { get, set } = useLocalStorage();
   const showShortcutsHelper = ref(get("showShortcutsHelper") ?? true);
   const platform = usePlatform();
+  const enableShortcuts =
+    record.questions.filter((q) => q.isSpanType).length === 1;
+
   let timeout = null;
 
   const toggleShortcutsHelper = () => {
@@ -53,5 +57,5 @@ export const useQuestionsViewModel = () => {
     document.removeEventListener("keyup", trackOnKeyUp);
   });
 
-  return { showShortcutsHelper };
+  return { showShortcutsHelper, enableShortcuts };
 };

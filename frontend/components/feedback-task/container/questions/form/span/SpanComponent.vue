@@ -11,6 +11,7 @@
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
+      :enableShortcuts="enableShortcuts"
       @on-focus="onFocus"
       @on-selected="onSelected"
     />
@@ -31,6 +32,10 @@ export default {
       default: () => false,
     },
     showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
+    enableShortcuts: {
       type: Boolean,
       default: () => false,
     },

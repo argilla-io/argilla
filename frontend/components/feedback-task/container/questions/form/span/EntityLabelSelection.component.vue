@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @keydown="keyboardHandler">
+  <div class="container">
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -42,7 +42,7 @@
         :key="option.id"
         ref="options"
         :option="option"
-        :showShortcutsHelper="showShortcutsHelper"
+        :showShortcutsHelper="showShortcutsHelper && enableShortcuts"
         :keyboards="keyboards"
         v-model="option.isSelected"
         @keydown.enter.prevent
@@ -83,6 +83,10 @@ export default {
       default: () => false,
     },
     showShortcutsHelper: {
+      type: Boolean,
+      default: () => false,
+    },
+    enableShortcuts: {
       type: Boolean,
       default: () => false,
     },
@@ -181,34 +185,15 @@ export default {
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
-      if (
-        $event.key === "Tab" ||
-        $event.key === "Enter" ||
-        $event.key === "Backspace" ||
-        $event.shiftKey ||
-        $event.ctrlKey ||
-        $event.metaKey
-      )
-        return;
+      if ($event.shiftKey || $event.ctrlKey || $event.metaKey) return;
 
-      const isSearchActive =
-        document.activeElement ===
-        this.$refs.searchComponentRef?.searchInputRef;
+      const isAnInput = document.activeElement.tagName === "INPUT";
 
-      if (isSearchActive) return;
-
-      if ($event.code == "Space") {
-        $event.preventDefault();
-        document.activeElement.click();
-
-        return;
-      }
+      if (isAnInput) return;
 
       this.keyCode += $event.key;
 
       if (isNaN(this.keyCode)) {
-        this.$refs.searchComponentRef?.focusInSearch();
-
         return this.reset();
       }
 
@@ -234,7 +219,7 @@ export default {
     selectByKeyCode($event, keyCode) {
       const match = this.$refs.options.find(
         (option) => option.$refs.inputRef.dataset.keyboard === keyCode
-      ).$refs.inputRef;
+      )?.$refs.inputRef;
 
       if (match) {
         $event.preventDefault();
@@ -267,6 +252,12 @@ export default {
         this.isExpanded = true;
       }
     },
+  },
+  mounted() {
+    document.addEventListener("keydown", this.keyboardHandler);
+  },
+  destroyed() {
+    document.removeEventListener("keydown", this.keyboardHandler);
   },
 };
 </script>

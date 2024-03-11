@@ -63,6 +63,7 @@
           :isFocused="checkIfQuestionIsFocused(index)"
           :is-bulk-mode="isBulkMode"
           :showShortcutsHelper="showShortcutsHelper"
+          :enableShortcuts="enableShortcuts"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
         />
@@ -76,6 +77,10 @@ import { useQuestionsViewModel } from "./useQuestionsViewModel";
 export default {
   name: "QuestionsComponent",
   props: {
+    record: {
+      type: Object,
+      required: true,
+    },
     questions: {
       type: Array,
       required: true,
@@ -165,8 +170,8 @@ export default {
       return this.autofocusPosition === index;
     },
   },
-  setup() {
-    return useQuestionsViewModel();
+  setup(props) {
+    return useQuestionsViewModel(props);
   },
 };
 </script>
