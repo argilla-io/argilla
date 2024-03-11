@@ -90,7 +90,7 @@
 </template>
 
 <script>
-const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 15;
 import suggestionIcon from "@/static/icons/suggestion.svg";
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";

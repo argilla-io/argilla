@@ -81,14 +81,8 @@ export default {
     display: flex;
     align-items: center;
     gap: calc($base-space / 2);
-    margin-right: auto;
-    padding: calc($base-space / 2) $base-space;
-    background: palette(white);
-    border: 1px solid palette(grey, 600);
     color: $black-54;
     @include font-size(13px);
-    border-radius: $border-radius-m;
-    box-shadow: $shadow-100;
   }
 }
 </style>

@@ -117,7 +117,7 @@ export default {
     color: $black-87;
     padding: calc($base-space / 2);
     border-radius: $border-radius;
-    box-shadow: $shadow;
+    box-shadow: $shadow-100;
     background: palette(white);
     @include font-size(12px);
     line-height: 1;
@@ -148,7 +148,7 @@ export default {
       color: $black-87;
       padding: calc($base-space / 2);
       border-radius: $border-radius;
-      box-shadow: $shadow;
+      box-shadow: $shadow-100;
       background: v-bind(cursorColor);
       @include font-size(10px);
       text-transform: uppercase;
