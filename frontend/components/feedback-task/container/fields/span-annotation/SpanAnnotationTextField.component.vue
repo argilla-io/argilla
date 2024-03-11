@@ -210,12 +210,14 @@ export default {
   opacity: 0;
 }
 
-.span-annotation__field--active {
-  &::selection {
-    background-color: v-bind("selectedEntityColor");
+.span-annotation__field {
+  margin: 0;
+  &--active {
+    cursor: none;
+    &::selection {
+      background-color: v-bind("selectedEntityColor");
+    }
   }
-
-  cursor: none;
 }
 
 :deep([id^="entity-span-container"]) {
