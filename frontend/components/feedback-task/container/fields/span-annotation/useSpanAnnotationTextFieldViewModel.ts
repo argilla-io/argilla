@@ -9,10 +9,10 @@ import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
-  name,
+  id,
 }: {
   spanQuestion: Question;
-  name: string;
+  id: string;
 }) => {
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
@@ -95,7 +95,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(name, entityComponentFactory)
+    new Highlighting(id, entityComponentFactory)
   );
 
   watch(
