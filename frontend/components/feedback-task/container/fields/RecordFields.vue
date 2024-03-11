@@ -2,7 +2,7 @@
   <div class="fields">
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
       <SpanAnnotationTextFieldComponent
-        v-if="hasSpanQuestion(name) && supportedSpanAnnotation && isFocusMode"
+        v-if="hasSpanQuestion(name) && supportedSpanAnnotation"
         :id="`${id}-${record.id}-span-field`"
         :name="name"
         :title="title"
@@ -27,10 +27,6 @@ export default {
     },
     fields: {
       type: Array,
-      required: true,
-    },
-    recordCriteria: {
-      type: Object,
       required: true,
     },
   },
