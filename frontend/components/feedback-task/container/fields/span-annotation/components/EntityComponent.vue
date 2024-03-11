@@ -6,11 +6,11 @@
     id="spanEntity"
   >
     <div
-      @click="!singleOption && toggleDropdown()"
-      class="span-entity"
+      v-on="!singleOption ? { click: toggleDropdown } : {}"
+      :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
       v-if="!visibleDropdown"
     >
-      {{ selectedOption.text }}
+      <span class="span-entity__text">{{ selectedOption.text }}</span>
       <BaseButton
         class="span-entity__close-button"
         @click="removeSelectedOption"
@@ -135,12 +135,9 @@ export default {
   display: flex;
   gap: 2px;
   margin-top: -1px;
-  max-width: v-bind("entityPosition.width");
-  min-width: 10px;
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
-  cursor: pointer;
-  @include truncate;
+  user-select: none;
   transition: background 0.3s;
   &__wrapper {
     position: absolute;
@@ -148,6 +145,11 @@ export default {
     margin-top: 20px;
     line-height: 1.2;
     @include font-size(11px);
+  }
+  &__text {
+    min-width: 10px;
+    max-width: v-bind("entityPosition.width");
+    @include truncate;
   }
   &:hover {
     position: relative;
@@ -172,6 +174,10 @@ export default {
         color: $black-87;
       }
     }
+  }
+  &--clickable {
+    cursor: pointer;
+    @extend .span-entity;
   }
 }
 </style>
