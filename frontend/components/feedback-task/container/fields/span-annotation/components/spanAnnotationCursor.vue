@@ -69,7 +69,7 @@ export default {
   },
   watch: {
     showMessage: {
-      handler(n, o) {
+      handler(n) {
         if (n) this.messagePosition = { ...this.cursorPosition };
       },
     },
