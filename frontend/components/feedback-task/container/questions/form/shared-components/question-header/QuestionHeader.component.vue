@@ -9,8 +9,8 @@
       <svgicon
         class="title-area__suggestion-icon"
         name="suggestion"
-        width="16"
-        height="16"
+        width="14"
+        height="14"
       />
     </BaseTooltip>
     <span
@@ -61,12 +61,14 @@ export default {
       return !!this.question.description?.length;
     },
     suggestionTooltipText() {
-      if (!this.question.suggestion.agent || !this.question.suggestion.score) {
-        return null;
+      const qAgent = this.question.suggestion.agent;
+      const qScore = this.question.suggestion.score;
+      if (!qAgent && !qScore) {
+        return;
       }
-      return `This question contains a suggestion \n agent: ${
-        this.question.suggestion.agent || "-"
-      } \n score: ${this.question.suggestion.score || "-"}`;
+      const agent = qAgent ? `agent: ${qAgent}` : "";
+      const score = qScore ? `\n score: ${qScore}` : "";
+      return `This question contains a suggestion \n ${agent} ${score}`;
     },
   },
   watch: {
