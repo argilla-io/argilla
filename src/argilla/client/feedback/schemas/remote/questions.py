@@ -148,7 +148,9 @@ class RemoteRankingQuestion(RankingQuestion, RemoteSchema):
 
 class RemoteSpanQuestion(SpanQuestion, RemoteSchema):
     def to_local(self) -> SpanQuestion:
-        return SpanQuestion(name=self.name, title=self.title, required=self.required, labels=self.labels)
+        return SpanQuestion(
+            name=self.name, title=self.title, field=self.field, required=self.required, labels=self.labels
+        )
 
     @classmethod
     def _parse_options_from_api(cls, options: List[Dict[str, str]]) -> List[SpanLabelOption]:
@@ -160,6 +162,7 @@ class RemoteSpanQuestion(SpanQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            field=payload.settings["field"],
             required=payload.required,
             labels=cls._parse_options_from_api(payload.settings["options"]),
         )

@@ -17,6 +17,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.response_values import parse_value_response_for_question
+from argilla.client.feedback.schemas.responses import ResponseValue, ValueSchema
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
 from argilla.pydantic_v1 import BaseModel, Extra, Field, conint, conlist, root_validator, validator
@@ -76,6 +79,16 @@ class QuestionSchema(BaseModel, ABC):
             "required": self.required,
             "settings": self.server_settings,
         }
+
+    def suggestion(self, value: ResponseValue, **kwargs) -> SuggestionSchema:
+        """Method that will be used to create a `SuggestionSchema` from the question and a suggested value."""
+        value = parse_value_response_for_question(self, value)
+        return SuggestionSchema(question_name=self.name, value=value, **kwargs)
+
+    def response(self, value: ResponseValue) -> Dict[str, ValueSchema]:
+        """Method that will be used to create a response from the question and a value."""
+        value = parse_value_response_for_question(self, value)
+        return {self.name: ValueSchema(value=value)}
 
 
 class TextQuestion(QuestionSchema):
@@ -334,21 +347,35 @@ class SpanQuestion(QuestionSchema):
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import SpanQuestion
-        >>> SpanQuestion(name="span_question", title="Span Question", labels=["person", "org"])
+        >>> SpanQuestion(name="span_question", field="prompt", title="Span Question", labels=["person", "org"])
     """
 
     type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
 
-    labels: conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)
+    field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
+    labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
+
+    @validator("labels", pre=True)
+    def parse_labels_dict(cls, labels) -> List[SpanLabelOption]:
+        if isinstance(labels, dict):
+            return [SpanLabelOption(value=label, text=text) for label, text in labels.items()]
+        return labels
 
     @validator("labels", always=True)
     def normalize_labels(cls, v: List[Union[str, SpanLabelOption]]) -> List[SpanLabelOption]:
         return [SpanLabelOption(value=label, text=label) if isinstance(label, str) else label for label in v]
 
+    @validator("labels")
+    def labels_must_be_valid(cls, labels: List[SpanLabelOption]) -> List[SpanLabelOption]:
+        # This validator is needed since the conlist constraint does not work.
+        assert len(labels) > 0, "At least one label must be provided"
+        return labels
+
     @property
     def server_settings(self) -> Dict[str, Any]:
         return {
             "type": self.type,
+            "field": self.field,
             "options": [label.dict() for label in self.labels],
         }
 

@@ -37,14 +37,10 @@ from argilla.client.feedback.schemas.questions import (
     SpanQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.records import (
-    FeedbackRecord,
-    RankingValueSchema,
-    ResponseSchema,
-    SortBy,
-    SuggestionSchema,
-    ValueSchema,
-)
+from argilla.client.feedback.schemas.records import FeedbackRecord, SortBy
+from argilla.client.feedback.schemas.response_values import RankingValueSchema, ResponseValue, SpanValueSchema
+from argilla.client.feedback.schemas.responses import ResponseSchema, ResponseStatus, ValueSchema
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 __all__ = [
@@ -67,10 +63,13 @@ __all__ = [
     "SpanQuestion",
     "SpanLabelOption",
     "FeedbackRecord",
-    "RankingValueSchema",
     "ResponseSchema",
+    "ResponseValue",
+    "ResponseStatus",
     "SuggestionSchema",
     "ValueSchema",
+    "RankingValueSchema",
+    "SpanValueSchema",
     "SortOrder",
     "SortBy",
     "RecordSortField",

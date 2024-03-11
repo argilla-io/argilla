@@ -191,7 +191,7 @@ def get_unified_responses_and_suggestions(
         unified_responses = [
             tuple(ranking_schema.rank for ranking_schema in response) for response in unified_responses
         ]
-        suggestions = [tuple(s["rank"] for s in suggestion) for suggestion in suggestions]
+        suggestions = [tuple(s.rank for s in suggestion) for suggestion in suggestions]
 
     return unified_responses, suggestions
 

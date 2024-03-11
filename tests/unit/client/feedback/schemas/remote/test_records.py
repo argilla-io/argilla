@@ -194,6 +194,7 @@ def test_remote_response_schema(schema_kwargs: Dict[str, Any], server_payload: D
                 "question-4": FeedbackValueModel(
                     value=[FeedbackRankingValueModel(value="a", rank=1), FeedbackRankingValueModel(value="b", rank=2)]
                 ),
+                "question-5": FeedbackValueModel(value=[{"start": 0, "end": 1, "label": "a"}]),
             },
             status="submitted",
             user_id=uuid4(),
@@ -204,6 +205,14 @@ def test_remote_response_schema(schema_kwargs: Dict[str, Any], server_payload: D
             id=uuid4(),
             values={"question-1": FeedbackValueModel(value="a")},
             status="draft",
+            user_id=uuid4(),
+            inserted_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        FeedbackResponseModel(
+            id=uuid4(),
+            values={"span-question": FeedbackValueModel(value=[{"start": 0, "end": 1, "label": "a"}])},
+            status="discarded",
             user_id=uuid4(),
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
