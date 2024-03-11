@@ -6,11 +6,11 @@
       position="left"
       minimalist
     >
-      <img
+      <svgicon
         class="title-area__suggestion-icon"
-        src="@/static/icons/suggestion.svg"
-        :alt="$t('suggestion.name')"
-        draggable="false"
+        name="suggestion"
+        width="16"
+        height="16"
       />
     </BaseTooltip>
     <span
@@ -39,6 +39,7 @@
 
 <script>
 import "assets/icons/info";
+import "assets/icons/suggestion";
 
 export default {
   name: "QuestionHeader",
@@ -60,6 +61,9 @@ export default {
       return !!this.question.description?.length;
     },
     suggestionTooltipText() {
+      if (!this.question.suggestion.agent || !this.question.suggestion.score) {
+        return null;
+      }
       return `This question contains a suggestion \n agent: ${
         this.question.suggestion.agent || "-"
       } \n score: ${this.question.suggestion.score || "-"}`;
@@ -85,7 +89,7 @@ export default {
   font-weight: 500;
   &__suggestion-icon {
     cursor: default;
-    width: 20px;
+    fill: $black-87;
   }
 }
 
