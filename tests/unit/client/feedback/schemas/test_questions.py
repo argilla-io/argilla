@@ -502,6 +502,7 @@ def test_span_question_with_duplicated_labels() -> None:
         SpanQuestion(
             name="question",
             title="Question",
+            field="field",
             description="Description",
             labels=[SpanLabelOption(value="a", text="A text"), SpanLabelOption(value="a", text="Text for A")],
         )
