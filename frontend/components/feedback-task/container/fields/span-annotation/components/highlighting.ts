@@ -222,7 +222,7 @@ export class Highlighting {
     }
 
     for (const span of this.spans) {
-      const { entity, node } = span;
+      const { node } = span;
 
       if (node.id !== this.nodeId) continue;
 
