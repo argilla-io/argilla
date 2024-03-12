@@ -63,12 +63,10 @@ export default {
     suggestionTooltipText() {
       const qAgent = this.question.suggestion.agent;
       const qScore = this.question.suggestion.score;
-      if (!qAgent && !qScore) {
-        return;
-      }
-      const agent = qAgent ? `agent: ${qAgent}` : "";
-      const score = qScore ? `\n score: ${qScore}` : "";
-      return `This question contains a suggestion \n ${agent} ${score}`;
+      return this.$t("suggestion.tooltip", {
+        agent: qAgent ? this.$t("suggestion.agent", { agent: qAgent }) : "",
+        score: qScore ? this.$t("suggestion.score", { score: qScore }) : "",
+      });
     },
   },
   watch: {
