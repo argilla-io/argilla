@@ -19,7 +19,7 @@ interface OriginalQuestion {
 
 export class Question {
   public answer: QuestionAnswer;
-  private suggestion: Suggestion;
+  public suggestion: Suggestion;
   private original: OriginalQuestion;
 
   constructor(
