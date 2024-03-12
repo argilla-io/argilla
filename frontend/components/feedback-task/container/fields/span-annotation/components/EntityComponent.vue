@@ -11,16 +11,16 @@
       v-if="!visibleDropdown"
     >
       <svgicon
+        v-if="suggestionScore"
         class="span-entity__suggestion"
         name="suggestion"
         width="8"
         height="8"
-        v-if="suggestion.score"
       />
       <span class="span-entity__text" v-text="selectedOption.text" />
       <span
+        v-if="suggestionScore"
         class="span-entity__score"
-        v-if="suggestion.score"
         v-text="suggestionScore"
       />
       <BaseButton
@@ -65,7 +65,6 @@ export default {
     },
     suggestion: {
       type: Object,
-      default: false,
     },
     entityPosition: {
       type: Object,
@@ -92,7 +91,7 @@ export default {
       return this.options.length === 1;
     },
     suggestionScore() {
-      return this.suggestion.score.toFixed(1);
+      return this.suggestion?.score.toFixed(1);
     },
   },
   methods: {
