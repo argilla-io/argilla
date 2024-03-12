@@ -10,16 +10,19 @@
       :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
       v-if="!visibleDropdown"
     >
-      <span class="span-entity__text">
-        <svgicon
-          class="span-entity__suggestion"
-          name="suggestion"
-          width="12"
-          height="12"
-          v-if="suggestion.score"
-        />{{ selectedOption.text }}
-        <template v-if="suggestion.score">{{ suggestionScore }}</template></span
-      >
+      <svgicon
+        class="span-entity__suggestion"
+        name="suggestion"
+        width="8"
+        height="8"
+        v-if="suggestion.score"
+      />
+      <span class="span-entity__text" v-text="selectedOption.text" />
+      <span
+        class="span-entity__score"
+        v-if="suggestion.score"
+        v-text="suggestionScore"
+      />
       <BaseButton
         class="span-entity__close-button"
         @click="removeSelectedOption"
@@ -89,7 +92,7 @@ export default {
       return this.options.length === 1;
     },
     suggestionScore() {
-      return this.suggestion.score.toFixed(2);
+      return this.suggestion.score.toFixed(1);
     },
   },
   methods: {
@@ -149,8 +152,13 @@ export default {
 <style lang="scss" scoped>
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
 .span-entity {
+  $this: &;
   display: flex;
   gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 10px;
+  max-width: v-bind("entityPosition.width");
   margin-top: -1px;
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
@@ -158,20 +166,16 @@ export default {
   transition: background 0.3s;
   &__wrapper {
     position: absolute;
-    display: block;
+    display: flex;
     margin-top: 20px;
     line-height: 1.2;
     @include font-size(11px);
   }
-  &__suggestion {
-    margin-top: 1px;
-    min-width: 8px;
+  &__score {
+    display: none;
   }
   &__text {
-    display: flex;
     gap: 4px;
-    min-width: 10px;
-    max-width: v-bind("entityPosition.width");
     @include truncate(auto);
   }
   &:hover {
@@ -179,17 +183,17 @@ export default {
     z-index: 1;
     background: v-bind("selectedOption.color");
     transition: background 0.3s;
+    max-width: none;
 
-    > button {
-      opacity: 1;
+    #{$this}__close-button {
+      display: inline-flex;
     }
-
-    .span-entity__text {
-      max-width: none;
+    #{$this}__score {
+      display: inline-flex;
     }
   }
   &__close-button {
-    opacity: 0;
+    display: none;
     padding: 0;
     flex-shrink: 0;
     border-radius: 0;
