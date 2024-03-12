@@ -10,7 +10,16 @@
       :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
       v-if="!visibleDropdown"
     >
-      <span class="span-entity__text">{{ selectedOption.text }}</span>
+      <span class="span-entity__text">
+        <svgicon
+          class="span-entity__suggestion"
+          name="suggestion"
+          width="12"
+          height="12"
+          v-if="suggestion.score"
+        />{{ selectedOption.text }}
+        <template v-if="suggestion.score">{{ suggestionScore }}</template></span
+      >
       <BaseButton
         class="span-entity__close-button"
         @click="removeSelectedOption"
@@ -39,6 +48,7 @@
 
 <script>
 import "assets/icons/close";
+import "assets/icons/suggestion";
 
 export default {
   name: "EntityComponent",
@@ -77,6 +87,9 @@ export default {
     },
     singleOption() {
       return this.options.length === 1;
+    },
+    suggestionScore() {
+      return this.suggestion.score.toFixed(2);
     },
   },
   methods: {
@@ -150,20 +163,29 @@ export default {
     line-height: 1.2;
     @include font-size(11px);
   }
+  &__suggestion {
+    margin-top: 1px;
+    min-width: 8px;
+  }
   &__text {
+    display: flex;
+    gap: 4px;
     min-width: 10px;
     max-width: v-bind("entityPosition.width");
-    @include truncate;
+    @include truncate(auto);
   }
   &:hover {
     position: relative;
-    max-width: none;
     z-index: 1;
     background: v-bind("selectedOption.color");
     transition: background 0.3s;
 
     > button {
       opacity: 1;
+    }
+
+    .span-entity__text {
+      max-width: none;
     }
   }
   &__close-button {
