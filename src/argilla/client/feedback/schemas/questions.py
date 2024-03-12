@@ -350,10 +350,14 @@ class SpanQuestion(QuestionSchema):
         >>> SpanQuestion(name="span_question", field="prompt", title="Span Question", labels=["person", "org"])
     """
 
+    _DEFAULT_MAX_VISIBLE_LABELS = 20
+    _MIN_VISIBLE_LABELS = 3
+
     type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
 
     field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
     labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
+    visible_labels: Union[conint(ge=3), None] = _DEFAULT_MAX_VISIBLE_LABELS
 
     @validator("labels", pre=True)
     def parse_labels_dict(cls, labels) -> List[SpanLabelOption]:
@@ -371,11 +375,39 @@ class SpanQuestion(QuestionSchema):
         assert len(labels) > 0, "At least one label must be provided"
         return labels
 
+    @root_validator(skip_on_failure=True)
+    def check_visible_labels_value(cls, values) -> Optional[int]:
+        visible_labels_key = "visible_labels"
+
+        v = values[visible_labels_key]
+        if v is None:
+            return values
+
+        msg = None
+        number_of_labels = len(values.get("labels", []))
+
+        if cls._MIN_VISIBLE_LABELS > number_of_labels < v:
+            msg = f"Since `labels` has less than {cls._MIN_VISIBLE_LABELS} labels, `visible_labels` will be set to `None`."
+            v = None
+        elif v > number_of_labels:
+            msg = (
+                f"`visible_labels={v}` is greater than the total number of labels ({number_of_labels}), "
+                f"so it will be set to `{number_of_labels}`.",
+            )
+            v = number_of_labels
+
+        if msg:
+            warnings.warn(msg, UserWarning, stacklevel=1)
+
+        values[visible_labels_key] = v
+        return values
+
     @property
     def server_settings(self) -> Dict[str, Any]:
         return {
             "type": self.type,
             "field": self.field,
+            "visible_options": self.visible_labels,
             "options": [label.dict() for label in self.labels],
         }
 
