@@ -2,10 +2,11 @@
   <div class="wrapper">
     <QuestionHeaderComponent :question="question" />
     <div class="question__warning" v-if="warningMessage">
-      <svgicon name="danger" width="18" height="18" />
+      <svgicon name="danger" width="16" height="16" />
       <span v-text="warningMessage" />
     </div>
     <EntityLabelSelectionComponent
+      v-if="!isBulkMode"
       v-model="question.answer.options"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
@@ -80,7 +81,7 @@ export default {
   &__warning {
     display: flex;
     align-items: center;
-    gap: calc($base-space / 2);
+    gap: $base-space;
     color: $black-54;
     @include font-size(13px);
   }
