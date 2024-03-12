@@ -89,7 +89,7 @@ export default {
   font-weight: 500;
   &__suggestion-icon {
     cursor: default;
-    fill: $black-87;
+    fill: $black-54;
   }
 }
 
