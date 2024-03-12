@@ -26,19 +26,25 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const entityComponentFactory = (
-    entityId: string,
+    span: Span,
     entityPosition: Position,
     removeSpan: () => void,
     replaceEntity: (entity: Entity) => void
   ) => {
-    const entity = answer.options.find((e) => e.id === entityId);
     const EntityComponentReference = Vue.extend(EntityComponent);
+    const entity = answer.options.find((e) => e.id === span.entity.id);
+    const suggestion = spanQuestion.suggestion.getSuggestion({
+      start: span.from,
+      end: span.to,
+      label: entity?.value,
+    });
 
     const instance = new EntityComponentReference({
       propsData: {
         entity,
         spanQuestion,
         entityPosition,
+        suggestion,
       },
     });
 

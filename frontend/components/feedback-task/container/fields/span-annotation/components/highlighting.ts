@@ -50,7 +50,7 @@ export class Highlighting {
   constructor(
     private readonly nodeId: string,
     private readonly EntityComponentConstructor: (
-      entityId: string,
+      span: Span,
       entityPosition: Position,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
@@ -250,7 +250,7 @@ export class Highlighting {
       };
 
       const entityElement = this.EntityComponentConstructor(
-        entity.id,
+        span,
         entityPosition,
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)

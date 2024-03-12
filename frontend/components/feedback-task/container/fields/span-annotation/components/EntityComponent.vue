@@ -50,6 +50,10 @@ export default {
     spanQuestion: {
       type: Object,
     },
+    suggestion: {
+      type: Object,
+      default: false,
+    },
     entityPosition: {
       type: Object,
       required: true,
