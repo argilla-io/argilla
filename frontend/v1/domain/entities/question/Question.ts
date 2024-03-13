@@ -1,4 +1,5 @@
 import { Answer } from "../IAnswer";
+import { Color } from "./Color";
 import {
   QuestionAnswer,
   QuestionType,
@@ -233,6 +234,17 @@ export class Question {
   private initialize() {
     if (this.settings.options && !this.settings.visible_options) {
       this.settings.visible_options = this.settings.options.length;
+    }
+
+    if (this.isSpanType) {
+      this.settings.options = this.settings.options.map((option) => {
+        return {
+          ...option,
+          color: option.color
+            ? Color.from(option.color)
+            : Color.generate(option.value),
+        };
+      });
     }
   }
 

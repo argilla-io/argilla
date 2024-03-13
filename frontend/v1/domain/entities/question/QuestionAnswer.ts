@@ -91,7 +91,6 @@ export class SpanQuestionAnswer extends QuestionAnswer {
     this.options = options.map((e) => ({
       ...e,
       id: `${questionName}-${e.value}`,
-      color: e.color ?? this.colorGenerator(e.value),
       isSelected: false,
     }));
 
@@ -116,16 +115,6 @@ export class SpanQuestionAnswer extends QuestionAnswer {
 
   matchSuggestion(_: Suggestion): boolean {
     return false;
-  }
-
-  private colorGenerator(key: string, saturation = 80, lightness = 80) {
-    const stringUniqueHash = [...key].reduce((acc, char) => {
-      return char.charCodeAt(0) + ((acc << 5) - acc);
-    }, 0);
-
-    return `hsl(${Math.abs(
-      stringUniqueHash % 360
-    )}, ${saturation}%, ${lightness}%)`;
   }
 }
 

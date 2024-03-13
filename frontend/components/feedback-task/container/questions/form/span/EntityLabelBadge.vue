@@ -49,25 +49,16 @@ export default {
     },
   },
   computed: {
-    getHSLValues() {
-      const [hue, saturation, lightness] = this.optionColor
-        .match(/\d+/g)
-        .map(Number);
-      return { hue, saturation, lightness };
-    },
-    optionColor() {
-      return this.option.color;
-    },
     optionDarkColor() {
-      const { hue } = this.getHSLValues;
+      const { hue } = this.option.color.parts;
       return `hsl(${hue}, 60%, 60%)`;
     },
     optionLightColor() {
-      const { hue } = this.getHSLValues;
+      const { hue } = this.option.color.parts;
       return `hsl(${hue}, 80%, 92%)`;
     },
     optionVeryLightColor() {
-      const { hue } = this.getHSLValues;
+      const { hue } = this.option.color.parts;
       return `hsl(${hue}, 30%, 96%)`;
     },
   },
