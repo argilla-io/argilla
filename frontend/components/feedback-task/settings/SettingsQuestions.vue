@@ -49,7 +49,7 @@
                 ghost-class="label__item__ghost"
                 :list="question.settings.options"
                 :group="{ name: question.name }"
-                @end="question.initializeAnswers()"
+                @end="question.reloadAnswerFromOptions()"
               >
                 <div
                   v-for="option in question.settings.options"
@@ -81,10 +81,7 @@
             >
 
             <BaseRangeSlider
-              v-if="
-                !!question.settings.visible_options &&
-                question.settings.options.length > 3
-              "
+              v-if="question.settings.options?.length > 3"
               :id="`visible_options-${question.id}`"
               :min="3"
               :max="question.settings.options.length"
