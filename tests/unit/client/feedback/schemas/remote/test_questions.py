@@ -459,6 +459,7 @@ def test_span_questions_from_api():
         settings={
             "type": "span",
             "field": "field",
+            "visible_options": None,
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {
@@ -466,6 +467,34 @@ def test_span_questions_from_api():
                     "value": "b",
                     "description": None,
                 },
+            ],
+        },
+        inserted_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+    question = RemoteSpanQuestion.from_api(model)
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == model.settings
+    assert question.to_server_payload() == model.dict(exclude={"id", "inserted_at", "updated_at"})
+    assert question.to_local().type == QuestionTypes.span
+
+
+def test_span_questions_from_api_with_visible_labels():
+    model = FeedbackQuestionModel(
+        id=uuid4(),
+        name="question",
+        title="Question",
+        required=True,
+        settings={
+            "type": "span",
+            "field": "field",
+            "visible_options": 3,
+            "options": [
+                {"text": "Span label a", "value": "a", "description": None},
+                {"text": "Span label b", "value": "b", "description": None},
+                {"text": "Span label c", "value": "c", "description": None},
+                {"text": "Span label d", "value": "d", "description": None},
             ],
         },
         inserted_at=datetime.now(),
