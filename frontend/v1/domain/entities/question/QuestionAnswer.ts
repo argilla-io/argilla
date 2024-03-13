@@ -40,7 +40,6 @@ export abstract class QuestionAnswer {
   abstract clear();
   abstract get isValid(): boolean;
   abstract get valuesAnswered();
-
   abstract matchSuggestion(suggestion: Suggestion): boolean;
 }
 export class TextQuestionAnswer extends QuestionAnswer {
@@ -80,7 +79,7 @@ type Option = {
 
 export class SpanQuestionAnswer extends QuestionAnswer {
   public readonly options: Option[] = [];
-  public values: SpanAnswer[] = [];
+  private values: SpanAnswer[] = [];
 
   constructor(
     public readonly type: QuestionType,
@@ -108,7 +107,7 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   }
 
   get isValid(): boolean {
-    return this.values.length > 0;
+    return true;
   }
 
   get valuesAnswered(): SpanAnswer[] {
