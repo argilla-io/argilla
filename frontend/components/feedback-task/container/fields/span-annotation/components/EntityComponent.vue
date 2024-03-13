@@ -11,7 +11,7 @@
       v-if="!visibleDropdown"
     >
       <svgicon
-        v-if="suggestionScore"
+        v-if="!!suggestion"
         class="span-entity__suggestion"
         name="suggestion"
         width="8"
@@ -91,7 +91,7 @@ export default {
       return this.options.length === 1;
     },
     suggestionScore() {
-      return this.suggestion?.score.toFixed(1);
+      return this.suggestion?.score?.toFixed(1);
     },
   },
   methods: {
