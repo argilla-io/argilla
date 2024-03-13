@@ -8,7 +8,6 @@
       :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
       :multiple="false"
       :isFocused="isFocused"
-      :showShortcutsHelper="showShortcutsHelper"
       v-model="question.answer.values"
       @on-focus="onFocus"
       @on-selected="onSelected"
@@ -25,10 +24,6 @@ export default {
       required: true,
     },
     isFocused: {
-      type: Boolean,
-      default: () => false,
-    },
-    showShortcutsHelper: {
       type: Boolean,
       default: () => false,
     },

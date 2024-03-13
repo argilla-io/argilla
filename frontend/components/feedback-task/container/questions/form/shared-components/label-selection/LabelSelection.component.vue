@@ -75,11 +75,7 @@
             :for="option.id"
             :title="option.text"
           >
-            <span
-              class="key"
-              v-if="showShortcutsHelper"
-              v-text="keyboards[option.id]"
-            />
+            <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
           </label></BaseTooltip
         >
@@ -124,10 +120,6 @@ export default {
       default: () => false,
     },
     isFocused: {
-      type: Boolean,
-      default: () => false,
-    },
-    showShortcutsHelper: {
       type: Boolean,
       default: () => false,
     },
@@ -202,6 +194,7 @@ export default {
     },
     showCollapseButton() {
       if (this.maxOptionsToShowBeforeCollapse === -1) return false;
+
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
@@ -305,9 +298,8 @@ export default {
       this.$emit("on-focus");
     },
     expandLabelsOnTab(index) {
-      if (!this.showCollapseButton) {
-        return;
-      }
+      if (!this.showCollapseButton) return;
+
       if (index === this.maxOptionsToShowBeforeCollapse - 1) {
         this.isExpanded = true;
       }
