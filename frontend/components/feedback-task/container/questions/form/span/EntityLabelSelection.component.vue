@@ -42,7 +42,7 @@
         :key="option.id"
         ref="options"
         :option="option"
-        :showShortcutsHelper="showShortcutsHelper && enableShortcuts"
+        :showShortcutsHelper="enableShortcuts"
         :keyboards="keyboards"
         v-model="option.isSelected"
         @keydown.enter.prevent
@@ -64,7 +64,7 @@ export default {
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
-      default: () => -1,
+      required: true,
     },
     options: {
       type: Array,
@@ -79,10 +79,6 @@ export default {
       required: true,
     },
     isFocused: {
-      type: Boolean,
-      default: () => false,
-    },
-    showShortcutsHelper: {
       type: Boolean,
       default: () => false,
     },
@@ -114,12 +110,16 @@ export default {
           this.$nextTick(() => {
             const options = this.$refs?.options;
 
-            if (options.some((o) => o.$el.contains(document.activeElement))) {
+            if (
+              options.some((o) =>
+                o.$refs.inputRef.contains(document.activeElement)
+              )
+            ) {
               return;
             }
 
             if (options.length > 0) {
-              options[0].$el.focus({
+              options[0].$refs.inputRef.focus({
                 preventScroll: true,
               });
             } else {
@@ -150,8 +150,7 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
-        return this.filteredOptions;
+      if (this.isExpanded) return this.filteredOptions;
 
       return this.filteredOptions
         .slice(0, this.maxOptionsToShowBeforeCollapse)
@@ -161,7 +160,6 @@ export default {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
-      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
@@ -185,15 +183,27 @@ export default {
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
-      if ($event.shiftKey || $event.ctrlKey || $event.metaKey) return;
+      if (
+        $event.key === "Tab" ||
+        $event.key === "Enter" ||
+        $event.key === "Backspace" ||
+        $event.shiftKey ||
+        $event.ctrlKey ||
+        $event.metaKey
+      )
+        return;
 
-      const isAnInput = document.activeElement.tagName === "INPUT";
+      const isSearchActive =
+        document.activeElement ===
+        this.$refs.searchComponentRef?.searchInputRef;
 
-      if (isAnInput) return;
+      if (isSearchActive) return;
 
       this.keyCode += $event.key;
 
       if (isNaN(this.keyCode)) {
+        this.$refs.searchComponentRef?.focusInSearch();
+
         return this.reset();
       }
 
@@ -245,9 +255,8 @@ export default {
       this.$emit("on-focus");
     },
     expandLabelsOnTab(index) {
-      if (!this.showCollapseButton) {
-        return;
-      }
+      if (!this.showCollapseButton) return;
+
       if (index === this.maxOptionsToShowBeforeCollapse - 1) {
         this.isExpanded = true;
       }

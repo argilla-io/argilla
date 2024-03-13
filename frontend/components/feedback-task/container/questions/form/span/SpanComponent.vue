@@ -9,7 +9,7 @@
       v-if="!isBulkMode"
       v-model="question.answer.options"
       :componentId="question.id"
-      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
       :enableShortcuts="enableShortcuts"
@@ -46,9 +46,6 @@ export default {
     },
   },
   computed: {
-    maxOptionsToShowBeforeCollapse() {
-      return this.question.settings.visible_options ?? -1;
-    },
     supportedSpanAnnotation() {
       return !!CSS.highlights;
     },
