@@ -183,6 +183,7 @@ export default {
   }
   &__score {
     display: none;
+    margin-left: 2px;
   }
   &__text {
     gap: 4px;
@@ -194,10 +195,6 @@ export default {
     transition: scale 0.2s;
     max-width: none;
     scale: 1.1;
-    color: $black-54;
-    &:not(:has(#{$this}__close-button:hover)) {
-      color: $black-87;
-    }
     #{$this}__close-button {
       display: inline-flex;
     }
