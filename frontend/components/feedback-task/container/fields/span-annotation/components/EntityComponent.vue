@@ -10,19 +10,6 @@
       :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
       v-if="!visibleDropdown"
     >
-      <svgicon
-        v-if="!!suggestion"
-        class="span-entity__suggestion"
-        name="suggestion"
-        width="8"
-        height="8"
-      />
-      <span class="span-entity__text" v-text="selectedOption.text" />
-      <span
-        v-if="suggestionScore"
-        class="span-entity__score"
-        v-text="suggestionScore"
-      />
       <BaseButton
         class="span-entity__close-button"
         @click="removeSelectedOption"
@@ -33,6 +20,19 @@
           width="10"
           height="10"
       /></BaseButton>
+      <span class="span-entity__text" v-text="selectedOption.text" />
+      <svgicon
+        v-if="!!suggestion"
+        class="span-entity__suggestion"
+        name="suggestion"
+        width="8"
+        height="8"
+      />
+      <span
+        v-if="suggestionScore"
+        class="span-entity__score"
+        v-text="suggestionScore"
+      />
     </div>
     <EntityComponentDropdown
       v-else
