@@ -182,7 +182,8 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.isExpanded) return this.filteredOptions;
+      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
+        return this.filteredOptions;
 
       return this.filteredOptions
         .slice(0, this.maxOptionsToShowBeforeCollapse)
@@ -192,6 +193,8 @@ export default {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
+      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
+
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
