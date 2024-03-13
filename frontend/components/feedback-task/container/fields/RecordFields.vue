@@ -2,7 +2,7 @@
   <div class="fields">
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
       <SpanAnnotationTextFieldComponent
-        v-if="hasSpanQuestion(name) && supportedSpanAnnotation"
+        v-if="hasSpanQuestion(name)"
         :id="`${id}-${record.id}-span-field`"
         :name="name"
         :title="title"
@@ -44,9 +44,6 @@ export default {
     },
     searchValue() {
       return this.$route.query?._search ?? "";
-    },
-    supportedSpanAnnotation() {
-      return !!CSS.highlights;
     },
   },
 };

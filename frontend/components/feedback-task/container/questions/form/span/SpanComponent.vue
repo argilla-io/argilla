@@ -6,7 +6,7 @@
       <span v-text="warningMessage" />
     </div>
     <EntityLabelSelectionComponent
-      v-if="!isBulkMode"
+      v-if="!isBulkMode && supportedSpanAnnotation"
       v-model="question.answer.options"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
