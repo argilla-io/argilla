@@ -34,6 +34,7 @@ export class Question {
     this.description = description;
     this.title = title;
 
+    this.initialize();
     this.initializeAnswers();
     this.initializeOriginal();
   }
@@ -179,8 +180,8 @@ export class Question {
     this.suggestion = suggestion;
   }
 
-  initializeAnswers() {
-    this.answer = this.createEmptyAnswers();
+  reloadAnswerFromOptions() {
+    this.initializeAnswers();
   }
 
   private createEmptyAnswers(): QuestionAnswer {
@@ -227,6 +228,16 @@ export class Question {
         this.settings.options
       );
     }
+  }
+
+  private initialize() {
+    if (this.settings.options && !this.settings.visible_options) {
+      this.settings.visible_options = this.settings.options.length;
+    }
+  }
+
+  private initializeAnswers() {
+    this.answer = this.createEmptyAnswers();
   }
 
   private initializeOriginal() {
