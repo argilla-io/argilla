@@ -162,7 +162,17 @@ export default {
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
   user-select: none;
-  transition: background 0.3s;
+  transform-origin: left top;
+  transition: scale 0.2s;
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    z-index: -1;
+    transition: width 0.2s ease;
+  }
   &__wrapper {
     position: absolute;
     display: flex;
@@ -180,9 +190,9 @@ export default {
   &:hover {
     position: relative;
     z-index: 1;
-    background: v-bind("selectedOption.color");
-    transition: background 0.3s;
+    transition: scale 0.2s;
     max-width: none;
+    scale: 1.1;
 
     #{$this}__close-button {
       display: inline-flex;
@@ -190,10 +200,16 @@ export default {
     #{$this}__score {
       display: inline-flex;
     }
+    &:before {
+      background: v-bind("selectedOption.color");
+      width: 100%;
+      transition: width 0.2s ease;
+    }
   }
   &__close-button {
     display: none;
     padding: 0;
+    margin-left: calc($base-space / 2);
     flex-shrink: 0;
     border-radius: 0;
     &__icon {
