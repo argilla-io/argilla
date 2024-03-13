@@ -159,6 +159,7 @@ export default {
   min-width: 10px;
   max-width: v-bind("entityPosition.width");
   margin-top: -1px;
+  padding-right: 3px;
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
   user-select: none;
@@ -193,7 +194,10 @@ export default {
     transition: scale 0.2s;
     max-width: none;
     scale: 1.1;
-
+    color: $black-54;
+    &:not(:has(#{$this}__close-button:hover)) {
+      color: $black-87;
+    }
     #{$this}__close-button {
       display: inline-flex;
     }
@@ -208,16 +212,18 @@ export default {
   }
   &__close-button {
     display: none;
-    padding: 0;
-    margin-left: calc($base-space / 2);
+    height: 100%;
+    padding: 0 1px;
+    margin-right: calc($base-space / 2);
     flex-shrink: 0;
     border-radius: 0;
+    background: $black-37;
+    &:hover {
+      background: $black-54;
+    }
     &__icon {
       min-width: 10px;
-      color: $black-54;
-      &:hover {
-        color: $black-87;
-      }
+      color: palette(white);
     }
   }
   &--clickable {
