@@ -87,6 +87,7 @@ class HuggingFaceDatasetMixin:
                         "start": Value(dtype="int32"),
                         "end": Value(dtype="int32"),
                         "label": Value(dtype="string"),
+                        "text": Value(dtype="string"),
                     },
                     id="question",
                 )
@@ -95,6 +96,7 @@ class HuggingFaceDatasetMixin:
                         "start": Value(dtype="int32"),
                         "end": Value(dtype="int32"),
                         "label": Value(dtype="string"),
+                        "text": Value(dtype="string"),
                         "score": Value(dtype="float32"),
                     }
                 )
@@ -165,6 +167,7 @@ class HuggingFaceDatasetMixin:
                                     "start": span.start,
                                     "end": span.end,
                                     "label": span.label,
+                                    "text": record.fields[question.field][span.start : span.end],
                                 }
                                 for span in response.values[question.name].value
                             ]
@@ -178,7 +181,20 @@ class HuggingFaceDatasetMixin:
                 if record.suggestions:
                     for suggestion in record.suggestions:
                         if question.name == suggestion.question_name:
-                            suggestion_value = suggestion.dict(include={"value"})["value"]
+                            if question.type == QuestionTypes.span:
+                                suggestion_value = [
+                                    {
+                                        "start": span.start,
+                                        "end": span.end,
+                                        "label": span.label,
+                                        "score": span.score,
+                                        "text": record.fields[question.field][span.start : span.end],
+                                    }
+                                    for span in suggestion.value
+                                ]
+                            else:
+                                suggestion_value = suggestion.dict(include={"value"})["value"]
+
                             suggestion_metadata = {
                                 "type": suggestion.type,
                                 "score": suggestion.score,
