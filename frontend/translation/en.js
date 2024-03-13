@@ -27,6 +27,12 @@ export default {
   },
   userSettings: {
     title: "My settings",
+    fields: {
+      userName: "Username",
+      firstName: "Name",
+      lastName: "Surname",
+      workspaces: "Workspaces",
+    },
   },
   settings: {
     title: "Dataset settings",
