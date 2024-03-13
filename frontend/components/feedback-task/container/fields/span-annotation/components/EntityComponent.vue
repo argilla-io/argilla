@@ -214,9 +214,9 @@ export default {
     margin-right: calc($base-space / 2);
     flex-shrink: 0;
     border-radius: 0;
-    background: $black-37;
+    background: $black-54;
     &:hover {
-      background: $black-54;
+      background: $black-87;
     }
     &__icon {
       min-width: 10px;
