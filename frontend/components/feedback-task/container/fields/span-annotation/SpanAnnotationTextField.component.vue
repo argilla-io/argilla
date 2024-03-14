@@ -1,9 +1,9 @@
 <template>
   <div
-    @mouseenter="onFieldMouseEnter"
-    @mouseleave="onFieldMouseLeave"
     class="text_field_component"
     :key="name"
+    @mouseenter.stop="mouseEnter = true"
+    @mouseleave.stop="mouseEnter = false"
   >
     <div class="title-area --body2">
       <span class="text_field_component__title-content" v-text="title" />
@@ -84,7 +84,9 @@ export default {
       usedCharacterAnnotation: false,
       mouseDown: false,
       mouseTimeout: null,
+      mouseEnter: false,
       showCursorWithEntity: false,
+      timeOutShowEntity: null,
     };
   },
   computed: {
@@ -96,6 +98,17 @@ export default {
     },
     hasSelectedEntity() {
       return !!this.selectedEntity;
+    },
+  },
+  watch: {
+    mouseEnter(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        clearTimeout(this.timeOutShowEntity);
+        this.showCursorWithEntity = true;
+        this.timeOutShowEntity = setTimeout(() => {
+          this.showCursorWithEntity = false;
+        }, 3000);
+      }
     },
   },
   methods: {
@@ -134,15 +147,6 @@ export default {
       if (!this.spanQuestion.settings.allow_character_annotation) return;
 
       this.keyPressing(event, false);
-    },
-    onFieldMouseEnter() {
-      this.showCursorWithEntity = true;
-      setTimeout(() => {
-        this.showCursorWithEntity = false;
-      }, 3000);
-    },
-    onFieldMouseLeave() {
-      this.showCursorWithEntity = false;
     },
   },
   mounted() {
