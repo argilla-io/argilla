@@ -17,7 +17,7 @@ export default {
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",
   dimension: "Dimension",
-  visibleOptions: "Visible options",
+  visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {

@@ -41,7 +41,11 @@
 
             <div
               class="settings__edition-form__group"
-              v-if="question.isMultiLabelType || question.isSingleLabelType"
+              v-if="
+                question.isMultiLabelType ||
+                question.isSingleLabelType ||
+                question.isSpanType
+              "
             >
               <label :for="`options-${question.id}`" v-text="$t('labels')" />
               <draggable
@@ -55,13 +59,7 @@
                   v-for="option in question.settings.options"
                   :key="option.value"
                 >
-                  <label
-                    class="label__item"
-                    :class="{
-                      square: question.isMultiLabelType,
-                      round: !question.isMultiLabelType,
-                    }"
-                  >
+                  <label class="label__item">
                     <svgicon
                       width="6"
                       name="draggable"
@@ -86,7 +84,7 @@
               :min="3"
               :max="question.settings.options.length"
               v-model="question.settings.visible_options"
-              >{{ $t("visibleOptions") }}</BaseRangeSlider
+              >{{ $t("visibleLabels") }}</BaseRangeSlider
             >
 
             <div class="settings__edition-form__footer">
@@ -279,6 +277,7 @@ $label-dark-color: palette(purple, 200);
   gap: $base-space;
   width: 100%;
   min-height: $base-space * 4;
+  border-radius: $border-radius-s;
   min-width: 50px;
   text-align: center;
   padding-inline: $base-space;
@@ -287,7 +286,6 @@ $label-dark-color: palette(purple, 200);
   font-weight: 500;
   outline: none;
   border: 2px solid transparent;
-  border-radius: $border-radius-rounded;
   cursor: grab;
   user-select: none;
 
@@ -295,12 +293,5 @@ $label-dark-color: palette(purple, 200);
     opacity: 0.5;
     background: #c8ebfb;
   }
-}
-
-.round {
-  border-radius: $border-radius-rounded;
-}
-.square {
-  border-radius: $border-radius-s;
 }
 </style>
