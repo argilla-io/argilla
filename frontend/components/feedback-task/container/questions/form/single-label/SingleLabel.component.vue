@@ -5,7 +5,7 @@
     <LabelSelectionComponent
       :componentId="question.id"
       :suggestions="question.suggestion?.suggestedAnswer"
-      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
       :multiple="false"
       :isFocused="isFocused"
       v-model="question.answer.values"
@@ -26,11 +26,6 @@ export default {
     isFocused: {
       type: Boolean,
       default: () => false,
-    },
-  },
-  computed: {
-    maxOptionsToShowBeforeCollapse() {
-      return this.question.settings.visible_options ?? -1;
     },
   },
   methods: {
