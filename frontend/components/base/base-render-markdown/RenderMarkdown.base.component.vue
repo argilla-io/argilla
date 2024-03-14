@@ -13,7 +13,7 @@ const preprocess = (html) => {
 const postprocess = (html) => {
   return DOMPurify.sanitize(html, {
     ADD_TAGS: ["embed", "object"],
-    ADD_ATTR: ["data"],
+    ADD_ATTR: ["data", "target"],
     ADD_URI_SAFE_ATTR: ["data"],
   });
 };
@@ -26,6 +26,9 @@ DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
     if (!viewBox && width && height) {
       node.setAttribute("viewBox", `0 0 ${width} ${height}`);
     }
+  }
+  if (node.tagName === "A") {
+    node.setAttribute("target", "_blank");
   }
 });
 
