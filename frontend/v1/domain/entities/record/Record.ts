@@ -124,7 +124,9 @@ export class Record {
   private completeQuestion() {
     return this.questions.map((question) => {
       const answer = this.answer?.value[question.name];
-      const suggestion = this.suggestions?.find((s) => s.question === question);
+      const suggestion = this.suggestions?.find(
+        (s) => s.questionId === question.id
+      );
 
       question.addSuggestion(suggestion);
 

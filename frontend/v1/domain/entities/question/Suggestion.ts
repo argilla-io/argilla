@@ -4,12 +4,13 @@ import {
   RankingAnswer,
   SpanAnswer,
 } from "../IAnswer";
-import { Question } from "./Question";
+import { QuestionType } from "./QuestionType";
 
 export class Suggestion implements Answer {
   constructor(
     public readonly id: string,
-    public readonly question: Question,
+    public readonly questionId: string,
+    public readonly questionType: QuestionType,
     public readonly suggestedAnswer: AnswerCombinations,
     public readonly score: number,
     public readonly agent: string
@@ -25,21 +26,21 @@ export class Suggestion implements Answer {
 
   getSuggestion(answer: string | number | RankingAnswer | SpanAnswer) {
     if (
-      this.question.isSingleLabelType ||
-      this.question.isTextType ||
-      this.question.isRatingType
+      this.questionType.isSingleLabelType ||
+      this.questionType.isTextType ||
+      this.questionType.isRatingType
     ) {
       return this.value === answer;
     }
 
-    if (this.question.isMultiLabelType) {
+    if (this.questionType.isMultiLabelType) {
       const multiLabel = this.value as string[];
       const answerValue = answer as string;
 
       return multiLabel.includes(answerValue);
     }
 
-    if (this.question.isSpanType) {
+    if (this.questionType.isSpanType) {
       const span = answer as SpanAnswer;
       const suggestions = this.value as SpanAnswer[];
 
@@ -49,7 +50,7 @@ export class Suggestion implements Answer {
       );
     }
 
-    if (this.question.isRankingType) {
+    if (this.questionType.isRankingType) {
       const suggestedRanking = this.value as RankingAnswer[];
       const ranking = answer as RankingAnswer;
 

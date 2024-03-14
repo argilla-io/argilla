@@ -80,7 +80,8 @@ export class GetRecordsByCriteriaUseCase {
 
               return new Suggestion(
                 suggestion.id,
-                question,
+                suggestion.question_id,
+                question.type,
                 suggestion.value,
                 suggestion.score,
                 suggestion.agent
