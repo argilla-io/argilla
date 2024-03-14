@@ -98,7 +98,7 @@ export default {
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
-      default: () => -1,
+      required: true,
     },
     options: {
       type: Array,
@@ -182,8 +182,7 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
-        return this.filteredOptions;
+      if (this.isExpanded) return this.filteredOptions;
 
       return this.filteredOptions
         .slice(0, this.maxOptionsToShowBeforeCollapse)
@@ -193,8 +192,6 @@ export default {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
-      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
-
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
@@ -323,9 +320,11 @@ $label-dark-color: palette(purple, 200);
   flex-direction: column;
   gap: $base-space * 2;
   .component-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    height: 28px;
   }
   .inputs-area {
     display: inline-flex;
