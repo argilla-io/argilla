@@ -56,7 +56,7 @@
         />
         <BaseTooltip
           :text="
-            hasSuggestion(option.text)
+            isSuggested(option)
               ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
                   option.text
                 }`
@@ -68,7 +68,7 @@
             class="label-text"
             :class="{
               'label-active': option.isSelected,
-              '--suggestion': hasSuggestion(option.text),
+              '--suggestion': isSuggested(option),
               square: multiple,
               round: !multiple,
             }"
@@ -104,8 +104,8 @@ export default {
       type: Array,
       required: true,
     },
-    suggestions: {
-      type: [Array, String],
+    suggestion: {
+      type: Object,
     },
     placeholder: {
       type: String,
@@ -304,8 +304,8 @@ export default {
         this.isExpanded = true;
       }
     },
-    hasSuggestion(value) {
-      return this.suggestions?.includes(value) || false;
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
     },
   },
   setup(props) {

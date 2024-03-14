@@ -4,11 +4,11 @@
 
     <LabelSelectionComponent
       :componentId="question.id"
-      :suggestions="question.suggestion?.suggestedAnswer"
+      :suggestion="question.suggestion"
       :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
+      v-model="question.answer.values"
       :multiple="false"
       :isFocused="isFocused"
-      v-model="question.answer.values"
       @on-focus="onFocus"
       @on-selected="onSelected"
     />

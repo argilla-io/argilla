@@ -32,7 +32,6 @@
           ref="multiLabel"
           v-if="question.isMultiLabelType"
           :question="question"
-          :visibleOptions="question.settings.visible_options"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />

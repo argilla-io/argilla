@@ -1,3 +1,5 @@
+import { Guard } from "../error";
+
 interface Parts {
   hue: number;
   saturation: number;
@@ -17,12 +19,10 @@ export class Color extends String {
   private constructor(value: string) {
     const [hue, saturation, lightness] = value.match(/\d+/g).map(Number);
 
-    if (
-      hue === undefined ||
-      saturation === undefined ||
-      lightness === undefined
-    )
-      throw new Error("The value color must be HSL");
+    Guard.condition(
+      hue === undefined || saturation === undefined || lightness === undefined,
+      "The value color must be HSL for now."
+    );
 
     super(value);
 

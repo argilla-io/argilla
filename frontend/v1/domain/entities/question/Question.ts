@@ -1,8 +1,8 @@
 import { Answer } from "../IAnswer";
+import { Guard } from "../error";
 import { Color } from "./Color";
 import {
   QuestionAnswer,
-  QuestionType,
   TextQuestionAnswer,
   SingleLabelQuestionAnswer,
   RatingLabelQuestionAnswer,
@@ -10,6 +10,7 @@ import {
   RankingQuestionAnswer,
   SpanQuestionAnswer,
 } from "./QuestionAnswer";
+import { QuestionType } from "./QuestionType";
 import { Suggestion } from "./Suggestion";
 
 interface OriginalQuestion {
@@ -67,35 +68,31 @@ export class Question {
   }
 
   public get type(): QuestionType {
-    return this.settings.type.toLowerCase();
+    return QuestionType.from(this.settings.type);
   }
 
   public get isRankingType(): boolean {
-    return this.type === "ranking";
+    return this.type.isRankingType;
   }
 
   public get isMultiLabelType(): boolean {
-    return this.type === "multi_label_selection";
+    return this.type.isMultiLabelType;
   }
 
   public get isSingleLabelType(): boolean {
-    return this.type === "label_selection";
+    return this.type.isSingleLabelType;
   }
 
   public get isTextType(): boolean {
-    return this.type === "text";
+    return this.type.isTextType;
   }
 
   public get isSpanType(): boolean {
-    return this.type === "span";
+    return this.type.isSpanType;
   }
 
   public get isRatingType(): boolean {
-    return this.type === "rating";
-  }
-
-  public get matchSuggestion(): boolean {
-    return !!this.suggestion && this.answer.matchSuggestion(this.suggestion);
+    return this.type.isRatingType;
   }
 
   public get isModified(): boolean {
@@ -229,6 +226,10 @@ export class Question {
         this.settings.options
       );
     }
+
+    Guard.throw(
+      `Question answer for type ${this.type} is not implemented yet.`
+    );
   }
 
   private initialize() {
