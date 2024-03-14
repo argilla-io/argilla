@@ -1,5 +1,9 @@
 <template>
-  <div class="container">
+  <div
+    class="container"
+    v-click-outside="clickOutside"
+    @keydown="keyboardHandler"
+  >
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -93,6 +97,7 @@ export default {
   },
   data() {
     return {
+      isOutside: false,
       searchInput: "",
       isExpanded: false,
       timer: null,
@@ -106,6 +111,7 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
+        this.isOutside = !newValue;
         if (newValue) {
           this.$nextTick(() => {
             const options = this.$refs?.options;
@@ -128,6 +134,14 @@ export default {
           });
         }
       },
+    },
+    isOutside() {
+      if (!this.enableShortcuts) return;
+      if (this.isOutside) {
+        document.addEventListener("keydown", this.keyboardHandler);
+      } else {
+        document.removeEventListener("keydown", this.keyboardHandler);
+      }
     },
   },
   computed: {
@@ -180,9 +194,13 @@ export default {
     },
   },
   methods: {
+    clickOutside() {
+      this.isOutside = true;
+    },
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
+      debugger;
       if (
         $event.key === "Tab" ||
         $event.key === "Enter" ||
@@ -233,6 +251,7 @@ export default {
 
       if (match) {
         $event.preventDefault();
+        $event.stopPropagation();
 
         match.click();
       }
@@ -261,16 +280,6 @@ export default {
         this.isExpanded = true;
       }
     },
-  },
-  mounted() {
-    if (this.enableShortcuts) {
-      document.addEventListener("keydown", this.keyboardHandler);
-    }
-  },
-  destroyed() {
-    if (this.enableShortcuts) {
-      document.removeEventListener("keydown", this.keyboardHandler);
-    }
   },
 };
 </script>

@@ -225,6 +225,8 @@ export default {
       )
         return;
 
+      $event.stopPropagation();
+
       const isSearchActive =
         document.activeElement ===
         this.$refs.searchComponentRef?.searchInputRef;
@@ -233,6 +235,8 @@ export default {
 
       if ($event.code == "Space") {
         $event.preventDefault();
+        $event.stopPropagation();
+
         document.activeElement.click();
 
         return;
@@ -271,6 +275,7 @@ export default {
 
       if (match) {
         $event.preventDefault();
+        $event.stopPropagation();
 
         match.click();
       }
