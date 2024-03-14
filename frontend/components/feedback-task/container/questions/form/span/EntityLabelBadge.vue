@@ -49,17 +49,17 @@ export default {
     },
   },
   computed: {
+    optionColor() {
+      return this.option.color;
+    },
     optionDarkColor() {
-      const { hue } = this.option.color.parts;
-      return `hsl(${hue}, 60%, 60%)`;
+      return this.optionColor.palette.dark;
     },
     optionLightColor() {
-      const { hue } = this.option.color.parts;
-      return `hsl(${hue}, 80%, 92%)`;
+      return this.optionColor.palette.light;
     },
     optionVeryLightColor() {
-      const { hue } = this.option.color.parts;
-      return `hsl(${hue}, 30%, 96%)`;
+      return this.optionColor.palette.veryLight;
     },
   },
 };

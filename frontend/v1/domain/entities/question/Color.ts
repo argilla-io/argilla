@@ -4,15 +4,35 @@ interface Parts {
   lightness: number;
 }
 
+interface Palette {
+  dark: string;
+  light: string;
+  veryLight: string;
+}
+
 export class Color extends String {
+  public readonly parts: Parts;
+  public readonly palette: Palette;
+
   private constructor(value: string) {
+    const [hue, saturation, lightness] = value.match(/\d+/g).map(Number);
+
+    if (
+      hue === undefined ||
+      saturation === undefined ||
+      lightness === undefined
+    )
+      throw new Error("The value color must be HSL");
+
     super(value);
-  }
 
-  get parts(): Parts {
-    const [hue, saturation, lightness] = this.match(/\d+/g).map(Number);
+    this.parts = { hue, saturation, lightness };
 
-    return { hue, saturation, lightness };
+    this.palette = {
+      dark: `hsl(${hue}, 60%, 60%)`,
+      light: `hsl(${hue}, 80%, 92%)`,
+      veryLight: `hsl(${hue}, 30%, 96%)`,
+    };
   }
 
   static from(value: string): Color {
