@@ -4,7 +4,7 @@
 
     <LabelSelectionComponent
       :componentId="question.id"
-      :suggestions="question.suggestion?.suggestedAnswer"
+      :suggestion="question.suggestion"
       :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
       :multiple="true"
       :isFocused="isFocused"

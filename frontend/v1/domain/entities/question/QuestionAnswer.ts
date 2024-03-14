@@ -1,13 +1,5 @@
 import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
-import { Suggestion } from "./Suggestion";
-
-export type QuestionType =
-  | "text"
-  | "rating"
-  | "ranking"
-  | "label_selection"
-  | "multi_label_selection"
-  | "span";
+import { QuestionType } from "./QuestionType";
 
 export abstract class QuestionAnswer {
   private _answer: Answer;
@@ -40,7 +32,6 @@ export abstract class QuestionAnswer {
   abstract clear();
   abstract get isValid(): boolean;
   abstract get valuesAnswered();
-  abstract matchSuggestion(suggestion: Suggestion): boolean;
 }
 export class TextQuestionAnswer extends QuestionAnswer {
   public originalValue: string;
@@ -62,10 +53,6 @@ export class TextQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered() {
     return this.value;
-  }
-
-  matchSuggestion(suggestion: Suggestion): boolean {
-    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 
@@ -91,7 +78,6 @@ export class SpanQuestionAnswer extends QuestionAnswer {
     this.options = options.map((e) => ({
       ...e,
       id: `${questionName}-${e.value}`,
-      color: e.color ?? this.colorGenerator(e.value),
       isSelected: false,
     }));
 
@@ -112,20 +98,6 @@ export class SpanQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): SpanAnswer[] {
     return this.values;
-  }
-
-  matchSuggestion(_: Suggestion): boolean {
-    return false;
-  }
-
-  private colorGenerator(key: string, saturation = 80, lightness = 80) {
-    const stringUniqueHash = [...key].reduce((acc, char) => {
-      return char.charCodeAt(0) + ((acc << 5) - acc);
-    }, 0);
-
-    return `hsl(${Math.abs(
-      stringUniqueHash % 360
-    )}, ${saturation}%, ${lightness}%)`;
   }
 }
 
@@ -172,10 +144,6 @@ export class SingleLabelQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): string {
     return this.values.filter((label) => label.isSelected)[0]?.value;
-  }
-
-  matchSuggestion(suggestion: Suggestion): boolean {
-    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 type MultiLabelValue = {
@@ -225,17 +193,6 @@ export class MultiLabelQuestionAnswer extends QuestionAnswer {
       .filter((label) => label.isSelected)
       .map((label) => label.value);
   }
-
-  matchSuggestion(suggestion: Suggestion): boolean {
-    const valuesSuggested = suggestion.suggestedAnswer as string[];
-
-    const equal =
-      valuesSuggested.every((answered) =>
-        this.valuesAnswered.includes(answered)
-      ) && valuesSuggested.length === this.valuesAnswered.length;
-
-    return equal;
-  }
 }
 type RatingValue = {
   id: string;
@@ -278,10 +235,6 @@ export class RatingLabelQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): number {
     return this.values.filter((rating) => rating.isSelected)[0]?.value;
-  }
-
-  matchSuggestion(suggestion: Suggestion): boolean {
-    return this.valuesAnswered === suggestion.suggestedAnswer;
   }
 }
 type RankingValue = {
@@ -339,14 +292,5 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): RankingValue[] {
     return this.values;
-  }
-
-  matchSuggestion(suggestion: Suggestion): boolean {
-    const suggestedAnswers = suggestion.suggestedAnswer as RankingAnswer[];
-    return suggestedAnswers.every(
-      (suggested) =>
-        this.values.find((value) => value.value === suggested.value)?.rank ===
-        suggested.rank
-    );
   }
 }

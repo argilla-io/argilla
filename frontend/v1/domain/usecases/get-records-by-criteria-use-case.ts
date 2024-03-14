@@ -74,9 +74,13 @@ export class GetRecordsByCriteriaUseCase {
 
         const suggestions = !criteria.page.isBulkMode
           ? record.suggestions.map((suggestion) => {
+              const question = questions.find(
+                (q) => q.id === suggestion.question_id
+              );
+
               return new Suggestion(
                 suggestion.id,
-                suggestion.question_id,
+                question,
                 suggestion.value,
                 suggestion.score,
                 suggestion.agent

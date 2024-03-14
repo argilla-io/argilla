@@ -124,10 +124,10 @@ export class Record {
   private completeQuestion() {
     return this.questions.map((question) => {
       const answer = this.answer?.value[question.name];
-      const suggestion = this.suggestions?.find(
-        (s) => s.questionId === question.id
-      );
+      const suggestion = this.suggestions?.find((s) => s.question === question);
+
       question.addSuggestion(suggestion);
+
       if (this.isPending || this.isDraft) {
         question.responseIfUnanswered(answer);
       } else {
