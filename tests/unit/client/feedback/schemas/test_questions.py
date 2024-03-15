@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import pytest
 from typing import Any, Dict
 
-import pytest
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -26,7 +26,6 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
     _LabelQuestion,
 )
-
 from tests.pydantic_v1 import ValidationError
 
 
@@ -540,7 +539,7 @@ def test_span_question_with_default_visible_label_when_labels_is_less_than_20():
 def test_span_question_when_visible_labels_is_greater_than_total_labels():
     with pytest.warns(
         UserWarning,
-        match="'`visible_labels=4` is greater than the total number of labels \(3\), so it will be set to `3`.'",
+        match="`visible_labels=4` is greater than the total number of labels \(3\)",
     ):
         question = SpanQuestion(
             name="question",
@@ -580,6 +579,20 @@ def test_span_question_with_visible_labels_less_than_min_value():
             labels=["a", "b"],
             visible_labels=2,
         )
+
+
+
+def test_span_questions_with_default_visible_labels_and_less_labels_than_default():
+    with pytest.warns(UserWarning, match="visible_labels=20` is greater than the total number of labels"):
+        question = SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=list(range(10)),
+        )
+
+        assert question.visible_labels == 10
 
 
 def test_span_question_with_no_labels() -> None:
