@@ -98,7 +98,7 @@ Use the **Find Similar** feature, other filters (Suggestions, Metadata, etc.) an
 ```
 
 ```{note}
-**Span questions** cannot be answered from the _Bulk view_. You will need to switch to _Focus view_ to answer them. 
+**Span questions** cannot be answered from the _Bulk view_. You will need to switch to _Focus view_ to answer them.
 
 If you have a Span question in your dataset, you can always answer other questions in bulk and save your responses as a draft. Later, you will be able to answer to the Span question in the _Focus view_ of the _Draft_ queue.
 ```
