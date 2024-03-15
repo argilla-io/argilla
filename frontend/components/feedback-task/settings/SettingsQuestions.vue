@@ -254,44 +254,50 @@ export default {
   }
 }
 
-$label-color: palette(purple, 800);
-$label-dark-color: palette(purple, 200);
+$label-color: palette(grey, 700);
+$label-dark-color: $black-54;
 
 .label__container {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: $base-space;
-  border-radius: 5em;
-  background: transparent;
-
-  &:hover {
-    border-color: darken($label-color, 12%);
-  }
+  gap: calc($base-space / 2);
 }
 
 .label__item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $base-space;
+  gap: calc($base-space / 2);
   width: 100%;
-  min-height: $base-space * 4;
+  padding: calc($base-space / 4);
   border-radius: $border-radius-s;
   min-width: 50px;
   text-align: center;
-  padding-inline: $base-space;
-  background: $label-color;
   color: $label-dark-color;
   font-weight: 500;
   outline: none;
   border: 2px solid transparent;
   cursor: grab;
   user-select: none;
+  transition: background 0.2s ease;
+  span {
+    border-radius: calc($border-radius-s - 2px);
+    background: $black-10;
+    padding: 2px 4px;
+    line-height: 1.2;
+  }
+  svg {
+    fill: $black-20;
+  }
+  &:hover {
+    background: $label-color;
+    transition: background 0.2s ease;
+  }
 
   &__ghost {
     opacity: 0.5;
-    background: #c8ebfb;
+    background: $black-6;
   }
 }
 </style>
