@@ -19,7 +19,7 @@ const postprocess = (html) => {
 };
 
 DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
-  if (node.tagName === "svg") {
+  if (node instanceof SVGElement) {
     const width = node.getAttribute("width");
     const height = node.getAttribute("height");
     const viewBox = node.getAttribute("viewBox");
