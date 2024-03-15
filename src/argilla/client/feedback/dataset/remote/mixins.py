@@ -68,7 +68,7 @@ class ArgillaRecordsMixin:
                 offsets = list(range(start, stop, FETCHING_BATCH_SIZE))
                 limits = [FETCHING_BATCH_SIZE] * len(offsets)
                 if stop % FETCHING_BATCH_SIZE != 0:
-                    limits[-1] = (stop % FETCHING_BATCH_SIZE)
+                    limits[-1] = stop % FETCHING_BATCH_SIZE
         elif isinstance(key, int):
             if num_records is not None:
                 if key < 0:
