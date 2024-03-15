@@ -74,4 +74,18 @@ describe("RenderMarkdownBaseComponent", () => {
 </div>`
     );
   });
+
+  it("open in other window if the node already hace target blank", () => {
+    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+      ...options,
+      propsData: {
+        markdown: `<a href="https://example.com" target="_blank">example</a>`,
+      },
+    });
+    expect(wrapper.html()).toBe(
+      `<div class="markdown-render">
+  <p><a target="_blank" href="https://example.com">example</a></p>
+</div>`
+    );
+  });
 });
