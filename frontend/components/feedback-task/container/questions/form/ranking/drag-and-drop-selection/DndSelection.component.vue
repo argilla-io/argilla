@@ -23,12 +23,17 @@
           v-text="item.text"
           :id="`${item.value}-span`"
         />
-        <span
-          :title="$t('suggestion.suggested-rank')"
-          class="draggable__suggestion"
+
+        <BaseTooltip
           v-if="findRankSuggestion(item)"
-          v-text="findRankSuggestion(item).rank"
-        />
+          class="draggable__suggestion"
+          :text="`<img src='/icons/suggestion.svg' /> ${$t(
+            'suggestion.suggested-rank'
+          )}`"
+          minimalist
+        >
+          <span v-text="findRankSuggestion(item).rank" />
+        </BaseTooltip>
       </div>
     </draggable>
 
@@ -65,12 +70,17 @@
               v-text="item.text"
               :id="`${item.value}-span`"
             />
-            <span
-              :title="$t('suggestion.suggested-rank')"
-              class="draggable__suggestion"
+
+            <BaseTooltip
               v-if="findRankSuggestion(item)"
-              v-text="findRankSuggestion(item).rank"
-            />
+              class="draggable__suggestion"
+              :text="`<img src='/icons/suggestion.svg' /> ${$t(
+                'suggestion.suggested-rank'
+              )}`"
+              minimalist
+            >
+              <span v-text="findRankSuggestion(item).rank" />
+            </BaseTooltip>
           </div>
         </draggable>
       </div>
@@ -80,7 +90,6 @@
 
 <script>
 import "assets/icons/draggable";
-import suggestionIcon from "@/static/icons/suggestion.svg";
 
 export default {
   name: "DndSelectionComponent",
@@ -101,7 +110,6 @@ export default {
     return {
       timer: null,
       keyCode: "",
-      suggestionIcon,
     };
   },
   watch: {
@@ -281,6 +289,11 @@ $max-visible-card-items: 12;
       box-shadow: none;
       &:hover {
         box-shadow: none;
+      }
+    }
+    &.sortable-chosen {
+      .tooltip {
+        display: none;
       }
     }
     &--unranked {
