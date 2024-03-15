@@ -27,7 +27,7 @@ DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
       node.setAttribute("viewBox", `0 0 ${width} ${height}`);
     }
   }
-  if (node.tagName === "A") {
+  if (node instanceof HTMLAnchorElement) {
     node.setAttribute("target", "_blank");
   }
 });
