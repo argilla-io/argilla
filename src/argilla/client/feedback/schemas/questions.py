@@ -392,7 +392,7 @@ class SpanQuestion(QuestionSchema):
         elif v > number_of_labels:
             msg = (
                 f"`visible_labels={v}` is greater than the total number of labels ({number_of_labels}), "
-                f"so it will be set to `{number_of_labels}`.",
+                f"so it will be set to `{number_of_labels}`."
             )
             v = number_of_labels
 
