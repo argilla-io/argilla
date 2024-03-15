@@ -116,6 +116,7 @@ You can define metadata properties using the Python SDK by providing the followi
 - `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
 
 The following arguments apply to specific metadata types:
+
 - `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
 - `min` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
 - `max` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
@@ -308,6 +309,7 @@ dataset.fields.extend(new_fields)
 # Remove a non-required field
 dataset.fields.pop(0)
 ```
+
 :::
 
 :::{tab-item} Questions
@@ -327,6 +329,7 @@ dataset.questions.extend(new_questions)
 # Remove a non-required question
 dataset.questions.pop(0)
 ```
+
 :::
 
 :::{tab-item} Metadata
@@ -347,6 +350,7 @@ dataset.update_metadata_properties(metadata_cfg)
 # Delete a metadata property
 dataset.delete_metadata_properties(metadata_properties="my_metadata")
 ```
+
 :::
 
 :::{tab-item} Vectors
@@ -366,6 +370,7 @@ dataset.update_vectors_settings(vector_cfg)
 # Delete vector settings
 dataset.delete_vectors_settings("my_vectors")
 ```
+
 :::
 
 :::{tab-item} Guidelines
@@ -378,6 +383,7 @@ dataset = rg.FeedbackDataset(...)
 # Define new guidelines for a question
 dataset.questions[0].description = 'New description for the question.'
 ```
+
 :::
 
 ::::
