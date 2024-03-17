@@ -161,9 +161,9 @@ export class DatasetRepository implements IDatasetRepository {
 
   private fetchWorkspaces = async (axios) => {
     try {
-      const { data } = await axios.get("/workspaces");
+      const { data } = await axios.get("v1/me/workspaces");
 
-      return data;
+      return data.items;
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_FETCHING_WORKSPACES,
