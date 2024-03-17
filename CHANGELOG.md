@@ -22,6 +22,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed contextualized workspaces ([#4665](https://github.com/argilla-io/argilla/pull/4665))
 - Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
 - Fixed parsing ranking values in suggestions from HF datasets. ([#4629](https://github.com/argilla-io/argilla/pull/4629))
 - Fixed reading description from API response payload. ([#4632](https://github.com/argilla-io/argilla/pull/4632))
