@@ -47,9 +47,19 @@ export default {
 }
 .top {
   grid-area: 2 / 2 / 3 / 5;
+
+  @include media("<tablet") {
+    grid-area: 2 / 1 / 3 / 6;
+    padding-inline: 2em;
+  }
 }
 .left {
   grid-area: 3 / 2 / 6 / 4;
+
+  @include media("<tablet") {
+    grid-area: 3 / 1 / 6 / 6;
+    padding-inline: 2em;
+  }
 }
 .right {
   grid-area: 3 / 4 / 6 / 5;

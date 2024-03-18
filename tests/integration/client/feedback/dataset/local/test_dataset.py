@@ -20,6 +20,7 @@ import datasets
 import pytest
 from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
@@ -454,6 +455,26 @@ async def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.questions) == len(dataset.questions)
     assert len(dataset_from_argilla.records) == len(dataset.records)
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
+
+
+@pytest.mark.asyncio
+async def test_pull_from_argilla_with_one_more_record_than_chunk_size(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    settings = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="generated-text")],
+    )
+
+    remote = settings.push_to_argilla(name="test-dataset")
+
+    chunk_size = FETCHING_BATCH_SIZE
+    double_chunk_size = 2 * chunk_size
+    remote.add_records([FeedbackRecord(fields={"text": "This is a negative example"})] * (double_chunk_size + 1))
+
+    assert len(remote.pull()) == double_chunk_size + 1
+    assert len(remote.pull(chunk_size + 1)) == chunk_size + 1
 
 
 @pytest.mark.asyncio
