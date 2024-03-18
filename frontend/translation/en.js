@@ -17,7 +17,7 @@ export default {
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",
   dimension: "Dimension",
-  visibleOptions: "Visible options",
+  visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
@@ -102,6 +102,9 @@ export default {
     metadata: "metadata",
   },
   suggestion: {
+    agent: "\nagent: {agent}",
+    score: "\nscore: {score}",
+    tooltip: "This question contains a suggestion{agent}{score}",
     filter: {
       value: "Suggestion values",
       score: "Score",
@@ -119,6 +122,11 @@ export default {
     similarUsing: "similar using",
     expand: "Expand",
     collapse: "Collapse",
+  },
+  spanAnnotation: {
+    shortcutHelper: "Hold 'Shift' to select character level",
+    notSupported: "Span annotation is not supported for your browser",
+    bulkMode: "Span annotation is not supported in Bulk view",
   },
   login: {
     title: "Sign in",

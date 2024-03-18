@@ -98,6 +98,7 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   height: 100%;

@@ -3,7 +3,7 @@
     <QuestionHeaderComponent :question="question" />
     <DndSelectionComponent
       :ranking="ranking"
-      :suggestions="question.suggestion?.suggestedAnswer"
+      :suggestion="question.suggestion"
       @on-reorder="onChanged"
       :isFocused="isFocused"
       @on-focus="onFocus"

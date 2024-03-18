@@ -1,5 +1,9 @@
 <template>
-  <div class="container" @keydown="keyboardHandler">
+  <div
+    class="container"
+    v-click-outside="clickOutside"
+    @keydown="keyboardHandler"
+  >
     <div class="component-header" v-if="showSearch || showCollapseButton">
       <div class="left-header">
         <SearchLabelComponent
@@ -37,49 +41,19 @@
       class="inputs-area"
       v-if="filteredOptions.length"
     >
-      <div
-        class="input-button"
+      <EntityLabelBadge
         v-for="(option, index) in visibleOptions"
         :key="option.id"
+        ref="options"
+        :option="option"
+        :showShortcutsHelper="enableShortcuts"
+        :keyboards="keyboards"
+        v-model="option.isSelected"
         @keydown.enter.prevent
-      >
-        <input
-          ref="options"
-          type="checkbox"
-          :name="option.text"
-          :id="option.id"
-          :data-keyboard="keyboards[option.id]"
-          v-model="option.isSelected"
-          @change="onSelect(option)"
-          @focus="onFocus"
-          @keydown.tab="expandLabelsOnTab(index)"
-        />
-        <BaseTooltip
-          :text="
-            isSuggested(option)
-              ? `<img src='icons/suggestion.svg' /> ${$t('suggestion.name')}: ${
-                  option.text
-                }`
-              : null
-          "
-          minimalist
-        >
-          <label
-            class="label-text"
-            :class="{
-              'label-active': option.isSelected,
-              '--suggestion': isSuggested(option),
-              square: multiple,
-              round: !multiple,
-            }"
-            :for="option.id"
-            :title="option.text"
-          >
-            <span class="key" v-text="keyboards[option.id]" />
-            <span>{{ option.text }}</span>
-          </label></BaseTooltip
-        >
-      </div>
+        @on-selected="onSelect(option)"
+        @on-expand-labels-on-tab="expandLabelsOnTab(index)"
+        @on-focus="onFocus"
+      />
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
   </div>
@@ -89,11 +63,8 @@
 const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 15;
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
-
-import { useLabelSelectionViewModel } from "./useLabelSelectionViewModel";
-
 export default {
-  name: "LabelSelectionComponent",
+  name: "EntityLabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
@@ -103,9 +74,6 @@ export default {
       type: Array,
       required: true,
     },
-    suggestion: {
-      type: Object,
-    },
     placeholder: {
       type: String,
       default: () => "Search labels",
@@ -114,11 +82,11 @@ export default {
       type: String,
       required: true,
     },
-    multiple: {
+    isFocused: {
       type: Boolean,
       default: () => false,
     },
-    isFocused: {
+    enableShortcuts: {
       type: Boolean,
       default: () => false,
     },
@@ -129,7 +97,9 @@ export default {
   },
   data() {
     return {
+      isOutside: false,
       searchInput: "",
+      isExpanded: false,
       timer: null,
       keyCode: "",
     };
@@ -141,15 +111,21 @@ export default {
     isFocused: {
       immediate: true,
       handler(newValue) {
+        this.isOutside = !newValue;
         if (newValue) {
           this.$nextTick(() => {
             const options = this.$refs?.options;
-            if (options.some((o) => o.contains(document.activeElement))) {
+
+            if (
+              options.some((o) =>
+                o.$refs.inputRef.contains(document.activeElement)
+              )
+            ) {
               return;
             }
 
             if (options.length > 0) {
-              options[0].focus({
+              options[0].$refs.inputRef.focus({
                 preventScroll: true,
               });
             } else {
@@ -158,6 +134,14 @@ export default {
           });
         }
       },
+    },
+    isOutside() {
+      if (!this.enableShortcuts) return;
+      if (this.isOutside) {
+        document.addEventListener("keydown", this.keyboardHandler);
+      } else {
+        document.removeEventListener("keydown", this.keyboardHandler);
+      }
     },
   },
   computed: {
@@ -210,9 +194,13 @@ export default {
     },
   },
   methods: {
+    clickOutside() {
+      this.isOutside = true;
+    },
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
+      debugger;
       if (
         $event.key === "Tab" ||
         $event.key === "Enter" ||
@@ -223,22 +211,11 @@ export default {
       )
         return;
 
-      $event.stopPropagation();
-
       const isSearchActive =
         document.activeElement ===
         this.$refs.searchComponentRef?.searchInputRef;
 
       if (isSearchActive) return;
-
-      if ($event.code == "Space") {
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        document.activeElement.click();
-
-        return;
-      }
 
       this.keyCode += $event.key;
 
@@ -258,8 +235,9 @@ export default {
     },
     hasJustOneCoincidence(keyCode) {
       return (
-        this.$refs.options.filter((o) => o.dataset.keyboard.startsWith(keyCode))
-          .length == 1
+        this.$refs.options.filter((o) =>
+          o.$refs.inputRef.dataset.keyboard.startsWith(keyCode)
+        ).length == 1
       );
     },
     reset() {
@@ -268,8 +246,8 @@ export default {
     },
     selectByKeyCode($event, keyCode) {
       const match = this.$refs.options.find(
-        (option) => option.dataset.keyboard === keyCode
-      );
+        (option) => option.$refs.inputRef.dataset.keyboard === keyCode
+      )?.$refs.inputRef;
 
       if (match) {
         $event.preventDefault();
@@ -281,8 +259,6 @@ export default {
       this.reset();
     },
     onSelect({ id, isSelected }) {
-      if (this.multiple) return;
-
       this.options.forEach((option) => {
         option.isSelected = option.id === id ? isSelected : false;
       });
@@ -304,20 +280,11 @@ export default {
         this.isExpanded = true;
       }
     },
-    isSuggested(option) {
-      return this.suggestion?.isSuggested(option.value);
-    },
-  },
-  setup(props) {
-    return useLabelSelectionViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$suggestion-color: palette(yellow, 400);
-$label-color: palette(purple, 800);
-$label-dark-color: palette(purple, 200);
 .container {
   display: flex;
   flex-direction: column;
@@ -336,9 +303,6 @@ $label-dark-color: palette(purple, 200);
     gap: $base-space;
     border-radius: 5em;
     background: transparent;
-    &:hover {
-      border-color: darken($label-color, 12%);
-    }
   }
 
   .input-button {
@@ -371,95 +335,6 @@ $label-dark-color: palette(purple, 200);
   }
 }
 
-.label-text {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: $base-space;
-  width: 100%;
-  min-height: $base-space * 4;
-  min-width: 50px;
-  text-align: center;
-  padding-inline: $base-space;
-  background: $label-color;
-  color: $label-dark-color;
-  font-weight: 500;
-  outline: none;
-  border: 2px solid transparent;
-  border-radius: $border-radius-rounded;
-  cursor: pointer;
-  user-select: none;
-  span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-    &:hover {
-      direction: rtl;
-    }
-  }
-  &.--suggestion {
-    background: $suggestion-color;
-    &:not(.label-active):hover {
-      background: darken($suggestion-color, 8%);
-    }
-  }
-  &:not(.label-active):hover {
-    background: darken($label-color, 8%);
-  }
-  &.label-active {
-    color: white;
-    background: $label-dark-color;
-    &.--suggestion {
-      border: 2px solid $suggestion-color;
-    }
-  }
-}
-
-.round {
-  border-radius: $border-radius-rounded;
-}
-.square {
-  border-radius: $border-radius-s;
-}
-
-input[type="checkbox"] {
-  @extend %visuallyhidden;
-  &:focus {
-    & + div .label-text {
-      outline: 2px solid $primary-color;
-    }
-  }
-}
-.input-button:not(:first-of-type) {
-  input[type="checkbox"] {
-    &:focus:not(:focus-visible) {
-      & + div .label-text {
-        outline: none;
-        &.label-active {
-          outline: none;
-        }
-      }
-    }
-  }
-}
-.key {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  height: $base-space * 2;
-  aspect-ratio: 1;
-  border-radius: $border-radius;
-  border-width: 1px 1px 3px 1px;
-  border-color: $black-20;
-  border-style: solid;
-  box-sizing: content-box;
-  color: $black-87;
-  background: palette(grey, 700);
-  @include font-size(11px);
-  font-family: monospace, monospace;
-}
 .no-result {
   display: block;
   height: $base-space * 4;

@@ -41,7 +41,11 @@
 
             <div
               class="settings__edition-form__group"
-              v-if="question.isMultiLabelType || question.isSingleLabelType"
+              v-if="
+                question.isMultiLabelType ||
+                question.isSingleLabelType ||
+                question.isSpanType
+              "
             >
               <label :for="`options-${question.id}`" v-text="$t('labels')" />
               <draggable
@@ -49,19 +53,13 @@
                 ghost-class="label__item__ghost"
                 :list="question.settings.options"
                 :group="{ name: question.name }"
-                @end="question.initializeAnswers()"
+                @end="question.reloadAnswerFromOptions()"
               >
                 <div
                   v-for="option in question.settings.options"
                   :key="option.value"
                 >
-                  <label
-                    class="label__item"
-                    :class="{
-                      square: question.isMultiLabelType,
-                      round: !question.isMultiLabelType,
-                    }"
-                  >
+                  <label class="label__item">
                     <svgicon
                       width="6"
                       name="draggable"
@@ -81,15 +79,12 @@
             >
 
             <BaseRangeSlider
-              v-if="
-                !!question.settings.visible_options &&
-                question.settings.options.length > 3
-              "
+              v-if="question.settings.options?.length > 3"
               :id="`visible_options-${question.id}`"
               :min="3"
               :max="question.settings.options.length"
               v-model="question.settings.visible_options"
-              >{{ $t("visibleOptions") }}</BaseRangeSlider
+              >{{ $t("visibleLabels") }}</BaseRangeSlider
             >
 
             <div class="settings__edition-form__footer">
@@ -259,51 +254,50 @@ export default {
   }
 }
 
-$label-color: palette(purple, 800);
-$label-dark-color: palette(purple, 200);
+$label-color: palette(grey, 700);
+$label-dark-color: $black-54;
 
 .label__container {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: $base-space;
-  border-radius: 5em;
-  background: transparent;
-
-  &:hover {
-    border-color: darken($label-color, 12%);
-  }
+  gap: calc($base-space / 2);
 }
 
 .label__item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $base-space;
+  gap: calc($base-space / 2);
   width: 100%;
-  min-height: $base-space * 4;
+  padding: calc($base-space / 4);
+  border-radius: $border-radius-s;
   min-width: 50px;
   text-align: center;
-  padding-inline: $base-space;
-  background: $label-color;
   color: $label-dark-color;
   font-weight: 500;
   outline: none;
   border: 2px solid transparent;
-  border-radius: $border-radius-rounded;
   cursor: grab;
   user-select: none;
+  transition: background 0.2s ease;
+  span {
+    border-radius: calc($border-radius-s - 2px);
+    background: $black-10;
+    padding: 2px 4px;
+    line-height: 1.2;
+  }
+  svg {
+    fill: $black-20;
+  }
+  &:hover {
+    background: $label-color;
+    transition: background 0.2s ease;
+  }
 
   &__ghost {
     opacity: 0.5;
-    background: #c8ebfb;
+    background: $black-6;
   }
-}
-
-.round {
-  border-radius: $border-radius-rounded;
-}
-.square {
-  border-radius: $border-radius-s;
 }
 </style>

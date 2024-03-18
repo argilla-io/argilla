@@ -33,15 +33,18 @@ export default {
     },
   },
   computed: {
+    isSuggested() {
+      return this.question.suggestion?.isSuggested(this.question.answer.value);
+    },
     tabs() {
       return [
         {
           id: "0",
-          name: this.question.matchSuggestion ? "Suggestion" : "Write",
-          class: this.question.matchSuggestion ? "--suggestion" : null,
+          name: this.isSuggested ? "Suggestion" : "Write",
+          class: this.isSuggested ? "--suggestion" : null,
           component: "TextAreaContents",
         },
-        ...(this.question.suggestion && !this.question.matchSuggestion
+        ...(!this.isSuggested
           ? [
               {
                 id: "1",
