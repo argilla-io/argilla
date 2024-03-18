@@ -1,13 +1,19 @@
 <template>
   <div
     class="span-entity__wrapper"
-    :style="{ left: entityPosition.left, top: entityPosition.top }"
+    :style="{
+      left: entityPosition.left,
+      top: entityPosition.top,
+    }"
     ref="spanEntityRef"
     id="spanEntity"
   >
     <div
       v-on="!singleOption ? { click: toggleDropdown } : {}"
-      :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
+      :class="[
+        !singleOption ? 'span-entity--clickable' : 'span-entity',
+        allowOverlapping ? 'span-entity--overlapping' : null,
+      ]"
       v-if="!visibleDropdown"
     >
       <BaseButton
@@ -46,6 +52,13 @@
       @on-remove-option="removeSelectedOption"
       v-click-outside="hideDropdown"
     />
+    <span
+      v-if="allowOverlapping"
+      class="span-entity__line"
+      :style="{
+        width: entityPosition.width,
+      }"
+    ></span>
   </div>
 </template>
 
@@ -92,6 +105,13 @@ export default {
     },
     suggestionScore() {
       return this.suggestion?.score?.toFixed(1);
+    },
+    entityColor() {
+      return this.entity.color;
+    },
+    allowOverlapping() {
+      // return this.spanQuestion.settings.allow_overlapping;
+      return true;
     },
   },
   methods: {
@@ -189,6 +209,12 @@ export default {
     gap: 4px;
     @include truncate(auto);
   }
+  &__line {
+    position: absolute;
+    flex: 1;
+    height: 2px;
+    background: v-bind(entityColor);
+  }
   &:hover {
     position: relative;
     z-index: 1;
@@ -226,6 +252,11 @@ export default {
   &--clickable {
     cursor: pointer;
     @extend .span-entity;
+  }
+  &--overlapping {
+    @extend .span-entity;
+    background: v-bind(entityColor);
+    margin-top: 0;
   }
 }
 </style>

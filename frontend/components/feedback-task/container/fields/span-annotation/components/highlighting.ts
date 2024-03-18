@@ -43,8 +43,9 @@ export class Highlighting {
   private entity: Entity = null;
   private scrollingElement: HTMLElement;
   private config: Configuration = {
-    allowOverlap: false,
+    allowOverlap: true,
     allowCharacter: false,
+    lineHeight: 32,
   };
 
   constructor(
@@ -58,7 +59,7 @@ export class Highlighting {
     styles?: Styles
   ) {
     this.styles = {
-      entitiesGap: 9,
+      entitiesGap: 12,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
       ...styles,
@@ -128,6 +129,10 @@ export class Highlighting {
 
   allowCharacterAnnotation(allow: boolean) {
     this.config.allowCharacter = allow;
+  }
+
+  updateLineHeight(height: number) {
+    this.config.lineHeight = height;
   }
 
   replaceEntity(span: Span, entity: Entity) {
@@ -212,14 +217,11 @@ export class Highlighting {
   }
 
   private applyEntityStyle() {
-    const overlappedSpans: {
-      left: number;
-      top: number;
-    }[] = [];
-
     while (this.entitySpanContainer.firstChild) {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
+
+    let overlappedLevels = 0;
 
     for (const span of this.spans) {
       const { node } = span;
@@ -237,10 +239,23 @@ export class Highlighting {
       const { left, top } = rangePosition;
       const { width } = rangeWidth;
 
-      const position = { left, top: top + window.scrollY, width };
+      const position = {
+        left,
+        top: top + window.scrollY,
+        width,
+      };
 
-      if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
-        position.top += this.styles.entitiesGap;
+      const overlapped = this.spans.filter((s) => s.from === span.from);
+
+      if (overlapped.length > overlappedLevels) {
+        overlappedLevels = overlapped.length;
+      }
+      if (overlappedLevels) {
+        const overlappedIndex = overlapped.findIndex((s) => s === span);
+        position.top += this.styles.entitiesGap * overlappedIndex;
+        this.updateLineHeight(
+          32 + this.styles.entitiesGap * (overlappedLevels - 1)
+        );
       }
 
       const entityPosition = {
@@ -257,8 +272,6 @@ export class Highlighting {
       );
 
       this.entitySpanContainer.appendChild(entityElement);
-
-      overlappedSpans.push(position);
     }
   }
 

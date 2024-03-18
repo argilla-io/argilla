@@ -41,12 +41,14 @@
         :entity-name="selectedEntity.text"
         :message="$t('spanAnnotation.shortcutHelper')"
       />
-      <template v-for="{ id, color } in spanQuestion.answer.options">
-        <style :key="id" scoped>
-          .span-annotation__field::highlight(hl-{{id}}) {
-            background-color: {{color}};
-          }
-        </style>
+      <template v-if="!allowOverlapping">
+        <template v-for="{ id, color } in spanQuestion.answer.options">
+          <style :key="id" scoped>
+            .span-annotation__field::highlight(hl-{{id}}) {
+              background-color: {{color}};
+            }
+          </style>
+        </template>
       </template>
     </div>
   </div>
@@ -90,6 +92,9 @@ export default {
     };
   },
   computed: {
+    lineHeight() {
+      return `${this.highlighting.config.lineHeight}px`;
+    },
     selectedEntity() {
       return this.spanQuestion.answer.options.find((e) => e.isSelected);
     },
@@ -98,6 +103,10 @@ export default {
     },
     hasSelectedEntity() {
       return !!this.selectedEntity;
+    },
+    allowOverlapping() {
+      // return this.spanQuestion.settings.allow_overlapping;
+      return true;
     },
   },
   watch: {
@@ -207,7 +216,7 @@ export default {
 .span-annotation {
   &__field {
     position: relative;
-    line-height: 32px;
+    line-height: v-bind(lineHeight);
   }
 }
 .fade-enter-active,
