@@ -18,7 +18,8 @@ These are the section headers that we use:
 
 ### Added
 
--If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process ([#4630](https://github.com/argilla-io/argilla/pull/4630))
+- Added `Span` questions for `FeedbackDataset` ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+- If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process ([#4630](https://github.com/argilla-io/argilla/pull/4630))
 
 ### Fixed
 
