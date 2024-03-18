@@ -10,6 +10,7 @@ class SpanSelection extends SpanSelectionBase {
   config: Configuration = {
     allowCharacter: false,
     allowOverlap: false,
+    lineHeight: 32,
   };
 
   public constructor() {
