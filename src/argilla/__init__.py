@@ -22,9 +22,9 @@ import sys as _sys
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
-
 from . import _version
 from .utils import LazyargillaModule as _LazyargillaModule
+from .utils.python import check_deprecated_python_version as _check_deprecated_python_version
 
 try:
     from rich.traceback import install as _install_rich
@@ -170,3 +170,4 @@ _sys.modules[__name__] = _LazyargillaModule(
 )
 
 _configure_logging()
+_check_deprecated_python_version()
