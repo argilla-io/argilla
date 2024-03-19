@@ -106,6 +106,7 @@ input[type="checkbox"] {
   border: 2px solid transparent;
   border-radius: $border-radius;
   cursor: pointer;
+  user-select: none;
   span {
     white-space: nowrap;
     overflow: hidden;
