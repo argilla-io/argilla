@@ -139,6 +139,26 @@ After this, you can start using Argilla, so you can create a dataset and add rec
 </details>
 
 <details>
+<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
+<p>
+Once you have connected to the server, we will create a workspace for datasets.
+
+```python
+workspace = rg.Workspace.create("new-workspace")
+```
+
+After this, you can assign users to the workspace, this will allow the datasets to appear in the UI for that user.
+
+```python
+users = [u for u in rg.User.list() if u.role == "annotator"]
+for user in users:
+    workspace.add_user(user)
+```
+
+</p>
+</details>
+
+<details>
 <summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
 <p>
 
