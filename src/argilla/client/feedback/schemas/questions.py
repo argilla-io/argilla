@@ -353,7 +353,7 @@ class SpanQuestion(QuestionSchema):
     _DEFAULT_MAX_VISIBLE_LABELS = 20
     _MIN_VISIBLE_LABELS = 3
 
-    type: Literal[QuestionTypes.span] = Field(QuestionTypes.span, allow_mutation=False, const=True)
+    type: Literal[QuestionTypes.span] = Field(QuestionTypes.span.value, allow_mutation=False, const=True)
 
     field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
     labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
