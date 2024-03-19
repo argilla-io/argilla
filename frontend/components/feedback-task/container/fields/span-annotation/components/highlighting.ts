@@ -202,7 +202,11 @@ export class Highlighting {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      const className = `${this.styles.entityCssKey}-${span.entity.id}`;
+      const overlapped = this.spans.filter((s) => s.from === span.from);
+
+      const overlappedIndex = overlapped.findIndex((s) => s === span) || 0;
+
+      const className = `${this.styles.entityCssKey}-${span.entity.id}-${overlappedIndex}`;
 
       if (!highlights[className]) highlights[className] = [];
 

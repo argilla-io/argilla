@@ -52,13 +52,6 @@
       @on-remove-option="removeSelectedOption"
       v-click-outside="hideDropdown"
     />
-    <span
-      v-if="allowOverlapping"
-      class="span-entity__line"
-      :style="{
-        width: entityPosition.width,
-      }"
-    ></span>
   </div>
 </template>
 
@@ -208,12 +201,6 @@ export default {
   &__text {
     gap: 4px;
     @include truncate(auto);
-  }
-  &__line {
-    position: absolute;
-    flex: 1;
-    height: 2px;
-    background: v-bind(entityColor);
   }
   &:hover {
     position: relative;

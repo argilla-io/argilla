@@ -23,8 +23,12 @@
     </div>
     <div class="content-area --body1">
       <p
-        class="span-annotation__field"
-        :class="hasSelectedEntity ? 'span-annotation__field--active' : null"
+        :class="[
+          allowOverlapping
+            ? 'span-annotation__field--overlapped'
+            : 'span-annotation__field',
+          hasSelectedEntity ? 'span-annotation__field--active' : null,
+        ]"
         ref="spanAnnotationField"
         :id="id"
         v-html="fieldText"
@@ -41,13 +45,24 @@
         :entity-name="selectedEntity.text"
         :message="$t('spanAnnotation.shortcutHelper')"
       />
-      <template v-if="!allowOverlapping">
+      <template>
         <template v-for="{ id, color } in spanQuestion.answer.options">
           <style :key="id" scoped>
-            .span-annotation__field::highlight(hl-{{id}}) {
+            .span-annotation__field::highlight(hl-{{id}}-0) {
               background-color: {{color}};
             }
           </style>
+        </template>
+        <template v-for="{ id, color } in spanQuestion.answer.options">
+          <template v-for="(level, i) in 5">
+            <style :key="`${id}${i}`" scoped>
+
+              .span-annotation__field--overlapped::highlight(hl-{{id}}-{{i}}) {
+                text-decoration: underline {{color}} 2px;
+                text-underline-offset: {{i ? (i * 10) + 4  : 4 }}px;
+              }
+            </style>
+          </template>
         </template>
       </template>
     </div>
@@ -217,6 +232,9 @@ export default {
   &__field {
     position: relative;
     line-height: v-bind(lineHeight);
+    &--overlapped {
+      @extend .span-annotation__field;
+    }
   }
 }
 .fade-enter-active,
