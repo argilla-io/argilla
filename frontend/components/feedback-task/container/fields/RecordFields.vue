@@ -1,11 +1,16 @@
 <template>
   <div class="fields">
-    <div
-      v-for="{ id, title, content, isTextType, settings } in fields"
-      :key="id"
-    >
+    <div v-for="{ id, name, title, content, settings } in fields" :key="id">
+      <SpanAnnotationTextFieldComponent
+        v-if="hasSpanQuestion(name)"
+        :id="`${id}-${record.id}-span-field`"
+        :name="name"
+        :title="title"
+        :fieldText="content"
+        :spanQuestion="getSpanQuestion(name)"
+      />
       <TextFieldComponent
-        v-if="isTextType"
+        v-else
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
@@ -17,12 +22,26 @@
 <script>
 export default {
   props: {
+    record: {
+      type: Object,
+    },
     fields: {
       type: Array,
       required: true,
     },
   },
+  methods: {
+    getSpanQuestion(fieldName) {
+      return this.spanQuestions?.find((q) => q.settings.field === fieldName);
+    },
+    hasSpanQuestion(fieldName) {
+      return !!this.getSpanQuestion(fieldName);
+    },
+  },
   computed: {
+    spanQuestions() {
+      return this.record?.questions.filter((q) => q.isSpanType);
+    },
     searchValue() {
       return this.$route.query?._search ?? "";
     },

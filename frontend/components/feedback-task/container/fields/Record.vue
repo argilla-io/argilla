@@ -13,7 +13,7 @@
         @on-select-record="onSelectedRecord"
       />
       <div class="record__content">
-        <RecordFields :fields="record.fields" />
+        <RecordFields :record="record" :fields="record.fields" />
       </div>
     </div>
   </div>
@@ -50,6 +50,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .record {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;

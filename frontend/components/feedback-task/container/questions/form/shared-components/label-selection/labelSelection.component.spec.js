@@ -7,6 +7,7 @@ const options = {
   propsData: {
     componentId: `componentId`,
     options: [],
+    maxOptionsToShowBeforeCollapse: 0,
   },
 };
 beforeEach(() => {
@@ -27,7 +28,6 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.searchInput).toBe(``);
     expect(wrapper.vm.showSearch).toBe(false);
     expect(wrapper.vm.showCollapseButton).toBe(false);
-    expect(wrapper.vm.maxOptionsToShowBeforeCollapse).toBe(-1);
     expect(wrapper.vm.searchRef).toBe(`componentIdSearchFilterRef`);
 
     const searchWrapper = wrapper.findComponent({
@@ -54,6 +54,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 1,
     });
 
     // by default it's a single selection
@@ -98,6 +99,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 2,
     });
 
     // by default it's a single selection
@@ -151,6 +153,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
     });
 
     // by default it's a single selection
@@ -160,7 +163,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     const searchWrapper = wrapper.findComponent({
       name: "SearchLabelComponent",
     });
-    expect(searchWrapper.exists()).toBe(true);
+    expect(searchWrapper.exists()).toBe(false);
 
     // by default there is no collapse button
     const showLessButtonWrapper = wrapper.findComponent({
@@ -207,6 +210,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
     });
 
     // by default it's a single selection
@@ -280,6 +284,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
     });
 
     // by default it's a single selection
@@ -353,6 +358,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
       showSearch: true,
     });
 
@@ -360,7 +366,7 @@ describe("LabelSelectionComponent in Single Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(false);
 
     const searchWrapper = wrapper.findComponent({ ref: "searchComponentRef" });
-    expect(searchWrapper.exists()).toBe(true);
+    expect(searchWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([
@@ -543,6 +549,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
       multiple: true,
     });
 
@@ -553,7 +560,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     const searchWrapper = wrapper.findComponent({
       name: "SearchLabelComponent",
     });
-    expect(searchWrapper.exists()).toBe(true);
+    expect(searchWrapper.exists()).toBe(false);
 
     // by default there is no collapse button
     const showLessButtonWrapper = wrapper.findComponent({
@@ -600,6 +607,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
       multiple: true,
     });
 
@@ -674,6 +682,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
       multiple: true,
     });
 
@@ -748,6 +757,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
 
     await wrapper.setProps({
       options,
+      maxOptionsToShowBeforeCollapse: 3,
       multiple: true,
       showSearch: true,
     });
@@ -756,7 +766,7 @@ describe("LabelSelectionComponent in Multi Selection mode", () => {
     expect(wrapper.vm.multiple).toBe(true);
 
     const searchWrapper = wrapper.findComponent({ ref: "searchComponentRef" });
-    expect(searchWrapper.exists()).toBe(true);
+    expect(searchWrapper.exists()).toBe(false);
 
     await wrapper.setData({ searchInput: "" });
     expect(wrapper.vm.filteredOptions).toStrictEqual([

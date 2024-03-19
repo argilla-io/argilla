@@ -20,35 +20,19 @@ from argilla.client.feedback.schemas.metadata import (
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import (
-    LabelQuestion,
-    MultiLabelQuestion,
-    RankingQuestion,
-    RatingQuestion,
-    TextQuestion,
-)
+from argilla.client.feedback.schemas.questions import AllowedQuestionTypes  # noqa
 from argilla.client.feedback.schemas.remote.fields import RemoteTextField
 from argilla.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.remote.questions import (
-    RemoteLabelQuestion,
-    RemoteMultiLabelQuestion,
-    RemoteRankingQuestion,
-    RemoteRatingQuestion,
-    RemoteTextQuestion,
-)
+from argilla.client.feedback.schemas.remote.questions import AllowedRemoteQuestionTypes  # noqa
 from argilla.client.feedback.schemas.remote.vector_settings import RemoteVectorSettings
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 
 AllowedFieldTypes = TextField
 AllowedRemoteFieldTypes = RemoteTextField
-AllowedQuestionTypes = Union[TextQuestion, RatingQuestion, LabelQuestion, MultiLabelQuestion, RankingQuestion]
-AllowedRemoteQuestionTypes = Union[
-    RemoteTextQuestion, RemoteRatingQuestion, RemoteLabelQuestion, RemoteMultiLabelQuestion, RemoteRankingQuestion
-]
 AllowedMetadataPropertyTypes = Union[TermsMetadataProperty, FloatMetadataProperty, IntegerMetadataProperty]
 AllowedRemoteMetadataPropertyTypes = Union[
     RemoteTermsMetadataProperty, RemoteIntegerMetadataProperty, RemoteFloatMetadataProperty

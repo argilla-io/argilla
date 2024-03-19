@@ -13,19 +13,22 @@ const preprocess = (html) => {
 const postprocess = (html) => {
   return DOMPurify.sanitize(html, {
     ADD_TAGS: ["embed", "object"],
-    ADD_ATTR: ["data"],
+    ADD_ATTR: ["data", "target"],
     ADD_URI_SAFE_ATTR: ["data"],
   });
 };
 
 DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
-  if (node.tagName === "svg") {
+  if (node instanceof SVGElement) {
     const width = node.getAttribute("width");
     const height = node.getAttribute("height");
     const viewBox = node.getAttribute("viewBox");
     if (!viewBox && width && height) {
       node.setAttribute("viewBox", `0 0 ${width} ${height}`);
     }
+  }
+  if (node instanceof HTMLAnchorElement) {
+    node.setAttribute("target", "_blank");
   }
 });
 

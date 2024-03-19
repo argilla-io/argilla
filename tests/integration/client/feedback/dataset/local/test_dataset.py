@@ -18,8 +18,9 @@ from typing import TYPE_CHECKING, List, Type, Union
 import argilla.client.singleton
 import datasets
 import pytest
-from argilla import User, Workspace
+from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
+from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
@@ -27,12 +28,14 @@ from argilla.client.feedback.schemas.metadata import (
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.feedback.training.schemas.base import TrainingTask
 from argilla.client.models import Framework
+from argilla.client.sdk.commons.errors import ValidationApiError
+from argilla.feedback import SpanValueSchema
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
@@ -51,7 +54,7 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
         records=[
             FeedbackRecord(
                 fields={"text": "this is a text"},
-                suggestions=[{"question_name": "text", "value": "This is a suggestion"}],
+                suggestions=[ds.question_by_name("text").suggestion(value="This is a suggestion")],
             )
         ]
     )
@@ -62,6 +65,22 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     assert remote_dataset.records[0].id is not None
     assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
     assert remote_dataset.records[0].suggestions[0].question_id == remote_dataset.question_by_name("text").id
+
+
+def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    ds = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"])],
+    )
+
+    rg_dataset = ds.push_to_argilla(name="new_dataset")
+
+    assert rg_dataset.id
+    assert rg_dataset.questions[0].name == "spans"
+    assert rg_dataset.questions[0].field == "text"
+    assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
 
 
 @pytest.mark.asyncio
@@ -78,7 +97,7 @@ async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser
     assert remote_dataset.records[0].id is not None
     assert remote_dataset.records[0].suggestions == ()
 
-    remote_dataset.records[0].update(suggestions=[{"question_name": "text", "value": "This is a suggestion"}])
+    remote_dataset.records[0].update(suggestions=[ds.question_by_name("text").suggestion(value="This is a suggestion")])
 
     # TODO: Review this requirement for tests and explain, try to avoid use or at least, document.
     await db.refresh(argilla_user, attribute_names=["datasets"])
@@ -97,9 +116,7 @@ def test_add_records(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
 ) -> None:
     dataset = FeedbackDataset(
-        guidelines=feedback_dataset_guidelines,
-        fields=feedback_dataset_fields,
-        questions=feedback_dataset_questions,
+        guidelines=feedback_dataset_guidelines, fields=feedback_dataset_fields, questions=feedback_dataset_questions
     )
 
     assert dataset.records == []
@@ -124,6 +141,13 @@ def test_add_records(
     assert not dataset.records[0].responses
     assert not dataset.records[0].suggestions
 
+    question_1 = dataset.question_by_name("question-1")
+    question_2 = dataset.question_by_name("question-2")
+    question_3 = dataset.question_by_name("question-3")
+    question_4 = dataset.question_by_name("question-4")
+    question_5 = dataset.question_by_name("question-5")
+    question_6 = dataset.question_by_name("question-6")
+
     dataset.add_records(
         [
             FeedbackRecord(
@@ -133,38 +157,25 @@ def test_add_records(
                 },
                 metadata={"unit": "test"},
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=0),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                            question_6.response(value=[SpanValueSchema(start=0, end=4, label="a")]),
+                        ],
+                    ),
                 ],
                 suggestions=[
-                    {
-                        "question_name": "question-1",
-                        "value": "answer",
-                    },
-                    {
-                        "question_name": "question-2",
-                        "value": 0,
-                    },
-                    {
-                        "question_name": "question-3",
-                        "value": "a",
-                    },
-                    {
-                        "question_name": "question-4",
-                        "value": ["a", "b"],
-                    },
-                    {
-                        "question_name": "question-5",
-                        "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
-                    },
+                    question_1.suggestion(value="answer"),
+                    question_2.suggestion(value=0),
+                    question_3.suggestion(value="a"),
+                    question_4.suggestion(value=["a", "b"]),
+                    question_5.suggestion(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                    question_6.suggestion(value=[SpanValueSchema(start=0, end=4, label="a")]),
                 ],
                 external_id="test-id",
             ),
@@ -185,6 +196,7 @@ def test_add_records(
             "question-3": {"value": "a"},
             "question-4": {"value": ["a", "b"]},
             "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
+            "question-6": {"value": [{"start": 0, "end": 4, "label": "a", "score": None}]},
         },
         "status": "submitted",
     }
@@ -224,6 +236,45 @@ def test_add_records(
     assert len(dataset[:2]) == 2
     assert len(dataset[1:2]) == 1
     assert len(dataset) == len(dataset.records)
+
+
+@pytest.mark.parametrize(
+    "spans, expected_message_match",
+    [
+        (
+            [{"start": 0, "end": 400, "label": "label1"}],
+            "value `end` must have a value lower or equal than record field `text` length",
+        ),
+        (
+            [
+                SpanValueSchema(start=0, end=4, label="wrong-label"),
+            ],
+            "undefined label 'wrong-label' for span question.",
+        ),
+    ],
+)
+def test_add_records_with_wrong_spans_suggestions(
+    argilla_user: "ServerUser", spans: list, expected_message_match: str
+) -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    dataset_cfg = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"])],
+    )
+
+    dataset = dataset_cfg.push_to_argilla(name="test-dataset")
+    question = dataset.question_by_name("spans")
+
+    with pytest.raises(ValidationApiError, match=expected_message_match):
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "this is a text"},
+                    suggestions=[question.suggestion(value=spans)],
+                )
+            ]
+        )
 
 
 def test_add_records_with_vectors() -> None:
@@ -350,6 +401,13 @@ async def test_push_to_argilla_and_from_argilla(
         fields=feedback_dataset_fields,
         questions=feedback_dataset_questions,
     )
+
+    question_1 = dataset.question_by_name("question-1")
+    question_2 = dataset.question_by_name("question-2")
+    question_3 = dataset.question_by_name("question-3")
+    question_4 = dataset.question_by_name("question-4")
+    question_5 = dataset.question_by_name("question-5")
+    question_6 = dataset.question_by_name("question-6")
     # Make sure UUID in `user_id` is pushed to Argilla with no issues as it should be
     # converted to a string
     dataset.add_records(
@@ -360,26 +418,28 @@ async def test_push_to_argilla_and_from_argilla(
                     "label": "F",
                 },
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 1},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
-                    {
-                        "values": {
-                            "question-1": {"value": "answer"},
-                            "question-2": {"value": 1},
-                            "question-3": {"value": "a"},
-                            "question-4": {"value": ["a", "b"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=1),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                            question_6.response(value=[SpanValueSchema(start=0, end=1, label="a")]),
+                        ],
+                    ),
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            question_1.response(value="answer"),
+                            question_2.response(value=1),
+                            question_3.response(value="a"),
+                            question_4.response(value=["a", "b"]),
+                            question_5.response(value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]),
+                            question_6.response(value=[SpanValueSchema(start=0, end=1, label="a")]),
+                        ],
+                    ),
                 ],
             ),
         ]
@@ -395,6 +455,26 @@ async def test_push_to_argilla_and_from_argilla(
     assert len(dataset_from_argilla.questions) == len(dataset.questions)
     assert len(dataset_from_argilla.records) == len(dataset.records)
     assert len(dataset_from_argilla.records[-1].responses) == 1  # Since the second one was discarded as `user_id=None`
+
+
+@pytest.mark.asyncio
+async def test_pull_from_argilla_with_one_more_record_than_chunk_size(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.active_api()
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    settings = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="generated-text")],
+    )
+
+    remote = settings.push_to_argilla(name="test-dataset")
+
+    chunk_size = FETCHING_BATCH_SIZE
+    double_chunk_size = 2 * chunk_size
+    remote.add_records([FeedbackRecord(fields={"text": "This is a negative example"})] * (double_chunk_size + 1))
+
+    assert len(remote.pull()) == double_chunk_size + 1
+    assert len(remote.pull(chunk_size + 1)) == chunk_size + 1
 
 
 @pytest.mark.asyncio
@@ -576,26 +656,36 @@ def test_push_to_huggingface_and_from_huggingface(
             FeedbackRecord(
                 fields={"text": "This is a negative example", "label": "negative"},
                 responses=[
-                    {
-                        "values": {
-                            "question-1": {"value": "This is a response to question 1"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "b"},
-                            "question-4": {"value": ["b", "c"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
-                    {
-                        "values": {
-                            "question-1": {"value": "This is a response to question 1"},
-                            "question-2": {"value": 0},
-                            "question-3": {"value": "b"},
-                            "question-4": {"value": ["b", "c"]},
-                            "question-5": {"value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]},
-                        },
-                        "status": "submitted",
-                    },
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            dataset.question_by_name("question-1").response(value="This is a response to question 1"),
+                            dataset.question_by_name("question-2").response(value=0),
+                            dataset.question_by_name("question-3").response(value="b"),
+                            dataset.question_by_name("question-4").response(value=["b", "c"]),
+                            dataset.question_by_name("question-5").response(
+                                value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
+                            ),
+                            dataset.question_by_name("question-6").response(
+                                value=[SpanValueSchema(start=0, end=4, label="a")]
+                            ),
+                        ],
+                    ),
+                    ResponseSchema(
+                        status="submitted",
+                        values=[
+                            dataset.question_by_name("question-1").response(value="This is a response to question 1"),
+                            dataset.question_by_name("question-2").response(value=0),
+                            dataset.question_by_name("question-3").response(value="b"),
+                            dataset.question_by_name("question-4").response(value=["b", "c"]),
+                            dataset.question_by_name("question-5").response(
+                                value=[{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}]
+                            ),
+                            dataset.question_by_name("question-6").response(
+                                value=[SpanValueSchema(start=0, end=4, label="a")]
+                            ),
+                        ],
+                    ),
                 ],
             ),
         ],

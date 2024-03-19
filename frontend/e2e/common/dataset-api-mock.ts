@@ -128,7 +128,7 @@ export const mockAllDatasets = async (page: Page) => {
   await page.route("*/**/api/v1/me/datasets", async (route) => {
     await route.fulfill({ json: { items: newDatasetsMocked } });
   });
-  await page.route("*/**/api/workspaces", async (route) => {
+  await page.route("*/**/api/v1/me/workspaces", async (route) => {
     await route.fulfill({ json: workspacesMocked });
   });
 };

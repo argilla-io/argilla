@@ -21,6 +21,8 @@ from argilla.client.feedback.schemas.questions import (
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
+    SpanLabelOption,
+    SpanQuestion,
     TextQuestion,
     _LabelQuestion,
 )
@@ -444,3 +446,172 @@ def test_ranking_question(schema_kwargs: Dict[str, Any], server_payload: Dict[st
 def test_ranking_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
     with pytest.raises(exception_cls, match=exception_message):
         RankingQuestion(**schema_kwargs)
+
+
+def test_span_question() -> None:
+    question = SpanQuestion(
+        name="question",
+        field="field",
+        title="Question",
+        description="Description",
+        required=True,
+        labels=["a", "b"],
+    )
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == {
+        "type": "span",
+        "field": "field",
+        "visible_options": None,
+        "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
+    }
+
+
+def test_span_question_with_labels_dict() -> None:
+    question = SpanQuestion(
+        name="question",
+        field="field",
+        title="Question",
+        description="Description",
+        labels={"a": "A text", "b": "B text"},
+    )
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == {
+        "type": "span",
+        "field": "field",
+        "visible_options": None,
+        "options": [
+            {"value": "a", "text": "A text", "description": None},
+            {"value": "b", "text": "B text", "description": None},
+        ],
+    }
+
+
+def test_span_question_with_visible_labels() -> None:
+    question = SpanQuestion(
+        name="question",
+        field="field",
+        title="Question",
+        description="Description",
+        labels=["a", "b", "c", "d"],
+        visible_labels=3,
+    )
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == {
+        "type": "span",
+        "field": "field",
+        "visible_options": 3,
+        "options": [
+            {"value": "a", "text": "a", "description": None},
+            {"value": "b", "text": "b", "description": None},
+            {"value": "c", "text": "c", "description": None},
+            {"value": "d", "text": "d", "description": None},
+        ],
+    }
+
+
+def test_span_question_with_visible_labels_default_value():
+    question = SpanQuestion(
+        name="question",
+        field="field",
+        title="Question",
+        description="Description",
+        labels=list(range(21)),
+    )
+
+    assert question.visible_labels == 20
+
+
+def test_span_question_with_default_visible_label_when_labels_is_less_than_20():
+    with pytest.warns(UserWarning, match=""):
+        question = SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=list(range(19)),
+        )
+
+        assert question.visible_labels == 19
+
+
+def test_span_question_when_visible_labels_is_greater_than_total_labels():
+    with pytest.warns(
+        UserWarning,
+        match="`visible_labels=4` is greater than the total number of labels \(3\)",
+    ):
+        question = SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=["a", "b", "c"],
+            visible_labels=4,
+        )
+
+        assert question.visible_labels == 3
+
+
+def test_span_question_with_visible_labels_less_than_total_labels():
+    with pytest.warns(
+        UserWarning, match="Since `labels` has less than 3 labels, `visible_labels` will be set to `None`."
+    ):
+        question = SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=["a", "b"],
+            visible_labels=3,
+        )
+
+        assert question.visible_labels is None
+
+
+def test_span_question_with_visible_labels_less_than_min_value():
+    with pytest.raises(ValidationError, match="ensure this value is greater than or equal to 3"):
+        SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=["a", "b"],
+            visible_labels=2,
+        )
+
+
+def test_span_questions_with_default_visible_labels_and_less_labels_than_default():
+    with pytest.warns(UserWarning, match="visible_labels=20` is greater than the total number of labels"):
+        question = SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=list(range(10)),
+        )
+
+        assert question.visible_labels == 10
+
+
+def test_span_question_with_no_labels() -> None:
+    with pytest.raises(ValidationError, match="At least one label must be provided"):
+        SpanQuestion(
+            name="question",
+            field="field",
+            title="Question",
+            description="Description",
+            labels=[],
+        )
+
+
+def test_span_question_with_duplicated_labels() -> None:
+    with pytest.raises(ValidationError, match="the list has duplicated items"):
+        SpanQuestion(
+            name="question",
+            title="Question",
+            field="field",
+            description="Description",
+            labels=[SpanLabelOption(value="a", text="A text"), SpanLabelOption(value="a", text="Text for A")],
+        )
