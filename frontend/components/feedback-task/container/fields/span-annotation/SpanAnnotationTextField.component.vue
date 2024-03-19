@@ -116,7 +116,10 @@ export default {
       this.highlighting.allowCharacterAnnotation(allow);
     },
     keyPressing(event, isDown) {
-      if (event.key == "Shift" && this.highlighting.allowCharacterAnnotation) {
+      if (event.key === "Shift") {
+        event.preventDefault();
+        event.stopPropagation();
+
         this.allowCharacterAnnotation(isDown);
         this.usedCharacterAnnotation = true;
         this.visibleShortcutsHelper = false;
