@@ -81,7 +81,7 @@ export default {
   data() {
     return {
       visibleShortcutsHelper: false,
-      usedCharacterAnnotation: false,
+      alreadyUsedTheCharacterAnnotation: false,
       mouseDown: false,
       mouseTimeout: null,
       mouseEnter: false,
@@ -121,14 +121,14 @@ export default {
         event.stopPropagation();
 
         this.allowCharacterAnnotation(isDown);
-        this.usedCharacterAnnotation = true;
+        this.alreadyUsedTheCharacterAnnotation = true;
         this.visibleShortcutsHelper = false;
       }
     },
     showShortcutsHelper(value) {
       if (!this.spanQuestion.settings.allow_character_annotation) return;
+      if (this.alreadyUsedTheCharacterAnnotation) return;
 
-      if (this.usedCharacterAnnotation) return;
       this.visibleShortcutsHelper = value;
     },
     onMouseUp(value) {
