@@ -204,6 +204,10 @@ export default {
         $event.key === "Tab" ||
         $event.key === "Enter" ||
         $event.key === "Backspace" ||
+        $event.key === "ArrowLeft" ||
+        $event.key === "ArrowRight" ||
+        $event.key === "ArrowUp" ||
+        $event.key === "ArrowDown" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
