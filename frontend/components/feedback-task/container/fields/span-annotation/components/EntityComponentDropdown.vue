@@ -19,13 +19,7 @@
         :placeholder="$nuxt.$t('search')"
         autofocus
         v-model="searchText"
-        @keydown.arrow-up.stop=""
-        @keydown.arrow-down.stop=""
-        @keydown.arrow-right.stop=""
-        @keydown.arrow-left.stop=""
-        @keydown.delete.exact.stop=""
-        @keydown.enter.exact.stop=""
-        @keydown.backspace.exact.stop=""
+        @keydown.stop=""
       />
     </div>
     <ul class="span-entity__dropdown__content">
