@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from argilla.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, conint, root_validator
+from argilla.pydantic_v1 import BaseModel, Field, StrictStr, conint, root_validator
 
 
 class FeedbackDatasetModel(BaseModel):
@@ -56,7 +56,7 @@ class FeedbackResponseModel(BaseModel):
     id: UUID
     values: Union[Dict[str, FeedbackValueModel], None]
     status: FeedbackResponseStatus
-    user_id: UUID
+    user_id: Optional[UUID]  # Support changes introduced in https://github.com/argilla-io/argilla-server/pull/57
     inserted_at: datetime
     updated_at: datetime
 
