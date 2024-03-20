@@ -296,8 +296,7 @@ $label-dark-color: $black-54;
   }
 
   &__ghost {
-    opacity: 0.5;
-    background: $black-6;
+    opacity: 0.2;
   }
 }
 </style>
