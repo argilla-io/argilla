@@ -12,11 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import importlib
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla.client.login import ARGILLA_CREDENTIALS_FILE, ArgillaCredentials, login
+from argilla.client import login
 
 if TYPE_CHECKING:
     from pytest_mock import MockFixture
@@ -25,14 +26,14 @@ if TYPE_CHECKING:
 def test_argilla_credentials_save(mocker: "MockFixture"):
     mocker.patch("builtins.open", new_callable=mocker.mock_open)
 
-    ArgillaCredentials(
+    login.ArgillaCredentials(
         api_url="http://unit-test.com:6900",
         api_key="unit.test",
         workspace="unit-tests",
         extra_headers={"X-Unit-Test": "true"},
     ).save()
 
-    open.assert_called_once_with(ARGILLA_CREDENTIALS_FILE, "w")
+    open.assert_called_once_with(login.ARGILLA_CREDENTIALS_FILE, "w")
     open().write.assert_called_once_with(
         '{"api_url": "http://unit-test.com:6900", "api_key": "unit.test", "workspace": "unit-tests", "extra_headers": {"X-Unit-Test": "true"}}'
     )
@@ -48,9 +49,9 @@ def test_argilla_credentials_load(mocker: "MockFixture"):
     path_mock = mocker.patch.object(Path, "exists")
     path_mock.return_value = True
 
-    credentials = ArgillaCredentials.load()
+    credentials = login.ArgillaCredentials.load()
 
-    open.assert_called_once_with(ARGILLA_CREDENTIALS_FILE, "r")
+    open.assert_called_once_with(login.ARGILLA_CREDENTIALS_FILE, "r")
     assert credentials.api_url == "http://unit-test.com:6900"
     assert credentials.api_key == "unit.test"
     assert credentials.workspace == "unit-tests"
@@ -62,7 +63,7 @@ def test_argilla_credentials_remove(mocker: "MockFixture"):
     path_mock.return_value = True
     unlink_mock = mocker.patch.object(Path, "unlink")
 
-    ArgillaCredentials.remove()
+    login.ArgillaCredentials.remove()
 
     path_mock.assert_called_once()
     unlink_mock.assert_called_once()
@@ -73,19 +74,19 @@ def test_argilla_credentials_remove_raises_error(mocker: "MockFixture"):
     path_mock.return_value = False
 
     with pytest.raises(FileNotFoundError):
-        ArgillaCredentials.remove()
+        login.ArgillaCredentials.remove()
 
 
 def test_argilla_credentials_load_raises_error():
     with pytest.raises(FileNotFoundError):
-        ArgillaCredentials.load()
+        login.ArgillaCredentials.load()
 
 
 def test_login(mocker: "MockFixture"):
     mocker.patch("builtins.open", new_callable=mocker.mock_open)
     init_mock = mocker.patch("argilla.client.login.init")
 
-    login(
+    login.login(
         api_url="http://unit-test.com:6900",
         api_key="unit.test",
         workspace="unit-tests",
@@ -98,3 +99,15 @@ def test_login(mocker: "MockFixture"):
         workspace="unit-tests",
         extra_headers={"X-Unit-Test": "true"},
     )
+
+
+def test_argilla_cache_dir_environment_variable():
+    import os
+
+    assert login.ARGILLA_CACHE_DIR == Path().home() / ".cache" / "argilla"
+
+    os.environ["ARGILLA_CACHE_DIR"] = "/tmp/unit-test"
+
+    importlib.reload(login)
+
+    assert login.ARGILLA_CACHE_DIR == Path("/tmp/unit-test")
