@@ -23,27 +23,6 @@ from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 
 
-def list_workspaces(client: httpx.Client) -> Response[Union[List[WorkspaceModel], ErrorMessage, HTTPValidationError]]:
-    """Sends a request to `GET /api/workspaces` to list all the workspaces in the account.
-
-    Args:
-        client: the authenticated Argilla client to be used to send the request to the API.
-
-    Returns:
-        A Response object with the parsed response, containing a `parsed` attribute with the
-        parsed response if the request was successful, which is a list of `WorkspaceModel` objects.
-    """
-    url = "/api/workspaces"
-
-    response = client.get(url=url)
-
-    if response.status_code == 200:
-        response_obj = Response.from_httpx_response(response)
-        response_obj.parsed = [WorkspaceModel(**workspace) for workspace in response.json()]
-        return response_obj
-    return handle_response_error(response)
-
-
 def create_workspace(
     client: httpx.Client, name: str
 ) -> Response[Union[WorkspaceModel, ErrorMessage, HTTPValidationError]]:
