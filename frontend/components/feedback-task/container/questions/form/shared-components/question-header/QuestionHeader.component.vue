@@ -3,11 +3,15 @@
     <BaseTooltip
       v-if="question.suggestion"
       :text="suggestionTooltipText"
-      :offset="4"
       position="left"
       minimalist
     >
-      <span class="title-area__suggestion-icon" v-text="`✨ `" />
+      <svgicon
+        class="title-area__suggestion-icon"
+        name="suggestion"
+        width="14"
+        height="14"
+      />
     </BaseTooltip>
     <span
       class="suggestion-info"
@@ -35,6 +39,8 @@
 
 <script>
 import "assets/icons/info";
+import "assets/icons/suggestion";
+
 export default {
   name: "QuestionHeader",
   props: {
@@ -55,9 +61,12 @@ export default {
       return !!this.question.description?.length;
     },
     suggestionTooltipText() {
-      return `This question contains a suggestion \n agent: ${
-        this.question.suggestion.agent || "-"
-      } \n score: ${this.question.suggestion.score || "-"}`;
+      const qAgent = this.question.suggestion.agent;
+      const qScore = this.question.suggestion.score;
+      return this.$t("suggestion.tooltip", {
+        agent: qAgent ? this.$t("suggestion.agent", { agent: qAgent }) : "",
+        score: qScore ? this.$t("suggestion.score", { score: qScore }) : "",
+      });
     },
   },
   watch: {
@@ -79,8 +88,8 @@ export default {
   color: $black-87;
   font-weight: 500;
   &__suggestion-icon {
-    font-size: 1.2em;
     cursor: default;
+    fill: $black-54;
   }
 }
 

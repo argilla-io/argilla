@@ -14,16 +14,91 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [1.23.0-Unreleased]()
+## [Unreleased]()
+
+### Added
+
+- If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process. ([#4630](https://github.com/argilla-io/argilla/pull/4630))
+- Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
+- Added support for spans values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
+- Added `Span` questions for `FeedbackDataset` ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+
+### Fixed
+
+- Fixed contextualized workspaces ([#4665](https://github.com/argilla-io/argilla/pull/4665))
+- Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
+- Fixed parsing ranking values in suggestions from HF datasets. ([#4629](https://github.com/argilla-io/argilla/pull/4629))
+- Fixed reading description from API response payload. ([#4632](https://github.com/argilla-io/argilla/pull/4632))
+
+## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
+
+> [!NOTE]
+> For changes in the argilla-server module, visit the argilla-server [release notes](https://github.com/argilla-io/argilla-server/releases/tag/v1.25.0)
 
 ### Added
 
+- Reorder labels in `dataset settings page` for single/multi label questions ([#4598](https://github.com/argilla-io/argilla/pull/4598))
+- Added pandas v2 support using the python SDK. ([#4600](https://github.com/argilla-io/argilla/pull/4600))
+
+### Removed
+
+- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
+
+### Fixed
+
+- Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
+- Fixed redirect to `user-settings` instead of 404 `user_settings` ([#4609](https://github.com/argilla-io/argilla/pull/4609))
+
+## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
+
+> [!NOTE]
+> This release does not contain any new features, but it includes a major change in the `argilla-server` dependency.
+> The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
+### Changed
+
+- The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
+## [1.23.1](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.23.1)
+
+### Fixed
+
+- Fixed Responsive view for Feedback Datasets. ([#4579](https://github.com/argilla-io/argilla/pull/4579))
+
+## [1.23.0](https://github.com/argilla-io/argilla/compare/v1.22.0...v1.23.0)
+
+### Added
+
+- Added bulk annotation by filter criteria. ([#4516](https://github.com/argilla-io/argilla/pull/4516))
+- Automatically fetch new datasets on focus tab. ([#4514](https://github.com/argilla-io/argilla/pull/4514))
 - API v1 responses returning `Record` schema now always include `dataset_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Response` schema now always include `record_id` as attribute. ([#4482](https://github.com/argilla-io/argilla/pull/4482))
 - API v1 responses returning `Question` schema now always include `dataset_id` attribute. ([#4487](https://github.com/argilla-io/argilla/pull/4487))
 - API v1 responses returning `Field` schema now always include `dataset_id` attribute. ([#4488](https://github.com/argilla-io/argilla/pull/4488))
 - API v1 responses returning `MetadataProperty` schema now always include `dataset_id` attribute. ([#4489](https://github.com/argilla-io/argilla/pull/4489))
 - API v1 responses returning `VectorSettings` schema now always include `dataset_id` attribute. ([#4490](https://github.com/argilla-io/argilla/pull/4490))
+- Added `pdf_to_html` function to `.html_utils` module that convert PDFs to dataURL to be able to render them in tha Argilla UI. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
+- Added `ARGILLA_AUTH_SECRET_KEY` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
+- Added `ARGILLA_AUTH_ALGORITHM` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
+- Added `ARGILLA_AUTH_TOKEN_EXPIRATION` environment variable. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
+- Added `ARGILLA_AUTH_OAUTH_CFG` environment variable. ([#4546](https://github.com/argilla-io/argilla/pull/4546))
+- Added OAuth2 support for HuggingFace Hub. ([#4546](https://github.com/argilla-io/argilla/pull/4546))
+
+### Deprecated
+
+- Deprecated `ARGILLA_LOCAL_AUTH_*` environment variables. Will be removed in the release v1.25.0. ([#4539](https://github.com/argilla-io/argilla/pull/4539))
+
+### Changed
+
+- Changed regex pattern for `username` attribute in `UserCreate`. Now uppercase letters are allowed. ([#4544](https://github.com/argilla-io/argilla/pull/4544))
+
+### Removed
+
+- Remove sending `Authorization` header from python SDK requests. ([#4535](https://github.com/argilla-io/argilla/pull/4535))
+
+### Fixed
+
+- Fixed keyboard shortcut for label questions. ([#4530](https://github.com/argilla-io/argilla/pull/4530))
 
 ## [1.22.0](https://github.com/argilla-io/argilla/compare/v1.21.0...v1.22.0)
 
@@ -43,6 +118,7 @@ These are the section headers that we use:
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+- Refactor and add `width`, `height`, `autoplay` and `loop` attributes as optional args in `to_html` functions. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
 
 ### Fixed
 

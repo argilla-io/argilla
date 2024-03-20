@@ -16,6 +16,7 @@
 import concurrent.futures
 import datetime
 import re
+import warnings
 from pathlib import Path
 from time import sleep
 from typing import Iterable
@@ -74,12 +75,12 @@ from argilla.client.sdk.users.models import UserModel
 from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.client.singleton import active_client, init
-from argilla.server.apis.v0.models.text_classification import (
+from argilla_server.apis.v0.models.text_classification import (
     TextClassificationBulkRequest,
     TextClassificationRecordInputs,
 )
-from argilla.server.commons.models import TaskStatus
-from argilla.server.models import User, UserRole
+from argilla_server.commons.models import TaskStatus
+from argilla_server.models import User, UserRole
 from httpx import ConnectError
 
 from tests.factories import UserFactory, WorkspaceFactory
@@ -1054,7 +1055,7 @@ def test_list_datasets_only_feedback_datasets(argilla_user: User):
 
 
 def test_aligned_argilla_versions(mock_init_ok):
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings(record=True) as record:
         Argilla()
         for warning in record:
             assert "You're connecting to Argilla Server" not in str(warning.message)

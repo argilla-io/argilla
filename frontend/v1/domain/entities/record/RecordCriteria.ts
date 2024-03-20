@@ -171,6 +171,14 @@ export class RecordCriteria implements IRecordCriteria {
     return this.areDifferent(this, this.committed);
   }
 
+  get isPaginatingForward() {
+    return this.page.client.page > this.previous?.page.client.page;
+  }
+
+  get isPaginatingBackward() {
+    return this.page.client.page < this.previous?.page.client.page;
+  }
+
   complete(
     page: string,
     status: RecordStatus,
@@ -229,6 +237,20 @@ export class RecordCriteria implements IRecordCriteria {
     this.sortBy.reset();
     this.response.reset();
     this.suggestion.reset();
+  }
+
+  clone() {
+    return new RecordCriteria(
+      this.datasetId,
+      this.page.urlParams,
+      this.status,
+      this.searchText,
+      this.metadata.urlParams,
+      this.sortBy.urlParams,
+      this.response.urlParams,
+      this.suggestion.urlParams,
+      this.similaritySearch.urlParams
+    );
   }
 
   get queuePage(): number {

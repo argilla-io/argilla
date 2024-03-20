@@ -33,7 +33,7 @@ from argilla.labeling.text_classification.weak_labels import (
     NoRulesFoundError,
     WeakLabelsBase,
 )
-from argilla.server.commons.models import TaskType
+from argilla_server.commons.models import TaskType
 from pandas.testing import assert_frame_equal
 
 from tests.integration.helpers import SecuredClient

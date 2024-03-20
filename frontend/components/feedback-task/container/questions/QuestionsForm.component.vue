@@ -24,6 +24,7 @@
       <QuestionsComponent
         :questions="record.questions"
         :autofocusPosition="autofocusPosition"
+        :is-bulk-mode="isBulkMode"
         @on-focus="updateQuestionAutofocus"
       />
     </div>
@@ -35,6 +36,7 @@
           class="button--discard"
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
+          :loading-progress="progress"
           :disabled="isDiscardDisabled || isSaving"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onDiscard"
@@ -50,6 +52,7 @@
           class="button--draft"
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
+          :loading-progress="progress"
           :disabled="isDraftSaveDisabled || isSaving"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onSaveDraft"
@@ -70,6 +73,7 @@
             isSubmitting ? '--button--submitting' : null,
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
+          :loading-progress="progress"
           :loading="isSubmitting"
           :disabled="
             !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
@@ -149,6 +153,18 @@ export default {
       type: String,
       default: null,
     },
+    progress: {
+      type: Number,
+      default: 0,
+    },
+    enableAutoSubmitWithKeyboard: {
+      type: Boolean,
+      default: false,
+    },
+    isBulkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -201,6 +217,7 @@ export default {
   },
   methods: {
     async autoSubmitWithKeyboard() {
+      if (!this.enableAutoSubmitWithKeyboard) return;
       if (!this.record.isModified) return;
       if (this.record.questions.length > 1) return;
 
@@ -305,6 +322,9 @@ export default {
   min-width: 0;
   justify-content: space-between;
   margin-bottom: auto;
+  @include media("<desktop") {
+    justify-content: flex-start;
+  }
   &__header {
     display: flex;
     justify-content: right;

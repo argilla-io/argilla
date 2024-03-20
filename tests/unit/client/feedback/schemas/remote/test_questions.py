@@ -30,6 +30,7 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteMultiLabelQuestion,
     RemoteRankingQuestion,
     RemoteRatingQuestion,
+    RemoteSpanQuestion,
     RemoteTextQuestion,
 )
 from argilla.client.sdk.v1.datasets.models import FeedbackQuestionModel
@@ -80,6 +81,7 @@ def test_remote_text_question(schema_kwargs: Dict[str, Any], server_payload: Dic
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={"type": "text", "use_markdown": False},
             inserted_at=datetime.now(),
@@ -89,6 +91,7 @@ def test_remote_text_question(schema_kwargs: Dict[str, Any], server_payload: Dic
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={"type": "text", "use_markdown": True},
             inserted_at=datetime.now(),
@@ -148,6 +151,7 @@ def test_remote_rating_question(schema_kwargs: Dict[str, Any], server_payload: D
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
             inserted_at=datetime.now(),
@@ -157,6 +161,7 @@ def test_remote_rating_question(schema_kwargs: Dict[str, Any], server_payload: D
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={"type": "rating", "options": [{"value": 1}, {"value": 2}, {"value": 3}]},
             inserted_at=datetime.now(),
@@ -232,6 +237,7 @@ def test_remote_label_question(schema_kwargs: Dict[str, Any], server_payload: Di
             name="a",
             title="A",
             required=True,
+            description="Description",
             settings={
                 "type": "label_selection",
                 "options": [{"text": "a", "value": "a"}, {"text": "b", "value": "b"}, {"text": "c", "value": "c"}],
@@ -244,6 +250,7 @@ def test_remote_label_question(schema_kwargs: Dict[str, Any], server_payload: Di
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "label_selection",
@@ -322,6 +329,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={
                 "type": "multi_label_selection",
@@ -335,6 +343,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "multi_label_selection",
@@ -410,6 +419,7 @@ def test_remote_ranking_question(schema_kwargs: Dict[str, Any], server_payload: 
             id=uuid4(),
             name="a",
             title="A",
+            description="Description",
             required=True,
             settings={
                 "type": "ranking",
@@ -422,6 +432,7 @@ def test_remote_ranking_question(schema_kwargs: Dict[str, Any], server_payload: 
             id=uuid4(),
             name="b",
             title="B",
+            description="Description",
             required=False,
             settings={
                 "type": "ranking",
@@ -437,3 +448,61 @@ def test_remote_ranking_question_from_api(payload: FeedbackQuestionModel) -> Non
     assert ranking_question.type == QuestionTypes.ranking
     assert ranking_question.server_settings == payload.settings
     assert ranking_question.to_server_payload() == payload.dict(exclude={"id", "inserted_at", "updated_at"})
+
+
+def test_span_questions_from_api():
+    model = FeedbackQuestionModel(
+        id=uuid4(),
+        name="question",
+        title="Question",
+        required=True,
+        settings={
+            "type": "span",
+            "field": "field",
+            "visible_options": None,
+            "options": [
+                {"text": "Span label a", "value": "a", "description": None},
+                {
+                    "text": "Span label b",
+                    "value": "b",
+                    "description": None,
+                },
+            ],
+        },
+        inserted_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+    question = RemoteSpanQuestion.from_api(model)
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == model.settings
+    assert question.to_server_payload() == model.dict(exclude={"id", "inserted_at", "updated_at"})
+    assert question.to_local().type == QuestionTypes.span
+
+
+def test_span_questions_from_api_with_visible_labels():
+    model = FeedbackQuestionModel(
+        id=uuid4(),
+        name="question",
+        title="Question",
+        required=True,
+        settings={
+            "type": "span",
+            "field": "field",
+            "visible_options": 3,
+            "options": [
+                {"text": "Span label a", "value": "a", "description": None},
+                {"text": "Span label b", "value": "b", "description": None},
+                {"text": "Span label c", "value": "c", "description": None},
+                {"text": "Span label d", "value": "d", "description": None},
+            ],
+        },
+        inserted_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
+    question = RemoteSpanQuestion.from_api(model)
+
+    assert question.type == QuestionTypes.span
+    assert question.server_settings == model.settings
+    assert question.to_server_payload() == model.dict(exclude={"id", "inserted_at", "updated_at"})
+    assert question.to_local().type == QuestionTypes.span

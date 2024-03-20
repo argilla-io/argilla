@@ -124,6 +124,16 @@ Learn how to set up a project to curate a public dataset that can be used to fin
 
 Learn how to apply multimodality (video, audio and images) to your FeedbackDataset using the Argilla TextFields.
 ```
+```{grid-item-card} 👀 Monitoring Ethics and Bias in LLMs: Giskard and DPO
+:link: feedback/monitoring-bias-ethics-dpo.html
+
+Learn how to monitor bias and ethics in LLMs detecting them with Giskard and fine-tuning with DPO.
+```
+```{grid-item-card} 🎮 Monitoring a Real-world Example of Data and Model Drift
+:link: feedback/monitoring-data-model-drift.html
+
+Learn how to monitor data and model drift in a real-world scenario using different tools.
+```
 ````
 
 **Other datasets**
@@ -188,6 +198,10 @@ feedback/labelling-feedback-setfit
 feedback/trainer-feedback-setfit
 feedback/labelling-feedback-langchain-syntethic
 feedback/fine-tuning-sentencesimilarity-rag
+feedback/training-qa-transformers
+feedback/labelling-spacy-llm
+feedback/making-most-of-markdown
+feedback/monitoring-bias-ethics-dpo
 
 other_datasets/few_shot_learning_with_setfit
 other_datasets/few_shot_text_classification_with_active_learning

@@ -3,13 +3,12 @@
     <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
-      v-model="question.answer.values"
       :componentId="question.id"
-      :suggestions="question.suggestion?.suggestedAnswer"
-      :maxOptionsToShowBeforeCollapse="maxOptionsToShowBeforeCollapse"
+      :suggestion="question.suggestion"
+      :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
+      v-model="question.answer.values"
       :multiple="false"
       :isFocused="isFocused"
-      :showShortcutsHelper="showShortcutsHelper"
       @on-focus="onFocus"
       @on-selected="onSelected"
     />
@@ -27,15 +26,6 @@ export default {
     isFocused: {
       type: Boolean,
       default: () => false,
-    },
-    showShortcutsHelper: {
-      type: Boolean,
-      default: () => false,
-    },
-  },
-  computed: {
-    maxOptionsToShowBeforeCollapse() {
-      return this.question.settings.visible_options ?? -1;
     },
   },
   methods: {

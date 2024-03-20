@@ -282,7 +282,10 @@ class TextDescriptivesExtractor:
         return dataset
 
     def _add_text_descriptives_to_metadata(
-        self, records: List[Union[FeedbackRecord, RemoteFeedbackRecord]], df: pd.DataFrame
+        self,
+        records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
+        df: pd.DataFrame,
+        metadata_prop_types: Optional[dict] = None,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
         """
         Add the text descriptives metrics extracted previously as metadata
@@ -291,6 +294,7 @@ class TextDescriptivesExtractor:
         Args:
             records (List[Union[FeedbackRecord, RemoteFeedbackRecord]]): A list of FeedbackDataset or RemoteFeedbackDataset records.
             df (pd.DataFrame): The text descriptives dataframe.
+            metadata_prop_types (Optional[dict]): A dictionary with the name of the metadata property and the type if needed. Defaults to None.
 
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with extracted metrics added as metadata.
@@ -302,10 +306,15 @@ class TextDescriptivesExtractor:
             )
             for record, metrics in zip(records, df.to_dict("records")):
                 filtered_metrics = {key: value for key, value in metrics.items() if not pd.isna(value)}
-                filtered_metrics = {
-                    key: int(value) if isinstance(value, float) and value.is_integer() else value
-                    for key, value in filtered_metrics.items()
-                }
+                if metadata_prop_types is not None:
+                    filtered_metrics = {
+                        key: int(value)
+                        if metadata_prop_types.get(key) == "integer"
+                        else float(value)
+                        if metadata_prop_types.get(key) == "float"
+                        else value
+                        for key, value in filtered_metrics.items()
+                    }
                 record.metadata.update(filtered_metrics)
                 modified_records.append(record)
                 progress_bar.update(task, advance=1)
@@ -316,6 +325,7 @@ class TextDescriptivesExtractor:
         records: List[Union[FeedbackRecord, RemoteFeedbackRecord]],
         fields: Optional[List[str]] = None,
         overwrite: Optional[bool] = False,
+        metadata_prop_types: Optional[dict] = None,
     ) -> List[Union[FeedbackRecord, RemoteFeedbackRecord]]:
         """
         Extract text descriptives metrics from a list of FeedbackDataset or RemoteFeedbackDataset records,
@@ -325,6 +335,7 @@ class TextDescriptivesExtractor:
             records (List[Union[FeedbackRecord, RemoteFeedbackRecord]]): A list of FeedbackDataset or RemoteFeedbackDataset records.
             fields (List[str]): A list of fields to extract metrics for. If None, extract metrics for all fields.
             overwrite (Optional[bool]): Whether to overwrite existing metadata properties with the same name. Defaults to False.
+            metadata_prop_types (Optional[dict]): A dictionary with the name of the metadata property and the type if needed. Defaults to None.
 
         Returns:
             List[Union[FeedbackRecord, RemoteFeedbackRecord]]: A list of FeedbackDataset or RemoteFeedbackDataset records with text descriptives metrics added as metadata.
@@ -358,7 +369,12 @@ class TextDescriptivesExtractor:
             # Clean column names
             extracted_metrics.columns = [self._clean_column_name(col) for col in extracted_metrics.columns]
             # Add the metrics to the metadata of the records
-            modified_records = self._add_text_descriptives_to_metadata(modified_records, extracted_metrics)
+            if metadata_prop_types is None:
+                modified_records = self._add_text_descriptives_to_metadata(modified_records, extracted_metrics)
+            else:
+                modified_records = self._add_text_descriptives_to_metadata(
+                    modified_records, extracted_metrics, metadata_prop_types
+                )
             return modified_records
 
     def update_dataset(
@@ -400,7 +416,10 @@ class TextDescriptivesExtractor:
 
         # Update the records in the dataset too
         if update_records:
-            records = self.update_records(records=dataset.records, fields=fields, overwrite=overwrite)
+            metadata_prop_types = {item.name: item.type for item in dataset.metadata_properties}
+            records = self.update_records(
+                records=dataset.records, fields=fields, overwrite=overwrite, metadata_prop_types=metadata_prop_types
+            )
             if isinstance(dataset, RemoteFeedbackDataset):
                 dataset.update_records(records)
         return dataset

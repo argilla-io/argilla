@@ -22,7 +22,7 @@ from argilla.monitoring.asgi import (
     text_classification_mapper,
     token_classification_mapper,
 )
-from argilla.server.models import User
+from argilla_server.models import User
 from fastapi import FastAPI
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse

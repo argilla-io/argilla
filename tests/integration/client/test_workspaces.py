@@ -28,7 +28,7 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from argilla.server.models import User as ServerUser
+    from argilla_server.models import User as ServerUser
 
 
 def test_workspace_cls_init() -> None:

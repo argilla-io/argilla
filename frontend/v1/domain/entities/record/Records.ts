@@ -23,6 +23,14 @@ export class Records {
     return this.records.find((record) => record.page === criteria.client.page);
   }
 
+  hasNecessaryBuffering(criteria: PageCriteria) {
+    const bufferedRecords = this.records.filter(
+      (record) => record.page > criteria.client.page
+    );
+
+    return bufferedRecords.length > criteria.buffer;
+  }
+
   getRecordsOn(criteria: PageCriteria): Record[] {
     return this.records
       .filter((record) => record.page >= criteria.client.page)
@@ -42,15 +50,15 @@ export class Records {
       committed,
     } = criteria;
 
-    if (page.isBulkMode && committed.page.isFocusMode) return;
-    if (page.isFocusMode && committed.page.isBulkMode) return;
-
     if (isFilteringBySimilarity) {
       return page.synchronizePagination({
         from: 1,
         many: similaritySearch.limit,
       });
     }
+
+    if (page.isBulkMode && committed.page.isFocusMode) return;
+    if (page.isFocusMode && committed.page.isBulkMode) return;
 
     if (this.hasRecordsToAnnotate) {
       const isMovingForward = page.client.page > this.lastRecord.page;
@@ -106,11 +114,11 @@ export class Records {
     this.records = this.records.sort((r1, r2) => (r1.page < r2.page ? -1 : 1));
   }
 
-  private get lastRecord() {
+  get lastRecord() {
     return this.records[this.records.length - 1];
   }
 
-  private get firstRecord() {
+  get firstRecord() {
     return this.records[0];
   }
 

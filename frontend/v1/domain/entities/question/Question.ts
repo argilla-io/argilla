@@ -1,13 +1,16 @@
 import { Answer } from "../IAnswer";
+import { Guard } from "../error";
+import { Color } from "./Color";
 import {
   QuestionAnswer,
-  QuestionType,
   TextQuestionAnswer,
   SingleLabelQuestionAnswer,
   RatingLabelQuestionAnswer,
   MultiLabelQuestionAnswer,
   RankingQuestionAnswer,
+  SpanQuestionAnswer,
 } from "./QuestionAnswer";
+import { QuestionType } from "./QuestionType";
 import { Suggestion } from "./Suggestion";
 
 interface OriginalQuestion {
@@ -18,7 +21,7 @@ interface OriginalQuestion {
 
 export class Question {
   public answer: QuestionAnswer;
-  private suggestion: Suggestion;
+  public suggestion: Suggestion;
   private original: OriginalQuestion;
 
   constructor(
@@ -30,10 +33,11 @@ export class Question {
     public readonly isRequired: boolean,
     public settings: any
   ) {
-    this.answer = this.createEmptyAnswers();
     this.description = description;
     this.title = title;
 
+    this.initialize();
+    this.initializeAnswers();
     this.initializeOriginal();
   }
 
@@ -64,31 +68,31 @@ export class Question {
   }
 
   public get type(): QuestionType {
-    return this.settings.type.toLowerCase();
+    return QuestionType.from(this.settings.type);
   }
 
   public get isRankingType(): boolean {
-    return this.type === "ranking";
+    return this.type.isRankingType;
   }
 
   public get isMultiLabelType(): boolean {
-    return this.type === "multi_label_selection";
+    return this.type.isMultiLabelType;
   }
 
   public get isSingleLabelType(): boolean {
-    return this.type === "label_selection";
+    return this.type.isSingleLabelType;
   }
 
   public get isTextType(): boolean {
-    return this.type === "text";
+    return this.type.isTextType;
+  }
+
+  public get isSpanType(): boolean {
+    return this.type.isSpanType;
   }
 
   public get isRatingType(): boolean {
-    return this.type === "rating";
-  }
-
-  public get matchSuggestion(): boolean {
-    return !!this.suggestion && this.answer.matchSuggestion(this.suggestion);
+    return this.type.isRatingType;
   }
 
   public get isModified(): boolean {
@@ -96,7 +100,10 @@ export class Question {
       this.title !== this.original.title ||
       this.description !== this.original.description ||
       this.settings.use_markdown !== this.original.settings.use_markdown ||
-      this.settings.visible_options !== this.original.settings.visible_options
+      this.settings.visible_options !==
+        this.original.settings.visible_options ||
+      JSON.stringify(this.settings.options) !==
+        JSON.stringify(this.original.settings.options)
     );
   }
 
@@ -137,13 +144,13 @@ export class Question {
   restore() {
     this.title = this.original.title;
     this.description = this.original.description;
-    this.settings = {
-      ...this.settings,
-      ...this.original.settings,
-    };
+
+    this.restoreOriginal();
+    this.initializeAnswers();
   }
 
   update() {
+    this.initializeAnswers();
     this.initializeOriginal();
   }
 
@@ -171,13 +178,17 @@ export class Question {
     this.suggestion = suggestion;
   }
 
+  reloadAnswerFromOptions() {
+    this.initializeAnswers();
+  }
+
   private createEmptyAnswers(): QuestionAnswer {
     if (this.isTextType) {
       return new TextQuestionAnswer(this.type, "");
     }
 
-    if (this.isSingleLabelType) {
-      return new SingleLabelQuestionAnswer(
+    if (this.isSpanType) {
+      return new SpanQuestionAnswer(
         this.type,
         this.name,
         this.settings.options
@@ -200,6 +211,14 @@ export class Question {
       );
     }
 
+    if (this.isSingleLabelType) {
+      return new SingleLabelQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
     if (this.isRankingType) {
       return new RankingQuestionAnswer(
         this.type,
@@ -207,15 +226,52 @@ export class Question {
         this.settings.options
       );
     }
+
+    Guard.throw(
+      `Question answer for type ${this.type} is not implemented yet.`
+    );
+  }
+
+  private initialize() {
+    if (this.settings.options && !this.settings.visible_options) {
+      this.settings.visible_options = this.settings.options.length;
+    }
+
+    if (this.isSpanType) {
+      this.settings.options = this.settings.options.map((option) => {
+        return {
+          ...option,
+          color: option.color
+            ? Color.from(option.color)
+            : Color.generate(option.value),
+        };
+      });
+    }
+  }
+
+  private initializeAnswers() {
+    this.answer = this.createEmptyAnswers();
   }
 
   private initializeOriginal() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { options, ...rest } = this.settings;
+
     this.original = {
       title: this.title,
       description: this.description,
-      settings: rest,
+      settings: {
+        ...rest,
+        options: options?.map((option: string) => option),
+      },
+    };
+  }
+
+  private restoreOriginal() {
+    const { options, ...rest } = this.original.settings;
+
+    this.settings = {
+      ...rest,
+      options: options?.map((option: string) => option),
     };
   }
 }

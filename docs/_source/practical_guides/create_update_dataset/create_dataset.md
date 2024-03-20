@@ -53,7 +53,7 @@ You can define the fields using the Python SDK providing the following arguments
 - `name`: The name of the field, as it will be seen internally.
 - `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
 - `required` (optional): Whether the field is required or not. Defaults to `True`. Note that at least one field must be required.
-- `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials_and_integrations/tutorials/feedback/making-most-of-markdown.ipynb).
+- `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting, as well as embed multimedia content and PDFs. To delve further into the details, please refer to this [tutorial](/tutorials_and_integrations/tutorials/feedback/making-most-of-markdown.ipynb).
 
 ```{note}
 Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
@@ -74,11 +74,12 @@ The order of the fields in the UI follows the order in which these are added to 
 
 To collect feedback for your dataset, you need to formulate questions. The Feedback Task currently supports the following types of questions:
 
-- `RatingQuestion`: These questions require annotators to select one option from a list of integer values. This type is useful for collecting numerical scores.
-- `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
 - `LabelQuestion`: These questions ask annotators to choose one label from a list of options. This type is useful for text classification tasks. In the UI, the labels of the `LabelQuestion` will have a rounded shape.
 - `MultiLabelQuestion`: These questions ask annotators to choose all applicable labels from a list of options. This type is useful for multi-label text classification tasks. In the UI, the labels of the `MultiLabelQuestion` will have a squared shape.
 - `RankingQuestion`: This question asks annotators to order a list of options. It is useful to gather information on the preference or relevance of a set of options. Ties are allowed and all options will need to be ranked.
+- `RatingQuestion`: These questions require annotators to select one option from a list of integer values. This type is useful for collecting numerical scores.
+- `SpanQuestion`: Here, annotators are asked to select a portion of the text of a specific field and apply a label to it. This type of question is useful for named entity recognition or information extraction tasks.
+- `TextQuestion`: These questions offer annotators a free-text area where they can enter any text. This type is useful for collecting natural language data, such as corrections or explanations.
 
 You can define your questions using the Python SDK and set up the following configurations:
 
@@ -90,9 +91,10 @@ You can define your questions using the Python SDK and set up the following conf
 The following arguments apply to specific question types:
 
 - `values`: In the `RatingQuestion` this will be any list of unique integers that represent the options that annotators can choose from. These values must be defined in the range [1, 10]. In the `RankingQuestion`, values will be a list of strings with the options they will need to rank. If you'd like the text of the options to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value is the text to display in the UI.
-- `labels`: In `LabelQuestion` and `MultiLabelQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value of the text to display in the UI.
-- `visible_labels` (optional): In `LabelQuestion` and `MultiLabelQuestion` this is the number of labels that will be visible in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
-- `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting and embedded multimedia content. To delve further into the details, please refer to this [tutorial](/tutorials_and_integrations/tutorials/feedback/making-most-of-markdown.ipynb).
+- `labels`: In `LabelQuestion`, `MultiLabelQuestion` and `SpanQuestion` this is a list of strings with the options for these questions. If you'd like the text of the labels to be different in the UI and internally, you can pass a dictionary instead where the key is the internal name and the value will be the text to display in the UI.
+- `field`: A `SpanQuestion` is always attached to a specific field. Here you should pass a string with the name of the field where the labels of the `SpanQuestion` should be used.
+- `visible_labels` (optional): In `LabelQuestion`, `MultiLabelQuestion` and `SpanQuestion` this is the number of labels that will be visible at first sight in the UI. By default, the UI will show 20 labels and collapse the rest. Set your preferred number to change this limit or set `visible_labels=None` to show all options.
+- `use_markdown` (optional): In `TextQuestion` define whether the field should render markdown text. Defaults to `False`. If you set it to `True`, you will be able to use all the Markdown features for text formatting, as well as embed multimedia content and PDFs. To delve further into the details, please refer to this [tutorial](/tutorials_and_integrations/tutorials/feedback/making-most-of-markdown.ipynb).
 
 ```{note}
 Multimedia in Markdown is here, but it's still in the experimental phase. As we navigate the early stages, there are limits on file sizes due to ElasticSearch constraints, and the visualization and loading times may vary depending on your browser. We're on the case to improve this and welcome your feedback and suggestions!
@@ -114,6 +116,7 @@ You can define metadata properties using the Python SDK by providing the followi
 - `visible_for_annotators` (optional): A boolean to specify whether the metadata property will be accessible for users with an `annotator` role in the UI (`True`), or if it will only be visible for users with `owner` or `admin` roles (`False`). It is set to `True` by default.
 
 The following arguments apply to specific metadata types:
+
 - `values` (optional): In a `TermsMetadataProperty`, you can pass a list of valid values for this metadata property, in case you want to run a validation. If none are provided, the list of values will be computed from the values provided in the records.
 - `min` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a minimum valid value. If none is provided, the minimum value will be computed from the values provided in the records.
 - `max` (optional): In an `IntegerMetadataProperty` or a `FloatMetadataProperty`, you can pass a maximum valid value. If none is provided, the maximum value will be computed from the values provided in the records.
@@ -306,6 +309,7 @@ dataset.fields.extend(new_fields)
 # Remove a non-required field
 dataset.fields.pop(0)
 ```
+
 :::
 
 :::{tab-item} Questions
@@ -325,6 +329,7 @@ dataset.questions.extend(new_questions)
 # Remove a non-required question
 dataset.questions.pop(0)
 ```
+
 :::
 
 :::{tab-item} Metadata
@@ -345,6 +350,7 @@ dataset.update_metadata_properties(metadata_cfg)
 # Delete a metadata property
 dataset.delete_metadata_properties(metadata_properties="my_metadata")
 ```
+
 :::
 
 :::{tab-item} Vectors
@@ -364,6 +370,7 @@ dataset.update_vectors_settings(vector_cfg)
 # Delete vector settings
 dataset.delete_vectors_settings("my_vectors")
 ```
+
 :::
 
 :::{tab-item} Guidelines
@@ -376,6 +383,7 @@ dataset = rg.FeedbackDataset(...)
 # Define new guidelines for a question
 dataset.questions[0].description = 'New description for the question.'
 ```
+
 :::
 
 ::::

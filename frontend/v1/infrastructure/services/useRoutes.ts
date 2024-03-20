@@ -111,8 +111,30 @@ export const useRoutes = () => {
     return decodeURIComponent(value) as T;
   };
 
-  const go = (where: string) => {
+  const getParams = () => {
+    return route.value.params;
+  };
+
+  const go = (
+    where: string,
+    params: { external: boolean; newWindow: boolean } = {
+      external: false,
+      newWindow: false,
+    }
+  ) => {
+    if (params.external) {
+      if (params.newWindow) {
+        window.open(where);
+      } else {
+        window.location.href = where;
+      }
+    }
+
     router.push(where);
+  };
+
+  const getQuery = () => {
+    return route.value.query;
   };
 
   const goBack = () => {
@@ -122,12 +144,14 @@ export const useRoutes = () => {
   return {
     go,
     goBack,
+    getQuery,
     goToFeedbackTaskAnnotationPage,
     goToDatasetsList,
     goToSetting,
     getDatasetLink,
     setQueryParams,
     getQueryParams,
+    getParams,
     getPreviousRoute,
     previousRouteMatchWith,
     watchBrowserNavigation: (callBack: () => void) => {

@@ -30,7 +30,6 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsModel,
     FeedbackRecordsSearchModel,
     FeedbackRecordsSearchVectorQuery,
-    FeedbackResponseStatusFilter,
     FeedbackVectorSettingsModel,
 )
 
@@ -177,7 +176,7 @@ def get_records(
     include: Union[None, List[str]] = None,
     offset: int = 0,
     limit: int = 50,
-    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    response_status: Optional[List[str]] = None,
     metadata_filters: Optional[List[str]] = None,
     sort_by: Optional[List[str]] = None,
 ) -> Response[Union[FeedbackRecordsModel, ErrorMessage, HTTPValidationError]]:
@@ -192,7 +191,7 @@ def get_records(
         offset: the offset to be used in the pagination. Defaults to 0.
         limit: the limit to be used in the pagination. Defaults to 50.
         response_status: the status of the responses to be retrieved. Can either be
-            `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
+            `draft`, `pending`, `discarded`, or `submitted`. Defaults to None.
         metadata_filters: the metadata filters to be applied to the records. Defaults to None.
         sort_by: the fields to be used to sort the records. Defaults to None.
 
@@ -229,7 +228,7 @@ def search_records(
     id: UUID,
     vector_query: FeedbackRecordsSearchVectorQuery,
     include: Union[None, List[str]] = None,
-    response_status: Optional[List[FeedbackResponseStatusFilter]] = None,
+    response_status: Optional[List[str]] = None,
     metadata_filters: Optional[List[str]] = None,
     limit: int = 50,
 ) -> Response[Union[FeedbackRecordsSearchModel, ErrorMessage, HTTPValidationError]]:
@@ -241,7 +240,7 @@ def search_records(
         include: the fields to be included in the response.
         vector_query: the vector query to be used to search for records.
         response_status: the status of the responses to be retrieved.
-            Can either be `draft`, `missing`, `discarded`, or `submitted`. Defaults to None.
+            Can either be `draft`, `pending`, `discarded`, or `submitted`. Defaults to None.
         metadata_filters: the metadata filters to be applied to the records. Defaults to None.
         limit: an optional value to limit the number of returned records by the search.
 

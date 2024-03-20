@@ -40,6 +40,7 @@
       :is-draft-saving="isDraftSaving"
       :is-submitting="isSubmitting"
       :is-discarding="isDiscarding"
+      :enableAutoSubmitWithKeyboard="true"
       @on-submit-responses="onSubmit"
       @on-discard-responses="onDiscard"
       @on-save-draft="onSaveDraft"
@@ -97,6 +98,7 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   height: 100%;
@@ -110,7 +112,7 @@ export default {
   &__form {
     @include media("<desktop") {
       overflow: visible;
-      height: auto;
+      height: auto !important;
       max-height: none !important;
     }
   }
@@ -121,6 +123,10 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
+    @include media("<desktop") {
+      flex: 0;
+      height: auto;
+    }
     &__header {
       display: flex;
       justify-content: flex-end;

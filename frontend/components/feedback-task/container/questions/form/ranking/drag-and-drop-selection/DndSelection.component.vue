@@ -23,12 +23,17 @@
           v-text="item.text"
           :id="`${item.value}-span`"
         />
-        <span
-          :title="$t('suggestion.suggested-rank')"
+
+        <BaseTooltip
+          v-if="findRankSuggestion(item)"
           class="draggable__suggestion"
-          v-if="findRankSuggestion(item.value)"
-          >{{ findRankSuggestion(item.value).rank }}</span
+          :text="`<img src='/icons/suggestion.svg' /> ${$t(
+            'suggestion.suggested-rank'
+          )}`"
+          minimalist
         >
+          <span v-text="findRankSuggestion(item).rank" />
+        </BaseTooltip>
       </div>
     </draggable>
 
@@ -65,12 +70,17 @@
               v-text="item.text"
               :id="`${item.value}-span`"
             />
-            <span
-              :title="$t('suggestion.suggested-rank')"
+
+            <BaseTooltip
+              v-if="findRankSuggestion(item)"
               class="draggable__suggestion"
-              v-if="findRankSuggestion(item.value)"
-              >{{ findRankSuggestion(item.value).rank }}</span
+              :text="`<img src='/icons/suggestion.svg' /> ${$t(
+                'suggestion.suggested-rank'
+              )}`"
+              minimalist
             >
+              <span v-text="findRankSuggestion(item).rank" />
+            </BaseTooltip>
           </div>
         </draggable>
       </div>
@@ -88,8 +98,8 @@ export default {
       type: Object,
       required: true,
     },
-    suggestions: {
-      type: Array,
+    suggestion: {
+      type: Object,
     },
     isFocused: {
       type: Boolean,
@@ -198,8 +208,8 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-    findRankSuggestion(value) {
-      return this.suggestions?.find((suggestion) => suggestion.value == value);
+    findRankSuggestion(item) {
+      return this.suggestion?.getSuggestion(item);
     },
   },
 };
@@ -279,6 +289,11 @@ $max-visible-card-items: 12;
       box-shadow: none;
       &:hover {
         box-shadow: none;
+      }
+    }
+    &.sortable-chosen {
+      .tooltip {
+        display: none;
       }
     }
     &--unranked {

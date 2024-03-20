@@ -14,9 +14,11 @@ interface ServerPagination {
 
 export class PageCriteria extends Criteria {
   public readonly options = [10, 25, 50, 100];
+
   public mode: "focus" | "bulk" = "focus";
   public client: BrowserPagination;
   private _server: ServerPagination;
+
   constructor() {
     super();
 
@@ -54,6 +56,12 @@ export class PageCriteria extends Criteria {
     if (this.isFocusMode) return this.client.page.toString();
 
     return `${this.client.page}~${this.client.many}`;
+  }
+
+  get buffer(): number {
+    if (this.isBulkMode) return this.client.many;
+
+    return this.client.many / 2;
   }
 
   withValue({ client, mode }: PageCriteria) {
@@ -110,15 +118,15 @@ export class PageCriteria extends Criteria {
     };
   }
 
-  goTo(page: number) {
+  goTo(page: number, many: number = this.client.many) {
     this.client = {
-      ...this.client,
       page,
+      many,
     };
   }
 
-  goToFirst() {
-    this.goTo(1);
+  goToFirst(many?: number) {
+    this.goTo(1, many);
   }
 
   isFirstPage() {

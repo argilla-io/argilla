@@ -65,6 +65,9 @@ export default {
       flex-direction: column;
       height: 100%;
       min-height: 0;
+      .tabs {
+        flex-wrap: wrap;
+      }
     }
   }
 }

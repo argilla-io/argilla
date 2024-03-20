@@ -35,7 +35,7 @@ from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
-from argilla.server.models import User
+from argilla_server.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -70,7 +70,6 @@ class TestFilteredRemoteFeedbackDataset:
         "statuses, expected_num_records",
         [
             ([ResponseStatusFilter.draft], 1),
-            ([ResponseStatusFilter.missing], 10),
             ([ResponseStatusFilter.pending], 10),
             ([ResponseStatusFilter.discarded], 1),
             ([ResponseStatusFilter.submitted], 1),
@@ -87,7 +86,7 @@ class TestFilteredRemoteFeedbackDataset:
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         for status, record in zip(statuses, records):
-            if status not in [ResponseStatusFilter.missing, ResponseStatusFilter.pending]:
+            if status != ResponseStatusFilter.pending:
                 await ResponseFactory.create(record=record, status=status, values={})
 
         argilla.client.singleton.init(api_key=user.api_key)

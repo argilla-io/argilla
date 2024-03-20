@@ -28,16 +28,41 @@
               v-if="records.hasRecordsToAnnotate"
               :decoration-circle="true"
               class="wrapper__records__header__checkbox"
-              :value="selectedRecords.length === recordsOnPage.length"
+              :value="isSelectedAll"
               @input="toggleAllRecords"
             />
             <span
               class="wrapper__records__header__selection-text"
-              v-if="selectedRecords.length"
+              v-if="selectedRecords.length && !affectAllRecords"
               v-text="
                 $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
               "
             />
+
+            <div v-if="isAffectAllRecordsAllowed" class="bulk-by-criteria">
+              <BaseButton
+                v-if="!affectAllRecords"
+                class="bulk-by-criteria__button primary text small"
+                @on-click="affectAllRecords = true"
+                >{{
+                  $t("bulkAnnotation.selectAllResults", {
+                    total: records.total,
+                  })
+                }}</BaseButton
+              >
+              <template v-else>
+                <span class="wrapper__records__header__selection-text">{{
+                  $t("bulkAnnotation.haveSelectedRecords", {
+                    total: records.total,
+                  })
+                }}</span>
+                <BaseButton
+                  class="bulk-by-criteria__button primary text small"
+                  @on-click="resetAffectAllRecords"
+                  >{{ $t("button.cancel") }}</BaseButton
+                >
+              </template>
+            </div>
           </div>
           <RecordsViewConfig
             v-if="records.hasRecordsToAnnotate"
@@ -76,6 +101,7 @@
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
         :record="record"
+        :is-bulk-mode="true"
         :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
         :is-submitting="isSubmitting"
         :is-discarding="isDiscarding"
@@ -86,11 +112,35 @@
         :submit-tooltip="bulkActionsTooltip"
         :discard-tooltip="bulkActionsTooltip"
         :draft-saving-tooltip="bulkActionsTooltip"
-        @on-submit-responses="onSubmit"
-        @on-discard-responses="onDiscard"
-        @on-save-draft="onSaveDraft"
+        :progress="progress"
+        @on-submit-responses="onClickSubmit"
+        @on-discard-responses="onClickDiscard"
+        @on-save-draft="onClickSaveDraft"
       />
     </div>
+    <BaseModal
+      class="conformation-modal"
+      :modal-custom="true"
+      :prevent-body-scroll="true"
+      modal-class="modal-secondary"
+      :modal-title="$t('bulkAnnotation.actionConfirmation')"
+      :modal-visible="visibleConfirmationModal"
+      @close-modal="cancelAction"
+    >
+      <p
+        v-text="
+          $t('bulkAnnotation.actionConfirmationText', { total: records.total })
+        "
+      />
+      <div class="modal-buttons">
+        <BaseButton class="primary outline" @on-click="cancelAction">
+          {{ $t("button.cancel") }}
+        </BaseButton>
+        <BaseButton class="primary" @on-click="confirmAction">
+          {{ $t("button.continue") }}
+        </BaseButton>
+      </div>
+    </BaseModal>
   </span>
 </template>
 <script>
@@ -125,6 +175,8 @@ export default {
     return {
       selectedRecords: [],
       recordHeight: "defaultHeight",
+      visibleConfirmationModal: false,
+      allowedAction: null,
     };
   },
   computed: {
@@ -132,6 +184,8 @@ export default {
       return this.records.getRecordsOn(this.recordCriteria.committed.page);
     },
     numberOfSelectedRecords() {
+      if (this.affectAllRecords) return this.records.total;
+
       return this.selectedRecords.length;
     },
     hasSelectedAtLeastOneRecord() {
@@ -146,6 +200,20 @@ export default {
         this.numberOfSelectedRecords
       );
     },
+    isSelectedAll() {
+      return this.selectedRecords.length === this.recordsOnPage.length;
+    },
+    isAffectAllRecordsAllowed() {
+      return (
+        this.isSelectedAll &&
+        this.checkIfSomeFilterIsActive(this.recordCriteria) &&
+        this.records.total > this.recordsOnPage.length &&
+        this.records.total <= 1000
+      );
+    },
+    shouldShowModalToConfirm() {
+      return this.affectAllRecords && this.numberOfSelectedRecords > 100;
+    },
   },
   methods: {
     onSelectRecord(isSelected, record) {
@@ -157,36 +225,87 @@ export default {
         (r) => r.id !== record.id
       );
     },
+    showConfirmationModal(action) {
+      this.visibleConfirmationModal = true;
+      this.allowedAction = action;
+    },
+    cancelAction() {
+      this.visibleConfirmationModal = false;
+      this.allowedAction = null;
+    },
+    async confirmAction() {
+      this.visibleConfirmationModal = false;
+      switch (this.allowedAction) {
+        case "submit":
+          await this.onSubmit();
+          break;
+        case "saveDraft":
+          await this.onSaveDraft();
+          break;
+        case "discard":
+          await this.onDiscard();
+          break;
+      }
+      this.allowedAction = null;
+    },
+    onClickSubmit() {
+      if (this.shouldShowModalToConfirm) {
+        this.showConfirmationModal("submit");
+      } else {
+        this.onSubmit();
+      }
+    },
+    onClickSaveDraft() {
+      if (this.shouldShowModalToConfirm) {
+        this.showConfirmationModal("saveDraft");
+      } else {
+        this.onSaveDraft();
+      }
+    },
+    onClickDiscard() {
+      if (this.shouldShowModalToConfirm) {
+        this.showConfirmationModal("discard");
+      } else {
+        this.onDiscard();
+      }
+    },
     async onSubmit() {
       const allSuccessful = await this.submit(
-        this.selectedRecords,
-        this.record
+        this.recordCriteria,
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
     },
     async onDiscard() {
       const allSuccessful = await this.discard(
-        this.selectedRecords,
-        this.record
+        this.recordCriteria,
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
     },
     async onSaveDraft() {
       const allSuccessful = await this.saveAsDraft(
-        this.selectedRecords,
-        this.record
+        this.recordCriteria,
+        this.record,
+        this.selectedRecords
       );
 
       if (allSuccessful) this.selectedRecords = [];
     },
     toggleAllRecords() {
-      if (this.selectedRecords.length === this.recordsOnPage.length) {
+      if (this.isSelectedAll) {
         this.selectedRecords = [];
       } else {
         this.selectedRecords = [...this.recordsOnPage];
       }
+    },
+    resetAffectAllRecords() {
+      this.affectAllRecords = false;
+      this.selectedRecords = [];
     },
     resetScroll() {
       if (!this.$refs.bulkScrollableArea) return;
@@ -206,9 +325,14 @@ export default {
 
       this.$root.$emit("on-change-record-criteria-filter", this.recordCriteria);
     },
+    isSelectedAll(value) {
+      if (!value) {
+        this.affectAllRecords = false;
+      }
+    },
   },
-  setup() {
-    return useBulkAnnotationViewModel();
+  setup(props) {
+    return useBulkAnnotationViewModel(props);
   },
 };
 </script>
@@ -221,6 +345,7 @@ export default {
   scroll-snap-align: start;
 }
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   height: 100%;
@@ -234,7 +359,7 @@ export default {
   &__form {
     @include media("<desktop") {
       overflow: visible;
-      height: auto;
+      height: auto !important;
       max-height: none !important;
     }
   }
@@ -283,6 +408,7 @@ export default {
 }
 .bulk {
   &__records {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space;
@@ -296,6 +422,19 @@ export default {
         max-height: 80%;
         height: 100%;
       }
+    }
+  }
+}
+
+.bulk-by-criteria {
+  display: flex;
+  align-items: center;
+  gap: $base-space * 2;
+  &__button.button {
+    padding: 6px;
+    border-radius: $border-radius;
+    &:hover {
+      background: #edf0fa;
     }
   }
 }
