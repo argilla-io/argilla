@@ -16,7 +16,7 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Added
+### Added
 
 - If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process. ([#4630](https://github.com/argilla-io/argilla/pull/4630))
 - Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
@@ -29,6 +29,8 @@ These are the section headers that we use:
 - Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
 - Fixed parsing ranking values in suggestions from HF datasets. ([#4629](https://github.com/argilla-io/argilla/pull/4629))
 - Fixed reading description from API response payload. ([#4632](https://github.com/argilla-io/argilla/pull/4632))
+- Fixed pulling (n*chunk_size)+1 records when using `ds.pull` or iterating over the dataset. ([#4662](https://github.com/argilla-io/argilla/pull/4662))
+- Fixed client's resolution of enum values when calling the Search and Metrics api, to support Python >=3.11 enum handling. ([#4672](https://github.com/argilla-io/argilla/pull/4672))
 
 ## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
 
