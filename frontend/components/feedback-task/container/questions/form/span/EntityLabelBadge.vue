@@ -76,7 +76,7 @@ input[type="checkbox"] {
     }
   }
 }
-.input-button {
+.input-button:not(:first-of-type) {
   input[type="checkbox"] {
     &:focus:not(:focus-visible) {
       & + .label-text {
