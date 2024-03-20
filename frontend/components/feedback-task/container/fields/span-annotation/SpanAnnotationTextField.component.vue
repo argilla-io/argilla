@@ -117,6 +117,8 @@ export default {
     },
     keyPressing(event, isDown) {
       if (event.key === "Shift") {
+        window.getSelection()?.removeAllRanges();
+
         event.preventDefault();
         event.stopPropagation();
 
