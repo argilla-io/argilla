@@ -228,6 +228,8 @@ export default {
         return this.reset();
       }
 
+      if (!this.enableShortcuts) return;
+
       if (this.hasJustOneCoincidence(this.keyCode)) {
         return this.selectByKeyCode($event, this.keyCode);
       }

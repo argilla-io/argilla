@@ -14,7 +14,6 @@
       :showShortcutsHelper="showShortcutsHelper"
       :enableShortcuts="enableShortcuts"
       @on-focus="onFocus"
-      @on-selected="onSelected"
     />
   </div>
 </template>
@@ -60,9 +59,6 @@ export default {
   methods: {
     onFocus() {
       this.$emit("on-focus");
-    },
-    onSelected() {
-      this.$emit("on-user-answer");
     },
   },
 };

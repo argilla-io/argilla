@@ -169,6 +169,7 @@ export default {
 <style lang="scss" scoped>
 .text_field_component {
   $this: &;
+  user-select: text;
   display: flex;
   flex-direction: column;
   gap: $base-space;
