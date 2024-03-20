@@ -22,6 +22,7 @@ These are the section headers that we use:
 - Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
 - Added support for spans values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
 - Added `Span` questions for `FeedbackDataset` ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+- Added `ARGILLA_CACHE_DIR` environment variable to configure the client cache directory. ([#4509](https://github.com/argilla-io/argilla/pull/4509))
 
 ### Fixed
 
