@@ -281,9 +281,10 @@ $label-dark-color: $black-54;
   cursor: grab;
   user-select: none;
   transition: background 0.2s ease;
+  @include font-size(12px);
   span {
     border-radius: calc($border-radius-s - 2px);
-    background: $black-10;
+    background: $black-6;
     padding: 2px 4px;
     line-height: 1.2;
   }
