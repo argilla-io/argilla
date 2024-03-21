@@ -12,7 +12,7 @@
       :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
       :isFocused="isFocused"
       :showShortcutsHelper="showShortcutsHelper"
-      :enableShortcuts="enableShortcuts"
+      :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
       @on-focus="onFocus"
     />
   </div>
@@ -35,7 +35,7 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    enableShortcuts: {
+    enableSpanQuestionShortcutsGlobal: {
       type: Boolean,
       default: () => false,
     },

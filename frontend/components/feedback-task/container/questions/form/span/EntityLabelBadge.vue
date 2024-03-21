@@ -22,11 +22,7 @@
       :for="option.id"
       :title="option.text"
     >
-      <span
-        class="key"
-        v-if="showShortcutsHelper"
-        v-text="keyboards[option.id]"
-      />
+      <span class="key" v-text="keyboards[option.id]" />
       <span>{{ option.text }}</span>
     </label>
   </div>
@@ -38,10 +34,6 @@ export default {
     option: {
       type: Object,
       required: true,
-    },
-    showShortcutsHelper: {
-      type: Boolean,
-      default: false,
     },
     keyboards: {
       type: Object,

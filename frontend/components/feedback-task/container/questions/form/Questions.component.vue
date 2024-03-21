@@ -59,7 +59,7 @@
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           :is-bulk-mode="isBulkMode"
-          :enableShortcuts="enableSpanQuestionShortcuts"
+          :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
           @on-focus="updateQuestionAutofocus(index)"
         />
       </div>
