@@ -12,5 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# coding: utf-8
-version = "1.27.0-dev"
+import pytest
+from argilla.feedback import SuggestionSchema, TextQuestion
+
+
+def test_create_suggestion():
+    question = TextQuestion(name="text")
+
+    suggestion = question.suggestion("Value for text", agent="mock")
+
+    assert suggestion.question_name == question.name
+    assert suggestion.agent == "mock"
+
+
+def test_create_suggestion_with_wrong_value():
+    with pytest.raises(ValueError, match="Value 10 is not valid for question type text. Expected <class 'str'>."):
+        TextQuestion(name="text").suggestion(value=10, agent="Mock")

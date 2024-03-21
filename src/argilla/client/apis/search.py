@@ -68,7 +68,7 @@ class Search(AbstractApi):
         else:
             raise ValueError(f"Task {task} not supported")
 
-        url = self._API_URL_PATTERN.format(name=name, task=task)
+        url = Search._API_URL_PATTERN.format(name=name, task=task.value)
         if size:
             url += f"?limit={size}"
 
