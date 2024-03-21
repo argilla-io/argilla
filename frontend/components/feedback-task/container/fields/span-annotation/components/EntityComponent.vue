@@ -201,6 +201,9 @@ export default {
     #{$this}__close-button {
       display: inline-flex;
     }
+    #{$this}__text {
+      min-width: $base-space * 3;
+    }
     #{$this}__score {
       display: inline-flex;
     }
