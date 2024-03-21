@@ -28,9 +28,12 @@
         ref="spanAnnotationField"
         :id="id"
         v-html="fieldText"
-        @mousedown="mouseDown = true"
-        @mouseup="onMouseUp(false)"
-        @mousemove="onMouseMove(mouseDown)"
+        tabindex="0"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+        @mousemove="onMouseMove"
+        @keydown="onKeyDown"
+        @keyup="onKeyUp"
       />
       <SpanAnnotationCursor
         v-if="hasSelectedEntity"
@@ -117,8 +120,6 @@ export default {
     },
     keyPressing(event, isDown) {
       if (event.key === "Shift") {
-        window.getSelection()?.removeAllRanges();
-
         event.preventDefault();
         event.stopPropagation();
 
@@ -133,14 +134,18 @@ export default {
 
       this.visibleShortcutsHelper = value;
     },
-    onMouseUp(value) {
-      this.mouseDown = value;
-      if (this.mouseTimeout) clearTimeout(this.mouseTimeout);
-      this.showShortcutsHelper(value);
+    onMouseDown() {
+      this.mouseDown = true;
     },
-    onMouseMove(value) {
+    onMouseUp() {
+      this.mouseDown = false;
+      if (this.mouseTimeout) clearTimeout(this.mouseTimeout);
+
+      this.showShortcutsHelper(false);
+    },
+    onMouseMove() {
       this.mouseTimeout = setTimeout(() => {
-        if (this.mouseDown) this.showShortcutsHelper(value);
+        if (this.mouseDown) this.showShortcutsHelper(true);
       }, 500);
     },
     onKeyDown(event) {
@@ -153,14 +158,6 @@ export default {
 
       this.keyPressing(event, false);
     },
-  },
-  mounted() {
-    window.addEventListener("keydown", this.onKeyDown);
-    window.addEventListener("keyup", this.onKeyUp);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.onKeyDown);
-    window.removeEventListener("keyup", this.onKeyUp);
   },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);
@@ -210,12 +207,6 @@ export default {
   }
 }
 
-.span-annotation {
-  &__field {
-    position: relative;
-    line-height: 32px;
-  }
-}
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.25s;
@@ -225,12 +216,21 @@ export default {
   opacity: 0;
 }
 
-.span-annotation__field {
-  margin: 0;
-  &--active {
-    cursor: none;
-    &::selection {
-      background-color: v-bind("selectedEntityColor");
+.span-annotation {
+  &__field {
+    position: relative;
+    line-height: 32px;
+    margin: 0;
+
+    &--active {
+      cursor: none;
+      &::selection {
+        background-color: v-bind("selectedEntityColor");
+      }
+    }
+
+    &:focus {
+      outline: none;
     }
   }
 }
