@@ -189,6 +189,9 @@ export default {
     gap: 4px;
     @include truncate(auto);
   }
+  &__suggestion {
+    flex-shrink: 0;
+  }
   &:hover {
     position: relative;
     z-index: 1;

@@ -76,7 +76,7 @@ input[type="checkbox"] {
     }
   }
 }
-.input-button {
+.input-button:not(:first-of-type) {
   input[type="checkbox"] {
     &:focus:not(:focus-visible) {
       & + .label-text {
@@ -106,6 +106,7 @@ input[type="checkbox"] {
   border: 2px solid transparent;
   border-radius: $border-radius;
   cursor: pointer;
+  user-select: none;
   span {
     white-space: nowrap;
     overflow: hidden;

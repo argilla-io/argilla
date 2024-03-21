@@ -61,7 +61,6 @@
           :is-bulk-mode="isBulkMode"
           :enableShortcuts="enableSpanQuestionShortcuts"
           @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="focusNext(index)"
         />
       </div>
     </div>

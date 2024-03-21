@@ -200,11 +200,14 @@ export default {
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
-      debugger;
       if (
         $event.key === "Tab" ||
         $event.key === "Enter" ||
         $event.key === "Backspace" ||
+        $event.key === "ArrowLeft" ||
+        $event.key === "ArrowRight" ||
+        $event.key === "ArrowUp" ||
+        $event.key === "ArrowDown" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
@@ -224,6 +227,8 @@ export default {
 
         return this.reset();
       }
+
+      if (!this.enableShortcuts) return;
 
       if (this.hasJustOneCoincidence(this.keyCode)) {
         return this.selectByKeyCode($event, this.keyCode);
