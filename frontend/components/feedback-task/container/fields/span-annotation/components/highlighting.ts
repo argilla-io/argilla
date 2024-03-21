@@ -53,13 +53,14 @@ export class Highlighting {
     private readonly EntityComponentConstructor: (
       span: Span,
       entityPosition: Position,
+      hoverSpan: (span: Span, value: Boolean) => void,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
     styles?: Styles
   ) {
     this.styles = {
-      entitiesGap: 12,
+      entitiesGap: 9,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
       ...styles,
@@ -190,6 +191,15 @@ export class Highlighting {
     }
   }
 
+  private getOverlappedSpans(span: Span) {
+    return this.spans.filter(
+      (s) =>
+        (span.from >= s.from && span.from <= s.to) ||
+        (span.to >= s.from && span.to <= s.to) ||
+        (span.from < s.from && span.to > s.to)
+    );
+  }
+
   private applyStyles() {
     if (!CSS.highlights) return;
 
@@ -202,11 +212,38 @@ export class Highlighting {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      const overlapped = this.spans.filter((s) => s.from === span.from);
+      const overlapped = this.getOverlappedSpans(span);
 
       const overlappedIndex = overlapped.findIndex((s) => s === span) || 0;
 
       const className = `${this.styles.entityCssKey}-${span.entity.id}-${overlappedIndex}`;
+
+      if (!highlights[className]) highlights[className] = [];
+
+      const range = this.createRange(span);
+
+      highlights[className].push(range);
+    }
+
+    for (const [entity, selections] of Object.entries(highlights)) {
+      CSS.highlights.set(entity, new Highlight(...selections.flat()));
+    }
+  }
+
+  hoverSpan(span: Span, isHovered: Boolean) {
+    CSS.highlights.clear();
+    const highlights: Dictionary<Range[]> = {};
+
+    const hoveredSpan = span;
+
+    for (const span of this.spans) {
+      const overlapped = this.getOverlappedSpans(span);
+
+      const overlappedIndex = overlapped.findIndex((s) => s === span) || 0;
+      const className =
+        hoveredSpan === span && isHovered
+          ? `${this.styles.entityCssKey}-${span.entity.id}-${overlappedIndex}-hover`
+          : `${this.styles.entityCssKey}-${span.entity.id}-${overlappedIndex}`;
 
       if (!highlights[className]) highlights[className] = [];
 
@@ -249,7 +286,7 @@ export class Highlighting {
         width,
       };
 
-      const overlapped = this.spans.filter((s) => s.from === span.from);
+      const overlapped = this.getOverlappedSpans(span);
 
       if (overlapped.length > overlappedLevels) {
         overlappedLevels = overlapped.length;
@@ -271,6 +308,7 @@ export class Highlighting {
       const entityElement = this.EntityComponentConstructor(
         span,
         entityPosition,
+        (span: Span, isHovered: Boolean) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)
       );
@@ -284,7 +322,7 @@ export class Highlighting {
     this.applyStyles();
   }
 
-  private createRange({ from, to, node }: Span) {
+  public createRange({ from, to, node }: Span) {
     const range = new Range();
 
     range.setStart(node.element, from);

@@ -59,7 +59,14 @@
 
               .span-annotation__field--overlapped::highlight(hl-{{id}}-{{i}}) {
                 text-decoration: underline {{color}} 2px;
-                text-underline-offset: {{i ? (i * 10) + 4  : 4 }}px;
+                text-underline-offset: {{i ? (i * 9) + 4  : 4 }}px;
+                text-underline-position: under;
+              }
+              .span-annotation__field--overlapped::highlight(hl-{{id}}-{{i}}-hover) {
+                text-decoration: underline {{color}} 2px;
+                text-underline-offset: {{i ? (i * 9) + 4  : 4 }}px;
+                text-underline-position: under;
+                background: {{color.palette.light}};
               }
             </style>
           </template>
@@ -231,6 +238,7 @@ export default {
 .span-annotation {
   &__field {
     position: relative;
+    font-size: 18px;
     line-height: v-bind(lineHeight);
     &--overlapped {
       @extend .span-annotation__field;

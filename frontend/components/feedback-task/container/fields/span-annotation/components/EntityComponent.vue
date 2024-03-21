@@ -10,6 +10,8 @@
   >
     <div
       v-on="!singleOption ? { click: toggleDropdown } : {}"
+      @mouseenter="hoverSpan(true)"
+      @mouseleave="hoverSpan(false)"
       :class="[
         !singleOption ? 'span-entity--clickable' : 'span-entity',
         allowOverlapping ? 'span-entity--overlapping' : null,
@@ -115,6 +117,11 @@ export default {
     removeSelectedOption() {
       this.$emit("on-remove-option");
       this.hideDropdown();
+    },
+    hoverSpan(isHovered) {
+      if (this.allowOverlapping) {
+        this.$emit("on-hover-span", isHovered);
+      }
     },
     toggleDropdown() {
       this.visibleDropdown = !this.visibleDropdown;
@@ -243,7 +250,10 @@ export default {
   &--overlapping {
     @extend .span-entity;
     background: v-bind(entityColor);
-    margin-top: 0;
+    margin-top: 2px;
+    .span-entity__text {
+      line-height: 9px;
+    }
   }
 }
 </style>
