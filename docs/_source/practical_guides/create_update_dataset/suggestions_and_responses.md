@@ -16,6 +16,7 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 ::::{tab-set}
 
 :::{tab-item} Label
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -28,9 +29,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Multi-label
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -43,9 +46,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Ranking
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -62,9 +67,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Rating
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -77,9 +84,37 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
+:::
+
+:::{tab-item} Span
+
+```python
+from argilla.client.feedback.schemas import SpanValueSchema
+
+record = rg.FeedbackRecord(
+    fields=...,
+    suggestions = [
+        {
+            "question_name": "entities",
+            "value": [
+                SpanValueSchema(
+                    start=0, # position of the first character of the span
+                    end=10, # position of the character right after the end of the span
+                    label="ORG",
+                    score=1.0
+                )
+            ],
+            "agent": model_name,
+        }
+    ]
+)
+```
+
 :::
 
 :::{tab-item} Text
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -92,6 +127,7 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 ::::
@@ -107,6 +143,7 @@ The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an insta
 ::::{tab-set}
 
 :::{tab-item} Local dataset
+
 ```python
 for record in dataset.records:
     record.suggestions = [
@@ -117,9 +154,11 @@ for record in dataset.records:
         }
     ]
 ```
+
 :::
 
 :::{tab-item} Remote dataset
+
 ```python
 modified_records = []
 for record in dataset.records:
@@ -133,6 +172,7 @@ for record in dataset.records:
     modified_records.append(record)
 dataset.update_records(modified_records)
 ```
+
 :::
 
 ::::
@@ -148,6 +188,7 @@ If your dataset includes some annotations, you can add those to the records as y
 ::::{tab-set}
 
 :::{tab-item} Label
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -162,9 +203,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Multi-label
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -179,9 +222,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Ranking
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -200,9 +245,11 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 :::{tab-item} Rating
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -217,9 +264,38 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
+:::
+
+:::{tab-item} Span
+
+```python
+from argilla.client.feedback.schemas import SpanValueSchema
+
+record = rg.FeedbackRecord(
+    fields=...,
+    responses = [
+        {
+            "values":{
+                "entities":{
+                    "value": [
+                        SpanValueSchema(
+                            start=0,
+                            end=10,
+                            label="ORG"
+                        )
+                    ]
+                }
+            }
+        }
+    ]
+)
+```
+
 :::
 
 :::{tab-item} Text
+
 ```python
 record = rg.FeedbackRecord(
     fields=...,
@@ -234,6 +310,7 @@ record = rg.FeedbackRecord(
     ]
 )
 ```
+
 :::
 
 ::::
@@ -249,6 +326,7 @@ The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an insta
 ::::{tab-set}
 
 :::{tab-item} Local dataset
+
 ```python
 for record in dataset.records:
     record.responses = [
@@ -261,9 +339,11 @@ for record in dataset.records:
         }
     ]
 ```
+
 :::
 
 :::{tab-item} Remote dataset
+
 ```python
 from datetime import datetime
 
@@ -283,6 +363,7 @@ for record in dataset.records:
     modified_records.append(record)
 dataset.update_records(modified_records)
 ```
+
 :::
 
 ::::
@@ -296,6 +377,7 @@ You can also follow the same strategy to modify existing responses.
 
 ```{include} /_common/other_datasets.md
 ```
+
 ### Add `suggestions`
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. We allow for multiple suggestions per record.

@@ -11,11 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import json
 import logging
 import tempfile
 import warnings
+from copy import copy
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 
 from packaging.version import parse as parse_version
@@ -50,7 +50,7 @@ class HuggingFaceDatasetMixin:
             questions, and metadata_properties formatted as `datasets.Features`.
 
         Examples:
-            >>> from argilla.client.feedback.integrations.dataset import HuggingFaceDatasetMixin
+            >>> from argilla.client.feedback.integrations.huggingface import HuggingFaceDatasetMixin
             >>> dataset = FeedbackDataset(...) or RemoteFeedbackDataset(...)
             >>> huggingface_dataset = HuggingFaceDatasetMixin._huggingface_format(dataset)
         """
@@ -71,17 +71,40 @@ class HuggingFaceDatasetMixin:
         for question in dataset.questions:
             if question.type in [QuestionTypes.text, QuestionTypes.label_selection]:
                 value = Value(dtype="string", id="question")
+                suggestion_value = copy(value)
             elif question.type == QuestionTypes.rating:
                 value = Value(dtype="int32", id="question")
+                suggestion_value = copy(value)
             elif question.type == QuestionTypes.ranking:
                 value = Sequence({"rank": Value(dtype="uint8"), "value": Value(dtype="string")}, id="question")
+                suggestion_value = copy(value)
             elif question.type in QuestionTypes.multi_label_selection:
                 value = Sequence(Value(dtype="string"), id="question")
+                suggestion_value = copy(value)
+            elif question.type in QuestionTypes.span:
+                value = Sequence(
+                    {
+                        "start": Value(dtype="int32"),
+                        "end": Value(dtype="int32"),
+                        "label": Value(dtype="string"),
+                        "text": Value(dtype="string"),
+                    },
+                    id="question",
+                )
+                suggestion_value = Sequence(
+                    {
+                        "start": Value(dtype="int32"),
+                        "end": Value(dtype="int32"),
+                        "label": Value(dtype="string"),
+                        "text": Value(dtype="string"),
+                        "score": Value(dtype="float32"),
+                    }
+                )
             else:
                 raise ValueError(
                     f"Question {question.name} is of type `{question.type}`,"
                     " for the moment only the following question types are supported:"
-                    f" `{'`, `'.join([arg.value for arg in QuestionTypes])}`."
+                    f" `{'`, `'.join(QuestionTypes.values())}`."
                 )
 
             hf_features[question.name] = [
@@ -94,8 +117,8 @@ class HuggingFaceDatasetMixin:
             if question.name not in hf_dataset:
                 hf_dataset[question.name] = []
 
-            value.id = "suggestion"
-            hf_features[f"{question.name}-suggestion"] = value
+            suggestion_value.id = "suggestion"
+            hf_features[f"{question.name}-suggestion"] = suggestion_value
             if f"{question.name}-suggestion" not in hf_dataset:
                 hf_dataset[f"{question.name}-suggestion"] = []
 
@@ -138,6 +161,16 @@ class HuggingFaceDatasetMixin:
                         }
                         if question.type == QuestionTypes.ranking:
                             value = [r.dict() for r in response.values[question.name].value]
+                        elif question.type == QuestionTypes.span:
+                            value = [
+                                {
+                                    "start": span.start,
+                                    "end": span.end,
+                                    "label": span.label,
+                                    "text": record.fields[question.field][span.start : span.end],
+                                }
+                                for span in response.values[question.name].value
+                            ]
                         else:
                             value = response.values[question.name].value
                         formatted_response["value"] = value
@@ -148,7 +181,20 @@ class HuggingFaceDatasetMixin:
                 if record.suggestions:
                     for suggestion in record.suggestions:
                         if question.name == suggestion.question_name:
-                            suggestion_value = suggestion.value
+                            if question.type == QuestionTypes.span:
+                                suggestion_value = [
+                                    {
+                                        "start": span.start,
+                                        "end": span.end,
+                                        "label": span.label,
+                                        "score": span.score,
+                                        "text": record.fields[question.field][span.start : span.end],
+                                    }
+                                    for span in suggestion.value
+                                ]
+                            else:
+                                suggestion_value = suggestion.dict(include={"value"})["value"]
+
                             suggestion_metadata = {
                                 "type": suggestion.type,
                                 "score": suggestion.score,
@@ -421,6 +467,11 @@ class HuggingFaceDatasetMixin:
                         if value is not None:
                             if question.type == QuestionTypes.ranking:
                                 value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
+                            elif question.type == QuestionTypes.span:
+                                value = [
+                                    {"start": s, "end": e, "label": l}
+                                    for s, e, l in zip(value["start"], value["end"], value["label"])
+                                ]
                             responses[user_id or "user_without_id"]["values"].update({question.name: {"value": value}})
 
                 # First if-condition is here for backwards compatibility
@@ -428,10 +479,16 @@ class HuggingFaceDatasetMixin:
                     f"{question.name}-suggestion" in hfds[index]
                     and hfds[index][f"{question.name}-suggestion"] is not None
                 ):
-                    suggestion = {
-                        "question_name": question.name,
-                        "value": hfds[index][f"{question.name}-suggestion"],
-                    }
+                    value = hfds[index][f"{question.name}-suggestion"]
+                    if question.type == QuestionTypes.ranking:
+                        value = [{"rank": r, "value": v} for r, v in zip(value["rank"], value["value"])]
+                    elif question.type == QuestionTypes.span:
+                        value = [
+                            {"start": s, "end": e, "label": l}
+                            for s, e, l in zip(value["start"], value["end"], value["label"])
+                        ]
+
+                    suggestion = {"question_name": question.name, "value": value}
                     if hfds[index][f"{question.name}-suggestion-metadata"] is not None:
                         suggestion.update(hfds[index][f"{question.name}-suggestion-metadata"])
                     suggestions.append(suggestion)

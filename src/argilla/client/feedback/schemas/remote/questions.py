@@ -14,11 +14,14 @@
 
 from typing import TYPE_CHECKING, Dict, List, Union
 
+from argilla.client.feedback.schemas import QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
+    SpanLabelOption,
+    SpanQuestion,
     TextQuestion,
 )
 from argilla.client.feedback.schemas.remote.shared import RemoteSchema
@@ -43,6 +46,7 @@ class RemoteTextQuestion(TextQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             use_markdown=payload.settings["use_markdown"],
         )
@@ -64,6 +68,7 @@ class RemoteRatingQuestion(RatingQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             values=[option["value"] for option in payload.settings["options"]],
         )
@@ -93,6 +98,7 @@ class RemoteLabelQuestion(LabelQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             labels=_parse_options_from_api(payload),
             visible_labels=payload.settings["visible_options"],
@@ -116,6 +122,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             labels=_parse_options_from_api(payload),
             visible_labels=payload.settings["visible_options"],
@@ -138,6 +145,54 @@ class RemoteRankingQuestion(RankingQuestion, RemoteSchema):
             id=payload.id,
             name=payload.name,
             title=payload.title,
+            description=payload.description,
             required=payload.required,
             values=_parse_options_from_api(payload),
         )
+
+
+class RemoteSpanQuestion(SpanQuestion, RemoteSchema):
+    def to_local(self) -> SpanQuestion:
+        return SpanQuestion(
+            name=self.name,
+            title=self.title,
+            field=self.field,
+            required=self.required,
+            labels=self.labels,
+            visible_labels=self.visible_labels,
+        )
+
+    @classmethod
+    def _parse_options_from_api(cls, options: List[Dict[str, str]]) -> List[SpanLabelOption]:
+        return [SpanLabelOption(value=option["value"], text=option["text"]) for option in options]
+
+    @classmethod
+    def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteSpanQuestion":
+        return RemoteSpanQuestion(
+            id=payload.id,
+            name=payload.name,
+            title=payload.title,
+            field=payload.settings["field"],
+            required=payload.required,
+            visible_labels=payload.settings["visible_options"],
+            labels=cls._parse_options_from_api(payload.settings["options"]),
+        )
+
+
+AllowedRemoteQuestionTypes = Union[
+    RemoteTextQuestion,
+    RemoteRatingQuestion,
+    RemoteLabelQuestion,
+    RemoteMultiLabelQuestion,
+    RemoteRankingQuestion,
+    RemoteSpanQuestion,
+]
+
+QUESTION_TYPE_TO_QUESTION = {
+    QuestionTypes.text: RemoteTextQuestion,
+    QuestionTypes.rating: RemoteRatingQuestion,
+    QuestionTypes.label_selection: RemoteLabelQuestion,
+    QuestionTypes.multi_label_selection: RemoteMultiLabelQuestion,
+    QuestionTypes.ranking: RemoteRankingQuestion,
+    QuestionTypes.span: RemoteSpanQuestion,
+}

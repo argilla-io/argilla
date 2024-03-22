@@ -292,7 +292,7 @@ record = rg.FeedbackRecord(
 We can add records to our `FeedbackDataset`. Take some time to explore and find data that fits the purpose of your project. If you are planning to use public data, the [Datasets page](https://huggingface.co/datasets) of the Hugging Face Hub is a good place to start.
 
 ```{tip}
-If you are using a public dataset, remember to always check the license to make sure you can legally employ it for your specific use case.
+If you are working with a public dataset, remember to always check the license to make sure you can legally use it for your specific use case.
 ```
 
 ```python

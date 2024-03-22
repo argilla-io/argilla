@@ -21,7 +21,7 @@ export class GetRecordsByCriteriaUseCase {
   ) {}
 
   public async execute(criteria: RecordCriteria): Promise<Records> {
-    const { datasetId } = criteria;
+    const { datasetId, queuePage } = criteria;
     const savedRecords = this.recordsStorage.get();
     savedRecords.synchronizeQueuePagination(criteria);
 
@@ -34,7 +34,7 @@ export class GetRecordsByCriteriaUseCase {
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
-        const recordPage = index + criteria.queuePage;
+        const recordPage = index + queuePage;
 
         const fields = fieldsFromBackend
           .filter((f) => record.fields[f.name])
@@ -74,9 +74,14 @@ export class GetRecordsByCriteriaUseCase {
 
         const suggestions = !criteria.page.isBulkMode
           ? record.suggestions.map((suggestion) => {
+              const question = questions.find(
+                (q) => q.id === suggestion.question_id
+              );
+
               return new Suggestion(
                 suggestion.id,
                 suggestion.question_id,
+                question.type,
                 suggestion.value,
                 suggestion.score,
                 suggestion.agent

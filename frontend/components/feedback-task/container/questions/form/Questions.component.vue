@@ -23,7 +23,6 @@
           v-if="question.isSingleLabelType"
           ref="singleLabel"
           :question="question"
-          :showShortcutsHelper="showShortcutsHelper"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
           @on-user-answer="focusNext(index)"
@@ -33,8 +32,6 @@
           ref="multiLabel"
           v-if="question.isMultiLabelType"
           :question="question"
-          :showShortcutsHelper="showShortcutsHelper"
-          :visibleOptions="question.settings.visible_options"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
         />
@@ -53,6 +50,16 @@
           ref="ranking"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
+          @on-focus="updateQuestionAutofocus(index)"
+        />
+
+        <SpanComponent
+          v-if="question.isSpanType"
+          ref="span"
+          :question="question"
+          :isFocused="checkIfQuestionIsFocused(index)"
+          :is-bulk-mode="isBulkMode"
+          :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
           @on-focus="updateQuestionAutofocus(index)"
         />
       </div>
@@ -75,10 +82,14 @@ export default {
     autofocusPosition: {
       type: Number,
     },
+    isBulkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     questionsWithLoopMovement() {
-      return ["singleLabel", "multiLabel", "rating", "ranking"]
+      return ["singleLabel", "multiLabel", "rating", "ranking", "span"]
         .filter((componentType) => this.$refs[componentType])
         .map((componentType) => this.$refs[componentType][0].$el);
     },
@@ -150,8 +161,8 @@ export default {
       return this.autofocusPosition === index;
     },
   },
-  setup() {
-    return useQuestionsViewModel();
+  setup(props) {
+    return useQuestionsViewModel(props);
   },
 };
 </script>

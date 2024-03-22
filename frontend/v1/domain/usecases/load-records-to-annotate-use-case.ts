@@ -3,6 +3,8 @@ import { IRecordStorage } from "../services/IRecordStorage";
 import { GetRecordsByCriteriaUseCase } from "./get-records-by-criteria-use-case";
 
 export class LoadRecordsToAnnotateUseCase {
+  private isBuffering = false;
+
   constructor(
     private readonly getRecords: GetRecordsByCriteriaUseCase,
     private readonly recordsStorage: IRecordStorage
@@ -33,19 +35,20 @@ export class LoadRecordsToAnnotateUseCase {
     this.recordsStorage.save(newRecords);
   }
 
-  async paginate(criteria: RecordCriteria): Promise<boolean> {
-    const { page } = criteria;
+  async paginate(criteria: RecordCriteria) {
+    const { page, isFilteringBySimilarity } = criteria;
+
     const records = this.recordsStorage.get();
     let isNextRecordExist = records.existsRecordOn(page);
 
-    if (!criteria.isFilteringBySimilarity) {
-      if (!isNextRecordExist) {
-        const newRecords = await this.getRecords.execute(criteria);
+    if (!isFilteringBySimilarity && !isNextRecordExist) {
+      const newRecords = await this.getRecords.execute(criteria);
 
-        records.append(newRecords);
+      records.append(newRecords);
 
-        isNextRecordExist = records.existsRecordOn(page);
-      }
+      isNextRecordExist = records.existsRecordOn(page);
+
+      this.recordsStorage.save(records);
     }
 
     if (isNextRecordExist) {
@@ -56,8 +59,46 @@ export class LoadRecordsToAnnotateUseCase {
       criteria.commit();
     }
 
-    this.recordsStorage.save(records);
+    this.loadBuffer(criteria);
 
     return isNextRecordExist;
+  }
+
+  private loadBuffer(criteria: RecordCriteria) {
+    const { page, isFilteringBySimilarity, isPaginatingBackward } = criteria;
+
+    if (isFilteringBySimilarity || isPaginatingBackward) return;
+
+    const records = this.recordsStorage.get();
+
+    if (!records.hasNecessaryBuffering(page)) {
+      this.loadBufferedRecords(criteria);
+    }
+  }
+
+  private async loadBufferedRecords(criteria: RecordCriteria) {
+    if (this.isBuffering) return;
+
+    const { isPaginatingForward } = criteria;
+
+    const records = this.recordsStorage.get();
+    const newCriteria = criteria.clone();
+
+    try {
+      this.isBuffering = true;
+
+      if (isPaginatingForward) {
+        newCriteria.page.goTo(records.lastRecord.page + 1);
+      }
+
+      const newRecords = await this.getRecords.execute(newCriteria);
+
+      records.append(newRecords);
+
+      this.recordsStorage.save(records);
+    } catch {
+    } finally {
+      this.isBuffering = false;
+    }
   }
 }

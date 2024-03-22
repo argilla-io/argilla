@@ -56,8 +56,8 @@
         />
         <BaseTooltip
           :text="
-            hasSuggestion(option.text)
-              ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
+            isSuggested(option)
+              ? `<img src='icons/suggestion.svg' /> ${$t('suggestion.name')}: ${
                   option.text
                 }`
               : null
@@ -68,18 +68,14 @@
             class="label-text"
             :class="{
               'label-active': option.isSelected,
-              '--suggestion': hasSuggestion(option.text),
+              '--suggestion': isSuggested(option),
               square: multiple,
               round: !multiple,
             }"
             :for="option.id"
             :title="option.text"
           >
-            <span
-              class="key"
-              v-if="showShortcutsHelper"
-              v-text="keyboards[option.id]"
-            />
+            <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
           </label></BaseTooltip
         >
@@ -90,23 +86,25 @@
 </template>
 
 <script>
-const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
-import suggestionIcon from "@/static/icons/suggestion.svg";
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 15;
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
+
+import { useLabelSelectionViewModel } from "./useLabelSelectionViewModel";
+
 export default {
   name: "LabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
-      default: () => -1,
+      required: true,
     },
     options: {
       type: Array,
       required: true,
     },
-    suggestions: {
-      type: [Array, String],
+    suggestion: {
+      type: Object,
     },
     placeholder: {
       type: String,
@@ -124,10 +122,6 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    showShortcutsHelper: {
-      type: Boolean,
-      default: () => false,
-    },
   },
   model: {
     prop: "options",
@@ -136,10 +130,8 @@ export default {
   data() {
     return {
       searchInput: "",
-      isExpanded: false,
       timer: null,
       keyCode: "",
-      suggestionIcon,
     };
   },
   created() {
@@ -188,8 +180,7 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
-        return this.filteredOptions;
+      if (this.isExpanded) return this.filteredOptions;
 
       return this.filteredOptions
         .slice(0, this.maxOptionsToShowBeforeCollapse)
@@ -199,7 +190,6 @@ export default {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
-      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
@@ -227,11 +217,17 @@ export default {
         $event.key === "Tab" ||
         $event.key === "Enter" ||
         $event.key === "Backspace" ||
+        $event.key === "ArrowLeft" ||
+        $event.key === "ArrowRight" ||
+        $event.key === "ArrowUp" ||
+        $event.key === "ArrowDown" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
       )
         return;
+
+      $event.stopPropagation();
 
       const isSearchActive =
         document.activeElement ===
@@ -241,6 +237,8 @@ export default {
 
       if ($event.code == "Space") {
         $event.preventDefault();
+        $event.stopPropagation();
+
         document.activeElement.click();
 
         return;
@@ -279,6 +277,7 @@ export default {
 
       if (match) {
         $event.preventDefault();
+        $event.stopPropagation();
 
         match.click();
       }
@@ -303,16 +302,18 @@ export default {
       this.$emit("on-focus");
     },
     expandLabelsOnTab(index) {
-      if (!this.showCollapseButton) {
-        return;
-      }
+      if (!this.showCollapseButton) return;
+
       if (index === this.maxOptionsToShowBeforeCollapse - 1) {
         this.isExpanded = true;
       }
     },
-    hasSuggestion(value) {
-      return this.suggestions?.includes(value) || false;
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
     },
+  },
+  setup(props) {
+    return useLabelSelectionViewModel(props);
   },
 };
 </script>
@@ -326,9 +327,11 @@ $label-dark-color: palette(purple, 200);
   flex-direction: column;
   gap: $base-space * 2;
   .component-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    height: 28px;
   }
   .inputs-area {
     display: inline-flex;

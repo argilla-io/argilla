@@ -33,6 +33,23 @@ interface SingleSelectionSetting {
     value: string;
   }[];
 }
+
+type Entity = {
+  id: string;
+  name: string;
+  color: string;
+};
+type Span = {
+  from: string;
+  to: string;
+  entity: string;
+};
+interface SpanSetting {
+  type: "span";
+  entities: Entity[];
+  values: Record<string, Span[]>;
+}
+
 export interface BackendQuestion {
   id: string;
   description?: string;
@@ -44,5 +61,6 @@ export interface BackendQuestion {
     | MultiSelectionSetting
     | SingleSelectionSetting
     | RatingSetting
-    | RankingSetting;
+    | RankingSetting
+    | SpanSetting;
 }

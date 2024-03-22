@@ -17,6 +17,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.response_values import parse_value_response_for_question
+from argilla.client.feedback.schemas.responses import ResponseValue, ValueSchema
+from argilla.client.feedback.schemas.suggestions import SuggestionSchema
 from argilla.client.feedback.schemas.utils import LabelMappingMixin
 from argilla.client.feedback.schemas.validators import title_must_have_value
 from argilla.pydantic_v1 import BaseModel, Extra, Field, conint, conlist, root_validator, validator
@@ -77,6 +80,16 @@ class QuestionSchema(BaseModel, ABC):
             "settings": self.server_settings,
         }
 
+    def suggestion(self, value: ResponseValue, **kwargs) -> SuggestionSchema:
+        """Method that will be used to create a `SuggestionSchema` from the question and a suggested value."""
+        value = parse_value_response_for_question(self, value)
+        return SuggestionSchema(question_name=self.name, value=value, **kwargs)
+
+    def response(self, value: ResponseValue) -> Dict[str, ValueSchema]:
+        """Method that will be used to create a response from the question and a value."""
+        value = parse_value_response_for_question(self, value)
+        return {self.name: ValueSchema(value=value)}
+
 
 class TextQuestion(QuestionSchema):
     """Schema for the `FeedbackDataset` text questions, which are the ones that will
@@ -93,7 +106,7 @@ class TextQuestion(QuestionSchema):
         >>> TextQuestion(name="text_question", title="Text Question")
     """
 
-    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text.value, allow_mutation=False)
+    type: Literal[QuestionTypes.text] = Field(QuestionTypes.text.value, allow_mutation=False, const=True)
     use_markdown: bool = False
 
     @property
@@ -120,7 +133,7 @@ class RatingQuestion(QuestionSchema, LabelMappingMixin):
         >>> RatingQuestion(name="rating_question", title="Rating Question", values=[1, 2, 3, 4, 5])
     """
 
-    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating.value, allow_mutation=False)
+    type: Literal[QuestionTypes.rating] = Field(QuestionTypes.rating.value, allow_mutation=False, const=True)
     values: List[int] = Field(..., unique_items=True, ge=1, le=10, min_items=2)
 
     @property
@@ -230,7 +243,9 @@ class LabelQuestion(_LabelQuestion):
         >>> LabelQuestion(name="label_question", title="Label Question", labels=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.label_selection] = Field(QuestionTypes.label_selection.value, allow_mutation=False)
+    type: Literal[QuestionTypes.label_selection] = Field(
+        QuestionTypes.label_selection.value, allow_mutation=False, const=True
+    )
 
 
 class MultiLabelQuestion(_LabelQuestion):
@@ -254,7 +269,7 @@ class MultiLabelQuestion(_LabelQuestion):
     """
 
     type: Literal[QuestionTypes.multi_label_selection] = Field(
-        QuestionTypes.multi_label_selection.value, allow_mutation=False
+        QuestionTypes.multi_label_selection.value, allow_mutation=False, const=True
     )
 
 
@@ -274,10 +289,10 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import RankingQuestion
-        >>> RankingQuestion(name="ranking_question", title="Ranking Question", labels=["label_1", "label_2"])
+        >>> RankingQuestion(name="ranking_question", title="Ranking Question", values=["label_1", "label_2"])
     """
 
-    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False)
+    type: Literal[QuestionTypes.ranking] = Field(QuestionTypes.ranking.value, allow_mutation=False, const=True)
     values: Union[conlist(str, unique_items=True, min_items=2), Dict[str, str]]
 
     @validator("values", always=True)
@@ -296,3 +311,112 @@ class RankingQuestion(QuestionSchema, LabelMappingMixin):
         elif isinstance(self.values, list):
             settings["options"] = [{"value": label, "text": label} for label in self.values]
         return settings
+
+
+class SpanLabelOption(BaseModel):
+    """Schema for the `FeedbackDataset` span label options, which are the ones that will be
+    used in the `SpanQuestion` to define the labels that the user can select.
+
+    Args:
+        value: The value of the span label. This is the value that will be shown in the UI.
+        text: The text of the span label. This is the text that will be shown in the UI.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.questions import SpanLabelOption
+        >>> SpanLabelOption(value="span_label_1", text="Span Label 1")
+    """
+
+    value: str
+    text: Optional[str]
+    description: Optional[str]
+
+    def __eq__(self, other):
+        return other and self.value == other.value
+
+    @validator("text", pre=True, always=True)
+    def default_text_value(cls, v: str, values: Dict[str, Any]) -> str:
+        if v is None:
+            return values["value"]
+        return v
+
+
+class SpanQuestion(QuestionSchema):
+    """Schema for the `FeedbackDataset` span questions, which are the ones that will
+    require a span response from the user. More specifically, the user will be asked
+    to select a span of text from the input.
+
+    Examples:
+        >>> from argilla.client.feedback.schemas.questions import SpanQuestion
+        >>> SpanQuestion(name="span_question", field="prompt", title="Span Question", labels=["person", "org"])
+    """
+
+    _DEFAULT_MAX_VISIBLE_LABELS = 20
+    _MIN_VISIBLE_LABELS = 3
+
+    type: Literal[QuestionTypes.span] = Field(QuestionTypes.span.value, allow_mutation=False, const=True)
+
+    field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
+    labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
+    visible_labels: Union[conint(ge=3), None] = _DEFAULT_MAX_VISIBLE_LABELS
+
+    @validator("labels", pre=True)
+    def parse_labels_dict(cls, labels) -> List[SpanLabelOption]:
+        if isinstance(labels, dict):
+            return [SpanLabelOption(value=label, text=text) for label, text in labels.items()]
+        return labels
+
+    @validator("labels", always=True)
+    def normalize_labels(cls, v: List[Union[str, SpanLabelOption]]) -> List[SpanLabelOption]:
+        return [SpanLabelOption(value=label, text=label) if isinstance(label, str) else label for label in v]
+
+    @validator("labels")
+    def labels_must_be_valid(cls, labels: List[SpanLabelOption]) -> List[SpanLabelOption]:
+        # This validator is needed since the conlist constraint does not work.
+        assert len(labels) > 0, "At least one label must be provided"
+        return labels
+
+    @root_validator(skip_on_failure=True)
+    def check_visible_labels_value(cls, values) -> Optional[int]:
+        visible_labels_key = "visible_labels"
+
+        v = values[visible_labels_key]
+        if v is None:
+            return values
+
+        msg = None
+        number_of_labels = len(values.get("labels", []))
+
+        if cls._MIN_VISIBLE_LABELS > number_of_labels < v:
+            msg = f"Since `labels` has less than {cls._MIN_VISIBLE_LABELS} labels, `visible_labels` will be set to `None`."
+            v = None
+        elif v > number_of_labels:
+            msg = (
+                f"`visible_labels={v}` is greater than the total number of labels ({number_of_labels}), "
+                f"so it will be set to `{number_of_labels}`."
+            )
+            v = number_of_labels
+
+        if msg:
+            warnings.warn(msg, UserWarning, stacklevel=1)
+
+        values[visible_labels_key] = v
+        return values
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "field": self.field,
+            "visible_options": self.visible_labels,
+            "options": [label.dict() for label in self.labels],
+        }
+
+
+AllowedQuestionTypes = Union[
+    TextQuestion,
+    RatingQuestion,
+    LabelQuestion,
+    MultiLabelQuestion,
+    RankingQuestion,
+    SpanQuestion,
+]

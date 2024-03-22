@@ -55,6 +55,13 @@ Select a single value from a list of values.
 ![Rating question](/_static/images/llms/questions/rating_question.png)
 :::
 
+:::{tab-item} Span
+
+Select pieces of text in the field linked to the span question and apply a label.
+
+![Span question](/_static/images/llms/questions/span_question.png)
+:::
+
 :::{tab-item} Text
 
 Provide a text response inside the text area.
@@ -88,6 +95,12 @@ In Argilla's Feedback Task datasets, you can annotate and process records in two
 
 ```{hint}
 Use the **Find Similar** feature, other filters (Suggestions, Metadata, etc.) and sorting to get a list of records where it's safe to do bulk actions and labelling. Learn more about how to use filters [here](/practical_guides/filter_dataset.md).
+```
+
+```{note}
+**Span questions** cannot be answered from the _Bulk view_. You will need to switch to _Focus view_ to answer them.
+
+If you have a Span question in your dataset, you can always answer other questions in bulk and save your responses as a draft. Later, you will be able to answer to the Span question in the _Focus view_ of the _Draft_ queue.
 ```
 
 In the queue of **Pending** records, you can change from _Focus_ to _Bulk_ view. Once in the _Bulk view_, you can expand or collapse records --i.e. see the full length of all records in the page or set a fixed height-- and select the number of records you want to see per page.

@@ -410,7 +410,7 @@ class TrainingTask:
             >>> from argilla import TrainingTask
             >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
             >>> def formatting_func(sample: Dict[str, Any]):
-            ...     annotations = sample["good]
+            ...     annotations = sample["good"]
             ...     if annotations and annotations[0]["value"] == "Bad":
             ...         return
             ...     return template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])
@@ -973,7 +973,7 @@ class TrainingTaskForSFT(BaseModel, TrainingData):
         >>> from argilla import TrainingTaskForSFT
         >>> dataset = rg.FeedbackDataset.from_argilla(name="...")
         >>> def formatting_func(sample: Dict[str, Any]):
-        ...     annotations = sample["good]
+        ...     annotations = sample["good"]
         ...     if annotations and annotations[0]["value"] == "Bad":
         ...         return
         ...     yield template.format(prompt=sample["prompt"][0]["value"], response=sample["response"][0]["value"])

@@ -1,6 +1,29 @@
-import { createTextQuestionMocked } from "../__mocks__/question/mock";
+import {
+  createLabelQuestionMocked,
+  createTextQuestionMocked,
+} from "../__mocks__/question/mock";
 
 describe("Question", () => {
+  describe("initialize should", () => {
+    test("initialize visible options with same options length in case that visible options comes as null", () => {
+      const question = createLabelQuestionMocked({
+        visible_options: null,
+      });
+
+      expect(question.settings.visible_options).toBe(
+        question.settings.options.length
+      );
+    });
+
+    test("no modify visible options prop if is already defined", () => {
+      const question = createLabelQuestionMocked({
+        visible_options: 99,
+      });
+
+      expect(question.settings.visible_options).toBe(99);
+    });
+  });
+
   describe("restore should", () => {
     test("can restore previous title", () => {
       const question = createTextQuestionMocked();

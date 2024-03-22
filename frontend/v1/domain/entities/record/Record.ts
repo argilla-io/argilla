@@ -127,9 +127,11 @@ export class Record {
       const suggestion = this.suggestions?.find(
         (s) => s.questionId === question.id
       );
+
       question.addSuggestion(suggestion);
-      if (this.isPending || this.isDraft) {
-        question.responseIfUnanswered(answer);
+
+      if (this.isPending) {
+        question.response(suggestion);
       } else {
         question.response(answer);
       }
