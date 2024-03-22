@@ -48,28 +48,13 @@
       <template>
         <template v-for="{ id, color } in spanQuestion.answer.options">
           <style :key="id" scoped>
-            .span-annotation__field::highlight(hl-{{id}}-0) {
+            .span-annotation__field::highlight(hl-{{id}}) {
               background-color: {{color}};
             }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color.palette.light}};
+            }
           </style>
-        </template>
-        <template v-for="{ id, color } in spanQuestion.answer.options">
-          <template v-for="(level, i) in 5">
-            <style :key="`${id}${i}`" scoped>
-
-              .span-annotation__field--overlapped::highlight(hl-{{id}}-{{i}}) {
-                text-decoration: underline {{color}} 2px;
-                text-underline-offset: {{i ? (i * 9) + 4  : 4 }}px;
-                text-underline-position: under;
-              }
-              .span-annotation__field--overlapped::highlight(hl-{{id}}-{{i}}-hover) {
-                text-decoration: underline {{color}} 2px;
-                text-underline-offset: {{i ? (i * 9) + 4  : 4 }}px;
-                text-underline-position: under;
-                background: {{color.palette.light}};
-              }
-            </style>
-          </template>
         </template>
       </template>
     </div>
