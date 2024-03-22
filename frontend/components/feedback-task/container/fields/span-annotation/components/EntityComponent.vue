@@ -1,52 +1,74 @@
 <template>
-  <div
-    class="span-entity__wrapper"
-    :style="{ left: entityPosition.left, top: entityPosition.top }"
-    ref="spanEntityRef"
-    id="spanEntity"
-  >
-    <div
-      v-on="!singleOption ? { click: toggleDropdown } : {}"
-      :class="!singleOption ? 'span-entity--clickable' : 'span-entity'"
-      v-if="!visibleDropdown"
-    >
-      <BaseButton
-        class="span-entity__close-button"
-        @click="removeSelectedOption"
-      >
-        <svgicon
-          class="span-entity__close-button__icon"
-          name="close"
-          width="10"
-          height="10"
-      /></BaseButton>
-      <span class="span-entity__text" v-text="selectedOption.text" />
-      <svgicon
-        v-if="!!suggestion"
-        class="span-entity__suggestion"
-        name="suggestion"
-        width="8"
-        height="8"
-      />
+  <span class="span-entity__wrapper">
+    <template v-if="allowOverlapping">
       <span
-        v-if="suggestionScore"
-        class="span-entity__score"
-        v-text="suggestionScore"
+        v-for="(line, index) in lines"
+        :key="index"
+        class="span-entity__line"
+        :style="{
+          width: line.width,
+          left: line.left,
+          top: line.top,
+        }"
+      ></span>
+    </template>
+    <div
+      class="span-entity__container"
+      :style="{
+        left: `${entityPosition.left}px`,
+        top: `${entityPosition.top}px`,
+      }"
+      ref="spanEntityRef"
+      id="spanEntity"
+    >
+      <div
+        v-on="!singleOption ? { click: toggleDropdown } : {}"
+        @mouseenter="hoverSpan(true)"
+        @mouseleave="hoverSpan(false)"
+        :class="[
+          !singleOption ? 'span-entity--clickable' : 'span-entity',
+          allowOverlapping ? 'span-entity--overlapping' : null,
+        ]"
+        v-if="!visibleDropdown"
+      >
+        <BaseButton
+          class="span-entity__close-button"
+          @click="removeSelectedOption"
+        >
+          <svgicon
+            class="span-entity__close-button__icon"
+            name="close"
+            width="10"
+            height="10"
+        /></BaseButton>
+        <span class="span-entity__text" v-text="selectedOption.text" />
+        <svgicon
+          v-if="!!suggestion"
+          class="span-entity__suggestion"
+          name="suggestion"
+          width="8"
+          height="8"
+        />
+        <span
+          v-if="suggestionScore"
+          class="span-entity__score"
+          v-text="suggestionScore"
+        />
+      </div>
+      <EntityComponentDropdown
+        v-else
+        :style="{
+          left: `${spanEntityPosition.left}px`,
+          top: `${spanEntityPosition.top}px`,
+        }"
+        :selectedOption="selectedOption"
+        :options="options"
+        @on-replace-option="selectOption"
+        @on-remove-option="removeSelectedOption"
+        v-click-outside="hideDropdown"
       />
     </div>
-    <EntityComponentDropdown
-      v-else
-      :style="{
-        left: spanEntityPosition.left,
-        top: spanEntityPosition.top,
-      }"
-      :selectedOption="selectedOption"
-      :options="options"
-      @on-replace-option="selectOption"
-      @on-remove-option="removeSelectedOption"
-      v-click-outside="hideDropdown"
-    />
-  </div>
+  </span>
 </template>
 
 <script>
@@ -93,8 +115,51 @@ export default {
     suggestionScore() {
       return this.suggestion?.score?.toFixed(1);
     },
+    entityColor() {
+      return this.entity.color;
+    },
+    allowOverlapping() {
+      // return this.spanQuestion.settings.allow_overlapping;
+      return true;
+    },
+    lines() {
+      const lines = [];
+      const { width, top, topEnd, left, right } = this.entityPosition;
+      const space = topEnd - top;
+      const linesCount = this.getNumberOfLines(space);
+      if (linesCount === 1) {
+        return [
+          {
+            width: `${width}px`,
+            left: `${left}px`,
+            top: `${top}px`,
+          },
+        ];
+      }
+
+      const firstLine = 0;
+      const lastLine = linesCount - 1;
+
+      for (let i = 0; i < linesCount; i++) {
+        lines.push({
+          width:
+            i === firstLine
+              ? `${width - left}px`
+              : i === lastLine
+              ? `${right}px`
+              : `${width}px`,
+          left: i === 0 ? `${left}px` : 0,
+          top: `${top + i * this.entityPosition.lineHeight}px`,
+        });
+      }
+
+      return lines;
+    },
   },
   methods: {
+    getNumberOfLines(space) {
+      return Math.floor(space / this.entityPosition.lineHeight + 1) || 1;
+    },
     selectOption(option) {
       this.$emit("on-replace-option", option);
       this.hideDropdown();
@@ -102,6 +167,11 @@ export default {
     removeSelectedOption() {
       this.$emit("on-remove-option");
       this.hideDropdown();
+    },
+    hoverSpan(isHovered) {
+      if (this.allowOverlapping) {
+        this.$emit("on-hover-span", isHovered);
+      }
     },
     toggleDropdown() {
       this.visibleDropdown = !this.visibleDropdown;
@@ -112,10 +182,9 @@ export default {
     },
     getPosition() {
       const position = this.$refs.spanEntityRef.getBoundingClientRect();
-      this.spanEntityPosition.left = `${position.left}px`;
-      this.spanEntityPosition.top = `${
-        position.top + this.$refs.spanEntityRef.scrollTop
-      }px`;
+      this.spanEntityPosition.left = position.left;
+      this.spanEntityPosition.top =
+        position.top + this.$refs.spanEntityRef.scrollTop;
     },
     getScrollParent(element) {
       if (!element) return;
@@ -175,6 +244,9 @@ export default {
     transition: width 0.2s ease;
   }
   &__wrapper {
+    position: static;
+  }
+  &__container {
     position: absolute;
     display: flex;
     margin-top: 20px;
@@ -188,6 +260,12 @@ export default {
   &__text {
     gap: 4px;
     @include truncate(auto);
+  }
+  &__line {
+    position: absolute;
+    height: 2px;
+    background: v-bind(entityColor);
+    margin-top: 20px;
   }
   &:hover {
     position: relative;
@@ -226,6 +304,11 @@ export default {
   &--clickable {
     cursor: pointer;
     @extend .span-entity;
+  }
+  &--overlapping {
+    @extend .span-entity;
+    background: v-bind(entityColor);
+    margin-top: 0;
   }
 }
 </style>

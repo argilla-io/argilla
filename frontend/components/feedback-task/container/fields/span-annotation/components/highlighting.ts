@@ -8,7 +8,14 @@ import {
 
 export type LoadedSpan = Omit<Span, "text" | "node">;
 
-export type Position = { top: string; left: string };
+export type Position = {
+  top: number;
+  left: number;
+  width: number;
+  topEnd: number;
+  right: number;
+  lineHeight: number;
+};
 
 declare class Highlight {
   constructor(...ranges: Range[]);
@@ -42,9 +49,10 @@ export class Highlighting {
   private readonly styles: Required<Styles>;
   private entity: Entity = null;
   private scrollingElement: HTMLElement;
-  private config: Configuration = {
-    allowOverlap: false,
+  config: Configuration = {
+    allowOverlap: true,
     allowCharacter: false,
+    lineHeight: 32,
   };
 
   constructor(
@@ -52,13 +60,14 @@ export class Highlighting {
     private readonly EntityComponentConstructor: (
       span: Span,
       entityPosition: Position,
+      hoverSpan: (value: Boolean) => void,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
     styles?: Styles
   ) {
     this.styles = {
-      entitiesGap: 9,
+      entitiesGap: 12,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
       ...styles,
@@ -130,6 +139,10 @@ export class Highlighting {
     this.config.allowCharacter = allow;
   }
 
+  updateLineHeight(height: number) {
+    this.config.lineHeight = height;
+  }
+
   replaceEntity(span: Span, entity: Entity) {
     this.spanSelection.replaceEntity(span, entity);
     this.applyStyles();
@@ -185,6 +198,15 @@ export class Highlighting {
     }
   }
 
+  private getOverlappedSpans(span: Span) {
+    return this.spans.filter(
+      (s) =>
+        (span.from >= s.from && span.from <= s.to) ||
+        (span.to >= s.from && span.to <= s.to) ||
+        (span.from < s.from && span.to > s.to)
+    );
+  }
+
   private applyStyles() {
     if (!CSS.highlights) return;
 
@@ -211,54 +233,98 @@ export class Highlighting {
     }
   }
 
-  private applyEntityStyle() {
-    const overlappedSpans: {
-      left: number;
-      top: number;
-    }[] = [];
+  hoverSpan(span: Span, isHovered: Boolean) {
+    CSS.highlights.clear();
+    const highlights: Dictionary<Range[]> = {};
 
+    const hoveredSpan = span;
+
+    for (const span of this.spans) {
+      const className =
+        hoveredSpan === span && isHovered
+          ? `${this.styles.entityCssKey}-${span.entity.id}-hover`
+          : `${this.styles.entityCssKey}-${span.entity.id}`;
+
+      if (!highlights[className]) highlights[className] = [];
+
+      const range = this.createRange(span);
+
+      highlights[className].push(range);
+    }
+
+    for (const [entity, selections] of Object.entries(highlights)) {
+      CSS.highlights.set(entity, new Highlight(...selections.flat()));
+    }
+  }
+
+  private applyEntityStyle() {
     while (this.entitySpanContainer.firstChild) {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
+
+    let overlappedLevels = 0;
 
     for (const span of this.spans) {
       const { node } = span;
 
       if (node.id !== this.nodeId) continue;
 
-      const rangePosition = this.createRange({
+      const rangePositionStart = this.createRange({
         ...span,
         to: span.from + 1,
       }).getBoundingClientRect();
-      const rangeWidth = this.createRange(span).getBoundingClientRect();
+      const rangePositionEnd = this.createRange({
+        ...span,
+        from: span.to - 1,
+      }).getBoundingClientRect();
+      const rangeNaturalPosition =
+        this.createRange(span).getBoundingClientRect();
       const offset = this.entitySpanContainer.getBoundingClientRect();
       const scrollTop = this.entitySpanContainer.scrollTop;
 
-      const { left, top } = rangePosition;
-      const { width } = rangeWidth;
+      const { left, top } = rangePositionStart;
+      const { right, top: topEnd } = rangePositionEnd;
+      const { width } = rangeNaturalPosition;
 
-      const position = { left, top: top + window.scrollY, width };
+      const position = {
+        left,
+        top: top + window.scrollY,
+        width,
+        right: right + window.scrollX,
+        topEnd: topEnd + window.scrollY,
+      };
 
-      if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
-        position.top += this.styles.entitiesGap;
+      const overlapped = this.getOverlappedSpans(span);
+
+      if (overlapped.length > overlappedLevels) {
+        overlappedLevels = overlapped.length;
+      }
+      const lineHeight = 32 + this.styles.entitiesGap * (overlappedLevels - 1);
+      if (overlappedLevels) {
+        const overlappedIndex = overlapped.findIndex((s) => s === span);
+        position.top += this.styles.entitiesGap * overlappedIndex;
+        position.topEnd += this.styles.entitiesGap * overlappedIndex;
+        this.updateLineHeight(lineHeight);
       }
 
       const entityPosition = {
-        top: `${position.top - offset.top + scrollTop}px`,
-        left: `${position.left - offset.left}px`,
-        width: `${position.width}px`,
+        top: position.top - offset.top + scrollTop,
+        left: position.left - offset.left,
+        width: position.width,
+        topEnd: position.topEnd - offset.top + scrollTop,
+        right: position.right - offset.left,
+        lineHeight,
       };
 
       const entityElement = this.EntityComponentConstructor(
         span,
         entityPosition,
+        (isHovered: Boolean) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)
       );
 
       this.entitySpanContainer.appendChild(entityElement);
-
-      overlappedSpans.push(position);
     }
   }
 
@@ -267,7 +333,7 @@ export class Highlighting {
     this.applyStyles();
   }
 
-  private createRange({ from, to, node }: Span) {
+  public createRange({ from, to, node }: Span) {
     const range = new Range();
 
     range.setStart(node.element, from);

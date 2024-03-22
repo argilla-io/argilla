@@ -23,8 +23,12 @@
     </div>
     <div class="content-area --body1">
       <p
-        class="span-annotation__field"
-        :class="hasSelectedEntity ? 'span-annotation__field--active' : null"
+        :class="[
+          allowOverlapping
+            ? 'span-annotation__field--overlapped'
+            : 'span-annotation__field',
+          hasSelectedEntity ? 'span-annotation__field--active' : null,
+        ]"
         ref="spanAnnotationField"
         :id="id"
         v-html="fieldText"
@@ -41,12 +45,17 @@
         :entity-name="selectedEntity.text"
         :message="$t('spanAnnotation.shortcutHelper')"
       />
-      <template v-for="{ id, color } in spanQuestion.answer.options">
-        <style :key="id" scoped>
-          .span-annotation__field::highlight(hl-{{id}}) {
-            background-color: {{color}};
-          }
-        </style>
+      <template>
+        <template v-for="{ id, color } in spanQuestion.answer.options">
+          <style :key="id" scoped>
+            .span-annotation__field::highlight(hl-{{id}}) {
+              background-color: {{color}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color.palette.light}};
+            }
+          </style>
+        </template>
       </template>
     </div>
   </div>
@@ -90,6 +99,9 @@ export default {
     };
   },
   computed: {
+    lineHeight() {
+      return `${this.highlighting.config.lineHeight}px`;
+    },
     selectedEntity() {
       return this.spanQuestion.answer.options.find((e) => e.isSelected);
     },
@@ -98,6 +110,10 @@ export default {
     },
     hasSelectedEntity() {
       return !!this.selectedEntity;
+    },
+    allowOverlapping() {
+      // return this.spanQuestion.settings.allow_overlapping;
+      return true;
     },
   },
   watch: {
@@ -207,7 +223,11 @@ export default {
 .span-annotation {
   &__field {
     position: relative;
-    line-height: 32px;
+    font-size: 18px;
+    line-height: v-bind(lineHeight);
+    &--overlapped {
+      @extend .span-annotation__field;
+    }
   }
 }
 .fade-enter-active,

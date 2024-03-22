@@ -28,6 +28,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   const entityComponentFactory = (
     span: Span,
     entityPosition: Position,
+    hoverSpan: (isHovered: Boolean) => void,
     removeSpan: () => void,
     replaceEntity: (entity: Entity) => void
   ) => {
@@ -49,6 +50,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
     });
 
     instance.$on("on-remove-option", removeSpan);
+    instance.$on("on-hover-span", hoverSpan);
     instance.$on("on-replace-option", (newEntity: Entity) => {
       selectEntity(newEntity);
 

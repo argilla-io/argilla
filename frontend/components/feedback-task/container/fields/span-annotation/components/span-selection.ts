@@ -28,6 +28,7 @@ export type Span = {
 export type Configuration = {
   allowOverlap: boolean;
   allowCharacter: boolean;
+  lineHeight: number;
 };
 
 export class SpanSelection {
