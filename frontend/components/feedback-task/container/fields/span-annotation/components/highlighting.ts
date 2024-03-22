@@ -59,7 +59,7 @@ export class Highlighting {
     private readonly EntityComponentConstructor: (
       span: Span,
       entityPosition: Position,
-      hoverSpan: (span: Span, value: Boolean) => void,
+      hoverSpan: (value: Boolean) => void,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
@@ -318,7 +318,7 @@ export class Highlighting {
       const entityElement = this.EntityComponentConstructor(
         span,
         entityPosition,
-        (span: Span, isHovered: Boolean) => this.hoverSpan(span, isHovered),
+        (isHovered: Boolean) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
         (newEntity: Entity) => this.replaceEntity(span, newEntity)
       );
