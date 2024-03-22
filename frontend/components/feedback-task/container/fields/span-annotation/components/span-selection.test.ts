@@ -78,7 +78,9 @@ const createTextSelection = (selection: TestSelection): TextSelection => {
   };
 };
 
-const createSpan = (selection: TestSelection): Span => {
+const createSpan = (selection: TestSelection & { level?: number }): Span => {
+  const level = selection.level || 1;
+
   return {
     from: selection.from,
     to: selection.to,
@@ -89,6 +91,10 @@ const createSpan = (selection: TestSelection): Span => {
     node: {
       element: {} as HTMLElement,
       id: "node-id",
+    },
+    overlap: {
+      level,
+      index: level - 1,
     },
   };
 };
@@ -212,8 +218,20 @@ describe("Span Selection", () => {
           { from: 849, to: 857, text: "re-or-le", entity: "TOKEN-2" },
         ],
         [
-          { from: 847, to: 859, text: "more-or-less", entity: "TOKEN" },
-          { from: 847, to: 859, text: "more-or-less", entity: "TOKEN-2" },
+          {
+            from: 847,
+            to: 859,
+            text: "more-or-less",
+            entity: "TOKEN",
+            level: 1,
+          },
+          {
+            from: 847,
+            to: 859,
+            text: "more-or-less",
+            entity: "TOKEN-2",
+            level: 2,
+          },
         ],
       ],
       [
@@ -232,8 +250,9 @@ describe("Span Selection", () => {
             to: 91,
             text: "printing and typesetting",
             entity: "TOKEN",
+            level: 1,
           },
-          { from: 61, to: 69, text: "printing", entity: "TOKEN-2" },
+          { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
         ],
       ],
       [
@@ -278,9 +297,10 @@ describe("Span Selection", () => {
             to: 91,
             text: "printing and typesetting",
             entity: "TOKEN",
+            level: 1,
           },
-          { from: 61, to: 69, text: "printing", entity: "TOKEN-2" },
-          { from: 69, to: 70, text: " ", entity: "TOKEN-3" },
+          { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
+          { from: 69, to: 70, text: " ", entity: "TOKEN-3", level: 2 },
         ],
       ],
     ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
