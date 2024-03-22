@@ -14,6 +14,7 @@ export type Position = {
   width: number;
   topEnd: number;
   right: number;
+  lineHeight: number;
 };
 
 declare class Highlight {
@@ -298,13 +299,12 @@ export class Highlighting {
       if (overlapped.length > overlappedLevels) {
         overlappedLevels = overlapped.length;
       }
+      const lineHeight = 32 + this.styles.entitiesGap * (overlappedLevels - 1);
       if (overlappedLevels) {
         const overlappedIndex = overlapped.findIndex((s) => s === span);
         position.top += this.styles.entitiesGap * overlappedIndex;
         position.topEnd += this.styles.entitiesGap * overlappedIndex;
-        this.updateLineHeight(
-          32 + this.styles.entitiesGap * (overlappedLevels - 1)
-        );
+        this.updateLineHeight(lineHeight);
       }
 
       const entityPosition = {
@@ -313,6 +313,7 @@ export class Highlighting {
         width: position.width,
         topEnd: position.topEnd - offset.top + scrollTop,
         right: position.right - offset.left,
+        lineHeight,
       };
 
       const entityElement = this.EntityComponentConstructor(

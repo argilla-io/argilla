@@ -92,9 +92,6 @@ export default {
       type: Object,
       required: true,
     },
-    lineHeight: {
-      type: Number,
-    },
   },
   data() {
     return {
@@ -152,7 +149,7 @@ export default {
               ? `${right}px`
               : `${width}px`,
           left: i === 0 ? `${left}px` : 0,
-          top: `${top + i * this.lineHeight}px`,
+          top: `${top + i * this.entityPosition.lineHeight}px`,
         });
       }
 
@@ -161,7 +158,7 @@ export default {
   },
   methods: {
     getNumberOfLines(space) {
-      return Math.floor(space / this.lineHeight + 1) || 1;
+      return Math.floor(space / this.entityPosition.lineHeight + 1) || 1;
     },
     selectOption(option) {
       this.$emit("on-replace-option", option);

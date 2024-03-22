@@ -34,7 +34,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
   ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
     const entity = answer.options.find((e) => e.id === span.entity.id);
-    const lineHeight = highlighting.value.config.lineHeight;
     const suggestion = spanQuestion.suggestion?.getSuggestion({
       start: span.from,
       end: span.to,
@@ -47,7 +46,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
         spanQuestion,
         entityPosition,
         suggestion,
-        lineHeight,
       },
     });
 
