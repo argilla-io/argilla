@@ -200,7 +200,6 @@ export default {
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
-      debugger;
       if (
         $event.key === "Tab" ||
         $event.key === "Enter" ||

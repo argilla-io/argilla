@@ -19,6 +19,10 @@ export type Span = {
   to: number;
   entity: Entity;
   text: string;
+  overlap: {
+    level: number;
+    index: number;
+  };
   node: {
     element: Node;
     id: string;
@@ -66,16 +70,16 @@ export class SpanSelection {
       this.completeRightSide(selection);
     }
 
-    if (!config?.allowOverlap) {
-      const overlaps = this.selections.filter((s) => {
-        return (
-          (selection.from <= s.from && selection.to >= s.to) ||
-          (selection.from >= s.from && selection.to <= s.to) ||
-          (selection.from < s.from && selection.to > s.from) ||
-          (selection.from < s.to && selection.to > s.to)
-        );
-      });
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (selection.from <= s.from && selection.to >= s.to) ||
+        (selection.from >= s.from && selection.to <= s.to) ||
+        (selection.from < s.from && selection.to > s.from) ||
+        (selection.from < s.to && selection.to > s.to)
+      );
+    });
 
+    if (!config?.allowOverlap) {
       this.selections = [
         ...this.selections.filter((s) => s.node.id !== selection.node.id),
         ...filteredSelections.filter((s) => !overlaps.includes(s)),
@@ -102,7 +106,7 @@ export class SpanSelection {
     return selection.from < 0 || selection.to < 0;
   }
 
-  loadSpans(selections: Span[]) {
+  loadSpans(selections: Omit<Span, "overlap">[]) {
     selections.forEach((s) => this.select(s));
   }
 
@@ -132,8 +136,28 @@ export class SpanSelection {
     );
   }
 
-  private select(selected: Span) {
-    this.selections.push(selected);
+  private select(selected: Omit<Span, "overlap">) {
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (selected.from <= s.from && selected.to >= s.to) ||
+        (selected.from >= s.from && selected.to <= s.to) ||
+        (selected.from < s.from && selected.to > s.from) ||
+        (selected.from < s.to && selected.to > s.to)
+      );
+    });
+
+    const maxLevelInOverlaps =
+      overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;
+
+    const newVariable = {
+      ...selected,
+      overlap: {
+        level: maxLevelInOverlaps,
+        index: maxLevelInOverlaps - 1,
+      },
+    };
+
+    this.selections.push(newVariable);
   }
 
   private completeLeftSide(selection: TextSelection) {
@@ -199,7 +223,7 @@ export class SpanSelection {
     );
   }
 
-  private createId(span: Span | TextSelection) {
+  private createId(span: Omit<Span, "overlap"> | TextSelection) {
     return `${span.from}-${span.to}-${span.entity.id}-${span.node.id}`;
   }
 }
