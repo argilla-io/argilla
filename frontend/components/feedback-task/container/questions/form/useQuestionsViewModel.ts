@@ -5,8 +5,8 @@ export const useQuestionsViewModel = ({
 }: {
   questions: Question[];
 }) => {
-  const enableSpanQuestionShortcuts =
+  const enableSpanQuestionShortcutsGlobal =
     questions.filter((q) => q.isSpanType).length === 1;
 
-  return { enableSpanQuestionShortcuts };
+  return { enableSpanQuestionShortcutsGlobal };
 };

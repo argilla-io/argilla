@@ -22,11 +22,7 @@
       :for="option.id"
       :title="option.text"
     >
-      <span
-        class="key"
-        v-if="showShortcutsHelper"
-        v-text="keyboards[option.id]"
-      />
+      <span class="key" v-text="keyboards[option.id]" />
       <span>{{ option.text }}</span>
     </label>
   </div>
@@ -38,10 +34,6 @@ export default {
     option: {
       type: Object,
       required: true,
-    },
-    showShortcutsHelper: {
-      type: Boolean,
-      default: false,
     },
     keyboards: {
       type: Object,
@@ -76,7 +68,7 @@ input[type="checkbox"] {
     }
   }
 }
-.input-button {
+.input-button:not(:first-of-type) {
   input[type="checkbox"] {
     &:focus:not(:focus-visible) {
       & + .label-text {
@@ -106,6 +98,7 @@ input[type="checkbox"] {
   border: 2px solid transparent;
   border-radius: $border-radius;
   cursor: pointer;
+  user-select: none;
   span {
     white-space: nowrap;
     overflow: hidden;

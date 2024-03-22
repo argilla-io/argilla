@@ -61,6 +61,22 @@ rg.RatingQuestion(
 ![Rating question](/_static/images/llms/questions/rating_question.png)
 :::
 
+:::{tab-item} Span
+
+```python
+rg.SpanQuestion(
+    name="entities",
+    title="Highlight the entities in the text:",
+    labels={"PER": "Person", "ORG": "Organization", "EVE": "Event"},
+    # or ["PER", "ORG", "EVE"],
+    field="text",
+    required=True
+)
+```
+
+![Span question](/_static/images/llms/questions/span_question.png)
+:::
+
 :::{tab-item} Text
 
 ```python
@@ -71,6 +87,7 @@ rg.TextQuestion(
     use_markdown=True
 )
 ```
+
 ![Text Question](/_static/images/llms/questions/text_question.png)
 :::
 

@@ -17,12 +17,6 @@ export abstract class QuestionAnswer {
     return this._answer;
   }
 
-  responseIfUnanswered(answer: Answer) {
-    if (this._answer) return;
-
-    this.response(answer);
-  }
-
   response(answer: Answer) {
     this._answer = answer;
     this.fill(this._answer);

@@ -36,10 +36,7 @@
       :aria-description="description"
       autocomplete="off"
       @keydown.enter.stop="applySearch"
-      @keydown.arrow-right.stop=""
-      @keydown.arrow-left.stop=""
-      @keydown.delete.stop=""
-      @keydown.backspace.stop=""
+      @keydown.stop=""
     />
     <BaseButton
       @on-click="resetValue"

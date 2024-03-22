@@ -46,7 +46,6 @@
         :key="option.id"
         ref="options"
         :option="option"
-        :showShortcutsHelper="enableShortcuts"
         :keyboards="keyboards"
         v-model="option.isSelected"
         @keydown.enter.prevent
@@ -86,7 +85,7 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    enableShortcuts: {
+    enableSpanQuestionShortcutsGlobal: {
       type: Boolean,
       default: () => false,
     },
@@ -136,7 +135,7 @@ export default {
       },
     },
     isOutside() {
-      if (!this.enableShortcuts) return;
+      if (!this.enableSpanQuestionShortcutsGlobal) return;
       if (this.isOutside) {
         document.addEventListener("keydown", this.keyboardHandler);
       } else {
@@ -200,11 +199,14 @@ export default {
     keyboardHandler($event) {
       if (this.timer) clearTimeout(this.timer);
 
-      debugger;
       if (
         $event.key === "Tab" ||
         $event.key === "Enter" ||
         $event.key === "Backspace" ||
+        $event.key === "ArrowLeft" ||
+        $event.key === "ArrowRight" ||
+        $event.key === "ArrowUp" ||
+        $event.key === "ArrowDown" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
