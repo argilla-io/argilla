@@ -244,7 +244,10 @@ export default {
   &--active {
     cursor: none;
     &::selection {
-      background-color: v-bind("selectedEntityColor");
+      // background-color: v-bind("selectedEntityColor");
+      background-color: transparent;
+      text-shadow: 6px -3px 20px v-bind("selectedEntityColor"),
+        -6px 3px 20px v-bind("selectedEntityColor");
     }
   }
 }
