@@ -103,7 +103,6 @@ export default {
         left: "0px",
         top: "0px",
       },
-      initialLineHeight: 32,
     };
   },
   computed: {
@@ -127,8 +126,8 @@ export default {
       return true;
     },
     lines() {
-      const { width, top, topEnd, left, right } = this.entityPosition;
       const lines = [];
+      const { width, top, topEnd, left, right } = this.entityPosition;
       const space = topEnd - top;
       const linesCount = this.getNumberOfLines(space);
       if (linesCount === 1) {
@@ -162,8 +161,7 @@ export default {
   },
   methods: {
     getNumberOfLines(space) {
-      if (space <= 0) return 1;
-      return Math.floor(space / this.initialLineHeight + 1);
+      return Math.floor(space / this.lineHeight + 1) || 1;
     },
     selectOption(option) {
       this.$emit("on-replace-option", option);

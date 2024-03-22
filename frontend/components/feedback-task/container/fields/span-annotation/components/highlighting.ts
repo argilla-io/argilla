@@ -301,6 +301,7 @@ export class Highlighting {
       if (overlappedLevels) {
         const overlappedIndex = overlapped.findIndex((s) => s === span);
         position.top += this.styles.entitiesGap * overlappedIndex;
+        position.topEnd += this.styles.entitiesGap * overlappedIndex;
         this.updateLineHeight(
           32 + this.styles.entitiesGap * (overlappedLevels - 1)
         );
