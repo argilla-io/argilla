@@ -51,7 +51,13 @@
             .span-annotation__field::highlight(hl-{{id}}) {
               background-color: {{color}};
             }
+            .span-annotation__field::highlight(hl-{{id}}-selection) {
+              background-color: {{color}};
+            }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color.palette.light}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
               background: {{color.palette.light}};
             }
           </style>
@@ -244,10 +250,7 @@ export default {
   &--active {
     cursor: none;
     &::selection {
-      // background-color: v-bind("selectedEntityColor");
       background-color: transparent;
-      text-shadow: 6px -3px 20px v-bind("selectedEntityColor"),
-        -6px 3px 20px v-bind("selectedEntityColor");
     }
   }
 }

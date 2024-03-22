@@ -178,6 +178,28 @@ export class Highlighting {
       this.applyStyles();
     });
 
+    document.addEventListener("selectionchange", () => {
+      const selection = document.getSelection();
+      if (selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+
+      if (!range) return;
+
+      const entity = this.entity;
+      const styles = this.styles;
+
+      const isSelectionInsideNode =
+        range?.startContainer?.parentNode instanceof Element &&
+        range?.startContainer?.parentNode.id === this.nodeId;
+
+      if (entity && isSelectionInsideNode) {
+        const className = `${styles.entityCssKey}-${entity.id}-selection`;
+
+        CSS.highlights.set(className, new Highlight(range));
+      }
+    });
+
     new ResizeObserver(() => this.applyStyles()).observe(node);
 
     this.applyStylesOnScroll();
