@@ -398,6 +398,7 @@ $label-dark-color: palette(purple, 200);
 
   &__suggestion-icon {
     margin-top: -$base-space;
+    margin-left: -$base-space;
     flex-shrink: 0;
     width: 10px;
     height: 10px;
