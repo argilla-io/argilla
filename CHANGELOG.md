@@ -16,12 +16,9 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Added
+### Changed
 
-- If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process. ([#4630](https://github.com/argilla-io/argilla/pull/4630))
-- Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
-- Added support for spans values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
-- Added `Span` questions for `FeedbackDataset` ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+- New UI design for suggestions ([#4682](https://github.com/argilla-io/argilla/pull/4682))
 
 ## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
 
