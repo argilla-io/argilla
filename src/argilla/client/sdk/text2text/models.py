@@ -48,9 +48,11 @@ class CreationText2TextRecord(BaseRecord[Text2TextAnnotation]):
         if record.prediction is not None:
             prediction = Text2TextAnnotation(
                 sentences=[
-                    Text2TextPrediction(text=pred[0], score=pred[1])
-                    if isinstance(pred, tuple)
-                    else Text2TextPrediction(text=pred)
+                    (
+                        Text2TextPrediction(text=pred[0], score=pred[1])
+                        if isinstance(pred, tuple)
+                        else Text2TextPrediction(text=pred)
+                    )
                     for pred in record.prediction
                 ],
                 agent=record.prediction_agent or MACHINE_NAME,
@@ -81,9 +83,9 @@ class Text2TextRecord(CreationText2TextRecord):
     def to_client(self) -> ClientText2TextRecord:
         return ClientText2TextRecord(
             text=self.text,
-            prediction=[(sentence.text, sentence.score) for sentence in self.prediction.sentences]
-            if self.prediction
-            else None,
+            prediction=(
+                [(sentence.text, sentence.score) for sentence in self.prediction.sentences] if self.prediction else None
+            ),
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=self.annotation.sentences[0].text if self.annotation else None,
             annotation_agent=self.annotation.agent if self.annotation else None,

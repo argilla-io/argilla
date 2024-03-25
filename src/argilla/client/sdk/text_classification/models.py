@@ -100,19 +100,21 @@ class TextClassificationRecord(CreationTextClassificationRecord):
             multi_label=self.multi_label,
             status=self.status,
             metadata=self.metadata or {},
-            prediction=[(label.class_label, label.score) for label in self.prediction.labels]
-            if self.prediction
-            else None,
+            prediction=(
+                [(label.class_label, label.score) for label in self.prediction.labels] if self.prediction else None
+            ),
             prediction_agent=self.prediction.agent if self.prediction else None,
             annotation=annotations,
             annotation_agent=self.annotation.agent if self.annotation else None,
             vectors=self._to_client_vectors(self.vectors),
-            explanation={
-                key: [ClientTokenAttributions.parse_obj(attribution) for attribution in attributions]
-                for key, attributions in self.explanation.items()
-            }
-            if self.explanation
-            else None,
+            explanation=(
+                {
+                    key: [ClientTokenAttributions.parse_obj(attribution) for attribution in attributions]
+                    for key, attributions in self.explanation.items()
+                }
+                if self.explanation
+                else None
+            ),
             metrics=self.metrics or None,
             search_keywords=self.search_keywords or None,
         )

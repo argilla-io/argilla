@@ -65,9 +65,11 @@ class AutoTrainMixin:
             token=self.HF_TOKEN,
             task=self.task,
             num_samples=self._num_samples,
-            num_models=self.trainer_kwargs["autotrain"][0]["num_models"]
-            if self._model.lower() == "autotrain"
-            else len(self.trainer_kwargs["hub_model"]),
+            num_models=(
+                self.trainer_kwargs["autotrain"][0]["num_models"]
+                if self._model.lower() == "autotrain"
+                else len(self.trainer_kwargs["hub_model"])
+            ),
         )
 
     def initialize_project(self):

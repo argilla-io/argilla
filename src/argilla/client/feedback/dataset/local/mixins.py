@@ -504,23 +504,27 @@ class TaskTemplateMixin:
         return cls(
             fields=[TextField(name="text", use_markdown=use_markdown)],
             questions=[
-                LabelQuestion(
-                    name="label",
-                    labels=labels,
-                    description=description,
-                )
-                if not multi_label
-                else MultiLabelQuestion(
-                    name="label",
-                    labels=labels,
-                    description=description,
+                (
+                    LabelQuestion(
+                        name="label",
+                        labels=labels,
+                        description=description,
+                    )
+                    if not multi_label
+                    else MultiLabelQuestion(
+                        name="label",
+                        labels=labels,
+                        description=description,
+                    )
                 )
             ],
-            guidelines=guidelines
-            if guidelines is not None
-            else default_guidelines
-            if multi_label
-            else default_guidelines.replace("one or more labels", "one label"),
+            guidelines=(
+                guidelines
+                if guidelines is not None
+                else (
+                    default_guidelines if multi_label else default_guidelines.replace("one or more labels", "one label")
+                )
+            ),
             metadata_properties=metadata_properties,
             vectors_settings=vectors_settings,
         )
@@ -739,11 +743,15 @@ class TaskTemplateMixin:
                     name="response", description="Write the response to the instruction.", use_markdown=use_markdown
                 )
             ],
-            guidelines=guidelines
-            if guidelines is not None
-            else default_guidelines + " Take the context into account when writing the response."
-            if context
-            else default_guidelines,
+            guidelines=(
+                guidelines
+                if guidelines is not None
+                else (
+                    default_guidelines + " Take the context into account when writing the response."
+                    if context
+                    else default_guidelines
+                )
+            ),
             metadata_properties=metadata_properties,
             vectors_settings=vectors_settings,
         )
@@ -977,23 +985,27 @@ class TaskTemplateMixin:
         return cls(
             fields=[TextField(name="content", use_markdown=True, required=True)],
             questions=[
-                LabelQuestion(
-                    name="label",
-                    labels=labels,
-                    description=description,
-                )
-                if not multi_label
-                else MultiLabelQuestion(
-                    name="label",
-                    labels=labels,
-                    description=description,
+                (
+                    LabelQuestion(
+                        name="label",
+                        labels=labels,
+                        description=description,
+                    )
+                    if not multi_label
+                    else MultiLabelQuestion(
+                        name="label",
+                        labels=labels,
+                        description=description,
+                    )
                 )
             ],
-            guidelines=guidelines
-            if guidelines is not None
-            else default_guidelines
-            if multi_label
-            else default_guidelines.replace("one or more labels", "one label"),
+            guidelines=(
+                guidelines
+                if guidelines is not None
+                else (
+                    default_guidelines if multi_label else default_guidelines.replace("one or more labels", "one label")
+                )
+            ),
             metadata_properties=metadata_properties,
             vectors_settings=vectors_settings,
         )

@@ -71,8 +71,7 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     @property
     @abstractmethod
-    def server_settings(self) -> Dict[str, Any]:
-        ...
+    def server_settings(self) -> Dict[str, Any]: ...
 
     def to_server_payload(self) -> Dict[str, Any]:
         return {
@@ -84,20 +83,17 @@ class MetadataPropertySchema(BaseModel, ABC):
 
     @property
     @abstractmethod
-    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[Any, ...]], Dict[str, Callable]]:
-        ...
+    def _pydantic_field_with_validator(self) -> Tuple[Dict[str, Tuple[Any, ...]], Dict[str, Callable]]: ...
 
     @abstractmethod
     def _validate_filter(self, metadata_filter: "MetadataFilters") -> None:
         pass
 
     @abstractmethod
-    def _check_allowed_value_type(self, value: Any) -> Any:
-        ...
+    def _check_allowed_value_type(self, value: Any) -> Any: ...
 
     @abstractmethod
-    def _validator(self, value: Any) -> Any:
-        ...
+    def _validator(self, value: Any) -> Any: ...
 
 
 def _validator_definition(schema: MetadataPropertySchema) -> Dict[str, Any]:
@@ -395,8 +391,7 @@ class MetadataFilterSchema(BaseModel, ABC):
 
     @property
     @abstractmethod
-    def query_string(self) -> str:
-        ...
+    def query_string(self) -> str: ...
 
 
 class TermsMetadataFilter(MetadataFilterSchema):

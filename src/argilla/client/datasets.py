@@ -744,16 +744,20 @@ class DatasetForTextClassification(DatasetBase):
         for key in self._RECORD_TYPE.__fields__:
             if key == "prediction":
                 ds_dict[key] = [
-                    [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
-                    if rec.prediction is not None
-                    else None
+                    (
+                        [{"label": pred[0], "score": pred[1]} for pred in rec.prediction]
+                        if rec.prediction is not None
+                        else None
+                    )
                     for rec in self._records
                 ]
             elif key == "explanation":
                 ds_dict[key] = [
-                    {key: list(map(dict, tokattrs)) for key, tokattrs in rec.explanation.items()}
-                    if rec.explanation is not None
-                    else None
+                    (
+                        {key: list(map(dict, tokattrs)) for key, tokattrs in rec.explanation.items()}
+                        if rec.explanation is not None
+                        else None
+                    )
                     for rec in self._records
                 ]
             elif key == "id":
@@ -1255,9 +1259,11 @@ class DatasetForTokenClassification(DatasetBase):
             if entities is None:
                 return None
             return [
-                {"label": ent[0], "start": ent[1], "end": ent[2]}
-                if len(ent) == 3
-                else {"label": ent[0], "start": ent[1], "end": ent[2], "score": ent[3]}
+                (
+                    {"label": ent[0], "start": ent[1], "end": ent[2]}
+                    if len(ent) == 3
+                    else {"label": ent[0], "start": ent[1], "end": ent[2], "score": ent[3]}
+                )
                 for ent in entities
             ]
 
@@ -1281,9 +1287,11 @@ class DatasetForTokenClassification(DatasetBase):
         entities,
     ) -> List[Union[Tuple[str, int, int], Tuple[str, int, int, float]]]:
         return [
-            (ent["label"], ent["start"], ent["end"])
-            if len(ent) == 3
-            else (ent["label"], ent["start"], ent["end"], ent["score"] or 0.0)
+            (
+                (ent["label"], ent["start"], ent["end"])
+                if len(ent) == 3
+                else (ent["label"], ent["start"], ent["end"], ent["score"] or 0.0)
+            )
             for ent in entities
         ]
 
