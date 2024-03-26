@@ -27,9 +27,7 @@
         <BaseTooltip
           v-if="findRankSuggestion(item)"
           class="draggable__suggestion"
-          :text="`<img src='/icons/suggestion.svg' /> ${$t(
-            'suggestion.suggested-rank'
-          )}`"
+          :text="$t('suggestion.suggested-rank')"
           minimalist
         >
           <span v-text="findRankSuggestion(item).rank" />
@@ -75,9 +73,7 @@
             <BaseTooltip
               v-if="findRankSuggestion(item)"
               class="draggable__suggestion"
-              :text="`<img src='/icons/suggestion.svg' /> ${$t(
-                'suggestion.suggested-rank'
-              )}`"
+              :text="`${$t('suggestion.suggested-rank')}`"
               minimalist
             >
               <span v-text="findRankSuggestion(item).rank" />
@@ -374,10 +370,6 @@ $max-visible-card-items: 12;
     margin-left: auto;
     @include font-size(12px);
     cursor: default;
-
-    & .svg-icon {
-      margin-top: -$base-space;
-    }
   }
 
   .svg-icon {

@@ -8,11 +8,7 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :text="
-            isSuggested(option)
-              ? `<img src='/icons/suggestion.svg' /> ${$t('suggestion.name')}`
-              : null
-          "
+          :text="isSuggested(option) ? $t('suggestion.name') : null"
           minimalist
         >
           <input
@@ -135,9 +131,6 @@ export default {
   cursor: pointer;
 
   &__suggestion-icon {
-    position: absolute;
-    margin-top: -$base-space;
-    margin-left: $base-space * 2;
     flex-shrink: 0;
     width: 10px;
     height: 10px;

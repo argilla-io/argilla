@@ -55,13 +55,7 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="
-            isSuggested(option)
-              ? `<img src='icons/suggestion.svg' /> ${$t('suggestion.name')}: ${
-                  option.text
-                }`
-              : null
-          "
+          :text="isSuggested(option) ? $t('suggestion.name') : null"
           minimalist
         >
           <label
@@ -397,8 +391,6 @@ $label-dark-color: palette(purple, 200);
   user-select: none;
 
   &__suggestion-icon {
-    margin-top: -$base-space;
-    margin-left: -$base-space;
     flex-shrink: 0;
     width: 10px;
     height: 10px;
