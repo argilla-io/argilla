@@ -158,11 +158,12 @@ export class Highlighting {
   private updateLineHeight() {
     const maxOverlappedLevels = this.spans.reduce(
       (max, span) => Math.max(max, span.overlap.level),
-      -1
+      0
     );
 
     const lineHeight =
-      this.styles.lineHeight + this.styles.entitiesGap * maxOverlappedLevels;
+      this.styles.lineHeight +
+      this.styles.entitiesGap * Math.max(0, maxOverlappedLevels - 1);
 
     this.config.lineHeight = lineHeight;
   }
