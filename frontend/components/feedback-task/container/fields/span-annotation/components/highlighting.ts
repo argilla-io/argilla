@@ -66,7 +66,7 @@ export class Highlighting {
     styles?: Styles
   ) {
     this.styles = {
-      entitiesGap: 12,
+      entitiesGap: 16,
       lineHeight: 32,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
@@ -120,6 +120,20 @@ export class Highlighting {
     this.entity = entity;
   }
 
+  allowCharacterAnnotation(allow: boolean) {
+    this.config.allowCharacter = allow;
+  }
+
+  replaceEntity(span: Span, entity: Entity) {
+    this.spanSelection.replaceEntity(span, entity);
+    this.applyStyles();
+  }
+
+  removeAllHighlights() {
+    this.spanSelection.clear();
+    this.applyStyles();
+  }
+
   private loadHighlights(selections: LoadedSpan[]) {
     if (!this.node) {
       throw new Error(
@@ -138,20 +152,6 @@ export class Highlighting {
 
     this.spanSelection.loadSpans(loaded);
 
-    this.applyStyles();
-  }
-
-  allowCharacterAnnotation(allow: boolean) {
-    this.config.allowCharacter = allow;
-  }
-
-  replaceEntity(span: Span, entity: Entity) {
-    this.spanSelection.replaceEntity(span, entity);
-    this.applyStyles();
-  }
-
-  removeAllHighlights() {
-    this.spanSelection.clear();
     this.applyStyles();
   }
 
@@ -263,7 +263,7 @@ export class Highlighting {
     }
   }
 
-  hoverSpan(hoveredSpan: Span, isHovered: Boolean) {
+  private hoverSpan(hoveredSpan: Span, isHovered: Boolean) {
     this.applyHighlightStyle((span) =>
       hoveredSpan === span && isHovered
         ? `${this.styles.entityCssKey}-${span.entity.id}-hover`
@@ -288,9 +288,9 @@ export class Highlighting {
       const entityElement = this.EntityComponentConstructor(
         span,
         entityPosition,
-        (isHovered: Boolean) => this.hoverSpan(span, isHovered),
+        (isHovered) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
-        (newEntity: Entity) => this.replaceEntity(span, newEntity)
+        (newEntity) => this.replaceEntity(span, newEntity)
       );
 
       this.entitySpanContainer.appendChild(entityElement);
@@ -318,7 +318,7 @@ export class Highlighting {
 
     const position = {
       left,
-      top: top + window.scrollY,
+      top: top + window.scrollY + this.styles.entitiesGap / 4,
       width,
       right: right + window.scrollX,
       topEnd: topEnd + window.scrollY,
@@ -341,7 +341,12 @@ export class Highlighting {
 
   private removeSpan(span: Span) {
     this.spanSelection.removeSpan(span);
-    this.applyStyles();
+
+    const spans = this.spans;
+
+    this.removeAllHighlights();
+
+    this.loadHighlights(spans);
   }
 
   public createRange({ from, to, node }: Span) {
