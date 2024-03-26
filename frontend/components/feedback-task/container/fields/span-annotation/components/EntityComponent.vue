@@ -259,7 +259,7 @@ export default {
   }
   &__text {
     gap: 4px;
-    padding-inline: $base-space / 2;
+    padding-inline: calc($base-space / 2);
     @include truncate(auto);
   }
   &__line {
