@@ -11,7 +11,7 @@
         ref="text"
         id="contentId"
         class="content__text"
-        :class="textIsEdited ? '--edited-text' : null"
+        :class="classes"
         :contenteditable="true"
         :placeholder="placeholder"
         @input="onInputText"
@@ -54,6 +54,21 @@ export default {
     };
   },
   computed: {
+    classes() {
+      const classes = [];
+
+      if (this.textIsEdited) {
+        classes.push("--edited-text");
+      }
+
+      if (this.$language.isRTL(this.value)) {
+        classes.push("--rtl");
+      } else {
+        classes.push("--ltr");
+      }
+
+      return classes;
+    },
     textIsEdited() {
       return this.originalValue !== this.value;
     },
