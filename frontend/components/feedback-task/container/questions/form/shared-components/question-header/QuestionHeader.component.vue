@@ -1,18 +1,5 @@
 <template>
   <div class="title-area --body1">
-    <BaseTooltip
-      v-if="question.suggestion"
-      :text="suggestionTooltipText"
-      position="left"
-      minimalist
-    >
-      <svgicon
-        class="title-area__suggestion-icon"
-        name="suggestion"
-        width="14"
-        height="14"
-      />
-    </BaseTooltip>
     <span
       class="suggestion-info"
       v-text="question.title"
@@ -59,14 +46,6 @@ export default {
   computed: {
     showIcon() {
       return !!this.question.description?.length;
-    },
-    suggestionTooltipText() {
-      const qAgent = this.question.suggestion.agent;
-      const qScore = this.question.suggestion.score;
-      return this.$t("suggestion.tooltip", {
-        agent: qAgent ? this.$t("suggestion.agent", { agent: qAgent }) : "",
-        score: qScore ? this.$t("suggestion.score", { score: qScore }) : "",
-      });
     },
   },
   watch: {

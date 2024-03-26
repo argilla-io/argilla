@@ -7,9 +7,10 @@
         v-for="tab in tabs"
         :key="tab.id"
       >
-        <base-button class="small" @on-click="changeTab(tab)">{{
-          tab.name
-        }}</base-button>
+        <BaseButton class="small" @on-click="changeTab(tab)">
+          {{ tab.name }}
+          <svgicon v-if="tab.icon" :name="tab.icon" width="10" height="10" />
+        </BaseButton>
       </li>
     </ul>
     <div class="card-with-tabs__content">
