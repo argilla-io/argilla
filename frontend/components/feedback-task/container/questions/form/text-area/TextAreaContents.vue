@@ -101,36 +101,12 @@ export default {
     },
   },
   computed: {
-    isRTL() {
-      const rtl_count = (
-        this.question.answer.value.match(
-          /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/g
-        ) || []
-      ).length;
-
-      const ltr_count = (
-        this.question.answer.value.match(
-          // eslint-disable-next-line no-misleading-character-class
-          /[A-Za-z\u00C0-\u00C0\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]/g
-        ) || []
-      ).length;
-
-      return rtl_count > ltr_count;
-    },
     classes() {
-      const classes = [];
-
-      if (this.isRTL) {
-        classes.push("--rtl");
-      } else {
-        classes.push("--ltr");
-      }
-
       if (this.isEditionModeActive) {
-        classes.push("--editing");
+        return "--editing";
       }
 
-      return classes;
+      return null;
     },
   },
 };
@@ -145,12 +121,6 @@ export default {
   min-height: 10em;
   background: palette(white);
   outline: none;
-  &.--rtl {
-    direction: rtl;
-  }
-  &.--ltr {
-    direction: ltr;
-  }
   &.--editing {
     border-color: $primary-color;
     outline: 1px solid $primary-color;

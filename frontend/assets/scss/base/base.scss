@@ -304,3 +304,10 @@ a {
 .--capitalized {
   text-transform: capitalize;
 }
+
+.--rtl {
+  direction: rtl;
+}
+.--ltr {
+  direction: ltr;
+}
