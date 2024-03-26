@@ -319,7 +319,7 @@ export class Highlighting {
 
     const position = {
       left,
-      top: top + window.scrollY + this.styles.entitiesGap / 4,
+      top: top + window.scrollY + this.styles.entitiesGap / 10,
       width,
       right: right + window.scrollX,
       topEnd: topEnd + window.scrollY,
