@@ -25,7 +25,7 @@ describe("RenderMarkdownBaseComponent", () => {
   it("render correct html", () => {
     const wrapper = shallowMount(RenderMarkdownBaseComponent, options);
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <h1>example</h1>
 </div>`
     );
@@ -38,7 +38,7 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><svg viewBox="0 0 100 100" width="100" height="100">
       <circle fill="red" stroke-width="3" stroke="black" r="40" cy="50" cx="50"></circle>
     </svg></p>
@@ -53,7 +53,7 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><svg viewBox="0 0 100 100" width="100" height="100">
       <circle fill="red" stroke-width="3" stroke="black" r="40" cy="50" cx="50"></circle>
     </svg></p>
@@ -69,7 +69,7 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><a target="_blank" href="https://example.com">example</a></p>
 </div>`
     );
@@ -83,7 +83,7 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><a target="_blank" href="https://example.com">example</a></p>
 </div>`
     );

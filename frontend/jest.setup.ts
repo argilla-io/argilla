@@ -54,6 +54,9 @@ const buildNuxt = async () => {
 
 config.mocks = {
   $t: (key) => `#${key}#`,
+  $language: {
+    isRTL: () => false,
+  },
 };
 
 export default async () => {
