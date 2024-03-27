@@ -16,12 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
+
 ### Added
 
-- If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process. ([#4630](https://github.com/argilla-io/argilla/pull/4630))
-- Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
-- Added support for spans values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
-- Added `Span` questions for `FeedbackDataset` ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+- Added support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
 
 ## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
 
@@ -32,7 +31,6 @@ These are the section headers that we use:
 - Added support for span values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
 - Added `span` questions for `FeedbackDataset`. ([#4622](https://github.com/argilla-io/argilla/pull/4622))
 - Added `ARGILLA_CACHE_DIR` environment variable to configure the client cache directory. ([#4509](https://github.com/argilla-io/argilla/pull/4509))
-  > > > > > > > main
 
 ### Fixed
 
