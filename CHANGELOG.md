@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
+
+### Added
+
+- Added support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
+
 ## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
 
 ### Added
