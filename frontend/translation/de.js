@@ -58,7 +58,7 @@ export default {
   },
   to_submit_complete_required: "Zum Absenden beantworten \nSie benötigte Fragen",
   some_records_failed_to_annotate: "Einige Einträge konnten nicht annotiert werden",
-  changes_no_submit: "Sie haben Ihre Änderungen nicht gespeichert", 
+  changes_no_submit: "Sie haben Ihre Änderungen nicht gespeichert",
   bulkAnnotation: {
     recordsSelected: "1 Eintrag ausgewählt | {count} Einträge ausgewählt",
     recordsViewSettings: "Anzahl der Einträge",
