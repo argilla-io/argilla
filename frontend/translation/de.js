@@ -28,7 +28,7 @@ export default {
   userSettings: {
     title: "Meine Einstellungen",
     fields: {
-      userName: "Nutzername",
+      userName: "Benutzername",
       firstName: "Vorname",
       lastName: "Nachname",
       workspaces: "Arbeitsbereiche",
@@ -132,7 +132,9 @@ export default {
   },
   login: {
     title: "Anmelden",
-    claim: "Arbeiten Sie gemeinsam an Daten.</br>Verbessern Sie Ihre Modelle.",
+    username: "Benutzername",
+    password: "Passwort",
+    claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
     support:
       "Um Unterstützung von der Community zu erhalten, folgen Sie uns auf <a href='{link}' target='_blank'>Slack</a>",
     quickstart:

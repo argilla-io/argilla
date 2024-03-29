@@ -130,6 +130,8 @@ export default {
   },
   login: {
     title: "Sign in",
+    username: "Username",
+    password: "Password",
     claim: "Work on data together.</br>Make your models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
