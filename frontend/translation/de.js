@@ -56,8 +56,10 @@ export default {
     cancel: "Abbrechen",
     continue: "Fortfahren",
   },
-  to_submit_complete_required: "Zum Absenden beantworten \nSie benötigte Fragen",
-  some_records_failed_to_annotate: "Einige Einträge konnten nicht annotiert werden",
+  to_submit_complete_required:
+    "Zum Absenden beantworten \nSie benötigte Fragen",
+  some_records_failed_to_annotate:
+    "Einige Einträge konnten nicht annotiert werden",
   changes_no_submit: "Sie haben Ihre Änderungen nicht gespeichert",
   bulkAnnotation: {
     recordsSelected: "1 Eintrag ausgewählt | {count} Einträge ausgewählt",
@@ -137,7 +139,8 @@ export default {
       "Sie verwenden die Quickstart-Version von Argilla. Überprüfen Sie <a href='{link}' target='_blank'>diesen Leitfaden</a> um mehr über Nutzung und Konfigurationsoptionen zu erfahren.",
     hf: {
       title: "Willkommen bei {space}",
-      subtitle: "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
+      subtitle:
+        "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
     },
   },
   status: "Status",
@@ -170,10 +173,12 @@ export default {
         message: "Die angeforderte Ressource konnte nicht gefunden werden",
       },
       429: {
-        message: "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
+        message:
+          "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
       },
       500: {
-        message: "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
+        message:
+          "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
       },
     },
   },
