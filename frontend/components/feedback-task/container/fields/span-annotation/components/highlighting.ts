@@ -62,7 +62,8 @@ export class Highlighting {
       entityPosition: Position,
       hoverSpan: (value: boolean) => void,
       removeSpan: () => void,
-      replaceEntity: (entity: Entity) => void
+      replaceEntity: (entity: Entity) => void,
+      cloneSpanWith: (entity: Entity) => void
     ) => Element,
     styles?: Styles
   ) {
@@ -292,15 +293,8 @@ export class Highlighting {
         entityPosition,
         (isHovered) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
-        (newEntity) => {
-          if (this.config.allowOverlap) {
-            this.addSpanBaseOn(span, newEntity);
-
-            return;
-          }
-
-          this.replaceEntity(span, newEntity);
-        }
+        (newEntity) => this.replaceEntity(span, newEntity),
+        (newEntity) => this.addSpanBaseOn(span, newEntity)
       );
 
       this.entitySpanContainer.appendChild(entityElement);
