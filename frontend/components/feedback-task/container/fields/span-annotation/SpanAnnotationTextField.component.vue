@@ -166,8 +166,9 @@ export default {
       this.showShortcutsHelper(false);
     },
     onMouseMove() {
+      const mouseDown = this.mouseDown;
       this.mouseTimeout = setTimeout(() => {
-        if (this.mouseDown) this.showShortcutsHelper(true);
+        if (this.mouseDown) this.showShortcutsHelper(mouseDown);
       }, 500);
     },
     onKeyDown(event) {
