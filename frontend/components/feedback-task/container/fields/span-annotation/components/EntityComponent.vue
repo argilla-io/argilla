@@ -126,28 +126,17 @@ export default {
       const lines = [];
       const { width, top, topEnd, left, right } = this.entityPosition;
       const space = topEnd - top;
-      const linesCount = this.getNumberOfLines(space);
-      if (linesCount === 1) {
-        return [
-          {
-            width: `${width}px`,
-            left: `${left}px`,
-            top: `${top}px`,
-          },
-        ];
-      }
+      const linesCount = space > 0 ? this.getNumberOfLines(space) : 0;
 
-      const firstLine = 0;
-      const lastLine = linesCount - 1;
-
-      for (let i = 0; i < linesCount; i++) {
+      for (let i = 0; i <= linesCount; i++) {
         lines.push({
-          width:
-            i === firstLine
+          width: linesCount
+            ? i === 0
               ? `${width - left}px`
-              : i === lastLine
+              : i === linesCount
               ? `${right}px`
-              : `${width}px`,
+              : `${width}px`
+            : `${width}px`,
           left: i === 0 ? `${left}px` : 0,
           top: `${top + i * this.entityPosition.lineHeight}px`,
         });
@@ -158,7 +147,7 @@ export default {
   },
   methods: {
     getNumberOfLines(space) {
-      return Math.floor(space / this.entityPosition.lineHeight + 1) || 1;
+      return Math.floor(space / this.entityPosition.lineHeight + 1);
     },
     selectOption(option) {
       this.$emit("on-replace-option", option);
