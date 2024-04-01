@@ -130,8 +130,8 @@ export class Record {
 
       question.addSuggestion(suggestion);
 
-      if (this.isPending || this.isDraft) {
-        question.responseIfUnanswered(answer);
+      if (this.isPending) {
+        question.response(suggestion);
       } else {
         question.response(answer);
       }

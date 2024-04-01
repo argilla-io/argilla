@@ -32,9 +32,12 @@
         ref="spanAnnotationField"
         :id="id"
         v-html="fieldText"
-        @mousedown="mouseDown = true"
-        @mouseup="onMouseUp(false)"
-        @mousemove="onMouseMove(mouseDown)"
+        tabindex="0"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+        @mousemove="onMouseMove"
+        @keydown="onKeyDown"
+        @keyup="onKeyUp"
       />
       <SpanAnnotationCursor
         v-if="hasSelectedEntity"
@@ -96,7 +99,7 @@ export default {
   data() {
     return {
       visibleShortcutsHelper: false,
-      usedCharacterAnnotation: false,
+      alreadyUsedTheCharacterAnnotation: false,
       mouseDown: false,
       mouseTimeout: null,
       mouseEnter: false,
@@ -138,26 +141,33 @@ export default {
       this.highlighting.allowCharacterAnnotation(allow);
     },
     keyPressing(event, isDown) {
-      if (event.key == "Shift" && this.highlighting.allowCharacterAnnotation) {
+      if (event.key === "Shift") {
+        event.preventDefault();
+        event.stopPropagation();
+
         this.allowCharacterAnnotation(isDown);
-        this.usedCharacterAnnotation = true;
+        this.alreadyUsedTheCharacterAnnotation = true;
         this.visibleShortcutsHelper = false;
       }
     },
     showShortcutsHelper(value) {
       if (!this.spanQuestion.settings.allow_character_annotation) return;
+      if (this.alreadyUsedTheCharacterAnnotation) return;
 
-      if (this.usedCharacterAnnotation) return;
       this.visibleShortcutsHelper = value;
     },
-    onMouseUp(value) {
-      this.mouseDown = value;
-      if (this.mouseTimeout) clearTimeout(this.mouseTimeout);
-      this.showShortcutsHelper(value);
+    onMouseDown() {
+      this.mouseDown = true;
     },
-    onMouseMove(value) {
+    onMouseUp() {
+      this.mouseDown = false;
+      if (this.mouseTimeout) clearTimeout(this.mouseTimeout);
+
+      this.showShortcutsHelper(false);
+    },
+    onMouseMove() {
       this.mouseTimeout = setTimeout(() => {
-        if (this.mouseDown) this.showShortcutsHelper(value);
+        if (this.mouseDown) this.showShortcutsHelper(true);
       }, 500);
     },
     onKeyDown(event) {
@@ -171,14 +181,6 @@ export default {
       this.keyPressing(event, false);
     },
   },
-  mounted() {
-    window.addEventListener("keydown", this.onKeyDown);
-    window.addEventListener("keyup", this.onKeyUp);
-  },
-  destroyed() {
-    window.removeEventListener("keydown", this.onKeyDown);
-    window.removeEventListener("keyup", this.onKeyUp);
-  },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);
   },
@@ -188,6 +190,7 @@ export default {
 <style lang="scss" scoped>
 .text_field_component {
   $this: &;
+  user-select: text;
   display: flex;
   flex-direction: column;
   gap: $base-space;
@@ -229,13 +232,24 @@ export default {
 .span-annotation {
   &__field {
     position: relative;
-    font-size: 18px;
+    margin: 0;
+    @include font-size(18px);
     line-height: v-bind(lineHeight);
     &--overlapped {
       @extend .span-annotation__field;
     }
+    &--active {
+      cursor: none;
+      &::selection {
+        background-color: transparent;
+      }
+    }
+    &:focus {
+      outline: none;
+    }
   }
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.25s;
@@ -243,16 +257,6 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.span-annotation__field {
-  margin: 0;
-  &--active {
-    cursor: none;
-    &::selection {
-      background-color: transparent;
-    }
-  }
 }
 
 :deep([id^="entity-span-container"]) {

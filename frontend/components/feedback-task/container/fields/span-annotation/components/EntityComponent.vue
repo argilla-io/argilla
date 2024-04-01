@@ -257,6 +257,9 @@ export default {
     background: v-bind(entityColor);
     margin-top: 20px;
   }
+  &__suggestion {
+    flex-shrink: 0;
+  }
   &:hover {
     position: relative;
     z-index: 1;
@@ -265,6 +268,9 @@ export default {
     scale: 1.1;
     #{$this}__close-button {
       display: inline-flex;
+    }
+    #{$this}__text {
+      min-width: $base-space * 3;
     }
     #{$this}__score {
       display: inline-flex;

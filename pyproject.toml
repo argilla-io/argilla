@@ -44,18 +44,13 @@ dependencies = [
     # for CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
     # metrics
-    "nltk < 4.0.0"
+    "nltk < 4.0.0",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-
-server = [
-    "argilla-server", # TODO: Fix the versions when publishing a new release
-]
-server-postgresql = [
-    "argilla-server[postgresql]", # TODO: Fix the versions when publishing a new release
-]
+server = ["argilla-server ~= 1.26.1"]
+server-postgresql = ["argilla-server[postgresql] ~= 1.26.1"]
 listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
 integrations = [
     "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`

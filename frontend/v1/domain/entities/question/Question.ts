@@ -158,14 +158,6 @@ export class Question {
     this.answer = questionReference.answer;
   }
 
-  responseIfUnanswered(answer: Answer) {
-    if (this.suggestion) {
-      this.answer.responseIfUnanswered(this.suggestion);
-    } else if (answer) {
-      this.answer.responseIfUnanswered(answer);
-    }
-  }
-
   response(answer: Answer) {
     if (!answer) return;
 

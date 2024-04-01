@@ -1,5 +1,10 @@
 <template>
-  <div class="markdown-render" v-html="markdownToHtml" v-copy-code />
+  <div
+    class="markdown-render"
+    :class="classes"
+    v-html="markdownToHtml"
+    v-copy-code
+  />
 </template>
 <script>
 import { marked } from "marked";
@@ -52,6 +57,9 @@ export default {
     },
   },
   computed: {
+    classes() {
+      return this.$language.isRTL(this.markdown) ? "--rtl" : "--ltr";
+    },
     markdownToHtml() {
       return marked.parse(this.markdown, {
         headerIds: false,
