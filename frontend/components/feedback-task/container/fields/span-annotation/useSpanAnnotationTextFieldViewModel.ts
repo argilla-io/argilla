@@ -28,7 +28,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   const entityComponentFactory = (
     span: Span,
     entityPosition: Position,
-    hoverSpan: (isHovered: Boolean) => void,
+    hoverSpan: (isHovered: boolean) => void,
     removeSpan: () => void,
     replaceEntity: (entity: Entity) => void
   ) => {

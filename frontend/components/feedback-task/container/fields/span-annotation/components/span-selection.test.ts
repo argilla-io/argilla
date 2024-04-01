@@ -1,7 +1,7 @@
 /* eslint-disable quotes */
 import {
   Configuration,
-  Span,
+  OverlappedSpan,
   SpanSelection as SpanSelectionBase,
   TextSelection,
 } from "./span-selection";
@@ -78,7 +78,9 @@ const createTextSelection = (selection: TestSelection): TextSelection => {
   };
 };
 
-const createSpan = (selection: TestSelection & { level?: number }): Span => {
+const createSpan = (
+  selection: TestSelection & { level?: number }
+): OverlappedSpan => {
   const level = selection.level || 1;
 
   return {
