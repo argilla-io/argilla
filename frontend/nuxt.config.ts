@@ -123,6 +123,11 @@ const config: NuxtConfig = {
         file: "en.js",
       },
     ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root",
+    },
     lazy: true,
     langDir: "translation/",
     defaultLocale: "en",
