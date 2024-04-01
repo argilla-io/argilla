@@ -19,13 +19,16 @@ export type Span = {
   to: number;
   entity: Entity;
   text: string;
-  overlap: {
-    level: number;
-    index: number;
-  };
   node: {
     element: Node;
     id: string;
+  };
+};
+
+export type OverlappedSpan = Span & {
+  overlap: {
+    level: number;
+    index: number;
   };
 };
 
@@ -36,7 +39,7 @@ export type Configuration = {
 };
 
 export class SpanSelection {
-  private selections: Span[] = [];
+  private selections: OverlappedSpan[] = [];
 
   protected constructor() {}
 
@@ -54,7 +57,7 @@ export class SpanSelection {
     return [...this.selections];
   }
 
-  public addSpan(selection?: TextSelection, config?: Configuration) {
+  addSpan(selection?: TextSelection, config?: Configuration) {
     if (!selection) return;
     if (this.isOutOfRange(selection)) return;
 
@@ -86,8 +89,6 @@ export class SpanSelection {
       ];
     }
 
-    if (this.exists(selection)) return;
-
     const { from, to, entity, text, node } = selection;
 
     this.select({
@@ -102,11 +103,37 @@ export class SpanSelection {
     });
   }
 
+  select(selected: Span) {
+    if (this.exists(selected)) return;
+
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (selected.from <= s.from && selected.to >= s.to) ||
+        (selected.from >= s.from && selected.to <= s.to) ||
+        (selected.from < s.from && selected.to > s.from) ||
+        (selected.from < s.to && selected.to > s.to)
+      );
+    });
+
+    const maxLevelInOverlaps =
+      overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;
+
+    const newVariable = {
+      ...selected,
+      overlap: {
+        level: maxLevelInOverlaps,
+        index: maxLevelInOverlaps - 1,
+      },
+    };
+
+    this.selections.push(newVariable);
+  }
+
   isOutOfRange(selection: TextSelection) {
     return selection.from < 0 || selection.to < 0;
   }
 
-  loadSpans(selections: Omit<Span, "overlap">[]) {
+  loadSpans(selections: Span[]) {
     selections.forEach((s) => this.select(s));
   }
 
@@ -130,34 +157,10 @@ export class SpanSelection {
     );
   }
 
-  private exists(selection: TextSelection) {
+  private exists(span: Span) {
     return this.selections.some(
-      (s) => this.createId(s) === this.createId(selection)
+      (s) => this.createId(s) === this.createId(span)
     );
-  }
-
-  private select(selected: Omit<Span, "overlap">) {
-    const overlaps = this.selections.filter((s) => {
-      return (
-        (selected.from <= s.from && selected.to >= s.to) ||
-        (selected.from >= s.from && selected.to <= s.to) ||
-        (selected.from < s.from && selected.to > s.from) ||
-        (selected.from < s.to && selected.to > s.to)
-      );
-    });
-
-    const maxLevelInOverlaps =
-      overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;
-
-    const newVariable = {
-      ...selected,
-      overlap: {
-        level: maxLevelInOverlaps,
-        index: maxLevelInOverlaps - 1,
-      },
-    };
-
-    this.selections.push(newVariable);
   }
 
   private completeLeftSide(selection: TextSelection) {
@@ -223,7 +226,7 @@ export class SpanSelection {
     );
   }
 
-  private createId(span: Omit<Span, "overlap"> | TextSelection) {
+  private createId(span: Span | TextSelection) {
     return `${span.from}-${span.to}-${span.entity.id}-${span.node.id}`;
   }
 }

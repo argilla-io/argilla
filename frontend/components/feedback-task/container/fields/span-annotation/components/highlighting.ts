@@ -4,9 +4,10 @@ import {
   type Entity,
   SpanSelection,
   Configuration,
+  OverlappedSpan,
 } from "./span-selection";
 
-export type LoadedSpan = Omit<Span, "text" | "node" | "overlap">;
+export type LoadedSpan = Omit<Span, "text" | "node">;
 
 export type Position = {
   top: number;
@@ -59,7 +60,7 @@ export class Highlighting {
     private readonly EntityComponentConstructor: (
       span: Span,
       entityPosition: Position,
-      hoverSpan: (value: Boolean) => void,
+      hoverSpan: (value: boolean) => void,
       removeSpan: () => void,
       replaceEntity: (entity: Entity) => void
     ) => Element,
@@ -264,7 +265,7 @@ export class Highlighting {
     }
   }
 
-  private hoverSpan(hoveredSpan: Span, isHovered: Boolean) {
+  private hoverSpan(hoveredSpan: Span, isHovered: boolean) {
     this.applyHighlightStyle((span) =>
       hoveredSpan === span && isHovered
         ? `${this.styles.entityCssKey}-${span.entity.id}-hover`
@@ -291,14 +292,35 @@ export class Highlighting {
         entityPosition,
         (isHovered) => this.hoverSpan(span, isHovered),
         () => this.removeSpan(span),
-        (newEntity) => this.replaceEntity(span, newEntity)
+        (newEntity) => {
+          if (this.config.allowOverlap) {
+            this.addSpanBaseOn(span, newEntity);
+
+            return;
+          }
+
+          this.replaceEntity(span, newEntity);
+        }
       );
 
       this.entitySpanContainer.appendChild(entityElement);
     }
   }
 
-  private createPosition(span: Span) {
+  addSpanBaseOn(span: Span, newEntity: Entity) {
+    if (span.entity.id === newEntity.id) return;
+
+    const clonedSpan = {
+      ...span,
+      entity: newEntity,
+    };
+
+    this.spanSelection.select(clonedSpan);
+
+    this.applyStyles();
+  }
+
+  private createPosition(span: OverlappedSpan) {
     const rangePositionStart = this.createRange({
       ...span,
       to: span.from + 1,
