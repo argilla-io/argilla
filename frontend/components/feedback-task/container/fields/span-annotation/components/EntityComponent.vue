@@ -233,7 +233,8 @@ export default {
     transition: width 0.2s ease;
   }
   &__wrapper {
-    position: static;
+    position: absolute;
+    pointer-events: none;
   }
   &__container {
     position: absolute;
@@ -241,6 +242,7 @@ export default {
     margin-top: 20px;
     line-height: 1.2;
     @include font-size(11px);
+    pointer-events: all;
   }
   &__score {
     display: none;
