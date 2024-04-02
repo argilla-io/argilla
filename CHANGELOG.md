@@ -15,6 +15,7 @@ These are the section headers that we use:
 -->
 
 ## [Unreleased]()
+- Fixed requirements for version of wrapt library conflicting with Python 3.11 ([#4693](https://github.com/argilla-io/argilla/pull/4693)) 
 
 ## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
 
