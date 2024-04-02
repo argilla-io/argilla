@@ -30,7 +30,7 @@ export default {
     datasetSettings: "settings",
     userSettings: "my settings",
   },
-  status: {
+  recordStatus: {
     pending: "Pending",
     draft: "Draft",
     discarded: "Discarded",
@@ -46,8 +46,9 @@ export default {
       workspaces: "Workspaces",
     },
     apiKey: "API key",
-    apiKeyDescription: "API key tokens allow you to manage datasets using the Python SDK.",
-    copyKey : "Copy key"
+    apiKeyDescription:
+      "API key tokens allow you to manage datasets using the Python SDK.",
+    copyKey: "Copy key",
   },
   userAvatarTooltip: {
     settings: "My settings",

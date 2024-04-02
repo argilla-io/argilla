@@ -1,7 +1,7 @@
 <template>
   <div class="settings__container">
     <div class="settings__content">
-      <h2 class="--heading5 --medium">{{ $t('settings.datasetInfo') }}</h2>
+      <h2 class="--heading5 --medium">{{ $t("settings.datasetInfo") }}</h2>
       <div class="settings__area">
         <div class="settings__row">
           <div class="settings__item">
@@ -17,7 +17,7 @@
               class="secondary small"
               @click.prevent="$copyToClipboard(datasetSettingsUrl)"
             >
-              {{ $t('copyLink') }}
+              {{ $t("copyLink") }}
             </base-button>
           </base-action-tooltip>
         </div>

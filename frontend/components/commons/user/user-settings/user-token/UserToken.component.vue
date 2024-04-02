@@ -18,7 +18,7 @@
           class="secondary small"
           @click.prevent="$copyToClipboard(userToken)"
         >
-          {{ $t('userSettings.copyKey') }}
+          {{ $t("userSettings.copyKey") }}
         </BaseButton>
       </base-action-tooltip>
     </div>
@@ -35,8 +35,8 @@ export default {
     },
   },
   created() {
-    this.title = this.$t('userSettings.apiKey');
-    this.description = this.$t('userSettings.apiKeyDescription');
+    this.title = this.$t("userSettings.apiKey");
+    this.description = this.$t("userSettings.apiKeyDescription");
   },
 };
 </script>

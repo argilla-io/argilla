@@ -7,7 +7,7 @@
     minimize: "Minimieren",
     select: "Auswählen",
     search: "Suchen",
-    searchDatasets: "Durchsuche Datensätze",
+    searchDatasets: "Durchsuche Datensätze", 
     expand: "Erweitern",
     copied: "Kopiert",
     copyClipboard: "In Zwischenablage kopieren",
@@ -201,22 +201,22 @@
       progress: "Fortschritt",
     },
 
-    validations: {
-      http: {
-        401: {
-          message: "Anmeldedaten konnten nicht überprüft werden",
-        },
-        404: {
-          message: "Die angeforderte Ressource konnte nicht gefunden werden",
-        },
-        429: {
-          message:
-            "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
-        },
-        500: {
-          message:
-            "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
-        },
+  validations: {
+    http: {
+      401: {
+        message: "Anmeldedaten konnten nicht überprüft werden",
+      },
+      404: {
+        message: "Die angeforderte Ressource konnte nicht gefunden werden",
+      },
+      429: {
+        message:
+          "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
+      },
+      500: {
+        message:
+          "Bitte warten Sie einige Sekunden, bevor Sie es erneut versuchen",
       },
     },
-  };
+  },
+};

@@ -17,9 +17,9 @@
 
 <template>
   <div v-if="annotationsProgress">
-    <p class="metrics__title">{{ $t('metrics.progress') }}</p>
+    <p class="metrics__title">{{ $t("metrics.progress") }}</p>
     <div class="metrics__info">
-      <p class="metrics__info__name">{{ $t('metrics.total') }}</p>
+      <p class="metrics__info__name">{{ $t("metrics.total") }}</p>
       <span class="metrics__info__counter">{{ progress | percent }}</span>
     </div>
     <div class="metrics__numbers">

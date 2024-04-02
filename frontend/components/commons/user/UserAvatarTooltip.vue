@@ -19,7 +19,7 @@
       </div>
       <div class="">
         <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
-          {{ $t('userAvatarTooltip.settings') }}
+          {{ $t("userAvatarTooltip.settings") }}
         </NuxtLink>
         <a
           class="user__link"
@@ -27,7 +27,11 @@
           target="_blank"
           v-text="$t('userAvatarTooltip.docs')"
         />
-        <a class="user__link" @click.prevent="logout" v-text="$t('userAvatarTooltip.logout')" />
+        <a
+          class="user__link"
+          @click.prevent="logout"
+          v-text="$t('userAvatarTooltip.logout')"
+        />
       </div>
       <span class="copyright"
         >© {{ currentYear }} Argilla ({{ $config.clientVersion }})</span
