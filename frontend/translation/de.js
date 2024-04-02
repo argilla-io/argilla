@@ -7,7 +7,7 @@
     minimize: "Minimieren",
     select: "Auswählen",
     search: "Suchen",
-    searchDatasets: "Durchsuche Datensätze", 
+    searchDatasets: "Durchsuche Datensätze",
     expand: "Erweitern",
     copied: "Kopiert",
     copyClipboard: "In Zwischenablage kopieren",

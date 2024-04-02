@@ -25,7 +25,7 @@
           class="user__link"
           :href="$config.documentationSite"
           target="_blank"
-          v-text="$t('userAvatarTooltip.docs')" 
+          v-text="$t('userAvatarTooltip.docs')"
         />
         <a class="user__link" @click.prevent="logout" v-text="$t('userAvatarTooltip.logout')" />
       </div>

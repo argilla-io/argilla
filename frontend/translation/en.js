@@ -7,7 +7,7 @@ export default {
   minimize: "Minimize",
   select: "Select",
   search: "Search",
-  searchDatasets: "Search datasets", 
+  searchDatasets: "Search datasets",
   expand: "Expand",
   copied: "Copied",
   copyClipboard: "Copy to clipboard",
