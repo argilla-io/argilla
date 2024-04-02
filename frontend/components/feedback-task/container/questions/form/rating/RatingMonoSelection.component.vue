@@ -139,10 +139,16 @@ export default {
   &.label-active {
     color: white;
     background: palette(purple, 200);
+    box-shadow: none;
+    &:hover {
+      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
+      background: darken(palette(purple, 200), 4%);
+    }
   }
 
   &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 8%);
+    background: darken(palette(purple, 800), 5%);
+    transition: all 0.2s ease-in-out;
   }
 }
 input[type="checkbox"] {

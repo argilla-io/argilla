@@ -387,6 +387,7 @@ $label-dark-color: palette(purple, 200);
   outline: none;
   border: 2px solid transparent;
   border-radius: $border-radius-rounded;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
 
@@ -407,12 +408,18 @@ $label-dark-color: palette(purple, 200);
   }
 
   &:not(.label-active):hover {
-    background: darken($label-color, 8%);
+    background: darken($label-color, 2%);
+    transition: all 0.2s ease-in-out;
   }
 
   &.label-active {
     color: white;
     background: $label-dark-color;
+    box-shadow: none;
+    &:hover {
+      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
+      background: darken(palette(purple, 200), 4%);
+    }
   }
 }
 
