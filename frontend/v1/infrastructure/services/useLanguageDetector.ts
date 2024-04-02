@@ -1,4 +1,13 @@
-import { Context } from "@nuxt/types";
+import { NuxtI18nInstance } from "@nuxtjs/i18n";
+
+type Context = {
+  app: {
+    i18n: {
+      locales: NuxtI18nInstance["locales"];
+      setLocale: NuxtI18nInstance["setLocale"];
+    };
+  };
+};
 
 export const useLanguageDetector = (context: Context) => {
   const { i18n } = context.app;
