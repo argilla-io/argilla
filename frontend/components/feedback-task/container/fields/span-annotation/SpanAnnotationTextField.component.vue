@@ -121,7 +121,7 @@ export default {
       return !!this.selectedEntity;
     },
     allowOverlapping() {
-      return this.highlighting.config.allowOverlapping;
+      return this.highlighting.config.allowOverlap;
     },
   },
   watch: {
