@@ -121,8 +121,7 @@ export default {
       return !!this.selectedEntity;
     },
     allowOverlapping() {
-      // return this.spanQuestion.settings.allow_overlapping;
-      return true;
+      return this.highlighting.config.allowOverlapping;
     },
   },
   watch: {

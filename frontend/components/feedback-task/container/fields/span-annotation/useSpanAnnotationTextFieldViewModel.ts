@@ -16,6 +16,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
+  const initialConfiguration = {
+    allowOverlap: spanQuestion.settings.allow_overlapping,
+  };
 
   const selectEntity = (entity: Entity) => {
     answer.options.forEach((e) => {
@@ -108,7 +111,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(id, entityComponentFactory)
+    new Highlighting(id, entityComponentFactory, initialConfiguration)
   );
 
   watch(
