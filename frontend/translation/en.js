@@ -7,8 +7,13 @@ export default {
   minimize: "Minimize",
   select: "Select",
   search: "Search",
+  searchDatasets: "Search datasets", 
   expand: "Expand",
   copied: "Copied",
+  copyClipboard: "Copy to clipboard",
+  copyLink: "Copy link",
+  refresh: "Refresh",
+  refreshTooltip: "Refresh",
   title: "Title",
   description: "Description",
   labels: "Labels",
@@ -25,6 +30,13 @@ export default {
     datasetSettings: "settings",
     userSettings: "my settings",
   },
+  status: {
+    pending: "Pending",
+    draft: "Draft",
+    discarded: "Discarded",
+    submitted: "Submitted",
+    validated: "Validated",
+  },
   userSettings: {
     title: "My settings",
     fields: {
@@ -33,9 +45,18 @@ export default {
       lastName: "Surname",
       workspaces: "Workspaces",
     },
+    apiKey: "API key",
+    apiKeyDescription: "API key tokens allow you to manage datasets using the Python SDK.",
+    copyKey : "Copy key"
+  },
+  userAvatarTooltip: {
+    settings: "My settings",
+    docs: "View docs",
+    logout: "Log out",
   },
   settings: {
     title: "Dataset settings",
+    datasetInfo: "Dataset info",
     seeYourDataset: "See your dataset",
     editFields: "Edit fields",
     editQuestions: "Edit questions",
@@ -131,7 +152,9 @@ export default {
   login: {
     title: "Sign in",
     username: "Username",
+    usernameDescription: "Enter your username",
     password: "Password",
+    passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
@@ -162,7 +185,18 @@ export default {
   update: "Update",
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
-
+  datasetTable: {
+    name: "Name",
+    workspace: "Workspace",
+    task: "Task",
+    tags: "Tags",
+    createdAt: "Created at",
+    lastActivityAt: "Updated at",
+  },
+  metrics: {
+    total: "Total",
+    progress: "Progress",
+  },
   validations: {
     http: {
       401: {

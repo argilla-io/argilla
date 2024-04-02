@@ -1,7 +1,7 @@
 <template>
   <div class="settings__container">
     <div class="settings__content">
-      <h2 class="--heading5 --medium">Dataset info</h2>
+      <h2 class="--heading5 --medium">{{ $t('settings.datasetInfo') }}</h2>
       <div class="settings__area">
         <div class="settings__row">
           <div class="settings__item">
@@ -11,13 +11,13 @@
             />
             <BaseBadge :text="settings.dataset.task" />
           </div>
-          <base-action-tooltip tooltip="Copied">
+          <base-action-tooltip tooltip="$t('copied')">
             <base-button
               title="Copy to clipboard"
               class="secondary small"
               @click.prevent="$copyToClipboard(datasetSettingsUrl)"
             >
-              Copy link
+              {{ $t('copyLink') }}
             </base-button>
           </base-action-tooltip>
         </div>

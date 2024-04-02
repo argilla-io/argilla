@@ -33,7 +33,7 @@
               <input
                 v-model="login.username"
                 type="text"
-                placeholder="Enter your username"
+                :placeholder="$t('login.usernameDescription')"
               />
             </div>
             <div class="form__input" :class="{ active: login.password }">
@@ -41,7 +41,7 @@
               <input
                 v-model="login.password"
                 type="password"
-                placeholder="Enter your password"
+                :placeholder="$t('login.passwordDescription')"
               />
             </div>
             <p

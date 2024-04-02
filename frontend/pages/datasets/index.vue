@@ -39,9 +39,9 @@
         :sidebar-items="[
           {
             id: 'refresh',
-            tooltip: 'Refresh',
+            tooltip: $t('refreshTooltip'),
             icon: 'refresh',
-            group: 'Refresh',
+            group: $t('refresh'),
             action: 'refresh',
           },
         ]"
