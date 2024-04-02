@@ -12,8 +12,13 @@ export default {
   copied: "Kopiert",
   copyClipboard: "In Zwischenablage kopieren",
   copyLink: "Link kopieren",
-  refresh: "Aktualisieren",
-  refreshTooltip: "Refresh",
+  refresh: "Refresh",
+  typeYourText: "Type your text",
+  sidebar: {
+    progressTooltip: "Fortschritt",
+    refreshTooltip: "Aktualisieren",
+    shortcutsTooltip: "Tastenkürzel",
+  },
   title: "Titel",
   description: "Beschreibung",
   labels: "Labels",
@@ -69,6 +74,8 @@ export default {
     deleteConfirmationMessage:
       "Sie sind dabei diesen Datensatz: <strong>{datasetName}</strong> aus dem Arbeitsbereich <strong>{workspaceName}</strong> zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
     yesDelete: "Ja, löschen",
+    write: "Bearbeiten",
+    preview: "Vorschau",
   },
   button: {
     ignore_and_continue: "Ignorieren und fortfahren",
@@ -77,6 +84,7 @@ export default {
     sign_in_with_username: "Mit Benutzername anmelden",
     cancel: "Abbrechen",
     continue: "Fortfahren",
+    delete: "Löschen",
   },
   to_submit_complete_required:
     "Zum Absenden beantworten \nSie benötigte Fragen",
@@ -111,6 +119,9 @@ export default {
     },
   },
   questions_form: {
+    validate: "Validieren",
+    clear: "Clear",
+    reset: "Zurücksetzen",
     discard: "Verwerfen",
     submit: "Absenden",
     draft: "Entwurf speichern",

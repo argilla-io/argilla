@@ -13,7 +13,12 @@ export default {
   copyClipboard: "Copy to clipboard",
   copyLink: "Copy link",
   refresh: "Refresh",
-  refreshTooltip: "Refresh",
+  typeYourText: "Type your text",
+  sidebar: {
+    progressTooltip: "Progress",
+    refreshTooltip: "Refresh",
+    shortcutsTooltip: "Shortcuts",
+  },
   title: "Title",
   description: "Description",
   labels: "Labels",
@@ -69,6 +74,8 @@ export default {
     deleteConfirmationMessage:
       "You are about to delete: <strong>{datasetName}</strong> from workspace <strong>{workspaceName}</strong>. This action cannot be undone",
     yesDelete: "Yes, delete",
+    write: "Write",
+    preview: "Preview",
   },
   button: {
     ignore_and_continue: "Ignore and continue",
@@ -77,6 +84,7 @@ export default {
     sign_in_with_username: "Sign in with username",
     cancel: "Cancel",
     continue: "Continue",
+    delete: "Delete",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -109,6 +117,9 @@ export default {
     },
   },
   questions_form: {
+    validate: "Validate",
+    clear: "Clear",
+    reset: "Reset",
     discard: "Discard",
     submit: "Submit",
     draft: "Save as draft",
