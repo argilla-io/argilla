@@ -130,6 +130,9 @@ const config: NuxtConfig = {
       cookieKey: "i18n_redirected",
       redirectOn: "root",
     },
+    vueI18n: {
+      fallbackLocale: "en",
+    },
     lazy: true,
     langDir: "translation/",
     defaultLocale: "en",
