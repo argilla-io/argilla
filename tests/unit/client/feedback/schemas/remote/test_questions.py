@@ -17,6 +17,7 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
+
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -460,6 +461,7 @@ def test_span_questions_from_api():
             "type": "span",
             "field": "field",
             "visible_options": None,
+            "allow_overlapping": False,
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {
@@ -490,6 +492,7 @@ def test_span_questions_from_api_with_visible_labels():
             "type": "span",
             "field": "field",
             "visible_options": 3,
+            "allow_overlapping": False,
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {"text": "Span label b", "value": "b", "description": None},

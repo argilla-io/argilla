@@ -15,9 +15,10 @@
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
-import argilla.client.singleton
 import datasets
 import pytest
+
+import argilla.client.singleton
 from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -72,15 +73,17 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
-        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"])],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=True)],
     )
 
     rg_dataset = ds.push_to_argilla(name="new_dataset")
 
     assert rg_dataset.id
-    assert rg_dataset.questions[0].name == "spans"
-    assert rg_dataset.questions[0].field == "text"
-    assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
+    question = rg_dataset.questions[0]
+    assert question.name == "spans"
+    assert question.field == "text"
+    assert question.labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
+    assert question.allow_overlapping is True
 
 
 @pytest.mark.asyncio
