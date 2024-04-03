@@ -1,4 +1,4 @@
-import { Metrics } from "../entities/Metrics";
+import { Metrics } from "../entities/dataset/Metrics";
 
 export interface IMetricsStorage {
   save(metrics: Metrics);

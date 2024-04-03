@@ -1,4 +1,4 @@
-import { Dataset } from "@/v1/domain/entities/Dataset";
+import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { IDatasetsStorage } from "@/v1/domain/services/IDatasetsStorage";
 import { useStoreFor } from "@/v1/store/create";
 
