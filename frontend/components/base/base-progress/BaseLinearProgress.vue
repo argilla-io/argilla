@@ -23,7 +23,7 @@
             class="progress__tooltip__percent-info"
             v-text="`${range.name}: ${getPercentage(range.value)}%`"
           />
-          <slot name="tooltip"></slot>
+          {{ range.tooltip }}
         </div>
       </div>
     </div>

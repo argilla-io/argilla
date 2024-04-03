@@ -90,7 +90,7 @@
                       </base-action-tooltip>
                     </span>
                     <span v-else-if="column.type === 'progress'">
-                      <DatasetProgress :dataset-id="item.id" />
+                      <DatasetProgress :dataset="item" />
                     </span>
                     <base-date
                       format="date-relative-now"
