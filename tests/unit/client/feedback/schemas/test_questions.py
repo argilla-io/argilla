@@ -15,7 +15,6 @@
 from typing import Any, Dict
 
 import pytest
-
 from argilla.client.feedback.schemas.enums import QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -27,6 +26,7 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
     _LabelQuestion,
 )
+
 from tests.pydantic_v1 import ValidationError
 
 
@@ -465,7 +465,7 @@ def test_span_question() -> None:
         "field": "field",
         "visible_options": None,
         "allow_overlapping": True,
-        "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}]
+        "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
     }
 
 
