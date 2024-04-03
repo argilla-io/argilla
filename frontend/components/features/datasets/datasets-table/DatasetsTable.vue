@@ -3,7 +3,10 @@
     <datasets-empty v-if="!datasets.length" />
     <div class="dataset__table" v-else>
       <div class="interactions">
-        <base-search-bar @input="onSearch" placeholder="Search datasets" />
+        <base-search-bar
+          @input="onSearch"
+          :placeholder="$t('searchDatasets')"
+        />
       </div>
       <base-table-info
         ref="table"
@@ -44,41 +47,41 @@ export default {
       querySearch: undefined,
       tableColumns: [
         {
-          name: "Name",
+          name: this.$t("datasetTable.name"),
           field: "name",
           class: "table-info__title",
           type: "link",
         },
         {
-          name: "Workspace",
+          name: this.$t("datasetTable.workspace"),
           field: "workspace",
           class: "text",
           type: "text",
           filtrable: "true",
         },
         {
-          name: "Task",
+          name: this.$t("datasetTable.task"),
           field: "task",
           class: "task",
           type: "task",
           filtrable: "true",
         },
         {
-          name: "Tags",
+          name: this.$t("datasetTable.tags"),
           field: "tags",
           class: "text",
           type: "object",
           filtrable: "true",
         },
         {
-          name: "Created at",
+          name: this.$t("datasetTable.createdAt"),
           field: "createdAt",
           class: "date",
           type: "date",
           sortable: "true",
         },
         {
-          name: "Updated at",
+          name: this.$t("datasetTable.lastActivityAt"),
           field: "lastActivityAt",
           class: "date",
           type: "date",

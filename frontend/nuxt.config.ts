@@ -124,6 +124,10 @@ const config: NuxtConfig = {
         code: "en",
         file: "en.js",
       },
+      {
+        code: "de",
+        file: "de.js",
+      },
     ],
     detectBrowserLanguage: {
       useCookie: true,
