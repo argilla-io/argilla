@@ -25,6 +25,12 @@ export default {
     datasetSettings: "settings",
     userSettings: "my settings",
   },
+  datasets: {
+    left: "left",
+    submitted: "Submitted",
+    discarded: "Discarded",
+    pending: "Pending",
+  },
   userSettings: {
     title: "My settings",
     fields: {
