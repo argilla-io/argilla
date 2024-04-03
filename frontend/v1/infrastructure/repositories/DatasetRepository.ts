@@ -5,6 +5,7 @@ import {
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
+import { useDebounce } from "../services";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
@@ -123,6 +124,11 @@ export class DatasetRepository implements IDatasetRepository {
   }
 
   async getProgress(datasetId: string): Promise<Progress> {
+    const debounce = useDebounce(Math.random() * 1200);
+
+    await debounce.wait();
+    return new Progress(200, 52);
+
     try {
       const { data } = await this.axios.get<BackendProgress>(
         `/v1/datasets/${datasetId}/progress`,

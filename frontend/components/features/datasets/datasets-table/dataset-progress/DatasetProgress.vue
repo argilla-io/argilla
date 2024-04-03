@@ -1,36 +1,25 @@
 <template>
-  <div class="dataset-progress">
+  <p v-if="$fetchState.pending">Loading</p>
+  <div v-else-if="!!progress" class="dataset-progress">
     <BaseLinearProgress
       class="dataset-progress__bar"
       :progress-ranges="progressRanges"
-      :progress-max="totalRecords"
+      :progress-max="progress.total"
       :show-tooltip="true"
-    >
-      <template v-slot:tooltip>
-        {{ numberOfNonPendingRecords }}/{{ totalRecords }}
-      </template>
-    </BaseLinearProgress>
+    />
     <p class="dataset-progress__pending-info">
-      {{ numberOfPendingRecords }} {{ $t("left") }}
+      {{ progress.remaining }} {{ $t("left") }}
     </p>
   </div>
 </template>
 
 <script>
 import { useDatasetProgressViewModel } from "./useDatasetProgressViewModel";
+
 export default {
   props: {
-    datasetId: {
-      type: String,
-      required: true,
-    },
-  },
-  computed: {
-    numberOfPendingRecords() {
-      return this.progressRanges.find((range) => range.id === "pending").value;
-    },
-    numberOfNonPendingRecords() {
-      return this.totalRecords - this.numberOfPendingRecords;
+    dataset: {
+      type: Object,
     },
   },
   setup(props) {
