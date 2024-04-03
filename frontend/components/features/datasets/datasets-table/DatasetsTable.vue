@@ -64,11 +64,10 @@ export default {
           filtrable: "true",
         },
         {
-          name: "Tags",
-          field: "tags",
-          class: "text",
-          type: "object",
-          filtrable: "true",
+          name: "Global progress",
+          field: "progress",
+          class: "progress",
+          type: "progress",
         },
         {
           name: "Created at",
