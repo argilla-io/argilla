@@ -9,7 +9,7 @@ import {
   useRoutes,
   useTranslate,
 } from "@/v1/infrastructure/services";
-import { DatasetSetting } from "~/v1/domain/entities/DatasetSetting";
+import { DatasetSetting } from "~/v1/domain/entities/dataset/DatasetSetting";
 import { Notification } from "~/models/Notifications";
 
 interface Tab {

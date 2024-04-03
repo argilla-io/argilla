@@ -1,5 +1,5 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Metrics } from "~/v1/domain/entities/Metrics";
+import { Metrics } from "~/v1/domain/entities/dataset/Metrics";
 
 interface BackendMetrics {
   records: {

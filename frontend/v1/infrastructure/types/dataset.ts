@@ -13,3 +13,8 @@ export interface BackendDatasetFeedbackTaskResponse {
   last_activity_at: string;
   workspace_id: string;
 }
+
+export interface BackendProgress {
+  total: number;
+  submitted: number;
+}
