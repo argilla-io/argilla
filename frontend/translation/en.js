@@ -40,7 +40,6 @@ export default {
     submitted: "Submitted",
     conflicting: "Conflicting",
     discarded: "Discarded",
-    conflicting: "Conflicting",
     pending: "Pending",
   },
   recordStatus: {
