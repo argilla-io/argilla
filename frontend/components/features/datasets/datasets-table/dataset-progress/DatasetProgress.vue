@@ -1,16 +1,21 @@
 <template>
-  <p v-if="$fetchState.pending">Loading</p>
-  <div v-else-if="!!progress" class="dataset-progress">
-    <BaseLinearProgress
-      class="dataset-progress__bar"
-      :progress-ranges="progressRanges"
-      :progress-max="progress.total"
-      :show-tooltip="true"
-    />
-    <p class="dataset-progress__pending-info">
-      {{ progress.remaining }} {{ $t("left") }}
-    </p>
-  </div>
+  <BaseLinearProgressSkeleton
+    v-if="$fetchState.pending"
+    class="dataset-progress__bar"
+  />
+  <transition v-else-if="!!progress" name="fade" appear>
+    <div class="dataset-progress">
+      <BaseLinearProgress
+        class="dataset-progress__bar"
+        :progress-ranges="progressRanges"
+        :progress-max="progress.total"
+        :show-tooltip="true"
+      />
+      <p class="dataset-progress__pending-info">
+        {{ progress.remaining }} {{ $t("left") }}
+      </p>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -32,7 +37,7 @@ export default {
 .dataset-progress {
   display: flex;
   align-items: center;
-  gap: $base-space;
+  gap: $base-space * 2;
   :deep(.submitted) {
     .progress__tooltip__percent-info {
       color: $submitted-color;
@@ -45,9 +50,10 @@ export default {
   }
   &__bar {
     flex: 1;
-    max-width: 180px;
+    max-width: 160px;
   }
   &__pending-info {
+    margin: 0;
     font-weight: 600;
     color: $black-87;
     @include font-size(12px);

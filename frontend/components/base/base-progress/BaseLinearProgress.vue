@@ -1,5 +1,5 @@
 <template>
-  <transition appear :duration="3000" name="animate-progress">
+  <transition appear :duration="500" name="animate-progress">
     <div class="progress__wrapper">
       <div
         v-for="range in filteredProgressRanges"
