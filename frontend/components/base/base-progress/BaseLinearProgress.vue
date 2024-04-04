@@ -8,7 +8,6 @@
         :class="[
           'progress__range',
           showTooltip ? 'progress__range--with-tooltip' : null,
-          range.id,
         ]"
         :style="{
           width: `${getPercentage(range.value)}%`,

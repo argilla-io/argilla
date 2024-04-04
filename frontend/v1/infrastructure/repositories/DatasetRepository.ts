@@ -127,7 +127,7 @@ export class DatasetRepository implements IDatasetRepository {
     const debounce = useDebounce(Math.random() * 1200);
 
     await debounce.wait();
-    return new Progress(200, 52);
+    return new Progress(200, 100, 40, 80);
 
     try {
       const { data } = await this.axios.get<BackendProgress>(

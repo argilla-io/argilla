@@ -28,14 +28,28 @@ export const useDatasetProgressViewModel = ({
           name: t("datasets.submitted"),
           color: "#0508D9",
           value: progress.value.submitted,
-          tooltip: `${progress.value.submitted} / ${progress.value.total}`,
+          tooltip: `${progress.value.submitted}/${progress.value.total}`,
+        },
+        {
+          id: "conflicting",
+          name: t("datasets.conflicting"),
+          color: "#8893c0",
+          value: progress.value.conflicting,
+          tooltip: `${progress.value.conflicting}/${progress.value.total}`,
+        },
+        {
+          id: "discarded",
+          name: t("datasets.discarded"),
+          color: "#b7b7b7",
+          value: progress.value.discarded,
+          tooltip: `${progress.value.discarded}/${progress.value.total}`,
         },
         {
           id: "pending",
           name: t("datasets.pending"),
           color: "#f2f2f2",
           value: progress.value.remaining,
-          tooltip: `${progress.value.remaining} / ${progress.value.total}`,
+          tooltip: `${progress.value.remaining}/${progress.value.total}`,
         },
       ];
     } catch {}

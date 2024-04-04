@@ -38,16 +38,6 @@ export default {
   display: flex;
   align-items: center;
   gap: $base-space * 2;
-  :deep(.submitted) {
-    .progress__tooltip__percent-info {
-      color: $submitted-color;
-    }
-  }
-  :deep(.discarded) {
-    .progress__tooltip__percent-info {
-      color: darken($discarded-color, 5%);
-    }
-  }
   &__bar {
     flex: 1;
     max-width: 160px;

@@ -28,6 +28,7 @@ export default {
   datasets: {
     left: "left",
     submitted: "Submitted",
+    conflicting: "Conflicting",
     discarded: "Discarded",
     pending: "Pending",
   },
