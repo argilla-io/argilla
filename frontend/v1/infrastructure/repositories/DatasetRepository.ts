@@ -137,7 +137,12 @@ export class DatasetRepository implements IDatasetRepository {
         }
       );
 
-      return new Progress(data.total, data.submitted);
+      return new Progress(
+        data.total,
+        data.submitted,
+        data.conflicting,
+        data.discarded
+      );
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,
