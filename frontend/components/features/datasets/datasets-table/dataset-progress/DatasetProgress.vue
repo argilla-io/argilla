@@ -44,9 +44,9 @@ export default {
   }
   &__pending-info {
     margin: 0;
-    font-weight: 600;
-    color: $black-87;
+    color: $black-54;
     @include font-size(12px);
+    font-weight: 500;
   }
 }
 </style>

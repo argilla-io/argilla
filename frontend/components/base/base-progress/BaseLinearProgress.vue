@@ -60,8 +60,8 @@ export default {
 
 <styles lang="scss" scoped>
 $progressHeight: 12px;
-$progressBackgroundColor: #f2f2f2;
-$tooltipBackgroundColor: #f2f2f2;
+$progressBackgroundColor: palette(grey, 600);
+$tooltipBackgroundColor: palette(grey, 600);
 $tooltipTriangleSize: 5px;
 $borderRadius: 10px;
 
@@ -100,7 +100,7 @@ $borderRadius: 10px;
     transform: translateX(-50%);
     padding: 4px;
     background: $tooltipBackgroundColor;
-    color: $black-87;
+    color: $black-54;
     border-radius: $border-radius;
     transition: opacity 0.2s 0.2s;
     @include font-size(12px);
@@ -151,7 +151,7 @@ $borderRadius: 10px;
 .animate-progress-leave-to {
   .progress__range {
     max-width: 100%;
-    transition: all 3s ease-in-out;
+    transition: all 0.5s $cb-slow;
   }
 }
 </styles>
