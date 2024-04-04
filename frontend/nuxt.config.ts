@@ -63,6 +63,8 @@ const config: NuxtConfig = {
 
     { src: "~/plugins/di" },
 
+    { src: "~/plugins/language" },
+
     { src: "~/plugins/plugins/axios.ts" },
     { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
@@ -122,7 +124,19 @@ const config: NuxtConfig = {
         code: "en",
         file: "en.js",
       },
+      {
+        code: "de",
+        file: "de.js",
+      },
     ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root",
+    },
+    vueI18n: {
+      fallbackLocale: "en",
+    },
     lazy: true,
     langDir: "translation/",
     defaultLocale: "en",
