@@ -12,7 +12,7 @@
         :show-tooltip="true"
       />
       <p class="dataset-progress__pending-info">
-        {{ progress.remaining }} {{ $t("left") }}
+        {{ progress.remaining }} {{ $t("datasets.left") }}
       </p>
     </div>
   </transition>
