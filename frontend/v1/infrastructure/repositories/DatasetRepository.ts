@@ -134,8 +134,9 @@ export class DatasetRepository implements IDatasetRepository {
       return new Progress(
         data.total,
         data.submitted,
+        data.discarded,
         data.conflicting,
-        data.discarded
+        data.pending
       );
     } catch (err) {
       throw {
