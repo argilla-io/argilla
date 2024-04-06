@@ -15,9 +15,10 @@
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
-import argilla.client.singleton
 import datasets
 import pytest
+
+import argilla.client.singleton
 from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -297,6 +298,71 @@ def test_add_records_with_wrong_spans_suggestions(
                 FeedbackRecord(
                     fields={"text": "this is a text"},
                     suggestions=[question.suggestion(value=spans)],
+                )
+            ]
+        )
+
+
+def test_add_records_with_overlapped_spans(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    dataset_cfg = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=True)],
+    )
+
+    dataset = dataset_cfg.push_to_argilla(name="test-dataset")
+    question = dataset.question_by_name("spans")
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text": "this is a text"},
+                suggestions=[
+                    question.suggestion(
+                        value=[
+                            SpanValueSchema(start=0, end=4, label="label1"),
+                            SpanValueSchema(start=1, end=2, label="label2"),
+                        ]
+                    )
+                ],
+            )
+        ]
+    )
+
+    assert len(dataset.records) == 1
+
+    record = dataset.records[0]
+    assert record.suggestions[0].value == [
+        SpanValueSchema(start=0, end=4, label="label1"),
+        SpanValueSchema(start=1, end=2, label="label2"),
+    ]
+
+
+def test_add_records_with_overlapped_spans_and_disabling_overlapping_span(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    dataset_cfg = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=False)],
+    )
+
+    dataset = dataset_cfg.push_to_argilla(name="test-dataset")
+    question = dataset.question_by_name("spans")
+
+    with pytest.raises(ValidationApiError, match="overlapping values found between spans at index idx=0 and idx=1"):
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "this is a text"},
+                    suggestions=[
+                        question.suggestion(
+                            value=[
+                                SpanValueSchema(start=0, end=4, label="label1"),
+                                SpanValueSchema(start=1, end=2, label="label2"),
+                            ]
+                        )
+                    ],
                 )
             ]
         )
