@@ -2,27 +2,24 @@
   <transition appear :duration="500" name="animate-progress">
     <div class="progress__wrapper">
       <div
-        v-for="range in filteredProgressRanges"
-        :key="range.id"
+        v-for="{ value, name, color, tooltip } in filteredProgressRanges"
+        :key="name"
         role="progressbar"
         :class="[
           'progress__range',
           showTooltip ? 'progress__range--with-tooltip' : null,
         ]"
         :style="{
-          width: `${getPercentage(range.value)}%`,
+          width: `${getPercentage(value)}%`,
         }"
       >
-        <div
-          class="progress__bar"
-          :style="{ backgroundColor: range.color }"
-        ></div>
+        <div class="progress__bar" :style="{ backgroundColor: color }"></div>
         <div v-if="showTooltip" class="progress__tooltip">
           <span
             class="progress__tooltip__percent-info"
-            v-text="`${range.name}: ${getPercentage(range.value)}%`"
+            v-text="`${name}: ${getPercentage(value)}%`"
           />
-          {{ range.tooltip }}
+          {{ tooltip }}
         </div>
       </div>
     </div>
@@ -130,7 +127,7 @@ $borderRadius: 10px;
         }
       }
     }
-    &:last-of-type {
+    &:last-of-type:not(:first-of-type) {
       #{$this}__bar {
         margin: 0;
         border-top-left-radius: 0;

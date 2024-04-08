@@ -44,6 +44,7 @@ export default {
   }
   &__pending-info {
     margin: 0;
+    min-width: $base-space * 6;
     color: $black-54;
     @include font-size(12px);
     font-weight: 500;
