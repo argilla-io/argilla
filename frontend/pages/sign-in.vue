@@ -29,19 +29,19 @@
           <div>
             <p class="form__title" v-text="$t('login.title')" />
             <div class="form__input" :class="{ active: login.username }">
-              <label class="form__label">Username</label>
+              <label class="form__label" v-text="$t('login.username')"></label>
               <input
                 v-model="login.username"
                 type="text"
-                placeholder="Enter your username"
+                :placeholder="$t('login.usernameDescription')"
               />
             </div>
             <div class="form__input" :class="{ active: login.password }">
-              <label class="form__label">Password</label>
+              <label class="form__label" v-text="$t('login.password')"></label>
               <input
                 v-model="login.password"
                 type="password"
-                placeholder="Enter your password"
+                :placeholder="$t('login.passwordDescription')"
               />
             </div>
             <p

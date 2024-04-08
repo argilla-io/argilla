@@ -124,11 +124,18 @@ const config: NuxtConfig = {
         code: "en",
         file: "en.js",
       },
+      {
+        code: "de",
+        file: "de.js",
+      },
     ],
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "i18n_redirected",
       redirectOn: "root",
+    },
+    vueI18n: {
+      fallbackLocale: "en",
     },
     lazy: true,
     langDir: "translation/",
