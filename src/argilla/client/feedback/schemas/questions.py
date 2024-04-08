@@ -358,6 +358,7 @@ class SpanQuestion(QuestionSchema):
     field: str = Field(..., description="The field in the input that the user will be asked to annotate.")
     labels: Union[Dict[str, str], conlist(Union[str, SpanLabelOption], min_items=1, unique_items=True)]
     visible_labels: Union[conint(ge=3), None] = _DEFAULT_MAX_VISIBLE_LABELS
+    allow_overlapping: bool = Field(False, description="Configure span to support overlap")
 
     @validator("labels", pre=True)
     def parse_labels_dict(cls, labels) -> List[SpanLabelOption]:
@@ -408,6 +409,7 @@ class SpanQuestion(QuestionSchema):
             "type": self.type,
             "field": self.field,
             "visible_options": self.visible_labels,
+            "allow_overlapping": self.allow_overlapping,
             "options": [label.dict() for label in self.labels],
         }
 

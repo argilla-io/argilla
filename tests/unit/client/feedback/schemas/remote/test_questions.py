@@ -460,6 +460,7 @@ def test_span_questions_from_api():
             "type": "span",
             "field": "field",
             "visible_options": None,
+            "allow_overlapping": False,
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {
@@ -490,6 +491,7 @@ def test_span_questions_from_api_with_visible_labels():
             "type": "span",
             "field": "field",
             "visible_options": 3,
+            "allow_overlapping": False,
             "options": [
                 {"text": "Span label a", "value": "a", "description": None},
                 {"text": "Span label b", "value": "b", "description": None},
