@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Improve performance for more than 250 labels ([#4702](https://github.com/argilla-io/argilla/pull/4702))
+
 ## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
 
 ### Added
