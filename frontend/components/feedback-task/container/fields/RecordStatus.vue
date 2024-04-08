@@ -20,34 +20,34 @@ export default {
       switch (this.recordStatus) {
         case "edited":
           return {
-            name: "Pending",
+            name: this.$t("recordStatus.pending"),
             icon: "time",
             class: "--edited",
           };
 
         case "pending":
           return {
-            name: "Pending",
+            name: this.$t("recordStatus.pending"),
             icon: null,
             class: "--pending",
           };
         case "draft":
           return {
-            name: "Draft",
+            name: this.$t("recordStatus.draft"),
             icon: null,
             class: "--draft",
           };
 
         case "discarded":
           return {
-            name: "Discarded",
+            name: this.$t("recordStatus.discarded"),
             icon: "discard",
             class: "--discarded",
           };
 
         case "submitted":
           return {
-            name: "Submitted",
+            name: this.$t("recordStatus.submitted"),
             icon: "validate",
             class: "--submitted",
           };

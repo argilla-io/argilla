@@ -16,9 +16,19 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added German language translation ([#4688](https://github.com/argilla-io/argilla/pull/4688))
+
 ### Changed
 
 - New UI design for suggestions ([#4682](https://github.com/argilla-io/argilla/pull/4682))
+
+## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
+
+### Added
+
+- Added support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
 
 ## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
 
@@ -29,7 +39,6 @@ These are the section headers that we use:
 - Added support for span values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
 - Added `span` questions for `FeedbackDataset`. ([#4622](https://github.com/argilla-io/argilla/pull/4622))
 - Added `ARGILLA_CACHE_DIR` environment variable to configure the client cache directory. ([#4509](https://github.com/argilla-io/argilla/pull/4509))
-  > > > > > > > main
 
 ### Fixed
 
