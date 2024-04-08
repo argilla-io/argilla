@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added overall progress bar on `Datasets` table ([#4696](https://github.com/argilla-io/argilla/pull/4696))
+
 ## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
 
 ### Added
