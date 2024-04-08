@@ -134,6 +134,11 @@ Learn how to monitor bias and ethics in LLMs detecting them with Giskard and fin
 
 Learn how to monitor data and model drift in a real-world scenario using different tools.
 ```
+```{grid-item-card} 💭 Aspect-Based Sentiment Analysis with Setfit ABSA and Argilla
+:link: feedback/training-setfit-absa.html
+
+Learn how to train an ABSA model and evaluate with Argilla.
+```
 ````
 
 **Other datasets**
@@ -202,6 +207,7 @@ feedback/training-qa-transformers
 feedback/labelling-spacy-llm
 feedback/making-most-of-markdown
 feedback/monitoring-bias-ethics-dpo
+feedback/training-setfit-absa
 
 other_datasets/few_shot_learning_with_setfit
 other_datasets/few_shot_text_classification_with_active_learning
