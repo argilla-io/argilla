@@ -78,9 +78,34 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
     rg_dataset = ds.push_to_argilla(name="new_dataset")
 
     assert rg_dataset.id
-    assert rg_dataset.questions[0].name == "spans"
-    assert rg_dataset.questions[0].field == "text"
-    assert rg_dataset.questions[0].labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
+    question = rg_dataset.questions[0]
+    assert question.name == "spans"
+    assert question.field == "text"
+    assert question.labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
+    assert question.allow_overlapping is False
+
+
+@pytest.mark.parametrize("allow_overlapping", [True, False])
+def test_create_dataset_with_span_questions_allow_overlapping(
+    argilla_user: "ServerUser", allow_overlapping: bool
+) -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    ds = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[
+            SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=allow_overlapping)
+        ],
+    )
+
+    rg_dataset = ds.push_to_argilla(name="new_dataset")
+
+    assert rg_dataset.id
+    question = rg_dataset.questions[0]
+    assert question.name == "spans"
+    assert question.field == "text"
+    assert question.labels == [SpanLabelOption(value="label1"), SpanLabelOption(value="label2")]
+    assert question.allow_overlapping is allow_overlapping
 
 
 @pytest.mark.asyncio
@@ -272,6 +297,71 @@ def test_add_records_with_wrong_spans_suggestions(
                 FeedbackRecord(
                     fields={"text": "this is a text"},
                     suggestions=[question.suggestion(value=spans)],
+                )
+            ]
+        )
+
+
+def test_add_records_with_overlapped_spans(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    dataset_cfg = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=True)],
+    )
+
+    dataset = dataset_cfg.push_to_argilla(name="test-dataset")
+    question = dataset.question_by_name("spans")
+
+    dataset.add_records(
+        [
+            FeedbackRecord(
+                fields={"text": "this is a text"},
+                suggestions=[
+                    question.suggestion(
+                        value=[
+                            SpanValueSchema(start=0, end=4, label="label1"),
+                            SpanValueSchema(start=1, end=2, label="label2"),
+                        ]
+                    )
+                ],
+            )
+        ]
+    )
+
+    assert len(dataset.records) == 1
+
+    record = dataset.records[0]
+    assert record.suggestions[0].value == [
+        SpanValueSchema(start=0, end=4, label="label1"),
+        SpanValueSchema(start=1, end=2, label="label2"),
+    ]
+
+
+def test_add_records_with_overlapped_spans_and_disabling_overlapping_span(argilla_user: "ServerUser") -> None:
+    argilla.client.singleton.init(api_key=argilla_user.api_key)
+
+    dataset_cfg = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[SpanQuestion(name="spans", field="text", labels=["label1", "label2"], allow_overlapping=False)],
+    )
+
+    dataset = dataset_cfg.push_to_argilla(name="test-dataset")
+    question = dataset.question_by_name("spans")
+
+    with pytest.raises(ValidationApiError, match="overlapping values found between spans at index idx=0 and idx=1"):
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "this is a text"},
+                    suggestions=[
+                        question.suggestion(
+                            value=[
+                                SpanValueSchema(start=0, end=4, label="label1"),
+                                SpanValueSchema(start=1, end=2, label="label2"),
+                            ]
+                        )
+                    ],
                 )
             ]
         )

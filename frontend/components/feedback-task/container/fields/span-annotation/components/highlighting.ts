@@ -47,6 +47,8 @@ type Styles = {
   lineHeight: number;
 };
 
+type InitialConfiguration = Partial<Omit<Configuration, "lineHeight">>;
+
 export class Highlighting {
   private readonly spanSelection = SpanSelection.getInstance();
   private node: HTMLElement | undefined;
@@ -65,6 +67,7 @@ export class Highlighting {
       replaceEntity: (entity: Entity) => void,
       cloneSpanWith: (entity: Entity) => void
     ) => Element,
+    config?: InitialConfiguration,
     styles?: Styles
   ) {
     this.styles = {
@@ -76,9 +79,10 @@ export class Highlighting {
     };
 
     this.config = {
-      allowOverlap: true,
+      allowOverlap: false,
       allowCharacter: false,
       lineHeight: this.styles.lineHeight,
+      ...config,
     };
   }
 

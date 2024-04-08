@@ -4,6 +4,7 @@ import RatingMonoSelectionComponent from "./RatingMonoSelection.component";
 let wrapper = null;
 const $t = () => {};
 const options = {
+  stubs: ["BaseTooltip"],
   mocks: { $t },
   propsData: {
     options: [
