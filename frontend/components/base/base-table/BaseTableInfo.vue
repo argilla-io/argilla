@@ -461,8 +461,9 @@ export default {
     align-items: center;
     background: palette(white);
     list-style: none;
-    padding: 2em 5em 2em 2em;
+    padding-inline: $base-space * 3 $base-space * 8;
     width: 100%;
+    min-height: $base-space * 10;
     text-decoration: none;
     outline: none;
     border: 1px solid palette(grey, 700);
