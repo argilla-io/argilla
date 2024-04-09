@@ -65,7 +65,7 @@ class FeedbackSuggestionModel(BaseModel):
     id: UUID
     question_id: str
     type: Optional[Literal["human", "model"]] = None
-    score: Optional[float] = None
+    score: Optional[Union[float, List[float]]] = None
     value: Any
     agent: Optional[str] = None
 
