@@ -137,6 +137,7 @@ $borderRadius: 10px;
     @include font-size(12px);
     &__percent-info {
       font-weight: 600;
+      text-transform: capitalize;
     }
     &__triangle {
       opacity: 1;
