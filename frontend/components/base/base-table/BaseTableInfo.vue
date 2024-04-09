@@ -479,7 +479,7 @@ export default {
         flex-grow: 1.5;
       }
       &.progress {
-        flex-grow: 1.5;
+        min-width: 160px;
       }
     }
     .svg-icon {

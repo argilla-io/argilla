@@ -5,15 +5,15 @@
   />
   <transition v-else-if="!!progress" name="fade" appear>
     <div class="dataset-progress">
+      <p class="dataset-progress__pending-info">
+        {{ progress.pending }} {{ $t("datasets.left") }}
+      </p>
       <BaseLinearProgress
         class="dataset-progress__bar"
         :progress-ranges="progressRanges"
         :progress-max="progress.total"
         :show-tooltip="true"
       />
-      <p class="dataset-progress__pending-info">
-        {{ progress.pending }} {{ $t("datasets.left") }}
-      </p>
     </div>
   </transition>
 </template>
@@ -36,18 +36,18 @@ export default {
 <style lang="scss" scoped>
 .dataset-progress {
   display: flex;
-  align-items: center;
-  gap: $base-space * 2;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc($base-space / 2);
+  max-width: 160px;
   &__bar {
-    flex: 1;
+    width: 100%;
     max-width: 160px;
   }
   &__pending-info {
-    margin: 0;
-    min-width: $base-space * 6;
-    color: $black-54;
+    color: $black-37;
     @include font-size(12px);
-    font-weight: 500;
+    margin: 0 0 0 auto;
   }
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="progress__wrapper">
       <div class="progress__container">
         <div
-          v-for="range in filteredProgressRanges"
+          v-for="(range, index) in filteredProgressRanges"
           :key="range.name"
           role="progressbar"
           :class="[
@@ -12,6 +12,7 @@
           ]"
           :style="{
             width: `${getPercentage(range.value)}%`,
+            zIndex: filteredProgressRanges.length - index,
           }"
           @mouseenter="hoveredRange = range"
           @mouseleave="hoveredRange = null"
@@ -124,11 +125,11 @@ $borderRadius: 10px;
     justify-content: space-between;
     gap: $base-space;
     white-space: nowrap;
-    min-width: 100%;
+    min-width: 180px;
     bottom: calc(100% + #{$tooltipTriangleSize} + 2px);
     left: 50%;
     transform: translateX(-50%);
-    padding: 4px;
+    padding: calc($base-space / 2);
     background: $tooltipBackgroundColor;
     color: $black-54;
     border-radius: $border-radius;
