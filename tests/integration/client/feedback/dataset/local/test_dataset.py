@@ -28,7 +28,7 @@ from argilla.client.feedback.schemas.metadata import (
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion, MultiLabelQuestion
+from argilla.client.feedback.schemas.questions import MultiLabelQuestion, SpanLabelOption, SpanQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
