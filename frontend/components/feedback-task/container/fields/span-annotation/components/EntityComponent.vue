@@ -41,10 +41,18 @@
             width="10"
             height="10"
         /></BaseButton>
-        <span class="span-entity__text" v-text="selectedOption.text" />
+        <span
+          class="span-entity__text"
+          :style="{ maxWidth: `${entityPosition.width}px` }"
+          v-text="selectedOption.text"
+        />
         <svgicon
           v-if="!!suggestion"
-          class="span-entity__suggestion"
+          :class="
+            suggestionScore
+              ? 'span-entity__suggestion--score'
+              : 'span-entity__suggestion'
+          "
           name="suggestion"
           width="8"
           height="8"
@@ -245,13 +253,14 @@ export default {
     pointer-events: all;
   }
   &__score {
-    display: none;
+    display: inline-flex;
     margin-left: 2px;
   }
   &__text {
     gap: 4px;
     padding-inline: calc($base-space / 2);
     @include truncate(auto);
+    text-overflow: clip;
   }
   &__line {
     position: absolute;
@@ -261,6 +270,9 @@ export default {
   }
   &__suggestion {
     flex-shrink: 0;
+    &--score {
+      display: none;
+    }
   }
   &:hover {
     position: relative;
@@ -273,9 +285,15 @@ export default {
     }
     #{$this}__text {
       min-width: $base-space * 3;
+      max-width: none !important;
     }
     #{$this}__score {
       display: inline-flex;
+    }
+    #{$this}__suggestion {
+      &--score {
+        display: inline-flex;
+      }
     }
     &:before {
       background: v-bind("selectedOption.color");
