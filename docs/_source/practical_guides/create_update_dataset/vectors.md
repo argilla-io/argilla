@@ -150,10 +150,10 @@ tde = SentenceTransformersExtractor(
 )
 
 dataset = tde.update_dataset(
-    dataset=dataset
-    fields=None # None means using all fields
-    update_records=True # Also, update the records in the dataset
-    overwrite=False # Whether to overwrite existing vectors
+    dataset=dataset,
+    fields=None, # None means using all fields
+    update_records=True, # Also, update the records in the dataset
+    overwrite=False, # Whether to overwrite existing vectors
 )
 ```
 :::
