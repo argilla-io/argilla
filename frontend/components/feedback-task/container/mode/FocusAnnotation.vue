@@ -134,7 +134,6 @@ export default {
 }
 .swipeUp {
   animation: swipeUp 0.5s ease-in-out forwards;
-  background: blue;
 }
 
 @keyframes swipeUp {
