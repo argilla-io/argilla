@@ -6,7 +6,7 @@
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
   >
-    <div class="questions-form__content">
+    <div class="questions-form__content" v-show="false">
       <div class="questions-form__header">
         <p class="questions-form__guidelines-link">
           <NuxtLink
@@ -31,6 +31,31 @@
     <div class="footer-form">
       <div class="footer-form__content">
         <BaseButton
+          type="submit"
+          class="button--submit"
+          :class="[
+            isSubmitting ? '--button--submitting' : null,
+            isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
+          ]"
+          :loading-progress="progress"
+          :loading="isSubmitting"
+          :disabled="
+            !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
+          "
+          :data-title="
+            !isSaving
+              ? !questionAreCompletedCorrectly && !isSubmitDisabled
+                ? $t('to_submit_complete_required')
+                : submitTooltip
+              : null
+          "
+          @on-click="onSubmit"
+        >
+          <span>Bad</span>
+          <span v-if="isRunningTransition" class="dot swipeDotLeft" />
+          <span v-if="isRunningTransition" class="handIcon swipeLeft" />
+        </BaseButton>
+        <BaseButton
           v-if="showDiscardButton || isDiscarding"
           type="button"
           class="button--discard"
@@ -41,30 +66,9 @@
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onDiscard"
         >
-          <span
-            v-if="!isDiscarding"
-            class="button__shortcuts"
-            v-text="'⌫'"
-          /><span v-text="$t('questions_form.discard')" />
-        </BaseButton>
-        <BaseButton
-          type="button"
-          class="button--draft"
-          :class="isDraftSaving ? '--button--saving-draft' : null"
-          :loading="isDraftSaving"
-          :loading-progress="progress"
-          :disabled="isDraftSaveDisabled || isSaving"
-          :data-title="!isSaving ? draftSavingTooltip : null"
-          @on-click="onSaveDraft"
-        >
-          <span v-if="!isDraftSaving"
-            ><span
-              class="button__shortcuts"
-              v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
-              class="button__shortcuts"
-              v-text="'S'"
-          /></span>
-          <span v-text="$t('questions_form.draft')" />
+          <span>Discard</span>
+          <span v-if="isRunningTransition" class="dot swipeDotUp" />
+          <span v-if="isRunningTransition" class="handIcon swipeUp" />
         </BaseButton>
         <BaseButton
           type="submit"
@@ -87,8 +91,9 @@
           "
           @on-click="onSubmit"
         >
-          <span v-if="!isSubmitting" class="button__shortcuts" v-text="'↵'" />
-          <span v-text="$t('questions_form.submit')" />
+          <span>Good</span>
+          <span v-if="isRunningTransition" class="dot swipeDotRight" />
+          <span v-if="isRunningTransition" class="handIcon swipeRight" />
         </BaseButton>
       </div>
     </div>
@@ -168,6 +173,7 @@ export default {
   },
   data() {
     return {
+      isRunningTransition: true,
       autofocusPosition: 0,
       interactionCount: 0,
       isSubmittedTouched: false,
@@ -211,6 +217,10 @@ export default {
   },
   mounted() {
     document.addEventListener("keydown", this.handleGlobalKeys);
+
+    setTimeout(() => {
+      this.isRunningTransition = false;
+    }, 3500);
   },
   destroyed() {
     document.removeEventListener("keydown", this.handleGlobalKeys);
@@ -316,7 +326,6 @@ export default {
 .questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: clamp(33%, 520px, 40%);
   gap: $base-space;
   max-height: 100%;
   min-width: 0;
@@ -403,6 +412,7 @@ export default {
 }
 
 .button {
+  @include font-size(16px);
   &__shortcuts {
     display: inline-flex;
     align-items: center;
@@ -417,7 +427,6 @@ export default {
     box-sizing: content-box;
     color: $black-87;
     background: palette(white);
-    @include font-size(11px);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Open Sans", "Helvetica Neue", sans-serif;
     padding: 0 4px;
@@ -500,6 +509,126 @@ export default {
     &--discard {
       flex-direction: column;
     }
+  }
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  background: rgba(149, 147, 241, 0.5);
+  border-radius: 40px;
+  top: 28px;
+  left: 78px;
+  visibility: hidden;
+}
+
+.handIcon {
+  position: relative;
+  background-image: url("https://i.postimg.cc/8556gm60/hand.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 50px;
+  height: 50px;
+  transform-origin: 52% 62%;
+}
+
+.swipeDotLeft {
+  animation: swipeDotLeft 2s 0.5s infinite;
+}
+.swipeLeft {
+  animation: swipeHandLeft 2s infinite;
+}
+
+.swipeDotRight {
+  animation: swipeDotRight 2s 0.5s infinite;
+}
+.swipeRight {
+  animation: swipeHandRight 2s infinite;
+}
+
+.swipeDotUp {
+  animation: swipeDotUp 2s 0.5s infinite;
+}
+.swipeUp {
+  animation: swipeHandUp 2s infinite;
+}
+
+@keyframes swipeHandLeft {
+  25% {
+    transform: translate(20px) rotate(30deg);
+  }
+  50% {
+    transform: translate(-20px) rotate(-15deg);
+  }
+  100% {
+    transform: translate(0px) rotate(0);
+  }
+}
+
+@keyframes swipeDotLeft {
+  12% {
+    visibility: visible;
+    width: 40px;
+  }
+  25% {
+    visibility: visible;
+    transform: translate(-65px);
+    width: 20px;
+  }
+  26% {
+    visibility: hidden;
+  }
+}
+
+@keyframes swipeHandRight {
+  25% {
+    transform: translate(-20px) rotate(-15deg);
+  }
+  50% {
+    transform: translate(20px) rotate(30deg);
+  }
+  100% {
+    transform: translate(0px) rotate(0);
+  }
+}
+
+@keyframes swipeDotRight {
+  0% {
+    transform: translate(-55px);
+    width: 20px;
+  }
+  25% {
+    width: 50px;
+    visibility: visible;
+  }
+  26% {
+    visibility: hidden;
+  }
+}
+
+@keyframes swipeHandUp {
+  0% {
+    transform: translate(-20px) rotate(90deg) translateX(10px);
+  }
+  100% {
+    transform: translate(-20px) rotate(60deg) translateX(-15px);
+  }
+}
+
+@keyframes swipeDotUp {
+  0% {
+    transform: translate(-20px) translateY(40px);
+    height: 20px;
+  }
+  25% {
+    transform: translate(-20px) translateY(-5px);
+    height: 45px;
+    visibility: visible;
+  }
+  26% {
+    transform: translate(-20px) translateY(-5px);
+    visibility: hidden;
   }
 }
 </style>

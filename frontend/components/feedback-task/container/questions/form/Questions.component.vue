@@ -3,7 +3,7 @@
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
-        v-for="(question, index) in questions"
+        v-for="(question, index) in questions.slice(0, 1)"
         :key="question.id"
         @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)
@@ -12,56 +12,7 @@
           updateQuestionAutofocus(autofocusPosition + 1)
         "
       >
-        <TextAreaComponent
-          v-if="question.isTextType"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
-
-        <SingleLabelComponent
-          v-if="question.isSingleLabelType"
-          ref="singleLabel"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="focusNext(index)"
-        />
-
-        <MultiLabelComponent
-          ref="multiLabel"
-          v-if="question.isMultiLabelType"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
-
-        <RatingComponent
-          v-if="question.isRatingType"
-          ref="rating"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-          @on-user-answer="focusNext(index)"
-        />
-
-        <RankingComponent
-          v-if="question.isRankingType"
-          ref="ranking"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
-
-        <SpanComponent
-          v-if="question.isSpanType"
-          ref="span"
-          :question="question"
-          :isFocused="checkIfQuestionIsFocused(index)"
-          :is-bulk-mode="isBulkMode"
-          :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
-          @on-focus="updateQuestionAutofocus(index)"
-        />
+        <SwipeQuestionComponent :question="question" />
       </div>
     </div>
   </div>

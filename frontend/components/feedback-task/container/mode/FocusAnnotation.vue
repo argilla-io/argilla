@@ -99,6 +99,7 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   position: relative;
+  flex-direction: column;
   display: flex;
   flex-wrap: wrap;
   height: 100%;
@@ -124,7 +125,7 @@ export default {
     height: 100%;
     min-width: 0;
     @include media("<desktop") {
-      flex: 0;
+      flex: 1;
       height: auto;
     }
     &__header {

@@ -50,6 +50,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .record {
+  height: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
