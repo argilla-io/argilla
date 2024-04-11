@@ -16,16 +16,17 @@ export default {
   },
   methods: {
     swipeToLeft() {
-      this.question.answer.value = "left";
-      console.log("swipeLeft");
+      this.question.answer.values[0].isSelected = true;
+
+      this.$root.$emit("swipeLeft");
     },
     swipeToRight() {
-      this.question.answer.value = "right";
-      console.log("swipeRight");
+      this.question.answer.values[1].isSelected = true;
+
+      this.$root.$emit("swipeRight");
     },
     swipeToUp() {
-      console.log("swipeUP");
-      //DISCARD!
+      this.$root.$emit("swipeUp");
     },
   },
   mounted() {

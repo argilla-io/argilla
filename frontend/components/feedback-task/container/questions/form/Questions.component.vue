@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div v-show="false">
     <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
     <div class="questions">
       <div
-        v-for="(question, index) in questions.slice(0, 1)"
+        v-for="question in questions.slice(0, 1)"
         :key="question.id"
         @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)

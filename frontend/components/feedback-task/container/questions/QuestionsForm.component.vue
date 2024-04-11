@@ -38,7 +38,6 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading-progress="progress"
-          :loading="isSubmitting"
           :disabled="
             !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
           "
@@ -78,7 +77,6 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading-progress="progress"
-          :loading="isSubmitting"
           :disabled="
             !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
           "
@@ -173,7 +171,7 @@ export default {
   },
   data() {
     return {
-      isRunningTransition: true,
+      isRunningTransition: window.isRunningTransition ?? true,
       autofocusPosition: 0,
       interactionCount: 0,
       isSubmittedTouched: false,
@@ -206,6 +204,9 @@ export default {
     },
   },
   watch: {
+    isRunningTransition() {
+      window.isRunningTransition = this.isRunningTransition;
+    },
     record: {
       deep: true,
       immediate: true,
@@ -221,6 +222,10 @@ export default {
     setTimeout(() => {
       this.isRunningTransition = false;
     }, 3500);
+
+    this.$root.$on("swipeLeft", () => this.onSubmit());
+    this.$root.$on("swipeRight", () => this.onSubmit());
+    this.$root.$on("swipeUp", () => this.onDiscard());
   },
   destroyed() {
     document.removeEventListener("keydown", this.handleGlobalKeys);
@@ -443,7 +448,7 @@ export default {
     width: 100%;
     justify-content: center;
     color: $black-87;
-    min-height: $base-space * 6;
+    min-height: $base-space * 10;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
     &:hover {
@@ -459,12 +464,7 @@ export default {
     }
   }
   &--submit {
-    &:not([disabled]) {
-      background: $submitted-color-light;
-    }
-    &:hover:not([disabled]) {
-      background: darken($submitted-color-light, 2%);
-    }
+    background: darken($submitted-color-light, 2%);
     &:active:not([disabled]),
     &.--button--submitting,
     &.--button--submitting:hover {
@@ -475,9 +475,7 @@ export default {
     }
   }
   &--draft {
-    &:hover:not([disabled]) {
-      background: $draft-color-light;
-    }
+    background: $draft-color-light;
     &:active:not([disabled]),
     &.--button--saving-draft,
     &.--button--saving-draft:hover {
@@ -485,9 +483,7 @@ export default {
     }
   }
   &--discard {
-    &:hover:not([disabled]) {
-      background: $discarded-color-light;
-    }
+    background: $discarded-color-light;
     &:active:not([disabled]),
     &.--button--discarding,
     &.--button--discarding:hover {
