@@ -91,6 +91,11 @@ export default {
       await this.saveAsDraft(this.record);
     },
   },
+  data() {
+    return {
+      swipeClass: "",
+    };
+  },
   mounted() {
     this.$root.$on("swipeLeft", () => {
       this.swipeClass = "swipeLeft";
@@ -129,6 +134,7 @@ export default {
 }
 .swipeUp {
   animation: swipeUp 0.5s ease-in-out forwards;
+  background: blue;
 }
 
 @keyframes swipeUp {
@@ -196,7 +202,7 @@ export default {
   padding: $base-space * 2;
   @include media("<desktop") {
     flex-flow: column;
-    overflow: auto;
+    overflow: hidden;
   }
   &__records,
   &__form {

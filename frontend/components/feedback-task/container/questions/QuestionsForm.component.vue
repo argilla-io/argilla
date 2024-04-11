@@ -28,7 +28,34 @@
         @on-focus="updateQuestionAutofocus"
       />
     </div>
-    <div class="footer-form">
+    <div v-if="isRunningTransition" class="commands">
+      <div class="commands__content">
+        <div>
+          <span class="font">Swipe left for Bad response</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotLeft" />
+            <span class="handIcon swipeLeft" />
+          </div>
+        </div>
+
+        <div>
+          <span class="font">Swipe up to Discard</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotUp" />
+            <span class="handIcon swipeUp" />
+          </div>
+        </div>
+
+        <div>
+          <span class="font">Swipe right for Right response</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotRight" />
+            <span class="handIcon swipeRight" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-form" v-show="false">
       <div class="footer-form__content">
         <BaseButton
           type="submit"
@@ -221,7 +248,7 @@ export default {
 
     setTimeout(() => {
       this.isRunningTransition = false;
-    }, 3500);
+    }, 4500);
 
     this.$root.$on("swipeLeft", () => this.onSubmit());
     this.$root.$on("swipeRight", () => this.onSubmit());
@@ -509,18 +536,16 @@ export default {
 }
 
 .dot {
+  position: absolute;
   width: 20px;
   height: 20px;
-  position: absolute;
-  background: rgba(149, 147, 241, 0.5);
+  background: rgba(149, 147, 241, 0.8);
   border-radius: 40px;
-  top: 28px;
-  left: 78px;
+  left: 40px;
   visibility: hidden;
 }
 
 .handIcon {
-  position: relative;
   background-image: url("https://i.postimg.cc/8556gm60/hand.png");
   background-repeat: no-repeat;
   background-position: center;
@@ -591,7 +616,7 @@ export default {
 
 @keyframes swipeDotRight {
   0% {
-    transform: translate(-55px);
+    transform: translate(-40px);
     width: 20px;
   }
   25% {
@@ -605,7 +630,7 @@ export default {
 
 @keyframes swipeHandUp {
   0% {
-    transform: translate(-20px) rotate(90deg) translateX(10px);
+    transform: translate(-20px) rotate(90deg) translateX(20px);
   }
   100% {
     transform: translate(-20px) rotate(60deg) translateX(-15px);
@@ -614,7 +639,7 @@ export default {
 
 @keyframes swipeDotUp {
   0% {
-    transform: translate(-20px) translateY(40px);
+    transform: translate(-20px) translateY(30px);
     height: 20px;
   }
   25% {
@@ -625,6 +650,42 @@ export default {
   26% {
     transform: translate(-20px) translateY(-5px);
     visibility: hidden;
+  }
+}
+
+.font {
+  color: white;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.commands {
+  background: rgba(149, 147, 241, 0.5);
+  position: absolute;
+  width: 110vw;
+  left: -20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  top: 0;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    height: 70%;
+    width: 100%;
+
+    &--buttons {
+      margin-top: 20px;
+      margin-left: 30%;
+      position: relative;
+      display: flex;
+      gap: 1em;
+    }
   }
 }
 </style>
