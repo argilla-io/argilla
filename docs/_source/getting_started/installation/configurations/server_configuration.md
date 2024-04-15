@@ -87,9 +87,9 @@ You can set the following environment variables to further configure your server
 
 ### Feedback Datasets
 
-- `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS` (default: `500`): set the number of maximum items to be allowed by label and multi label questions.
+- `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by label and multi label questions (Default: `500`).
 
-- `ARGILLA_SPAN_OPTIONS_MAX_ITEMS` (default: `500`): set the number of maximum items to be allowed by span questions.
+- `ARGILLA_SPAN_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by span questions (Default: `500`).
 
 ### Client
 
