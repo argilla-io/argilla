@@ -1,11 +1,12 @@
 ARG ARGILLA_SERVER_TAG=main
+
 FROM argilla/argilla-quickstart:${ARGILLA_SERVER_TAG}
 
 USER root
 
-RUN apt-get update  \
-&& apt-get install -y nodejs npm \
-&& pip install honcho --no-cache-dir
+RUN apt-get update && \
+    apt-get install -y nodejs npm && \
+    pip install honcho --no-cache-dir
 
 USER argilla
 
@@ -16,10 +17,11 @@ COPY --chown=argilla:argilla .nuxt ./.nuxt
 COPY --chown=argilla:argilla package.json ./package.json
 COPY --chown=argilla:argilla nuxt.config.ts ./nuxt.config.ts
 
-RUN npm install \
-&& echo \
-'quickstart: /bin/bash /home/argilla/start_quickstart_argilla.sh\n\
-frontend: cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile
+RUN npm install && \
+    echo \
+    'elastic: /usr/share/elasticsearch/bin/elasticsearch\n\
+    argilla: sleep 30; /bin/bash /home/argilla/start_argilla_server.sh\n\
+    frontend: sleep 30; cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile
 
 WORKDIR /home/argilla/
 
