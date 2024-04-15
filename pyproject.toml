@@ -51,7 +51,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 server = ["argilla-server ~= 1.26.1"]
 server-postgresql = ["argilla-server[postgresql] ~= 1.26.1"]
-listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
+listeners = ["schedule ~= 1.1.0"]
 integrations = [
     "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
