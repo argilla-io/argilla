@@ -34,6 +34,7 @@
       ref="inputsAreaRef"
       :key="searchInput"
       name="shuffle"
+      :css="options.length < 50"
       class="inputs-area"
       v-if="filteredOptions.length"
     >
