@@ -263,7 +263,7 @@ export default {
   &__text {
     margin-inline: calc($base-space / 4);
     @include truncate(auto);
-    @include font-size(0);
+    @include font-size(0px);
     span {
       @include font-size(11px);
     }
