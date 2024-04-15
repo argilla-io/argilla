@@ -14,15 +14,11 @@
     </template>
     <div
       class="span-entity__container"
-      :style="{
-        left: `${entityPosition.left}px`,
-        top: `${entityPosition.top}px`,
-      }"
+      :style="entityRelativePosition"
       ref="spanEntityRef"
       id="spanEntity"
     >
       <div
-        :style="{ maxWidth: `${entityPosition.width}px` }"
         v-on="!singleOption ? { click: toggleDropdown } : {}"
         @mouseenter="hoverSpan(true)"
         @mouseleave="hoverSpan(false)"
@@ -62,10 +58,7 @@
       </div>
       <EntityComponentDropdown
         v-else
-        :style="{
-          left: `${spanEntityPosition.left}px`,
-          top: `${spanEntityPosition.top}px`,
-        }"
+        :style="entityFixedPosition"
         :selectedOption="selectedOption"
         :options="options"
         @on-replace-option="selectOption"
@@ -102,8 +95,8 @@ export default {
     return {
       visibleDropdown: false,
       spanEntityPosition: {
-        left: "0px",
-        top: "0px",
+        left: 0,
+        top: 0,
       },
     };
   },
@@ -149,6 +142,21 @@ export default {
 
       return lines;
     },
+    entityWidth() {
+      return `${this.entityPosition.width}px`;
+    },
+    entityRelativePosition() {
+      return {
+        left: `${this.entityPosition.left}px`,
+        top: `${this.entityPosition.top}px`,
+      };
+    },
+    entityFixedPosition() {
+      return {
+        left: `${this.spanEntityPosition.left}px`,
+        top: `${this.spanEntityPosition.top}px`,
+      };
+    },
   },
   methods: {
     getNumberOfLines(space) {
@@ -163,6 +171,7 @@ export default {
       this.hideDropdown();
     },
     hoverSpan(isHovered) {
+      this.getPosition();
       if (this.allowOverlapping) {
         this.$emit("on-hover-span", isHovered);
       }
@@ -175,7 +184,6 @@ export default {
       this.visibleDropdown = false;
     },
     getPosition() {
-      console.log("x");
       const position = this.$refs.spanEntityRef.getBoundingClientRect();
       this.spanEntityPosition.left = position.left;
       this.spanEntityPosition.top =
@@ -220,6 +228,7 @@ export default {
   align-items: center;
   flex-shrink: 0;
   min-width: $base-space * 2;
+  max-width: v-bind(entityWidth);
   margin-top: -1px;
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
@@ -273,10 +282,12 @@ export default {
     }
   }
   &:hover {
-    position: relative;
+    position: fixed;
+    left: v-bind("entityFixedPosition.left");
+    top: v-bind("entityFixedPosition.top");
     z-index: 1;
     transition: scale 0.2s;
-    max-width: none !important;
+    max-width: none;
     scale: 1.1;
     #{$this}__close-button {
       display: inline-flex;
