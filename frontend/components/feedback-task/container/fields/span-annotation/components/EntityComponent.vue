@@ -204,11 +204,12 @@ export default {
     },
   },
   mounted() {
-    this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
-
-    if (this.scroll) {
-      this.scroll.addEventListener("scroll", this.getPosition);
-    }
+    this.$nextTick(() => {
+      this.scroll = this.getScrollParent(document.getElementById("spanEntity"));
+      if (this.scroll) {
+        this.scroll.addEventListener("scroll", this.getPosition);
+      }
+    });
   },
   beforeDestroy() {
     if (this.scroll) {
