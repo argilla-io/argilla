@@ -5,8 +5,7 @@ FROM argilla/argilla-quickstart:${ARGILLA_SERVER_TAG}
 USER root
 
 RUN apt-get update && \
-    apt-get install -y nodejs npm && \
-    pip install honcho --no-cache-dir
+    apt-get install -y nodejs npm
 
 USER argilla
 
@@ -21,7 +20,7 @@ RUN npm install && \
     echo \
     'elastic: /usr/share/elasticsearch/bin/elasticsearch\n\
     argilla: sleep 30; /bin/bash /home/argilla/start_argilla_server.sh\n\
-    frontend: sleep 30; cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile
+    frontend: sleep 30; cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile.frontend
 
 WORKDIR /home/argilla/
 
@@ -29,4 +28,4 @@ EXPOSE 3000
 EXPOSE 6900
 EXPOSE 9200
 
-CMD ["honcho", "start"]
+CMD ["honcho", "start", "--procfile", "Procfile.frontend"]
