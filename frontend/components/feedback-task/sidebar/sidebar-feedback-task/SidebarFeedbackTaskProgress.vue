@@ -33,10 +33,10 @@
       :progress="metrics.percentage.submitted"
       :progress-secondary="metrics.percentage.discarded"
       :progress-tertiary="metrics.percentage.draft"
-      :progress-bg="itemColor(0)"
-      :color="itemColor(2)"
-      :color-secondary="itemColor(1)"
-      :color-tertiary="itemColor(3)"
+      :progress-bg="pendingColor"
+      :color="submittedColor"
+      :color-secondary="discardedColor"
+      :color-tertiary="draftColor"
     >
     </BaseProgress>
     <div class="scroll">
@@ -82,31 +82,40 @@ export default {
       return [
         {
           name: RECORD_STATUS.PENDING,
-          color: RECORD_STATUS_COLOR.PENDING,
+          color: this.pendingColor,
           progress: this.metrics.pending,
         },
         {
           name: RECORD_STATUS.DRAFT,
-          color: RECORD_STATUS_COLOR.DRAFT,
+          color: this.draftColor,
           progress: this.metrics.draft,
         },
         {
           name: RECORD_STATUS.SUBMITTED,
-          color: RECORD_STATUS_COLOR.SUBMITTED,
+          color: this.submittedColor,
           progress: this.metrics.submitted,
         },
         {
           name: RECORD_STATUS.DISCARDED,
-          color: RECORD_STATUS_COLOR.DISCARDED,
+          color: this.discardedColor,
           progress: this.metrics.discarded,
         },
       ];
     },
+    pendingColor() {
+      return RECORD_STATUS_COLOR.PENDING;
+    },
+    draftColor() {
+      return RECORD_STATUS_COLOR.DRAFT;
+    },
+    submittedColor() {
+      return RECORD_STATUS_COLOR.SUBMITTED;
+    },
+    discardedColor() {
+      return RECORD_STATUS_COLOR.DISCARDED;
+    },
   },
   methods: {
-    itemColor(order) {
-      return this.progressItems[order]?.color || null;
-    },
     getFormattedName(name) {
       return name && this.$options.filters.capitalize(name);
     },
