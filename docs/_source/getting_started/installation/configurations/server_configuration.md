@@ -43,7 +43,6 @@ uvicorn argilla:app
 For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
 :::
 
-
 ## Environment variables
 
 You can set the following environment variables to further configure your server and client.
@@ -58,7 +57,7 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_CORS_ORIGINS`: List of host patterns for CORS origin access.
 
-- `ARGILLA_DOCS_ENABLED`: If False, disables openapi docs endpoint at */api/docs*.
+- `ARGILLA_DOCS_ENABLED`: If False, disables openapi docs endpoint at _/api/docs_.
 
 - `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
 
@@ -85,6 +84,12 @@ You can set the following environment variables to further configure your server
 - `ARGILLA_METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
 
 - `ARGILLA_METADATA_FIELD_LENGTH`: Max length supported for the string metadata fields. Higher values will be truncated. Abusing this may lead to Elastic performance issues (Default: 128).
+
+### Feedback Datasets
+
+- `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS` (default: `500`): set the number of maximum items to be allowed by label and multi label questions.
+
+- `ARGILLA_SPAN_OPTIONS_MAX_ITEMS` (default: `500`): set the number of maximum items to be allowed by span questions.
 
 ### Client
 
