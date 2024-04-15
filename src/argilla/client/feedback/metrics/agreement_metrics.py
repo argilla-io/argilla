@@ -13,11 +13,8 @@
 #  limitations under the License.
 
 """This module contains metrics to gather information related to inter-Annotator agreement. """
-
+import warnings
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
-
-from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
-from nltk.metrics.distance import binary_distance, interval_distance, masi_distance
 
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.base import AgreementMetricResult, AnnotationTaskMetricBase, MetricBase
@@ -35,6 +32,17 @@ if TYPE_CHECKING:
     from argilla.client.feedback.metrics.base import FormattedResponses
     from argilla.client.feedback.schemas.enums import ResponseStatusFilter
     from argilla.client.feedback.schemas.records import SortBy
+
+
+try:
+    from nltk.metrics.agreement import AnnotationTask as NLTKAnnotationTask
+    from nltk.metrics.distance import binary_distance, interval_distance, masi_distance
+except (ImportError, ModuleNotFoundError):
+    warnings.warn("nltk is not installed, please install it to use the agreement metrics.")
+    NLTKAnnotationTask = None
+    binary_distance = None
+    interval_distance = None
+    masi_distance = None
 
 
 def prepare_dataset_for_annotation_task(
