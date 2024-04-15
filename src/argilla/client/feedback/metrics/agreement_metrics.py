@@ -39,7 +39,11 @@ try:
     from nltk.metrics.distance import binary_distance, interval_distance, masi_distance
 except (ImportError, ModuleNotFoundError):
     warnings.warn("nltk is not installed, please install it to use the agreement metrics.")
-    NLTKAnnotationTask = None
+
+    class NLTKAnnotationTask:
+        def __init__(self, **kwargs):
+            raise ModuleNotFoundError("nltk is not installed, please install it to use the agreement metrics.")
+
     binary_distance = None
     interval_distance = None
     masi_distance = None
