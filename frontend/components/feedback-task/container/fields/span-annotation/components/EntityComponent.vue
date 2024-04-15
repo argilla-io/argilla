@@ -32,13 +32,11 @@
           class="span-entity__close-button"
           @click="removeSelectedOption"
         >
-          <svgicon
-            class="span-entity__close-button__icon"
-            name="close"
-            width="10"
-            height="10"
+          <svgicon name="close" width="10" height="10" color="#fff"
         /></BaseButton>
-        <span class="span-entity__text" v-text="selectedOption.text" />
+        <span class="span-entity__text"
+          ><span v-text="selectedOption.text"
+        /></span>
         <svgicon
           v-if="!!suggestion"
           :class="
@@ -194,8 +192,8 @@ export default {
 
       let parent = element.parentElement;
       while (parent) {
-        const { overflow } = window.getComputedStyle(parent);
-        if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
+        const { "overflow-y": overflowY } = window.getComputedStyle(parent);
+        if (overflowY.split(" ").every((o) => o === "auto" || o === "scroll")) {
           return parent;
         }
 
@@ -231,7 +229,7 @@ export default {
   max-width: v-bind(entityWidth);
   margin-top: -1px;
   text-transform: uppercase;
-  font-family: "Roboto Condensed", sans-serif;
+  font-family: $tertiary-font-family;
   user-select: none;
   transform-origin: left top;
   transition: scale 0.2s;
@@ -262,10 +260,12 @@ export default {
     margin-right: calc($base-space / 2);
   }
   &__text {
-    gap: 4px;
+    margin-inline: calc($base-space / 4);
     @include truncate(auto);
-    text-overflow: clip;
-    margin-inline: calc($base-space / 2);
+    @include font-size(0);
+    span {
+      @include font-size(11px);
+    }
   }
   &__line {
     position: absolute;
@@ -312,17 +312,11 @@ export default {
   }
   &__close-button {
     display: none;
-    height: 100%;
-    padding: 0 1px;
-    flex-shrink: 0;
+    padding: 1px;
     border-radius: 0;
     background: $black-54;
     &:hover {
       background: $black-87;
-    }
-    &__icon {
-      min-width: 10px;
-      color: palette(white);
     }
   }
   &--clickable {
