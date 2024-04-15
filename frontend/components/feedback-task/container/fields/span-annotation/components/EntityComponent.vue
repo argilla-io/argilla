@@ -22,6 +22,7 @@
       id="spanEntity"
     >
       <div
+        :style="{ maxWidth: `${entityPosition.width}px` }"
         v-on="!singleOption ? { click: toggleDropdown } : {}"
         @mouseenter="hoverSpan(true)"
         @mouseleave="hoverSpan(false)"
@@ -41,11 +42,7 @@
             width="10"
             height="10"
         /></BaseButton>
-        <span
-          class="span-entity__text"
-          :style="{ maxWidth: `${entityPosition.width}px` }"
-          v-text="selectedOption.text"
-        />
+        <span class="span-entity__text" v-text="selectedOption.text" />
         <svgicon
           v-if="!!suggestion"
           :class="
@@ -178,6 +175,7 @@ export default {
       this.visibleDropdown = false;
     },
     getPosition() {
+      console.log("x");
       const position = this.$refs.spanEntityRef.getBoundingClientRect();
       this.spanEntityPosition.left = position.left;
       this.spanEntityPosition.top =
@@ -219,13 +217,10 @@ export default {
 .span-entity {
   $this: &;
   display: flex;
-  gap: 2px;
   align-items: center;
   flex-shrink: 0;
-  min-width: 10px;
-  max-width: v-bind("entityPosition.width");
+  min-width: $base-space * 2;
   margin-top: -1px;
-  padding-right: 3px;
   text-transform: uppercase;
   font-family: "Roboto Condensed", sans-serif;
   user-select: none;
@@ -254,13 +249,14 @@ export default {
   }
   &__score {
     display: inline-flex;
-    margin-left: 2px;
+    flex-shrink: 0;
+    margin-right: calc($base-space / 2);
   }
   &__text {
     gap: 4px;
-    padding-inline: calc($base-space / 2);
     @include truncate(auto);
     text-overflow: clip;
+    margin-inline: calc($base-space / 2);
   }
   &__line {
     position: absolute;
@@ -269,16 +265,18 @@ export default {
     margin-top: 20px;
   }
   &__suggestion {
-    flex-shrink: 0;
+    margin-right: calc($base-space / 2);
     &--score {
       display: none;
+      margin-right: calc($base-space / 2);
+      flex-shrink: 0;
     }
   }
   &:hover {
     position: relative;
     z-index: 1;
     transition: scale 0.2s;
-    max-width: none;
+    max-width: none !important;
     scale: 1.1;
     #{$this}__close-button {
       display: inline-flex;
@@ -305,7 +303,6 @@ export default {
     display: none;
     height: 100%;
     padding: 0 1px;
-    margin-right: calc($base-space / 2);
     flex-shrink: 0;
     border-radius: 0;
     background: $black-54;
