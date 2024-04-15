@@ -37,6 +37,7 @@
     <transition-group
       ref="inputsAreaRef"
       :key="searchInput"
+      :css="options.length < 50"
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"

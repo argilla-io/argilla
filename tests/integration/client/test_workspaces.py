@@ -86,7 +86,7 @@ def test_workspace_create(owner: "ServerUser") -> None:
         Workspace.create("test_workspace")
 
     api = ArgillaSingleton.get()
-    workspaces = api.http_client.get("/api/workspaces")
+    workspaces = api.http_client.get("/api/v1/me/workspaces")["items"]
     assert any(ws["name"] == "test_workspace" for ws in workspaces)
 
 
