@@ -67,11 +67,10 @@ export default {
           filtrable: "true",
         },
         {
-          name: this.$t("datasetTable.tags"),
-          field: "tags",
-          class: "text",
-          type: "object",
-          filtrable: "true",
+          name: "Global progress",
+          field: "progress",
+          class: "progress",
+          type: "progress",
         },
         {
           name: this.$t("datasetTable.createdAt"),

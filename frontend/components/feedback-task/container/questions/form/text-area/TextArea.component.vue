@@ -41,7 +41,7 @@ export default {
         {
           id: "0",
           name: this.isSuggested ? "Suggestion" : "Write",
-          class: this.isSuggested ? "--suggestion" : null,
+          icon: this.isSuggested && "suggestion",
           component: "TextAreaContents",
         },
         ...(!this.isSuggested
@@ -49,7 +49,7 @@ export default {
               {
                 id: "1",
                 name: "Suggestion",
-                class: "--suggestion",
+                icon: "suggestion",
                 component: "TextAreaSuggestion",
               },
             ]
@@ -61,29 +61,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$suggestion-color: palette(yellow, 400);
-$suggestion-color-lighten: lighten($suggestion-color, 24%);
-
 .wrapper {
   display: flex;
   flex-direction: column;
   gap: $base-space;
-}
-.card-with-tabs {
-  &.--suggestion {
-    :deep(.card-with-tabs__content) {
-      border-color: $suggestion-color;
-      background: $suggestion-color-lighten;
-    }
-  }
-  :deep(.card-with-tabs__tab.--suggestion) {
-    border-top-color: $suggestion-color;
-    border-left-color: $suggestion-color;
-    border-right-color: $suggestion-color;
-    border-bottom-color: $suggestion-color-lighten;
-    .button {
-      background: $suggestion-color-lighten;
-    }
-  }
 }
 </style>
