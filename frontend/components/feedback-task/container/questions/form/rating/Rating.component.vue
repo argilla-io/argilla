@@ -5,7 +5,7 @@
 
       <RatingMonoSelectionComponent
         ref="ratingMonoSelectionRef"
-        :suggestions="question.suggestion?.suggestedAnswer"
+        :suggestion="question.suggestion"
         v-model="question.answer.values"
         :isFocused="isFocused"
         @on-focus="onFocus"

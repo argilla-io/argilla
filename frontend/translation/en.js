@@ -35,6 +35,13 @@ export default {
     datasetSettings: "settings",
     userSettings: "my settings",
   },
+  datasets: {
+    left: "left",
+    submitted: "Submitted",
+    conflicting: "Conflicting",
+    discarded: "Discarded",
+    pending: "Pending",
+  },
   recordStatus: {
     pending: "Pending",
     draft: "Draft",

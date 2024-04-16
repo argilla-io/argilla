@@ -2,10 +2,12 @@ import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Store } from "vuex";
 import {
   BackendDatasetFeedbackTaskResponse,
+  BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
-import { Dataset } from "@/v1/domain/entities/Dataset";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
+import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
+import { Progress } from "~/v1/domain/entities/dataset/Progress";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -14,6 +16,7 @@ export const DATASET_API_ERRORS = {
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
   ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
   ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
+  ERROR_FETCHING_DATASET_PROGRESS: "ERROR_FETCHING_DATASET_PROGRESS",
 };
 
 export class DatasetRepository implements IDatasetRepository {
@@ -112,6 +115,29 @@ export class DatasetRepository implements IDatasetRepository {
       await this.axios.delete(`/v1/datasets/${datasetId}`, {
         validateStatus: (status) => status === 200,
       });
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,
+      };
+    }
+  }
+
+  async getProgress(datasetId: string): Promise<Progress> {
+    try {
+      const { data } = await this.axios.get<BackendProgress>(
+        `/v1/datasets/${datasetId}/progress`,
+        {
+          headers: { "cache-control": "max-age=60" },
+        }
+      );
+
+      return new Progress(
+        data.total,
+        data.submitted,
+        data.discarded,
+        data.conflicting,
+        data.pending
+      );
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,

@@ -5,7 +5,7 @@ exports[`BaseTableInfo renders properly 1`] = `
   <div class="table-info">
     <div class="table-info__header">
       <div class="table-info__item">
-        <div class="table-info__item__col">
+        <div class="table-info__item__col text">
           <lazy-table-filtrable-column-stub column="[object Object]" data="[object Object],[object Object]" filters="[object Object]"></lazy-table-filtrable-column-stub>
         </div>
       </div>
@@ -14,7 +14,7 @@ exports[`BaseTableInfo renders properly 1`] = `
       <ul>
         <li>
           <div class="table-info__item">
-            <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
+            <!----> <span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
             <base-modal-stub modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation">
               <div>
@@ -33,7 +33,7 @@ exports[`BaseTableInfo renders properly 1`] = `
         </li>
         <li>
           <div class="table-info__item">
-            <!----> <span class="table-info__item__col"><span class="text"><span>recognai</span></span></span>
+            <!----> <span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span>
             <div class="table-info__actions"></div>
             <base-modal-stub modal-custom="true" prevent-body-scroll="true" modal-class="modal-secondary" modal-title="Delete confirmation">
               <div>

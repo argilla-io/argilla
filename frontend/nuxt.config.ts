@@ -129,11 +129,7 @@ const config: NuxtConfig = {
         file: "de.js",
       },
     ],
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-      redirectOn: "root",
-    },
+    detectBrowserLanguage: false,
     vueI18n: {
       fallbackLocale: "en",
     },
@@ -209,6 +205,7 @@ const config: NuxtConfig = {
         },
       },
     },
+    cookie: false,
     resetOnError: true,
     redirect: { login: "/sign-in", logout: "/sign-in" },
   },

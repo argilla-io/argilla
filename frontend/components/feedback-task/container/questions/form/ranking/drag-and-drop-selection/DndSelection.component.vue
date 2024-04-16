@@ -27,12 +27,11 @@
         <BaseTooltip
           v-if="findRankSuggestion(item)"
           class="draggable__suggestion"
-          :text="`<img src='/icons/suggestion.svg' /> ${$t(
-            'suggestion.suggested-rank'
-          )}`"
+          :text="$t('suggestion.suggested-rank')"
           minimalist
         >
           <span v-text="findRankSuggestion(item).rank" />
+          <svgicon name="suggestion" width="10" height="10" />
         </BaseTooltip>
       </div>
     </draggable>
@@ -74,12 +73,11 @@
             <BaseTooltip
               v-if="findRankSuggestion(item)"
               class="draggable__suggestion"
-              :text="`<img src='/icons/suggestion.svg' /> ${$t(
-                'suggestion.suggested-rank'
-              )}`"
+              :text="`${$t('suggestion.suggested-rank')}`"
               minimalist
             >
               <span v-text="findRankSuggestion(item).rank" />
+              <svgicon name="suggestion" width="10" height="10" />
             </BaseTooltip>
           </div>
         </draggable>
@@ -220,7 +218,6 @@ $card-primary-color: palette(purple, 200);
 $card-secondary-color: palette(white);
 $card-ghost-color: palette(purple, 300);
 $card-empty-color: palette(purple, 400);
-$suggestion-color: palette(yellow, 400);
 $cards-separation: $base-space;
 $background-slot-color: $black-4;
 $slot-height: 50px;
@@ -364,16 +361,13 @@ $max-visible-card-items: 12;
 
   &__suggestion {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     height: $base-space * 2;
-    width: $base-space * 2;
+    width: $base-space * 3;
     margin-left: auto;
-    border-radius: $border-radius-rounded;
-    border: 1px solid $suggestion-color;
-    color: $card-primary-color;
-    background: $suggestion-color;
     @include font-size(12px);
     cursor: default;
   }
