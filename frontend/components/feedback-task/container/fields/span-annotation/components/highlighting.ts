@@ -182,7 +182,9 @@ export class Highlighting {
     this.node.addEventListener("click", () => {
       this.highlightUserSelection();
 
-      this.applyStyles();
+      try {
+        this.applyStyles();
+      } catch {}
     });
 
     document.addEventListener("selectionchange", () => {
@@ -252,7 +254,6 @@ export class Highlighting {
     getClassName: (span: Span) => string = (span) =>
       `${this.styles.entityCssKey}-${span.entity.id}`
   ) {
-    CSS.highlights.clear();
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
@@ -264,6 +265,8 @@ export class Highlighting {
 
       highlights[className].push(range);
     }
+
+    CSS.highlights.clear();
 
     for (const [entity, selections] of Object.entries(highlights)) {
       CSS.highlights.set(entity, new Highlight(...selections.flat()));
