@@ -80,6 +80,7 @@ export default {
     },
     spanQuestion: {
       type: Object,
+      required: true,
     },
     suggestion: {
       type: Object,
@@ -115,8 +116,7 @@ export default {
       return this.entity.color;
     },
     allowOverlapping() {
-      // return this.spanQuestion.settings.allow_overlapping;
-      return true;
+      return this.spanQuestion.settings.allow_overlapping;
     },
     lines() {
       const lines = [];
