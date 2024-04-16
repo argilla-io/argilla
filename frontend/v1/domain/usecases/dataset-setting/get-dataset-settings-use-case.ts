@@ -1,4 +1,4 @@
-import { DatasetSetting } from "../../entities/DatasetSetting";
+import { DatasetSetting } from "../../entities/dataset/DatasetSetting";
 import { Field } from "../../entities/field/Field";
 import { Metadata } from "../../entities/metadata/Metadata";
 import { Question } from "../../entities/question/Question";

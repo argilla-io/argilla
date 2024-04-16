@@ -64,8 +64,9 @@ dependencies:
       - rich!=13.1.0
       - textdescriptives>=2.7.0,<3.0.0
       - ipynbname>=2023.2.0.0
+      - nltk < 4.0.0
       - httpx~=0.26.0
       # For now we can just install argilla-server from the GitHub repo
-      - git+https://github.com/argilla-io/argilla-server.git@main
+      - git+https://github.com/argilla-io/argilla-server.git
       # install Argilla in editable mode
       - -e .[listeners]

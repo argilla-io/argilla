@@ -1,5 +1,10 @@
 <template>
-  <div class="markdown-render" v-html="markdownToHtml" v-copy-code />
+  <div
+    class="markdown-render"
+    :class="classes"
+    v-html="markdownToHtml"
+    v-copy-code
+  />
 </template>
 <script>
 import { marked } from "marked";
@@ -13,19 +18,22 @@ const preprocess = (html) => {
 const postprocess = (html) => {
   return DOMPurify.sanitize(html, {
     ADD_TAGS: ["embed", "object"],
-    ADD_ATTR: ["data"],
+    ADD_ATTR: ["data", "target"],
     ADD_URI_SAFE_ATTR: ["data"],
   });
 };
 
 DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
-  if (node.tagName === "svg") {
+  if (node instanceof SVGElement) {
     const width = node.getAttribute("width");
     const height = node.getAttribute("height");
     const viewBox = node.getAttribute("viewBox");
     if (!viewBox && width && height) {
       node.setAttribute("viewBox", `0 0 ${width} ${height}`);
     }
+  }
+  if (node instanceof HTMLAnchorElement) {
+    node.setAttribute("target", "_blank");
   }
 });
 
@@ -49,6 +57,9 @@ export default {
     },
   },
   computed: {
+    classes() {
+      return this.$language.isRTL(this.markdown) ? "--rtl" : "--ltr";
+    },
     markdownToHtml() {
       return marked.parse(this.markdown, {
         headerIds: false,

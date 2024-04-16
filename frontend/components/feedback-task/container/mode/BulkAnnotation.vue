@@ -101,6 +101,7 @@
         :class="statusClass"
         :datasetId="recordCriteria.datasetId"
         :record="record"
+        :is-bulk-mode="true"
         :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
         :is-submitting="isSubmitting"
         :is-discarding="isDiscarding"
@@ -344,6 +345,7 @@ export default {
   scroll-snap-align: start;
 }
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   height: 100%;
@@ -406,6 +408,7 @@ export default {
 }
 .bulk {
   &__records {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: $base-space;

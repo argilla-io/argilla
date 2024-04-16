@@ -17,7 +17,7 @@
       </BaseActionTooltip>
     </div>
     <div class="content-area --body1">
-      <div v-if="!useMarkdown" v-html="text" />
+      <div :class="classes" v-if="!useMarkdown" v-html="text" />
       <RenderMarkdownBaseComponent v-else :markdown="text" />
     </div>
   </div>
@@ -43,6 +43,11 @@ export default {
     useMarkdown: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    classes() {
+      return this.$language.isRTL(this.text) ? "--rtl" : "--ltr";
     },
   },
   setup(props) {

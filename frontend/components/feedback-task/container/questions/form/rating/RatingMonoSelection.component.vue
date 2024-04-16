@@ -6,28 +6,36 @@
         v-for="option in options"
         :key="option.id"
         @keydown.enter.prevent
-        :data-title="
-          suggestions === option.value ? $t('suggestion.name') : null
-        "
       >
-        <input
-          ref="options"
-          type="checkbox"
-          :name="option.value"
-          :id="option.id"
-          v-model="option.isSelected"
-          @change="onSelect(option)"
-          @focus="onFocus"
-        />
-        <label
-          class="label-text"
-          :class="{
-            'label-active': option.isSelected,
-            '--suggestion': suggestions === option.value,
-          }"
-          :for="option.id"
-          v-text="option.value"
-        />
+        <BaseTooltip
+          :text="isSuggested(option) ? $t('suggestion.name') : null"
+          minimalist
+        >
+          <input
+            ref="options"
+            type="checkbox"
+            :name="option.value"
+            :id="option.id"
+            v-model="option.isSelected"
+            @change="onSelect(option)"
+            @focus="onFocus"
+          />
+          <label
+            class="label-text"
+            :class="{
+              'label-active': option.isSelected,
+            }"
+            :for="option.id"
+          >
+            {{ option.value }}
+
+            <svgicon
+              v-if="isSuggested(option)"
+              class="label-text__suggestion-icon"
+              name="suggestion"
+            />
+          </label>
+        </BaseTooltip>
       </div>
     </div>
   </div>
@@ -45,8 +53,8 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    suggestions: {
-      type: Number,
+    suggestion: {
+      type: Object,
     },
   },
   model: {
@@ -70,6 +78,9 @@ export default {
     },
   },
   methods: {
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
+    },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
         option.isSelected = option.id === id ? isSelected : false;
@@ -89,7 +100,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$suggestion-color: palette(yellow, 400);
 .container {
   display: flex;
   .inputs-area {
@@ -119,22 +129,26 @@ $suggestion-color: palette(yellow, 400);
   overflow: hidden;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
-  &.--suggestion {
-    background: $suggestion-color;
-    &:not(.label-active):hover {
-      background: darken($suggestion-color, 8%);
-    }
+
+  &__suggestion-icon {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
   }
+
   &.label-active {
     color: white;
     background: palette(purple, 200);
-    &.--suggestion {
-      border: 2px solid $suggestion-color;
+    box-shadow: none;
+    &:hover {
+      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
+      background: darken(palette(purple, 200), 4%);
     }
   }
 
   &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 8%);
+    background: darken(palette(purple, 800), 5%);
+    transition: all 0.2s ease-in-out;
   }
 }
 input[type="checkbox"] {

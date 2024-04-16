@@ -14,13 +14,11 @@ export class VectorRepository {
   async getVectors(datasetId: string): Promise<BackendVector[]> {
     try {
       const { data } = await this.axios.get<Response<BackendVector[]>>(
-        `/v1/datasets/${datasetId}/vectors-settings`
+        `/v1/datasets/${datasetId}/vectors-settings`,
+        { headers: { "cache-control": "max-age=120" } }
       );
 
-      return data.items.map((v) => ({
-        ...v,
-        title: v.title ?? v.name, // TODO: Remove when we have titles for vectors
-      }));
+      return data.items;
     } catch (err) {
       throw {
         response: VECTOR_API_ERRORS.FETCHING,

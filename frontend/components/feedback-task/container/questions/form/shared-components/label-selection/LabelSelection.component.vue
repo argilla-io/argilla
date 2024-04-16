@@ -34,6 +34,7 @@
       ref="inputsAreaRef"
       :key="searchInput"
       name="shuffle"
+      :css="options.length < 50"
       class="inputs-area"
       v-if="filteredOptions.length"
     >
@@ -55,34 +56,27 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="
-            hasSuggestion(option.text)
-              ? `<img src=${suggestionIcon} /> ${$t('suggestion.name')}: ${
-                  option.text
-                }`
-              : null
-          "
+          :text="isSuggested(option) ? $t('suggestion.name') : null"
           minimalist
         >
           <label
             class="label-text"
             :class="{
               'label-active': option.isSelected,
-              '--suggestion': hasSuggestion(option.text),
               square: multiple,
               round: !multiple,
             }"
             :for="option.id"
             :title="option.text"
           >
-            <span
-              class="key"
-              v-if="showShortcutsHelper"
-              v-text="keyboards[option.id]"
-            />
+            <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
-          </label></BaseTooltip
-        >
+            <svgicon
+              v-if="isSuggested(option)"
+              class="label-text__suggestion-icon"
+              name="suggestion"
+            /> </label
+        ></BaseTooltip>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -90,23 +84,25 @@
 </template>
 
 <script>
-const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 3;
-import suggestionIcon from "@/static/icons/suggestion.svg";
+const OPTIONS_THRESHOLD_TO_ENABLE_SEARCH = 15;
 import "assets/icons/chevron-down";
 import "assets/icons/chevron-up";
+
+import { useLabelSelectionViewModel } from "./useLabelSelectionViewModel";
+
 export default {
   name: "LabelSelectionComponent",
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
-      default: () => -1,
+      required: true,
     },
     options: {
       type: Array,
       required: true,
     },
-    suggestions: {
-      type: [Array, String],
+    suggestion: {
+      type: Object,
     },
     placeholder: {
       type: String,
@@ -124,10 +120,6 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    showShortcutsHelper: {
-      type: Boolean,
-      default: () => false,
-    },
   },
   model: {
     prop: "options",
@@ -136,10 +128,8 @@ export default {
   data() {
     return {
       searchInput: "",
-      isExpanded: false,
       timer: null,
       keyCode: "",
-      suggestionIcon,
     };
   },
   created() {
@@ -188,8 +178,7 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.maxOptionsToShowBeforeCollapse === -1 || this.isExpanded)
-        return this.filteredOptions;
+      if (this.isExpanded) return this.filteredOptions;
 
       return this.filteredOptions
         .slice(0, this.maxOptionsToShowBeforeCollapse)
@@ -199,7 +188,6 @@ export default {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
-      if (this.maxOptionsToShowBeforeCollapse === -1) return false;
       return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
     },
     showSearch() {
@@ -227,11 +215,17 @@ export default {
         $event.key === "Tab" ||
         $event.key === "Enter" ||
         $event.key === "Backspace" ||
+        $event.key === "ArrowLeft" ||
+        $event.key === "ArrowRight" ||
+        $event.key === "ArrowUp" ||
+        $event.key === "ArrowDown" ||
         $event.shiftKey ||
         $event.ctrlKey ||
         $event.metaKey
       )
         return;
+
+      $event.stopPropagation();
 
       const isSearchActive =
         document.activeElement ===
@@ -241,6 +235,8 @@ export default {
 
       if ($event.code == "Space") {
         $event.preventDefault();
+        $event.stopPropagation();
+
         document.activeElement.click();
 
         return;
@@ -279,6 +275,7 @@ export default {
 
       if (match) {
         $event.preventDefault();
+        $event.stopPropagation();
 
         match.click();
       }
@@ -303,22 +300,23 @@ export default {
       this.$emit("on-focus");
     },
     expandLabelsOnTab(index) {
-      if (!this.showCollapseButton) {
-        return;
-      }
+      if (!this.showCollapseButton) return;
+
       if (index === this.maxOptionsToShowBeforeCollapse - 1) {
         this.isExpanded = true;
       }
     },
-    hasSuggestion(value) {
-      return this.suggestions?.includes(value) || false;
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
     },
+  },
+  setup(props) {
+    return useLabelSelectionViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$suggestion-color: palette(yellow, 400);
 $label-color: palette(purple, 800);
 $label-dark-color: palette(purple, 200);
 .container {
@@ -326,9 +324,11 @@ $label-dark-color: palette(purple, 200);
   flex-direction: column;
   gap: $base-space * 2;
   .component-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    height: 28px;
   }
   .inputs-area {
     display: inline-flex;
@@ -388,8 +388,16 @@ $label-dark-color: palette(purple, 200);
   outline: none;
   border: 2px solid transparent;
   border-radius: $border-radius-rounded;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
+
+  &__suggestion-icon {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+  }
+
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -399,20 +407,19 @@ $label-dark-color: palette(purple, 200);
       direction: rtl;
     }
   }
-  &.--suggestion {
-    background: $suggestion-color;
-    &:not(.label-active):hover {
-      background: darken($suggestion-color, 8%);
-    }
-  }
+
   &:not(.label-active):hover {
-    background: darken($label-color, 8%);
+    background: darken($label-color, 2%);
+    transition: all 0.2s ease-in-out;
   }
+
   &.label-active {
     color: white;
     background: $label-dark-color;
-    &.--suggestion {
-      border: 2px solid $suggestion-color;
+    box-shadow: none;
+    &:hover {
+      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
+      background: darken(palette(purple, 200), 4%);
     }
   }
 }

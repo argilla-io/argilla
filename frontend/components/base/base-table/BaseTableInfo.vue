@@ -24,7 +24,7 @@
             <div
               v-for="(column, key) in columns"
               :key="key"
-              class="table-info__item__col"
+              :class="[`table-info__item__col`, column.class]"
             >
               <lazy-table-filtrable-column
                 :column="column"
@@ -65,7 +65,7 @@
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
-                  class="table-info__item__col"
+                  :class="[`table-info__item__col`, column.class]"
                 >
                   <span :class="column.class">
                     <a
@@ -88,6 +88,9 @@
                           <svgicon name="copy" width="16" height="16" />
                         </base-button>
                       </base-action-tooltip>
+                    </span>
+                    <span v-else-if="column.type === 'progress'">
+                      <DatasetProgress :dataset="item" />
                     </span>
                     <base-date
                       format="date-relative-now"
@@ -453,13 +456,14 @@ export default {
     }
   }
   &__item {
-    background: palette(white);
     position: relative;
-    list-style: none;
-    padding: 2em 5em 2em 2em;
     display: flex;
+    align-items: center;
+    background: palette(white);
+    list-style: none;
+    padding-inline: $base-space * 3 $base-space * 8;
     width: 100%;
-    align-items: flex-start;
+    min-height: $base-space * 10;
     text-decoration: none;
     outline: none;
     border: 1px solid palette(grey, 700);
@@ -474,6 +478,9 @@ export default {
         width: auto;
         min-width: auto;
         flex-grow: 1.5;
+      }
+      &.progress {
+        min-width: 160px;
       }
     }
     .svg-icon {

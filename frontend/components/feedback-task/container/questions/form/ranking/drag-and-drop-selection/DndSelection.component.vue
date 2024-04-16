@@ -23,15 +23,15 @@
           v-text="item.text"
           :id="`${item.value}-span`"
         />
+
         <BaseTooltip
-          v-if="findRankSuggestion(item.value)"
+          v-if="findRankSuggestion(item)"
           class="draggable__suggestion"
-          :text="`<img src=${suggestionIcon} /> ${$t(
-            'suggestion.suggested-rank'
-          )}`"
+          :text="$t('suggestion.suggested-rank')"
           minimalist
         >
-          <span v-text="findRankSuggestion(item.value).rank" />
+          <span v-text="findRankSuggestion(item).rank" />
+          <svgicon name="suggestion" width="10" height="10" />
         </BaseTooltip>
       </div>
     </draggable>
@@ -69,12 +69,16 @@
               v-text="item.text"
               :id="`${item.value}-span`"
             />
-            <span
-              :title="$t('suggestion.suggested-rank')"
+
+            <BaseTooltip
+              v-if="findRankSuggestion(item)"
               class="draggable__suggestion"
-              v-if="findRankSuggestion(item.value)"
-              >{{ findRankSuggestion(item.value).rank }}</span
+              :text="`${$t('suggestion.suggested-rank')}`"
+              minimalist
             >
+              <span v-text="findRankSuggestion(item).rank" />
+              <svgicon name="suggestion" width="10" height="10" />
+            </BaseTooltip>
           </div>
         </draggable>
       </div>
@@ -84,7 +88,6 @@
 
 <script>
 import "assets/icons/draggable";
-import suggestionIcon from "@/static/icons/suggestion.svg";
 
 export default {
   name: "DndSelectionComponent",
@@ -93,8 +96,8 @@ export default {
       type: Object,
       required: true,
     },
-    suggestions: {
-      type: Array,
+    suggestion: {
+      type: Object,
     },
     isFocused: {
       type: Boolean,
@@ -105,7 +108,6 @@ export default {
     return {
       timer: null,
       keyCode: "",
-      suggestionIcon,
     };
   },
   watch: {
@@ -204,8 +206,8 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-    findRankSuggestion(value) {
-      return this.suggestions?.find((suggestion) => suggestion.value == value);
+    findRankSuggestion(item) {
+      return this.suggestion?.getSuggestion(item);
     },
   },
 };
@@ -216,7 +218,6 @@ $card-primary-color: palette(purple, 200);
 $card-secondary-color: palette(white);
 $card-ghost-color: palette(purple, 300);
 $card-empty-color: palette(purple, 400);
-$suggestion-color: palette(yellow, 400);
 $cards-separation: $base-space;
 $background-slot-color: $black-4;
 $slot-height: 50px;
@@ -287,6 +288,11 @@ $max-visible-card-items: 12;
         box-shadow: none;
       }
     }
+    &.sortable-chosen {
+      .tooltip {
+        display: none;
+      }
+    }
     &--unranked {
       @extend .draggable__rank-card;
       background-color: $card-secondary-color;
@@ -355,16 +361,13 @@ $max-visible-card-items: 12;
 
   &__suggestion {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     height: $base-space * 2;
-    width: $base-space * 2;
+    width: $base-space * 3;
     margin-left: auto;
-    border-radius: $border-radius-rounded;
-    border: 1px solid $suggestion-color;
-    color: $card-primary-color;
-    background: $suggestion-color;
     @include font-size(12px);
     cursor: default;
   }

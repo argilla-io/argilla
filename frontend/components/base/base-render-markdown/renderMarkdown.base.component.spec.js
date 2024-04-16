@@ -25,7 +25,7 @@ describe("RenderMarkdownBaseComponent", () => {
   it("render correct html", () => {
     const wrapper = shallowMount(RenderMarkdownBaseComponent, options);
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <h1>example</h1>
 </div>`
     );
@@ -38,7 +38,7 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><svg viewBox="0 0 100 100" width="100" height="100">
       <circle fill="red" stroke-width="3" stroke="black" r="40" cy="50" cx="50"></circle>
     </svg></p>
@@ -53,10 +53,38 @@ describe("RenderMarkdownBaseComponent", () => {
       },
     });
     expect(wrapper.html()).toBe(
-      `<div class="markdown-render">
+      `<div class="markdown-render --ltr">
   <p><svg viewBox="0 0 100 100" width="100" height="100">
       <circle fill="red" stroke-width="3" stroke="black" r="40" cy="50" cx="50"></circle>
     </svg></p>
+</div>`
+    );
+  });
+
+  it("open in other window if the node is a link", () => {
+    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+      ...options,
+      propsData: {
+        markdown: `[example](https://example.com)`,
+      },
+    });
+    expect(wrapper.html()).toBe(
+      `<div class="markdown-render --ltr">
+  <p><a target="_blank" href="https://example.com">example</a></p>
+</div>`
+    );
+  });
+
+  it("open in other window if the node already hace target blank", () => {
+    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+      ...options,
+      propsData: {
+        markdown: `<a href="https://example.com" target="_blank">example</a>`,
+      },
+    });
+    expect(wrapper.html()).toBe(
+      `<div class="markdown-render --ltr">
+  <p><a target="_blank" href="https://example.com">example</a></p>
 </div>`
     );
   });

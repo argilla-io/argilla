@@ -1,18 +1,5 @@
 <template>
   <div class="title-area --body1">
-    <BaseTooltip
-      v-if="question.suggestion"
-      :text="suggestionTooltipText"
-      position="left"
-      minimalist
-    >
-      <img
-        class="title-area__suggestion-icon"
-        src="@/static/icons/suggestion.svg"
-        :alt="$t('suggestion.name')"
-        draggable="false"
-      />
-    </BaseTooltip>
     <span
       class="suggestion-info"
       v-text="question.title"
@@ -39,6 +26,7 @@
 
 <script>
 import "assets/icons/info";
+import "assets/icons/suggestion";
 
 export default {
   name: "QuestionHeader",
@@ -58,11 +46,6 @@ export default {
   computed: {
     showIcon() {
       return !!this.question.description?.length;
-    },
-    suggestionTooltipText() {
-      return `This question contains a suggestion \n agent: ${
-        this.question.suggestion.agent || "-"
-      } \n score: ${this.question.suggestion.score || "-"}`;
     },
   },
   watch: {
@@ -85,7 +68,7 @@ export default {
   font-weight: 500;
   &__suggestion-icon {
     cursor: default;
-    width: 20px;
+    fill: $black-54;
   }
 }
 

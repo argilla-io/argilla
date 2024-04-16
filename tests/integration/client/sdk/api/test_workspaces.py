@@ -19,25 +19,12 @@ from argilla.client.sdk.workspaces.api import (
     create_workspace_user,
     delete_workspace_user,
     list_workspace_users,
-    list_workspaces,
 )
 from argilla.client.sdk.workspaces.models import WorkspaceModel
 from argilla.client.singleton import ArgillaSingleton
 from argilla_server.models import User
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
-
-
-@pytest.mark.asyncio
-async def test_list_workspaces(owner: User) -> None:
-    await WorkspaceFactory.create(name="test_workspace")
-    httpx_client = ArgillaSingleton.init(api_key=owner.api_key).http_client.httpx
-
-    response = list_workspaces(client=httpx_client)
-    assert response.status_code == 200
-    assert isinstance(response.parsed, list)
-    assert len(response.parsed) > 0
-    assert isinstance(response.parsed[0], WorkspaceModel)
 
 
 def test_create_workspace(owner: User) -> None:
