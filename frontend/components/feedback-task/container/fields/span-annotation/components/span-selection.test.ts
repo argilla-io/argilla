@@ -62,6 +62,10 @@ type TestSelection = {
   entity: string;
 };
 
+const node = {
+  textContent: DUMMY_TEXT,
+} as HTMLElement;
+
 const createTextSelection = (selection: TestSelection): TextSelection => {
   return {
     from: selection.from,
@@ -71,7 +75,7 @@ const createTextSelection = (selection: TestSelection): TextSelection => {
       id: selection.entity,
     },
     node: {
-      element: {} as HTMLElement,
+      element: node,
       id: "node-id",
       text: DUMMY_TEXT,
     },
@@ -91,7 +95,7 @@ const createSpan = (
       id: selection.entity,
     },
     node: {
-      element: {} as HTMLElement,
+      element: node,
       id: "node-id",
     },
     overlap: {
@@ -102,383 +106,411 @@ const createSpan = (
 };
 
 describe("Span Selection", () => {
-  describe("should auto complete token correctly", () => {
-    test.each([
-      [
-        { from: 9, to: 15, text: "orem I", entity: "TOKEN" },
-        {
+  describe("addSpan", () => {
+    describe("should auto complete token correctly", () => {
+      test.each([
+        [
+          { from: 9, to: 15, text: "orem I", entity: "TOKEN" },
+          {
+            from: 8,
+            to: 19,
+            text: "Lorem Ipsum",
+            entity: "TOKEN",
+          },
+        ],
+        [
+          { from: 852, to: 854, text: "or", entity: "TOKEN" },
+          { from: 852, to: 854, text: "or", entity: "TOKEN" },
+        ],
+        [
+          { from: 5, to: 8, text: "is ", entity: "TOKEN" },
+          { from: 5, to: 7, text: "is", entity: "TOKEN" },
+        ],
+        [
+          { from: 5, to: 9, text: "is L", entity: "TOKEN" },
+          { from: 5, to: 13, text: "is Lorem", entity: "TOKEN" },
+        ],
+        [
+          { from: 7, to: 10, text: " Lo", entity: "TOKEN" },
+          { from: 8, to: 13, text: "Lorem", entity: "TOKEN" },
+        ],
+        [
+          { from: 8, to: 20, text: "Lorem Ipsum?", entity: "TOKEN" },
+          {
+            from: 8,
+            to: 20,
+            text: "Lorem Ipsum?",
+            entity: "TOKEN",
+          },
+        ],
+        [
+          {
+            from: 1865,
+            to: 1870,
+            text: ".10.3",
+            entity: "TOKEN",
+          },
+          {
+            from: 1864,
+            to: 1871,
+            text: "1.10.33",
+            entity: "TOKEN",
+          },
+        ],
+        [
+          { from: 849, to: 857, text: "re-or-le", entity: "TOKEN" },
+          { from: 847, to: 859, text: "more-or-less", entity: "TOKEN" },
+        ],
+        [
+          { from: 1120, to: 1136, text: "for 'lorem ipsum", entity: "TOKEN" },
+          { from: 1120, to: 1136, text: "for 'lorem ipsum", entity: "TOKEN" },
+        ],
+        [
+          {
+            from: 1872,
+            to: 1911,
+            text: 'of "de Finibus Bonorum et Malorum',
+            entity: "TOKEN",
+          },
+          {
+            from: 1872,
+            to: 1911,
+            text: 'of "de Finibus Bonorum et Malorum',
+            entity: "TOKEN",
+          },
+        ],
+        [
+          { from: 1993, to: 1994, text: "a", entity: "TOKEN" },
+          { from: 1993, to: 1994, text: "a", entity: "TOKEN" },
+        ],
+        [
+          { from: 2132, to: 2136, text: "amet", entity: "TOKEN" },
+          { from: 2132, to: 2136, text: "amet", entity: "TOKEN" },
+        ],
+        [
+          { from: 2496, to: 2499, text: "m.", entity: "TOKEN" },
+          { from: 2490, to: 2498, text: "Rackham.", entity: "TOKEN" },
+        ],
+      ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
+        const spanSelection = new SpanSelection();
+
+        const textSelection = createTextSelection(actual);
+
+        spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans[0]).toEqual(createSpan(expected));
+        expect(spanSelection.spans).toHaveLength(1);
+      });
+    });
+
+    describe("should allow selection by character level", () => {
+      test.each([
+        [
+          { from: 4, to: 5, text: " ", entity: "TOKEN" },
+          { from: 4, to: 5, text: " ", entity: "TOKEN" },
+        ],
+      ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
+        const spanSelection = new SpanSelection();
+        spanSelection.config.allowCharacter = true;
+
+        const textSelection = createTextSelection(actual);
+
+        spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans[0]).toEqual(createSpan(expected));
+      });
+    });
+
+    describe("should allow overlapping selection", () => {
+      test.each([
+        [
+          [
+            { from: 849, to: 857, text: "re-or-le", entity: "TOKEN" },
+            { from: 849, to: 857, text: "re-or-le", entity: "TOKEN-2" },
+          ],
+          [
+            {
+              from: 847,
+              to: 859,
+              text: "more-or-less",
+              entity: "TOKEN",
+              level: 1,
+            },
+            {
+              from: 847,
+              to: 859,
+              text: "more-or-less",
+              entity: "TOKEN-2",
+              level: 2,
+            },
+          ],
+        ],
+        [
+          [
+            {
+              from: 65,
+              to: 86,
+              text: "ting and typese",
+              entity: "TOKEN",
+            },
+            { from: 64, to: 69, text: "nting", entity: "TOKEN-2" },
+          ],
+          [
+            {
+              from: 61,
+              to: 91,
+              text: "printing and typesetting",
+              entity: "TOKEN",
+              level: 1,
+            },
+            { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
+          ],
+        ],
+        [
+          [
+            { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
+            { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
+            { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
+          ],
+          [{ from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" }],
+        ],
+      ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
+        const spanSelection = new SpanSelection();
+        spanSelection.config.allowOverlap = true;
+
+        actual.forEach((span) => {
+          const textSelection = createTextSelection(span);
+
+          spanSelection.addSpan(textSelection);
+        });
+
+        expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
+        expect(spanSelection.spans).toHaveLength(expected.length);
+      });
+    });
+
+    describe("should allow overlapping selection for character level", () => {
+      test.each([
+        [
+          [
+            {
+              from: 61,
+              to: 91,
+              text: "printing and typesetting",
+              entity: "TOKEN",
+            },
+            { from: 61, to: 69, text: "printing", entity: "TOKEN-2" },
+            { from: 69, to: 70, text: " ", entity: "TOKEN-3" },
+          ],
+          [
+            {
+              from: 61,
+              to: 91,
+              text: "printing and typesetting",
+              entity: "TOKEN",
+              level: 1,
+            },
+            { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
+            { from: 69, to: 70, text: " ", entity: "TOKEN-3", level: 2 },
+          ],
+        ],
+      ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
+        const spanSelection = new SpanSelection();
+        spanSelection.config.allowOverlap = true;
+        spanSelection.config.allowCharacter = true;
+
+        actual.forEach((span) => {
+          const textSelection = createTextSelection(span);
+
+          spanSelection.addSpan(textSelection);
+        });
+
+        expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
+      });
+    });
+
+    describe("should replace current token when overlapping is not allowed", () => {
+      test.each([
+        [
+          [
+            {
+              from: 61,
+              to: 91,
+              text: "printing and typesetting",
+              entity: "TOKEN",
+            },
+            {
+              from: 55,
+              to: 97,
+              text: "f the printing and typesetting indus",
+              entity: "TOKEN",
+            },
+          ],
+          {
+            from: 54,
+            to: 100,
+            text: "of the printing and typesetting industry",
+            entity: "TOKEN",
+          },
+        ],
+      ])("%o %o", (actual: TestSelection[], expected: TestSelection) => {
+        const spanSelection = new SpanSelection();
+
+        actual.forEach((span) => {
+          const textSelection = createTextSelection(span);
+
+          spanSelection.addSpan(textSelection);
+        });
+
+        expect(spanSelection.spans[0]).toEqual(createSpan(expected));
+        expect(spanSelection.spans).toHaveLength(1);
+      });
+    });
+
+    describe("should not create span for one character when character level is not allowed", () => {
+      test.each([{ from: 4, to: 5, text: " ", entity: "TOKEN" }])(
+        "%o %o",
+        (actual: TestSelection) => {
+          const spanSelection = new SpanSelection();
+          spanSelection.config.allowCharacter = false;
+
+          const textSelection = createTextSelection(actual);
+          spanSelection.addSpan(textSelection);
+
+          expect(spanSelection.spans).toEqual([]);
+        }
+      );
+    });
+
+    describe("should remove span created", () => {
+      test("should remove span", () => {
+        const spanSelection = new SpanSelection();
+        const textSelection = createTextSelection({
+          from: 10,
+          to: 17,
+          text: "rem Ips",
+          entity: "TOKEN",
+        });
+
+        const expectedSpan = createSpan({
           from: 8,
           to: 19,
           text: "Lorem Ipsum",
           entity: "TOKEN",
-        },
-      ],
-      [
-        { from: 852, to: 854, text: "or", entity: "TOKEN" },
-        { from: 852, to: 854, text: "or", entity: "TOKEN" },
-      ],
-      [
-        { from: 5, to: 8, text: "is ", entity: "TOKEN" },
-        { from: 5, to: 7, text: "is", entity: "TOKEN" },
-      ],
-      [
-        { from: 5, to: 9, text: "is L", entity: "TOKEN" },
-        { from: 5, to: 13, text: "is Lorem", entity: "TOKEN" },
-      ],
-      [
-        { from: 7, to: 10, text: " Lo", entity: "TOKEN" },
-        { from: 8, to: 13, text: "Lorem", entity: "TOKEN" },
-      ],
-      [
-        { from: 8, to: 20, text: "Lorem Ipsum?", entity: "TOKEN" },
-        {
-          from: 8,
-          to: 20,
-          text: "Lorem Ipsum?",
-          entity: "TOKEN",
-        },
-      ],
-      [
-        {
-          from: 1865,
-          to: 1870,
-          text: ".10.3",
-          entity: "TOKEN",
-        },
-        {
-          from: 1864,
-          to: 1871,
-          text: "1.10.33",
-          entity: "TOKEN",
-        },
-      ],
-      [
-        { from: 849, to: 857, text: "re-or-le", entity: "TOKEN" },
-        { from: 847, to: 859, text: "more-or-less", entity: "TOKEN" },
-      ],
-      [
-        { from: 1120, to: 1136, text: "for 'lorem ipsum", entity: "TOKEN" },
-        { from: 1120, to: 1136, text: "for 'lorem ipsum", entity: "TOKEN" },
-      ],
-      [
-        {
-          from: 1872,
-          to: 1911,
-          text: 'of "de Finibus Bonorum et Malorum',
-          entity: "TOKEN",
-        },
-        {
-          from: 1872,
-          to: 1911,
-          text: 'of "de Finibus Bonorum et Malorum',
-          entity: "TOKEN",
-        },
-      ],
-      [
-        { from: 1993, to: 1994, text: "a", entity: "TOKEN" },
-        { from: 1993, to: 1994, text: "a", entity: "TOKEN" },
-      ],
-      [
-        { from: 2132, to: 2136, text: "amet", entity: "TOKEN" },
-        { from: 2132, to: 2136, text: "amet", entity: "TOKEN" },
-      ],
-    ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
-      const spanSelection = new SpanSelection();
-
-      const textSelection = createTextSelection(actual);
-
-      spanSelection.addSpan(textSelection);
-
-      expect(spanSelection.spans[0]).toEqual(createSpan(expected));
-      expect(spanSelection.spans).toHaveLength(1);
-    });
-  });
-
-  describe("should allow selection by character level", () => {
-    test.each([
-      [
-        { from: 4, to: 5, text: " ", entity: "TOKEN" },
-        { from: 4, to: 5, text: " ", entity: "TOKEN" },
-      ],
-    ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
-      const spanSelection = new SpanSelection();
-      spanSelection.config.allowCharacter = true;
-
-      const textSelection = createTextSelection(actual);
-
-      spanSelection.addSpan(textSelection);
-
-      expect(spanSelection.spans[0]).toEqual(createSpan(expected));
-    });
-  });
-
-  describe("should allow overlapping selection", () => {
-    test.each([
-      [
-        [
-          { from: 849, to: 857, text: "re-or-le", entity: "TOKEN" },
-          { from: 849, to: 857, text: "re-or-le", entity: "TOKEN-2" },
-        ],
-        [
-          {
-            from: 847,
-            to: 859,
-            text: "more-or-less",
-            entity: "TOKEN",
-            level: 1,
-          },
-          {
-            from: 847,
-            to: 859,
-            text: "more-or-less",
-            entity: "TOKEN-2",
-            level: 2,
-          },
-        ],
-      ],
-      [
-        [
-          {
-            from: 65,
-            to: 86,
-            text: "ting and typese",
-            entity: "TOKEN",
-          },
-          { from: 64, to: 69, text: "nting", entity: "TOKEN-2" },
-        ],
-        [
-          {
-            from: 61,
-            to: 91,
-            text: "printing and typesetting",
-            entity: "TOKEN",
-            level: 1,
-          },
-          { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
-        ],
-      ],
-      [
-        [
-          { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
-          { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
-          { from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" },
-        ],
-        [{ from: 21, to: 32, text: "Lorem Ipsum", entity: "TOKEN" }],
-      ],
-    ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
-      const spanSelection = new SpanSelection();
-      spanSelection.config.allowOverlap = true;
-
-      actual.forEach((span) => {
-        const textSelection = createTextSelection(span);
+        });
 
         spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans).toEqual([expectedSpan]);
+
+        spanSelection.removeSpan(expectedSpan);
+
+        expect(spanSelection.spans).toHaveLength(0);
       });
-
-      expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
-      expect(spanSelection.spans).toHaveLength(expected.length);
     });
-  });
 
-  describe("should allow overlapping selection for character level", () => {
-    test.each([
-      [
-        [
-          {
-            from: 61,
-            to: 91,
-            text: "printing and typesetting",
-            entity: "TOKEN",
-          },
-          { from: 61, to: 69, text: "printing", entity: "TOKEN-2" },
-          { from: 69, to: 70, text: " ", entity: "TOKEN-3" },
-        ],
-        [
-          {
-            from: 61,
-            to: 91,
-            text: "printing and typesetting",
-            entity: "TOKEN",
-            level: 1,
-          },
-          { from: 61, to: 69, text: "printing", entity: "TOKEN-2", level: 2 },
-          { from: 69, to: 70, text: " ", entity: "TOKEN-3", level: 2 },
-        ],
-      ],
-    ])("%o %o", (actual: TestSelection[], expected: TestSelection[]) => {
-      const spanSelection = new SpanSelection();
-      spanSelection.config.allowOverlap = true;
-      spanSelection.config.allowCharacter = true;
-
-      actual.forEach((span) => {
-        const textSelection = createTextSelection(span);
-
-        spanSelection.addSpan(textSelection);
-      });
-
-      expect(spanSelection.spans).toEqual(expected.map((e) => createSpan(e)));
-    });
-  });
-
-  describe("should replace current token when overlapping is not allowed", () => {
-    test.each([
-      [
-        [
-          {
-            from: 61,
-            to: 91,
-            text: "printing and typesetting",
-            entity: "TOKEN",
-          },
-          {
-            from: 55,
-            to: 97,
-            text: "f the printing and typesetting indus",
-            entity: "TOKEN",
-          },
-        ],
-        {
-          from: 54,
-          to: 100,
-          text: "of the printing and typesetting industry",
-          entity: "TOKEN",
-        },
-      ],
-    ])("%o %o", (actual: TestSelection[], expected: TestSelection) => {
-      const spanSelection = new SpanSelection();
-
-      actual.forEach((span) => {
-        const textSelection = createTextSelection(span);
-
-        spanSelection.addSpan(textSelection);
-      });
-
-      expect(spanSelection.spans[0]).toEqual(createSpan(expected));
-      expect(spanSelection.spans).toHaveLength(1);
-    });
-  });
-
-  describe("should not create span for one character when character level is not allowed", () => {
-    test.each([{ from: 4, to: 5, text: " ", entity: "TOKEN" }])(
-      "%o %o",
-      (actual: TestSelection) => {
+    describe("should replace the entity for the span", () => {
+      test("should replace entity", () => {
         const spanSelection = new SpanSelection();
-        spanSelection.config.allowCharacter = false;
+        const textSelection = createTextSelection({
+          from: 10,
+          to: 17,
+          text: "rem Ips",
+          entity: "TOKEN",
+        });
 
-        const textSelection = createTextSelection(actual);
+        const expectedSpan = createSpan({
+          from: 8,
+          to: 19,
+          text: "Lorem Ipsum",
+          entity: "TOKEN",
+        });
+
+        const newEntity = {
+          id: "TOKEN-2",
+          text: "TOKEN-2",
+          value: "TOKEN-2",
+        };
+
         spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans).toEqual([expectedSpan]);
+
+        spanSelection.replaceEntity(expectedSpan, newEntity);
+
+        expect(spanSelection.spans[0].entity).toEqual(newEntity);
+      });
+
+      test("should not replace entity if span is not found", () => {
+        const spanSelection = new SpanSelection();
+        const textSelection = createTextSelection({
+          from: 10,
+          to: 17,
+          text: "rem Ips",
+          entity: "TOKEN",
+        });
+        const expectedSpan = createSpan({
+          from: 8,
+          to: 19,
+          text: "Lorem Ipsum",
+          entity: "TOKEN",
+        });
+
+        const noExisting = createSpan({
+          from: 300,
+          to: 21,
+          text: "xxx",
+          entity: "TOKEN-3",
+        });
+
+        spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans).toEqual([expectedSpan]);
+
+        spanSelection.replaceEntity(noExisting, {
+          id: "TOKEN-2",
+        });
+
+        expect(spanSelection.spans[0].entity.id).toEqual("TOKEN");
+      });
+    });
+
+    describe("should not create span for selections", () => {
+      test("should not create out of range span", () => {
+        const spanSelection = new SpanSelection();
+        const textSelection1 = createTextSelection({
+          from: -1,
+          to: 10,
+          text: "NOT EXIST",
+          entity: "TOKEN",
+        });
+
+        spanSelection.addSpan(textSelection1);
 
         expect(spanSelection.spans).toEqual([]);
-      }
-    );
-  });
-
-  describe("should remove span created", () => {
-    test("should remove span", () => {
-      const spanSelection = new SpanSelection();
-      const textSelection = createTextSelection({
-        from: 10,
-        to: 17,
-        text: "rem Ips",
-        entity: "TOKEN",
       });
-
-      const expectedSpan = createSpan({
-        from: 8,
-        to: 19,
-        text: "Lorem Ipsum",
-        entity: "TOKEN",
-      });
-
-      spanSelection.addSpan(textSelection);
-
-      expect(spanSelection.spans).toEqual([expectedSpan]);
-
-      spanSelection.removeSpan(expectedSpan);
-
-      expect(spanSelection.spans).toHaveLength(0);
     });
   });
 
-  describe("should replace the entity for the span", () => {
-    test("should replace entity", () => {
+  describe("loadSpans", () => {
+    test.each([
+      [
+        { from: -1, to: 5, text: "What ", entity: "TOKEN" },
+        { from: 0, to: 5, text: "What ", entity: "TOKEN" },
+      ],
+      [
+        { from: 2496, to: 2499, text: "m.", entity: "TOKEN" },
+        { from: 2496, to: 2498, text: "m.", entity: "TOKEN" },
+      ],
+    ])("%o %o", (actual: TestSelection, expected: TestSelection) => {
       const spanSelection = new SpanSelection();
-      const textSelection = createTextSelection({
-        from: 10,
-        to: 17,
-        text: "rem Ips",
-        entity: "TOKEN",
-      });
 
-      const expectedSpan = createSpan({
-        from: 8,
-        to: 19,
-        text: "Lorem Ipsum",
-        entity: "TOKEN",
-      });
+      const span = createSpan(actual);
 
-      const newEntity = {
-        id: "TOKEN-2",
-        text: "TOKEN-2",
-        value: "TOKEN-2",
-      };
+      spanSelection.loadSpans([span]);
 
-      spanSelection.addSpan(textSelection);
-
-      expect(spanSelection.spans).toEqual([expectedSpan]);
-
-      spanSelection.replaceEntity(expectedSpan, newEntity);
-
-      expect(spanSelection.spans[0].entity).toEqual(newEntity);
-    });
-
-    test("should not replace entity if span is not found", () => {
-      const spanSelection = new SpanSelection();
-      const textSelection = createTextSelection({
-        from: 10,
-        to: 17,
-        text: "rem Ips",
-        entity: "TOKEN",
-      });
-      const expectedSpan = createSpan({
-        from: 8,
-        to: 19,
-        text: "Lorem Ipsum",
-        entity: "TOKEN",
-      });
-
-      const noExisting = createSpan({
-        from: 300,
-        to: 21,
-        text: "xxx",
-        entity: "TOKEN-3",
-      });
-
-      spanSelection.addSpan(textSelection);
-
-      expect(spanSelection.spans).toEqual([expectedSpan]);
-
-      spanSelection.replaceEntity(noExisting, {
-        id: "TOKEN-2",
-      });
-
-      expect(spanSelection.spans[0].entity.id).toEqual("TOKEN");
-    });
-  });
-
-  describe("should not create span for selections", () => {
-    test("should not create out of range span", () => {
-      const spanSelection = new SpanSelection();
-      const textSelection1 = createTextSelection({
-        from: -1,
-        to: 10,
-        text: "NOT EXIST",
-        entity: "TOKEN",
-      });
-
-      spanSelection.addSpan(textSelection1);
-
-      expect(spanSelection.spans).toEqual([]);
+      expect(spanSelection.spans[0]).toEqual(createSpan(expected));
+      expect(spanSelection.spans).toHaveLength(1);
     });
   });
 });

@@ -106,6 +106,8 @@ export class SpanSelection {
   select(selected: Span) {
     if (this.exists(selected)) return;
 
+    this.completeOutOfBoundaries(selected);
+
     const overlaps = this.selections.filter((s) => {
       return (
         (selected.from <= s.from && selected.to >= s.to) ||
@@ -127,10 +129,6 @@ export class SpanSelection {
     };
 
     this.selections.push(newVariable);
-  }
-
-  isOutOfRange(selection: TextSelection) {
-    return selection.from < 0 || selection.to < 0;
   }
 
   loadSpans(selections: Span[]) {
@@ -155,6 +153,18 @@ export class SpanSelection {
     this.selections = this.selections.filter(
       (s) => this.createId(s) !== this.createId(span)
     );
+  }
+
+  private completeOutOfBoundaries(selected: Span) {
+    selected.from = Math.max(0, selected.from);
+    selected.to = Math.min(
+      selected.node.element.textContent.length,
+      selected.to
+    );
+  }
+
+  private isOutOfRange(selection: TextSelection) {
+    return selection.from < 0 || selection.to < 0;
   }
 
   private exists(span: Span) {

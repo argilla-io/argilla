@@ -182,9 +182,7 @@ export class Highlighting {
     this.node.addEventListener("click", () => {
       this.highlightUserSelection();
 
-      try {
-        this.applyStyles();
-      } catch {}
+      this.applyStyles();
     });
 
     document.addEventListener("selectionchange", () => {
