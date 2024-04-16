@@ -212,7 +212,7 @@ class RGDatasetListener:
                     )
                 }
             )
-        return Metrics.from_dict(metrics)
+        return Metrics(**metrics)
 
     def __run_action__(self, ctx: Optional[RGListenerContext] = None, *args, **kwargs):
         try:

@@ -15,8 +15,6 @@
 import dataclasses
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-from prodict import Prodict
-
 from argilla.client.models import Record
 
 if TYPE_CHECKING:
@@ -37,7 +35,7 @@ class Search:
     query_params: Optional[Dict[str, Any]] = None
 
 
-class Metrics(Prodict):
+class Metrics(object):
     """
     Metrics results for a single listener execution.
 
@@ -46,7 +44,14 @@ class Metrics(Prodict):
     accessible as ``metrics.F1``
     """
 
-    pass
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            if isinstance(kwargs[key], dict):
+                kwargs[key] = Metrics(**kwargs[key])
+            setattr(self, key, kwargs[key])
+
+    def __iter__(self):
+        return iter(self.__dict__)
 
 
 @dataclasses.dataclass
