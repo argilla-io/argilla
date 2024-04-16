@@ -21,7 +21,7 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="content-area --body1">
+    <div class="text_field_component__area --body1">
       <p
         :class="[
           allowOverlapping
@@ -190,7 +190,6 @@ export default {
 <style lang="scss" scoped>
 .text_field_component {
   $this: &;
-  user-select: text;
   display: flex;
   flex-direction: column;
   gap: $base-space;
@@ -209,10 +208,11 @@ export default {
     gap: $base-space;
     color: $black-87;
   }
-  .content-area {
+  &__area {
     position: relative;
     white-space: pre-wrap;
     word-break: break-word;
+    user-select: none;
   }
   &__title-content {
     word-break: break-word;
@@ -235,6 +235,7 @@ export default {
     margin: 0;
     @include font-size(18px);
     line-height: v-bind(lineHeight);
+    user-select: text;
     &--overlapped {
       @extend .span-annotation__field;
     }
