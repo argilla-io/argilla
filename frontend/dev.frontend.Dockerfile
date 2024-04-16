@@ -17,10 +17,10 @@ COPY --chown=argilla:argilla package.json ./package.json
 COPY --chown=argilla:argilla nuxt.config.ts ./nuxt.config.ts
 
 RUN npm install && \
-    echo \
-    'elastic: /usr/share/elasticsearch/bin/elasticsearch\n\
-    argilla: /bin/bash /home/argilla/start_argilla_server.sh\n\
-    frontend: cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile.frontend
+echo \
+'elastic: /usr/share/elasticsearch/bin/elasticsearch\n\
+argilla: /bin/bash /home/argilla/start_argilla_server.sh\n\
+frontend: cd /home/argilla/frontend && HOST=0.0.0.0 PORT=3000 npm run start\n' > /home/argilla/Procfile.frontend
 
 WORKDIR /home/argilla/
 
