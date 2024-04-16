@@ -16,6 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added German language translation ([#4688](https://github.com/argilla-io/argilla/pull/4688))
+
+### Changed
+
+- New UI design for suggestions ([#4682](https://github.com/argilla-io/argilla/pull/4682))
+
 ### Fixed
 
 - Improve performance for more than 250 labels ([#4702](https://github.com/argilla-io/argilla/pull/4702))
@@ -25,7 +33,6 @@ These are the section headers that we use:
 ### Added
 
 - Added support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
-- Added German language translation ([#4688](https://github.com/argilla-io/argilla/pull/4688))
 
 ## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
 

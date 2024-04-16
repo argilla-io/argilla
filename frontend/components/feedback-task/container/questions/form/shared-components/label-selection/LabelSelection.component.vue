@@ -56,20 +56,13 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="
-            isSuggested(option)
-              ? `<img src='icons/suggestion.svg' /> ${$t('suggestion.name')}: ${
-                  option.text
-                }`
-              : null
-          "
+          :text="isSuggested(option) ? $t('suggestion.name') : null"
           minimalist
         >
           <label
             class="label-text"
             :class="{
               'label-active': option.isSelected,
-              '--suggestion': isSuggested(option),
               square: multiple,
               round: !multiple,
             }"
@@ -78,8 +71,12 @@
           >
             <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
-          </label></BaseTooltip
-        >
+            <svgicon
+              v-if="isSuggested(option)"
+              class="label-text__suggestion-icon"
+              name="suggestion"
+            /> </label
+        ></BaseTooltip>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -320,7 +317,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$suggestion-color: palette(yellow, 400);
 $label-color: palette(purple, 800);
 $label-dark-color: palette(purple, 200);
 .container {
@@ -392,8 +388,16 @@ $label-dark-color: palette(purple, 200);
   outline: none;
   border: 2px solid transparent;
   border-radius: $border-radius-rounded;
+  transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
+
+  &__suggestion-icon {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+  }
+
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -403,20 +407,19 @@ $label-dark-color: palette(purple, 200);
       direction: rtl;
     }
   }
-  &.--suggestion {
-    background: $suggestion-color;
-    &:not(.label-active):hover {
-      background: darken($suggestion-color, 8%);
-    }
-  }
+
   &:not(.label-active):hover {
-    background: darken($label-color, 8%);
+    background: darken($label-color, 2%);
+    transition: all 0.2s ease-in-out;
   }
+
   &.label-active {
     color: white;
     background: $label-dark-color;
-    &.--suggestion {
-      border: 2px solid $suggestion-color;
+    box-shadow: none;
+    &:hover {
+      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
+      background: darken(palette(purple, 200), 4%);
     }
   }
 }
