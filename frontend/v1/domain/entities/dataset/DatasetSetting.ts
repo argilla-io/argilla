@@ -1,8 +1,8 @@
+import { Field } from "../field/Field";
+import { Metadata } from "../metadata/Metadata";
+import { Question } from "../question/Question";
+import { Vector } from "../vector/Vector";
 import { Dataset } from "./Dataset";
-import { Field } from "./field/Field";
-import { Metadata } from "./metadata/Metadata";
-import { Question } from "./question/Question";
-import { Vector } from "./vector/Vector";
 
 export class DatasetSetting {
   constructor(

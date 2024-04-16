@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added overall progress bar on `Datasets` table ([#4696](https://github.com/argilla-io/argilla/pull/4696))
 - Added German language translation ([#4688](https://github.com/argilla-io/argilla/pull/4688))
 
 ### Changed

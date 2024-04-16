@@ -1,9 +1,9 @@
 import { IDatasetRepository } from "../services/IDatasetRepository";
 
-export class DeleteDatasetUseCase {
+export class GetDatasetProgressUseCase {
   constructor(private readonly datasetRepository: IDatasetRepository) {}
 
-  async execute(datasetId: string) {
-    await this.datasetRepository.delete(datasetId);
+  execute(datasetId: string) {
+    return this.datasetRepository.getProgress(datasetId);
   }
 }
