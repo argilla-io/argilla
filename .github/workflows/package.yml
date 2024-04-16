@@ -155,11 +155,8 @@ jobs:
       image-name: argilla/argilla-quickstart-for-dev
       dockerfile: frontend/dev.frontend.Dockerfile
       platforms: linux/amd64
-      # TODO: Using this build-args only for testing purposes. We should remove it after checking it's working.
       build-args: |
-        ARGILLA_SERVER_TAG=pr-102
-      # build-args: |
-      #   ARGILLA_SERVER_TAG=main
+        ARGILLA_SERVER_TAG=main
     secrets: inherit
 
   deploy_environment:
