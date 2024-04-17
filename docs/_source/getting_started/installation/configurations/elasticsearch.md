@@ -12,7 +12,7 @@ All you need to take into account is:
 
 * Argilla will create its ES indices with the following patterns: `rg.*` and `*ar.dataset*`. It's recommended to create a new role (e.g., argilla) and provide it with all privileges for these index patterns.
 
-Argilla uses the `ARGILLA_ELASTICSEARCH` environment variable to set the ES connection.
+- Argilla uses the `ARGILLA_ELASTICSEARCH` environment variable to set the ES connection.
 
 :::{note}
 Argilla supports ElasticSearch versions 8.8, 8.5, 8.0, and 7.17.
