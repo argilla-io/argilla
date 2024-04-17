@@ -455,6 +455,7 @@ def test_span_question() -> None:
         title="Question",
         description="Description",
         required=True,
+        allow_overlapping=True,
         labels=["a", "b"],
     )
 
@@ -463,6 +464,7 @@ def test_span_question() -> None:
         "type": "span",
         "field": "field",
         "visible_options": None,
+        "allow_overlapping": True,
         "options": [{"value": "a", "text": "a", "description": None}, {"value": "b", "text": "b", "description": None}],
     }
 
@@ -481,6 +483,7 @@ def test_span_question_with_labels_dict() -> None:
         "type": "span",
         "field": "field",
         "visible_options": None,
+        "allow_overlapping": False,
         "options": [
             {"value": "a", "text": "A text", "description": None},
             {"value": "b", "text": "B text", "description": None},
@@ -503,6 +506,7 @@ def test_span_question_with_visible_labels() -> None:
         "type": "span",
         "field": "field",
         "visible_options": 3,
+        "allow_overlapping": False,
         "options": [
             {"value": "a", "text": "a", "description": None},
             {"value": "b", "text": "b", "description": None},

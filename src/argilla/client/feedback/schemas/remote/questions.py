@@ -160,6 +160,7 @@ class RemoteSpanQuestion(SpanQuestion, RemoteSchema):
             required=self.required,
             labels=self.labels,
             visible_labels=self.visible_labels,
+            allow_overlapping=self.allow_overlapping,
         )
 
     @classmethod
@@ -168,14 +169,16 @@ class RemoteSpanQuestion(SpanQuestion, RemoteSchema):
 
     @classmethod
     def from_api(cls, payload: "FeedbackQuestionModel") -> "RemoteSpanQuestion":
+        question_settings = payload.settings
         return RemoteSpanQuestion(
             id=payload.id,
             name=payload.name,
             title=payload.title,
-            field=payload.settings["field"],
+            field=question_settings["field"],
             required=payload.required,
-            visible_labels=payload.settings["visible_options"],
-            labels=cls._parse_options_from_api(payload.settings["options"]),
+            visible_labels=question_settings["visible_options"],
+            labels=cls._parse_options_from_api(question_settings["options"]),
+            allow_overlapping=question_settings["allow_overlapping"],
         )
 
 
