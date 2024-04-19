@@ -57,7 +57,10 @@ export class SpanSelection {
     return [...this.selections];
   }
 
-  addSpan(selection?: TextSelection, config?: Configuration) {
+  crateSpan(
+    selection?: TextSelection,
+    config?: Configuration
+  ): Span | undefined {
     if (!selection) return;
     if (this.isOutOfRange(selection)) return;
 
@@ -91,7 +94,7 @@ export class SpanSelection {
 
     const { from, to, entity, text, node } = selection;
 
-    this.select({
+    const span = {
       from,
       to,
       entity,
@@ -100,7 +103,17 @@ export class SpanSelection {
         element: node.element,
         id: node.id,
       },
-    });
+    };
+
+    return span;
+  }
+
+  addSpan(selection?: TextSelection, config?: Configuration) {
+    const span = this.crateSpan(selection, config);
+
+    if (!span) return;
+
+    this.select(span);
   }
 
   select(selected: Span) {

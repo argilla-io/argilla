@@ -186,6 +186,7 @@ export class Highlighting {
     });
 
     document.addEventListener("selectionchange", () => {
+      // TODO try to replace with other function getTextSelection()
       const selection = document.getSelection();
       if (selection.rangeCount === 0) return;
 
@@ -202,8 +203,30 @@ export class Highlighting {
 
       if (entity && isSelectionInsideNode) {
         const className = `${styles.entityCssKey}-${entity.id}-selection`;
-
         CSS.highlights.set(className, new Highlight(range));
+
+        const simulatedSpan = this.spanSelection.crateSpan(
+          this.createTextSelection(),
+          this.config
+        );
+
+        const firstSpan: Span = {
+          ...simulatedSpan,
+          from: simulatedSpan.from,
+          to: range.startOffset,
+        };
+
+        const lastSpan: Span = {
+          ...simulatedSpan,
+          from: range.endOffset,
+          to: simulatedSpan.to,
+        };
+
+        const tokenizedClassName = `${styles.entityCssKey}-${entity.id}-pre-selection`;
+        CSS.highlights.set(
+          tokenizedClassName,
+          new Highlight(this.createRange(firstSpan), this.createRange(lastSpan))
+        );
       }
     });
 
@@ -231,7 +254,7 @@ export class Highlighting {
   }
 
   private highlightUserSelection() {
-    const textSelection = this.createTextSelection();
+    const textSelection = this.createTextSelection(true);
     this.spanSelection.addSpan(textSelection, this.config);
   }
 
@@ -380,7 +403,7 @@ export class Highlighting {
     return range;
   }
 
-  private createTextSelection(): TextSelection | undefined {
+  private createTextSelection(clear = false): TextSelection | undefined {
     const selection = this.getSelectedText();
     if (selection?.type !== "Range" || !this.entity) return;
 
@@ -400,7 +423,7 @@ export class Highlighting {
       },
     };
 
-    selection.empty();
+    if (clear) selection.empty();
 
     return textSelection;
   }
