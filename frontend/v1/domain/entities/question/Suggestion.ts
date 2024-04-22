@@ -17,7 +17,7 @@ interface SuggestionValue {
 export class Suggestion implements Answer {
   constructor(
     private readonly id: string,
-    private readonly questionId: string,
+    public readonly questionId: string,
     private readonly questionType: QuestionType,
     private readonly suggestedAnswer: AnswerCombinations,
     private readonly score: number | number[],
