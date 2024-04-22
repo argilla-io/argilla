@@ -178,6 +178,39 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
+      if (this.multiple) {
+        const visible = this.filteredOptions;
+
+        const suggestedOptions = visible
+          .filter(
+            (v) => this.suggestion && this.suggestion.isSuggested(v.value)
+          )
+          .sort((a, b) => {
+            const isASuggested = this.suggestion.getSuggestion(a.value);
+            const isBSuggested = this.suggestion.getSuggestion(b.value);
+
+            return isASuggested?.score - isBSuggested?.score;
+          });
+
+        const noSuggestedOptions = visible.filter(
+          (v) => this.suggestion && !this.suggestion.isSuggested(v.value)
+        );
+
+        const options = [...suggestedOptions, ...noSuggestedOptions];
+
+        if (this.isExpanded) {
+          return options;
+        }
+
+        return options.slice(
+          0,
+          Math.max(
+            this.suggestion?.value.length ?? 0,
+            this.maxOptionsToShowBeforeCollapse
+          )
+        );
+      }
+
       if (this.isExpanded) return this.filteredOptions;
 
       return this.filteredOptions
