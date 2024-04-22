@@ -6,55 +6,98 @@ import {
 } from "../IAnswer";
 import { QuestionType } from "./QuestionType";
 
+type AnswerValue = string | number | RankingAnswer | SpanAnswer;
+
+interface SuggestionValue {
+  value: AnswerValue;
+  score: number;
+  agent: string;
+}
+
 export class Suggestion implements Answer {
   constructor(
-    public readonly id: string,
-    public readonly questionId: string,
-    public readonly questionType: QuestionType,
-    public readonly suggestedAnswer: AnswerCombinations,
-    public readonly score: number,
-    public readonly agent: string
+    private readonly id: string,
+    private readonly questionId: string,
+    private readonly questionType: QuestionType,
+    private readonly suggestedAnswer: AnswerCombinations,
+    private readonly score: number | number[],
+    private readonly agent: string
   ) {}
 
   get value() {
     return this.suggestedAnswer;
   }
 
-  isSuggested(answer: string | number | RankingAnswer | SpanAnswer) {
+  isSuggested(answer: AnswerValue) {
     return !!this.getSuggestion(answer);
   }
 
-  getSuggestion(answer: string | number | RankingAnswer | SpanAnswer) {
+  getSuggestion(answer: AnswerValue): SuggestionValue | undefined {
     if (
       this.questionType.isSingleLabelType ||
       this.questionType.isTextType ||
       this.questionType.isRatingType
     ) {
-      return this.value === answer;
+      if (this.value === answer) {
+        return {
+          value: answer,
+          score: this.score as number,
+          agent: this.agent,
+        };
+      }
     }
 
     if (this.questionType.isMultiLabelType) {
       const multiLabel = this.value as string[];
       const answerValue = answer as string;
 
-      return multiLabel.includes(answerValue);
+      if (multiLabel.includes(answerValue)) {
+        const indexOf = multiLabel.indexOf(answerValue);
+
+        return {
+          value: answer,
+          score: this.score[indexOf],
+          agent: this.agent,
+        };
+      }
     }
 
     if (this.questionType.isSpanType) {
       const span = answer as SpanAnswer;
       const suggestions = this.value as SpanAnswer[];
 
-      return suggestions.find(
+      const spanSuggested = suggestions.find(
         (s) =>
           s.label === span.label && s.start === span.start && s.end === span.end
       );
+
+      if (spanSuggested) {
+        const indexOf = suggestions.indexOf(spanSuggested);
+
+        return {
+          value: spanSuggested,
+          score: this.score[indexOf],
+          agent: this.agent,
+        };
+      }
     }
 
     if (this.questionType.isRankingType) {
       const suggestedRanking = this.value as RankingAnswer[];
       const ranking = answer as RankingAnswer;
 
-      return suggestedRanking.find((s) => s.value === ranking.value);
+      const rankingSuggested = suggestedRanking.find(
+        (s) => s.value === ranking.value
+      );
+
+      if (rankingSuggested) {
+        const indexOf = suggestedRanking.indexOf(rankingSuggested);
+        return {
+          value: rankingSuggested,
+          score: this.score[indexOf],
+          agent: this.agent,
+        };
+      }
     }
   }
 }

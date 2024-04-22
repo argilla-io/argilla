@@ -25,12 +25,12 @@
         />
 
         <BaseTooltip
-          v-if="findRankSuggestion(item)"
+          v-if="suggestion?.isSuggested(item)"
           class="draggable__suggestion"
           :text="$t('suggestion.suggested-rank')"
           minimalist
         >
-          <span v-text="findRankSuggestion(item).rank" />
+          <span v-text="suggestion?.getSuggestion(item).value.rank" />
           <svgicon name="suggestion" width="10" height="10" />
         </BaseTooltip>
       </div>
@@ -71,12 +71,12 @@
             />
 
             <BaseTooltip
-              v-if="findRankSuggestion(item)"
+              v-if="suggestion?.isSuggested(item)"
               class="draggable__suggestion"
               :text="`${$t('suggestion.suggested-rank')}`"
               minimalist
             >
-              <span v-text="findRankSuggestion(item).rank" />
+              <span v-text="suggestion?.getSuggestion(item).value.rank" />
               <svgicon name="suggestion" width="10" height="10" />
             </BaseTooltip>
           </div>
@@ -205,9 +205,6 @@ export default {
     },
     onFocus() {
       this.$emit("on-focus");
-    },
-    findRankSuggestion(item) {
-      return this.suggestion?.getSuggestion(item);
     },
   },
 };
