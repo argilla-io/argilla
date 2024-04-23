@@ -30,7 +30,7 @@
       >
         <BaseButton
           class="span-entity__close-button"
-          @click="removeSelectedOption"
+          @click.stop="removeSelectedOption"
         >
           <svgicon name="close" width="10" height="10" color="#fff"
         /></BaseButton>
@@ -54,15 +54,27 @@
           v-text="suggestionScore"
         />
       </div>
-      <EntityComponentDropdown
-        v-else
-        :style="entityFixedPosition"
-        :selectedOption="selectedOption"
-        :options="options"
-        @on-replace-option="selectOption"
-        @on-remove-option="removeSelectedOption"
-        v-click-outside="hideDropdown"
-      />
+      <template v-else>
+        <EntityDropdownOverlapping
+          v-if="allowOverlapping"
+          :style="entityFixedPosition"
+          :selectedOption="selectedOption"
+          :options="options"
+          :entitiesInSameRange="entitiesInRange"
+          @on-replace-option="selectOption"
+          @on-remove-option="removeSelectedOption"
+          v-click-outside="hideDropdown"
+        />
+        <EntityDropdown
+          v-else
+          :style="entityFixedPosition"
+          :selectedOption="selectedOption"
+          :options="options"
+          @on-replace-option="selectOption"
+          @on-remove-option="removeSelectedOption"
+          v-click-outside="hideDropdown"
+        />
+      </template>
     </div>
   </span>
 </template>
@@ -88,6 +100,9 @@ export default {
     entityPosition: {
       type: Object,
       required: true,
+    },
+    entitiesInRange: {
+      type: Array,
     },
   },
   data() {
@@ -164,8 +179,8 @@ export default {
       this.$emit("on-replace-option", option);
       this.hideDropdown();
     },
-    removeSelectedOption() {
-      this.$emit("on-remove-option");
+    removeSelectedOption(option) {
+      this.$emit("on-remove-option", option);
       this.hideDropdown();
     },
     hoverSpan(isHovered) {

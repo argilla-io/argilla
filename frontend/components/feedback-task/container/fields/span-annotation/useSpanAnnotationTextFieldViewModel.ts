@@ -44,12 +44,21 @@ export const useSpanAnnotationTextFieldViewModel = ({
       label: entity?.value,
     });
 
+    const spanInRange = highlighting.value.spans.filter(
+      (entity) => entity.from === span.from && entity.to === span.to
+    );
+
+    const entitiesInRange = spanInRange.map((entity) => {
+      return answer.options.find((option) => option.id === entity.entity.id);
+    });
+
     const instance = new EntityComponentReference({
       propsData: {
         entity,
         spanQuestion,
         entityPosition,
         suggestion,
+        entitiesInRange,
       },
     });
 
