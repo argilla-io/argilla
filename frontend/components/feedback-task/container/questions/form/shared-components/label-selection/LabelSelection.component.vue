@@ -56,7 +56,13 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="isSuggested(option) ? $t('suggestion.name') : null"
+          :text="
+            getSuggestion(option)
+              ? `<span class='label-tooltip__title'>${$t(
+                  'suggestion.name'
+                )}</span>\n${getAgent(option)}`
+              : null
+          "
           minimalist
         >
           <label
@@ -71,12 +77,18 @@
           >
             <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
+            <span
+              v-if="getScore(option)"
+              class="label-text__score"
+              v-text="getScore(option)"
+            />
             <svgicon
-              v-if="isSuggested(option)"
+              v-else-if="getSuggestion(option)"
               class="label-text__suggestion-icon"
               name="suggestion"
-            /> </label
-        ></BaseTooltip>
+            />
+          </label>
+        </BaseTooltip>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -306,8 +318,14 @@ export default {
         this.isExpanded = true;
       }
     },
-    isSuggested(option) {
-      return this.suggestion?.isSuggested(option.value);
+    getSuggestion(option) {
+      return this.suggestion?.getSuggestion(option.value);
+    },
+    getScore(option) {
+      return this.getSuggestion(option)?.score?.toFixed(1) || "";
+    },
+    getAgent(option) {
+      return this.getSuggestion(option)?.agent || "";
     },
   },
   setup(props) {
@@ -397,6 +415,9 @@ $label-dark-color: palette(purple, 200);
     width: 10px;
     height: 10px;
   }
+  &__score {
+    @include font-size(11px);
+  }
 
   span {
     white-space: nowrap;
@@ -471,6 +492,11 @@ input[type="checkbox"] {
 .no-result {
   display: block;
   height: $base-space * 4;
+}
+
+:deep(.label-tooltip__title) {
+  font-weight: lighter;
+  @include font-size(12px);
 }
 
 .shuffle-move {

@@ -140,7 +140,7 @@ export default {
   white-space: pre;
   &--minimalist {
     background: palette(grey, 150);
-    @include font-size(12px);
+    @include font-size(13px);
     padding: calc($base-space / 2);
   }
   &--hide {

@@ -8,7 +8,13 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :text="isSuggested(option) ? $t('suggestion.name') : null"
+          :text="
+            getSuggestion(option)
+              ? `<span class='label-tooltip__title'>${$t(
+                  'suggestion.name'
+                )}</span>\n${getAgent(option)}: ${getScore(option)}`
+              : null
+          "
           minimalist
         >
           <input
@@ -30,7 +36,7 @@
             {{ option.value }}
 
             <svgicon
-              v-if="isSuggested(option)"
+              v-if="getSuggestion(option)"
               class="label-text__suggestion-icon"
               name="suggestion"
             />
@@ -78,8 +84,14 @@ export default {
     },
   },
   methods: {
-    isSuggested(option) {
-      return this.suggestion?.isSuggested(option.value);
+    getSuggestion(option) {
+      return this.suggestion?.getSuggestion(option.value);
+    },
+    getScore(option) {
+      return this.getSuggestion(option)?.score?.toFixed(1) || "";
+    },
+    getAgent(option) {
+      return this.getSuggestion(option)?.agent || "";
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
@@ -170,6 +182,11 @@ input[type="checkbox"] {
       }
     }
   }
+}
+
+:deep(.label-tooltip__title) {
+  font-weight: lighter;
+  @include font-size(12px);
 }
 
 [data-title] {
