@@ -25,6 +25,7 @@ declare class Highlight {
 declare namespace CSS {
   const highlights: {
     set(className: string, highlight: Highlight): void;
+    delete(className: string): void;
     clear(): void;
   };
 }
@@ -203,68 +204,59 @@ export class Highlighting {
   };
 
   private showSelection() {
-    const selection = document.getSelection();
-    if (selection.rangeCount === 0) return;
+    if (!this.entity) return;
 
-    const range = selection.getRangeAt(0);
+    const className = `${this.styles.entityCssKey}-${this.entity.id}-selection`;
+
+    const selection = this.createTextSelection();
+
+    if (!selection) {
+      return CSS.highlights.delete(className);
+    }
+
+    if (selection?.node.id !== this.nodeId) return;
+
+    const range = this.createRange(selection);
 
     if (!range) return;
 
-    const entity = this.entity;
-    const styles = this.styles;
-
-    const isSelectionInsideNode =
-      range?.startContainer?.parentNode instanceof Element &&
-      range?.startContainer?.parentNode.id === this.nodeId;
-
-    if (!entity || !isSelectionInsideNode) return;
-
-    const className = `${styles.entityCssKey}-${entity.id}-selection`;
     CSS.highlights.set(className, new Highlight(range));
   }
 
   private showPreSelection() {
-    const selection = document.getSelection();
-    if (selection.rangeCount === 0) return;
+    if (!this.entity) return;
 
-    const range = selection.getRangeAt(0);
+    const tokenizedClassName = `${this.styles.entityCssKey}-${this.entity.id}-pre-selection`;
 
-    if (!range) return;
+    const selection = this.createTextSelection();
 
-    const entity = this.entity;
-    const isSelectionInsideNode =
-      range?.startContainer?.parentNode instanceof Element &&
-      range?.startContainer?.parentNode.id === this.nodeId;
+    if (!selection) {
+      return CSS.highlights.delete(tokenizedClassName);
+    }
 
-    if (!entity || !isSelectionInsideNode) return;
+    if (selection.node.id !== this.nodeId) return;
 
-    const styles = this.styles;
-
-    const simulatedSpan = this.spanSelection.crateSpan(
-      this.createTextSelection(),
-      this.config
-    );
+    const simulatedSpan = this.spanSelection.crateSpan(selection, this.config);
 
     if (!simulatedSpan) return;
 
-    console.log("SIMulated span", simulatedSpan);
-
-    const firstSpan: Span = {
+    const firstRange = this.createRange({
       ...simulatedSpan,
       from: simulatedSpan.from,
-      to: range.startOffset,
-    };
+      to: selection.from,
+    });
 
-    const lastSpan: Span = {
+    const lastRange = this.createRange({
       ...simulatedSpan,
-      from: range.endOffset,
+      from: selection.to,
       to: simulatedSpan.to,
-    };
+    });
 
-    const tokenizedClassName = `${styles.entityCssKey}-${entity.id}-pre-selection`;
+    if (!firstRange || !lastRange) return;
+
     CSS.highlights.set(
       tokenizedClassName,
-      new Highlight(this.createRange(firstSpan), this.createRange(lastSpan))
+      new Highlight(firstRange, lastRange)
     );
   }
 
@@ -424,12 +416,14 @@ export class Highlighting {
   }
 
   public createRange({ from, to, node }: Span) {
-    const range = new Range();
+    try {
+      const range = new Range();
 
-    range.setStart(node.element, from);
-    range.setEnd(node.element, to);
+      range.setStart(node.element, from);
+      range.setEnd(node.element, to);
 
-    return range;
+      return range;
+    } catch {}
   }
 
   private createTextSelection(clear = false): TextSelection | undefined {
