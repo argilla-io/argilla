@@ -40,19 +40,13 @@
         <svgicon
           v-if="!!suggestion"
           :class="
-            suggestionScore
-              ? 'span-entity__suggestion--score'
-              : 'span-entity__suggestion'
+            score ? 'span-entity__suggestion--score' : 'span-entity__suggestion'
           "
           name="suggestion"
           width="8"
           height="8"
         />
-        <span
-          v-if="suggestionScore"
-          class="span-entity__score"
-          v-text="suggestionScore"
-        />
+        <span v-if="score" class="span-entity__score" v-text="score" />
       </div>
       <EntityComponentDropdown
         v-else
@@ -109,8 +103,8 @@ export default {
     singleOption() {
       return this.options.length === 1;
     },
-    suggestionScore() {
-      return this.suggestion?.score?.toFixed(1);
+    score() {
+      return this.suggestion?.value.score?.toFixed(1);
     },
     entityColor() {
       return this.entity.color;
