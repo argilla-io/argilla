@@ -35,7 +35,7 @@
         class="span-entity__input"
         type="text"
         autocomplete="off"
-        :placeholder="$nuxt.$t('search')"
+        :placeholder="selection.length ? '' : $nuxt.$t('search')"
         autofocus
         v-model="searchText"
         @keydown.stop=""
@@ -149,6 +149,11 @@ export default {
     searchText() {
       this.preSelectionIndex = 0;
     },
+    selection() {
+      this.$nextTick(() => {
+        this.$refs.search.focus();
+      });
+    },
   },
   mounted() {
     this.preselectedEntity = this.filteredOptions[0];
@@ -203,7 +208,7 @@ export default {
       }
       &.checkbox :deep(.checkbox__container .svg-icon) {
         display: inline-block;
-        fill: $primary-color;
+        fill: $black-37;
         min-width: 16px;
         min-height: 16px;
       }
