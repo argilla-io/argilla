@@ -91,6 +91,10 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_SPAN_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by span questions (Default: `500`).
 
+### Hugging Face
+
+- `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING`: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistant storage is disabled for the space (Default: `true`).
+
 ### Client
 
 - `ARGILLA_API_URL`: The default API URL when calling {meth}`argilla.init`.
