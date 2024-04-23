@@ -128,6 +128,8 @@ export class Highlighting {
 
   allowCharacterAnnotation(allow: boolean) {
     this.config.allowCharacter = allow;
+
+    this.showPreSelection();
   }
 
   replaceEntity(span: Span, entity: Entity) {
@@ -186,48 +188,9 @@ export class Highlighting {
     });
 
     document.addEventListener("selectionchange", () => {
-      // TODO try to replace with other function getTextSelection()
-      const selection = document.getSelection();
-      if (selection.rangeCount === 0) return;
+      this.showSelection();
 
-      const range = selection.getRangeAt(0);
-
-      if (!range) return;
-
-      const entity = this.entity;
-      const styles = this.styles;
-
-      const isSelectionInsideNode =
-        range?.startContainer?.parentNode instanceof Element &&
-        range?.startContainer?.parentNode.id === this.nodeId;
-
-      if (entity && isSelectionInsideNode) {
-        const className = `${styles.entityCssKey}-${entity.id}-selection`;
-        CSS.highlights.set(className, new Highlight(range));
-
-        const simulatedSpan = this.spanSelection.crateSpan(
-          this.createTextSelection(),
-          this.config
-        );
-
-        const firstSpan: Span = {
-          ...simulatedSpan,
-          from: simulatedSpan.from,
-          to: range.startOffset,
-        };
-
-        const lastSpan: Span = {
-          ...simulatedSpan,
-          from: range.endOffset,
-          to: simulatedSpan.to,
-        };
-
-        const tokenizedClassName = `${styles.entityCssKey}-${entity.id}-pre-selection`;
-        CSS.highlights.set(
-          tokenizedClassName,
-          new Highlight(this.createRange(firstSpan), this.createRange(lastSpan))
-        );
-      }
+      this.showPreSelection();
     });
 
     new ResizeObserver(() => this.applyStyles()).observe(node);
@@ -238,6 +201,72 @@ export class Highlighting {
   private scroll = () => {
     this.applyEntityStyle();
   };
+
+  private showSelection() {
+    const selection = document.getSelection();
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+
+    if (!range) return;
+
+    const entity = this.entity;
+    const styles = this.styles;
+
+    const isSelectionInsideNode =
+      range?.startContainer?.parentNode instanceof Element &&
+      range?.startContainer?.parentNode.id === this.nodeId;
+
+    if (!entity || !isSelectionInsideNode) return;
+
+    const className = `${styles.entityCssKey}-${entity.id}-selection`;
+    CSS.highlights.set(className, new Highlight(range));
+  }
+
+  private showPreSelection() {
+    const selection = document.getSelection();
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+
+    if (!range) return;
+
+    const entity = this.entity;
+    const isSelectionInsideNode =
+      range?.startContainer?.parentNode instanceof Element &&
+      range?.startContainer?.parentNode.id === this.nodeId;
+
+    if (!entity || !isSelectionInsideNode) return;
+
+    const styles = this.styles;
+
+    const simulatedSpan = this.spanSelection.crateSpan(
+      this.createTextSelection(),
+      this.config
+    );
+
+    if (!simulatedSpan) return;
+
+    console.log("SIMulated span", simulatedSpan);
+
+    const firstSpan: Span = {
+      ...simulatedSpan,
+      from: simulatedSpan.from,
+      to: range.startOffset,
+    };
+
+    const lastSpan: Span = {
+      ...simulatedSpan,
+      from: range.endOffset,
+      to: simulatedSpan.to,
+    };
+
+    const tokenizedClassName = `${styles.entityCssKey}-${entity.id}-pre-selection`;
+    CSS.highlights.set(
+      tokenizedClassName,
+      new Highlight(this.createRange(firstSpan), this.createRange(lastSpan))
+    );
+  }
 
   private applyStylesOnScroll() {
     if (this.scrollingElement) {
