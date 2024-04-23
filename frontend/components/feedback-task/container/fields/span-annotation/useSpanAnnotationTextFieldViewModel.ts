@@ -32,9 +32,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
     span: Span,
     entityPosition: Position,
     hoverSpan: (isHovered: boolean) => void,
-    removeSpan: () => void,
+    removeSpan: (span: Span) => void,
     replaceEntity: (entity: Entity) => void,
-    cloneSpanWith: (entity: Entity) => void
+    cloneSpanWith: (span: Span, entity: Entity) => void
   ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
     const entity = answer.options.find((e) => e.id === span.entity.id);
@@ -48,10 +48,6 @@ export const useSpanAnnotationTextFieldViewModel = ({
       (entity) => entity.from === span.from && entity.to === span.to
     );
 
-    const entitiesInRange = spanInRange.map((entity) => {
-      return answer.options.find((option) => option.id === entity.entity.id);
-    });
-
     const entitiesGap = highlighting.value.styles.entitiesGap;
 
     const instance = new EntityComponentReference({
@@ -60,7 +56,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
         spanQuestion,
         entityPosition,
         suggestion,
-        entitiesInRange,
+        spanInRange,
         entitiesGap,
       },
     });
@@ -68,13 +64,15 @@ export const useSpanAnnotationTextFieldViewModel = ({
     instance.$on("on-remove-option", removeSpan);
     instance.$on("on-hover-span", hoverSpan);
     instance.$on("on-replace-option", (newEntity: Entity) => {
-      if (highlighting.value.config.allowOverlap) {
-        return cloneSpanWith(newEntity);
-      }
-
       selectEntity(newEntity);
 
       replaceEntity(newEntity);
+    });
+
+    instance.$on("on-add-span-base-on", (span: Span, newEntity: Entity) => {
+      debugger;
+      cloneSpanWith(span, newEntity);
+      selectEntity(newEntity);
     });
 
     instance.$mount();

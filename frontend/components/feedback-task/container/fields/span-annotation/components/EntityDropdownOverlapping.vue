@@ -71,8 +71,9 @@ export default {
       type: Array,
       required: true,
     },
-    entitiesInRange: {
+    spanInRange: {
       type: Array,
+      required: true,
     },
   },
   data() {
@@ -94,15 +95,21 @@ export default {
   },
   methods: {
     selectOptions() {
-      this.selection.forEach((entity) => {
-        this.$emit("on-replace-option", entity);
-      });
-      const removedEntities = this.entitiesInRange.filter(
-        (entity) => !this.selection.includes(entity)
+      const removedSpans = this.spanInRange.filter(
+        ({ entity }) => !this.selection.includes(entity)
       );
 
-      removedEntities.forEach((entity) => {
-        this.$emit("on-remove-option", entity);
+      removedSpans.forEach((span) => {
+        this.$emit("on-remove-option", span);
+      });
+
+      const addedSpans = this.selection.filter(
+        (entity) =>
+          !this.spanInRange.map(({ entity }) => entity).includes(entity)
+      );
+
+      addedSpans.forEach((entity) => {
+        this.$emit("on-add-span-base-on", this.spanInRange[0], entity);
       });
     },
     excludeOption(entityOpt) {
@@ -144,7 +151,9 @@ export default {
   },
   mounted() {
     this.preselectedEntity = this.filteredOptions[0];
-    this.selection = this.entitiesInRange;
+    this.selection = this.spanInRange.map(({ entity }) => {
+      return this.options.find((option) => option.id === entity.id);
+    });
     this.$refs.search.focus();
   },
 };

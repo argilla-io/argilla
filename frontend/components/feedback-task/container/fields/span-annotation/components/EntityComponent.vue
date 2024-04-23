@@ -60,8 +60,8 @@
           :style="overlappingDropdownPosition"
           :selectedOption="selectedOption"
           :options="options"
-          :entitiesInRange="entitiesInRange"
-          @on-replace-option="selectOption"
+          :spanInRange="spanInRange"
+          @on-add-span-base-on="addSpanBaseOn"
           @on-remove-option="removeSelectedOption"
           v-click-outside="hideDropdown"
         />
@@ -101,8 +101,9 @@ export default {
       type: Object,
       required: true,
     },
-    entitiesInRange: {
+    spanInRange: {
       type: Array,
+      required: true,
     },
     entitiesGap: {
       type: Number,
@@ -175,8 +176,8 @@ export default {
       };
     },
     getLevelInEntitiesInRange() {
-      return this.entitiesInRange.findIndex(
-        (entity) => entity.id === this.entity.id
+      return this.spanInRange.findIndex(
+        ({ entity }) => entity.id === this.entity.id
       );
     },
     overlappingDropdownPosition() {
@@ -192,6 +193,10 @@ export default {
   methods: {
     getNumberOfLines(space) {
       return Math.floor(space / this.entityPosition.lineHeight + 1);
+    },
+    addSpanBaseOn(span, option) {
+      this.$emit("on-add-span-base-on", span, option);
+      this.hideDropdown();
     },
     selectOption(option) {
       this.$emit("on-replace-option", option);
