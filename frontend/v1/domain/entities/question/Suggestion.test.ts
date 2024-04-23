@@ -119,6 +119,27 @@ describe("Suggestion", () => {
       const isSuggested = suggestion.isSuggested("Three");
       expect(isSuggested).toBe(false);
     });
+
+    test("score should be undefined if not provided", () => {
+      const suggestion = new Suggestion(
+        "id",
+        "questionId",
+        QuestionType.from("multi_label_selection"),
+        ["One", "Two"],
+        undefined,
+        "agent"
+      );
+
+      const isSuggested = suggestion.isSuggested("One");
+      expect(isSuggested).toBe(true);
+
+      const suggested = suggestion.getSuggestion("One");
+      expect(suggested).toEqual({
+        value: "One",
+        score: undefined,
+        agent: "agent",
+      });
+    });
   });
 
   describe("rating type", () => {
@@ -230,6 +251,39 @@ describe("Suggestion", () => {
       });
       expect(isSuggested).toBe(false);
     });
+
+    test("score should be undefined if not provided", () => {
+      const suggestion = new Suggestion(
+        "id",
+        "questionId",
+        QuestionType.from("ranking"),
+        [
+          { value: "One", rank: 1 },
+          { value: "Two", rank: 2 },
+        ],
+        undefined,
+        "agent"
+      );
+
+      const isSuggested = suggestion.isSuggested({
+        value: "One",
+        rank: 1,
+      });
+      expect(isSuggested).toBe(true);
+
+      const suggested = suggestion.getSuggestion({
+        value: "One",
+        rank: 1,
+      });
+      expect(suggested).toEqual({
+        value: {
+          value: "One",
+          rank: 1,
+        },
+        score: undefined,
+        agent: "agent",
+      });
+    });
   });
 
   describe("Span type", () => {
@@ -303,6 +357,50 @@ describe("Suggestion", () => {
         label: "Three",
       });
       expect(isSuggested).toBe(false);
+    });
+
+    test("score should be undefined if not provided", () => {
+      const suggestion = new Suggestion(
+        "id",
+        "questionId",
+        QuestionType.from("span"),
+        [
+          {
+            start: 0,
+            end: 5,
+            label: "One",
+          },
+          {
+            start: 0,
+            end: 5,
+            label: "Two",
+          },
+        ],
+        undefined,
+        "agent"
+      );
+
+      const isSuggested = suggestion.isSuggested({
+        start: 0,
+        end: 5,
+        label: "One",
+      });
+      expect(isSuggested).toBe(true);
+
+      const suggested = suggestion.getSuggestion({
+        start: 0,
+        end: 5,
+        label: "One",
+      });
+      expect(suggested).toEqual({
+        value: {
+          start: 0,
+          end: 5,
+          label: "One",
+        },
+        score: undefined,
+        agent: "agent",
+      });
     });
   });
 });
