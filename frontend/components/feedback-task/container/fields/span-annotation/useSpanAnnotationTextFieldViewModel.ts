@@ -48,31 +48,24 @@ export const useSpanAnnotationTextFieldViewModel = ({
       (entity) => entity.from === span.from && entity.to === span.to
     );
 
-    const entitiesGap = highlighting.value.styles.entitiesGap;
-
     const instance = new EntityComponentReference({
       propsData: {
+        span,
+        spanInRange,
         entity,
         spanQuestion,
         entityPosition,
         suggestion,
-        spanInRange,
-        entitiesGap,
       },
     });
 
-    instance.$on("on-remove-option", removeSpan);
+    instance.$on("on-remove-span", removeSpan);
     instance.$on("on-hover-span", hoverSpan);
-    instance.$on("on-replace-option", (newEntity: Entity) => {
+    instance.$on("on-add-span-base-on", cloneSpanWith);
+    instance.$on("on-replace-entity", (newEntity: Entity) => {
       selectEntity(newEntity);
 
       replaceEntity(newEntity);
-    });
-
-    instance.$on("on-add-span-base-on", (span: Span, newEntity: Entity) => {
-      debugger;
-      cloneSpanWith(span, newEntity);
-      selectEntity(newEntity);
     });
 
     instance.$mount();

@@ -358,6 +358,7 @@ export class Highlighting {
       topEnd: position.topEnd - offset.top + scrollTop,
       right: position.right - offset.left,
       lineHeight: this.config.lineHeight,
+      baseEntityGap: this.styles.entitiesGap,
     };
   }
 

@@ -96,16 +96,17 @@ export default {
   methods: {
     selectOptions() {
       const removedSpans = this.spanInRange.filter(
-        ({ entity }) => !this.selection.includes(entity)
+        ({ entity }) =>
+          !this.selection.map((entity) => entity.id).includes(entity.id)
       );
 
       removedSpans.forEach((span) => {
-        this.$emit("on-remove-option", span);
+        this.$emit("on-remove-span", span);
       });
 
       const addedSpans = this.selection.filter(
         (entity) =>
-          !this.spanInRange.map(({ entity }) => entity).includes(entity)
+          !this.spanInRange.some((span) => span.entity.id === entity.id)
       );
 
       addedSpans.forEach((entity) => {

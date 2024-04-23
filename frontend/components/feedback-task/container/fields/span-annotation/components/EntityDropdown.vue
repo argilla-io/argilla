@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     selectOption(option) {
-      this.$emit("on-replace-option", option);
+      this.$emit("on-replace-entity", option);
     },
     includePreselectedOption() {
       if (!this.filteredOptions.length) return;

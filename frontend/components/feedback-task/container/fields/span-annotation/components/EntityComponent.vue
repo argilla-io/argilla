@@ -30,7 +30,7 @@
       >
         <BaseButton
           class="span-entity__close-button"
-          @click.stop="removeSelectedOption"
+          @click.stop="removeSelectedSpan(span)"
         >
           <svgicon name="close" width="10" height="10" color="#fff"
         /></BaseButton>
@@ -62,7 +62,7 @@
           :options="options"
           :spanInRange="spanInRange"
           @on-add-span-base-on="addSpanBaseOn"
-          @on-remove-option="removeSelectedOption"
+          @on-remove-span="removeSelectedSpan"
           v-click-outside="hideDropdown"
         />
         <EntityDropdown
@@ -70,8 +70,7 @@
           :style="entityFixedPosition"
           :selectedOption="selectedOption"
           :options="options"
-          @on-replace-option="selectOption"
-          @on-remove-option="removeSelectedOption"
+          @on-replace-entity="selectEntity"
           v-click-outside="hideDropdown"
         />
       </template>
@@ -86,6 +85,10 @@ import "assets/icons/suggestion";
 export default {
   name: "EntityComponent",
   props: {
+    span: {
+      type: Object,
+      required: true,
+    },
     entity: {
       type: Object,
       required: true,
@@ -104,10 +107,6 @@ export default {
     spanInRange: {
       type: Array,
       required: true,
-    },
-    entitiesGap: {
-      type: Number,
-      default: 0,
     },
   },
   data() {
@@ -185,7 +184,7 @@ export default {
         left: `${this.spanEntityPosition.left}px`,
         top: `${
           this.spanEntityPosition.top -
-          this.getLevelInEntitiesInRange * this.entitiesGap
+          this.getLevelInEntitiesInRange * this.entityPosition.baseEntityGap
         }px`,
       };
     },
@@ -194,16 +193,16 @@ export default {
     getNumberOfLines(space) {
       return Math.floor(space / this.entityPosition.lineHeight + 1);
     },
-    addSpanBaseOn(span, option) {
-      this.$emit("on-add-span-base-on", span, option);
+    addSpanBaseOn(span, entity) {
+      this.$emit("on-add-span-base-on", span, entity);
       this.hideDropdown();
     },
-    selectOption(option) {
-      this.$emit("on-replace-option", option);
+    selectEntity(entity) {
+      this.$emit("on-replace-entity", entity);
       this.hideDropdown();
     },
-    removeSelectedOption(option) {
-      this.$emit("on-remove-option", option);
+    removeSelectedSpan(span) {
+      this.$emit("on-remove-span", span);
       this.hideDropdown();
     },
     hoverSpan(isHovered) {
