@@ -57,10 +57,10 @@
       <template v-else>
         <EntityDropdownOverlapping
           v-if="allowOverlapping"
-          :style="entityFixedPosition"
+          :style="overlappingDropdownPosition"
           :selectedOption="selectedOption"
           :options="options"
-          :entitiesInSameRange="entitiesInRange"
+          :entitiesInRange="entitiesInRange"
           @on-replace-option="selectOption"
           @on-remove-option="removeSelectedOption"
           v-click-outside="hideDropdown"
@@ -103,6 +103,10 @@ export default {
     },
     entitiesInRange: {
       type: Array,
+    },
+    entitiesGap: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -168,6 +172,20 @@ export default {
       return {
         left: `${this.spanEntityPosition.left}px`,
         top: `${this.spanEntityPosition.top}px`,
+      };
+    },
+    getLevelInEntitiesInRange() {
+      return this.entitiesInRange.findIndex(
+        (entity) => entity.id === this.entity.id
+      );
+    },
+    overlappingDropdownPosition() {
+      return {
+        left: `${this.spanEntityPosition.left}px`,
+        top: `${
+          this.spanEntityPosition.top -
+          this.getLevelInEntitiesInRange * this.entitiesGap
+        }px`,
       };
     },
   },

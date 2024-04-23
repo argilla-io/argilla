@@ -52,6 +52,8 @@ export const useSpanAnnotationTextFieldViewModel = ({
       return answer.options.find((option) => option.id === entity.entity.id);
     });
 
+    const entitiesGap = highlighting.value.styles.entitiesGap;
+
     const instance = new EntityComponentReference({
       propsData: {
         entity,
@@ -59,6 +61,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
         entityPosition,
         suggestion,
         entitiesInRange,
+        entitiesGap,
       },
     });
 

@@ -71,7 +71,7 @@ export default {
       type: Array,
       required: true,
     },
-    entitiesInSameRange: {
+    entitiesInRange: {
       type: Array,
     },
   },
@@ -97,7 +97,7 @@ export default {
       this.selection.forEach((entity) => {
         this.$emit("on-replace-option", entity);
       });
-      const removedEntities = this.entitiesInSameRange.filter(
+      const removedEntities = this.entitiesInRange.filter(
         (entity) => !this.selection.includes(entity)
       );
 
@@ -144,7 +144,7 @@ export default {
   },
   mounted() {
     this.preselectedEntity = this.filteredOptions[0];
-    this.selection = this.entitiesInSameRange;
+    this.selection = this.entitiesInRange;
     this.$refs.search.focus();
   },
 };
