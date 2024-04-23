@@ -15,12 +15,11 @@
 from typing import Any, Dict
 
 import pytest
-
 from argilla import SuggestionSchema
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion, MultiLabelQuestion
+from argilla.client.feedback.schemas.questions import MultiLabelQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
