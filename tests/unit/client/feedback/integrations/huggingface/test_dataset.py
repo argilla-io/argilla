@@ -15,10 +15,12 @@
 from typing import Any, Dict
 
 import pytest
+
+from argilla import SuggestionSchema
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin
 from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
+from argilla.client.feedback.schemas.questions import TextQuestion, MultiLabelQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 
 
@@ -45,3 +47,22 @@ class TestSuiteHuggingFaceDatasetMixin:
         assert hf_record == {
             key: value for key, value in hf_dataset[0].items() if key in [field.name for field in dataset.fields]
         }
+
+    def test_format_with_multi_score(self):
+        dataset = FeedbackDataset(
+            fields=[TextField(name="text")],
+            questions=[MultiLabelQuestion(name="topics", labels=["politics", "sports", "economy"])],
+        )
+        dataset.add_records(
+            [
+                FeedbackRecord(
+                    fields={"text": "text"},
+                    suggestions=[
+                        SuggestionSchema(value=["politics", "sports"], question_name="topics", score=[0.5, 0.5])
+                    ],
+                )
+            ]
+        )
+
+        hf_dataset = HuggingFaceDatasetMixin._huggingface_format(dataset=dataset)
+        assert hf_dataset[0]["topics-suggestion-metadata"]["score"] == [0.5, 0.5]
