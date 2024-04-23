@@ -69,12 +69,20 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   ) {
     super(type);
 
+    const makeSafeForCSS = (str: string) => {
+      return str.replace(/[^a-z0-9]/g, (s) => {
+        const c = s.charCodeAt(0);
+        if (c === 32) return "-";
+        if (c >= 65 && c <= 90) return `-${s.toLowerCase()}`;
+        return `-${c.toString(16)}`;
+      });
+    };
+
     this.options = options.map((e) => ({
       ...e,
-      id: `${questionName}-${e.value}`,
+      id: makeSafeForCSS(`${questionName}-${e.value}`),
       isSelected: false,
     }));
-
     this.clear();
   }
 

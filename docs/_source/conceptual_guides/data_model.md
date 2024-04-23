@@ -24,11 +24,12 @@ A **Field** defines the schema or structure for a specific data element within a
 
 A **Question** represents a specific query or instruction presented to labelers for feedback. Questions play a crucial role in guiding labelers and capturing their input. Argilla Feedback supports different types of questions to accommodate various feedback scenarios.
 
-- **TextQuestion**: This type of question is suitable for collecting natural language feedback or textual responses from labelers. It allows them to provide detailed and descriptive feedback in response to the question.
-- **RatingQuestion**: This type of question is designed for capturing numerical rating feedback. Labelers can rate a given aspect or attribute using a predefined scale or set of options. It is useful for obtaining quantitative feedback or evaluating specific criteria.
 - **LabelQuestion**: This type of question is designed for capturing feedback in the form of a single label. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are mutually exclusive.
 - **MultiLabelQuestion**: This type of question is designed for capturing feedback in the form of one or multiple labels. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are not exclusive.
 - **RankingQuestion**: This type of question is designed to capture the labeler's preferences. Labelers can order a predefined set of options according to their preference or relevance. It is useful for obtaining feedback on the labeler's preference among multiple options.
+- **RatingQuestion**: This type of question is designed for capturing numerical rating feedback. Labelers can rate a given aspect or attribute using a predefined scale or set of options. It is useful for obtaining quantitative feedback or evaluating specific criteria.
+- **SpanQuestion**: This type of question is meant to highlight relevant pieces of text within record fields. It is useful for tasks such as named entity recognition or information extraction.
+- **TextQuestion**: This type of question is suitable for collecting natural language feedback or textual responses from labelers. It allows them to provide detailed and descriptive feedback in response to the question.
 
 #### Guidelines
 

@@ -25,13 +25,21 @@ export type Span = {
   };
 };
 
+export type OverlappedSpan = Span & {
+  overlap: {
+    level: number;
+    index: number;
+  };
+};
+
 export type Configuration = {
   allowOverlap: boolean;
   allowCharacter: boolean;
+  lineHeight: number;
 };
 
 export class SpanSelection {
-  private selections: Span[] = [];
+  private selections: OverlappedSpan[] = [];
 
   protected constructor() {}
 
@@ -49,7 +57,7 @@ export class SpanSelection {
     return [...this.selections];
   }
 
-  public addSpan(selection?: TextSelection, config?: Configuration) {
+  addSpan(selection?: TextSelection, config?: Configuration) {
     if (!selection) return;
     if (this.isOutOfRange(selection)) return;
 
@@ -65,23 +73,21 @@ export class SpanSelection {
       this.completeRightSide(selection);
     }
 
-    if (!config?.allowOverlap) {
-      const overlaps = this.selections.filter((s) => {
-        return (
-          (selection.from <= s.from && selection.to >= s.to) ||
-          (selection.from >= s.from && selection.to <= s.to) ||
-          (selection.from < s.from && selection.to > s.from) ||
-          (selection.from < s.to && selection.to > s.to)
-        );
-      });
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (selection.from <= s.from && selection.to >= s.to) ||
+        (selection.from >= s.from && selection.to <= s.to) ||
+        (selection.from < s.from && selection.to > s.from) ||
+        (selection.from < s.to && selection.to > s.to)
+      );
+    });
 
+    if (!config?.allowOverlap) {
       this.selections = [
         ...this.selections.filter((s) => s.node.id !== selection.node.id),
         ...filteredSelections.filter((s) => !overlaps.includes(s)),
       ];
     }
-
-    if (this.exists(selection)) return;
 
     const { from, to, entity, text, node } = selection;
 
@@ -97,8 +103,32 @@ export class SpanSelection {
     });
   }
 
-  isOutOfRange(selection: TextSelection) {
-    return selection.from < 0 || selection.to < 0;
+  select(selected: Span) {
+    if (this.exists(selected)) return;
+
+    this.completeOutOfBoundaries(selected);
+
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (selected.from <= s.from && selected.to >= s.to) ||
+        (selected.from >= s.from && selected.to <= s.to) ||
+        (selected.from < s.from && selected.to > s.from) ||
+        (selected.from < s.to && selected.to > s.to)
+      );
+    });
+
+    const maxLevelInOverlaps =
+      overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;
+
+    const newVariable = {
+      ...selected,
+      overlap: {
+        level: maxLevelInOverlaps,
+        index: maxLevelInOverlaps - 1,
+      },
+    };
+
+    this.selections.push(newVariable);
   }
 
   loadSpans(selections: Span[]) {
@@ -125,14 +155,22 @@ export class SpanSelection {
     );
   }
 
-  private exists(selection: TextSelection) {
-    return this.selections.some(
-      (s) => this.createId(s) === this.createId(selection)
+  private completeOutOfBoundaries(selected: Span) {
+    selected.from = Math.max(0, selected.from);
+    selected.to = Math.min(
+      selected.node.element.textContent.length,
+      selected.to
     );
   }
 
-  private select(selected: Span) {
-    this.selections.push(selected);
+  private isOutOfRange(selection: TextSelection) {
+    return selection.from < 0 || selection.to < 0;
+  }
+
+  private exists(span: Span) {
+    return this.selections.some(
+      (s) => this.createId(s) === this.createId(span)
+    );
   }
 
   private completeLeftSide(selection: TextSelection) {

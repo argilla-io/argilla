@@ -16,6 +16,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
+  const initialConfiguration = {
+    allowOverlap: spanQuestion.settings.allow_overlapping,
+  };
 
   const selectEntity = (entity: Entity) => {
     answer.options.forEach((e) => {
@@ -28,8 +31,10 @@ export const useSpanAnnotationTextFieldViewModel = ({
   const entityComponentFactory = (
     span: Span,
     entityPosition: Position,
+    hoverSpan: (isHovered: boolean) => void,
     removeSpan: () => void,
-    replaceEntity: (entity: Entity) => void
+    replaceEntity: (entity: Entity) => void,
+    cloneSpanWith: (entity: Entity) => void
   ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
     const entity = answer.options.find((e) => e.id === span.entity.id);
@@ -49,7 +54,12 @@ export const useSpanAnnotationTextFieldViewModel = ({
     });
 
     instance.$on("on-remove-option", removeSpan);
+    instance.$on("on-hover-span", hoverSpan);
     instance.$on("on-replace-option", (newEntity: Entity) => {
+      if (highlighting.value.config.allowOverlap) {
+        return cloneSpanWith(newEntity);
+      }
+
       selectEntity(newEntity);
 
       replaceEntity(newEntity);
@@ -101,7 +111,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(id, entityComponentFactory)
+    new Highlighting(id, entityComponentFactory, initialConfiguration)
   );
 
   watch(
