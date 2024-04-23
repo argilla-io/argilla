@@ -56,7 +56,7 @@ export class Suggestion implements Answer {
 
         return {
           value: answer,
-          score: this.score[indexOf],
+          score: this.score?.[indexOf],
           agent: this.agent,
         };
       }
@@ -76,7 +76,7 @@ export class Suggestion implements Answer {
 
         return {
           value: spanSuggested,
-          score: this.score[indexOf],
+          score: this.score?.[indexOf],
           agent: this.agent,
         };
       }
@@ -94,7 +94,7 @@ export class Suggestion implements Answer {
         const indexOf = suggestedRanking.indexOf(rankingSuggested);
         return {
           value: rankingSuggested,
-          score: this.score[indexOf],
+          score: this.score?.[indexOf],
           agent: this.agent,
         };
       }
