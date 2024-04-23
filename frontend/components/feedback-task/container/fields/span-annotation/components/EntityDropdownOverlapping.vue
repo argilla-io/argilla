@@ -206,7 +206,7 @@ export default {
     display: flex;
     gap: calc($base-space / 2);
     flex-wrap: wrap;
-    max-width: 160px;
+    max-width: 142px;
     &__close-button {
       position: absolute;
       top: calc($base-space / 2);
