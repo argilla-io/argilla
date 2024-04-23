@@ -19,8 +19,6 @@
 </template>
 
 <script>
-import VueSvgIcon from "vue-svgicon";
-
 export default {
   props: {
     text: {
