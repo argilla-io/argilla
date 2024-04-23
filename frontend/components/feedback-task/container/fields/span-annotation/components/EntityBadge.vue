@@ -7,10 +7,20 @@
     :is="renderComponent"
     @click="onClick($event)"
     ><span class="badge__text">{{ text }}</span>
+    <BaseButton v-if="clearable" class="badge__button" @click="onClear($event)">
+      <svgicon
+        name="close"
+        width="10"
+        height="10"
+        color="rgba(0, 0, 0, 0.54)"
+      />
+    </BaseButton>
   </component>
 </template>
 
 <script>
+import VueSvgIcon from "vue-svgicon";
+
 export default {
   props: {
     text: {
@@ -57,10 +67,9 @@ export default {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: $base-space * 1.3;
+  gap: $base-space;
   max-width: 200px;
-  margin: 0 auto 0 0;
-  margin-left: 0;
+  margin: 0;
   padding: 2px calc($base-space / 2);
   border-radius: 2px;
   background-color: v-bind(color);
@@ -82,6 +91,10 @@ export default {
   }
   &__text {
     @include truncate;
+  }
+  &__button {
+    padding: 0;
+    flex-shrink: 0;
   }
 }
 </style>
