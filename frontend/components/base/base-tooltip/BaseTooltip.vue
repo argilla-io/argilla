@@ -158,6 +158,7 @@ export default {
   border-radius: $tooltip-border-radius;
   font-weight: 500;
   white-space: pre;
+  line-height: 1.4;
   &--minimalist {
     background: palette(grey, 150);
     @include font-size(13px);
