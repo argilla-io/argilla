@@ -178,44 +178,37 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      if (this.multiple) {
-        const visible = this.filteredOptions;
+      // TODO: Sort the options base of the question settings.
+      const shouldOrderByScore = true;
 
-        const suggestedOptions = visible
-          .filter(
-            (v) => this.suggestion && this.suggestion.isSuggested(v.value)
-          )
-          .sort((a, b) => {
-            const isASuggested = this.suggestion.getSuggestion(a.value);
-            const isBSuggested = this.suggestion.getSuggestion(b.value);
+      if (!shouldOrderByScore) {
+        if (this.isExpanded) return this.filteredOptions;
 
-            return isASuggested?.score - isBSuggested?.score;
-          });
-
-        const noSuggestedOptions = visible.filter(
-          (v) => this.suggestion && !this.suggestion.isSuggested(v.value)
-        );
-
-        const options = [...suggestedOptions, ...noSuggestedOptions];
-
-        if (this.isExpanded) {
-          return options;
-        }
-
-        return options.slice(
-          0,
-          Math.max(
-            this.suggestion?.value.length ?? 0,
-            this.maxOptionsToShowBeforeCollapse
-          )
-        );
+        return this.filteredOptions
+          .concat(this.remainingVisibleOptions)
+          .slice(0, this.maxOptionsToShowBeforeCollapse);
       }
 
-      if (this.isExpanded) return this.filteredOptions;
+      const suggestedOptions = this.filteredOptions
+        .filter((v) => this.suggestion && this.suggestion.isSuggested(v.value))
+        .sort((a, b) => {
+          const isASuggested = this.suggestion.getSuggestion(a.value);
+          const isBSuggested = this.suggestion.getSuggestion(b.value);
 
-      return this.filteredOptions
-        .slice(0, this.maxOptionsToShowBeforeCollapse)
-        .concat(this.remainingVisibleOptions);
+          return isASuggested?.score - isBSuggested?.score;
+        });
+
+      const noSuggestedOptions = this.filteredOptions.filter(
+        (v) => this.suggestion && !this.suggestion.isSuggested(v.value)
+      );
+
+      const options = [...suggestedOptions, ...noSuggestedOptions];
+
+      if (this.isExpanded) {
+        return options;
+      }
+
+      return options.slice(0, this.maxOptionsToShowBeforeCollapse);
     },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
