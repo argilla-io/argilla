@@ -1,26 +1,31 @@
 <template>
-  <div class="tooltip">
-    <div v-if="text" ref="tooltipWrapper" @mouseenter="show" @mouseleave="hide">
-      <slot></slot>
+  <div
+    class="tooltip"
+    v-if="text"
+    ref="tooltipWrapper"
+    @mouseenter="show"
+    @mouseleave="hide"
+  >
+    <slot></slot>
 
-      <div
-        ref="tooltipText"
-        :class="[
-          'tooltip-content',
-          positionClass,
-          minimalist ? 'tooltip-content--minimalist' : null,
-          showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
-        ]"
-        :style="{
-          top: tooltipPosition.top + 'px',
-          left: tooltipPosition.left + 'px',
-        }"
-        v-html="text"
-      />
-    </div>
-    <div v-else>
-      <slot></slot>
-    </div>
+    <div
+      ref="tooltipText"
+      :class="[
+        'tooltip-content',
+        positionClass,
+        minimalist ? 'tooltip-content--minimalist' : null,
+        showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
+      ]"
+      :style="{
+        top: tooltipPosition.top + 'px',
+        left: tooltipPosition.left + 'px',
+      }"
+      v-html="text"
+    />
+  </div>
+
+  <div v-else>
+    <slot></slot>
   </div>
 </template>
 

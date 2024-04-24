@@ -56,13 +56,7 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="
-            getSuggestion(option)
-              ? `<span class='label-tooltip__title'>${$t(
-                  'suggestion.name'
-                )}</span>\n${getAgent(option)}`
-              : null
-          "
+          :text="getSuggestion(option) ? getTooltipText(option) : null"
           minimalist
         >
           <label
@@ -322,10 +316,17 @@ export default {
       return this.suggestion?.getSuggestion(option.value);
     },
     getScore(option) {
-      return this.getSuggestion(option)?.score?.toFixed(1) || "";
+      return this.getSuggestion(option)?.score?.toFixed(1);
     },
     getAgent(option) {
-      return this.getSuggestion(option)?.agent || "";
+      return this.getSuggestion(option)?.agent;
+    },
+    getTooltipText(option) {
+      const title = `<span class="label-tooltip__title">${$nuxt.$t(
+        "suggestion.name"
+      )}</span>`;
+      const agent = this.getAgent(option) || "";
+      return `${title}${agent}`;
     },
   },
   setup(props) {
@@ -495,6 +496,7 @@ input[type="checkbox"] {
 }
 
 :deep(.label-tooltip__title) {
+  display: block;
   font-weight: lighter;
   @include font-size(12px);
 }

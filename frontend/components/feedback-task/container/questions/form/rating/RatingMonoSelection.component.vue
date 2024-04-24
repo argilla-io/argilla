@@ -8,13 +8,7 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :text="
-            getSuggestion(option)
-              ? `<span class='label-tooltip__title'>${$t(
-                  'suggestion.name'
-                )}</span>\n${getAgent(option)}: ${getScore(option)}`
-              : null
-          "
+          :text="getSuggestion(option) ? getTooltipText(option) : null"
           minimalist
         >
           <input
@@ -88,10 +82,18 @@ export default {
       return this.suggestion?.getSuggestion(option.value);
     },
     getScore(option) {
-      return this.getSuggestion(option)?.score?.toFixed(1) || "";
+      return this.getSuggestion(option)?.score?.toFixed(1);
     },
     getAgent(option) {
-      return this.getSuggestion(option)?.agent || "";
+      return this.getSuggestion(option)?.agent;
+    },
+    getTooltipText(option) {
+      const title = `<span class="label-tooltip__title">${$nuxt.$t(
+        "suggestion.name"
+      )}</span>`;
+      const agent = this.getAgent(option) ? `${this.getAgent(option)}: ` : "";
+      const score = this.getScore(option) || "";
+      return `${title}${agent}${score}`;
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
@@ -185,6 +187,7 @@ input[type="checkbox"] {
 }
 
 :deep(.label-tooltip__title) {
+  display: block;
   font-weight: lighter;
   @include font-size(12px);
 }
