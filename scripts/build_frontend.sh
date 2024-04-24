@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd frontend \
+cd argilla-frontend \
 && npm install \
 && npm run-script lint \
 && npm run-script test \
