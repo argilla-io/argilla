@@ -322,7 +322,7 @@ export default {
       return this.getSuggestion(option)?.agent;
     },
     getTooltipText(option) {
-      const title = `<span class="label-tooltip__title">${$nuxt.$t(
+      const title = `<span class="tooltip__title">${$nuxt.$t(
         "suggestion.name"
       )}</span>`;
       const agent = this.getAgent(option) || "";
@@ -495,7 +495,7 @@ input[type="checkbox"] {
   height: $base-space * 4;
 }
 
-:deep(.label-tooltip__title) {
+:deep(.tooltip__title) {
   display: block;
   font-weight: lighter;
   @include font-size(12px);
