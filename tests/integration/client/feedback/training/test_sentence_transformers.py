@@ -15,6 +15,8 @@
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
+from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
+
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import LabelQuestion
@@ -25,8 +27,6 @@ from argilla.client.feedback.training.schemas.base import (
     RatingQuestionUnification,
     TrainingTask,
 )
-from sentence_transformers import CrossEncoder, InputExample, SentenceTransformer
-
 from tests.integration.client.feedback.helpers import (
     formatting_func_sentence_transformers,
     formatting_func_sentence_transformers_all_lists,

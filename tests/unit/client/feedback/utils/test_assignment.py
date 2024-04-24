@@ -16,6 +16,7 @@ import warnings
 from unittest.mock import Mock, patch
 
 import pytest
+
 from argilla.client.feedback.utils.assignment import (
     assign_records,
     assign_records_to_groups,

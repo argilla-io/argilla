@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import pytest
+
 from argilla.client.feedback.integrations.huggingface.card import size_categories_parser
 
 

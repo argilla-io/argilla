@@ -16,8 +16,9 @@ import os
 import re
 from uuid import uuid4
 
-import argilla as rg
 import pytest
+
+import argilla as rg
 
 
 @pytest.mark.skipif(os.getenv("HF_HUB_ACCESS_TOKEN") is None, reason="`HF_HUB_ACCESS_TOKEN` is not set")

@@ -18,6 +18,9 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
+from argilla_server.commons.models import TaskType
+from pandas.testing import assert_frame_equal
+
 from argilla.client.models import TextClassificationRecord
 from argilla.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
@@ -33,9 +36,6 @@ from argilla.labeling.text_classification.weak_labels import (
     NoRulesFoundError,
     WeakLabelsBase,
 )
-from argilla_server.commons.models import TaskType
-from pandas.testing import assert_frame_equal
-
 from tests.integration.helpers import SecuredClient
 
 

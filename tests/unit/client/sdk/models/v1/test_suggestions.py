@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.sdk.v1.suggestions.models import SuggestionModel as ClientSchema
 from argilla_server.schemas.v1.suggestions import Suggestion as ServerSchema
+
+from argilla.client.sdk.v1.suggestions.models import SuggestionModel as ClientSchema
 
 
 def test_suggestion_schema(helpers) -> None:

@@ -15,8 +15,9 @@
 import time
 from typing import List
 
-import argilla as rg
 import pytest
+
+import argilla as rg
 from argilla import RGListenerContext, listener
 from argilla.client.api import delete, log
 from argilla.client.models import Record, TextClassificationRecord

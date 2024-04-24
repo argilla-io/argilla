@@ -15,6 +15,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Type, Union
 
 import pytest
+
 from argilla.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
@@ -23,7 +24,6 @@ from argilla.client.feedback.schemas.records import (
     SuggestionSchema,
     ValueSchema,
 )
-
 from tests.pydantic_v1 import ValidationError
 
 

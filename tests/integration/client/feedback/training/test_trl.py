@@ -18,6 +18,11 @@ from collections import Counter
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List
 
 import pytest
+from datasets import Dataset, DatasetDict
+from peft import LoraConfig, TaskType
+from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
+from trl import AutoModelForCausalLMWithValueHead
+
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.training.base import ArgillaTrainer
@@ -30,11 +35,6 @@ from argilla.client.feedback.training.schemas.return_types import (
     RMReturnTypes,
     SFTReturnTypes,
 )
-from datasets import Dataset, DatasetDict
-from peft import LoraConfig, TaskType
-from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
-from trl import AutoModelForCausalLMWithValueHead
-
 from tests.integration.client.feedback.helpers import (
     formatting_func_dpo,
     formatting_func_ppo,

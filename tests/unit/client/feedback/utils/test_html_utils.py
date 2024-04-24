@@ -17,6 +17,7 @@ import base64
 from unittest import mock
 
 import pytest
+
 from argilla.client.feedback.utils import (
     audio_to_html,
     create_token_highlights,

@@ -16,8 +16,11 @@ from datetime import datetime
 from typing import List, Union
 from uuid import UUID
 
-import argilla.client.singleton
 import pytest
+from argilla_server.models import User
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import argilla.client.singleton
 from argilla import SortBy, TextField, TextQuestion
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.enums import ResponseStatusFilter
@@ -35,9 +38,6 @@ from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
-from argilla_server.models import User
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.factories import (
     DatasetFactory,
     RecordFactory,

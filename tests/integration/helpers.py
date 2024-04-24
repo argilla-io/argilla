@@ -12,13 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla_server.models import User
+from fastapi import FastAPI
+from starlette.testclient import TestClient
+
 from argilla._constants import (
     API_KEY_HEADER_NAME,
     WORKSPACE_HEADER_NAME,
 )
-from argilla_server.models import User
-from fastapi import FastAPI
-from starlette.testclient import TestClient
 
 
 class SecuredClient:
