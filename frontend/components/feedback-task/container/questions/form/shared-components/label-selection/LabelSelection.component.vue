@@ -56,7 +56,8 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="getSuggestion(option) ? getTooltipText(option) : null"
+          :title="getSuggestion(option) && $t('suggestion.name')"
+          :text="getSuggestion(option) && getAgent(option)"
           minimalist
         >
           <label
@@ -321,13 +322,6 @@ export default {
     getAgent(option) {
       return this.getSuggestion(option)?.agent;
     },
-    getTooltipText(option) {
-      const title = `<span class="tooltip__title">${$nuxt.$t(
-        "suggestion.name"
-      )}</span>`;
-      const agent = this.getAgent(option) || "";
-      return `${title}${agent}`;
-    },
   },
   setup(props) {
     return useLabelSelectionViewModel(props);
@@ -493,12 +487,6 @@ input[type="checkbox"] {
 .no-result {
   display: block;
   height: $base-space * 4;
-}
-
-:deep(.tooltip__title) {
-  display: block;
-  font-weight: lighter;
-  @include font-size(12px);
 }
 
 .shuffle-move {

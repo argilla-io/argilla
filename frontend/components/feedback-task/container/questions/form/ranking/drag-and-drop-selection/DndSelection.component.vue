@@ -19,7 +19,8 @@
         <BaseTooltip
           v-if="getSuggestion(item)"
           class="draggable__rank-card--unranked"
-          :text="getSuggestion(item) ? getTooltipText(item) : null"
+          :title="$t('suggestion.name')"
+          :text="getSuggestion(item) && getAgent(item)"
           minimalist
         >
           <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
@@ -69,7 +70,8 @@
             @focus="onFocus"
           >
             <BaseTooltip
-              :text="getSuggestion(item) ? getTooltipText(item) : null"
+              :title="$t('suggestion.name')"
+              :text="getSuggestion(item) && getAgent(item)"
               minimalist
               class="draggable__rank-card--ranked"
             >
@@ -228,13 +230,6 @@ export default {
     },
     getSuggestedRank(item) {
       return this.getSuggestion(item)?.value.rank;
-    },
-    getTooltipText(item) {
-      const title = `<span class="tooltip__title">${$nuxt.$t(
-        "suggestion.name"
-      )}</span>`;
-      const agent = this.getAgent(item);
-      return `${title}${agent}`;
     },
   },
 };
@@ -404,11 +399,5 @@ $max-visible-card-items: 12;
   .svg-icon {
     flex-shrink: 0;
   }
-}
-
-:deep(.tooltip__title) {
-  display: block;
-  font-weight: lighter;
-  @include font-size(12px);
 }
 </style>

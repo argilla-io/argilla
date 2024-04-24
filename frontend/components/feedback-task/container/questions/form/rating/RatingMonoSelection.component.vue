@@ -8,7 +8,8 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :text="getSuggestion(option) ? getTooltipText(option) : null"
+          :title="getSuggestion(option) && $t('suggestion.name')"
+          :text="getSuggestion(option) && getSuggestionText(option)"
           minimalist
         >
           <input
@@ -87,13 +88,10 @@ export default {
     getAgent(option) {
       return this.getSuggestion(option)?.agent;
     },
-    getTooltipText(option) {
-      const title = `<span class="tooltip__title">${$nuxt.$t(
-        "suggestion.name"
-      )}</span>`;
+    getSuggestionText(option) {
       const agent = this.getAgent(option) ? `${this.getAgent(option)}: ` : "";
       const score = this.getScore(option) || "";
-      return `${title}${agent}${score}`;
+      return `${agent}${score}`;
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {
@@ -184,12 +182,6 @@ input[type="checkbox"] {
       }
     }
   }
-}
-
-:deep(.tooltip__title) {
-  display: block;
-  font-weight: lighter;
-  @include font-size(12px);
 }
 
 [data-title] {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="tooltip"
-    v-if="text"
+    v-if="title || text"
     ref="tooltipWrapper"
     @mouseenter="show"
     @mouseleave="hide"
@@ -20,8 +20,13 @@
         top: tooltipPosition.top + 'px',
         left: tooltipPosition.left + 'px',
       }"
-      v-html="text"
-    />
+    >
+      <span class="tooltip__title" v-if="title" v-html="title" /><span
+        class="tooltip__text"
+        v-if="text"
+        v-html="text"
+      />
+    </div>
   </div>
 
   <div v-else>
@@ -41,6 +46,9 @@ export default {
     };
   },
   props: {
+    title: {
+      type: String,
+    },
     text: {
       type: String,
     },
@@ -126,6 +134,14 @@ export default {
   position: relative;
   display: inline-block;
   max-width: 100%;
+  &__title {
+    display: block;
+    font-weight: lighter;
+    @include font-size($tooltip-title-font-size);
+  }
+  &__text {
+    @include font-size($tooltip-font-size);
+  }
 }
 
 .tooltip-content {
@@ -140,7 +156,6 @@ export default {
   background: $tooltip-bg;
   color: $tooltip-color;
   border-radius: $tooltip-border-radius;
-  @include font-size($tooltip-font-size);
   font-weight: 500;
   white-space: pre;
   &--minimalist {

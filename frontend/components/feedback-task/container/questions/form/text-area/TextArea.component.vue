@@ -36,13 +36,21 @@ export default {
     isSuggested() {
       return this.question.suggestion?.isSuggested(this.question.answer.value);
     },
+    getScore() {
+      return this.question.suggestion?.score;
+    },
+    getAgent() {
+      return this.question.suggestion?.agent;
+    },
     tabs() {
       return [
         {
           id: "0",
           name: this.isSuggested ? "Suggestion" : "Write",
           icon: this.isSuggested && "suggestion",
-          tooltip: this.isSuggested && this.tooltipText,
+          info: this.isSuggested && this.getScore,
+          tooltipTitle: this.isSuggested && this.$nuxt.$t("suggestion.name"),
+          tooltipText: this.isSuggested && this.getAgent,
           component: "TextAreaContents",
         },
         ...(!this.isSuggested
@@ -51,17 +59,14 @@ export default {
                 id: "1",
                 name: "Suggestion",
                 icon: "suggestion",
-                tooltip: this.tooltipText,
+                info: this.getScore,
+                tooltipTitle: this.$nuxt.$t("suggestion.name"),
+                tooltipText: this.getAgent,
                 component: "TextAreaSuggestion",
               },
             ]
           : []),
       ];
-    },
-    tooltipText() {
-      return `<span class="tooltip__title">${$nuxt.$t(
-        "suggestion.name"
-      )}</span>`;
     },
   },
 };
@@ -72,10 +77,5 @@ export default {
   display: flex;
   flex-direction: column;
   gap: $base-space;
-}
-:deep(.tooltip__title) {
-  display: block;
-  font-weight: lighter;
-  @include font-size(12px);
 }
 </style>
