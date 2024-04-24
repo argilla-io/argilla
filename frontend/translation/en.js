@@ -130,6 +130,7 @@ export default {
     discard: "Discard",
     submit: "Submit",
     draft: "Save as draft",
+    write: "Write",
   },
   sorting: {
     addOtherField: "+ Add another field",

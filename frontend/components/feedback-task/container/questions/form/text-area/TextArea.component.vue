@@ -46,7 +46,7 @@ export default {
       return [
         {
           id: "0",
-          name: this.isSuggested ? "Suggestion" : "Write",
+          name: this.isSuggested ? "" : this.$nuxt.$t("questions_form.write"),
           icon: this.isSuggested && "suggestion",
           info: this.isSuggested && this.getScore,
           tooltipTitle: this.isSuggested && this.$nuxt.$t("suggestion.name"),
@@ -57,7 +57,7 @@ export default {
           ? [
               {
                 id: "1",
-                name: "Suggestion",
+                name: "",
                 icon: "suggestion",
                 info: this.getScore,
                 tooltipTitle: this.$nuxt.$t("suggestion.name"),
