@@ -10,28 +10,34 @@
         v-for="item in ranking.questions"
         :id="item.value"
         :key="item.value"
-        class="draggable__rank-card--unranked"
         :title="item.text"
         tabindex="0"
         ref="questions"
         @keydown="rankWithKeyboard($event, item)"
         @focus="onFocus"
       >
-        <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
-        <span
-          class="draggable__rank-card__title"
-          v-text="item.text"
-          :id="`${item.value}-span`"
-        />
-
         <BaseTooltip
-          v-if="findRankSuggestion(item)"
-          class="draggable__suggestion"
-          :text="$t('suggestion.suggested-rank')"
+          v-if="getSuggestion(item)"
+          class="draggable__rank-card--unranked"
+          :text="getSuggestion(item) ? getTooltipText(item) : null"
           minimalist
         >
-          <span v-text="findRankSuggestion(item).value.rank" />
-          <svgicon name="suggestion" width="10" height="10" />
+          <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+          <span
+            class="draggable__rank-card__title"
+            v-text="item.text"
+            :id="`${item.value}-span`"
+          />
+
+          <span v-if="getSuggestion(item)" class="draggable__suggestion">
+            <span v-text="getSuggestedRank(item)" />
+            <svgicon name="suggestion" width="10" height="10" />
+            <span
+              class="draggable__suggestion__score"
+              v-if="getScore(item)"
+              v-text="getScore(item)"
+            />
+          </span>
         </BaseTooltip>
       </div>
     </draggable>
@@ -56,28 +62,33 @@
             v-for="item in items"
             :id="item.value"
             :key="item.value"
-            class="draggable__rank-card--ranked"
             :title="item.text"
             tabindex="0"
             ref="items"
             @keydown="rankWithKeyboard($event, item)"
             @focus="onFocus"
           >
-            <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
-            <span
-              class="draggable__rank-card__title"
-              v-text="item.text"
-              :id="`${item.value}-span`"
-            />
-
             <BaseTooltip
-              v-if="findRankSuggestion(item)"
-              class="draggable__suggestion"
-              :text="`${$t('suggestion.suggested-rank')}`"
+              :text="getSuggestion(item) ? getTooltipText(item) : null"
               minimalist
+              class="draggable__rank-card--ranked"
             >
-              <span v-text="findRankSuggestion(item).value.rank" />
-              <svgicon name="suggestion" width="10" height="10" />
+              <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+              <span
+                class="draggable__rank-card__title"
+                v-text="item.text"
+                :id="`${item.value}-span`"
+              />
+
+              <span v-if="getSuggestion(item)" class="draggable__suggestion">
+                <span v-text="getSuggestedRank(item)" />
+                <svgicon name="suggestion" width="10" height="10" />
+                <span
+                  class="draggable__suggestion__score"
+                  v-if="getScore(item)"
+                  v-text="getScore(item)"
+                />
+              </span>
             </BaseTooltip>
           </div>
         </draggable>
@@ -206,8 +217,24 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-    findRankSuggestion(item) {
+    getSuggestion(item) {
       return this.suggestion?.getSuggestion(item);
+    },
+    getAgent(item) {
+      return this.getSuggestion(item)?.agent;
+    },
+    getScore(item) {
+      return this.getSuggestion(item)?.score?.toFixed(1);
+    },
+    getSuggestedRank(item) {
+      return this.getSuggestion(item)?.value.rank;
+    },
+    getTooltipText(item) {
+      const title = `<span class="label-tooltip__title">${$nuxt.$t(
+        "suggestion.name"
+      )}</span>`;
+      const agent = this.getAgent(item);
+      return `${title}${agent}`;
     },
   },
 };
@@ -330,7 +357,7 @@ $max-visible-card-items: 12;
   }
 
   &__slot-box {
-    width: calc(100% - $base-space * 6);
+    width: calc(100% - $base-space * 7);
     min-height: $slot-height;
     display: flex;
     flex-direction: column;
@@ -363,17 +390,25 @@ $max-visible-card-items: 12;
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: calc($base-space / 2);
     justify-content: center;
     flex-shrink: 0;
-    height: $base-space * 2;
-    width: $base-space * 3;
     margin-left: auto;
-    @include font-size(12px);
+    @include font-size(13px);
     cursor: default;
+    &__score {
+      @include font-size(11px);
+    }
   }
 
   .svg-icon {
     flex-shrink: 0;
   }
+}
+
+:deep(.label-tooltip__title) {
+  display: block;
+  font-weight: lighter;
+  @include font-size(12px);
 }
 </style>

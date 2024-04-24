@@ -151,7 +151,6 @@ export default {
       agent: "Agent",
     },
     plural: "Suggestions",
-    "suggested-rank": `Suggested rank`,
     name: `Suggestion`,
   },
   similarity: {

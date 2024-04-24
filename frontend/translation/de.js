@@ -146,7 +146,6 @@ export default {
       agent: "Agent",
     },
     plural: "Vorschläge",
-    "suggested-rank": `Vorgeschlagener Rang`,
     name: `Vorschlag`,
   },
   similarity: {
