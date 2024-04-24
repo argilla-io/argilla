@@ -25,6 +25,7 @@ declare class Highlight {
 declare namespace CSS {
   const highlights: {
     set(className: string, highlight: Highlight): void;
+    delete(className: string): void;
     clear(): void;
   };
 }
@@ -128,6 +129,8 @@ export class Highlighting {
 
   allowCharacterAnnotation(allow: boolean) {
     this.config.allowCharacter = allow;
+
+    this.showPreSelection();
   }
 
   replaceEntity(span: Span, entity: Entity) {
@@ -186,25 +189,9 @@ export class Highlighting {
     });
 
     document.addEventListener("selectionchange", () => {
-      const selection = document.getSelection();
-      if (selection.rangeCount === 0) return;
+      this.showSelection();
 
-      const range = selection.getRangeAt(0);
-
-      if (!range) return;
-
-      const entity = this.entity;
-      const styles = this.styles;
-
-      const isSelectionInsideNode =
-        range?.startContainer?.parentNode instanceof Element &&
-        range?.startContainer?.parentNode.id === this.nodeId;
-
-      if (entity && isSelectionInsideNode) {
-        const className = `${styles.entityCssKey}-${entity.id}-selection`;
-
-        CSS.highlights.set(className, new Highlight(range));
-      }
+      this.showPreSelection();
     });
 
     new ResizeObserver(() => this.applyStyles()).observe(node);
@@ -215,6 +202,63 @@ export class Highlighting {
   private scroll = () => {
     this.applyEntityStyle();
   };
+
+  private showSelection() {
+    if (!this.entity) return;
+
+    const className = `${this.styles.entityCssKey}-${this.entity.id}-selection`;
+
+    const selection = this.createTextSelection();
+
+    if (!selection) {
+      return CSS.highlights.delete(className);
+    }
+
+    if (selection?.node.id !== this.nodeId) return;
+
+    const range = this.createRange(selection);
+
+    if (!range) return;
+
+    CSS.highlights.set(className, new Highlight(range));
+  }
+
+  private showPreSelection() {
+    if (!this.entity) return;
+
+    const tokenizedClassName = `${this.styles.entityCssKey}-${this.entity.id}-pre-selection`;
+
+    const selection = this.createTextSelection();
+
+    if (!selection) {
+      return CSS.highlights.delete(tokenizedClassName);
+    }
+
+    if (selection.node.id !== this.nodeId) return;
+
+    const simulatedSpan = this.spanSelection.crateSpan(selection, this.config);
+
+    if (!simulatedSpan) return;
+
+    const firstRange = this.createRange({
+      ...simulatedSpan,
+      from: simulatedSpan.from,
+      to: selection.from,
+    });
+
+    const lastRange = this.createRange({
+      ...simulatedSpan,
+      from: selection.to,
+      to: simulatedSpan.to,
+    });
+
+    if (!firstRange || !lastRange) return;
+
+    CSS.highlights.set(
+      tokenizedClassName,
+      new Highlight(firstRange, lastRange)
+    );
+  }
 
   private applyStylesOnScroll() {
     if (this.scrollingElement) {
@@ -231,7 +275,7 @@ export class Highlighting {
   }
 
   private highlightUserSelection() {
-    const textSelection = this.createTextSelection();
+    const textSelection = this.createTextSelection(true);
     this.spanSelection.addSpan(textSelection, this.config);
   }
 
@@ -373,15 +417,17 @@ export class Highlighting {
   }
 
   public createRange({ from, to, node }: Span) {
-    const range = new Range();
+    try {
+      const range = new Range();
 
-    range.setStart(node.element, from);
-    range.setEnd(node.element, to);
+      range.setStart(node.element, from);
+      range.setEnd(node.element, to);
 
-    return range;
+      return range;
+    } catch {}
   }
 
-  private createTextSelection(): TextSelection | undefined {
+  private createTextSelection(clear = false): TextSelection | undefined {
     const selection = this.getSelectedText();
     if (selection?.type !== "Range" || !this.entity) return;
 
@@ -401,7 +447,7 @@ export class Highlighting {
       },
     };
 
-    selection.empty();
+    if (clear) selection.empty();
 
     return textSelection;
   }
