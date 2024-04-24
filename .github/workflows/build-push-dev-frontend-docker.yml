@@ -41,6 +41,9 @@ jobs:
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: argilla-frontend
 
     # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
     permissions:
@@ -58,7 +61,6 @@ jobs:
           node-version: "18"
 
       - name: Build Frontend
-        working-directory: frontend
         run: |
             npm install
             npm run build
@@ -105,7 +107,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: frontend
+          context: argilla-frontend
           file: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           tags: ${{ steps.generate-docker-tags.outputs.tags }}

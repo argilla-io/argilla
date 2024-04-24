@@ -26,31 +26,33 @@ jobs:
       end2endChanges: ${{ steps.path_filter.outputs.end2endChanges }}
       frontendChanges: ${{ steps.path_filter.outputs.frontendChanges }}
     steps:
+
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Check affected files
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         id: path_filter
         with:
           filters: |
             pythonChanges:
-              - 'src/**'
-              - 'tests/**'
-              - 'pyproject.toml'
-              - 'setup.py'
+              - 'argilla/src/**'
+              - 'argilla/tests/**'
+              - 'argilla/pyproject.toml'
+              - 'argilla/setup.py'
             end2endChanges:
-              - 'src/**'
-              - 'pyproject.toml'
-              - 'setup.py'
+              - 'argilla/src/**'
+              - 'argilla/pyproject.toml'
+              - 'argilla/setup.py'
               - 'scripts/end2end_examples.py'
               - 'docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples/**'
             frontendChanges:
-              - 'frontend/**'
+              - 'argilla-frontend/**'
             buildChanges:
-              - 'src/**'
-              - 'frontend/**'
-              - 'pyproject.toml'
-              - 'setup.py'
+              - 'argilla/src/**'
+              - 'argilla-frontend/**'
+              - 'argilla/pyproject.toml'
+              - 'argilla/setup.py'
               - 'docker/**'
               - '.dockerignore'
               - '.github/workflows/**'

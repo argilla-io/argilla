@@ -7,6 +7,10 @@ jobs:
   build:
     name: Build the python package
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./argilla
+
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
@@ -29,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: python-package
-          path: dist
+          path: argilla/dist

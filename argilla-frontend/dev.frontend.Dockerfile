@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 USER argilla
 
-WORKDIR /home/argilla/frontend
+WORKDIR /home/argilla/argilla-frontend
 
 COPY --chown=argilla:argilla dist ./dist
 COPY --chown=argilla:argilla .nuxt ./.nuxt

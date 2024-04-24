@@ -19,7 +19,7 @@ on:
         type: string
 env:
   # Increase this value to reset cache if etc/example-environment.yml has not changed
-  CACHE_NUMBER: 5
+  CACHE_NUMBER: 1
 
 jobs:
   # Runs depending on the result from the check-repo-files.yml
@@ -38,9 +38,11 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v3
+
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -48,40 +50,49 @@ jobs:
           miniforge-version: latest
           use-mamba: true
           activate-environment: argilla
+
       - name: Get date for conda cache
         id: get-date
         run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
         shell: bash
+
       - name: Cache Conda env
         uses: actions/cache@v3
         id: cache
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+
       - name: Update environment
         if: steps.cache.outputs.cache-hit != 'true'
         run: mamba env update -n argilla -f environment_dev.yml
+
       - name: Cache pip 👜
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+
       - name: Set huggingface hub credentials
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/releases')
         run: |
           echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
           echo "Enable HF access token"
+
       - name: Set Argilla search engine env variable
         if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
         run: |
           echo "ARGILLA_SEARCH_ENGINE=elasticsearch" >> "$GITHUB_ENV"
           echo "Configure elasticsearch engine"
+
       - name: Set Argilla search engine env variable
         if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
         run: |
           echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
           echo "Configure opensearch engine"
+
       - name: Launch Argilla Server
+        working-directory: argilla
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
         run: |
@@ -89,6 +100,7 @@ jobs:
           python -m argilla server database migrate
           python -m argilla server database users create_default
           python -m argilla server start &
+
       - name: Run end2end examples 📈
         env:
           ARGILLA_ENABLE_TELEMETRY: 0

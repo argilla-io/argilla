@@ -130,7 +130,7 @@ jobs:
           node-version: "18"
 
       - name: Run Frontend tests
-        working-directory: frontend
+        working-directory: argilla-frontend
         run: |
           npm install
           npm run lint
@@ -153,7 +153,7 @@ jobs:
     if: needs.deployable_check.outputs.isDeployable == 'true'
     with:
       image-name: argilla/argilla-quickstart-for-dev
-      dockerfile: frontend/dev.frontend.Dockerfile
+      dockerfile: argilla-frontend/dev.frontend.Dockerfile
       platforms: linux/amd64
       build-args: |
         ARGILLA_SERVER_TAG=main
