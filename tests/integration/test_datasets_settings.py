@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING, Optional, Union
 from uuid import uuid4
 
 import pytest
+from argilla_server.contexts import accounts
+from argilla_server.schemas.v0.workspaces import WorkspaceUserCreate
+
 from argilla import Workspace
 from argilla.client import singleton
 from argilla.client.api import get_workspace
@@ -29,15 +32,13 @@ from argilla.datasets import (
     configure_dataset_settings,
     load_dataset_settings,
 )
-from argilla_server.contexts import accounts
-from argilla_server.schemas.v0.workspaces import WorkspaceUserCreate
-
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
-    from argilla.client.apis.datasets import LabelsSchemaSettings
     from argilla_server.models import User
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from argilla.client.apis.datasets import LabelsSchemaSettings
 
     from .helpers import SecuredClient
 

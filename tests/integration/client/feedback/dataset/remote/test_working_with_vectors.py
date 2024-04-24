@@ -13,8 +13,9 @@
 #  limitations under the License.
 from typing import Any, List, Union
 
-import argilla.client.singleton as rg
 import pytest
+
+import argilla.client.singleton as rg
 from argilla import User, Workspace
 from argilla.feedback import (
     FeedbackDataset,

@@ -14,8 +14,10 @@
 
 from typing import TYPE_CHECKING
 
-import argilla as rg
 import pytest
+from argilla_server.settings import settings
+
+import argilla as rg
 from argilla.client.api import load, log
 from argilla.client.client import Argilla
 from argilla.client.datasets import read_datasets
@@ -26,8 +28,6 @@ from argilla.client.sdk.commons.errors import (
     ValidationApiError,
 )
 from argilla.client.singleton import init
-from argilla_server.settings import settings
-
 from tests.factories import WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors
 

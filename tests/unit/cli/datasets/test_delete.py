@@ -17,10 +17,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
+
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 
 
 @pytest.mark.usefixtures("login_mock")

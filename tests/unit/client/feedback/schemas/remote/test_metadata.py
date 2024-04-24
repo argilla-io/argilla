@@ -17,6 +17,7 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
+
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataProperty,

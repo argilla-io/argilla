@@ -17,10 +17,11 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
+from yaml import SafeLoader, load
+
 from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.schemas.fields import FieldSchema
 from argilla.client.feedback.schemas.questions import QuestionSchema
-from yaml import SafeLoader, load
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas.types import (
