@@ -42,6 +42,7 @@ export default {
           id: "0",
           name: this.isSuggested ? "Suggestion" : "Write",
           icon: this.isSuggested && "suggestion",
+          tooltip: this.isSuggested && this.tooltipText,
           component: "TextAreaContents",
         },
         ...(!this.isSuggested
@@ -50,11 +51,17 @@ export default {
                 id: "1",
                 name: "Suggestion",
                 icon: "suggestion",
+                tooltip: this.tooltipText,
                 component: "TextAreaSuggestion",
               },
             ]
           : []),
       ];
+    },
+    tooltipText() {
+      return `<span class="tooltip__title">${$nuxt.$t(
+        "suggestion.name"
+      )}</span>`;
     },
   },
 };
@@ -65,5 +72,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: $base-space;
+}
+:deep(.tooltip__title) {
+  display: block;
+  font-weight: lighter;
+  @include font-size(12px);
 }
 </style>
