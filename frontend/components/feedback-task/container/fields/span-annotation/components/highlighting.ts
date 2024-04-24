@@ -64,9 +64,9 @@ export class Highlighting {
       span: Span,
       entityPosition: Position,
       hoverSpan: (value: boolean) => void,
-      removeSpan: () => void,
+      removeSpan: (span: Span) => void,
       replaceEntity: (entity: Entity) => void,
-      cloneSpanWith: (entity: Entity) => void
+      cloneSpanWith: (span: Span, entity: Entity) => void
     ) => Element,
     config?: InitialConfiguration,
     styles?: Styles
@@ -341,9 +341,9 @@ export class Highlighting {
         span,
         entityPosition,
         (isHovered) => this.hoverSpan(span, isHovered),
-        () => this.removeSpan(span),
+        (span) => this.removeSpan(span),
         (newEntity) => this.replaceEntity(span, newEntity),
-        (newEntity) => this.addSpanBaseOn(span, newEntity)
+        (span, newEntity) => this.addSpanBaseOn(span, newEntity)
       );
 
       this.entitySpanContainer.appendChild(entityElement);
@@ -402,6 +402,7 @@ export class Highlighting {
       topEnd: position.topEnd - offset.top + scrollTop,
       right: position.right - offset.left,
       lineHeight: this.config.lineHeight,
+      baseEntityGap: this.styles.entitiesGap,
     };
   }
 
