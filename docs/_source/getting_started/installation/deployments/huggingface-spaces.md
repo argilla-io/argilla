@@ -148,6 +148,10 @@ To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#pe
 
 ![Alt text](../../../_static/images/installation/huggingface-spaces/persistent-storage.PNG)
 
+```{note}
+If persistent storage isn't enabled, Argilla will display a warning message by default. If you don't require persistent storage in your space and wish to avoid seeing the warning message, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING` to `false`. This way, the warning message won't be shown, even if persistent storage is disabled for the space.
+```
+
 ## Setting up secret environment variables
 
 The Space template provides a way to set up different **optional settings** focusing on securing your Argilla Space.
