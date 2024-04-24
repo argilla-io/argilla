@@ -1,0 +1,3 @@
+include src/argilla/server/alembic.ini
+graft src/argilla/server/static
+prune docs
