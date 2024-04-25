@@ -61,6 +61,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
+    register(EnvironmentRepository).withDependency(useAxios).build(),
     register(OAuthRepository)
       .withDependencies(useAxios, useRoutes, useAuth)
       .build(),
