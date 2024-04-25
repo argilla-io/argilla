@@ -21,7 +21,7 @@ These are the section headers that we use:
 - Added `multi selection entity dropdown` for span annotation overlap ([#4735](https://github.com/argilla-io/argilla/pull/4735))
 - Added `pre selection highlight` for span annotation ([#4726](https://github.com/argilla-io/argilla/pull/4726))
 
-### Fixed 
+### Fixed
 
 - Fixed requirements for version of wrapt library conflicting with Python 3.11 ([#4693](https://github.com/argilla-io/argilla/pull/4693))
 
