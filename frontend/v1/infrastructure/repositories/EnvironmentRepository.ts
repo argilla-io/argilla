@@ -1,5 +1,4 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Response } from "../types";
 import { BackendEnvironment } from "../types/environment";
 import { Environment } from "~/v1/domain/entities/environment/Environment";
 import { IEnvironmentRepository } from "~/v1/domain/services/IEnvironmentRepository";
@@ -9,16 +8,20 @@ const enum ENVIRONMENT_API_ERRORS {
 }
 
 export class EnvironmentRepository implements IEnvironmentRepository {
-  constructor(private readonly axios: NuxtAxiosInstance) {}
+  private readonly axios: NuxtAxiosInstance;
+  constructor(axios: NuxtAxiosInstance) {
+    this.axios = axios.create({
+      withCredentials: false,
+    });
+  }
 
   async getEnvironment(): Promise<Environment> {
     try {
-      const { data } = await this.axios.get<Response<BackendEnvironment>>(
-        "/v1/settings",
-        { headers: { "cache-control": "max-age=240" } }
-      );
+      const { data } = await this.axios.get<BackendEnvironment>("v1/settings", {
+        headers: { "cache-control": "max-age=240" },
+      });
 
-      const { argilla, huggingface } = data.items;
+      const { argilla, huggingface } = data;
 
       return new Environment(
         {
