@@ -43,18 +43,15 @@ dependencies = [
     "rich != 13.1.0",
     # for CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
-    # metrics
-    "nltk < 4.0.0",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-server = ["argilla-server ~= 1.26.1"]
-server-postgresql = ["argilla-server[postgresql] ~= 1.26.1"]
-listeners = ["schedule ~= 1.1.0", "prodict ~= 0.8.0"]
+server = ["argilla-server ~= 1.27.0"]
+server-postgresql = ["argilla-server[postgresql] ~= 1.27.0"]
+listeners = ["schedule ~= 1.1.0"]
 integrations = [
     "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`
-    "cleanlab ~= 2.0.0",
     # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
     "datasets > 1.17.0,!= 2.3.2",
     # TODO: some backward comp. problems introduced in 0.5.0

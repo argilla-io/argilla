@@ -7,8 +7,18 @@ export default {
   minimize: "Minimize",
   select: "Select",
   search: "Search",
+  searchDatasets: "Search datasets",
   expand: "Expand",
   copied: "Copied",
+  copyClipboard: "Copy to clipboard",
+  copyLink: "Copy link",
+  refresh: "Refresh",
+  typeYourText: "Type your text",
+  sidebar: {
+    progressTooltip: "Progress",
+    refreshTooltip: "Refresh",
+    shortcutsTooltip: "Shortcuts",
+  },
   title: "Title",
   description: "Description",
   labels: "Labels",
@@ -25,6 +35,20 @@ export default {
     datasetSettings: "settings",
     userSettings: "my settings",
   },
+  datasets: {
+    left: "left",
+    submitted: "Submitted",
+    conflicting: "Conflicting",
+    discarded: "Discarded",
+    pending: "Pending",
+  },
+  recordStatus: {
+    pending: "Pending",
+    draft: "Draft",
+    discarded: "Discarded",
+    submitted: "Submitted",
+    validated: "Validated",
+  },
   userSettings: {
     title: "My settings",
     fields: {
@@ -33,9 +57,19 @@ export default {
       lastName: "Surname",
       workspaces: "Workspaces",
     },
+    apiKey: "API key",
+    apiKeyDescription:
+      "API key tokens allow you to manage datasets using the Python SDK.",
+    copyKey: "Copy key",
+  },
+  userAvatarTooltip: {
+    settings: "My settings",
+    docs: "View docs",
+    logout: "Log out",
   },
   settings: {
     title: "Dataset settings",
+    datasetInfo: "Dataset info",
     seeYourDataset: "See your dataset",
     editFields: "Edit fields",
     editQuestions: "Edit questions",
@@ -47,6 +81,8 @@ export default {
     deleteConfirmationMessage:
       "You are about to delete: <strong>{datasetName}</strong> from workspace <strong>{workspaceName}</strong>. This action cannot be undone",
     yesDelete: "Yes, delete",
+    write: "Write",
+    preview: "Preview",
   },
   button: {
     ignore_and_continue: "Ignore and continue",
@@ -55,6 +91,7 @@ export default {
     sign_in_with_username: "Sign in with username",
     cancel: "Cancel",
     continue: "Continue",
+    delete: "Delete",
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -87,6 +124,9 @@ export default {
     },
   },
   questions_form: {
+    validate: "Validate",
+    clear: "Clear",
+    reset: "Reset",
     discard: "Discard",
     submit: "Submit",
     draft: "Save as draft",
@@ -130,6 +170,10 @@ export default {
   },
   login: {
     title: "Sign in",
+    username: "Username",
+    usernameDescription: "Enter your username",
+    password: "Password",
+    passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
     support:
       "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
@@ -160,7 +204,18 @@ export default {
   update: "Update",
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
-
+  datasetTable: {
+    name: "Name",
+    workspace: "Workspace",
+    task: "Task",
+    tags: "Tags",
+    createdAt: "Created at",
+    lastActivityAt: "Updated at",
+  },
+  metrics: {
+    total: "Total",
+    progress: "Progress",
+  },
   validations: {
     http: {
       401: {

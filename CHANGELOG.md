@@ -16,7 +16,31 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `multi selection entity dropdown` for span annotation overlap ([#4735](https://github.com/argilla-io/argilla/pull/4735))
+- Added `pre selection highlight` for span annotation ([#4726](https://github.com/argilla-io/argilla/pull/4726))
+
+### Fixed 
+
 - Fixed requirements for version of wrapt library conflicting with Python 3.11 ([#4693](https://github.com/argilla-io/argilla/pull/4693))
+
+## [1.27.0](https://github.com/argilla-io/argilla/compare/v1.26.1...v1.27.0)
+
+### Added
+
+- Added Allow overlap spans in the `FeedbackDataset` ([#4668](https://github.com/argilla-io/argilla/pull/4668))
+- Added `allow_overlapping` parameter for span questions. ([#4697](https://github.com/argilla-io/argilla/pull/4697))
+- Added overall progress bar on `Datasets` table ([#4696](https://github.com/argilla-io/argilla/pull/4696))
+- Added German language translation ([#4688](https://github.com/argilla-io/argilla/pull/4688))
+
+### Changed
+
+- New UI design for suggestions ([#4682](https://github.com/argilla-io/argilla/pull/4682))
+
+### Fixed
+
+- Improve performance for more than 250 labels ([#4702](https://github.com/argilla-io/argilla/pull/4702))
 
 ## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
 

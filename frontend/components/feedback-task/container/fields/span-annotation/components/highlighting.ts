@@ -4,11 +4,19 @@ import {
   type Entity,
   SpanSelection,
   Configuration,
+  OverlappedSpan,
 } from "./span-selection";
 
 export type LoadedSpan = Omit<Span, "text" | "node">;
 
-export type Position = { top: string; left: string };
+export type Position = {
+  top: number;
+  left: number;
+  width: number;
+  topEnd: number;
+  right: number;
+  lineHeight: number;
+};
 
 declare class Highlight {
   constructor(...ranges: Range[]);
@@ -17,6 +25,7 @@ declare class Highlight {
 declare namespace CSS {
   const highlights: {
     set(className: string, highlight: Highlight): void;
+    delete(className: string): void;
     clear(): void;
   };
 }
@@ -34,7 +43,12 @@ type Styles = {
 
   /** Span container ID */
   spanContainerId?: string;
+
+  /** Overlap line height */
+  lineHeight: number;
 };
+
+type InitialConfiguration = Partial<Omit<Configuration, "lineHeight">>;
 
 export class Highlighting {
   private readonly spanSelection = SpanSelection.getInstance();
@@ -42,26 +56,34 @@ export class Highlighting {
   private readonly styles: Required<Styles>;
   private entity: Entity = null;
   private scrollingElement: HTMLElement;
-  private config: Configuration = {
-    allowOverlap: false,
-    allowCharacter: false,
-  };
+  readonly config: Configuration;
 
   constructor(
     private readonly nodeId: string,
     private readonly EntityComponentConstructor: (
       span: Span,
       entityPosition: Position,
-      removeSpan: () => void,
-      replaceEntity: (entity: Entity) => void
+      hoverSpan: (value: boolean) => void,
+      removeSpan: (span: Span) => void,
+      replaceEntity: (entity: Entity) => void,
+      cloneSpanWith: (span: Span, entity: Entity) => void
     ) => Element,
+    config?: InitialConfiguration,
     styles?: Styles
   ) {
     this.styles = {
-      entitiesGap: 9,
+      entitiesGap: 16,
+      lineHeight: 32,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
       ...styles,
+    };
+
+    this.config = {
+      allowOverlap: false,
+      allowCharacter: false,
+      lineHeight: this.styles.lineHeight,
+      ...config,
     };
   }
 
@@ -105,6 +127,22 @@ export class Highlighting {
     this.entity = entity;
   }
 
+  allowCharacterAnnotation(allow: boolean) {
+    this.config.allowCharacter = allow;
+
+    this.showPreSelection();
+  }
+
+  replaceEntity(span: Span, entity: Entity) {
+    this.spanSelection.replaceEntity(span, entity);
+    this.applyStyles();
+  }
+
+  removeAllHighlights() {
+    this.spanSelection.clear();
+    this.applyStyles();
+  }
+
   private loadHighlights(selections: LoadedSpan[]) {
     if (!this.node) {
       throw new Error(
@@ -112,7 +150,7 @@ export class Highlighting {
       );
     }
 
-    const loaded: Span[] = selections.map((s) => ({
+    const loaded: Omit<Span, "overlap">[] = selections.map((s) => ({
       ...s,
       text: "",
       node: {
@@ -126,18 +164,17 @@ export class Highlighting {
     this.applyStyles();
   }
 
-  allowCharacterAnnotation(allow: boolean) {
-    this.config.allowCharacter = allow;
-  }
+  private updateLineHeight() {
+    const maxOverlappedLevels = this.spans.reduce(
+      (max, span) => Math.max(max, span.overlap.level),
+      0
+    );
 
-  replaceEntity(span: Span, entity: Entity) {
-    this.spanSelection.replaceEntity(span, entity);
-    this.applyStyles();
-  }
+    const lineHeight =
+      this.styles.lineHeight +
+      this.styles.entitiesGap * Math.max(0, maxOverlappedLevels - 1);
 
-  removeAllHighlights() {
-    this.spanSelection.clear();
-    this.applyStyles();
+    this.config.lineHeight = lineHeight;
   }
 
   private attachNode(node: HTMLElement) {
@@ -151,6 +188,12 @@ export class Highlighting {
       this.applyStyles();
     });
 
+    document.addEventListener("selectionchange", () => {
+      this.showSelection();
+
+      this.showPreSelection();
+    });
+
     new ResizeObserver(() => this.applyStyles()).observe(node);
 
     this.applyStylesOnScroll();
@@ -159,6 +202,63 @@ export class Highlighting {
   private scroll = () => {
     this.applyEntityStyle();
   };
+
+  private showSelection() {
+    if (!this.entity) return;
+
+    const className = `${this.styles.entityCssKey}-${this.entity.id}-selection`;
+
+    const selection = this.createTextSelection();
+
+    if (!selection) {
+      return CSS.highlights.delete(className);
+    }
+
+    if (selection?.node.id !== this.nodeId) return;
+
+    const range = this.createRange(selection);
+
+    if (!range) return;
+
+    CSS.highlights.set(className, new Highlight(range));
+  }
+
+  private showPreSelection() {
+    if (!this.entity) return;
+
+    const tokenizedClassName = `${this.styles.entityCssKey}-${this.entity.id}-pre-selection`;
+
+    const selection = this.createTextSelection();
+
+    if (!selection) {
+      return CSS.highlights.delete(tokenizedClassName);
+    }
+
+    if (selection.node.id !== this.nodeId) return;
+
+    const simulatedSpan = this.spanSelection.crateSpan(selection, this.config);
+
+    if (!simulatedSpan) return;
+
+    const firstRange = this.createRange({
+      ...simulatedSpan,
+      from: simulatedSpan.from,
+      to: selection.from,
+    });
+
+    const lastRange = this.createRange({
+      ...simulatedSpan,
+      from: selection.to,
+      to: simulatedSpan.to,
+    });
+
+    if (!firstRange || !lastRange) return;
+
+    CSS.highlights.set(
+      tokenizedClassName,
+      new Highlight(firstRange, lastRange)
+    );
+  }
 
   private applyStylesOnScroll() {
     if (this.scrollingElement) {
@@ -175,7 +275,7 @@ export class Highlighting {
   }
 
   private highlightUserSelection() {
-    const textSelection = this.createTextSelection();
+    const textSelection = this.createTextSelection(true);
     this.spanSelection.addSpan(textSelection, this.config);
   }
 
@@ -192,12 +292,14 @@ export class Highlighting {
     this.applyEntityStyle();
   }
 
-  private applyHighlightStyle() {
-    CSS.highlights.clear();
+  private applyHighlightStyle(
+    getClassName: (span: Span) => string = (span) =>
+      `${this.styles.entityCssKey}-${span.entity.id}`
+  ) {
     const highlights: Dictionary<Range[]> = {};
 
     for (const span of this.spans) {
-      const className = `${this.styles.entityCssKey}-${span.entity.id}`;
+      const className = getClassName(span);
 
       if (!highlights[className]) highlights[className] = [];
 
@@ -206,77 +308,126 @@ export class Highlighting {
       highlights[className].push(range);
     }
 
+    CSS.highlights.clear();
+
     for (const [entity, selections] of Object.entries(highlights)) {
       CSS.highlights.set(entity, new Highlight(...selections.flat()));
     }
   }
 
-  private applyEntityStyle() {
-    const overlappedSpans: {
-      left: number;
-      top: number;
-    }[] = [];
+  private hoverSpan(hoveredSpan: Span, isHovered: boolean) {
+    this.applyHighlightStyle((span) =>
+      hoveredSpan === span && isHovered
+        ? `${this.styles.entityCssKey}-${span.entity.id}-hover`
+        : `${this.styles.entityCssKey}-${span.entity.id}`
+    );
+  }
 
+  private applyEntityStyle() {
     while (this.entitySpanContainer.firstChild) {
       this.entitySpanContainer.removeChild(this.entitySpanContainer.firstChild);
     }
+
+    this.updateLineHeight();
 
     for (const span of this.spans) {
       const { node } = span;
 
       if (node.id !== this.nodeId) continue;
 
-      const rangePosition = this.createRange({
-        ...span,
-        to: span.from + 1,
-      }).getBoundingClientRect();
-      const rangeWidth = this.createRange(span).getBoundingClientRect();
-      const offset = this.entitySpanContainer.getBoundingClientRect();
-      const scrollTop = this.entitySpanContainer.scrollTop;
-
-      const { left, top } = rangePosition;
-      const { width } = rangeWidth;
-
-      const position = { left, top: top + window.scrollY, width };
-
-      if (overlappedSpans.some((p) => p.left === left && p.top === top)) {
-        position.top += this.styles.entitiesGap;
-      }
-
-      const entityPosition = {
-        top: `${position.top - offset.top + scrollTop}px`,
-        left: `${position.left - offset.left}px`,
-        width: `${position.width}px`,
-      };
+      const entityPosition = this.createPosition(span);
 
       const entityElement = this.EntityComponentConstructor(
         span,
         entityPosition,
-        () => this.removeSpan(span),
-        (newEntity: Entity) => this.replaceEntity(span, newEntity)
+        (isHovered) => this.hoverSpan(span, isHovered),
+        (span) => this.removeSpan(span),
+        (newEntity) => this.replaceEntity(span, newEntity),
+        (span, newEntity) => this.addSpanBaseOn(span, newEntity)
       );
 
       this.entitySpanContainer.appendChild(entityElement);
-
-      overlappedSpans.push(position);
     }
+  }
+
+  addSpanBaseOn(span: Span, newEntity: Entity) {
+    if (span.entity.id === newEntity.id) return;
+
+    const clonedSpan = {
+      ...span,
+      entity: newEntity,
+    };
+
+    this.spanSelection.select(clonedSpan);
+
+    this.applyStyles();
+  }
+
+  private createPosition(span: OverlappedSpan) {
+    const rangePositionStart = this.createRange({
+      ...span,
+      to: span.from + 1,
+    }).getBoundingClientRect();
+    const rangePositionEnd = this.createRange({
+      ...span,
+      from: span.to - 1,
+    }).getBoundingClientRect();
+
+    const rangeNaturalPosition = this.createRange(span).getBoundingClientRect();
+
+    const offset = this.entitySpanContainer.getBoundingClientRect();
+    const scrollTop = this.entitySpanContainer.scrollTop;
+
+    const { left, top } = rangePositionStart;
+    const { right, top: topEnd } = rangePositionEnd;
+    const { width } = rangeNaturalPosition;
+
+    const position = {
+      left,
+      top: top + window.scrollY + this.styles.entitiesGap / 10,
+      width,
+      right: right + window.scrollX,
+      topEnd: topEnd + window.scrollY,
+    };
+
+    if (span.overlap.level > 0) {
+      position.top += this.styles.entitiesGap * span.overlap.index;
+      position.topEnd += this.styles.entitiesGap * span.overlap.index;
+    }
+
+    return {
+      top: position.top - offset.top + scrollTop,
+      left: position.left - offset.left,
+      width: position.width,
+      topEnd: position.topEnd - offset.top + scrollTop,
+      right: position.right - offset.left,
+      lineHeight: this.config.lineHeight,
+      baseEntityGap: this.styles.entitiesGap,
+    };
   }
 
   private removeSpan(span: Span) {
     this.spanSelection.removeSpan(span);
-    this.applyStyles();
+
+    const spans = this.spans;
+
+    this.removeAllHighlights();
+
+    this.loadHighlights(spans);
   }
 
-  private createRange({ from, to, node }: Span) {
-    const range = new Range();
+  public createRange({ from, to, node }: Span) {
+    try {
+      const range = new Range();
 
-    range.setStart(node.element, from);
-    range.setEnd(node.element, to);
+      range.setStart(node.element, from);
+      range.setEnd(node.element, to);
 
-    return range;
+      return range;
+    } catch {}
   }
 
-  private createTextSelection(): TextSelection | undefined {
+  private createTextSelection(clear = false): TextSelection | undefined {
     const selection = this.getSelectedText();
     if (selection?.type !== "Range" || !this.entity) return;
 
@@ -296,7 +447,7 @@ export class Highlighting {
       },
     };
 
-    selection.empty();
+    if (clear) selection.empty();
 
     return textSelection;
   }

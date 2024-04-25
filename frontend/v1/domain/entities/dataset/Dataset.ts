@@ -1,9 +1,13 @@
-interface OriginalDAtaset {
+import { Progress } from "./Progress";
+
+interface OriginalDataset {
   guidelines: string;
   allowExtraMetadata: boolean;
 }
 export class Dataset {
-  public original: OriginalDAtaset;
+  public original: OriginalDataset;
+  public progress: Progress;
+
   constructor(
     public readonly id: string,
     public readonly name: string,
@@ -30,6 +34,10 @@ export class Dataset {
       this.guidelines !== this.original.guidelines ||
       this.allowExtraMetadata !== this.original.allowExtraMetadata
     );
+  }
+
+  get isFeedbackTask(): boolean {
+    return this.task === "FeedbackTask";
   }
 
   restore() {

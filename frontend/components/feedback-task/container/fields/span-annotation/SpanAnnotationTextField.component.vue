@@ -21,10 +21,14 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="content-area --body1">
+    <div class="text_field_component__area --body1">
       <p
-        class="span-annotation__field"
-        :class="hasSelectedEntity ? 'span-annotation__field--active' : null"
+        :class="[
+          allowOverlapping
+            ? 'span-annotation__field--overlapped'
+            : 'span-annotation__field',
+          hasSelectedEntity ? 'span-annotation__field--active' : null,
+        ]"
         ref="spanAnnotationField"
         :id="id"
         v-html="fieldText"
@@ -44,12 +48,29 @@
         :entity-name="selectedEntity.text"
         :message="$t('spanAnnotation.shortcutHelper')"
       />
-      <template v-for="{ id, color } in spanQuestion.answer.options">
-        <style :key="id" scoped>
-          .span-annotation__field::highlight(hl-{{id}}) {
-            background-color: {{color}};
-          }
-        </style>
+      <template>
+        <template v-for="{ id, color } in spanQuestion.answer.options">
+          <style :key="id" scoped>
+            .span-annotation__field::highlight(hl-{{id}}) {
+              background-color: {{color}};
+            }
+            .span-annotation__field::highlight(hl-{{id}}-selection) {
+              background-color: {{color}};
+            }
+            .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.light}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+              background: {{color}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.light}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color}};
+            }
+          </style>
+        </template>
       </template>
     </div>
   </div>
@@ -93,6 +114,9 @@ export default {
     };
   },
   computed: {
+    lineHeight() {
+      return `${this.highlighting.config.lineHeight}px`;
+    },
     selectedEntity() {
       return this.spanQuestion.answer.options.find((e) => e.isSelected);
     },
@@ -101,6 +125,9 @@ export default {
     },
     hasSelectedEntity() {
       return !!this.selectedEntity;
+    },
+    allowOverlapping() {
+      return this.highlighting.config.allowOverlap;
     },
   },
   watch: {
@@ -144,8 +171,9 @@ export default {
       this.showShortcutsHelper(false);
     },
     onMouseMove() {
+      const mouseDown = this.mouseDown;
       this.mouseTimeout = setTimeout(() => {
-        if (this.mouseDown) this.showShortcutsHelper(true);
+        if (this.mouseDown) this.showShortcutsHelper(mouseDown);
       }, 500);
     },
     onKeyDown(event) {
@@ -168,7 +196,6 @@ export default {
 <style lang="scss" scoped>
 .text_field_component {
   $this: &;
-  user-select: text;
   display: flex;
   flex-direction: column;
   gap: $base-space;
@@ -187,10 +214,11 @@ export default {
     gap: $base-space;
     color: $black-87;
   }
-  .content-area {
+  &__area {
     position: relative;
     white-space: pre-wrap;
     word-break: break-word;
+    user-select: none;
   }
   &__title-content {
     word-break: break-word;
@@ -207,6 +235,28 @@ export default {
   }
 }
 
+.span-annotation {
+  &__field {
+    position: relative;
+    margin: 0;
+    @include font-size(18px);
+    line-height: v-bind(lineHeight);
+    user-select: text;
+    &--overlapped {
+      @extend .span-annotation__field;
+    }
+    &--active {
+      cursor: none;
+      &::selection {
+        background-color: transparent;
+      }
+    }
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.25s;
@@ -214,25 +264,6 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.span-annotation {
-  &__field {
-    position: relative;
-    line-height: 32px;
-    margin: 0;
-
-    &--active {
-      cursor: none;
-      &::selection {
-        background-color: v-bind("selectedEntityColor");
-      }
-    }
-
-    &:focus {
-      outline: none;
-    }
-  }
 }
 
 :deep([id^="entity-span-container"]) {

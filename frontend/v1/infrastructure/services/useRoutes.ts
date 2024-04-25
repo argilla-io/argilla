@@ -1,5 +1,5 @@
 import { useContext, useRoute, useRouter } from "@nuxtjs/composition-api";
-import { Dataset } from "@/v1/domain/entities/Dataset";
+import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 
 type KindOfParam =
   | "status"

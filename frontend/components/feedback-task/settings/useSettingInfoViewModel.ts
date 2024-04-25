@@ -1,6 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { UpdateDatasetSettingUseCase } from "~/v1/domain/usecases/dataset-setting/update-dataset-setting-use-case";
-import { Dataset } from "~/v1/domain/entities/Dataset";
+import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 
 export const useSettingInfoViewModel = () => {
   const updateDatasetSettingUseCase = useResolve(UpdateDatasetSettingUseCase);

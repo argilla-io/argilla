@@ -70,7 +70,8 @@ rg.SpanQuestion(
     labels={"PER": "Person", "ORG": "Organization", "EVE": "Event"},
     # or ["PER", "ORG", "EVE"],
     field="text",
-    required=True
+    required=True,
+    allow_overlapping=False
 )
 ```
 

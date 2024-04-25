@@ -58,7 +58,8 @@ export default {
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
   &--focus {
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   &__wrapper {
     flex: 1;

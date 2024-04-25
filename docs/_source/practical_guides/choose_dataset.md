@@ -45,6 +45,7 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | RLHF (DPO)               	| ✔️               	|                              	|
 | RAG               	| ✔️               	|                              	|
 | Image support               	| ✔️               	|                              	|
+| Overlapping spans           	|✔️                	|                  |
 | And many more               	| ✔️               	|                              	|
 
 ### Annotation workflows

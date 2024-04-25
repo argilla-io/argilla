@@ -16,6 +16,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
 }) => {
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
+  const initialConfiguration = {
+    allowOverlap: spanQuestion.settings.allow_overlapping,
+  };
 
   const selectEntity = (entity: Entity) => {
     answer.options.forEach((e) => {
@@ -28,8 +31,10 @@ export const useSpanAnnotationTextFieldViewModel = ({
   const entityComponentFactory = (
     span: Span,
     entityPosition: Position,
-    removeSpan: () => void,
-    replaceEntity: (entity: Entity) => void
+    hoverSpan: (isHovered: boolean) => void,
+    removeSpan: (span: Span) => void,
+    replaceEntity: (entity: Entity) => void,
+    cloneSpanWith: (span: Span, entity: Entity) => void
   ) => {
     const EntityComponentReference = Vue.extend(EntityComponent);
     const entity = answer.options.find((e) => e.id === span.entity.id);
@@ -39,8 +44,14 @@ export const useSpanAnnotationTextFieldViewModel = ({
       label: entity?.value,
     });
 
+    const spanInRange = highlighting.value.spans.filter(
+      (entity) => entity.from === span.from && entity.to === span.to
+    );
+
     const instance = new EntityComponentReference({
       propsData: {
+        span,
+        spanInRange,
         entity,
         spanQuestion,
         entityPosition,
@@ -48,8 +59,10 @@ export const useSpanAnnotationTextFieldViewModel = ({
       },
     });
 
-    instance.$on("on-remove-option", removeSpan);
-    instance.$on("on-replace-option", (newEntity: Entity) => {
+    instance.$on("on-remove-span", removeSpan);
+    instance.$on("on-hover-span", hoverSpan);
+    instance.$on("on-add-span-base-on", cloneSpanWith);
+    instance.$on("on-replace-entity", (newEntity: Entity) => {
       selectEntity(newEntity);
 
       replaceEntity(newEntity);
@@ -101,7 +114,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   };
 
   const highlighting = ref<Highlighting>(
-    new Highlighting(id, entityComponentFactory)
+    new Highlighting(id, entityComponentFactory, initialConfiguration)
   );
 
   watch(

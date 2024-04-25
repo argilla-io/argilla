@@ -41,19 +41,19 @@ export default {
       options: [
         {
           id: "pending",
-          name: "Pending",
+          name: this.$t("recordStatus.pending"),
         },
         {
           id: "draft",
-          name: "Draft",
+          name: this.$t("recordStatus.draft"),
         },
         {
           id: "submitted",
-          name: "Submitted",
+          name: this.$t("recordStatus.submitted"),
         },
         {
           id: "discarded",
-          name: "Discarded",
+          name: this.$t("recordStatus.discarded"),
         },
       ],
     };
