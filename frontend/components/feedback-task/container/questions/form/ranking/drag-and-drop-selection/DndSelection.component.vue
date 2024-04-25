@@ -42,7 +42,6 @@
         </BaseTooltip>
       </div>
     </draggable>
-
     <div class="draggable__slots-container">
       <div
         class="draggable__slot"
