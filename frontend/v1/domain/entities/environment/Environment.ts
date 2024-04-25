@@ -20,4 +20,13 @@ export class Environment {
       !this.huggingface.spacePersistantStorageEnabled
     );
   }
+
+  get huggingFaceSpace() {
+    if (this.huggingface?.spaceId) {
+      return {
+        space: this.huggingface.spaceRepoName,
+        user: this.huggingface.spaceAuthorName,
+      };
+    }
+  }
 }
