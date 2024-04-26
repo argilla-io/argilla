@@ -1,9 +1,18 @@
 export class QuestionSetting {
+  type:
+    | "text"
+    | "ranking"
+    | "multi_label_selection"
+    | "label_selection"
+    | "span";
+
   use_markdown: boolean;
   visible_options: number;
+  allow_overlapping: boolean;
+  allow_character_annotation: boolean;
+  field: string;
   options: any;
   options_order: "natural" | "suggestion";
-  type: string;
 
   constructor(settings: any) {
     this.type = settings.type;
@@ -12,6 +21,9 @@ export class QuestionSetting {
     this.visible_options = settings.visible_options;
     this.options = settings.options;
     this.options_order = settings.options_order;
+    this.allow_overlapping = settings.allow_overlapping;
+    this.allow_character_annotation = settings.allow_character_annotation;
+    this.field = settings.field;
   }
 
   get suggestionFirst() {
