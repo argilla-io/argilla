@@ -289,14 +289,6 @@ $max-visible-card-items: 12;
     border-radius: $border-radius;
     cursor: move;
 
-    &[draggable="true"] {
-      background: $card-ghost-color;
-      color: $card-primary-color;
-      box-shadow: $shadow-500;
-      &:focus {
-        outline: none !important;
-      }
-    }
     &.ghost-ticket {
       background: $card-empty-color;
       color: $card-empty-color;
@@ -308,11 +300,6 @@ $max-visible-card-items: 12;
       box-shadow: none;
       &:hover {
         box-shadow: none;
-      }
-    }
-    &.sortable-chosen {
-      .tooltip {
-        display: none;
       }
     }
     &--unranked {
@@ -393,6 +380,12 @@ $max-visible-card-items: 12;
     cursor: default;
     &__score {
       @include font-size(11px);
+    }
+  }
+
+  [draggable="true"] {
+    :deep(.tooltip-content) {
+      display: none;
     }
   }
 
