@@ -196,7 +196,7 @@ export default {
           const isASuggested = this.suggestion.getSuggestion(a.value);
           const isBSuggested = this.suggestion.getSuggestion(b.value);
 
-          return isASuggested?.score - isBSuggested?.score;
+          return isASuggested?.score > isBSuggested?.score ? -1 : 1;
         });
 
       const noSuggestedOptions = this.filteredOptions.filter(
