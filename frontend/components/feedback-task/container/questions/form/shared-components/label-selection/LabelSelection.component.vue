@@ -72,16 +72,14 @@
           >
             <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
-            <span
-              v-if="getSuggestedScore(option)"
-              class="label-text__score"
-              v-text="getSuggestedScore(option)"
-            />
-            <svgicon
-              v-else-if="isSuggested(option)"
-              class="label-text__suggestion-icon"
-              name="suggestion"
-            />
+            <span v-if="isSuggested(option)" class="label-text__suggestion">
+              <svgicon class="label-text__suggestion__icon" name="suggestion" />
+              <span
+                v-if="getSuggestedScore(option)"
+                class="label-text__suggestion__score"
+                v-text="getSuggestedScore(option)"
+              />
+            </span>
           </label>
         </BaseTooltip>
       </div>
@@ -404,14 +402,18 @@ $label-dark-color: palette(purple, 200);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
-
-  &__suggestion-icon {
-    flex-shrink: 0;
-    width: 10px;
-    height: 10px;
-  }
-  &__score {
-    @include font-size(11px);
+  &__suggestion {
+    display: flex;
+    align-items: center;
+    gap: calc($base-space / 2);
+    &__score {
+      @include font-size(11px);
+    }
+    &__icon {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+    }
   }
 
   span {
