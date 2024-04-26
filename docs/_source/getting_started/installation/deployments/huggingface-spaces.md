@@ -142,14 +142,14 @@ If you have improvement suggestions or need specific support, please join [Argil
 
 ## Setting up persistent storage
 
-Hugging Face Spaces recently introduced a feature for persistent storage, which must be enabled manually through the Hugging Face Spaces settings. Without this activation, and if you're not subscribed to a paid space upgrade, the space will automatically shut down after 48 hours of inactivity, resulting in data loss. To prevent this, we highly recommend using the persistent storage layer offered by Hugging Face.
+Hugging Face Spaces recently introduced a feature for persistent storage, which must be enabled manually through the Hugging Face Spaces settings. Without this activation, and if you're not subscribed to a paid space upgrade, the space will automatically shut down after 48 hours of inactivity and do a factory reset when it is restarted, meaning that all the data of the space will be lost, including all created users, workspaces and datasets. To prevent this, we highly recommend using the persistent storage layer offered by Hugging Face.
 
 To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section. This will enable persistent storage for your Space and you will be able to use it for data labeling and feedback collection.
 
 ![Alt text](../../../_static/images/installation/huggingface-spaces/persistent-storage.PNG)
 
 ```{note}
-If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is disabled for the space.
+If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is not enabled for the space.
 ```
 
 ## Setting up secret environment variables
