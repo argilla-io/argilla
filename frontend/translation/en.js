@@ -23,6 +23,7 @@ export default {
   description: "Description",
   labels: "Labels",
   useMarkdown: "Use Markdown",
+  suggestionFirst: "Suggestion first",
   visibleForAnnotators: "Visible for annotators",
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",

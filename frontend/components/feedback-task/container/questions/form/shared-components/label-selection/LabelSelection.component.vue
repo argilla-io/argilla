@@ -116,6 +116,10 @@ export default {
       type: Boolean,
       default: () => false,
     },
+    suggestionFirst: {
+      type: Boolean,
+      default: () => false,
+    },
     isFocused: {
       type: Boolean,
       default: () => false,
@@ -178,10 +182,7 @@ export default {
         .filter((option) => option.isSelected);
     },
     visibleOptions() {
-      // TODO: Sort the options base of the question settings.
-      const shouldOrderByScore = true;
-
-      if (!shouldOrderByScore) {
+      if (!this.suggestionFirst) {
         if (this.isExpanded) return this.filteredOptions;
 
         return this.filteredOptions
