@@ -56,8 +56,8 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :title="getSuggestion(option) && $t('suggestion.name')"
-          :text="getSuggestion(option) && getAgent(option)"
+          :title="isSuggested(option) && $t('suggestion.name')"
+          :text="getSuggestedAgent(option)"
           minimalist
         >
           <label
@@ -73,12 +73,12 @@
             <span class="key" v-text="keyboards[option.id]" />
             <span>{{ option.text }}</span>
             <span
-              v-if="getScore(option)"
+              v-if="getSuggestedScore(option)"
               class="label-text__score"
-              v-text="getScore(option)"
+              v-text="getSuggestedScore(option)"
             />
             <svgicon
-              v-else-if="getSuggestion(option)"
+              v-else-if="isSuggested(option)"
               class="label-text__suggestion-icon"
               name="suggestion"
             />
@@ -313,14 +313,14 @@ export default {
         this.isExpanded = true;
       }
     },
-    getSuggestion(option) {
-      return this.suggestion?.getSuggestion(option.value);
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
     },
-    getScore(option) {
-      return this.getSuggestion(option)?.score?.toFixed(1);
+    getSuggestedScore(option) {
+      return this.suggestion?.getSuggestion(option.value)?.score?.fixed;
     },
-    getAgent(option) {
-      return this.getSuggestion(option)?.agent;
+    getSuggestedAgent(option) {
+      return this.suggestion?.getSuggestion(option.value)?.agent;
     },
   },
   setup(props) {

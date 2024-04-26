@@ -7,10 +7,7 @@
         v-for="tab in tabs"
         :key="tab.id"
       >
-        <BaseTooltip
-          :title="tab.tooltipTitle ? tab.tooltipTitle : null"
-          :text="tab.tooltipText ? tab.tooltipText : null"
-        >
+        <BaseTooltip :title="tab.tooltipTitle" :text="tab.tooltipText">
           <BaseButton class="small" @on-click="changeTab(tab)">
             {{ tab.name }}
             <svgicon v-if="tab.icon" :name="tab.icon" width="10" height="10" />

@@ -17,10 +17,10 @@
         @focus="onFocus"
       >
         <BaseTooltip
-          v-if="getSuggestion(item)"
+          v-if="isSuggested(item)"
           class="draggable__rank-card--unranked"
           :title="$t('suggestion.name')"
-          :text="getSuggestion(item) && getAgent(item)"
+          :text="getSuggestedAgent(item)"
           minimalist
         >
           <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
@@ -30,13 +30,13 @@
             :id="`${item.value}-span`"
           />
 
-          <span v-if="getSuggestion(item)" class="draggable__suggestion">
+          <span v-if="isSuggested(item)" class="draggable__suggestion">
             <span v-text="getSuggestedRank(item)" />
             <svgicon name="suggestion" width="10" height="10" />
             <span
               class="draggable__suggestion__score"
-              v-if="getScore(item)"
-              v-text="getScore(item)"
+              v-if="getSuggestedScore(item)"
+              v-text="getSuggestedScore(item)"
             />
           </span>
         </BaseTooltip>
@@ -69,8 +69,9 @@
             @focus="onFocus"
           >
             <BaseTooltip
+              v-if="isSuggested(item)"
               :title="$t('suggestion.name')"
-              :text="getSuggestion(item) && getAgent(item)"
+              :text="getSuggestedAgent(item)"
               minimalist
               class="draggable__rank-card--ranked"
             >
@@ -81,13 +82,13 @@
                 :id="`${item.value}-span`"
               />
 
-              <span v-if="getSuggestion(item)" class="draggable__suggestion">
+              <span v-if="isSuggested(item)" class="draggable__suggestion">
                 <span v-text="getSuggestedRank(item)" />
                 <svgicon name="suggestion" width="10" height="10" />
                 <span
                   class="draggable__suggestion__score"
-                  v-if="getScore(item)"
-                  v-text="getScore(item)"
+                  v-if="getSuggestedScore(item)"
+                  v-text="getSuggestedScore(item)"
                 />
               </span>
             </BaseTooltip>
@@ -218,17 +219,17 @@ export default {
     onFocus() {
       this.$emit("on-focus");
     },
-    getSuggestion(item) {
-      return this.suggestion?.getSuggestion(item);
+    isSuggested(item) {
+      return this.suggestion?.isSuggested(item);
     },
-    getAgent(item) {
-      return this.getSuggestion(item)?.agent;
+    getSuggestedAgent(item) {
+      return this.suggestion?.getSuggestion(item)?.agent;
     },
-    getScore(item) {
-      return this.getSuggestion(item)?.score?.toFixed(1);
+    getSuggestedScore(item) {
+      return this.suggestion?.getSuggestion(item)?.score?.fixed;
     },
     getSuggestedRank(item) {
-      return this.getSuggestion(item)?.value.rank;
+      return this.suggestion?.getSuggestion(item)?.value.rank;
     },
   },
 };

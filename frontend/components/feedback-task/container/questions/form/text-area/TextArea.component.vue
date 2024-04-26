@@ -36,10 +36,10 @@ export default {
     isSuggested() {
       return this.question.suggestion?.isSuggested(this.question.answer.value);
     },
-    getScore() {
-      return this.question.suggestion?.score;
+    suggestedScore() {
+      return this.question.suggestion?.score.toFixed(1);
     },
-    getAgent() {
+    suggestedAgent() {
       return this.question.suggestion?.agent;
     },
     tabs() {
@@ -48,9 +48,9 @@ export default {
           id: "0",
           name: this.isSuggested ? "" : this.$nuxt.$t("questions_form.write"),
           icon: this.isSuggested && "suggestion",
-          info: this.isSuggested && this.getScore,
+          info: this.isSuggested && this.suggestedScore,
           tooltipTitle: this.isSuggested && this.$nuxt.$t("suggestion.name"),
-          tooltipText: this.isSuggested && this.getAgent,
+          tooltipText: this.isSuggested && this.suggestedAgent,
           component: "TextAreaContents",
         },
         ...(!this.isSuggested
@@ -59,9 +59,9 @@ export default {
                 id: "1",
                 name: "",
                 icon: "suggestion",
-                info: this.getScore,
+                info: this.suggestedScore,
                 tooltipTitle: this.$nuxt.$t("suggestion.name"),
-                tooltipText: this.getAgent,
+                tooltipText: this.suggestedAgent,
                 component: "TextAreaSuggestion",
               },
             ]

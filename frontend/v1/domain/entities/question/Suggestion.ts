@@ -8,10 +8,29 @@ import { QuestionType } from "./QuestionType";
 
 type AnswerValue = string | number | RankingAnswer | SpanAnswer;
 
-interface SuggestionValue {
-  value: AnswerValue;
-  score: number;
-  agent: string;
+class SuggestionScore extends Number {
+  private constructor(value: number) {
+    super(value);
+  }
+
+  get fixed() {
+    return this.toFixed(1);
+  }
+
+  static from(value: number) {
+    return new SuggestionScore(value);
+  }
+}
+
+export class SuggestionValue {
+  public readonly score: SuggestionScore;
+  constructor(
+    public readonly value: AnswerValue,
+    score: number,
+    public readonly agent: string
+  ) {
+    this.score = score ? SuggestionScore.from(score) : undefined;
+  }
 }
 
 export class Suggestion implements Answer {
@@ -39,11 +58,7 @@ export class Suggestion implements Answer {
       this.questionType.isRatingType
     ) {
       if (this.value === answer) {
-        return {
-          value: answer,
-          score: this.score as number,
-          agent: this.agent,
-        };
+        return new SuggestionValue(answer, this.score as number, this.agent);
       }
     }
 
@@ -54,11 +69,11 @@ export class Suggestion implements Answer {
       if (multiLabel.includes(answerValue)) {
         const indexOf = multiLabel.indexOf(answerValue);
 
-        return {
-          value: answer,
-          score: this.score?.[indexOf],
-          agent: this.agent,
-        };
+        return new SuggestionValue(
+          answerValue,
+          this.score?.[indexOf],
+          this.agent
+        );
       }
     }
 
@@ -74,11 +89,11 @@ export class Suggestion implements Answer {
       if (spanSuggested) {
         const indexOf = suggestions.indexOf(spanSuggested);
 
-        return {
-          value: spanSuggested,
-          score: this.score?.[indexOf],
-          agent: this.agent,
-        };
+        return new SuggestionValue(
+          spanSuggested,
+          this.score?.[indexOf],
+          this.agent
+        );
       }
     }
 
@@ -92,11 +107,12 @@ export class Suggestion implements Answer {
 
       if (rankingSuggested) {
         const indexOf = suggestedRanking.indexOf(rankingSuggested);
-        return {
-          value: rankingSuggested,
-          score: this.score?.[indexOf],
-          agent: this.agent,
-        };
+
+        return new SuggestionValue(
+          rankingSuggested,
+          this.score?.[indexOf],
+          this.agent
+        );
       }
     }
   }

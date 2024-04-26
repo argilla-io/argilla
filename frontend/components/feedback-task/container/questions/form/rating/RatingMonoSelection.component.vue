@@ -8,8 +8,8 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :title="getSuggestion(option) && $t('suggestion.name')"
-          :text="getSuggestion(option) && getSuggestionText(option)"
+          :title="isSuggested(option) && $t('suggestion.name')"
+          :text="getSuggestedInfo(option)"
           minimalist
         >
           <input
@@ -31,7 +31,7 @@
             {{ option.value }}
 
             <svgicon
-              v-if="getSuggestion(option)"
+              v-if="isSuggested(option)"
               class="label-text__suggestion-icon"
               name="suggestion"
             />
@@ -79,18 +79,16 @@ export default {
     },
   },
   methods: {
-    getSuggestion(option) {
-      return this.suggestion?.getSuggestion(option.value);
+    isSuggested(option) {
+      return this.suggestion?.isSuggested(option.value);
     },
-    getScore(option) {
-      return this.getSuggestion(option)?.score?.toFixed(1);
-    },
-    getAgent(option) {
-      return this.getSuggestion(option)?.agent;
-    },
-    getSuggestionText(option) {
-      const agent = this.getAgent(option) ? `${this.getAgent(option)}: ` : "";
-      const score = this.getScore(option) || "";
+    getSuggestedInfo(option) {
+      const suggestion = this.suggestion?.getSuggestion(option.value);
+      if (!suggestion) return;
+
+      const agent = suggestion.agent ? `${suggestion.agent}: ` : "";
+      const score = suggestion.score?.fixed ?? "";
+
       return `${agent}${score}`;
     },
     onSelect({ id, isSelected }) {

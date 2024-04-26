@@ -1,5 +1,5 @@
 import { QuestionType } from "./QuestionType";
-import { Suggestion } from "./Suggestion";
+import { Suggestion, SuggestionValue } from "./Suggestion";
 
 describe("Suggestion", () => {
   describe("single label type", () => {
@@ -9,18 +9,16 @@ describe("Suggestion", () => {
         "questionId",
         QuestionType.from("label_selection"),
         "suggestedAnswer",
-        1,
+        0.4544,
         "agent"
       );
       const isSuggested = suggestion.isSuggested("suggestedAnswer");
       expect(isSuggested).toBe(true);
 
       const suggested = suggestion.getSuggestion("suggestedAnswer");
-      expect(suggested).toEqual({
-        value: "suggestedAnswer",
-        score: 1,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(
+        new SuggestionValue("suggestedAnswer", 0.4544, "agent")
+      );
     });
 
     test("return false if the answer is not suggested", () => {
@@ -45,18 +43,16 @@ describe("Suggestion", () => {
         "questionId",
         QuestionType.from("text"),
         "Suggested text",
-        1,
+        0.122,
         "agent"
       );
       const isSuggested = suggestion.isSuggested("Suggested text");
       expect(isSuggested).toBe(true);
 
       const suggested = suggestion.getSuggestion("Suggested text");
-      expect(suggested).toEqual({
-        value: "Suggested text",
-        score: 1,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(
+        new SuggestionValue("Suggested text", 0.122, "agent")
+      );
     });
 
     test("return false if the answer is not suggested", () => {
@@ -81,7 +77,7 @@ describe("Suggestion", () => {
         "questionId",
         QuestionType.from("multi_label_selection"),
         ["One", "Two"],
-        [0.2, 0.3],
+        [0.2323, 0.32323],
         "agent"
       );
 
@@ -89,21 +85,15 @@ describe("Suggestion", () => {
       expect(isSuggested).toBe(true);
 
       const suggested = suggestion.getSuggestion("One");
-      expect(suggested).toEqual({
-        value: "One",
-        score: 0.2,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(new SuggestionValue("One", 0.2323, "agent"));
 
       const isSuggestedTwo = suggestion.isSuggested("Two");
       expect(isSuggestedTwo).toBe(true);
 
       const suggestedTwo = suggestion.getSuggestion("Two");
-      expect(suggestedTwo).toEqual({
-        value: "Two",
-        score: 0.3,
-        agent: "agent",
-      });
+      expect(suggestedTwo).toEqual(
+        new SuggestionValue("Two", 0.32323, "agent")
+      );
     });
 
     test("return false if the answer is not suggested", () => {
@@ -149,7 +139,7 @@ describe("Suggestion", () => {
         "questionId",
         QuestionType.from("rating"),
         5,
-        1,
+        0.9432,
         "agent"
       );
 
@@ -157,11 +147,7 @@ describe("Suggestion", () => {
       expect(isSuggested).toBe(true);
 
       const suggested = suggestion.getSuggestion(5);
-      expect(suggested).toEqual({
-        value: 5,
-        score: 1,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(new SuggestionValue(5, 0.9432, "agent"));
     });
 
     test("return false if the answer is not suggested", () => {
@@ -189,7 +175,7 @@ describe("Suggestion", () => {
           { value: "One", rank: 1 },
           { value: "Two", rank: 2 },
         ],
-        [0.2, 0.3],
+        [0.2333, 0.3123],
         "agent"
       );
 
@@ -203,14 +189,16 @@ describe("Suggestion", () => {
         value: "One",
         rank: 1,
       });
-      expect(suggested).toEqual({
-        value: {
-          value: "One",
-          rank: 1,
-        },
-        score: 0.2,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(
+        new SuggestionValue(
+          {
+            value: "One",
+            rank: 1,
+          },
+          0.2333,
+          "agent"
+        )
+      );
 
       const isSuggestedTwo = suggestion.isSuggested({
         value: "Two",
@@ -222,14 +210,16 @@ describe("Suggestion", () => {
         value: "Two",
         rank: 2,
       });
-      expect(suggestedTwo).toEqual({
-        value: {
-          value: "Two",
-          rank: 2,
-        },
-        score: 0.3,
-        agent: "agent",
-      });
+      expect(suggestedTwo).toEqual(
+        new SuggestionValue(
+          {
+            value: "Two",
+            rank: 2,
+          },
+          0.3123,
+          "agent"
+        )
+      );
     });
 
     test("return false if the answer is not suggested", () => {
@@ -304,7 +294,7 @@ describe("Suggestion", () => {
             label: "Two",
           },
         ],
-        [0.2, 0.3],
+        [0.2332, 0.31232],
         "agent"
       );
       const isSuggested = suggestion.isSuggested({
@@ -319,15 +309,17 @@ describe("Suggestion", () => {
         end: 5,
         label: "Two",
       });
-      expect(suggested).toEqual({
-        value: {
-          start: 0,
-          end: 5,
-          label: "Two",
-        },
-        score: 0.3,
-        agent: "agent",
-      });
+      expect(suggested).toEqual(
+        new SuggestionValue(
+          {
+            start: 0,
+            end: 5,
+            label: "Two",
+          },
+          0.31232,
+          "agent"
+        )
+      );
     });
 
     test("return false if the answer is not suggested", () => {
