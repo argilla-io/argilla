@@ -8,7 +8,7 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :title="isSuggested(option) && $t('suggestion.name')"
+          :title="isSuggested(option) ? $t('suggestion.name') : ''"
           :text="getSuggestedInfo(option)"
           minimalist
         >

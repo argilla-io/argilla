@@ -56,7 +56,7 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :title="isSuggested(option) && $t('suggestion.name')"
+          :title="isSuggested(option) ? $t('suggestion.name') : ''"
           :text="getSuggestedAgent(option)"
           minimalist
         >
