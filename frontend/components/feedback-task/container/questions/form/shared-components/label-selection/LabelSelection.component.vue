@@ -421,9 +421,6 @@ $label-dark-color: palette(purple, 200);
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
-    &:hover {
-      direction: rtl;
-    }
   }
 
   &:not(.label-active):hover {
