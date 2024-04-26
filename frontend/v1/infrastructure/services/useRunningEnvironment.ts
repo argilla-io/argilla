@@ -19,9 +19,14 @@ export const useRunningEnvironment = () => {
     );
   };
 
-  const getHuggingFaceSpace = async () => {
+  const getEnvironment = async () => {
     const environmentUseCase = useResolve(GetEnvironmentUseCase);
-    const environment = await environmentUseCase.execute();
+
+    return await environmentUseCase.execute();
+  };
+
+  const getHuggingFaceSpace = async () => {
+    const environment = await getEnvironment();
 
     return environment.huggingFaceSpace;
   };
@@ -37,6 +42,7 @@ export const useRunningEnvironment = () => {
   return {
     isEmbebed,
     isRunningOnHuggingFace,
+    getEnvironment,
     getHuggingFaceSpace,
     hasHuggingFaceOAuthConfigured,
   };
