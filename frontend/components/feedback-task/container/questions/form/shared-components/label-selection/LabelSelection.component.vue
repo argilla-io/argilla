@@ -71,7 +71,7 @@
             :title="option.text"
           >
             <span class="key" v-text="keyboards[option.id]" />
-            <span>{{ option.text }}</span>
+            <span class="label-text__text">{{ option.text }}</span>
             <span v-if="isSuggested(option)" class="label-text__suggestion">
               <svgicon class="label-text__suggestion__icon" name="suggestion" />
               <span
@@ -402,8 +402,18 @@ $label-dark-color: palette(purple, 200);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
+  &__text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    &:hover {
+      direction: rtl;
+    }
+  }
   &__suggestion {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     gap: calc($base-space / 2);
     &__score {
@@ -414,13 +424,6 @@ $label-dark-color: palette(purple, 200);
       width: 10px;
       height: 10px;
     }
-  }
-
-  span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
   }
 
   &:not(.label-active):hover {
