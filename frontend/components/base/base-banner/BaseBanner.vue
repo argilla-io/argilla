@@ -10,9 +10,13 @@
       />
       <p class="banner__text">{{ message }}</p>
     </div>
-    <BaseButton v-if="buttonLink" class="banner__link" :href="buttonLink">{{
-      buttonText
-    }}</BaseButton>
+    <BaseButton
+      v-if="buttonLink"
+      class="banner__link"
+      :href="buttonLink"
+      target="_blank"
+      >{{ buttonText }}</BaseButton
+    >
     <BaseButton
       class="banner__close-button"
       v-if="dismissible"
