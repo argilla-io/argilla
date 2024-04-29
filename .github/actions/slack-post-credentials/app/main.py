@@ -22,7 +22,7 @@ from typing import Any, Dict, Union
 from slack_sdk import WebClient
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
-GITHUB_REF = os.environ["GITHUB_REF"]
+GITHUB_REF: str = os.environ.get("GITHUB_REF")
 
 # Inputs
 SLACK_CHANNEL_NAME = os.environ.get("INPUT_SLACK-CHANNEL-NAME")

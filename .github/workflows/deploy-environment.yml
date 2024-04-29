@@ -68,6 +68,7 @@ jobs:
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           slack-channel-name: argilla-github
           url: ${{ steps.deploy.outputs.url }}
@@ -79,6 +80,7 @@ jobs:
 
       - name: Comment PR with Cloud Run URL
         uses: thollander/actions-comment-pull-request@v2
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           message: |
             The URL of the deployed environment for this PR is ${{ steps.deploy.outputs.url }}
