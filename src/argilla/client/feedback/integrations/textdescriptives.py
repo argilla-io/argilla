@@ -308,11 +308,11 @@ class TextDescriptivesExtractor:
                 filtered_metrics = {key: value for key, value in metrics.items() if not pd.isna(value)}
                 if metadata_prop_types is not None:
                     filtered_metrics = {
-                        key: int(value)
-                        if metadata_prop_types.get(key) == "integer"
-                        else float(value)
-                        if metadata_prop_types.get(key) == "float"
-                        else value
+                        key: (
+                            int(value)
+                            if metadata_prop_types.get(key) == "integer"
+                            else float(value) if metadata_prop_types.get(key) == "float" else value
+                        )
                         for key, value in filtered_metrics.items()
                     }
                 record.metadata.update(filtered_metrics)

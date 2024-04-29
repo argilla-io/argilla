@@ -44,9 +44,11 @@ def callback(
         dataset = FeedbackDataset.from_argilla(name=name, workspace=workspace)
     except ValueError as e:
         echo_in_panel(
-            f"`FeedbackDataset` with name={name} not found in Argilla. Try using '--workspace' option."
-            if not workspace
-            else f"`FeedbackDataset with name={name} and workspace={workspace} not found in Argilla.",
+            (
+                f"`FeedbackDataset` with name={name} not found in Argilla. Try using '--workspace' option."
+                if not workspace
+                else f"`FeedbackDataset with name={name} and workspace={workspace} not found in Argilla."
+            ),
             title="Dataset not found",
             title_align="left",
             success=False,

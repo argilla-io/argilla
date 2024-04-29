@@ -207,9 +207,9 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
 
         updated_record = self.from_api(
             payload=response.parsed,
-            question_id_to_name={value: key for key, value in self.question_name_to_id.items()}
-            if self.question_name_to_id
-            else None,
+            question_id_to_name=(
+                {value: key for key, value in self.question_name_to_id.items()} if self.question_name_to_id else None
+            ),
             client=self.client,
         )
 
@@ -306,15 +306,17 @@ class RemoteFeedbackRecord(FeedbackRecord, RemoteSchema):
             id=payload.id,
             client=client,
             fields=payload.fields,
-            responses=[RemoteResponseSchema.from_api(response) for response in payload.responses]
-            if payload.responses
-            else [],
-            suggestions=[
-                RemoteSuggestionSchema.from_api(suggestion, question_id_to_name=question_id_to_name, client=client)
-                for suggestion in payload.suggestions
-            ]
-            if payload.suggestions
-            else [],
+            responses=(
+                [RemoteResponseSchema.from_api(response) for response in payload.responses] if payload.responses else []
+            ),
+            suggestions=(
+                [
+                    RemoteSuggestionSchema.from_api(suggestion, question_id_to_name=question_id_to_name, client=client)
+                    for suggestion in payload.suggestions
+                ]
+                if payload.suggestions
+                else []
+            ),
             metadata=payload.metadata if payload.metadata else {},
             vectors=payload.vectors if payload.vectors else {},
             external_id=payload.external_id if payload.external_id else None,
