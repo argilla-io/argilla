@@ -25,6 +25,15 @@ export const useRunningEnvironment = () => {
     return await environmentUseCase.execute();
   };
 
+  const hasPersistentStorageWarning = async () => {
+    if (!isRunningOnHuggingFace) {
+      return;
+    }
+    const environment = await getEnvironment();
+
+    return environment.shouldShowHuggingfaceSpacePersistantStorageWarning;
+  };
+
   const getHuggingFaceSpace = async () => {
     const environment = await getEnvironment();
 
@@ -44,6 +53,7 @@ export const useRunningEnvironment = () => {
     isRunningOnHuggingFace,
     getEnvironment,
     getHuggingFaceSpace,
+    hasPersistentStorageWarning,
     hasHuggingFaceOAuthConfigured,
   };
 };
