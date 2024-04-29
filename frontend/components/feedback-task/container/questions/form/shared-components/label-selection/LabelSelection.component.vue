@@ -200,7 +200,7 @@ export default {
         });
 
       const noSuggestedOptions = this.filteredOptions.filter(
-        (v) => this.suggestion && !this.suggestion.isSuggested(v.value)
+        (v) => !this.suggestion || !this.suggestion.isSuggested(v.value)
       );
 
       const options = [...suggestedOptions, ...noSuggestedOptions];
