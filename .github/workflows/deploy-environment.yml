@@ -1,7 +1,17 @@
 name: Deploy Argilla environment
 
 on:
+
   workflow_dispatch:
+    inputs:
+      image-name:
+        description: The name of the Docker image to deploy.
+        type: string
+        default: argilla/argilla-quickstart-for-dev
+      image-version:
+        description: The version of the Docker image to deploy. In the form pr-<PR_NUMBER>.
+        type: string
+
   workflow_call:
     inputs:
       image-name:
