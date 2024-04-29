@@ -1,4 +1,4 @@
-name: Deploy Argilla PR environment
+name: Deploy Argilla environment
 
 on:
 
