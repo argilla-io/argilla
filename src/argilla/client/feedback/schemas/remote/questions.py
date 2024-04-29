@@ -114,6 +114,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
             required=self.required,
             labels=self.labels,
             visible_labels=self.visible_labels,
+            labels_order=self.labels_order,
         )
 
     @classmethod
@@ -126,6 +127,7 @@ class RemoteMultiLabelQuestion(MultiLabelQuestion, RemoteSchema):
             required=payload.required,
             labels=_parse_options_from_api(payload),
             visible_labels=payload.settings["visible_options"],
+            labels_order=payload.settings["options_order"],
         )
 
 

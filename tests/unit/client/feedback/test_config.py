@@ -16,6 +16,7 @@ import json
 import re
 from typing import TYPE_CHECKING, Any, Dict, List
 
+from argilla.client.feedback.schemas.enums import LabelsOrder
 import pytest
 from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
 from argilla.client.feedback.schemas.fields import FieldSchema
@@ -235,6 +236,7 @@ def test_dataset_config_json_deprecated(
                                 {"value": "label-3", "text": "label-3", "description": None},
                             ],
                             "visible_options": 3,
+                            "options_order": LabelsOrder.natural,
                         },
                         "visible_labels": 20,
                         "id": "a3a12c67-73d8-41b6-a697-f88be8f9386c",
@@ -327,6 +329,7 @@ def test_dataset_config_json_deprecated(
                                 {"value": "label-3", "text": "label-3", "description": None},
                             ],
                             "visible_options": 3,
+                            "options_order": LabelsOrder.natural,
                         },
                         "visible_labels": 20,
                         "id": "0fbcf59a-eef9-48d0-b50c-011b22a1b611",
@@ -406,6 +409,7 @@ def test_dataset_config_json_deprecated(
                                 {"value": "label-3", "text": "label-3"},
                             ],
                             "visible_options": 3,
+                            "options_order": LabelsOrder.natural,
                         },
                         "labels": ["label-1", "label-2", "label-3"],
                         "visible_labels": 3,
@@ -483,9 +487,11 @@ def test_dataset_config_json_deprecated(
                                 {"value": "label-3", "text": "label-3"},
                             ],
                             "visible_options": 3,
+                            "options_order": LabelsOrder.natural,
                         },
                         "labels": ["label-1", "label-2", "label-3"],
                         "visible_labels": 3,
+                        "labels_order": LabelsOrder.natural,
                     },
                     {
                         "name": "question-5",
@@ -652,9 +658,11 @@ def test_dataset_config_backwards_compatibility_argilla_cfg(
                   value: label-3
                 type: multi_label_selection
                 visible_options: 3
+                options_order: natural
               title: Question-4
               type: multi_label_selection
               visible_labels: 3
+              labels_order: natural
             - description: null
               id: !!python/object:uuid.UUID
                 int: 251163320782812347764238417960223431273
@@ -764,9 +772,11 @@ def test_dataset_config_backwards_compatibility_argilla_cfg(
                   value: label-3
                 type: multi_label_selection
                 visible_options: 3
+                options_order: natural
               title: Question-4
               type: multi_label_selection
               visible_labels: 3
+              labels_order: natural
             - description: null
               name: question-5
               required: false
