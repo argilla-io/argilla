@@ -2,7 +2,7 @@ name: Close Pull Request
 
 on:
   schedule:
-    - cron: "0 0 * * *" # every day at midnight
+    - cron: "0 8,20 * * *" # every day at 8:00 and 20:00 UTC
 
 jobs:
   teardown_pr_environments:
