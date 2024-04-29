@@ -60,6 +60,7 @@ class ResponseStatusFilter(str, Enum):
     discarded = "discarded"
     pending = "pending"
 
+
 class LabelsOrder(str, Enum):
     natural = "natural"
     suggestion = "suggestion"

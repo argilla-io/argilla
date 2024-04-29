@@ -124,7 +124,7 @@ def test_rating_question_errors(schema_kwargs: Dict[str, Any], exception_cls: An
         ({"name": "a", "labels": {"a": "a", "b": "a"}}, ValidationError, "ensure this dict has unique values"),
     ],
 )
-def test__label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+def test_label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
     with pytest.raises(exception_cls, match=exception_message):
         _LabelQuestion(**schema_kwargs, type="label_selection")
 
@@ -149,7 +149,7 @@ def test__label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: An
         ),
     ],
 )
-def test__label_question_warnings(schema_kwargs: Dict[str, Any], warning_cls: Warning, warning_message: str) -> None:
+def test_label_question_warnings(schema_kwargs: Dict[str, Any], warning_cls: Warning, warning_message: str) -> None:
     with pytest.warns(warning_cls, match=warning_message):
         _LabelQuestion(**schema_kwargs, type="label_selection")
 
