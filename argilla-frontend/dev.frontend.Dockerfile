@@ -16,6 +16,7 @@ COPY --chown=argilla:argilla .nuxt ./.nuxt
 COPY --chown=argilla:argilla package.json ./package.json
 COPY --chown=argilla:argilla nuxt.config.ts ./nuxt.config.ts
 
+
 # NOTE: Right now this Docker image is using dev.argilla.io as server.
 # If we want to use a built-in server in the future to check all functionality we can modify the following Procfile
 # content adding ElasticSearch and argilla-server processes.
