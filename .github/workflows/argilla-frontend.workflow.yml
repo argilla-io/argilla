@@ -1,0 +1,80 @@
+name: Build Argilla frontend package
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+
+  workflow_call:
+
+  push:
+    tags:
+      - "*"
+    paths:
+      - "argilla-frontend/**"
+
+jobs:
+
+  build:
+    name: Build argilla-frontend
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Run tests
+        working-directory: argilla-frontend
+        run: |
+          npm install
+          npm run lint
+          npm run test
+
+      - name: Build package
+        working-directory: argilla-frontend
+        env:
+          # BASE_URL is used in the server to support parameterizable base root path
+          # See scripts/build_frontend.sh
+          BASE_URL: "@@baseUrl@@"
+          DIST_FOLDER: ./dist
+        run: |
+          npm run build
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: argilla-frontend
+          path: argilla-frontend/dist
+
+  build_dev_docker_image:
+    name: Build development argilla-fronted docker image
+    uses: ./.github/workflows/argilla.build-push-dev-frontend-docker.yml
+    with:
+      image-name: argilla/argilla-frontend-for-dev
+      dockerfile: argilla-frontend/dev.frontend.Dockerfile
+      platforms: linux/amd64
+      build-args: |
+        ARGILLA_SERVER_TAG=main
+    secrets: inherit
+
+  deploy:
+    name: Deploy branch environment
+    uses: ./.github/workflows/argilla.deploy-environment.yml
+    needs: build_dev_docker_image
+    if: |
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.build_quickstart_for_develop_docker_image.result == 'success' &&
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    with:
+      image-name: argilla/argilla-quickstart-for-dev
+      image-version: ${{ needs.build_dev_docker_image.outputs.version }}
+    secrets: inherit
+
+
