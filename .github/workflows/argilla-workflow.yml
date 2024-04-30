@@ -1,4 +1,4 @@
-name: Build package
+name: Build Argilla package
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -34,7 +34,7 @@ jobs:
   check_repo_files:
     name: Check source changes
     if: ${{ !github.event.pull_request.draft }}
-    uses: ./.github/workflows/check-repo-files.yml
+    uses: ./.github/workflows/argilla/check-repo-files.yml
 
   deployable_check:
     name: Check if must build & deploy from environment
@@ -52,7 +52,7 @@ jobs:
 
   run_unit_tests:
     name: Run unit tests
-    uses: ./.github/workflows/run-python-tests.yml
+    uses: ./.github/workflows/argilla/run-python-tests.yml
     needs: check_repo_files
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
     with:
@@ -71,7 +71,7 @@ jobs:
             runsOn: extended-runner
 
     name: Run end2end tests
-    uses: ./.github/workflows/end2end-examples.yml
+    uses: ./.github/workflows/argilla/end2end-examples.yml
     needs: check_repo_files
     if: needs.check_repo_files.outputs.end2endChanges == 'true'
     with:
@@ -82,7 +82,7 @@ jobs:
 
   run_integration_tests:
     name: Run integration tests
-    uses: ./.github/workflows/run-python-tests.yml
+    uses: ./.github/workflows/argilla/run-python-tests.yml
     needs:
       - check_repo_files
       - run_unit_tests
@@ -138,7 +138,7 @@ jobs:
 
   build_python_package:
     name: Build Argilla python package
-    uses: ./.github/workflows/build-python-package.yml
+    uses: ./.github/workflows/argilla/build-python-package.yml
     needs:
       - run_unit_tests
       - run_integration_tests
@@ -148,7 +148,7 @@ jobs:
 
   build_quickstart_for_develop_docker_image:
     name: Build Quickstart For Develop docker image
-    uses: ./.github/workflows/build-push-dev-frontend-docker.yml
+    uses: ./.github/workflows/argilla/build-push-dev-frontend-docker.yml
     needs: deployable_check
     if: needs.deployable_check.outputs.isDeployable == 'true'
     with:
@@ -161,7 +161,7 @@ jobs:
 
   deploy_environment:
     name: Deploy branch environment
-    uses: ./.github/workflows/deploy-environment.yml
+    uses: ./.github/workflows/argilla/deploy-environment.yml
     needs: build_quickstart_for_develop_docker_image
     if: |
       !cancelled() &&
