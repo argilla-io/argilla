@@ -646,6 +646,12 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                     suggestion_q4 = q4_options[idx4 - 1]
                     suggestion_q5 = q5_options[idx5 - 1]
 
+            score_q1 = 0.0 if not isinstance(suggestion_q1, list) else [0.0] * len(suggestion_q1)
+            score_q2 = 0.0 if not isinstance(suggestion_q2, list) else [0.0] * len(suggestion_q2)
+            score_q3 = 0.0 if not isinstance(suggestion_q3, list) else [0.0] * len(suggestion_q3)
+            score_q4 = 0.0 if not isinstance(suggestion_q4, list) else [0.0] * len(suggestion_q4)
+            score_q5 = 0.0 if not isinstance(suggestion_q5, list) else [0.0] * len(suggestion_q5)
+
             responses.append(
                 {
                     "values": {
@@ -669,40 +675,35 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "question_name": "question-1",
                         "value": suggestion_q1,
                         "type": "human",
-                        # "score": 0.0,
-                        "score": None,
+                        "score": score_q1,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
                         "question_name": "question-2",
                         "value": suggestion_q2,
                         "type": "human",
-                        # "score": 0.0,
-                        "score": None,
+                        "score": score_q2,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
                         "question_name": "question-3",
                         "value": suggestion_q3,
                         "type": "human",
-                        # "score": 0.0,
-                        "score": None,
+                        "score": score_q3,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
                         "question_name": "question-4",
                         "value": suggestion_q4,
                         "type": "human",
-                        # "score": 0.0,
-                        "score": None,
+                        "score": score_q4,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
                         "question_name": "question-5",
                         "value": suggestion_q5,
                         "type": "human",
-                        # "score": 0.0,
-                        "score": None,
+                        "score": score_q5,
                         "agent": f"agent-{annotator_id}",
                     },
                 ],
