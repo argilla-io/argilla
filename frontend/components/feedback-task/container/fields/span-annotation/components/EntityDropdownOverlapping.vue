@@ -4,19 +4,38 @@
     @keyup.enter="includePreselectedOption"
     @keyup.up="preselectPreviousOption"
     @keyup.down="preselectNextOption"
+    v-click-outside="selectOptions"
   >
     <div class="span-entity__dropdown__header">
-      <EntityBadge
-        class="span-entity__badge--active"
-        :color="selectedOption.color"
-        :text="selectedOption.text"
-      ></EntityBadge>
+      <div class="span-entity__badges">
+        <EntityBadge
+          v-for="entity in selection"
+          :key="entity.id"
+          class="span-entity__badge--active"
+          :color="entity.color"
+          :text="entity.text"
+          @on-clear="excludeOption(entity)"
+          >{{ entity }}</EntityBadge
+        >
+      </div>
+      <BaseButton
+        v-if="selection.length"
+        class="span-entity__badges__close-button"
+        @click="excludeAll"
+        title="Clear all"
+      >
+        <svgicon
+          class="span-entity__badges__close-button__icon"
+          name="close"
+          width="10"
+          height="10"
+      /></BaseButton>
       <input
         ref="search"
         class="span-entity__input"
         type="text"
         autocomplete="off"
-        :placeholder="$nuxt.$t('search')"
+        :placeholder="selection.length ? '' : $nuxt.$t('search')"
         autofocus
         v-model="searchText"
         @keydown.stop=""
@@ -24,12 +43,13 @@
     </div>
     <ul class="span-entity__dropdown__content">
       <li>
-        <BaseButton
+        <BaseCheckbox
           v-for="(option, index) in filteredOptions"
           :key="option.id"
           class="span-entity__dropdown__item"
           :class="{ '--preselected': preSelectionIndex === index }"
-          @click="selectOption(option)"
+          :value="option"
+          v-model="selection"
           @mouseover.native="preSelectionIndex = index"
         >
           <EntityBadge
@@ -37,7 +57,7 @@
             :color="option.color"
             :text="option.text"
           ></EntityBadge>
-        </BaseButton>
+        </BaseCheckbox>
       </li>
     </ul>
   </div>
@@ -47,11 +67,11 @@
 export default {
   name: "EntityComponent",
   props: {
-    selectedOption: {
-      type: Object,
+    options: {
+      type: Array,
       required: true,
     },
-    options: {
+    spanInRange: {
       type: Array,
       required: true,
     },
@@ -60,17 +80,13 @@ export default {
     return {
       searchText: "",
       preSelectionIndex: 0,
+      selection: [],
     };
   },
   computed: {
     filteredOptions() {
-      return this.availableOptions.filter((entity) =>
+      return this.options.filter((entity) =>
         entity.text.toLowerCase().includes(this.searchText.toLowerCase())
-      );
-    },
-    availableOptions() {
-      return this.options.filter(
-        (entity) => entity.id !== this.selectedOption.id
       );
     },
     optionsLength() {
@@ -78,12 +94,44 @@ export default {
     },
   },
   methods: {
-    selectOption(option) {
-      this.$emit("on-replace-option", option);
+    selectOptions() {
+      const removedSpans = this.spanInRange.filter(
+        ({ entity }) =>
+          !this.selection.map((entity) => entity.id).includes(entity.id)
+      );
+
+      removedSpans.forEach((span) => {
+        this.$emit("on-remove-span", span);
+      });
+
+      const addedSpans = this.selection.filter(
+        (entity) =>
+          !this.spanInRange.some((span) => span.entity.id === entity.id)
+      );
+
+      addedSpans.forEach((entity) => {
+        this.$emit("on-add-span-base-on", this.spanInRange[0], entity);
+      });
+    },
+    excludeOption(entityOpt) {
+      this.selection = this.selection.filter(
+        (entity) => entity.id !== entityOpt.id
+      );
+    },
+    excludeAll() {
+      this.selection = [];
+    },
+    includeOption(option) {
+      this.selection.push(option);
     },
     includePreselectedOption() {
+      const option = this.filteredOptions[this.preSelectionIndex];
       if (!this.filteredOptions.length) return;
-      this.selectOption(this.filteredOptions[this.preSelectionIndex]);
+      if (this.selection.includes(option)) {
+        this.excludeOption(option);
+      } else {
+        this.includeOption(option);
+      }
       this.preSelectionIndex = 0;
     },
     preselectNextOption() {
@@ -101,9 +149,17 @@ export default {
     searchText() {
       this.preSelectionIndex = 0;
     },
+    selection() {
+      this.$nextTick(() => {
+        this.$refs.search.focus();
+      });
+    },
   },
   mounted() {
     this.preselectedEntity = this.filteredOptions[0];
+    this.selection = this.spanInRange.map(({ entity }) => {
+      return this.options.find((option) => option.id === entity.id);
+    });
     this.$refs.search.focus();
   },
 };
@@ -134,13 +190,50 @@ export default {
       overflow: auto;
       max-height: 200px;
     }
-    &__item.button {
+    &__item {
       display: flex;
       width: 100%;
+      justify-content: space-between;
       padding: calc($base-space / 2);
       border-radius: 4px;
+      :deep(.checkbox__container) {
+        background: none !important;
+        border: 0 !important;
+        width: auto !important;
+      }
+      :deep(label) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      &.checkbox :deep(.checkbox__container .svg-icon) {
+        display: inline-block;
+        fill: $black-37;
+        min-width: 16px;
+        min-height: 16px;
+      }
       &.--preselected {
         background-color: $black-4;
+      }
+    }
+  }
+  &__badges {
+    display: flex;
+    gap: calc($base-space / 2);
+    flex-wrap: wrap;
+    max-width: 142px;
+    &__close-button {
+      position: absolute;
+      top: calc($base-space / 2);
+      right: calc($base-space / 2);
+      padding: calc($base-space / 2);
+      background: $black-37;
+      border-radius: $border-radius-rounded;
+      &:hover {
+        background: $black-54;
+      }
+      &__icon {
+        color: palette(white);
       }
     }
   }

@@ -122,9 +122,12 @@ class HuggingFaceDatasetMixin:
             if f"{question.name}-suggestion" not in hf_dataset:
                 hf_dataset[f"{question.name}-suggestion"] = []
 
+            score_type = Value(dtype="float32", id="suggestion-metadata")
+            if question.type in [QuestionTypes.span, QuestionTypes.multi_label_selection, QuestionTypes.ranking]:
+                score_type = Sequence(score_type)
             hf_features[f"{question.name}-suggestion-metadata"] = {
                 "type": Value(dtype="string", id="suggestion-metadata"),
-                "score": Value(dtype="float32", id="suggestion-metadata"),
+                "score": score_type,
                 "agent": Value(dtype="string", id="suggestion-metadata"),
             }
             if f"{question.name}-suggestion-metadata" not in hf_dataset:

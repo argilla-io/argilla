@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `multi selection entity dropdown` for span annotation overlap ([#4735](https://github.com/argilla-io/argilla/pull/4735))
+- Added `pre selection highlight` for span annotation ([#4726](https://github.com/argilla-io/argilla/pull/4726))
+
 ## [1.27.0](https://github.com/argilla-io/argilla/compare/v1.26.1...v1.27.0)
 
 ### Added
