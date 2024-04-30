@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -50,7 +50,7 @@ jobs:
           npm run build
 
       - name: Upload package artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: argilla-frontend
           path: argilla-frontend/dist
@@ -72,9 +72,8 @@ jobs:
     uses: ./.github/workflows/argilla.deploy-environment.yml
     needs: build_dev_docker_image
     if: |
-      !cancelled() &&
-      needs.build_dev_docker_image.result == 'success' &&
-      github.event_name == 'pull_request' && github.event.pull_request.draft == false
+      !cancelled() && 
+      needs.build_dev_docker_image.result == 'success'
     with:
       image-name: argilla/argilla-quickstart-for-dev
       image-version: ${{ needs.build_dev_docker_image.outputs.version }}
