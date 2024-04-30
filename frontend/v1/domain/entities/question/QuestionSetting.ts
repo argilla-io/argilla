@@ -14,7 +14,7 @@ export class QuestionSetting {
   options: any;
   options_order: "natural" | "suggestion";
 
-  constructor(settings: any) {
+  constructor(private readonly settings: any) {
     this.type = settings.type;
 
     this.use_markdown = settings.use_markdown;
@@ -34,6 +34,10 @@ export class QuestionSetting {
 
   set suggestionFirst(value: boolean) {
     this.options_order = value ? "suggestion" : "natural";
+  }
+
+  get shouldShowVisibleOptions() {
+    return this.options?.length > 3 && "visible_options" in this.settings;
   }
 
   isEqual(setting: QuestionSetting) {

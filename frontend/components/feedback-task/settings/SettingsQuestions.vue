@@ -86,7 +86,7 @@
             >
 
             <BaseRangeSlider
-              v-if="question.settings.options?.length > 3"
+              v-if="question.settings.shouldShowVisibleOptions"
               :id="`visible_options-${question.id}`"
               :min="3"
               :max="question.settings.options.length"

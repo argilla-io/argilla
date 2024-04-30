@@ -59,4 +59,24 @@ describe("QuestionSetting", () => {
       expect(setting.isEqual(setting2)).toBeTruthy();
     });
   });
+
+  describe("shouldShowVisibleOptions", () => {
+    test("return false when options are less than 3", () => {
+      const setting = new QuestionSetting({ options: ["a", "b"] });
+      expect(setting.shouldShowVisibleOptions).toBeFalsy();
+    });
+
+    test("return false when visible_options is not present", () => {
+      const setting = new QuestionSetting({ options: ["a", "b", "c"] });
+      expect(setting.shouldShowVisibleOptions).toBeFalsy();
+    });
+
+    test("return true when options are more than 3 and visible_options is present", () => {
+      const setting = new QuestionSetting({
+        options: ["a", "b", "c", "d"],
+        visible_options: 3,
+      });
+      expect(setting.shouldShowVisibleOptions).toBeTruthy();
+    });
+  });
 });
