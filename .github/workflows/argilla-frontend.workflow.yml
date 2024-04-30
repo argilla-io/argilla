@@ -25,7 +25,7 @@ jobs:
     steps:
 
       - name: Checkout Code 🛎
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -75,7 +75,7 @@ jobs:
       !cancelled() && 
       needs.build_dev_docker_image.result == 'success'
     with:
-      image-name: argilla/argilla-quickstart-for-dev
+      image-name: argilla/argilla-frontend-for-dev
       image-version: ${{ needs.build_dev_docker_image.outputs.version }}
     secrets: inherit
 
