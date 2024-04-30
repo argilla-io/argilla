@@ -9,10 +9,10 @@ on:
   workflow_call:
 
   push:
-    tags:
-      - "*"
-    paths:
-      - "argilla-frontend/**"
+#    tags:
+#      - "*"
+#    paths:
+#      - "argilla-frontend/**"
 
 jobs:
 
