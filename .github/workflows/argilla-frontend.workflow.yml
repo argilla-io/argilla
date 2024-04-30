@@ -11,8 +11,8 @@ on:
   push:
 #    tags:
 #      - "*"
-#    paths:
-#      - "argilla-frontend/**"
+    paths:
+      - "argilla-frontend/**"
 
 jobs:
 
