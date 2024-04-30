@@ -47,8 +47,8 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-server = ["argilla-server ~= 1.27.0"]
-server-postgresql = ["argilla-server[postgresql] ~= 1.27.0"]
+server = ["argilla-server"]
+server-postgresql = ["argilla-server[postgresql]"]
 listeners = ["schedule ~= 1.1.0"]
 integrations = [
     "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`
