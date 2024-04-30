@@ -1,13 +1,22 @@
 name: Deploy Argilla environment
 
 on:
+
   workflow_dispatch:
-  workflow_call:
     inputs:
       image-name:
         description: The name of the Docker image to deploy.
         type: string
         default: argilla/argilla-quickstart-for-dev
+      image-version:
+        description: The version of the Docker image to deploy. In the form pr-<PR_NUMBER>.
+        type: string
+
+  workflow_call:
+    inputs:
+      image-name:
+        description: The name of the Docker image to deploy.
+        type: string
       image-version:
         description: The version of the Docker image to deploy. In the form pr-<PR_NUMBER>.
         type: string
@@ -59,6 +68,7 @@ jobs:
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           slack-channel-name: argilla-github
           url: ${{ steps.deploy.outputs.url }}
@@ -70,6 +80,7 @@ jobs:
 
       - name: Comment PR with Cloud Run URL
         uses: thollander/actions-comment-pull-request@v2
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         with:
           message: |
             The URL of the deployed environment for this PR is ${{ steps.deploy.outputs.url }}

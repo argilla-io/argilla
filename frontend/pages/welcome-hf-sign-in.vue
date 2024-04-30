@@ -57,11 +57,15 @@ export default {
     if (!this.isHuggingFaceConfigured) {
       this.goToLogin();
     }
-  },
-  mounted() {
-    const space = this.isRunningOnHuggingFace();
-    this.user = space.user;
-    this.space = space.space;
+
+    const huggingFaceSpaceInfo = await this.getHuggingFaceSpace();
+
+    if (!huggingFaceSpaceInfo) {
+      return this.goToLogin();
+    }
+
+    this.user = huggingFaceSpaceInfo.user;
+    this.space = huggingFaceSpaceInfo.space;
   },
   setup() {
     return useWelcomeHFViewModel();

@@ -35,6 +35,7 @@
         />
       </template>
       <template v-slot:center>
+        <PersistentStorageBanner />
         <RecordFeedbackTaskAndQuestionnaireContent
           :recordCriteria="recordCriteria"
         />
