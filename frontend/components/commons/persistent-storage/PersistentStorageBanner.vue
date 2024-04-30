@@ -1,5 +1,6 @@
 <template>
   <BaseBanner
+    v-if="showBanner"
     :message="
       isAdminOrOwnerRole
         ? $t('persistentStorage.adminOrOwner')
