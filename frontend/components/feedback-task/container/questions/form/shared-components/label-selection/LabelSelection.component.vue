@@ -186,8 +186,8 @@ export default {
         if (this.isExpanded) return this.filteredOptions;
 
         return this.filteredOptions
-          .concat(this.remainingVisibleOptions)
-          .slice(0, this.maxOptionsToShowBeforeCollapse);
+          .slice(0, this.maxOptionsToShowBeforeCollapse)
+          .concat(this.remainingVisibleOptions);
       }
 
       const suggestedOptions = this.filteredOptions
@@ -203,13 +203,19 @@ export default {
         (v) => !this.suggestion || !this.suggestion.isSuggested(v.value)
       );
 
-      const options = [...suggestedOptions, ...noSuggestedOptions];
-
       if (this.isExpanded) {
-        return options;
+        return [...suggestedOptions, ...noSuggestedOptions];
       }
 
-      return options.slice(0, this.maxOptionsToShowBeforeCollapse);
+      const options = [
+        ...suggestedOptions.filter((o) => o.isSelected),
+        ...noSuggestedOptions.filter((o) => o.isSelected),
+      ];
+
+      return options.slice(
+        0,
+        Math.max(options.length, this.maxOptionsToShowBeforeCollapse)
+      );
     },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
