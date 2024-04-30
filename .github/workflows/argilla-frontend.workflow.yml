@@ -54,6 +54,7 @@ jobs:
 
   build_dev_docker_image:
     name: Build development argilla-fronted docker image
+    needs: build
     uses: ./.github/workflows/argilla.build-push-dev-frontend-docker.yml
     with:
       image-name: argilla/argilla-frontend-for-dev
