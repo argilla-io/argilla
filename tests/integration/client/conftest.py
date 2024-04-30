@@ -670,6 +670,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "value": suggestion_q1,
                         "type": "human",
                         # "score": 0.0,
+                        "score": None,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
@@ -677,6 +678,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "value": suggestion_q2,
                         "type": "human",
                         # "score": 0.0,
+                        "score": None,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
@@ -684,6 +686,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "value": suggestion_q3,
                         "type": "human",
                         # "score": 0.0,
+                        "score": None,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
@@ -691,6 +694,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "value": suggestion_q4,
                         "type": "human",
                         # "score": 0.0,
+                        "score": None,
                         "agent": f"agent-{annotator_id}",
                     },
                     {
@@ -698,6 +702,7 @@ def feedback_dataset_records_with_paired_suggestions() -> List[FeedbackRecord]:
                         "value": suggestion_q5,
                         "type": "human",
                         # "score": 0.0,
+                        "score": None,
                         "agent": f"agent-{annotator_id}",
                     },
                 ],
