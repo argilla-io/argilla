@@ -786,7 +786,7 @@ def feedback_dataset_records_with_metadata() -> List[FeedbackRecord]:
                             "question_name": "question-5",
                             "value": [{"rank": 1, "value": "a"}, {"rank": 2, "value": "b"}],
                             "type": "human",
-                            "score": [0.0, 0.0]
+                            "score": [0.0, 0.0],
                             "agent": "agent-1",
                         },
                     ],
