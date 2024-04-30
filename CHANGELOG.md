@@ -20,6 +20,11 @@ These are the section headers that we use:
 
 - Added `multi selection entity dropdown` for span annotation overlap ([#4735](https://github.com/argilla-io/argilla/pull/4735))
 - Added `pre selection highlight` for span annotation ([#4726](https://github.com/argilla-io/argilla/pull/4726))
+- Added `banner when persistent storage is not enabled`([#4744](https://github.com/argilla-io/argilla/pull/4744))
+
+### Changed
+
+- Changed the way to show the `HF space` and `HF user` into sign in page for HF ([#4748](https://github.com/argilla-io/argilla/pull/4748))
 
 ### Fixed
 

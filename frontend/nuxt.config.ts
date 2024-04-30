@@ -228,6 +228,8 @@ const config: NuxtConfig = {
       "https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#define-a-labeling-schema",
     documentationSiteQueryDatasets:
       "https://docs.argilla.io/en/latest/guides/query_datasets.html",
+    documentationPersistentStorage:
+      "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
   },
 };
 export default config;
