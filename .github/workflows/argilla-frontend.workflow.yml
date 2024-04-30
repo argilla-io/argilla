@@ -8,13 +8,15 @@ on:
 
   workflow_call:
 
-  push:
-    paths:
-      - "argilla-frontend/**"
-
   pull_request:
     paths:
       - "argilla-frontend/**"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
 
 
 jobs:
@@ -73,7 +75,8 @@ jobs:
     needs: build_dev_docker_image
     if: |
       !cancelled() &&
-      needs.build_dev_docker_image.result == 'success'
+      needs.build_dev_docker_image.result == 'success' &&
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-frontend-for-dev
       image-version: ${{ needs.build_dev_docker_image.outputs.version }}
