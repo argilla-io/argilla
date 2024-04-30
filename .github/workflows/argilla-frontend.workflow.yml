@@ -72,7 +72,7 @@ jobs:
     uses: ./.github/workflows/argilla.deploy-environment.yml
     needs: build_dev_docker_image
     if: |
-      !cancelled() && 
+      !cancelled() &&
       needs.build_dev_docker_image.result == 'success'
     with:
       image-name: argilla/argilla-frontend-for-dev
