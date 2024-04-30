@@ -57,11 +57,17 @@
             .span-annotation__field::highlight(hl-{{id}}-selection) {
               background-color: {{color}};
             }
-            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+            .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
               background: {{color.palette.light}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+              background: {{color}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
               background: {{color.palette.light}};
+            }
+            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color}};
             }
           </style>
         </template>

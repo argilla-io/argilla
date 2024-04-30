@@ -57,41 +57,46 @@ export class SpanSelection {
     return [...this.selections];
   }
 
-  addSpan(selection?: TextSelection, config?: Configuration) {
+  crateSpan(
+    selection?: TextSelection,
+    config?: Configuration
+  ): Span | undefined {
     if (!selection) return;
     if (this.isOutOfRange(selection)) return;
 
+    const newSelection = { ...selection };
+
     const filteredSelections = this.selections.filter(
-      (s) => s.node.id === selection.node.id
+      (s) => s.node.id === newSelection.node.id
     );
 
     if (!config?.allowCharacter) {
-      if (this.isEmpty(selection.text)) return;
+      if (this.isEmpty(newSelection.text)) return;
 
-      this.completeLeftSide(selection);
+      this.completeLeftSide(newSelection);
 
-      this.completeRightSide(selection);
+      this.completeRightSide(newSelection);
     }
 
     const overlaps = this.selections.filter((s) => {
       return (
-        (selection.from <= s.from && selection.to >= s.to) ||
-        (selection.from >= s.from && selection.to <= s.to) ||
-        (selection.from < s.from && selection.to > s.from) ||
-        (selection.from < s.to && selection.to > s.to)
+        (newSelection.from <= s.from && newSelection.to >= s.to) ||
+        (newSelection.from >= s.from && newSelection.to <= s.to) ||
+        (newSelection.from < s.from && newSelection.to > s.from) ||
+        (newSelection.from < s.to && newSelection.to > s.to)
       );
     });
 
     if (!config?.allowOverlap) {
       this.selections = [
-        ...this.selections.filter((s) => s.node.id !== selection.node.id),
+        ...this.selections.filter((s) => s.node.id !== newSelection.node.id),
         ...filteredSelections.filter((s) => !overlaps.includes(s)),
       ];
     }
 
-    const { from, to, entity, text, node } = selection;
+    const { from, to, entity, text, node } = newSelection;
 
-    this.select({
+    const span = {
       from,
       to,
       entity,
@@ -100,7 +105,17 @@ export class SpanSelection {
         element: node.element,
         id: node.id,
       },
-    });
+    };
+
+    return span;
+  }
+
+  addSpan(selection?: TextSelection, config?: Configuration) {
+    const span = this.crateSpan(selection, config);
+
+    if (!span) return;
+
+    this.select(span);
   }
 
   select(selected: Span) {

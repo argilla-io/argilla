@@ -35,8 +35,8 @@
       :placeholder="placeholder"
       :aria-description="description"
       autocomplete="off"
-      @keydown.enter.stop="applySearch"
       @keydown.stop=""
+      @keypress.enter.stop="applySearch"
     />
     <BaseButton
       @on-click="resetValue"

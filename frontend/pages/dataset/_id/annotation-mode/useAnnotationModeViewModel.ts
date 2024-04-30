@@ -28,7 +28,7 @@ export const useAnnotationModeViewModel = () => {
       datasetId,
       routes.getQueryParams<string>("page"),
       routes.getQueryParams<RecordStatus>("status"),
-      routes.getQueryParams<RecordStatus>("search"),
+      routes.getQueryParams<string>("search"),
       routes.getQueryParams<string>("metadata"),
       routes.getQueryParams<string>("sort"),
       routes.getQueryParams<string>("response"),
@@ -41,7 +41,7 @@ export const useAnnotationModeViewModel = () => {
     recordCriteria.value.complete(
       routes.getQueryParams<string>("page"),
       routes.getQueryParams<RecordStatus>("status"),
-      routes.getQueryParams<RecordStatus>("search"),
+      routes.getQueryParams<string>("search"),
       routes.getQueryParams<string>("metadata"),
       routes.getQueryParams<string>("sort"),
       routes.getQueryParams<string>("response"),
