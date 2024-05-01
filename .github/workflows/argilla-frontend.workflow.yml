@@ -8,15 +8,12 @@ on:
 
   workflow_call:
 
-  push:
-    paths:
-      - "argilla-frontend/**"
-
   pull_request:
     paths:
       - "argilla-frontend/**"
     types:
       - opened
+      - edited
       - reopened
       - synchronize
       - ready_for_review
