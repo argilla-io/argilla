@@ -79,6 +79,8 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           file: coverage.xml
+          flags: argilla-server
+          token: ${{ secrets.CODECOV_TOKEN }}
       # This section is used to build the frontend and copy the build files to the server.
       # In the future, static files should be downloaded after the frontend is built and uploaded as an artifact.
       - name: Setup Node.js for frontend dependencies
