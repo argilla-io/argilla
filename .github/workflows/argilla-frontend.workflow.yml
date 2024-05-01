@@ -8,10 +8,6 @@ on:
 
   workflow_call:
 
-  push:
-    paths:
-      - "argilla-frontend/**"
-
   pull_request:
     paths:
       - "argilla-frontend/**"
@@ -54,7 +50,7 @@ jobs:
         run: |
           npm run build
 
-      - name: Upload package artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: argilla-frontend
@@ -66,7 +62,7 @@ jobs:
     uses: ./.github/workflows/argilla.build-push-dev-frontend-docker.yml
     if: |
       !cancelled() &&
-      github.event_name == 'pull_request'
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-frontend-for-dev
       dockerfile: argilla-frontend/dev.frontend.Dockerfile
