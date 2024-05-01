@@ -1,0 +1,107 @@
+name: Run Argilla python tests
+
+on:
+  workflow_call:
+    inputs:
+      runsOn:
+        required: false
+        type: string
+        default: ubuntu-latest
+      pytestArgs:
+        description: "Provide extra args to pytest command line"
+        required: true
+        type: string
+      coverageReport:
+        required: false
+        type: string
+        default: coverage
+      searchEngineDockerImage:
+        description: "The name of the Docker image of the search engine to use."
+        default: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+        required: false
+        type: string
+      searchEngineDockerEnv:
+        description: "The name of the Docker image of the search engine to use."
+        default: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
+        required: false
+        type: string
+      postgresDockerImage:
+        description: "The name of the Docker image of PostgreSQL"
+        required: false
+        type: string
+
+env:
+  # Increase this value to reset cache if etc/example-environment.yml has not changed
+  CACHE_NUMBER: 5
+
+jobs:
+  run-python-tests:
+    name: Argilla python tests
+    runs-on: ${{ inputs.runsOn }}
+    continue-on-error: true
+    timeout-minutes: 30
+    services:
+      search_engine:
+        image: ${{ inputs.searchEngineDockerImage }}
+        ports:
+          - 9200:9200
+        env: ${{ fromJson(inputs.searchEngineDockerEnv) }}
+      # NOTE: postgres service will not be executed by default.
+      # It will only be executed if the postgresDockerImage input is provided.
+      postgres:
+        image: ${{ inputs.postgresDockerImage }}
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: argilla
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      COVERAGE_REPORT: ${{ inputs.coverageReport }}
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v3
+      - name: Set huggingface hub credentials
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/releases')
+        run: |
+          echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'docker.elastic.co')
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=elasticsearch" >> "$GITHUB_ENV"
+          echo "Configure elasticsearch engine"
+      - name: Set Argilla search engine env variable
+        if: startsWith(inputs.searchEngineDockerImage, 'opensearchproject')
+        run: |
+          echo "ARGILLA_SEARCH_ENGINE=opensearch" >> "$GITHUB_ENV"
+          echo "Configure opensearch engine"
+      - name: Set Argilla PostgreSQL database env variable
+        if: inputs.postgresDockerImage != ''
+        run: |
+          echo "ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla" >> "$GITHUB_ENV"
+          echo "Configure PostgreSQL database"
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          cache: true
+      - name: Install dependencies
+        run: pdm install
+      - name: Run tests 📈
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
+        run: pdm run pytest --cov=argilla_server --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-${{ env.COVERAGE_REPORT }}
+          path: ${{ env.COVERAGE_REPORT }}.xml
