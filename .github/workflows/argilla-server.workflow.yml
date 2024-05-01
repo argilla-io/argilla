@@ -79,9 +79,25 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           file: coverage.xml
+      # This section is used to build the frontend and copy the build files to the server.
+      # In the future, static files should be downloaded after the frontend is built and uploaded as an artifact.
+      - name: Setup Node.js for frontend dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
+      - name: Install frontend dependencies
+        working-directory: argilla-frontend
+        env:
+          BASE_URL: "@@baseUrl@@"
+          DIST_FOLDER: ./dist
+        run: |
+          npm install
+          npm run build
+      # End of frontend build section
       - name: Build package
         run: |
+          cp -r ../argilla-frontend/dist src/argilla_server/static
           pdm build
 
       - name: Upload artifact
