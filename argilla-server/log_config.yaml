@@ -1,0 +1,36 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+    simple:
+        format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: simple
+        stream: ext://sys.stdout
+
+    file:
+        class: logging.FileHandler
+        level: INFO
+        formatter: simple
+        filename: argilla.log
+        mode: a
+
+loggers:
+    opensearch:
+        level: WARNING
+        handlers: [file]
+        propagate: no
+
+    elastic_transport:
+        level: WARNING
+        handlers: [file]
+        propagate: no
+
+root:
+    level: INFO
+    handlers: [console]

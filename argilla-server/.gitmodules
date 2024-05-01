@@ -1,0 +1,4 @@
+[submodule "argilla"]
+	path = argilla
+	url = https://github.com/argilla-io/argilla
+	branch = develop
