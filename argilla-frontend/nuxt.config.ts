@@ -18,7 +18,7 @@
 import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
-
+// Another change
 const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
