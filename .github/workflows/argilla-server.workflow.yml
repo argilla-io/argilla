@@ -56,6 +56,7 @@ jobs:
             searchEngineDockerEnv: '{"discovery.type": "single-node", "plugins.security.disabled": "true"}'
             coverageReport: coverage-opensearch-2.4.1
             runsOn: ubuntu-latest
+
     name: Run unit tests (${{ matrix.name }})
     uses: ./.github/workflows/argilla-server.run-python-tests.yml
     needs: check_repo_files
@@ -125,7 +126,7 @@ jobs:
 
   build_server_docker_image:
     name: Build Argilla server docker image
-    uses: ./.github/workflows/build-push-docker.yml
+    uses: ./.github/workflows/argilla-server.build-push-docker.yml
     needs:
       - build_python_package
       - run_unit_tests
