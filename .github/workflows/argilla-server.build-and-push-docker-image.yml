@@ -45,14 +45,14 @@ jobs:
     outputs:
       version: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download python package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         if: ${{ inputs.download-python-package }}
         with:
-          name: python-package
-          path: docker/server/dist
+          name: argilla-server
+          path: ${{ inputs.context }}/dist
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
