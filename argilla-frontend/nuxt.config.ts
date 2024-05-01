@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Other line of code
+
 import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
