@@ -1,24 +1,24 @@
 <template>
-  <HeaderAndTopAndTwoColumns>
+  <InternalPage>
     <template v-slot:header>
       <HeaderComponent />
     </template>
-    <template v-slot:top>
-      <TopDatasetSettingsContent />
+    <template v-slot:container>
+      <div>
+        <TopDatasetSettingsContent />
+        <LeftDatasetSettingsContent />
+      </div>
     </template>
-    <template v-slot:left>
-      <LeftDatasetSettingsContent />
-    </template>
-  </HeaderAndTopAndTwoColumns>
+  </InternalPage>
 </template>
 
 <script>
-import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
+import InternalPage from "@/layouts/InternalPage";
 
 export default {
   name: "SettingsPage",
   components: {
-    HeaderAndTopAndTwoColumns,
+    InternalPage,
   },
 };
 </script>

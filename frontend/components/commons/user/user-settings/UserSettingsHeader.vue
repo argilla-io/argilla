@@ -25,8 +25,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e6e6e6;
-  @include media("<desktop") {
-    min-height: 100%;
+  @include media(">tablet") {
+    min-height: 100px;
   }
 }
 </style>
