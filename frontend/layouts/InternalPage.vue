@@ -20,6 +20,7 @@ export default {
   background: palette(white);
   &__container {
     height: calc(100vh - $topbarHeight);
+    overflow: auto;
     max-width: 1500px;
     padding: 0 $base-space * 8;
     margin: 0 auto;

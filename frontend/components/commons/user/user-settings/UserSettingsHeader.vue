@@ -1,5 +1,5 @@
 <template>
-  <div class="top-content">
+  <div class="user-settings__header">
     <h1 v-text="$t('userSettings.title')" />
     <BaseButton :to="datasetsURL" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
@@ -20,11 +20,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.top-content {
+.user-settings__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
   border-bottom: 1px solid #e6e6e6;
+  @include media("<desktop") {
+    min-height: 100%;
+  }
 }
 </style>
