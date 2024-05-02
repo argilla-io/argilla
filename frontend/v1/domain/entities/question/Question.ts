@@ -10,6 +10,7 @@ import {
   RankingQuestionAnswer,
   SpanQuestionAnswer,
 } from "./QuestionAnswer";
+import { QuestionSetting } from "./QuestionSetting";
 import { QuestionType } from "./QuestionType";
 import { Suggestion } from "./Suggestion";
 
@@ -20,6 +21,7 @@ interface OriginalQuestion {
 }
 
 export class Question {
+  public settings: QuestionSetting;
   public answer: QuestionAnswer;
   public suggestion: Suggestion;
   private original: OriginalQuestion;
@@ -31,10 +33,11 @@ export class Question {
     public readonly datasetId: string,
     title: string,
     public readonly isRequired: boolean,
-    public settings: any
+    settings: any
   ) {
     this.description = description;
     this.title = title;
+    this.settings = new QuestionSetting(settings);
 
     this.initialize();
     this.initializeAnswers();
@@ -99,11 +102,7 @@ export class Question {
     return (
       this.title !== this.original.title ||
       this.description !== this.original.description ||
-      this.settings.use_markdown !== this.original.settings.use_markdown ||
-      this.settings.visible_options !==
-        this.original.settings.visible_options ||
-      JSON.stringify(this.settings.options) !==
-        JSON.stringify(this.original.settings.options)
+      !this.settings.isEqual(this.original.settings)
     );
   }
 
@@ -251,19 +250,19 @@ export class Question {
     this.original = {
       title: this.title,
       description: this.description,
-      settings: {
+      settings: new QuestionSetting({
         ...rest,
         options: options?.map((option: string) => option),
-      },
+      }),
     };
   }
 
   private restoreOriginal() {
     const { options, ...rest } = this.original.settings;
 
-    this.settings = {
+    this.settings = new QuestionSetting({
       ...rest,
       options: options?.map((option: string) => option),
-    };
+    });
   }
 }

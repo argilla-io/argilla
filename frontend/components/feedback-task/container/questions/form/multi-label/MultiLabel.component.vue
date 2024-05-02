@@ -6,6 +6,7 @@
       :componentId="question.id"
       :suggestion="question.suggestion"
       :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
+      :suggestionFirst="question.settings.suggestionFirst"
       :multiple="true"
       :isFocused="isFocused"
       v-model="question.answer.values"
