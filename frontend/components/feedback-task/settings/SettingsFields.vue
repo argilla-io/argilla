@@ -114,7 +114,7 @@ export default {
       & label {
         width: fit-content;
         height: 14px;
-        color: $black-54;
+        color: $black-87;
       }
 
       & input {
@@ -135,8 +135,11 @@ export default {
     }
 
     &__switch {
-      display: flex;
-      justify-content: space-between;
+      @include media(">desktop") {
+        :deep(label) {
+          width: 380px;
+        }
+      }
     }
 
     &__footer {

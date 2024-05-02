@@ -194,25 +194,34 @@ export default {
       }
     }
 
-    &__switch {
-      display: flex;
-      justify-content: space-between;
+    &__switch.re-switch {
+      @include media(">desktop") {
+        :deep(label) {
+          width: 380px;
+          color: $black-87;
+        }
+      }
       &.--subcategory {
         margin-top: $base-space * 2;
         @include font-size(13px);
-        :deep(.re-switch-container) {
-          margin-right: 233px;
-        }
       }
     }
 
     &__slider {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      @include media(">desktop") {
+        :deep(label) {
+          margin-right: 1em;
+          width: 380px;
+          color: $black-87;
+        }
+      }
       &.--subcategory {
-        margin-bottom: $base-space * 2;
         @include font-size(13px);
+        @include media(">desktop") {
+          display: flex;
+          align-items: center;
+          margin-bottom: $base-space;
+        }
       }
     }
 
@@ -225,7 +234,7 @@ export default {
       & > label {
         width: fit-content;
         height: 14px;
-        color: $black-54;
+        color: $black-87;
       }
 
       & input {

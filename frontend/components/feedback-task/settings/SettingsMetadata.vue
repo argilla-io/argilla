@@ -122,6 +122,7 @@ export default {
     &__switch {
       display: flex;
       justify-content: space-between;
+      max-width: 500px;
     }
 
     &__name {
@@ -147,7 +148,7 @@ export default {
       & label {
         width: fit-content;
         height: 14px;
-        color: $black-54;
+        color: $black-87;
       }
 
       & input {
