@@ -1,13 +1,13 @@
 <template>
   <BaseLoading v-if="isLoadingDataset" />
-  <HeaderAndOneColumn v-else>
+  <InternalPage v-else>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :datasetId="datasetId"
         :breadcrumbs="breadcrumbs"
       />
     </template>
-    <template v-slot:center>
+    <template v-slot:container>
       <div class="settings__wrapper">
         <TopDatasetSettingsFeedbackTaskContent
           class="settings__header"
@@ -34,17 +34,17 @@
         </BaseTabsAndContent>
       </div>
     </template>
-  </HeaderAndOneColumn>
+  </InternalPage>
 </template>
 
 <script>
-import HeaderAndOneColumn from "@/layouts/HeaderAndOneColumn";
+import InternalPage from "@/layouts/InternalPage";
 import { useDatasetSettingViewModel } from "./useDatasetSettingViewModel";
 
 export default {
   name: "SettingPage",
   components: {
-    HeaderAndOneColumn,
+    InternalPage,
   },
   setup() {
     return useDatasetSettingViewModel();
