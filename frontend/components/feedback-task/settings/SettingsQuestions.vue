@@ -48,6 +48,23 @@
               "
             >
               <label :for="`options-${question.id}`" v-text="$t('labels')" />
+              <BaseSwitch
+                v-if="question.isMultiLabelType"
+                class="settings__edition-form__switch --subcategory"
+                :id="`options-order-${question.id}`"
+                v-model="question.settings.suggestionFirst"
+                >{{ $t("suggestionFirst") }}</BaseSwitch
+              >
+
+              <BaseRangeSlider
+                v-if="question.settings.shouldShowVisibleOptions"
+                class="settings__edition-form__slider --subcategory"
+                :id="`visible_options-${question.id}`"
+                :min="3"
+                :max="question.settings.options.length"
+                v-model="question.settings.visible_options"
+                >{{ $t("visibleLabels") }}</BaseRangeSlider
+              >
               <draggable
                 class="label__container"
                 ghost-class="label__item__ghost"
@@ -73,25 +90,10 @@
 
             <BaseSwitch
               v-if="question.isTextType"
+              class="settings__edition-form__switch"
               :id="`use-markdown-${question.id}`"
               v-model="question.settings.use_markdown"
               >{{ $t("useMarkdown") }}</BaseSwitch
-            >
-
-            <BaseSwitch
-              v-if="question.isMultiLabelType"
-              :id="`options-order-${question.id}`"
-              v-model="question.settings.suggestionFirst"
-              >{{ $t("suggestionFirst") }}</BaseSwitch
-            >
-
-            <BaseRangeSlider
-              v-if="question.settings.shouldShowVisibleOptions"
-              :id="`visible_options-${question.id}`"
-              :min="3"
-              :max="question.settings.options.length"
-              v-model="question.settings.visible_options"
-              >{{ $t("visibleLabels") }}</BaseRangeSlider
             >
 
             <div class="settings__edition-form__footer">
@@ -168,6 +170,7 @@ export default {
       flex-direction: column;
       gap: $base-space * 2;
       width: 100%;
+      max-width: 800px;
       margin-top: $base-space;
     }
 
@@ -188,6 +191,28 @@ export default {
       }
       .badge {
         margin-inline: 0 auto;
+      }
+    }
+
+    &__switch {
+      display: flex;
+      justify-content: space-between;
+      &.--subcategory {
+        margin-top: $base-space * 2;
+        @include font-size(13px);
+        :deep(.re-switch-container) {
+          margin-right: 233px;
+        }
+      }
+    }
+
+    &__slider {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      &.--subcategory {
+        margin-bottom: $base-space * 2;
+        @include font-size(13px);
       }
     }
 

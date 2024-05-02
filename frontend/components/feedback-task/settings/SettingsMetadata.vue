@@ -20,9 +20,11 @@
             <input type="text" id="metadata.title" v-model="metadata.title" />
           </Validation>
 
-          <BaseSwitch v-model="metadata.visibleForAnnotators">{{
-            $t("visibleForAnnotators")
-          }}</BaseSwitch>
+          <BaseSwitch
+            class="settings__edition-form__switch"
+            v-model="metadata.visibleForAnnotators"
+            >{{ $t("visibleForAnnotators") }}</BaseSwitch
+          >
 
           <div class="settings__edition-form__footer">
             <BaseButton
@@ -49,9 +51,11 @@
         @submit.prevent="updateDataset(settings.dataset)"
         class="settings__edition-form__metadata"
       >
-        <BaseSwitch v-model="settings.dataset.allowExtraMetadata">{{
-          $t("allowExtraMetadata")
-        }}</BaseSwitch>
+        <BaseSwitch
+          class="settings__edition-form__switch"
+          v-model="settings.dataset.allowExtraMetadata"
+          >{{ $t("allowExtraMetadata") }}</BaseSwitch
+        >
         <div class="settings__edition-form__footer">
           <BaseButton
             type="button"
@@ -106,13 +110,18 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
-    max-width: 1000px;
+    max-width: 800px;
     padding-top: $base-space;
 
     &__metadata {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
+    }
+
+    &__switch {
+      display: flex;
+      justify-content: space-between;
     }
 
     &__name {

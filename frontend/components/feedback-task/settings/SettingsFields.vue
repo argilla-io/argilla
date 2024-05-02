@@ -19,9 +19,11 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
-          <BaseSwitch v-model="field.settings.use_markdown">{{
-            $t("useMarkdown")
-          }}</BaseSwitch>
+          <BaseSwitch
+            class="settings__edition-form__switch"
+            v-model="field.settings.use_markdown"
+            >{{ $t("useMarkdown") }}</BaseSwitch
+          >
 
           <div class="settings__edition-form__footer">
             <BaseButton
@@ -83,7 +85,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
-    max-width: 1000px;
+    max-width: 800px;
     padding-top: $base-space;
 
     &__fields {
@@ -130,6 +132,11 @@ export default {
           border: 1px solid $primary-color;
         }
       }
+    }
+
+    &__switch {
+      display: flex;
+      justify-content: space-between;
     }
 
     &__footer {

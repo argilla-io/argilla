@@ -89,7 +89,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
-    max-width: 1000px;
+    max-width: 800px;
     padding-top: $base-space;
 
     &__vectors {
