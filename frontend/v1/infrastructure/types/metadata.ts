@@ -23,6 +23,7 @@ export interface BackendMetadata {
     | MetadataIntegerSettings
     | MetadataFloatSettings;
   visible_for_annotators: boolean;
+  dataset_id: string;
 }
 
 export interface BackendMetadataMetric {

@@ -3,4 +3,5 @@ export interface BackendVector {
   title: string;
   name: string;
   dimensions: number;
+  dataset_id: string;
 }
