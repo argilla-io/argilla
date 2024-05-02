@@ -26,9 +26,8 @@ export const useRunningEnvironment = () => {
   };
 
   const hasPersistentStorageWarning = async () => {
-    if (!isRunningOnHuggingFace) {
-      return;
-    }
+    if (!isRunningOnHuggingFace()) return false;
+
     const environment = await getEnvironment();
 
     return environment.shouldShowHuggingfaceSpacePersistantStorageWarning;

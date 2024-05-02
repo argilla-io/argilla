@@ -18,7 +18,7 @@ export class EnvironmentRepository implements IEnvironmentRepository {
   async getEnvironment(): Promise<Environment> {
     try {
       const { data } = await this.axios.get<BackendEnvironment>("v1/settings", {
-        headers: { "cache-control": "max-age=240" },
+        headers: { "cache-control": "max-age=600" },
       });
 
       const { argilla, huggingface } = data;
