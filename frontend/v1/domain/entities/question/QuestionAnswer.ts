@@ -64,7 +64,7 @@ export class SpanQuestionAnswer extends QuestionAnswer {
 
   constructor(
     public readonly type: QuestionType,
-    private questionName: string,
+    questionName: string,
     options: Omit<Option, "isSelected" | "id">[]
   ) {
     super(type);
@@ -263,11 +263,10 @@ export class RankingQuestionAnswer extends QuestionAnswer {
   }
 
   protected fill(answer: Answer) {
-    const suggestedAnswers = answer.value as RankingAnswer[];
+    const value = answer.value as RankingAnswer[];
+
     this.values.forEach((ranking) => {
-      ranking.rank = suggestedAnswers.find(
-        (s) => s.value === ranking.value
-      )?.rank;
+      ranking.rank = value.find((s) => s.value === ranking.value)?.rank;
     });
   }
 

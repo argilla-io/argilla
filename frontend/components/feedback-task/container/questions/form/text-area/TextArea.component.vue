@@ -36,20 +36,34 @@ export default {
     isSuggested() {
       return this.question.suggestion?.isSuggested(this.question.answer.value);
     },
+    suggestedScore() {
+      return this.question.suggestion?.score?.toFixed(1);
+    },
+    suggestedAgent() {
+      return this.question.suggestion?.agent;
+    },
     tabs() {
       return [
         {
           id: "0",
-          name: this.isSuggested ? "Suggestion" : "Write",
-          icon: this.isSuggested && "suggestion",
+          name: this.isSuggested ? "" : this.$nuxt.$t("questions_form.write"),
+          icon: this.isSuggested ? "suggestion" : "",
+          info: this.isSuggested ? this.suggestedScore : "",
+          tooltipTitle: this.isSuggested
+            ? this.$nuxt.$t("suggestion.name")
+            : "",
+          tooltipText: this.isSuggested ? this.suggestedAgent : "",
           component: "TextAreaContents",
         },
         ...(!this.isSuggested
           ? [
               {
                 id: "1",
-                name: "Suggestion",
+                name: "",
                 icon: "suggestion",
+                info: this.suggestedScore,
+                tooltipTitle: this.$nuxt.$t("suggestion.name"),
+                tooltipText: this.suggestedAgent,
                 component: "TextAreaSuggestion",
               },
             ]

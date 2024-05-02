@@ -1,5 +1,5 @@
 export class QuestionType extends String {
-  constructor(value: string) {
+  private constructor(value: string) {
     super(value);
   }
 

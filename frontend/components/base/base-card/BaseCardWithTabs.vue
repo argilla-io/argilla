@@ -7,10 +7,17 @@
         v-for="tab in tabs"
         :key="tab.id"
       >
-        <BaseButton class="small" @on-click="changeTab(tab)">
-          {{ tab.name }}
-          <svgicon v-if="tab.icon" :name="tab.icon" width="10" height="10" />
-        </BaseButton>
+        <BaseTooltip :title="tab.tooltipTitle" :text="tab.tooltipText">
+          <BaseButton class="small" @on-click="changeTab(tab)">
+            {{ tab.name }}
+            <svgicon v-if="tab.icon" :name="tab.icon" width="10" height="10" />
+            <span
+              class="card-with-tabs__info"
+              v-if="tab.info"
+              v-text="tab.info"
+            />
+          </BaseButton>
+        </BaseTooltip>
       </li>
     </ul>
     <div class="card-with-tabs__content">
@@ -78,6 +85,10 @@ export default {
     &:last-child:not(:first-child) {
       margin-left: -1px;
     }
+  }
+  &__info {
+    @include font-size(11px);
+    margin-left: -4px;
   }
   &__content {
     padding: $base-space * 2;
