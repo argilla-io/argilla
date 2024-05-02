@@ -99,6 +99,7 @@ label {
     @include font-size(12px);
   }
   &__progress-value {
+    display: none;
     position: absolute;
     top: $base-space * 3;
     margin-left: -15px;
@@ -114,6 +115,9 @@ label {
       top: 0;
       transform: translateY(-50%);
       @include triangle(top, 6px, 6px, palette(grey, 200));
+    }
+    .range:hover & {
+      display: block;
     }
   }
   &__slider {
