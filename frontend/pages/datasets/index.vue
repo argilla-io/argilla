@@ -102,6 +102,7 @@ export default {
   }
   &__table {
     min-height: 0;
+    overflow: auto;
   }
 }
 </style>
