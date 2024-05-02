@@ -197,7 +197,7 @@ export default {
     &__switch.re-switch {
       @include media(">desktop") {
         :deep(label) {
-          width: 380px;
+          width: 320px;
           color: $black-87;
         }
       }
@@ -211,7 +211,7 @@ export default {
       @include media(">desktop") {
         :deep(label) {
           margin-right: 1em;
-          width: 380px;
+          width: 320px;
           color: $black-87;
         }
       }

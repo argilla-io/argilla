@@ -8,7 +8,7 @@
         ]"
       />
     </template>
-    <template v-slot:container>
+    <template v-slot:content>
       <div class="settings__wrapper">
         <UserSettingsHeader />
         <UserSettingsContent />

@@ -3,7 +3,7 @@
     <template v-slot:header>
       <HeaderComponent />
     </template>
-    <template v-slot:container>
+    <template v-slot:content>
       <div>
         <TopDatasetSettingsContent />
         <LeftDatasetSettingsContent />

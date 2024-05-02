@@ -7,10 +7,9 @@
         :breadcrumbs="breadcrumbs"
       />
     </template>
-    <template v-slot:container>
+    <template v-slot:content>
       <div class="settings__wrapper">
         <TopDatasetSettingsFeedbackTaskContent
-          class="settings__header"
           :separator="!isAdminOrOwnerRole"
           @goToDataset="goToDataset"
         />
