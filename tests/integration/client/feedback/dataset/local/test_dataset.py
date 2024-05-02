@@ -28,7 +28,7 @@ from argilla.client.feedback.schemas.metadata import (
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import SpanLabelOption, SpanQuestion, TextQuestion
+from argilla.client.feedback.schemas.questions import MultiLabelQuestion, SpanLabelOption, SpanQuestion, TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
@@ -48,13 +48,19 @@ if TYPE_CHECKING:
 def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     argilla.client.singleton.init(api_key=argilla_user.api_key)
 
-    ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
+    ds = FeedbackDataset(
+        fields=[TextField(name="text")],
+        questions=[TextQuestion(name="text"), MultiLabelQuestion(name="labels", labels=["label1", "label2"])],
+    )
 
     ds.add_records(
         records=[
             FeedbackRecord(
                 fields={"text": "this is a text"},
-                suggestions=[ds.question_by_name("text").suggestion(value="This is a suggestion")],
+                suggestions=[
+                    ds.question_by_name("text").suggestion(value="This is a suggestion"),
+                    ds.question_by_name("labels").suggestion(value=["label1", "label2"], score=[0.9, 0.9]),
+                ],
             )
         ]
     )
@@ -62,9 +68,17 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
     remote_dataset = ds.push_to_argilla(name="new_dataset")
 
     assert len(remote_dataset.records) == 1
-    assert remote_dataset.records[0].id is not None
-    assert isinstance(remote_dataset.records[0].suggestions[0], RemoteSuggestionSchema)
-    assert remote_dataset.records[0].suggestions[0].question_id == remote_dataset.question_by_name("text").id
+    record = remote_dataset.records[0]
+
+    assert record.id is not None
+    assert isinstance(record.suggestions[0], RemoteSuggestionSchema)
+    assert record.suggestions[0].question_id == remote_dataset.question_by_name("text").id
+    assert record.suggestions[0].value == "This is a suggestion"
+    assert record.suggestions[0].score is None
+    assert isinstance(record.suggestions[1], RemoteSuggestionSchema)
+    assert record.suggestions[1].question_id == remote_dataset.question_by_name("labels").id
+    assert record.suggestions[1].value == ["label1", "label2"]
+    assert record.suggestions[1].score == [0.9, 0.9]
 
 
 def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:

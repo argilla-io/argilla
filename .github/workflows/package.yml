@@ -167,6 +167,7 @@ jobs:
       !cancelled() &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       needs.build_quickstart_for_develop_docker_image.result == 'success' &&
+      needs.check_repo_files.outputs.frontendChanges == 'true' &&
       github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
       image-name: argilla/argilla-quickstart-for-dev

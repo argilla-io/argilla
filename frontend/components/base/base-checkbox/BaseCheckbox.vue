@@ -51,7 +51,7 @@ export default {
       default: false,
     },
     value: {
-      type: [String, Number, Boolean],
+      type: [String, Number, Boolean, Object],
       default: false,
     },
     areChecked: {

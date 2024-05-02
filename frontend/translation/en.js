@@ -197,6 +197,7 @@ export default {
   "reset-all": "Reset all",
   reset: "Reset",
   less: "Less",
+  learnMore: "Learn more",
   with: "with",
   find: "Find",
   cancel: "Cancel",
@@ -216,6 +217,12 @@ export default {
   metrics: {
     total: "Total",
     progress: "Progress",
+  },
+  persistentStorage: {
+    adminOrOwner:
+      "Persistent storage is not enabled. All data will be lost if this space restarts. Go to the space settings to enable it.",
+    annotator:
+      "Persistent storage is not enabled. All data will be lost if this space restarts.",
   },
   validations: {
     http: {
