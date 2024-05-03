@@ -17,7 +17,7 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
-from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -283,6 +283,7 @@ def test_remote_label_question_from_api(payload: FeedbackQuestionModel) -> None:
                     "type": "multi_label_selection",
                     "options": [{"text": "a", "value": "a"}, {"text": "b", "value": "b"}, {"text": "c", "value": "c"}],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -294,6 +295,7 @@ def test_remote_label_question_from_api(payload: FeedbackQuestionModel) -> None:
                 "required": False,
                 "labels": {"a": "A", "b": "B", "c": "C"},
                 "visible_labels": 3,
+                "labels_order": LabelsOrder.suggestion,
             },
             {
                 "name": "a",
@@ -304,6 +306,7 @@ def test_remote_label_question_from_api(payload: FeedbackQuestionModel) -> None:
                     "type": "multi_label_selection",
                     "options": [{"text": "A", "value": "a"}, {"text": "B", "value": "b"}, {"text": "C", "value": "c"}],
                     "visible_options": 3,
+                    "options_order": LabelsOrder.suggestion,
                 },
             },
         ),
@@ -335,6 +338,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
                 "type": "multi_label_selection",
                 "options": [{"text": "a", "value": "a"}, {"text": "b", "value": "b"}, {"text": "c", "value": "c"}],
                 "visible_options": None,
+                "options_order": LabelsOrder.natural,
             },
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
@@ -349,6 +353,7 @@ def test_remote_multi_label_question(schema_kwargs: Dict[str, Any], server_paylo
                 "type": "multi_label_selection",
                 "options": [{"text": "A", "value": "a"}, {"text": "B", "value": "b"}, {"text": "C", "value": "c"}],
                 "visible_options": 3,
+                "options_order": LabelsOrder.suggestion,
             },
             inserted_at=datetime.now(),
             updated_at=datetime.now(),
