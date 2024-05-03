@@ -221,7 +221,7 @@ export default {
         @include media(">desktop") {
           display: flex;
           align-items: center;
-          margin-bottom: $base-space;
+          margin-bottom: 12px;
         }
       }
     }
@@ -230,7 +230,7 @@ export default {
       display: flex;
       flex-direction: column;
       width: 100%;
-      gap: $base-space;
+      gap: 12px;
 
       & > label {
         width: fit-content;

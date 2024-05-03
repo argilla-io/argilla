@@ -109,7 +109,7 @@ export default {
       display: flex;
       flex-direction: column;
       width: 100%;
-      gap: $base-space;
+      gap: 12px;
 
       & label {
         width: fit-content;
