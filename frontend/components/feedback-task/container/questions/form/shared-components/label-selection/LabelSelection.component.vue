@@ -440,9 +440,6 @@ $label-dark-color: palette(purple, 200);
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
-    &:hover {
-      direction: rtl;
-    }
   }
   &__suggestion {
     display: flex;
@@ -507,8 +504,9 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  height: $base-space * 2;
-  aspect-ratio: 1;
+  min-width: 12px;
+  padding: 2px;
+  line-height: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
   border-color: $black-20;
