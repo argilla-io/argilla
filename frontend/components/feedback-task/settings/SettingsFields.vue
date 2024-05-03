@@ -137,7 +137,7 @@ export default {
     &__switch {
       @include media(">desktop") {
         :deep(label) {
-          width: 140px;
+          min-width: 140px;
         }
       }
     }
