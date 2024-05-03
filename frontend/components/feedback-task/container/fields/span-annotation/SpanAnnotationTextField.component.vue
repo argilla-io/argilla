@@ -239,7 +239,7 @@ export default {
   &__field {
     position: relative;
     margin: 0;
-    @include font-size(18px);
+    @include font-size(16px);
     line-height: v-bind(lineHeight);
     user-select: text;
     &--overlapped {
