@@ -3,8 +3,9 @@
     <div class="internal-page__header">
       <slot name="header">here is the header</slot>
     </div>
-    <main class="internal-page__content">
-      <slot name="content">here is the header</slot>
+    <main class="internal-page__container">
+      <slot name="page-header">here is the page header</slot>
+      <slot name="page-content">here is the page content</slot>
     </main>
   </main>
 </template>
@@ -18,7 +19,9 @@ export default {
 <style lang="scss" scoped>
 .internal-page {
   background: palette(white);
-  &__content {
+  &__container {
+    display: flex;
+    flex-direction: column;
     height: calc(100vh - $topbarHeight);
     overflow: auto;
     max-width: 1500px;

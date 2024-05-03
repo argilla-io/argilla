@@ -3,9 +3,11 @@
     <template v-slot:header>
       <HeaderComponent />
     </template>
-    <template v-slot:content>
+    <template v-slot:page-header>
+      <TopDatasetSettingsContent />
+    </template>
+    <template v-slot:page-content>
       <div>
-        <TopDatasetSettingsContent />
         <LeftDatasetSettingsContent />
       </div>
     </template>

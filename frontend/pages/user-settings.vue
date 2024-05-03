@@ -8,11 +8,11 @@
         ]"
       />
     </template>
-    <template v-slot:content>
-      <div class="settings__wrapper">
-        <UserSettingsHeader />
-        <UserSettingsContent />
-      </div>
+    <template v-slot:page-header>
+      <UserSettingsHeader />
+    </template>
+    <template v-slot:page-content>
+      <UserSettingsContent />
     </template>
   </InternalPage>
 </template>
@@ -28,12 +28,3 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
-.settings {
-  &__wrapper {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
-}
-</styles>
