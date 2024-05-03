@@ -1,6 +1,7 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendMetadata, Response } from "../types";
 import { MetadataMetricsRepository } from "./MetadataMetricsRepository";
+import { revalidateCache } from "./AxiosCache";
 import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
 
 const METADATA_API_ERRORS = {
@@ -48,6 +49,8 @@ export class MetadataRepository {
         `/v1/metadata-properties/${metadata.id}`,
         this.createRequest(metadata)
       );
+
+      revalidateCache(`/v1/datasets/${metadata.datasetId}/metadata-properties`);
 
       return data;
     } catch (err) {

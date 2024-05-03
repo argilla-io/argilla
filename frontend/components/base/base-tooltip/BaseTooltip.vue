@@ -1,26 +1,36 @@
 <template>
-  <div class="tooltip">
-    <div v-if="text" ref="tooltipWrapper" @mouseenter="show" @mouseleave="hide">
-      <slot></slot>
+  <div
+    class="tooltip"
+    v-if="title || text"
+    ref="tooltipWrapper"
+    @mouseenter="show"
+    @mouseleave="hide"
+  >
+    <slot></slot>
 
-      <div
-        ref="tooltipText"
-        :class="[
-          'tooltip-content',
-          positionClass,
-          minimalist ? 'tooltip-content--minimalist' : null,
-          showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
-        ]"
-        :style="{
-          top: tooltipPosition.top + 'px',
-          left: tooltipPosition.left + 'px',
-        }"
+    <div
+      ref="tooltipText"
+      :class="[
+        'tooltip-content',
+        positionClass,
+        minimalist ? 'tooltip-content--minimalist' : null,
+        showTooltip ? 'tooltip-content--show' : 'tooltip-content--hide',
+      ]"
+      :style="{
+        top: tooltipPosition.top + 'px',
+        left: tooltipPosition.left + 'px',
+      }"
+    >
+      <span class="tooltip__title" v-if="title" v-html="title" /><span
+        class="tooltip__text"
+        v-if="text"
         v-html="text"
       />
     </div>
-    <div v-else>
-      <slot></slot>
-    </div>
+  </div>
+
+  <div v-else>
+    <slot></slot>
   </div>
 </template>
 
@@ -36,6 +46,9 @@ export default {
     };
   },
   props: {
+    title: {
+      type: String,
+    },
     text: {
       type: String,
     },
@@ -121,6 +134,14 @@ export default {
   position: relative;
   display: inline-block;
   max-width: 100%;
+  &__title {
+    display: block;
+    font-weight: lighter;
+    @include font-size($tooltip-title-font-size);
+  }
+  &__text {
+    @include font-size($tooltip-font-size);
+  }
 }
 
 .tooltip-content {
@@ -135,12 +156,12 @@ export default {
   background: $tooltip-bg;
   color: $tooltip-color;
   border-radius: $tooltip-border-radius;
-  @include font-size($tooltip-font-size);
   font-weight: 500;
   white-space: pre;
+  line-height: 1.4;
   &--minimalist {
     background: palette(grey, 150);
-    @include font-size(12px);
+    @include font-size(13px);
     padding: calc($base-space / 2);
   }
   &--hide {

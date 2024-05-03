@@ -8,7 +8,8 @@
         @keydown.enter.prevent
       >
         <BaseTooltip
-          :text="isSuggested(option) ? $t('suggestion.name') : null"
+          :title="isSuggested(option) ? $t('suggestion.name') : ''"
+          :text="getSuggestedInfo(option)"
           minimalist
         >
           <input
@@ -80,6 +81,15 @@ export default {
   methods: {
     isSuggested(option) {
       return this.suggestion?.isSuggested(option.value);
+    },
+    getSuggestedInfo(option) {
+      const suggestion = this.suggestion?.getSuggestion(option.value);
+      if (!suggestion) return;
+
+      const agent = suggestion.agent ? `${suggestion.agent}: ` : "";
+      const score = suggestion.score?.fixed ?? "";
+
+      return `${agent}${score}`;
     },
     onSelect({ id, isSelected }) {
       this.options.forEach((option) => {

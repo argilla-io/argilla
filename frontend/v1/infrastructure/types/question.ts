@@ -34,20 +34,16 @@ interface SingleSelectionSetting {
   }[];
 }
 
-type Entity = {
-  id: string;
-  name: string;
-  color: string;
-};
-type Span = {
-  from: string;
-  to: string;
-  entity: string;
-};
 interface SpanSetting {
   type: "span";
-  entities: Entity[];
-  values: Record<string, Span[]>;
+  options: {
+    description?: string;
+    text: string;
+    value: string;
+  }[];
+  allow_overlapping: boolean;
+  allow_character_annotation: boolean;
+  field: string;
 }
 
 export interface BackendQuestion {

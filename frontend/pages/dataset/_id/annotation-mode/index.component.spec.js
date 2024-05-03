@@ -35,6 +35,7 @@ describe("AnnotationModePage", () => {
         "BaseModal",
         "DatasetTrainComponent",
         "BaseLoading",
+        "PersistentStorageBanner",
       ],
       mocks: {
         $route,
@@ -68,6 +69,7 @@ describe("AnnotationModePage", () => {
         "BaseModal",
         "DatasetTrainComponent",
         "BaseLoading",
+        "PersistentStorageBanner",
       ],
       mocks: {
         $route,

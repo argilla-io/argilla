@@ -78,8 +78,15 @@
               >{{ $t("useMarkdown") }}</BaseSwitch
             >
 
+            <BaseSwitch
+              v-if="question.isMultiLabelType"
+              :id="`options-order-${question.id}`"
+              v-model="question.settings.suggestionFirst"
+              >{{ $t("suggestionFirst") }}</BaseSwitch
+            >
+
             <BaseRangeSlider
-              v-if="question.settings.options?.length > 3"
+              v-if="question.settings.shouldShowVisibleOptions"
               :id="`visible_options-${question.id}`"
               :min="3"
               :max="question.settings.options.length"

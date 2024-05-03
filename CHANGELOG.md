@@ -18,6 +18,8 @@ These are the section headers that we use:
 
 ### Added
 
+- Added suggestion multi score attribute. ([#4730](https://github.com/argilla-io/argilla/pull/4730))
+- Added order by suggestion first. ([#4731](https://github.com/argilla-io/argilla/pull/4731))
 - Added multi selection entity dropdown for span annotation overlap. ([#4735](https://github.com/argilla-io/argilla/pull/4735))
 - Added pre selection highlight for span annotation. ([#4726](https://github.com/argilla-io/argilla/pull/4726))
 - Added banner when persistent storage is not enabled. ([#4744](https://github.com/argilla-io/argilla/pull/4744))
@@ -25,7 +27,7 @@ These are the section headers that we use:
 
 ### Changed
 
-- Changed the way to show the `HF space` and `HF user` into sign in page for HF. ([#4748](https://github.com/argilla-io/argilla/pull/4748))
+- Changed the way how Hugging Face space and user is showed in sign in. ([#4748](https://github.com/argilla-io/argilla/pull/4748))
 
 ### Fixed
 
