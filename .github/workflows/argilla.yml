@@ -44,7 +44,6 @@ jobs:
 
     name: Run end2end tests
     uses: ./.github/workflows/argilla.end2end-examples.yml
-    needs: check_repo_files
     with:
       runsOn: ${{ matrix.runsOn }}
       searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
