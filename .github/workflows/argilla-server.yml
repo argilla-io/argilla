@@ -7,10 +7,6 @@ concurrency:
 on:
   workflow_dispatch:
 
-  release:
-    types:
-      - "published"
-
   pull_request:
     paths:
       - 'argilla-server/**'
@@ -21,6 +17,10 @@ on:
       - synchronize
       - ready_for_review
 
+  release:
+    types:
+      - "published"
+
 jobs:
 
   build:
@@ -30,7 +30,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-        working-directory: ./argilla-server
+        working-directory: argilla-server
 
     services:
       elasticsearch:
