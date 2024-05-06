@@ -65,6 +65,11 @@
                 v-model="question.settings.visible_options"
                 >{{ $t("visibleLabels") }}</BaseRangeSlider
               >
+
+              <label
+                v-text="$t('order')"
+                class="settings__edition-form__label --subcategory"
+              />
               <draggable
                 class="label__container"
                 ghost-class="label__item__ghost"
@@ -165,6 +170,14 @@ export default {
     overflow: auto;
     padding-right: $base-space * 2;
 
+    &__label {
+      &.--subcategory {
+        display: block;
+        @include font-size(13px);
+        color: $black-87;
+      }
+    }
+
     &__content {
       display: flex;
       flex-direction: column;
@@ -195,10 +208,12 @@ export default {
     }
 
     &__switch.re-switch {
+      :deep(label) {
+        color: $black-87;
+      }
       @include media(">desktop") {
         :deep(label) {
           min-width: 140px;
-          color: $black-87;
         }
       }
       &.--subcategory {
@@ -208,11 +223,12 @@ export default {
     }
 
     &__slider {
+      :deep(label) {
+        color: $black-87;
+      }
       @include media(">desktop") {
         :deep(label) {
-          margin-right: 1em;
           min-width: 140px;
-          color: $black-87;
           margin-right: 1.5em;
         }
       }
@@ -221,7 +237,6 @@ export default {
         @include media(">desktop") {
           display: flex;
           align-items: center;
-          margin-bottom: 12px;
         }
       }
     }

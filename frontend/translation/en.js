@@ -22,6 +22,7 @@ export default {
   title: "Title",
   description: "Description",
   labels: "Labels",
+  order: "Order",
   useMarkdown: "Use Markdown",
   suggestionFirst: "Suggestion first",
   visibleForAnnotators: "Visible for annotators",
