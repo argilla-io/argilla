@@ -4,12 +4,13 @@ import { MetadataCriteria } from "../metadata/MetadataCriteria";
 import { ResponseCriteria } from "../response/ResponseCriteria";
 import { SuggestionCriteria } from "../suggestion/SuggestionCriteria";
 import { PageCriteria } from "../page/PageCriteria";
+import { SearchTextCriteria } from "../search/SearchTextCriteria";
 import { RecordStatus } from "./RecordAnswer";
 
 interface IRecordCriteria {
   readonly page: PageCriteria;
   readonly status: RecordStatus;
-  readonly searchText: string;
+  readonly searchText: SearchTextCriteria;
   readonly metadata: MetadataCriteria;
   readonly sortBy: SortCriteria;
   readonly response: ResponseCriteria;
@@ -20,7 +21,7 @@ interface IRecordCriteria {
 class CommittedRecordCriteria implements IRecordCriteria {
   public readonly page: PageCriteria;
   public readonly status: RecordStatus;
-  public readonly searchText: string;
+  public readonly searchText: SearchTextCriteria;
   public readonly metadata: MetadataCriteria;
   public readonly sortBy: SortCriteria;
   public readonly response: ResponseCriteria;
@@ -29,6 +30,7 @@ class CommittedRecordCriteria implements IRecordCriteria {
 
   constructor(recordCriteria: IRecordCriteria) {
     const pageCommitted = new PageCriteria();
+    const searchTextCommitted = new SearchTextCriteria();
     const similaritySearchCommitted = new SimilarityCriteria();
     const metadataCommitted = new MetadataCriteria();
     const sortByCommitted = new SortCriteria();
@@ -36,6 +38,7 @@ class CommittedRecordCriteria implements IRecordCriteria {
     const suggestionCommitted = new SuggestionCriteria();
 
     pageCommitted.withValue(recordCriteria.page);
+    searchTextCommitted.withValue(recordCriteria.searchText);
     metadataCommitted.withValue(recordCriteria.metadata);
     sortByCommitted.withValue(recordCriteria.sortBy);
     suggestionCommitted.withValue(recordCriteria.suggestion);
@@ -43,7 +46,7 @@ class CommittedRecordCriteria implements IRecordCriteria {
     similaritySearchCommitted.withValue(recordCriteria.similaritySearch);
 
     this.status = recordCriteria.status;
-    this.searchText = recordCriteria.searchText;
+    this.searchText = searchTextCommitted;
     this.page = pageCommitted;
     this.metadata = metadataCommitted;
     this.sortBy = sortByCommitted;
@@ -63,6 +66,7 @@ export class RecordCriteria implements IRecordCriteria {
   public previous?: CommittedRecordCriteria;
 
   public page: PageCriteria;
+  public searchText: SearchTextCriteria;
   public metadata: MetadataCriteria;
   public sortBy: SortCriteria;
   public response: ResponseCriteria;
@@ -73,7 +77,7 @@ export class RecordCriteria implements IRecordCriteria {
     public readonly datasetId: string,
     page: string,
     public status: RecordStatus,
-    public searchText: string,
+    searchText: string,
     metadata: string,
     sortBy: string,
     response: string,
@@ -81,6 +85,7 @@ export class RecordCriteria implements IRecordCriteria {
     similaritySearch: string
   ) {
     this.page = new PageCriteria();
+    this.searchText = new SearchTextCriteria();
     this.metadata = new MetadataCriteria();
     this.sortBy = new SortCriteria();
     this.response = new ResponseCriteria();
@@ -102,7 +107,7 @@ export class RecordCriteria implements IRecordCriteria {
   }
 
   get isFilteringByText() {
-    return this.searchText.length > 0;
+    return this.searchText.isCompleted;
   }
 
   get isFilteringBySimilarity() {
@@ -137,7 +142,7 @@ export class RecordCriteria implements IRecordCriteria {
   }
 
   get isFilteredByText() {
-    return this.committed.searchText.length > 0;
+    return this.committed.searchText.isCompleted;
   }
 
   get isFilteredByMetadata() {
@@ -192,9 +197,9 @@ export class RecordCriteria implements IRecordCriteria {
     this.isChangingAutomatically = true;
 
     this.status = status ?? "pending";
-    this.searchText = searchText ?? "";
 
     this.page.complete(page);
+    this.searchText.complete(searchText);
     this.metadata.complete(metadata);
     this.sortBy.complete(sortBy);
     this.response.complete(response);
@@ -218,9 +223,9 @@ export class RecordCriteria implements IRecordCriteria {
 
   rollback() {
     this.status = this.committed.status;
-    this.searchText = this.committed.searchText;
 
     this.page.withValue(this.committed.page);
+    this.searchText.withValue(this.committed.searchText);
     this.metadata.withValue(this.committed.metadata);
     this.sortBy.withValue(this.committed.sortBy);
     this.response.withValue(this.committed.response);
@@ -244,7 +249,7 @@ export class RecordCriteria implements IRecordCriteria {
       this.datasetId,
       this.page.urlParams,
       this.status,
-      this.searchText,
+      this.searchText.urlParams,
       this.metadata.urlParams,
       this.sortBy.urlParams,
       this.response.urlParams,
@@ -272,9 +277,10 @@ export class RecordCriteria implements IRecordCriteria {
     if (!actual) return false;
 
     if (actual.status !== previous.status) return true;
-    if (actual.searchText !== previous.searchText) return true;
 
+    if (!previous.searchText.isEqual(actual.searchText)) return true;
     if (!previous.page.isEqual(actual.page)) return true;
+    if (!previous.searchText.isEqual(actual.searchText)) return true;
     if (!previous.metadata.isEqual(actual.metadata)) return true;
     if (!previous.sortBy.isEqual(actual.sortBy)) return true;
     if (!previous.response.isEqual(actual.response)) return true;

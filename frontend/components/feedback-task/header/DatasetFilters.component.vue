@@ -1,10 +1,7 @@
 <template>
   <div class="filters__wrapper">
     <div class="filters">
-      <SearchBarBase
-        v-model="recordCriteria.searchText"
-        :placeholder="'Introduce a query'"
-      />
+      <SearchBarBase v-model="recordCriteria.searchText" />
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
       <FilterButton
         v-if="isAnyAvailableFilter"
@@ -40,8 +37,8 @@
             v-model="recordCriteria.metadata.value"
           />
           <ResponsesFilter
-            v-model="recordCriteria.response.value"
             :datasetQuestions="datasetQuestions"
+            v-model="recordCriteria.response.value"
           />
           <SuggestionFilter
             v-model="recordCriteria.suggestion.value"
@@ -102,7 +99,7 @@ export default {
     },
   },
   watch: {
-    "recordCriteria.searchText"() {
+    "recordCriteria.searchText.value"() {
       this.newFiltersChanged();
     },
     "recordCriteria.status"() {

@@ -21,7 +21,7 @@
     :class="{ active: isSearchActive, expanded: isExpanded }"
   >
     <BaseButton
-      @on-click="applySearch"
+      @on-click="openOrApply"
       class="search-area__icon --search"
       :data-title="$t('search')"
     >
@@ -32,8 +32,8 @@
       class="search-area__input"
       type="text"
       v-model.trim="searchValue"
-      :placeholder="placeholder"
-      :aria-description="description"
+      :placeholder="$t('searchPlaceholder')"
+      :aria-description="$t('searchPlaceholder')"
       autocomplete="off"
       @keydown.stop=""
       @keypress.enter.stop="applySearch"
@@ -49,65 +49,63 @@
 </template>
 
 <script>
-import { isNil } from "lodash";
-
 export default {
   name: "SearchBarComponent",
   props: {
     value: {
-      type: String,
-      default: "",
-    },
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    description: {
-      type: String,
-      default: "Introduce a text",
+      type: Object,
+      required: true,
     },
   },
   data() {
     return {
       searchValue: "",
-      localAdditionalInfo: "",
       isExpanded: false,
     };
   },
   computed: {
     isSearchActive() {
-      return !(isNil(this.value) || this.value.length === 0);
-    },
-    isSearchValueEmpty() {
-      return isNil(this.searchValue) || this.searchValue.length === 0;
+      return this.searchValue.length > 0 || this.value.isCompleted;
     },
     showDelete() {
-      return !this.isSearchValueEmpty || this.isSearchActive;
+      return this.isSearchActive;
     },
   },
   watch: {
     value: {
       immediate: true,
+      deep: true,
       handler(newValue) {
-        this.searchValue = newValue;
+        this.searchValue = newValue.value.text;
       },
     },
   },
   methods: {
-    applySearch() {
-      this.$emit("input", this.searchValue);
-      if (this.isSearchValueEmpty) {
-        this.isExpanded = !this.isExpanded;
-        this.$refs.searchRef.focus();
+    openOrApply() {
+      if (this.isExpanded && this.isSearchActive) {
+        this.applySearch();
       } else {
-        this.collapseSearch();
-        this.$refs.searchRef.blur();
+        this.isExpanded = !this.isExpanded;
+
+        if (this.isExpanded) {
+          this.$refs.searchRef.focus();
+        } else {
+          this.$refs.searchRef.blur();
+        }
       }
     },
+    applySearch() {
+      this.value.value = {
+        ...this.value.value,
+        text: this.searchValue,
+      };
+
+      this.$refs.searchRef.blur();
+    },
     resetValue() {
-      this.searchValue = "";
-      this.$emit("input", "");
       this.collapseSearch();
+
+      this.value.reset();
     },
     collapseSearch() {
       this.isExpanded = false;
