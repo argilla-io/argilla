@@ -7,7 +7,8 @@ export class Vector {
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    public readonly dimensions: number
+    public readonly dimensions: number,
+    public readonly datasetId: string
   ) {
     this.initializeOriginal();
   }

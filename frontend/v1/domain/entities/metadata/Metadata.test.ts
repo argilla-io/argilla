@@ -11,7 +11,8 @@ const createMetadataInteger = () =>
       min: 0,
       max: 2,
     },
-    true
+    true,
+    "FAKE_DATASET_ID"
   );
 const createMetadataTerms = () =>
   new Metadata(
@@ -22,7 +23,8 @@ const createMetadataTerms = () =>
       type: "terms",
       values: ["test", "train", "validation"],
     },
-    true
+    true,
+    "FAKE_DATASET_ID"
   );
 const createMetadataFloat = () =>
   new Metadata(
@@ -34,7 +36,8 @@ const createMetadataFloat = () =>
       min: 0.1,
       max: 3.76,
     },
-    true
+    true,
+    "FAKE_DATASET_ID"
   );
 
 describe("Metadata", () => {

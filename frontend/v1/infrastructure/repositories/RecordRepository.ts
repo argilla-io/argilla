@@ -14,6 +14,7 @@ import {
   BackendResponseRequest,
   BackendResponseBulkResponse,
 } from "../types";
+import { revalidateCache } from "./AxiosCache";
 import { RecordAnswer } from "@/v1/domain/entities/record/RecordAnswer";
 import { Record } from "@/v1/domain/entities/record/Record";
 import { Question } from "@/v1/domain/entities/question/Question";
@@ -157,6 +158,8 @@ export class RecordRepository {
         `/v1/records/${record.id}/responses`,
         request
       );
+
+      revalidateCache(`/v1/datasets/${record.datasetId}/progress`);
 
       return new RecordAnswer(
         data.id,

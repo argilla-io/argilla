@@ -15,7 +15,7 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -124,7 +124,7 @@ def test_rating_question_errors(schema_kwargs: Dict[str, Any], exception_cls: An
         ({"name": "a", "labels": {"a": "a", "b": "a"}}, ValidationError, "ensure this dict has unique values"),
     ],
 )
-def test__label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
+def test_label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: Any, exception_message: str) -> None:
     with pytest.raises(exception_cls, match=exception_message):
         _LabelQuestion(**schema_kwargs, type="label_selection")
 
@@ -149,7 +149,7 @@ def test__label_question_errors(schema_kwargs: Dict[str, Any], exception_cls: An
         ),
     ],
 )
-def test__label_question_warnings(schema_kwargs: Dict[str, Any], warning_cls: Warning, warning_message: str) -> None:
+def test_label_question_warnings(schema_kwargs: Dict[str, Any], warning_cls: Warning, warning_message: str) -> None:
     with pytest.warns(warning_cls, match=warning_message):
         _LabelQuestion(**schema_kwargs, type="label_selection")
 
@@ -292,11 +292,12 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
         (
-            {"name": "a", "labels": {"a": "A", "b": "B"}},
+            {"name": "a", "labels": {"a": "A", "b": "B"}, "labels_order": LabelsOrder.suggestion},
             {
                 "name": "a",
                 "title": "A",
@@ -306,6 +307,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": "a", "text": "A"}, {"value": "b", "text": "B"}],
                     "visible_options": None,
+                    "options_order": LabelsOrder.suggestion,
                 },
             },
         ),
@@ -320,6 +322,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -334,6 +337,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": "a", "text": "a"}, {"value": "b", "text": "b"}],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -348,6 +352,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": str(n), "text": str(n)} for n in list(range(20))],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -362,6 +367,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": str(n), "text": str(n)} for n in list(range(21))],
                     "visible_options": 20,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -376,6 +382,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),
@@ -390,6 +397,7 @@ def test_label_question(schema_kwargs: Dict[str, Any], server_payload: Dict[str,
                     "type": "multi_label_selection",
                     "options": [{"value": str(n), "text": str(n)} for n in list(range(2))],
                     "visible_options": None,
+                    "options_order": LabelsOrder.natural,
                 },
             },
         ),

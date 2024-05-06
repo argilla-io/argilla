@@ -17,7 +17,8 @@ export class Metadata {
     public name: string,
     public title: string,
     public settings: MetadataSettings,
-    public visibleForAnnotators: boolean
+    public visibleForAnnotators: boolean,
+    public readonly datasetId: string
   ) {
     this.initializeOriginal();
   }

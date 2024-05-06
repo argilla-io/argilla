@@ -97,7 +97,8 @@ export class GetDatasetSettingsUseCase {
         vector.id,
         vector.name,
         vector.title,
-        vector.dimensions
+        vector.dimensions,
+        vector.dataset_id
       );
     });
 
@@ -107,7 +108,8 @@ export class GetDatasetSettingsUseCase {
         metadata.name,
         metadata.title,
         metadata.settings,
-        metadata.visible_for_annotators
+        metadata.visible_for_annotators,
+        metadata.dataset_id
       );
     });
 
