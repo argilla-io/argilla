@@ -18,7 +18,7 @@
       >
         <BaseTooltip
           class="draggable__rank-card--unranked"
-          :title="$t('suggestion.name')"
+          :title="isSuggested(item) ? $t('suggestion.name') : null"
           :text="getSuggestedAgent(item)"
           minimalist
         >
@@ -68,7 +68,7 @@
             @focus="onFocus"
           >
             <BaseTooltip
-              :title="$t('suggestion.name')"
+              :title="isSuggested(item) ? $t('suggestion.name') : null"
               :text="getSuggestedAgent(item)"
               minimalist
               class="draggable__rank-card--ranked"
