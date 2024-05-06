@@ -1,0 +1,192 @@
+name: Build Argilla server package
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+
+  release:
+    types:
+      - "published"
+
+  pull_request:
+    paths:
+      - 'argilla-server/**'
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+
+  build:
+    name: Build `argilla-server` package
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: ./argilla-server
+
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: argilla
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      ARGILLA_ENABLE_TELEMETRY: 0
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version-file: argilla-server/pyproject.toml
+          cache-dependency-path: argilla-server/pdm.lock
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Run tests 📈
+        run: |
+          ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla
+          ARGILLA_ELASTICSEARCH=http://localhost:9200
+          ARGILLA_SEARCH_ENGINE=elasticsearch
+          pdm test tests/unit -vs --cov=argilla_server --cov-report=xml:coverage.xml
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          flags: argilla-server
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # This section is used to build the frontend and copy the build files to the server.
+      # In the future, static files should be downloaded after the frontend is built and uploaded as an artifact.
+      - name: Setup Node.js for frontend dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: argilla-frontend
+        env:
+          BASE_URL: "@@baseUrl@@"
+          DIST_FOLDER: ./dist
+        run: |
+          npm install
+          npm run build
+      # End of frontend build section
+      - name: Build package
+        run: |
+          cp -r ../argilla-frontend/dist src/argilla_server/static
+          pdm build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argilla-server
+          path: argilla-server/dist
+
+  build_server_docker_image:
+    name: Build Argilla server docker image
+    uses: ./.github/workflows/argilla-server.build-and-push-docker-image.yml
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    needs:
+      - build
+    with:
+      download-python-package: true
+      image-name: argilla/argilla-server
+      dockerfile: argilla-server/docker/server/Dockerfile
+      context: argilla-server/docker/server
+      readme: argilla-server/README.md
+      platforms: linux/amd64,linux/arm64
+    secrets: inherit
+
+  build_quickstart_docker_image:
+    name: Build Argilla quickstart docker image
+    uses: ./.github/workflows/argilla-server.build-and-push-docker-image.yml
+    needs: build_server_docker_image
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    with:
+      download-python-package: false
+      image-name: argilla/argilla-quickstart
+      dockerfile: argilla-server/docker/quickstart/Dockerfile
+      context: argilla-server/docker/quickstart
+      readme: argilla-server/docker/quickstart/README.md
+      platforms: linux/amd64,linux/arm64
+      build-args: |
+        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+    secrets: inherit
+
+  # This job will publish argilla-server python package into PyPI repository
+  publish_release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+
+    needs:
+      - build
+      - build_server_docker_image
+      - build_quickstart_docker_image
+
+    permissions:
+      # This permission is needed for private repositories.
+      # contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
+      id-token: write
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: ./argilla-server
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Download python package
+        uses: actions/download-artifact@v4
+        with:
+          name: argilla-server
+          path: argilla-server/dist
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          cache: true
+
+      - name: Publish Package to PyPI test environment 🥪
+        run: pdm publish --no-build --repository testpypi
+
+      - name: Test Installing 🍿
+        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
+
+      - name: Publish Package to PyPI 🥩
+        run: pdm publish --no-build
