@@ -1,0 +1,25 @@
+name: Release Argilla
+
+on:
+
+  workflow_dispatch:
+
+  #release:
+  #  types:
+  #    - published
+
+  push:
+
+jobs:
+
+  argilla_server:
+    name: Release `argilla-server` package
+    uses: ./.github/workflows/argilla-server.yml
+    secrets: inherit
+
+  argilla_sdk:
+    name: Release `argilla-sdk` package
+    needs: argilla_server
+    uses: ./.github/workflows/argilla.yml
+    secrets: inherit
+

@@ -6,9 +6,8 @@ concurrency:
 
 on:
   workflow_dispatch:
-  release:
-    types:
-      - "published"
+  workflow_call:
+
   push:
     branches:
       - "main"
