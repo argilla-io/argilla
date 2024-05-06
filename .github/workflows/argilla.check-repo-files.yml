@@ -28,7 +28,7 @@ jobs:
     steps:
 
       - name: Checkout Code 🛎
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check affected files
         uses: dorny/paths-filter@v3
