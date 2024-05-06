@@ -14,6 +14,13 @@ Being a developer in Argilla means that you are a part of the Argilla community 
 
 - **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with `Vue.js` and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
+The Argilla repository has a mono repo structure, which means that all the components are in the same repository, and is divided into the following folders:
+
+- `argilla`: The python SDK project
+- `argilla-frontend`: The Vue.js UI project
+- `argilla-server`: The FastAPI server project
+- `docs`: The documentation project
+
 For a proper installation, you will need to:
 
 - [Set up the Documentation Environment](#set-up-the-documentation-environment),
@@ -158,18 +165,21 @@ source .env/bin/activate
 Then, you just need to install Argilla with the command below. Note that we will install it in editable mode using the -e/--editable flag in the `pip` command to avoid having to re-install it on every code modification, but if you’re not planning to modify the code, you can just omit the -e/--editable flag.
 
 ```sh
+cd argilla
 pip install -e .
 ```
 
 Or installing just the `server` extra:
 
 ```sh
+cd argilla
 pip install -e ".[server]"
 ```
 
 Or you can install all the extras, which are also required to run the tests via pytest to make sure that the implemented features or the bug fixes work as expected, and that the unit/integration tests are passing. If you encounter any package or dependency problems, please consider upgrading or downgrading the related packages to solve the problem.
 
 ```sh
+cd argilla
 pip install -e ".[server,listeners,postgresql,integrations,tests]"
 ```
 
@@ -271,81 +281,13 @@ rm ~/.argilla/argilla.db
 
 After deleting the database, you will need to run the [database migration](#run-database-migration) task. By following these steps, you’ll have a fresh and clean database to work with.
 
-### Set up the Frontend
+### Set up Argilla Server
 
-If you want to work on the frontend of Argilla, you can do so by following the steps below.
+If you want to work on the server of Argilla, please visit the `argilla-server` [README.md](./argilla-server/README.md) file to see how to set up the server and run it on your local machine.
 
-#### Clone the Argilla Repository
+### Set up Argilla Frontend
 
-Firstly, you have to [fork our repository and clone the fork](<(/community/contributing.md#work-with-a-fork)>) to your computer.
-
-```sh
-git clone https://github.com/[your-github-username]/argilla.git
-cd argilla
-```
-
-To keep your fork’s develop branch up to date with our repo you should add it as an [upstream remote branch](https://dev.to/louhayes3/git-add-an-upstream-to-a-forked-repo-1mik):
-
-```sh
-git remote add upstream https://github.com/argilla-io/argilla.git
-```
-
-#### Build Frontend Static Files
-
-Build the static UI files in case you want to work on the UI:
-
-```sh
-bash scripts/build_frontend.sh
-```
-
-#### Run Frontend Files
-
-Run the Argilla backend using Docker with the following command:
-
-```sh
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
-```
-
-Navigate to the `frontend` folder from your project's root directory.
-
-Then, execute the command:
-
-```sh
-npm run dev
-```
-
-To log in, use the username `admin` and the password `12345678`. If you need more information, please check [here](/getting_started/quickstart_installation.ipynb).
-
-### Set up the Server
-
-Before running the Argilla server, it is recommended to [build the frontend files](#build-frontend-static-files) to be able to access the UI on your local host.
-
-Then, to run Argilla backend, you will need an ElasticSearch instance up and running for the time being. You can get one running using Docker with the following command:
-
-```sh
-docker run -d --name elasticsearch-for-argilla -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.5.3
-```
-
-You will also need the vector database set up, as we show in the [Vector Database](#vector-database ) section.
-
-
-#### Launch Argilla Server
-
-Now that your system has the Argilla backend server, you are ready to start your server and access Argilla. You can either use the CLI command, which uses the port 6900 and the host 0.0.0.0 as default.
-
-```sh
-argilla server start ARGILLA_ENABLE_TELEMETRY=0
-```
-
-Or you can start the server through uvicorn, with the following command:
-
-```sh
-ARGILLA_ENABLE_TELEMETRY=0 uvicorn argilla.server.app:app --port 6900 --host 0.0.0.0 --reload
-```
-
-With this command, you will activate reloading the backend files after every change. This way, whenever you make a change and save it, it will automatically be reflected in your server.
-
-Note that we start the server with `ARGILLA_ENABLE_TELEMETRY=0` to stop anonymous reporting for our development environment. You can read more about telemetry settings on the [telemetry page](/reference/telemetry.md).
+If you want to work on the frontend of Argilla, please visit the `argilla-frontend` [README.md](./argilla-frontend/README.md) file to see how to set up the frontend and run it on your local machine.
 
 ## Make Your Contribution
 
@@ -353,26 +295,50 @@ Now that everything is up and running, you can start to develop and contribute t
 
 ### Run Tests
 
+#### Running Tests for the Argilla Python SDK
 Running tests at the end of every development cycle is indispensable to make sure that there are no breaking changes. In your Argilla environment, you can run all the tests as follows:
 
 ```sh
+cd argilla/
 pytest tests
 ```
 
 You can also run only the unit tests by providing the proper path:
 
 ```sh
+cd argilla/
 pytest tests/unit
-```
-
-For the unit tests, you can also set up a PostgreSQL database instead of the default sqlite backend:
-
-```sh
-ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pytest tests/unit
 ```
 
 For running more heavy integration tests you can just run pytest with the `tests/integration` folder:
 
 ```sh
+cd argilla/
 pytest tests/integration
 ```
+
+#### Running tests for the Argilla Server
+
+To run the tests for the Argilla Server, you can use the following command:
+
+```sh
+cd argilla-server/
+pdm test test/unit
+```
+
+You can also set up a PostgreSQL database instead of the default sqlite backend:
+
+```sh
+cd argilla-server/
+ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432 pdm test tests/unit
+```
+
+#### Running tests for the Argilla Frontend
+
+To run the tests for the Argilla Frontend, you can use the following command:
+
+```sh
+cd argilla-frontend/
+npm run test
+```
+
