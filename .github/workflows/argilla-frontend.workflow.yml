@@ -50,7 +50,7 @@ jobs:
         run: |
           npm run build
 
-      - name: Upload artifact
+      - name: Upload frontend statics as artifact
         uses: actions/upload-artifact@v4
         with:
           name: argilla-frontend
