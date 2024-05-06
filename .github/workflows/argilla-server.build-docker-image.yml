@@ -1,4 +1,4 @@
-name: Build Argilla Docker image
+name: Build Argilla server docker image
 
 on:
   workflow_call:
