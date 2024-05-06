@@ -116,7 +116,7 @@ jobs:
 
   build_server_docker_image:
     name: Build Argilla server docker image
-    uses: ./.github/workflows/argilla-server.build-and-push-docker-image.yml
+    uses: ./.github/workflows/argilla-server.build-docker-image.yml
     if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
     needs:
       - build
@@ -131,7 +131,7 @@ jobs:
 
   build_quickstart_docker_image:
     name: Build Argilla quickstart docker image
-    uses: ./.github/workflows/argilla-server.build-and-push-docker-image.yml
+    uses: ./.github/workflows/argilla-server.build-docker-image.yml
     needs: build_server_docker_image
     if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
     with:
