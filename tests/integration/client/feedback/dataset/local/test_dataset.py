@@ -15,10 +15,9 @@
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
+import argilla.client.singleton
 import datasets
 import pytest
-
-import argilla.client.singleton
 from argilla import ResponseSchema, User, Workspace
 from argilla.client.feedback.config import DatasetConfig
 from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
@@ -39,10 +38,10 @@ from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.feedback import SpanValueSchema
 
 if TYPE_CHECKING:
+    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla_server.models import User as ServerUser
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from tests.integration.helpers import SecuredClient
 
 

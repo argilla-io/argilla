@@ -16,7 +16,6 @@ from datetime import datetime
 from uuid import uuid4
 
 import httpx
-
 from argilla.client.sdk.v1.records.api import update_record
 
 

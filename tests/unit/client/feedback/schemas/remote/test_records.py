@@ -17,7 +17,6 @@ from typing import Any, Dict
 from uuid import UUID, uuid4
 
 import pytest
-
 from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
 from argilla.client.feedback.schemas.remote.records import (
     RemoteFeedbackRecord,

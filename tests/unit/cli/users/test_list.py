@@ -18,17 +18,15 @@ from unittest.mock import ANY
 from uuid import uuid4
 
 import pytest
+from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from rich.table import Table
 
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
-
 if TYPE_CHECKING:
+    from argilla.client.users import User
+    from argilla.client.workspaces import Workspace
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-
-    from argilla.client.users import User
-    from argilla.client.workspaces import Workspace
 
 
 @pytest.mark.usefixtures("login_mock")

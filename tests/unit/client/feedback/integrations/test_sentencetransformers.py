@@ -17,14 +17,13 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from sentence_transformers import SentenceTransformer
-
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from sentence_transformers import SentenceTransformer
 
 
 @pytest.fixture(scope="function")

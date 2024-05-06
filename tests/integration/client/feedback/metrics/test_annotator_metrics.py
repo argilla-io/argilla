@@ -16,12 +16,12 @@ import uuid
 from typing import TYPE_CHECKING, List, Union
 
 import pytest
-
 from argilla import User, init
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric, UnifiedAnnotatorMetric
 from argilla.client.feedback.metrics.base import ModelMetricResult
 from argilla.client.feedback.schemas import FeedbackRecord
+
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:

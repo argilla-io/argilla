@@ -12,14 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 import argilla
 import argilla as rg
 import argilla.client.singleton
+import pytest
 from argilla.client.api import log
 from argilla.client.models import TextClassificationRecord
 from argilla.metrics.commons import keywords, records_status, text_length
+
 from tests.integration.utils import delete_ignoring_errors
 
 

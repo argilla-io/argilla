@@ -26,8 +26,6 @@ import shutil
 import sys
 from pathlib import Path
 
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -50,6 +48,8 @@ from argilla.client.feedback.training.schemas.return_types import (
 )
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
 from tests.integration.training.helpers import train_with_cleanup
 
 __OUTPUT_DIR__ = "tmp"

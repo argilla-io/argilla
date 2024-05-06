@@ -15,7 +15,6 @@
 from typing import Any, Dict
 
 import pytest
-
 from argilla import SuggestionSchema
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.huggingface.dataset import HuggingFaceDatasetMixin

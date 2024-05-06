@@ -17,6 +17,7 @@ from time import sleep
 
 from argilla.client.api import load
 from argilla.monitoring.model_monitor import monitor
+
 from tests.integration.utils import delete_ignoring_errors
 
 

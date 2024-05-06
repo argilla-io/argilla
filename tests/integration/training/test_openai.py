@@ -15,7 +15,6 @@
 import os
 
 import pytest
-
 from argilla.training import ArgillaTrainer
 
 FRAMEWORK = "openai"

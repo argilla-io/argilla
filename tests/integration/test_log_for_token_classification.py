@@ -11,9 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-
 import argilla
+import pytest
 from argilla import TokenClassificationRecord
 from argilla.client import api
 from argilla.client.client import Argilla
@@ -21,6 +20,7 @@ from argilla.client.sdk.commons.errors import NotFoundApiError
 from argilla.client.singleton import ArgillaSingleton
 from argilla.metrics import __all__ as ALL_METRICS
 from argilla.metrics import entity_consistency
+
 from tests.integration.utils import delete_ignoring_errors
 
 

@@ -16,9 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-from argilla_server.apis.v0.models.text2text import Text2TextBulkRequest as ServerText2TextBulkData
-from argilla_server.apis.v0.models.text2text import Text2TextQuery as ServerText2TextQuery
-
 from argilla.client.models import Text2TextRecord
 from argilla.client.sdk.text2text.models import (
     CreationText2TextRecord,
@@ -28,6 +25,8 @@ from argilla.client.sdk.text2text.models import (
     Text2TextQuery,
 )
 from argilla.client.sdk.text2text.models import Text2TextRecord as SdkText2TextRecord
+from argilla_server.apis.v0.models.text2text import Text2TextBulkRequest as ServerText2TextBulkData
+from argilla_server.apis.v0.models.text2text import Text2TextQuery as ServerText2TextQuery
 
 
 def test_bulk_data_schema(helpers):

@@ -18,18 +18,16 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from typer.testing import CliRunner
-
 from argilla.cli.app import app
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.users import User
 from argilla.client.workspaces import Workspace
+from typer.testing import CliRunner
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
-
     from argilla.cli.typer_ext import ArgillaTyper
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture(scope="session")

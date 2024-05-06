@@ -16,13 +16,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
-import pytest
-from argilla_server.models import User as ServerUser
-from argilla_server.settings import settings
-from sqlalchemy.ext.asyncio import AsyncSession
-
 import argilla as rg
 import argilla.client.singleton
+import pytest
 from argilla import FeedbackRecord, SuggestionSchema
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
@@ -49,6 +45,10 @@ from argilla.client.feedback.schemas.vector_settings import VectorSettings
 from argilla.client.sdk.commons.errors import ValidationApiError
 from argilla.client.sdk.users.models import UserRole
 from argilla.client.workspaces import Workspace
+from argilla_server.models import User as ServerUser
+from argilla_server.settings import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from tests.factories import (
     DatasetFactory,
     RecordFactory,

@@ -16,18 +16,18 @@
 import time
 from typing import Any, Dict
 
-from argilla_server.models import User
-from fastapi import FastAPI
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse, PlainTextResponse
-from starlette.testclient import TestClient
-
 import argilla
 from argilla.monitoring.asgi import (
     ArgillaLogHTTPMiddleware,
     text_classification_mapper,
     token_classification_mapper,
 )
+from argilla_server.models import User
+from fastapi import FastAPI
+from starlette.applications import Starlette
+from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.testclient import TestClient
+
 from tests.integration.utils import delete_ignoring_errors
 
 

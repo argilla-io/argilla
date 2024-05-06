@@ -11,13 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import pytest
-from argilla_server.models import User
-
 import argilla.client.singleton
+import pytest
 from argilla.client import api
 from argilla.client.models import TextClassificationRecord
 from argilla.client.singleton import active_api, active_client
+from argilla_server.models import User
+
 from tests.factories import UserFactory, WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors
 

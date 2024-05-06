@@ -15,7 +15,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
@@ -29,6 +28,7 @@ from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.records import FeedbackRecord, SuggestionSchema
 from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord, RemoteSuggestionSchema
 from argilla.client.sdk.users.models import UserRole
+
 from tests.factories import (
     DatasetFactory,
     RecordFactory,

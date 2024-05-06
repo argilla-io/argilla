@@ -16,17 +16,15 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY, call
 
 import pytest
+from argilla.client.enums import DatasetType
 from rich.table import Table
 
-from argilla.client.enums import DatasetType
-
 if TYPE_CHECKING:
+    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla.client.sdk.datasets.models import Dataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.sdk.datasets.models import Dataset
 
 
 @pytest.mark.usefixtures("login_mock")
