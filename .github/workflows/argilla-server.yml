@@ -9,7 +9,7 @@ on:
 
   pull_request:
     paths:
-      - 'argilla-server/**'
+      - "argilla-server/**"
     types:
       - opened
       - edited
