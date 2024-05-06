@@ -6,32 +6,21 @@ concurrency:
 
 on:
   workflow_dispatch:
+  workflow_call:
+
+  pull_request:
+    paths:
+      - "argilla/**"
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
 
   release:
     types:
       - "published"
-
-  push:
-    branches:
-      - "main"
-      - "develop"
-      - "releases/**"
-    tags:
-      - "*"
-
-  pull_request:
-    branches:
-      - "main"
-      - "develop"
-      - "releases/**"
-      - "feature/**"
-      - "feat/**"
-      - "fix/**"
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
 
 jobs:
   check_repo_files:

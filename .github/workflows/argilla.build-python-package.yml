@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./argilla
+        working-directory: argilla
 
     steps:
       - name: Checkout Code 🛎

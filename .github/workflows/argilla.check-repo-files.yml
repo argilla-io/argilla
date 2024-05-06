@@ -44,7 +44,7 @@ jobs:
               - 'argilla/src/**'
               - 'argilla/pyproject.toml'
               - 'argilla/setup.py'
-              - 'scripts/end2end_examples.py'
+              - 'argilla/scripts/end2end_examples.py'
               - 'docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples/**'
             frontendChanges:
               - 'argilla-frontend/**'
