@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Argilla io</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <style>
+      body {
+        width: 250px;
+        padding: 10px;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <h4>Argilla settings <img src="icon.png" width="20px" /></h4>
+      <form>
+        <div class="form-group">
+          <label for="metadata-filter-delay">Metadata filter delay in ms</label>
+          <input
+            class="form-control"
+            id="metadata-filter-delay"
+            type="number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="sort-delay">Sort delay in ms</label>
+          <input class="form-control" id="sort-delay" type="number" />
+        </div>
+
+        <button type="submit" class="btn btn-default">Save</button>
+      </form>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
