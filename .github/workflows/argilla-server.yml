@@ -81,26 +81,18 @@ jobs:
           file: coverage.xml
           flags: argilla-server
           token: ${{ secrets.CODECOV_TOKEN }}
-      # This section is used to build the frontend and copy the build files to the server.
-      # In the future, static files should be downloaded after the frontend is built and uploaded as an artifact.
-      - name: Setup Node.js for frontend dependencies
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
-      - name: Install frontend dependencies
-        working-directory: argilla-frontend
-        env:
-          BASE_URL: "@@baseUrl@@"
-          DIST_FOLDER: ./dist
-        run: |
-          npm install
-          npm run build
-      # End of frontend build section
+      - name: Build frontend statics
+        uses: ./.github/workflows/argilla-frontend.yml
+
+      - name: Download frontend statics
+        uses: actions/download-artifact@v4
+        with:
+          name: argilla-frontend
+          path: argilla-server/src/argilla_server/static
+
       - name: Build package
-        run: |
-          cp -r ../argilla-frontend/dist src/argilla_server/static
-          pdm build
+        run: pdm build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
