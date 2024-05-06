@@ -15,6 +15,7 @@
 from typing import TYPE_CHECKING, Any, List
 
 import pytest
+
 from argilla.client import singleton
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.metadata import (
@@ -29,9 +30,10 @@ from argilla.client.workspaces import Workspace
 from argilla.feedback import TrainingTask
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
     from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla.client.sdk.users.models import UserModel as User
-    from pytest_mock import MockerFixture
 
 
 @pytest.fixture

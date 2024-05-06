@@ -22,9 +22,9 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from typer import Typer
 
-from argilla.client.workspaces import Workspace
 from rich.table import Table
 
+from argilla.client.workspaces import Workspace
 from tests.factories import WorkspaceSyncFactory
 
 

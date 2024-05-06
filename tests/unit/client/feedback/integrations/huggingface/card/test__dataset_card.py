@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, List
 from uuid import uuid4
 
 import pytest
+from huggingface_hub import DatasetCardData
+
 from argilla.client.feedback.integrations.huggingface.card import ArgillaDatasetCard
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.metadata import (
@@ -35,7 +37,6 @@ from argilla.client.feedback.schemas.questions import (
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
 from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
     from argilla.client.feedback.schemas import FeedbackRecord

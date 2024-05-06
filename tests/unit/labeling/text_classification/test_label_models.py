@@ -16,6 +16,7 @@ import sys
 
 import numpy as np
 import pytest
+
 from argilla.client.models import TextClassificationRecord
 from argilla.labeling.text_classification import (
     FlyingSquid,

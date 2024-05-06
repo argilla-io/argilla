@@ -15,6 +15,7 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import pytest
+
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.metrics.utils import (
     get_responses_and_suggestions_per_user,

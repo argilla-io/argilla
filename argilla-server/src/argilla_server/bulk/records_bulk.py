@@ -43,7 +43,6 @@ from argilla_server.validators.vectors import VectorValidator
 
 
 class CreateRecordsBulk:
-
     def __init__(self, db: AsyncSession, search_engine: SearchEngine):
         self._db = db
         self._search_engine = search_engine
@@ -73,7 +72,6 @@ class CreateRecordsBulk:
         return RecordsBulk(items=records)
 
     async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
-
         records_and_suggestions = list(zip(records, [r.suggestions for r in records_create]))
         records_and_responses = list(zip(records, [r.responses for r in records_create]))
         records_and_vectors = list(zip(records, [r.vectors for r in records_create]))
@@ -87,7 +85,6 @@ class CreateRecordsBulk:
     async def _upsert_records_suggestions(
         self, records_and_suggestions: List[Tuple[Record, List[SuggestionCreate]]]
     ) -> List[Suggestion]:
-
         upsert_many_suggestions = []
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             try:
@@ -118,7 +115,6 @@ class CreateRecordsBulk:
     async def _upsert_records_responses(
         self, records_and_responses: List[Tuple[Record, List[UserResponseCreate]]]
     ) -> List[Response]:
-
         user_ids = [response.user_id for _, responses in records_and_responses for response in responses or []]
         users_by_id = await fetch_users_by_ids_as_dict(self._db, user_ids)
 
@@ -147,7 +143,6 @@ class CreateRecordsBulk:
     async def _upsert_records_vectors(
         self, records_and_vectors: List[Tuple[Record, Dict[str, List[float]]]]
     ) -> List[Vector]:
-
         upsert_many_vectors = []
         for idx, (record, vectors) in enumerate(records_and_vectors):
             try:
@@ -176,9 +171,7 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-
     async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
-
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
@@ -220,7 +213,6 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         dataset: Dataset,
         records_upsert: List[RecordUpsert],
     ) -> Dict[Union[str, UUID], Record]:
-
         records_by_external_id = await fetch_records_by_external_ids_as_dict(
             self._db, dataset, [r.external_id for r in records_upsert]
         )

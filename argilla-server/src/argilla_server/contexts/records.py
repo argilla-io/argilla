@@ -25,7 +25,6 @@ from argilla_server.models import Dataset, Record, Suggestion
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-
     query = select(Record).filter(Record.id.in_(record_ids), Record.dataset_id == dataset_id)
     return (await db.execute(query)).unique().scalars().all()
 
@@ -33,7 +32,6 @@ async def list_dataset_records_by_ids(
 async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
-
     query = (
         select(Record)
         .filter(Record.external_id.in_(external_ids), Record.dataset_id == dataset_id)

@@ -34,7 +34,6 @@ from tests.factories import (
 
 @pytest.mark.asyncio
 class TestDatasetRecordsBulkWithResponses:
-
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
@@ -361,7 +360,6 @@ class TestDatasetRecordsBulkWithResponses:
         await dataset.awaitable_attrs.fields
 
     async def _configure_dataset_questions(self, dataset: Dataset):
-
         await LabelSelectionQuestionFactory.create(
             dataset=dataset,
             name="label",

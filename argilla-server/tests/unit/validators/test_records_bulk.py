@@ -24,7 +24,6 @@ from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory
 
 @pytest.mark.asyncio
 class TestRecordsBulkValidators:
-
     async def configure_dataset(self) -> Dataset:
         dataset = await DatasetFactory.create(status="ready")
 

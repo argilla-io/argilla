@@ -15,6 +15,7 @@
 from typing import Callable
 
 import pytest
+
 from argilla.client.feedback.dataset import FeedbackDataset
 from argilla.client.feedback.schemas import (
     LabelQuestion,

@@ -15,6 +15,9 @@
 import pandas as pd
 import pytest
 import spacy
+from datasets import Dataset, DatasetDict
+from spacy.tokens import DocBin
+
 from argilla import (
     LabelQuestion,
     MultiLabelQuestion,
@@ -30,8 +33,6 @@ from argilla.client.feedback.unification import (
     RatingQuestionUnification,
 )
 from argilla.client.models import Framework
-from datasets import Dataset, DatasetDict
-from spacy.tokens import DocBin
 
 
 @pytest.mark.parametrize(

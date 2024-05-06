@@ -28,7 +28,7 @@ from argilla_server.search_engine import (
     TextQuery,
     UserResponseStatusFilter,
 )
-from argilla_server.search_engine.base import QueryStringFilter, FieldFilterScope
+from argilla_server.search_engine.base import FieldFilterScope, QueryStringFilter
 from argilla_server.search_engine.commons import (
     ALL_RESPONSES_STATUSES_FIELD,
     BaseElasticAndOpenSearchEngine,

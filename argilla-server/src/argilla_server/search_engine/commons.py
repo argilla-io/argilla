@@ -33,6 +33,7 @@ from argilla_server.models import (
 )
 from argilla_server.search_engine.base import (
     AndFilter,
+    FieldFilterScope,
     Filter,
     FilterScope,
     FloatMetadataFilter,
@@ -43,6 +44,7 @@ from argilla_server.search_engine.base import (
     MetadataFilterScope,
     MetadataMetrics,
     Order,
+    QueryStringFilter,
     RangeFilter,
     RecordFilterScope,
     ResponseFilterScope,
@@ -56,8 +58,6 @@ from argilla_server.search_engine.base import (
     TermsMetadataMetrics,
     TextQuery,
     UserResponseStatusFilter,
-    FieldFilterScope,
-    QueryStringFilter,
 )
 
 ALL_RESPONSES_STATUSES_FIELD = "all_responses_statuses"
