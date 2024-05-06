@@ -31,8 +31,6 @@ warnings.simplefilter("ignore", UserWarning)
 
 app = ArgillaTyper(help="Argilla CLI", no_args_is_help=True)
 
-# Force running the ci build pipeline
-
 
 @app.error_handler(PermissionError)
 def handler_permission_error(e: PermissionError) -> None:
