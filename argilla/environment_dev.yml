@@ -3,6 +3,7 @@ name: argilla
 channels:
   - conda-forge
 
+
 dependencies:
   - python~=3.9.7
   - pip>=2.22.0
