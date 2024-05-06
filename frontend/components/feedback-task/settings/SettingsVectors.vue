@@ -89,7 +89,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
-    max-width: 1000px;
+    max-width: 800px;
     padding-top: $base-space;
 
     &__vectors {
@@ -116,12 +116,12 @@ export default {
       display: flex;
       flex-direction: column;
       width: 100%;
-      gap: $base-space;
+      gap: 12px;
 
       & label {
         width: fit-content;
         height: 14px;
-        color: $black-54;
+        color: $black-87;
       }
 
       & input {
