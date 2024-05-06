@@ -29,15 +29,14 @@ jobs:
         working-directory: ./argilla-server
 
     services:
-      search_engine:
+      elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
         ports:
           - 9200:9200
         env:
           discovery.type: single-node
           xpack.security.enabled: false
-      # NOTE: postgres service will not be executed by default.
-      # It will only be executed if the postgresDockerImage input is provided.
+
       postgres:
         image: postgres:14
         env:
@@ -73,6 +72,8 @@ jobs:
       - name: Run tests 📈
         run: |
           ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla
+          ARGILLA_ELASTICSEARCH=http://localhost:9200
+          ARGILLA_SEARCH_ENGINE=elasticsearch
           pdm test tests/unit -vs --cov=argilla_server --cov-report=xml:coverage.xml
 
       - name: Upload test coverage
@@ -82,17 +83,26 @@ jobs:
           flags: argilla-server
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Build frontend statics
-        uses: ./.github/workflows/argilla-frontend.yml
-
-      - name: Download frontend statics
-        uses: actions/download-artifact@v4
+      # This section is used to build the frontend and copy the build files to the server.
+      # In the future, static files should be downloaded after the frontend is built and uploaded as an artifact.
+      - name: Setup Node.js for frontend dependencies
+        uses: actions/setup-node@v4
         with:
-          name: argilla-frontend
-          path: argilla-server/src/argilla_server/static
+          node-version: 20
 
+      - name: Install frontend dependencies
+        working-directory: argilla-frontend
+        env:
+          BASE_URL: "@@baseUrl@@"
+          DIST_FOLDER: ./dist
+        run: |
+          npm install
+          npm run build
+      # End of frontend build section
       - name: Build package
-        run: pdm build
+        run: |
+          cp -r ../argilla-frontend/dist src/argilla_server/static
+          pdm build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
