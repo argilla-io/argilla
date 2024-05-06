@@ -3,7 +3,6 @@ name: argilla
 channels:
   - conda-forge
 
-
 dependencies:
   - python~=3.9.7
   - pip>=2.22.0
@@ -68,5 +67,6 @@ dependencies:
       - ipynbname>=2023.2.0.0
       - nltk < 4.0.0
       - httpx~=0.26.0
-      # install Argilla in editable mode
+      # install Argilla packages in editable mode
+      - -e ../argilla-server[postgresql]
       - -e .[listeners]
