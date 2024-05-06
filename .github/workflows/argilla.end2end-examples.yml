@@ -22,9 +22,6 @@ env:
   CACHE_NUMBER: 1
 
 jobs:
-  # Runs depending on the result from the check-repo-files.yml
-  call-check-repo-files:
-    uses: ./.github/workflows/argilla.check-repo-files.yml
 
   end2end-examples:
     name: end2end notebook examples, FeedbackDataset for text-classification
