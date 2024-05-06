@@ -97,7 +97,8 @@ export const createMetadataMock = () =>
       metadata.name,
       metadata.description,
       metadata.settings,
-      metadata.visible_for_annotators
+      metadata.visible_for_annotators,
+      "FAKE_DATASET_ID"
     );
   });
 
@@ -108,6 +109,7 @@ export const createMetadataWithNoValuesMock = () =>
       metadata.name,
       metadata.description,
       metadata.settings,
-      metadata.visible_for_annotators
+      metadata.visible_for_annotators,
+      "FAKE_DATASET_ID"
     );
   });

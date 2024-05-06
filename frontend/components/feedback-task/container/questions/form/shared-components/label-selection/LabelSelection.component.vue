@@ -56,7 +56,8 @@
           @keydown.tab="expandLabelsOnTab(index)"
         />
         <BaseTooltip
-          :text="isSuggested(option) ? $t('suggestion.name') : null"
+          :title="isSuggested(option) ? $t('suggestion.name') : ''"
+          :text="getSuggestedAgent(option)"
           minimalist
         >
           <label
@@ -70,13 +71,17 @@
             :title="option.text"
           >
             <span class="key" v-text="keyboards[option.id]" />
-            <span>{{ option.text }}</span>
-            <svgicon
-              v-if="isSuggested(option)"
-              class="label-text__suggestion-icon"
-              name="suggestion"
-            /> </label
-        ></BaseTooltip>
+            <span class="label-text__text">{{ option.text }}</span>
+            <span v-if="isSuggested(option)" class="label-text__suggestion">
+              <svgicon class="label-text__suggestion__icon" name="suggestion" />
+              <span
+                v-if="getSuggestedScore(option)"
+                class="label-text__suggestion__score"
+                v-text="getSuggestedScore(option)"
+              />
+            </span>
+          </label>
+        </BaseTooltip>
       </div>
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />
@@ -113,6 +118,10 @@ export default {
       required: true,
     },
     multiple: {
+      type: Boolean,
+      default: () => false,
+    },
+    suggestionFirst: {
       type: Boolean,
       default: () => false,
     },
@@ -172,17 +181,39 @@ export default {
           .includes(this.searchInput.toLowerCase())
       );
     },
-    remainingVisibleOptions() {
-      return this.filteredOptions
+    visibleOptions() {
+      let options = this.filteredOptions;
+
+      if (this.suggestionFirst) {
+        const suggestedOptions = this.filteredOptions
+          .filter(
+            (v) => this.suggestion && this.suggestion.isSuggested(v.value)
+          )
+          .sort((a, b) => {
+            const isASuggested = this.suggestion.getSuggestion(a.value);
+            const isBSuggested = this.suggestion.getSuggestion(b.value);
+
+            return isASuggested?.score > isBSuggested?.score ? -1 : 1;
+          });
+
+        const noSuggestedOptions = this.filteredOptions.filter(
+          (v) => !this.suggestion || !this.suggestion.isSuggested(v.value)
+        );
+
+        options = [...suggestedOptions, ...noSuggestedOptions];
+      }
+
+      if (this.isExpanded) {
+        return options;
+      }
+
+      const remainingSorted = options
         .slice(this.maxOptionsToShowBeforeCollapse)
         .filter((option) => option.isSelected);
-    },
-    visibleOptions() {
-      if (this.isExpanded) return this.filteredOptions;
 
-      return this.filteredOptions
+      return options
         .slice(0, this.maxOptionsToShowBeforeCollapse)
-        .concat(this.remainingVisibleOptions);
+        .concat(remainingSorted);
     },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
@@ -309,6 +340,12 @@ export default {
     isSuggested(option) {
       return this.suggestion?.isSuggested(option.value);
     },
+    getSuggestedScore(option) {
+      return this.suggestion?.getSuggestion(option.value)?.score?.fixed;
+    },
+    getSuggestedAgent(option) {
+      return this.suggestion?.getSuggestion(option.value)?.agent;
+    },
   },
   setup(props) {
     return useLabelSelectionViewModel(props);
@@ -391,20 +428,24 @@ $label-dark-color: palette(purple, 200);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   user-select: none;
-
-  &__suggestion-icon {
-    flex-shrink: 0;
-    width: 10px;
-    height: 10px;
-  }
-
-  span {
+  &__text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
-    &:hover {
-      direction: rtl;
+  }
+  &__suggestion {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: calc($base-space / 2);
+    &__score {
+      @include font-size(11px);
+    }
+    &__icon {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
     }
   }
 
@@ -456,8 +497,9 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  height: $base-space * 2;
-  aspect-ratio: 1;
+  min-width: 12px;
+  padding: 2px;
+  line-height: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
   border-color: $black-20;

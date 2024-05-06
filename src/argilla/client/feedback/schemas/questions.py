@@ -16,7 +16,7 @@ import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from argilla.client.feedback.schemas.enums import QuestionTypes
+from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
 from argilla.client.feedback.schemas.response_values import parse_value_response_for_question
 from argilla.client.feedback.schemas.responses import ResponseValue, ValueSchema
 from argilla.client.feedback.schemas.suggestions import SuggestionSchema
@@ -262,6 +262,12 @@ class MultiLabelQuestion(_LabelQuestion):
             are the labels that will be shown in the UI.
         visible_labels: The number of visible labels in the UI. Defaults to 20, and must
             be 3 or greater.
+        labels_order: An optional value that configures the order in which the labels are
+            presented in the UI. Possible values are 'natural' and 'suggestion', with 'natural'
+            displaying the labels in the natural order in which they were specified, and 'suggestion'
+            displaying the labels with priority for those associated with a suggestion.
+            The score of the suggestion will be taken into account for ordering if available.
+            Defaults to 'natural'.
 
     Examples:
         >>> from argilla.client.feedback.schemas.questions import MultiLabelQuestion
@@ -271,6 +277,15 @@ class MultiLabelQuestion(_LabelQuestion):
     type: Literal[QuestionTypes.multi_label_selection] = Field(
         QuestionTypes.multi_label_selection.value, allow_mutation=False, const=True
     )
+    labels_order: LabelsOrder = Field(LabelsOrder.natural, description="The order of the labels in the UI.")
+
+    @property
+    def server_settings(self) -> Dict[str, Any]:
+        settings = super().server_settings
+
+        settings["options_order"] = self.labels_order
+
+        return settings
 
 
 class RankingQuestion(QuestionSchema, LabelMappingMixin):

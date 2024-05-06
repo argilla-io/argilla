@@ -21,6 +21,7 @@
     <div v-else>
       <div class="home__main">
         <app-header
+          class="home__header"
           :copy-button="false"
           :sticky="false"
           :breadcrumbs="[
@@ -28,12 +29,18 @@
           ]"
           @breadcrumb-action="onBreadcrumbAction($event)"
         />
+        <PersistentStorageBanner class="home__banner" />
         <error
           v-if="$fetchState.error"
           where="workspace datasets"
           :error="$fetchState.error"
         />
-        <datasets-table v-else ref="table" :datasets="datasets.datasets" />
+        <datasets-table
+          class="home__table"
+          v-else
+          ref="table"
+          :datasets="datasets.datasets"
+        />
       </div>
       <sidebar-menu
         class="home__sidebar"
@@ -80,12 +87,22 @@ export default {
       max-height: 100svh;
     }
   }
-
   &__sidebar.sidebar {
     position: fixed;
     top: 56px;
     right: 0;
     border-left: 1px solid palette(grey, 600);
+  }
+  &__header {
+    min-height: $topbarHeight;
+  }
+  &__banner {
+    margin-right: $sidebarMenuWidth;
+    width: auto;
+  }
+  &__table {
+    min-height: 0;
+    overflow: auto;
   }
 }
 </style>

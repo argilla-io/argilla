@@ -5,6 +5,7 @@ import {
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
+import { revalidateCache } from "./AxiosCache";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
@@ -100,6 +101,8 @@ export class DatasetRepository implements IDatasetRepository {
           request
         );
 
+      revalidateCache(`/v1/datasets/${id}`);
+
       return {
         when: data.updated_at,
       };
@@ -127,7 +130,7 @@ export class DatasetRepository implements IDatasetRepository {
       const { data } = await this.axios.get<BackendProgress>(
         `/v1/datasets/${datasetId}/progress`,
         {
-          headers: { "cache-control": "max-age=60" },
+          headers: { "cache-control": "max-age=600" },
         }
       );
 
@@ -147,7 +150,9 @@ export class DatasetRepository implements IDatasetRepository {
 
   private async getDatasetById(datasetId: string) {
     try {
-      const { data } = await this.axios.get(`/v1/datasets/${datasetId}`);
+      const { data } = await this.axios.get(`/v1/datasets/${datasetId}`, {
+        headers: { "cache-control": "max-age=600" },
+      });
 
       return data;
     } catch (err) {
@@ -160,7 +165,8 @@ export class DatasetRepository implements IDatasetRepository {
   private async getWorkspaceById(workspaceId: string) {
     try {
       const { data: responseWorkspace } = await this.axios.get(
-        `/v1/workspaces/${workspaceId}`
+        `/v1/workspaces/${workspaceId}`,
+        { headers: { "cache-control": "max-age=600" } }
       );
 
       const { name } = responseWorkspace || { name: null };

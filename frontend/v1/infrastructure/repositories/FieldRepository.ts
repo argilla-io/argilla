@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
+import { revalidateCache } from "./AxiosCache";
 import { Field } from "~/v1/domain/entities/field/Field";
 
 export const enum FIELD_API_ERRORS {
@@ -31,6 +32,8 @@ export class FieldRepository {
         `/v1/fields/${field.id}`,
         this.createRequest(field)
       );
+
+      revalidateCache(`/v1/datasets/${field.datasetId}/fields`);
 
       return data;
     } catch (err) {

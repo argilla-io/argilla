@@ -58,8 +58,11 @@ class SuggestionSchema(BaseModel):
     @validator("score")
     @classmethod
     def validate_score(cls, score, values):
-        if isinstance(score, list) and len(score) != len(values["value"]):
+        value = values["value"]
+
+        if isinstance(value, list) and isinstance(score, list) and len(value) != len(score):
             raise ValueError("The length of the score list should match the length of the value list")
+
         return score
 
     def to_server_payload(self, question_name_to_id: Dict[str, UUID]) -> Dict[str, Any]:

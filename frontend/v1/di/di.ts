@@ -3,7 +3,6 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
-import { OAuthRepository } from "../infrastructure/repositories/OAuthRepository";
 import {
   DatasetRepository,
   RecordRepository,
@@ -13,6 +12,8 @@ import {
   MetadataRepository,
   VectorRepository,
   AgentRepository,
+  OAuthRepository,
+  EnvironmentRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -44,6 +45,7 @@ import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-datas
 import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
 import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
+import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -59,6 +61,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
+    register(EnvironmentRepository).withDependency(useAxios).build(),
     register(OAuthRepository)
       .withDependencies(useAxios, useRoutes, useAuth)
       .build(),
@@ -155,6 +158,10 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetDatasetSuggestionsAgentsUseCase)
       .withDependency(AgentRepository)
+      .build(),
+
+    register(GetEnvironmentUseCase)
+      .withDependency(EnvironmentRepository)
       .build(),
 
     register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),

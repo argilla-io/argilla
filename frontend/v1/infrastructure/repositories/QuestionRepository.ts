@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Response, BackendQuestion } from "../types";
+import { revalidateCache } from "./AxiosCache";
 import { Question } from "~/v1/domain/entities/question/Question";
 
 export const enum QUESTION_API_ERRORS {
@@ -31,6 +32,8 @@ export class QuestionRepository {
         `/v1/questions/${question.id}`,
         this.createRequest(question)
       );
+
+      revalidateCache(`/v1/datasets/${question.datasetId}/questions`);
 
       return data;
     } catch (err) {

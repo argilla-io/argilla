@@ -22,7 +22,9 @@ export default {
   title: "Title",
   description: "Description",
   labels: "Labels",
+  order: "Order",
   useMarkdown: "Use Markdown",
+  suggestionFirst: "Show suggestions first",
   visibleForAnnotators: "Visible for annotators",
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",
@@ -130,6 +132,7 @@ export default {
     discard: "Discard",
     submit: "Submit",
     draft: "Save as draft",
+    write: "Write",
   },
   sorting: {
     addOtherField: "+ Add another field",
@@ -151,7 +154,6 @@ export default {
       agent: "Agent",
     },
     plural: "Suggestions",
-    "suggested-rank": `Suggested rank`,
     name: `Suggestion`,
   },
   similarity: {
@@ -196,6 +198,7 @@ export default {
   "reset-all": "Reset all",
   reset: "Reset",
   less: "Less",
+  learnMore: "Learn more",
   with: "with",
   find: "Find",
   cancel: "Cancel",
@@ -215,6 +218,12 @@ export default {
   metrics: {
     total: "Total",
     progress: "Progress",
+  },
+  persistentStorage: {
+    adminOrOwner:
+      "Persistent storage is not enabled. All data will be lost if this space restarts. Go to the space settings to enable it.",
+    annotator:
+      "Persistent storage is not enabled. All data will be lost if this space restarts.",
   },
   validations: {
     http: {
