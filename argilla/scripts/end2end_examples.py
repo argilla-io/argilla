@@ -32,6 +32,8 @@ from typing import Dict, Optional
 import papermill
 from argilla._constants import DEFAULT_API_KEY
 
+ARGILLA_DOCS_PATH = Path(__file__).parent.parent.parent / "docs"
+
 
 @dataclass
 class ExampleNotebook:
@@ -73,23 +75,11 @@ class ExampleNotebook:
             print(f"Removed output notebook: {self.dst_filename.stem}")
 
 
-def get_huggingface_token() -> Optional[str]:
-    if token := os.environ.get("HF_HUB_ACCESS_TOKEN"):
-        return token
-
-    from huggingface_hub import HfFolder
-
-    if token := HfFolder.get_token():
-        return token
-
-    raise ValueError("No token found. Please set HF_HUB_ACCESS_TOKEN environment variable.")
-
-
 def main(
     api_url: Optional[str] = "http://localhost:6900",
     api_key: Optional[str] = DEFAULT_API_KEY,
     hf_token: Optional[str] = None,
-    examples_folder: Optional[Path] = "docs/_source/tutorials_and_integrations/tutorials/feedback/end2end_examples",
+    examples_folder: Path = Path("examples"),
 ) -> None:
     """
     Run the end2end example notebooks. If no arguments are passed, it
@@ -135,6 +125,22 @@ def main(
             example.run()
 
 
+def get_huggingface_token() -> Optional[str]:
+    if token := os.environ.get("HF_HUB_ACCESS_TOKEN"):
+        return token
+
+    from huggingface_hub import HfFolder
+
+    if token := HfFolder.get_token():
+        return token
+
+    raise ValueError("No token found. Please set HF_HUB_ACCESS_TOKEN environment variable.")
+
+
 if __name__ == "__main__":
-    main(examples_folder="docs/_source/getting_started")
-    main()
+    main(examples_folder=ARGILLA_DOCS_PATH.joinpath("_source/getting_started"))
+    main(
+        examples_folder=ARGILLA_DOCS_PATH.joinpath(
+            "_source/tutorials_and_integrations/tutorials/feedback/end2end_examples"
+        )
+    )

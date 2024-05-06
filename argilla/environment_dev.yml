@@ -67,5 +67,6 @@ dependencies:
       - ipynbname>=2023.2.0.0
       - nltk < 4.0.0
       - httpx~=0.26.0
-      # install Argilla in editable mode
+      # install Argilla packages in editable mode
+      - -e ../argilla-server[postgresql]
       - -e .[listeners]

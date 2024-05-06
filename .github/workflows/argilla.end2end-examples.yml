@@ -22,9 +22,6 @@ env:
   CACHE_NUMBER: 1
 
 jobs:
-  # Runs depending on the result from the check-repo-files.yml
-  call-check-repo-files:
-    uses: ./.github/workflows/argilla.check-repo-files.yml
 
   end2end-examples:
     name: end2end notebook examples, FeedbackDataset for text-classification
@@ -38,10 +35,11 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+        working-directory: argilla
 
     steps:
       - name: Checkout Code 🛎
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Conda Env 🐍
         uses: conda-incubator/setup-miniconda@v2
@@ -61,7 +59,7 @@ jobs:
         id: cache
         with:
           path: ${{ env.CONDA }}/envs
-          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('argilla/environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
 
       - name: Update environment
         if: steps.cache.outputs.cache-hit != 'true'
