@@ -24,7 +24,7 @@ export default {
   labels: "Labels",
   order: "Order",
   useMarkdown: "Use Markdown",
-  suggestionFirst: "Suggestion first",
+  suggestionFirst: "Show suggestions first",
   visibleForAnnotators: "Visible for annotators",
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",
