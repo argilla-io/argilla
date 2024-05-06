@@ -17,7 +17,6 @@
         @focus="onFocus"
       >
         <BaseTooltip
-          v-if="isSuggested(item)"
           class="draggable__rank-card--unranked"
           :title="$t('suggestion.name')"
           :text="getSuggestedAgent(item)"
@@ -69,7 +68,6 @@
             @focus="onFocus"
           >
             <BaseTooltip
-              v-if="isSuggested(item)"
               :title="$t('suggestion.name')"
               :text="getSuggestedAgent(item)"
               minimalist
