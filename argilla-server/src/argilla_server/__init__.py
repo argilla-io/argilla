@@ -16,6 +16,8 @@ import warnings
 
 from argilla_server.pydantic_v1 import PYDANTIC_MAJOR_VERSION
 
+# This line should be removed
+
 if PYDANTIC_MAJOR_VERSION >= 2:
     warnings.warn("The argilla_server package is not compatible with Pydantic 2. " "Please use Pydantic 1.x instead.")
 else:
