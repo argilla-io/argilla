@@ -104,9 +104,6 @@ input[type="checkbox"] {
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
-    &:hover {
-      direction: rtl;
-    }
   }
   &:not(.label-active):hover {
     background: v-bind(optionLightColor);
