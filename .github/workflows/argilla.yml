@@ -107,27 +107,6 @@ jobs:
       - name: Upload Coverage reports to Codecov 📦
         uses: codecov/codecov-action@v2
 
-  run_frontend_test:
-    name: Run Argilla Frontend tests
-    runs-on: ubuntu-latest
-    needs: check_repo_files
-    if: needs.check_repo_files.outputs.frontendChanges == 'true'
-    steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Run Frontend tests
-        working-directory: argilla-frontend
-        run: |
-          npm install
-          npm run lint
-          npm run test
-
   build_python_package:
     name: Build Argilla python package
     uses: ./.github/workflows/argilla.build-python-package.yml
@@ -136,34 +115,6 @@ jobs:
       - run_integration_tests
       - check_repo_files
     if: needs.check_repo_files.outputs.pythonChanges == 'true'
-    secrets: inherit
-
-  build_quickstart_for_develop_docker_image:
-    name: Build Quickstart For Develop docker image
-    uses: ./.github/workflows/argilla.build-push-dev-frontend-docker.yml
-    needs: deployable_check
-    if: needs.deployable_check.outputs.isDeployable == 'true'
-    with:
-      image-name: argilla/argilla-quickstart-for-dev
-      dockerfile: argilla-frontend/dev.frontend.Dockerfile
-      platforms: linux/amd64
-      build-args: |
-        ARGILLA_SERVER_TAG=main
-    secrets: inherit
-
-  deploy_environment:
-    name: Deploy branch environment
-    uses: ./.github/workflows/argilla.deploy-environment.yml
-    needs: build_quickstart_for_develop_docker_image
-    if: |
-      !cancelled() &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      needs.build_quickstart_for_develop_docker_image.result == 'success' &&
-      needs.check_repo_files.outputs.frontendChanges == 'true' &&
-      github.event_name == 'pull_request' && github.event.pull_request.draft == false
-    with:
-      image-name: argilla/argilla-quickstart-for-dev
-      image-version: ${{ needs.build_quickstart_for_develop_docker_image.outputs.version }}
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
