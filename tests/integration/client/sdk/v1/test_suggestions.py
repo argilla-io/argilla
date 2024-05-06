@@ -13,6 +13,8 @@
 #  limitations under the License.
 
 import pytest
+from argilla_server.models import UserRole
+
 from argilla.client.client import Argilla
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.schemas.fields import TextField
@@ -20,8 +22,6 @@ from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
 from argilla.client.sdk.v1.suggestions.api import delete_suggestion
 from argilla.client.singleton import init
-from argilla_server.models import UserRole
-
 from tests.factories import UserFactory, WorkspaceFactory
 
 

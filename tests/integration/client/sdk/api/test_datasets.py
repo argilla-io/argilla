@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 import pytest
+from argilla_server.models import UserRole
+
 from argilla.client.client import Argilla
 from argilla.client.sdk.datasets.api import get_dataset, list_datasets
 from argilla.client.sdk.datasets.models import Dataset, TaskType
 from argilla.client.sdk.text_classification.models import TextClassificationBulkData
-from argilla_server.models import UserRole
-
 from tests.factories import UserFactory, WorkspaceFactory
 
 

@@ -21,6 +21,7 @@ from abc import ABC
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import pandas as pd
+
 from argilla._constants import OPENAI_SEPARATOR, OPENAI_WHITESPACE
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
@@ -61,8 +62,9 @@ _LOGGER = logging.getLogger(__name__)
 if TYPE_CHECKING:
     import datasets
     import spacy
-    from argilla.client.feedback.dataset import FeedbackDataset
     from sentence_transformers import InputExample
+
+    from argilla.client.feedback.dataset import FeedbackDataset
 
 
 class TrainingData(ABC):

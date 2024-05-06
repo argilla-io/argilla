@@ -1,17 +1,31 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 from typing import Union
 
-import pytest
-from pyinstrument import Profiler
-from sqlalchemy.ext.asyncio import AsyncSession
-
 import argilla_server.apis.v1.handlers.datasets.records_bulk
+import pytest
 from argilla_server.contexts import datasets
 from argilla_server.models import Dataset, Question, VectorSettings
-from argilla_server.schemas.v1.records import RecordsCreate, RecordCreate
+from argilla_server.schemas.v1.records import RecordCreate, RecordsCreate
 from argilla_server.schemas.v1.records_bulk import RecordsBulkCreate
 from argilla_server.schemas.v1.responses import UserDraftResponseCreate
 from argilla_server.schemas.v1.suggestions import SuggestionCreate
 from argilla_server.search_engine import ElasticSearchEngine
+from pyinstrument import Profiler
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from tests.factories import UserFactory
 from tests.unit.api.v1.datasets.records.records_bulk.test_dataset_records_bulk import TestDatasetRecordsBulk
 
@@ -30,9 +44,7 @@ def _get_dataset_vector_settings_by_name(dataset: Dataset, name: str) -> Union["
 
 @pytest.mark.asyncio
 class TestUpsertRecordsBulk:
-
     async def test_profiling_for_create_records(self, db: AsyncSession, elasticsearch_config: dict):
-
         engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
         dataset = await TestDatasetRecordsBulk().test_dataset()
 

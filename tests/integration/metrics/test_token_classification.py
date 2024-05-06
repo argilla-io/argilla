@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla
 import pytest
+
+import argilla
 from argilla.client.api import load, log
 from argilla.client.models import TokenClassificationRecord
 from argilla.metrics import entity_consistency
@@ -30,7 +31,6 @@ from argilla.metrics.token_classification import (
     tokens_length,
     top_k_mentions,
 )
-
 from tests.integration.utils import delete_ignoring_errors
 
 

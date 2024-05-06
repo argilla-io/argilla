@@ -12,8 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla.client.singleton
 import pytest
+from argilla_server.models import DatasetStatus, User, UserRole
+
+import argilla.client.singleton
 from argilla import (
     FeedbackDataset,
     FloatMetadataProperty,
@@ -57,8 +59,6 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackSuggestionModel,
 )
 from argilla.client.sdk.v1.records.api import set_suggestion
-from argilla_server.models import DatasetStatus, User, UserRole
-
 from tests.factories import (
     DatasetFactory,
     FloatMetadataPropertyFactory,

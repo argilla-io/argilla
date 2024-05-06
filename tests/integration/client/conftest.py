@@ -17,6 +17,9 @@ import random
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
+from argilla_server.models import User
+from datasets import Dataset
+
 from argilla import SpanQuestion
 from argilla.client.api import log
 from argilla.client.datasets import read_datasets
@@ -57,9 +60,6 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationBulkData,
 )
 from argilla.client.singleton import init
-from argilla_server.models import User
-from datasets import Dataset
-
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:

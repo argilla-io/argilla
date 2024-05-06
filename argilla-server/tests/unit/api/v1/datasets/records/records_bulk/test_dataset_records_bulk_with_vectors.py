@@ -31,7 +31,6 @@ from tests.factories import (
 
 @pytest.mark.asyncio
 class TestDatasetRecordsBulkWithVectors:
-
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 

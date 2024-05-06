@@ -12,8 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla.client.singleton
 import pytest
+from argilla_server.models import User as ServerUser
+from argilla_server.models import UserRole
+
+import argilla.client.singleton
 from argilla import (
     FeedbackDataset,
     FeedbackRecord,
@@ -29,9 +32,6 @@ from argilla import (
 from argilla.client.client import Argilla
 from argilla.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
 from argilla.client.sdk.v1.records.models import FeedbackItemModel
-from argilla_server.models import User as ServerUser
-from argilla_server.models import UserRole
-
 from tests.factories import (
     DatasetFactory,
     RatingQuestionFactory,

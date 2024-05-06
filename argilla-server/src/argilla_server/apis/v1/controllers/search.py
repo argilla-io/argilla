@@ -134,5 +134,4 @@ async def search(
     dataset_id: UUID,
     search_query: RecordsSearchQuery,
 ):
-
     return RecordsSearchResponse(query=search_query)

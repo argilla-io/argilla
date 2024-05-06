@@ -12,8 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.sdk.workspaces.models import WorkspaceModel as ClientSchema
 from argilla_server.schemas.v1.workspaces import Workspace as ServerSchema
+
+from argilla.client.sdk.workspaces.models import WorkspaceModel as ClientSchema
 
 
 def test_users_schema(helpers):

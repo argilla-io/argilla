@@ -15,6 +15,7 @@
 from typing import TYPE_CHECKING
 
 import pytest
+
 from argilla.client.sdk.v1.users.api import list_user_workspaces
 from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
 from argilla.client.singleton import ArgillaSingleton
