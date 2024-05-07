@@ -225,6 +225,7 @@ export default {
       :deep(label) {
         color: $black-87;
         line-height: 1;
+        margin-right: 1em;
       }
       @include media(">desktop") {
         :deep(label) {
