@@ -39,7 +39,6 @@ jobs:
         include:
           - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
             searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            coverageReport: coverage-elasticsearch-8.8.2
             runsOn: extended-runner
 
     name: Run end2end tests
@@ -64,24 +63,33 @@ jobs:
   push_coverage:
     name: Upload code coverage
     runs-on: ubuntu-latest
+
     needs:
       - run_unit_tests
       - run_integration_tests
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: argilla
+
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
+        with:
+          path: argilla/coverage-report
 
       - name: Copy all reports
-        run: find coverage-report*/ -name "*.xml" -exec mv '{}' . \;
-
-      - name: Display current files structure
-        run: ls -R
+        run: find coverage-report/ -name "*.xml" -exec mv '{}' . \;
 
       - name: Upload Coverage reports to Codecov 📦
         uses: codecov/codecov-action@v2
+        with:
+          flags: argilla
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build_python_package:
     name: Build Argilla python package

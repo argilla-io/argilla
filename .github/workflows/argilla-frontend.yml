@@ -85,5 +85,3 @@ jobs:
       image-name: argilla/argilla-frontend-for-dev
       image-version: ${{ needs.build_dev_docker_image.outputs.version }}
     secrets: inherit
-
-
