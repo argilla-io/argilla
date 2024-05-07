@@ -1,7 +1,7 @@
 name: Build Argilla frontend package
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -23,6 +23,10 @@ jobs:
   build:
     name: Build argilla-frontend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: argilla-frontend
+
     steps:
 
       - name: Checkout Code 🛎
@@ -34,14 +38,12 @@ jobs:
           node-version: 20
 
       - name: Run tests
-        working-directory: argilla-frontend
         run: |
           npm install
           npm run lint
           npm run test
 
       - name: Build package
-        working-directory: argilla-frontend
         env:
           # BASE_URL is used in the server to support parameterizable base root path
           # See scripts/build_frontend.sh
@@ -83,5 +85,3 @@ jobs:
       image-name: argilla/argilla-frontend-for-dev
       image-version: ${{ needs.build_dev_docker_image.outputs.version }}
     secrets: inherit
-
-
