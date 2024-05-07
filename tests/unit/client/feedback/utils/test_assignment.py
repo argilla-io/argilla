@@ -193,6 +193,16 @@ def test_assign_records_to_groups(mock_shuffle, overlap, shuffle, expected_error
                 "user3": ["record2", "record3", "record5"],
             },
         ),
+        (
+            3,
+            False,
+            None,
+            {
+                "user1": ["record1", "record2", "record3", "record4", "record5"],
+                "user2": ["record1", "record2", "record3", "record4", "record5"],
+                "user3": ["record1", "record2", "record3", "record4", "record5"],
+            },
+        ),
         (5, False, ValueError, None),
         (-1, False, ValueError, None),
     ],

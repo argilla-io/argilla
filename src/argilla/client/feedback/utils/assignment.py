@@ -142,8 +142,11 @@ def assign_records_to_individuals(
     Raises:
         ValueError: If `overlap` is higher than the number of users or negative.
     """
-    if overlap < 0 or overlap >= len(users):
-        raise ValueError("Overlap must be less than the number of users and must not be negative.")
+    if overlap < 0 or overlap > len(users):
+        raise ValueError("Overlap must be less or equal to than the number of users and must not be negative.")
+
+    if overlap == len(users):
+        warnings.warn("Overlap is equal to the number of users. Each user will annotate all records.", UserWarning)
 
     if len(records) < len(users):
         warnings.warn(
