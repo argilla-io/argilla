@@ -18,11 +18,12 @@ If you want to add something here, remember to add it as normal import in the _T
 as well as in the `_import_structure` dictionary.
 """
 
+# Force run the CI pipeline
+
 import sys as _sys
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
-
 from . import _version
 from .utils import LazyargillaModule as _LazyargillaModule
 
@@ -37,47 +38,7 @@ except ModuleNotFoundError:
 __version__ = _version.version
 
 if _TYPE_CHECKING:
-    from argilla.client.api import (
-        copy,
-        delete,
-        delete_records,
-        get_workspace,
-        list_datasets,
-        list_workspaces,
-        load,
-        log,
-        log_async,
-        set_workspace,
-    )
-    from argilla.client.datasets import (
-        DatasetForText2Text,
-        DatasetForTextClassification,
-        DatasetForTokenClassification,
-        read_datasets,
-        read_pandas,
-    )
-    from argilla.client.models import (
-        Text2TextRecord,
-        TextClassificationRecord,
-        TextGenerationRecord,  # TODO Remove TextGenerationRecord
-        TokenAttributions,
-        TokenClassificationRecord,
-    )
-    from argilla.client.singleton import active_client, init
-    from argilla.client.users import User
-    from argilla.client.utils import server_info
-    from argilla.client.workspaces import Workspace
-    from argilla.datasets import (
-        TextClassificationSettings,
-        TokenClassificationSettings,
-        configure_dataset,
-        configure_dataset_settings,
-        load_dataset_settings,
-    )
     from argilla.feedback import *  # noqa
-    from argilla.listeners import Metrics, RGListenerContext, Search, listener
-    from argilla.monitoring.model_monitor import monitor
-
 
 # TODO: remove me
 _import_structure = {
