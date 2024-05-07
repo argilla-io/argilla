@@ -129,8 +129,7 @@ $switch-thumb-size: 18px;
       display: none;
     }
     .re-switch-thumb {
-      background-color: palette(white) !important;
-      border: 1px solid palette(grey, 500) !important;
+      background-color: #f0f0f0 !important;
     }
   }
   &.disable-action {
