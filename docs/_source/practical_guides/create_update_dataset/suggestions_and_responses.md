@@ -24,6 +24,7 @@ record = rg.FeedbackRecord(
         {
             "question_name": "relevant",
             "value": "YES",
+            "score": 0.7,
             "agent": model_name,
         }
     ]
@@ -41,6 +42,7 @@ record = rg.FeedbackRecord(
         {
             "question_name": "content_class",
             "value": ["hate", "violent"],
+            "score": [0.3, 0.2],
             "agent": model_name,
         }
     ]
@@ -62,6 +64,7 @@ record = rg.FeedbackRecord(
                 {"rank": 2, "value": "reply-1"},
                 {"rank": 3, "value": "reply-3"},
             ],
+            "score": [0.20, 0.10, 0.01]
             "agent": model_name,
         }
     ]
@@ -79,6 +82,7 @@ record = rg.FeedbackRecord(
         {
             "question_name": "quality",
             "value": 5,
+            "score": 0.4,
             "agent": model_name,
         }
     ]
@@ -122,6 +126,7 @@ record = rg.FeedbackRecord(
         {
             "question_name": "corrected-text",
             "value": "This is a *suggestion*.",
+            "score": 0.7,
             "agent": model_name,
         }
     ]
