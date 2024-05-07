@@ -24,6 +24,7 @@ import sys as _sys
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from argilla.logging import configure_logging as _configure_logging
+
 from . import _version
 from .utils import LazyargillaModule as _LazyargillaModule
 
