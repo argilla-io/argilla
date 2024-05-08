@@ -129,7 +129,7 @@ export default {
       return this.options.length === 1;
     },
     suggestedScore() {
-      return this.suggestion?.value.score.fixed;
+      return this.suggestion?.value.score?.fixed;
     },
     entityColor() {
       return this.entity.color;
@@ -313,6 +313,7 @@ export default {
   }
   &__suggestion {
     margin-right: calc($base-space / 2);
+    flex-shrink: 0;
     &--score {
       display: none;
       margin-right: calc($base-space / 2);
