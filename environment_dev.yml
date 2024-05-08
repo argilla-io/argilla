@@ -68,6 +68,6 @@ dependencies:
       - nltk < 4.0.0
       - httpx~=0.26.0
       # For now we can just install argilla-server from the GitHub repo
-      - git+https://github.com/argilla-io/argilla-server.git
+      - git+https://github.com/argilla-io/argilla-server.git@feat/migrate-create-workspace-users-to-api-v1
       # install Argilla in editable mode
       - -e .[listeners]
