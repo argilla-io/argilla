@@ -12,7 +12,7 @@ export class Environment {
       spaceAuthorName: string;
       spacePersistentStorageEnabled: boolean;
     }
-  ) { }
+  ) {}
 
   get shouldShowHuggingfaceSpacePersistentStorageWarning(): boolean {
     return (
