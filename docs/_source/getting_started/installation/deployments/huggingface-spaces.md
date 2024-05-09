@@ -153,7 +153,7 @@ The moment you enable persistent storage, the space will restart and all data in
 ```
 
 ```{note}
-If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is not enabled for the space.
+If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is not enabled for the space.
 ```
 
 ## Setting up secret environment variables

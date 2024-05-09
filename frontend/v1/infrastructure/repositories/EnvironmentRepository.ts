@@ -25,8 +25,8 @@ export class EnvironmentRepository implements IEnvironmentRepository {
 
       return new Environment(
         {
-          showHuggingfaceSpacePersistantStorageWarning:
-            argilla.show_huggingface_space_persistant_storage_warning,
+          showHuggingfaceSpacePersistentStorageWarning:
+            argilla.show_huggingface_space_persistent_storage_warning,
         },
         {
           spaceId: huggingface.space_id,
@@ -35,8 +35,8 @@ export class EnvironmentRepository implements IEnvironmentRepository {
           spaceHost: huggingface.space_host,
           spaceRepoName: huggingface.space_repo_name,
           spaceAuthorName: huggingface.space_author_name,
-          spacePersistantStorageEnabled:
-            huggingface.space_persistant_storage_enabled,
+          spacePersistentStorageEnabled:
+            huggingface.space_persistent_storage_enabled,
         }
       );
     } catch (err) {

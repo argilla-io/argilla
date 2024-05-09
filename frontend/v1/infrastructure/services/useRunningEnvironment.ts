@@ -30,7 +30,7 @@ export const useRunningEnvironment = () => {
 
     const environment = await getEnvironment();
 
-    return environment.shouldShowHuggingfaceSpacePersistantStorageWarning;
+    return environment.shouldShowHuggingfaceSpacePersistentStorageWarning;
   };
 
   const getHuggingFaceSpace = async () => {
