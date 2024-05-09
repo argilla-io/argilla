@@ -30,7 +30,6 @@ If you want to customize the title, emojis, and colors of your space, go to "Fil
 
 You'll see the `Building` status and once it becomes `Running` your space is ready to go. If you don't see the Argilla login UI refresh the page.
 
-
 :::{tip}
 You'll see the login screen where you need to use either `admin` or `argilla` with the default passwords (12345678). Remember you can change the passwords using secret environment variables. If you get a 500 error when introducing the credentials, make sure you have introduced the correct password.
 :::
@@ -47,11 +46,11 @@ For quick experimentation, you can jump directly into the next section. If you w
 
 Once Argilla is running, you can use the UI with the Direct URL. This URL gives you access to a full-screen, stable Argilla instance, and is the `api_url` for reading and writing datasets using the Argilla Python library.
 
-* If you have a public space, you'll find the Direct URL in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`
+- If you have a public space, you'll find the Direct URL in the "Embed this Space" option (top right). You'll see a URL like this: `https://dvilasuero-argilla-setfit.hf.space`
 
 ![HF_Space_Direct_URL](/_static/reference/webapp/HF_Space_Direct_URL.png)
 
-* If you are using a private space, the Direct URL should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`. For instance, if the owner of the space is `dvilasuero` and your space name is `argilla-setfit`, your Direct URL will be `https://dvilasuero-argilla-setfit.hf.space`.
+- If you are using a private space, the Direct URL should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`. For instance, if the owner of the space is `dvilasuero` and your space name is `argilla-setfit`, your Direct URL will be `https://dvilasuero-argilla-setfit.hf.space`.
 
 ### Create your first dataset
 
@@ -153,7 +152,7 @@ The moment you enable persistent storage, the space will restart and all data in
 ```
 
 ```{note}
-If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTANT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is not enabled for the space.
+If you haven't enabled persistent storage, Argilla will show a warning message by default. If you don't require persistent storage for your space and want to prevent the warning message from appearing, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` to `false`. This will suppress the warning message, even if persistent storage is not enabled for the space.
 ```
 
 ## Setting up secret environment variables
@@ -166,37 +165,34 @@ The template space has three users: `owner`, `admin` and `argilla`. The username
 
 The usernames, passwords, and API keys to upload, read, update, and delete datasets can be configured using the following secrets:
 
-* `OWNER_USERNAME`: The owner username to log in Argilla. The default owner username is `owner`. By setting up
+- `OWNER_USERNAME`: The owner username to log in Argilla. The default owner username is `owner`. By setting up
   a custom username you can use your own username to log in to the app.
-* `OWNER_PASSWORD`: This sets a custom password to log in to the app with the `owner` username. The default
+- `OWNER_PASSWORD`: This sets a custom password to log in to the app with the `owner` username. The default
   password is `12345678`. By setting up a custom password you can use your own password to log in to the app.
-* `OWNER_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
+- `OWNER_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `owner.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
-* `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
+- `ADMIN_USERNAME`: The admin username to log in Argilla. The default admin username is `admin`. By setting up
   a custom username you can use your own username to log in to the app.
-* `ADMIN_PASSWORD`: This sets a custom password to log in to the app with the `admin` username. The default
+- `ADMIN_PASSWORD`: This sets a custom password to log in to the app with the `admin` username. The default
   password is `12345678`. By setting up a custom password you can use your own password to log in to the app.
-* `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
+- `ADMIN_API_KEY`: Argilla provides a Python library to interact with the app (read, write, and update data, log model
   predictions, etc.). If you don't set this variable, the library and your app will use the default API key
   i.e. `admin.apikey`. If you want to secure your app for reading and writing data, we recommend you to set up this
   variable. The API key you choose can be any string of your choice and you can check an online generator if you like.
-* `ANNOTATOR_USERNAME`: The annotator username to log in Argilla. The default annotator username is `argilla`. By setting
+- `ANNOTATOR_USERNAME`: The annotator username to log in Argilla. The default annotator username is `argilla`. By setting
   up a custom username you can use your own username to log in to the app.
-* `ANNOTATOR_PASSWORD`: This sets a custom password to log in to the app with the `argilla` username. The default password
+- `ANNOTATOR_PASSWORD`: This sets a custom password to log in to the app with the `argilla` username. The default password
   is `12345678`. By setting up a custom password you can use your own password to log in to the app.
 
 The combination of these secret variables gives you the following setup options:
 
-1. *I want to avoid that anyone without the API keys adds, deletes, or updates datasets using the Python client*: You need to set up `ADMIN_PASSWORD` and `ADMIN_API_KEY`.
-2. *Additionally, I want to avoid that the `argilla` username deletes datasets from the UI*: You need to set up `ANNOTATOR_PASSWORD` and use the `argilla` generated API key with the Python Client (check your Space logs). This option might be interesting if you want to control dataset management but want anyone to browse your datasets using the `argilla` user.
-3. *Additionally, I want to avoid that anyone without password browses my datasets with the `argilla` user*: You need to set up `ANNOTATOR_PASSWORD`. In this case, you can use the `argilla` generated API key and/or `ADMIN_API_KEY` values with the Python Client depending on your needs for dataset deletion rights.
+1. _I want to avoid that anyone without the API keys adds, deletes, or updates datasets using the Python client_: You need to set up `ADMIN_PASSWORD` and `ADMIN_API_KEY`.
+2. _Additionally, I want to avoid that the `argilla` username deletes datasets from the UI_: You need to set up `ANNOTATOR_PASSWORD` and use the `argilla` generated API key with the Python Client (check your Space logs). This option might be interesting if you want to control dataset management but want anyone to browse your datasets using the `argilla` user.
+3. _Additionally, I want to avoid that anyone without password browses my datasets with the `argilla` user_: You need to set up `ANNOTATOR_PASSWORD`. In this case, you can use the `argilla` generated API key and/or `ADMIN_API_KEY` values with the Python Client depending on your needs for dataset deletion rights.
 
-Additionally, the `LOAD_DATASETS` will let you configure the sample datasets that will be pre-loaded. The default value is `single` and the supported values for this variable are:
-    1. `single`: Load single datasets for TextClassification task.
-    2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text)
-    3. `none`: No datasets being loaded.
+Additionally, the `LOAD_DATASETS` will let you configure the sample datasets that will be pre-loaded. The default value is `single` and the supported values for this variable are: 1. `single`: Load single datasets for TextClassification task. 2. `full`: Load all the sample datasets for NLP tasks (TokenClassification, TextClassification, Text2Text) 3. `none`: No datasets being loaded.
 
 ## Setting up HF Authentication
 
@@ -206,14 +202,14 @@ From version `1.23.0` you can enable Hugging Face authentication for your Argill
 This feature is specially useful for public crowdsourcing projects. If you would like to have more control over who can log in to the Space, you can set this up on a private space so that only members of your Organization can sign in. Alternatively, you may want to [create users](/getting_started/installation/configurations/user_management.md#create-a-user) and use their credentials instead.
 ```
 
-To enable this feature, you will first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select *Connected Apps* > *Create App*. Once inside, choose a name for your app and complete the form with the following information:
+To enable this feature, you will first need to [create an OAuth App in Hugging Face](https://huggingface.co/docs/hub/oauth#creating-an-oauth-app). To do that, go to your user settings in Hugging Face and select _Connected Apps_ > _Create App_. Once inside, choose a name for your app and complete the form with the following information:
 
-* **Homepage URL:** [Your Argilla Space Direct URL](/getting_started/installation/deployments/huggingface-spaces.md#your-argilla-space-url).
-* **Logo URL:** `[Your Argilla Space Direct URL]/favicon.ico`
-* **Scopes:** `openid` and `profile`.
-* **Redirect URL:** `[Your Argilla Space Direct URL]/oauth/huggingface/callback`
+- **Homepage URL:** [Your Argilla Space Direct URL](/getting_started/installation/deployments/huggingface-spaces.md#your-argilla-space-url).
+- **Logo URL:** `[Your Argilla Space Direct URL]/favicon.ico`
+- **Scopes:** `openid` and `profile`.
+- **Redirect URL:** `[Your Argilla Space Direct URL]/oauth/huggingface/callback`
 
-This will create a Client ID and an App Secret that you will need to add as variables of your Space. To do this, go to the Space *Settings* > *Variables and Secrets* and save the Client ID and App Secret as environment secrets like so:
+This will create a Client ID and an App Secret that you will need to add as variables of your Space. To do this, go to the Space _Settings_ > _Variables and Secrets_ and save the Client ID and App Secret as environment secrets like so:
 
 1. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_ID` - **Value:** [Your Client ID]
 2. **Name:** `OAUTH2_HUGGINGFACE_CLIENT_SECRET` - **Value:** [Your App Secret]
@@ -225,8 +221,8 @@ Alternatively, you can provide the environment variables in the `.oauth.yaml` fi
 enabled: true
 
 providers:
-# The OAuth provider setup
-# For now, only Hugging Face is supported
+  # The OAuth provider setup
+  # For now, only Hugging Face is supported
   - name: huggingface
     # This is the client ID of the OAuth app. You can find it in your Hugging Face settings.
     # see https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.
@@ -244,7 +240,7 @@ providers:
 # This section defines the allowed workspaces for the oauth users.
 # Workspaces defined here must exist in Argilla.
 allowed_workspaces:
-    - name: admin
+  - name: admin
 ```
 
 ```{warning}
@@ -253,4 +249,4 @@ Be aware that the `.oauth.yaml` file is public in the case of public spaces or m
 Therefore, we recommend setting these variables as enviroment secrets.
 ```
 
-Now check that the `enabled` parameter is set to `true` in your `.oauth.yaml` file and go back to the *Settings* to do a *Factory rebuild*. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.
+Now check that the `enabled` parameter is set to `true` in your `.oauth.yaml` file and go back to the _Settings_ to do a _Factory rebuild_. Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.

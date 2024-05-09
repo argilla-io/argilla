@@ -1,7 +1,7 @@
 export class Environment {
   constructor(
     private readonly argilla: {
-      showHuggingfaceSpacePersistantStorageWarning: boolean;
+      showHuggingfaceSpacePersistentStorageWarning: boolean;
     },
     private readonly huggingface: {
       spaceId: string;
@@ -10,14 +10,14 @@ export class Environment {
       spaceHost: string;
       spaceRepoName: string;
       spaceAuthorName: string;
-      spacePersistantStorageEnabled: boolean;
+      spacePersistentStorageEnabled: boolean;
     }
-  ) {}
+  ) { }
 
-  get shouldShowHuggingfaceSpacePersistantStorageWarning(): boolean {
+  get shouldShowHuggingfaceSpacePersistentStorageWarning(): boolean {
     return (
-      this.argilla.showHuggingfaceSpacePersistantStorageWarning &&
-      !this.huggingface.spacePersistantStorageEnabled
+      this.argilla.showHuggingfaceSpacePersistentStorageWarning &&
+      !this.huggingface.spacePersistentStorageEnabled
     );
   }
 
