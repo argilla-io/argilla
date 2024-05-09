@@ -66,16 +66,16 @@ Then, you have to connect to your Argilla HF Space. Get the `api_url` as mention
 ```python
 import argilla as rg
 
-# If you connect to your public HF Space (uses default API key)
+# If you connect to your public HF Space
 rg.init(
   api_url="[your_space_url]",
-  api_key="admin.apikey"
+  api_key="admin.apikey" # this is the default API key, don't change it if you didn't set up one during the Space creation
   )
 
-# If you connect to your private HF Space (uses default API key)
+# If you connect to your private HF Space
 rg.init(
   api_url="[your_space_url]",
-  api_key="admin.apikey",
+  api_key="admin.apikey", # this is the default API key, don't change it if you didn't set up one during the Space creation
   extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"}
   )
 ```
