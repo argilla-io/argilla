@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`BaseSlider renders properly 1`] = `
-<div class="slides-nav"><a href="#" class="disabled"><svg version="1.1" viewBox="0 0 8 8" class="svg-icon svg-fill" style="width: 8px; height: 8px;"></svg></a>
-  1 of 2 sentences
-  <a href="#"><svg version="1.1" viewBox="0 0 8 8" class="svg-icon svg-fill" style="width: 8px; height: 8px;"></svg></a>
-</div>
-`;
