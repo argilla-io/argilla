@@ -45,6 +45,29 @@
     >
       <svgicon name="close" width="12" height="12" />
     </BaseButton>
+
+    <BaseDropdown
+      v-if="fields.length > 1"
+      class="search-area__fields"
+      :visible="dropdownIsVisible"
+      @visibility="onVisibility"
+    >
+      <template slot="dropdown-header">
+        <span class="search-area__fields__header">
+          <span class="search-area__fields__header__text">{{
+            value.value.field
+          }}</span>
+          <svgicon name="chevron-down" height="8" />
+        </span>
+      </template>
+      <template slot="dropdown-content">
+        <ul class="search-area__fields__content">
+          <li v-for="field in filteredFields" :key="field">
+            <BaseButton @on-click="selectField(field)">{{ field }}</BaseButton>
+          </li>
+        </ul>
+      </template>
+    </BaseDropdown>
   </div>
 </template>
 
@@ -56,11 +79,16 @@ export default {
       type: Object,
       required: true,
     },
+    fields: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
       searchValue: "",
       isExpanded: false,
+      dropdownIsVisible: false,
     };
   },
   computed: {
@@ -69,6 +97,12 @@ export default {
     },
     showDelete() {
       return this.isSearchActive;
+    },
+    fieldList() {
+      return ["all", ...this.fields];
+    },
+    filteredFields() {
+      return this.fieldList.filter((field) => field !== this.value.value.field);
     },
   },
   watch: {
@@ -98,6 +132,7 @@ export default {
       this.value.value = {
         ...this.value.value,
         text: this.searchValue,
+        field: this.value.value.field,
       };
 
       this.$refs.searchRef.blur();
@@ -109,6 +144,13 @@ export default {
     },
     collapseSearch() {
       this.isExpanded = false;
+    },
+    onVisibility(value) {
+      this.dropdownIsVisible = value;
+    },
+    selectField(field) {
+      this.value.value.field = field;
+      this.dropdownIsVisible = false;
     },
   },
 };
@@ -162,6 +204,55 @@ $searchBarSize: $base-space * 4;
     line-height: 1.4;
     @include input-placeholder {
       color: $black-37;
+    }
+  }
+  &__fields {
+    max-width: 30%;
+    border-left: 1px solid $black-37;
+    flex-shrink: 0;
+    &__header {
+      display: flex;
+      gap: $base-space;
+      align-items: center;
+      padding-left: $base-space;
+      min-width: 0;
+      &__text {
+        @include truncate;
+      }
+      &:hover {
+        cursor: pointer;
+        color: $black-87;
+      }
+      .svg-icon {
+        flex-shrink: 0;
+      }
+    }
+    &__content {
+      list-style: none;
+      padding: $base-space;
+      margin: 0;
+      li {
+        padding: $base-space;
+        border-radius: $border-radius-s;
+        transition: background-color 0.3s ease;
+        &:hover {
+          background: $black-4;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+      }
+      .button {
+        display: block;
+        max-width: 200px;
+        text-align: left;
+        padding: 0;
+        font-weight: normal;
+        @include truncate;
+      }
+    }
+    :deep(.dropdown__content) {
+      left: auto;
+      right: -$base-space;
     }
   }
 }
