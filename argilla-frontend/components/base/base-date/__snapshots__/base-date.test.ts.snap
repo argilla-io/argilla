@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Base Date should should format date correctly 1`] = `<span> 2023-07-19 00:00 </span>`;
+
+exports[`Base Date should should format day 1 second ago 1`] = `<span> 1 second ago </span>`;
+
+exports[`Base Date should should format day 2 days ago 1`] = `<span> 2 days ago </span>`;
+
+exports[`Base Date should should format day 2 hours ago 1`] = `<span> 2 hours ago </span>`;
+
+exports[`Base Date should should format day 2 months ago 1`] = `<span> 2 months ago </span>`;
+
+exports[`Base Date should should format day 2 seconds ago 1`] = `<span> 2 seconds ago </span>`;
+
+exports[`Base Date should should format day 2 weeks ago 1`] = `<span> 2 weeks ago </span>`;
+
+exports[`Base Date should should format day as yesterday 1`] = `<span> yesterday </span>`;
+
+exports[`Base Date should should format day last month 1`] = `<span> last month </span>`;
+
+exports[`Base Date should should format day last week 1`] = `<span> last week </span>`;
