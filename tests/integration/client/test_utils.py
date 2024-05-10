@@ -15,7 +15,6 @@
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla._version import version
 from argilla.client import singleton
 from argilla.client.utils import ServerInfo, server_info

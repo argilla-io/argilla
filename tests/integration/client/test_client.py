@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 import pytest
-
 from argilla.client.sdk.client import Client
 from argilla.client.singleton import active_api
 

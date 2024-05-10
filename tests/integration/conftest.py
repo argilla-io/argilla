@@ -20,15 +20,6 @@ from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 import httpx
 import pytest
 import pytest_asyncio
-from argilla_server import telemetry as server_telemetry
-from argilla_server.cli.database.migrate import migrate_db
-from argilla_server.database import get_async_db
-from argilla_server.models import User, UserRole, Workspace
-from argilla_server.settings import settings
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-
 from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla.client.api import log
 from argilla.client.apis.datasets import TextClassificationSettings
@@ -39,6 +30,15 @@ from argilla.client.sdk.users import api as users_api
 from argilla.client.singleton import ArgillaSingleton
 from argilla.datasets import configure_dataset
 from argilla.utils import telemetry as client_telemetry
+from argilla_server import telemetry as server_telemetry
+from argilla_server.cli.database.migrate import migrate_db
+from argilla_server.database import get_async_db
+from argilla_server.models import User, UserRole, Workspace
+from argilla_server.settings import settings
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
 from tests.factories import (
     AnnotatorFactory,
     OwnerFactory,

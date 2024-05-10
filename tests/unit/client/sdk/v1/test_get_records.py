@@ -15,7 +15,6 @@
 import uuid
 
 import httpx
-
 from argilla.client.sdk.v1.datasets.api import get_records
 
 

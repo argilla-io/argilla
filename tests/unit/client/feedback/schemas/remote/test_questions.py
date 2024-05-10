@@ -17,7 +17,6 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
-
 from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,

@@ -22,7 +22,6 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
-
 from argilla.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
@@ -31,6 +30,7 @@ from argilla.client.feedback.schemas import (
 from argilla.client.feedback.unification import LabelQuestionUnification
 from argilla.client.models import Framework
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+
 from tests.integration.client.feedback.helpers import (
     formatting_func_chat_completion,
     formatting_func_dpo,

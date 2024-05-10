@@ -12,11 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from argilla.client.sdk.users.models import UserModel as ClientUser
+from argilla.client.sdk.users.models import UserRole as ClientUserRole
 from argilla_server.models import UserRole as ServerUserRole
 from argilla_server.schemas.v0.users import User as ServerUser
 
-from argilla.client.sdk.users.models import UserModel as ClientUser
-from argilla.client.sdk.users.models import UserRole as ClientUserRole
 from tests.unit.client.sdk.models.conftest import Helpers
 
 

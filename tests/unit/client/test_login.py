@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-
 from argilla.client import login
 
 if TYPE_CHECKING:

@@ -16,13 +16,6 @@ import socket
 from datetime import datetime
 
 import pytest
-from argilla_server.apis.v0.models.token_classification import (
-    TokenClassificationBulkRequest as ServerTokenClassificationBulkData,
-)
-from argilla_server.apis.v0.models.token_classification import (
-    TokenClassificationQuery as ServerTokenClassificationQuery,
-)
-
 from argilla.client.models import TokenClassificationRecord
 from argilla.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
@@ -32,6 +25,12 @@ from argilla.client.sdk.token_classification.models import (
     TokenClassificationQuery,
 )
 from argilla.client.sdk.token_classification.models import TokenClassificationRecord as SdkTokenClassificationRecord
+from argilla_server.apis.v0.models.token_classification import (
+    TokenClassificationBulkRequest as ServerTokenClassificationBulkData,
+)
+from argilla_server.apis.v0.models.token_classification import (
+    TokenClassificationQuery as ServerTokenClassificationQuery,
+)
 
 
 def test_bulk_data_schema(helpers):

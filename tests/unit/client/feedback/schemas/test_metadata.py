@@ -15,7 +15,6 @@
 from typing import Any, Dict
 
 import pytest
-
 from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
 from argilla.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
@@ -25,6 +24,7 @@ from argilla.client.feedback.schemas.metadata import (
     TermsMetadataFilter,
     TermsMetadataProperty,
 )
+
 from tests.pydantic_v1 import ValidationError, create_model
 
 

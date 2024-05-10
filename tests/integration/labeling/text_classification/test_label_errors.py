@@ -16,8 +16,6 @@ import sys
 
 import cleanlab
 import pytest
-from pkg_resources import parse_version
-
 from argilla import User
 from argilla.client.api import delete, load, log
 from argilla.client.models import TextClassificationRecord
@@ -29,6 +27,7 @@ from argilla.labeling.text_classification.label_errors import (
     SortBy,
     _construct_s_and_psx,
 )
+from pkg_resources import parse_version
 
 
 @pytest.fixture(params=[False, True], ids=["single_label", "multi_label"], scope="module")

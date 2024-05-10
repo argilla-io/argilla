@@ -15,7 +15,6 @@
 from typing import Any, Dict
 
 import pytest
-
 from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
 from argilla.client.feedback.schemas.questions import (
     LabelQuestion,
@@ -27,6 +26,7 @@ from argilla.client.feedback.schemas.questions import (
     TextQuestion,
     _LabelQuestion,
 )
+
 from tests.pydantic_v1 import ValidationError
 
 

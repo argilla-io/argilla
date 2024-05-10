@@ -17,11 +17,10 @@ from typing import TYPE_CHECKING, Type
 import pytest
 
 if TYPE_CHECKING:
+    from argilla.client.users import User
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-
-    from argilla.client.users import User
 
 
 @pytest.mark.usefixtures("login_mock")

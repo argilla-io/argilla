@@ -14,10 +14,10 @@
 from time import sleep
 from typing import List, Union
 
-import pytest
-
 import argilla
+import pytest
 from argilla.client.models import TextClassificationRecord
+
 from tests.integration.utils import delete_ignoring_errors
 
 

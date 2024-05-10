@@ -15,14 +15,14 @@
 from typing import List
 
 import pytest
-from typing_extensions import TYPE_CHECKING
-
 from argilla import init
 from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
 from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
 from argilla.client.feedback.schemas.fields import TextField
 from argilla.client.feedback.schemas.questions import TextQuestion
 from argilla.client.feedback.schemas.records import FeedbackRecord
+from typing_extensions import TYPE_CHECKING
+
 from tests.factories import WorkspaceFactory
 
 if TYPE_CHECKING:
