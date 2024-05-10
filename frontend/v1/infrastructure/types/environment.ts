@@ -1,6 +1,6 @@
 export interface BackendEnvironment {
   argilla: {
-    show_huggingface_space_persistant_storage_warning: boolean;
+    show_huggingface_space_persistent_storage_warning: boolean;
   };
   huggingface: {
     space_id: string;
@@ -9,6 +9,6 @@ export interface BackendEnvironment {
     space_host: string;
     space_repo_name: string;
     space_author_name: string;
-    space_persistant_storage_enabled: boolean;
+    space_persistent_storage_enabled: boolean;
   };
 }
