@@ -19,7 +19,7 @@ on:
 
   release:
     types:
-      - "published"
+      - published
 
 jobs:
 
