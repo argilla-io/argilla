@@ -33,7 +33,7 @@ dependencies = [
     # monitoring
     "wrapt >= 1.14,< 1.15",
     # weaksupervision
-    "numpy < 1.24.0",
+    "numpy < 1.27.0",
     # for progressbars
     "tqdm >= 4.27.0",
     # monitor background consumers
