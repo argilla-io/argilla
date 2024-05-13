@@ -145,6 +145,8 @@ export default {
       }
     },
     applySearch() {
+      if (!this.isSearchActive) return;
+
       this.value.value = {
         ...this.value.value,
         text: this.searchValue,
@@ -167,6 +169,8 @@ export default {
     selectField(field) {
       this.value.value.field = field.name;
       this.dropdownIsVisible = false;
+
+      this.applySearch();
     },
   },
 };
@@ -259,6 +263,7 @@ $searchBarSize: $base-space * 4;
         }
       }
       .button {
+        text-transform: lowercase;
         display: block;
         max-width: 200px;
         text-align: left;
