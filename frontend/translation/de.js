@@ -15,6 +15,7 @@ export default {
   copyLink: "Link kopieren",
   refresh: "Refresh",
   typeYourText: "Type your text",
+  all: "Alle",
   sidebar: {
     progressTooltip: "Fortschritt",
     refreshTooltip: "Aktualisieren",

@@ -55,15 +55,17 @@
       <template slot="dropdown-header">
         <span class="search-area__fields__header">
           <span class="search-area__fields__header__text">{{
-            value.value.field
+            selectedField.title
           }}</span>
           <svgicon name="chevron-down" height="8" />
         </span>
       </template>
       <template slot="dropdown-content">
         <ul class="search-area__fields__content">
-          <li v-for="field in filteredFields" :key="field">
-            <BaseButton @on-click="selectField(field)">{{ field }}</BaseButton>
+          <li v-for="field in filteredFields" :key="field.id">
+            <BaseButton @on-click="selectField(field)">{{
+              field.title
+            }}</BaseButton>
           </li>
         </ul>
       </template>
@@ -73,7 +75,7 @@
 
 <script>
 export default {
-  name: "SearchBarComponent",
+  name: "SearchBarFilter",
   props: {
     value: {
       type: Object,
@@ -98,11 +100,25 @@ export default {
     showDelete() {
       return this.isSearchActive;
     },
+    selectedField() {
+      return this.fieldList.find(
+        (field) => field.name === this.value.value.field
+      );
+    },
     fieldList() {
-      return ["all", ...this.fields];
+      return [
+        {
+          id: "all",
+          name: "all",
+          title: this.$t("all"),
+        },
+        ...this.fields,
+      ];
     },
     filteredFields() {
-      return this.fieldList.filter((field) => field !== this.value.value.field);
+      return this.fieldList.filter(
+        (field) => field.name !== this.value.value.field
+      );
     },
   },
   watch: {
@@ -149,7 +165,7 @@ export default {
       this.dropdownIsVisible = value;
     },
     selectField(field) {
-      this.value.value.field = field;
+      this.value.value.field = field.name;
       this.dropdownIsVisible = false;
     },
   },
@@ -207,6 +223,7 @@ $searchBarSize: $base-space * 4;
     }
   }
   &__fields {
+    text-transform: lowercase;
     max-width: 30%;
     border-left: 1px solid $black-37;
     flex-shrink: 0;

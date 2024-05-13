@@ -1,7 +1,10 @@
 <template>
   <div class="filters__wrapper">
     <div class="filters">
-      <SearchBarBase v-model="recordCriteria.searchText" :fields="fields" />
+      <SearchBarFilter
+        v-model="recordCriteria.searchText"
+        :fields="datasetFields"
+      />
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
       <FilterButton
         v-if="isAnyAvailableFilter"
@@ -80,9 +83,6 @@ export default {
     },
     isSortedBy() {
       return this.recordCriteria.isSortedBy;
-    },
-    fields() {
-      return this.records.firstRecord.fields.map((f) => f.title);
     },
   },
   methods: {
