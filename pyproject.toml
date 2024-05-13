@@ -48,10 +48,10 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 server = [
-    "argilla-server@git+https://github.com/argilla-io/argilla-server.git#egg=feat/migrate-create-workspace-users-to-api-v1",
+    "argilla-server@git+https://github.com/argilla-io/argilla-server.git#egg=feat/move-api-v0-functionality-to-v1",
 ]
 server-postgresql = [
-    "argilla-server@git+https://github.com/argilla-io/argilla-server.git#egg=feat/migrate-create-workspace-users-to-api-v1[postgresql]",
+    "argilla-server@git+https://github.com/argilla-io/argilla-server.git#egg=feat/move-api-v0-functionality-to-v1[postgresql]",
 ]
 listeners = ["schedule ~= 1.1.0"]
 integrations = [

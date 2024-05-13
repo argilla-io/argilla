@@ -38,14 +38,14 @@ describe("useRunningEnvironment", () => {
           Promise.resolve(
             new Environment(
               {
-                showHuggingfaceSpacePersistantStorageWarning: false,
+                showHuggingfaceSpacePersistentStorageWarning: false,
               },
               {
                 spaceAuthorName: "USER_NAME_FAKE",
                 spaceRepoName: "AWESOME_SPACE",
                 spaceHost: "huggingface.co",
                 spaceId: "USER_NAME_FAKE/AWESOME_SPACE",
-                spacePersistantStorageEnabled: true,
+                spacePersistentStorageEnabled: true,
                 spaceSubdomain: "spaces",
                 spaceTitle: "AWESOME_SPACE",
               }
