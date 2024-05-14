@@ -30,7 +30,6 @@ from argilla.datasets import (
     load_dataset_settings,
 )
 from argilla_server.contexts import accounts
-from argilla_server.schemas.v0.workspaces import WorkspaceUserCreate
 
 from tests.integration.utils import delete_ignoring_errors
 
@@ -156,7 +155,7 @@ async def test_delete_dataset_by_non_creator(
     dataset = "test_delete_dataset_by_non_creator"
 
     for workspace in argilla_user.workspaces:
-        await accounts.create_workspace_user(db, WorkspaceUserCreate(user_id=mock_user.id, workspace_id=workspace.id))
+        await accounts.create_workspace_user(db, {"workspace_id": workspace.id, "user_id": mock_user.id})
 
     await db.refresh(mock_user, attribute_names=["workspaces"])
 
