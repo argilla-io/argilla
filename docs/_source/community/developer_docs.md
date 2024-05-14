@@ -14,7 +14,7 @@ Being a developer in Argilla means that you are a part of the Argilla community 
 
 - **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with `Vue.js` and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
-The Argilla repository has a mono repo structure, which means that all the components are in the same repository, and is divided into the following folders:
+The Argilla repository has a monorepo structure, which means that all the components live in the same repository: `argilla-io/argilla`. This repo is divided into the following folders:
 
 - `argilla`: The python SDK project
 - `argilla-frontend`: The Vue.js UI project
@@ -291,7 +291,7 @@ If you want to work on the frontend of Argilla, please visit the `argilla-fronte
 
 ## Make Your Contribution
 
-Now that everything is up and running, you can start to develop and contribute to Argilla! You can refer to our [contributer guide](/community/contributing.md) to have an understanding of how you can structure your contribution and upload it to the repository.
+Now that everything is up and running, you can start to develop and contribute to Argilla! You can refer to our [contributor guide](/community/contributing.md) to have an understanding of how you can structure your contribution and upload it to the repository.
 
 ### Run Tests
 
