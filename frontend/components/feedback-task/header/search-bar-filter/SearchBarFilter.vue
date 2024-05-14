@@ -234,7 +234,6 @@ $searchBarSize: $base-space * 4;
   }
   &__fields {
     display: none;
-    text-transform: lowercase;
     max-width: 30%;
     border-left: 1px solid $black-37;
     flex-shrink: 0;
@@ -246,6 +245,7 @@ $searchBarSize: $base-space * 4;
       min-width: 0;
       line-height: 1em;
       &__text {
+        font-weight: 500;
         @include truncate;
       }
       &:hover {
@@ -271,7 +271,6 @@ $searchBarSize: $base-space * 4;
         }
       }
       .button {
-        text-transform: lowercase;
         display: block;
         max-width: 200px;
         text-align: left;
@@ -281,8 +280,10 @@ $searchBarSize: $base-space * 4;
       }
     }
     :deep(.dropdown__content) {
+      min-width: 100%;
       left: auto;
-      right: -$base-space;
+      right: 0;
+      top: calc(100% + $base-space * 2);
     }
     :deep(.dropdown__header) {
       &:hover,
