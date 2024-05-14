@@ -26,7 +26,7 @@ declare namespace CSS {
   const highlights: {
     set(className: string, highlight: Highlight): void;
     delete(className: string): void;
-    clear(): void;
+    entries(): [string, Highlight][];
   };
 }
 
@@ -310,7 +310,10 @@ export class Highlighting {
       highlights[className].push(range);
     }
 
-    CSS.highlights.clear();
+    const entityCssKey = this.styles.entityCssKey;
+    CSS.highlights.entries().forEach(([key]) => {
+      if (key.startsWith(entityCssKey)) CSS.highlights.delete(key);
+    });
 
     for (const [entity, selections] of Object.entries(highlights)) {
       CSS.highlights.set(entity, new Highlight(...selections.flat()));

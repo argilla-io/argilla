@@ -21,7 +21,7 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="text_field_component__area --body1">
+    <div id="fields-content" class="text_field_component__area --body1">
       <p
         :class="[
           allowOverlapping
@@ -100,6 +100,10 @@ export default {
     spanQuestion: {
       type: Object,
       required: true,
+    },
+    searchText: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -270,5 +274,8 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+}
+::highlight(search-text-highlight) {
+  color: $highlight;
 }
 </style>

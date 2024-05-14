@@ -16,15 +16,16 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="content-area --body1">
-      <div :class="classes" v-if="!useMarkdown" v-html="text" />
-      <RenderMarkdownBaseComponent v-else :markdown="text" />
+    <div id="fields-content" class="content-area --body1">
+      <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
+      <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
     </div>
   </div>
 </template>
 
 <script>
 import { useTextFieldViewModel } from "./useTextFieldViewModel";
+
 export default {
   name: "TextFieldComponent",
   props: {
@@ -32,7 +33,7 @@ export default {
       type: String,
       required: true,
     },
-    stringToHighlight: {
+    searchText: {
       type: String,
       default: "",
     },
@@ -47,7 +48,7 @@ export default {
   },
   computed: {
     classes() {
-      return this.$language.isRTL(this.text) ? "--rtl" : "--ltr";
+      return this.$language.isRTL(this.fieldText) ? "--rtl" : "--ltr";
     },
   },
   setup(props) {
@@ -102,5 +103,9 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+::highlight(search-text-highlight) {
+  color: $highlight;
 }
 </style>
