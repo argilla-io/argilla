@@ -67,7 +67,7 @@ There are different options to get started:
 
 ## 🖥️ FRONTEND
 
--Before running Argilla frontend server, we need to install Node version 18:
+-Before running Argilla frontend server, you need to install Node version 18:
 
 ```bash
 -brew install node@18
