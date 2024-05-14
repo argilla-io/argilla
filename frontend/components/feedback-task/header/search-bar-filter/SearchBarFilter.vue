@@ -244,6 +244,7 @@ $searchBarSize: $base-space * 4;
       align-items: center;
       padding-inline: $base-space;
       min-width: 0;
+      line-height: 1em;
       &__text {
         @include truncate;
       }
