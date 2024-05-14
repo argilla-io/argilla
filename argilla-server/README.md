@@ -32,47 +32,21 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full
+data ownership, and overall efficiency**.
 
-This repository only contains developer info about the backend server. If you want to get started, we recommend taking a look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/).
+This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
+look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/).
 
-Are you a contributor or do you want to understand what is going on under the hood, please keep reading the documentation below.
-
-## Clone repository
-
-`argilla-server` is using `argilla` repository as submodule to build frontend statics so when cloning use the following command:
-
-```sh
-git clone --recurse-submodules git@github.com:argilla-io/argilla-server.git
-```
-
-If you already cloned the repository without using `--recurse-submodules` you can init and update the submodules with:
-
-```sh
-git submodule update --remote --recursive --init
-```
-
-> [!IMPORTANT]
-> By default `argilla` submodule is using `develop` branch so the previous command will get the latest commit from that branch.
-
-### Specify a tag for argilla submodule
-
-When doing a release we should change `argilla` submodule to use an specific tag. In the following example we are setting tag `v1.22.0`:
-
-```sh
-cd argilla
-git fetch --tags
-git checkout v1.22.0
-```
-
-> [!NOTE]
-> You should see some changes on the `argilla-server` root folder where the subproject commit is now changed to the one from the tag version. Feel free to commit these changes.
+Are you a contributor or do you want to understand what is going on under the hood, please keep reading the
+documentation below.
 
 ## Development environment
 
-By default all commands executed with `pdm run` will get environment variables from `.env.dev` except command `pdm test` that will overwrite some of them using values coming from `.env.test` file.
+By default all commands executed with `pdm run` will get environment variables from `.env.dev` except command `pdm test`
+that will overwrite some of them using values coming from `.env.test` file.
 
-These environment variables can be overrided if necessary so feel free to defined your own ones locally.
+These environment variables can be override if necessary so feel free to defined your own ones locally.
 
 ### Run cli
 
@@ -82,7 +56,8 @@ pdm cli
 
 ### Run database migrations
 
-By default a SQLite located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with the following custom PDM command:
+By default a SQLite located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with
+the following custom PDM command:
 
 ```sh
 pdm migrate
@@ -90,7 +65,8 @@ pdm migrate
 
 ### Run tests
 
-A SQLite database located at `~/.argilla/argilla-test.db` will be automatically created to run tests. You can run the entire test suite using the following custom PDM command:
+A SQLite database located at `~/.argilla/argilla-test.db` will be automatically created to run tests. You can run the
+entire test suite using the following custom PDM command:
 
 ```sh
 pdm test
@@ -98,21 +74,8 @@ pdm test
 
 ## Run development server
 
-### Build frontend static files
-
-Before running Argilla development server we need to build the frontend static files. Node version 18 is required for this action:
-
-```sh
-brew install node@18
-```
-
-After that you can build the frontend static files:
-
-```sh
-./scripts/build_frontend.sh
-```
-
-After running the previous script you should have a folder at `src/argilla_server/static` with all the frontend static files successfully generated.
+Note: If you need to run the frontend server you can follow the instructions at
+the [argilla-frontend](/argilla-frontend/README.md) project
 
 ### Run uvicorn development server
 
