@@ -29,6 +29,7 @@ import { GetDatasetProgressUseCase } from "@/v1/domain/usecases/get-dataset-prog
 import { DeleteDatasetUseCase } from "@/v1/domain/usecases/delete-dataset-use-case";
 import { GetRecordsByCriteriaUseCase } from "@/v1/domain/usecases/get-records-by-criteria-use-case";
 import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
+import { GetFieldsUseCase } from "@/v1/domain/usecases/get-fields-use-case";
 import { SubmitRecordUseCase } from "@/v1/domain/usecases/submit-record-use-case";
 import { SaveDraftUseCase } from "@/v1/domain/usecases/save-draft-use-case";
 import { BulkAnnotationUseCase } from "@/v1/domain/usecases/bulk-annotation-use-case";
@@ -92,6 +93,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(LoadRecordsToAnnotateUseCase)
       .withDependencies(GetRecordsByCriteriaUseCase, useRecords)
       .build(),
+
+    register(GetFieldsUseCase).withDependency(FieldRepository).build(),
 
     register(DiscardRecordUseCase)
       .withDependencies(RecordRepository, useEventDispatcher)

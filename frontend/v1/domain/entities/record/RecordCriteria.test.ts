@@ -421,7 +421,9 @@ describe("RecordCriteria", () => {
         ""
       );
 
-      criteria.searchText = "Can ML help to improve your business processes?";
+      criteria.searchText.complete(
+        "Can ML help to improve your business processes?"
+      );
 
       expect(criteria.hasChanges).toBe(true);
     });
@@ -503,7 +505,7 @@ describe("RecordCriteria", () => {
 
       criteria.page.goTo(2);
       criteria.status = "submitted";
-      criteria.searchText = "Love ML";
+      criteria.searchText.complete("Love ML");
       criteria.metadata.value = [
         { name: "metadata1", value: ["value1"] },
         { name: "metadata2", value: ["value2"] },
@@ -539,7 +541,7 @@ describe("RecordCriteria", () => {
 
       criteria.page.goTo(1);
       criteria.status = "discarded";
-      criteria.searchText = "Do you love AI?";
+      criteria.searchText.complete("Do you love AI?");
       criteria.metadata.complete("your_feel.sad");
       criteria.sortBy.complete("record.inserted_at.asc");
       criteria.similaritySearch.order = "least";
@@ -829,7 +831,9 @@ describe("RecordCriteria", () => {
 
       criteria.reset();
 
-      expect(criteria.searchText).toEqual("Can AI help us?");
+      expect(criteria.searchText).toEqual({
+        value: { field: "all", text: "Can AI help us?" },
+      });
     });
   });
 });
