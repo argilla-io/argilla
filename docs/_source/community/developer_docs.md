@@ -340,12 +340,12 @@ have a fresh and clean database to work with.
 
 ### Set up Argilla Server
 
-If you want to work on the server of Argilla, please visit the `argilla-server` [README.md](/argilla-server/README.md) 
+If you want to work on the server of Argilla, please visit the `argilla-server` [README.md](/argilla-server/README.md)
 file to see how to set up the server and run it on your local machine.
 
 ### Set up Argilla Frontend
 
-If you want to work on the frontend of Argilla, please visit the `argilla-frontend` [README.md](/argilla-frontend/README.md) 
+If you want to work on the frontend of Argilla, please visit the `argilla-frontend` [README.md](/argilla-frontend/README.md)
 file to see how to set up the frontend and run it on your local machine.
 
 ## Make Your Contribution
