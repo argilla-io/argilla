@@ -182,16 +182,11 @@ $searchBarSize: $base-space * 4;
   display: flex;
   align-items: center;
   gap: $base-space;
-  padding: 7px;
   max-height: $searchBarSize;
   max-width: $searchBarSize;
   border-radius: $border-radius-l;
   transition: all 0.3s ease;
   border: 1px solid transparent;
-  &:hover {
-    background: $black-4;
-    transition: all 0.3s ease;
-  }
   &.active,
   &.expanded {
     background: palette(white);
@@ -204,6 +199,9 @@ $searchBarSize: $base-space * 4;
   &.active,
   &.expanded {
     max-width: 100%;
+    .search-area__fields {
+      display: block;
+    }
   }
   &.expanded:focus-within,
   &.active {
@@ -212,8 +210,16 @@ $searchBarSize: $base-space * 4;
   &__icon.button {
     display: flex;
     flex-shrink: 0;
-    padding: 0;
+    padding: $base-space;
     color: $black-54;
+    &.--search {
+      border-radius: $border-radius-l;
+      &:hover {
+        background: $black-4;
+        color: $black-54;
+        transition: all 0.3s ease;
+      }
+    }
   }
   &__input {
     width: 100%;
@@ -227,6 +233,7 @@ $searchBarSize: $base-space * 4;
     }
   }
   &__fields {
+    display: none;
     text-transform: lowercase;
     max-width: 30%;
     border-left: 1px solid $black-37;
@@ -235,7 +242,7 @@ $searchBarSize: $base-space * 4;
       display: flex;
       gap: $base-space;
       align-items: center;
-      padding-left: $base-space;
+      padding-inline: $base-space;
       min-width: 0;
       &__text {
         @include truncate;
@@ -280,6 +287,6 @@ $searchBarSize: $base-space * 4;
 }
 .button[data-title] {
   overflow: visible;
-  @include tooltip-mini("top", 16px);
+  @include tooltip-mini("top", 8px);
 }
 </style>
