@@ -284,6 +284,12 @@ $searchBarSize: $base-space * 4;
       left: auto;
       right: -$base-space;
     }
+    :deep(.dropdown__header) {
+      &:hover,
+      &:focus {
+        background: none;
+      }
+    }
   }
 }
 .button[data-title] {
