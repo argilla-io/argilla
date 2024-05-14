@@ -30,11 +30,11 @@ is directly deployed alongside the Argilla Server within our Argilla Docker imag
 The Argilla repository has a monorepo structure, which means that all the components live in the same repository:
 `argilla-io/argilla`. This repo is divided into the following folders:
 
-- [`argilla`](argilla): The python SDK project
-- [`argilla-server`](argilla-server): The FastAPI server project
-- [`argilla-frontend`](argilla-frontend): The Vue.js UI project
-- [`docs`](docs): The documentation project
-- [`examples`](examples): Example resources for deployments, scripts and notebooks
+- [`argilla`](/argilla): The python SDK project
+- [`argilla-server`](/argilla-server): The FastAPI server project
+- [`argilla-frontend`](/argilla-frontend): The Vue.js UI project
+- [`docs`](/docs): The documentation project
+- [`examples`](/examples): Example resources for deployments, scripts and notebooks
 
 For a proper installation, you will need to:
 
@@ -340,12 +340,12 @@ have a fresh and clean database to work with.
 
 ### Set up Argilla Server
 
-If you want to work on the server of Argilla, please visit the `argilla-server` [README.md](argilla-server/README.md)
+If you want to work on the server of Argilla, please visit the `argilla-server` [README.md](/argilla-server/README.md) 
 file to see how to set up the server and run it on your local machine.
 
 ### Set up Argilla Frontend
 
-If you want to work on the frontend of Argilla, please visit the `argilla-frontend` [README.md](argilla-frontend/README.md)
+If you want to work on the frontend of Argilla, please visit the `argilla-frontend` [README.md](/argilla-frontend/README.md) 
 file to see how to set up the frontend and run it on your local machine.
 
 ## Make Your Contribution
