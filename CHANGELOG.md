@@ -20,6 +20,8 @@ These are the section headers that we use:
 
 ### Added
 
+-
+
 - Added suggestion multi score attribute. ([#4730](https://github.com/argilla-io/argilla/pull/4730))
 - Added order by suggestion first. ([#4731](https://github.com/argilla-io/argilla/pull/4731))
 - Added multi selection entity dropdown for span annotation overlap. ([#4735](https://github.com/argilla-io/argilla/pull/4735))
