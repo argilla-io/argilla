@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fix issue on character level ([#4836](https://github.com/argilla-io/argilla/pull/4836))
+
 ## [1.28.0](https://github.com/argilla-io/argilla/compare/v1.27.0...v1.28.0)
 
 ### Added
