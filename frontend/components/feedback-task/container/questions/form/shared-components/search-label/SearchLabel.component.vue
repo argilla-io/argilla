@@ -22,11 +22,7 @@
       @input="$emit('input', $event.target.value)"
       @keydown.arrow-up.prevent="looseFocus"
       @keydown.arrow-down.prevent="looseFocus"
-      @keydown.arrow-right.exact.stop=""
-      @keydown.arrow-left.exact.stop=""
-      @keydown.delete.exact.stop=""
-      @keydown.enter.exact.stop=""
-      @keydown.backspace.exact.stop=""
+      @keydown.stop=""
     />
     <BaseIconWithBadge
       v-if="value"
