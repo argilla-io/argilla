@@ -13,7 +13,11 @@
         @on-select-record="onSelectedRecord"
       />
       <div class="record__content">
-        <RecordFields :record="record" :fields="record.fields" />
+        <RecordFields
+          :record="record"
+          :fields="record.fields"
+          :recordCriteria="recordCriteria"
+        />
       </div>
     </div>
   </div>

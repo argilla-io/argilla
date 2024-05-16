@@ -1,5 +1,6 @@
 import Vue from "vue";
 import { onMounted, onUnmounted, ref, watch } from "vue-demi";
+import { useSearchTextHighlight } from "../useSearchTextHighlight";
 import { Highlighting, LoadedSpan, Position } from "./components/highlighting";
 import EntityComponent from "./components/EntityComponent.vue";
 import { Entity, Span } from "./components/span-selection";
@@ -10,10 +11,13 @@ import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 export const useSpanAnnotationTextFieldViewModel = ({
   spanQuestion,
   id,
+  searchText,
 }: {
   spanQuestion: Question;
   id: string;
+  searchText: string;
 }) => {
+  const searchTextHighlight = useSearchTextHighlight();
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
   const initialConfiguration = {
@@ -136,6 +140,14 @@ export const useSpanAnnotationTextFieldViewModel = ({
     }
   );
 
+  watch(
+    () => searchText,
+    (newValue) => {
+      const fieldContent = document.getElementById("fields-content");
+      searchTextHighlight.highlightText(fieldContent, newValue);
+    }
+  );
+
   onMounted(() => {
     const spans = convertResponseToSpans(spanQuestion.answer.valuesAnswered);
 
@@ -144,6 +156,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
     } catch {
       spanAnnotationSupported.value = false;
     }
+
+    const fieldContent = document.getElementById("fields-content");
+    searchTextHighlight.highlightText(fieldContent, searchText);
   });
 
   onUnmounted(() => {

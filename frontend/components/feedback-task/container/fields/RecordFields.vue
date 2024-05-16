@@ -8,13 +8,14 @@
         :title="title"
         :fieldText="content"
         :spanQuestion="getSpanQuestion(name)"
+        :searchText="recordCriteria.committed.searchText"
       />
       <TextFieldComponent
         v-else
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
-        :stringToHighlight="searchValue"
+        :searchText="recordCriteria.committed.searchText"
       />
     </div>
   </div>
@@ -29,6 +30,10 @@ export default {
       type: Array,
       required: true,
     },
+    recordCriteria: {
+      type: Object,
+      required: true,
+    },
   },
   methods: {
     getSpanQuestion(fieldName) {
@@ -41,9 +46,6 @@ export default {
   computed: {
     spanQuestions() {
       return this.record?.questions.filter((q) => q.isSpanType);
-    },
-    searchValue() {
-      return this.$route.query?._search ?? "";
     },
   },
 };
