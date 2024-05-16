@@ -40,7 +40,7 @@
             </Validation>
 
             <div
-              class="settings__edition-form__group --subcategories"
+              class="settings__edition-form__group"
               v-if="
                 question.isMultiLabelType ||
                 question.isSingleLabelType ||
@@ -213,10 +213,11 @@ export default {
       }
       @include media(">desktop") {
         :deep(label) {
-          min-width: 180px;
+          min-width: 140px;
         }
       }
       &.--subcategory {
+        margin-top: $base-space * 2;
         @include font-size(13px);
       }
     }
@@ -224,13 +225,11 @@ export default {
     &__slider {
       :deep(label) {
         color: $black-87;
-        line-height: 1;
-        margin-right: 1em;
       }
       @include media(">desktop") {
         :deep(label) {
-          min-width: 180px;
-          margin-right: 1em;
+          min-width: 140px;
+          margin-right: 1.5em;
         }
       }
       &.--subcategory {
@@ -247,25 +246,6 @@ export default {
       flex-direction: column;
       width: 100%;
       gap: 12px;
-
-      &.--subcategories {
-        & > label:first-child {
-          margin-bottom: $base-space * 2;
-        }
-        @include media(">desktop") {
-          gap: 0;
-        }
-      }
-
-      .--subcategory {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        @include media(">desktop") {
-          flex-wrap: nowrap;
-          height: 32px;
-        }
-      }
 
       & > label {
         width: fit-content;

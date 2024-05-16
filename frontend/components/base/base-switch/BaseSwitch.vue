@@ -34,7 +34,7 @@
           tabindex="-1"
         />
         <button :type="type" class="re-switch-holder">
-          <svgicon width="10" height="10" name="check" color="white"></svgicon>
+          <svgicon width="12" height="12" name="check" color="white"></svgicon>
         </button>
       </div>
     </div>
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-const checkedPosition = 70;
+const checkedPosition = 50;
 const initialPosition = "-1px";
 
 import "assets/icons/check";
@@ -117,9 +117,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$switch-width: 28px;
+$switch-width: 36px;
 $switch-height: 11px;
-$switch-thumb-size: 18px;
+$switch-thumb-size: 24px;
+$switch-ripple-size: 44px;
 .re-switch {
   display: flex;
   align-items: center;
@@ -129,13 +130,11 @@ $switch-thumb-size: 18px;
       display: none;
     }
     .re-switch-thumb {
-      background-color: #f0f0f0 !important;
+      background-color: palette(white) !important;
     }
   }
   &.disable-action {
     opacity: 0.5;
-    pointer-events: none;
-    cursor: default;
     .re-switch-thumb {
       background-color: palette(white) !important;
       transform: translate3d(-1px, -50%, 0px) !important;
@@ -152,9 +151,9 @@ $switch-thumb-size: 18px;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;
-    background-color: $black-20;
-    cursor: pointer;
+    background-color: palette(grey, 600);
     .re-switch-thumb {
+      box-shadow: $shadow;
       width: $switch-thumb-size;
       height: $switch-thumb-size;
       position: absolute;
@@ -170,14 +169,13 @@ $switch-thumb-size: 18px;
     }
     .re-switch-holder {
       @include absoluteCenter;
-      width: $switch-thumb-size;
-      height: $switch-thumb-size;
+      width: 40px;
+      height: 40px;
       margin: 0;
       padding: 0;
       z-index: 2;
       background: none;
       border: none;
-      cursor: pointer;
       &:focus {
         outline: none;
       }
@@ -186,6 +184,18 @@ $switch-thumb-size: 18px;
   .re-switch-label {
     margin-right: 1em;
     color: $black-54;
+  }
+}
+
+.re-switch.re-dragging {
+  .re-switch-thumb {
+    cursor: grabbing;
+  }
+}
+
+.re-switch.re-disabled {
+  .re-switch-thumb {
+    cursor: default;
   }
 }
 </style>

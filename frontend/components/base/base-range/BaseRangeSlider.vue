@@ -2,6 +2,7 @@
   <div>
     <label :for="id"><slot /></label>
     <div class="range__wrapper">
+      <span class="range__legend" v-text="min" />
       <div class="range">
         <span class="range__progress-value" ref="progress" v-text="range" />
         <input
@@ -14,10 +15,7 @@
           v-model.number="range"
         />
       </div>
-      <div class="range__legends">
-        <span v-text="min" />
-        <span v-text="max" />
-      </div>
+      <span class="range__legend" v-text="max" />
     </div>
   </div>
 </template>
@@ -67,7 +65,7 @@ export default {
       this.$refs.progress.style.left = `calc(${this.progress}% + (${
         8 - this.progress * 0.15
       }px))`;
-      this.$refs.slider.style.background = `linear-gradient(to right, #3e5cc9 ${this.progress}%, rgba(0, 0, 0, 0.2) ${this.progress}%)`;
+      this.$refs.slider.style.background = `linear-gradient(to right, #3e5cc9 ${this.progress}%, #ccc ${this.progress}%)`;
     },
   },
   created() {
@@ -80,7 +78,6 @@ export default {
 <style lang="scss" scoped>
 $slider-color: $primary-color;
 $slider-light-color: rgba(0, 26, 255, 0.1);
-$slider-thumb-size: 16px;
 label {
   width: fit-content;
   height: 14px;
@@ -93,14 +90,11 @@ label {
   min-width: 240px;
   &__wrapper {
     display: flex;
-    flex-direction: column;
+    gap: $base-space;
     align-items: center;
     margin-top: $base-space;
   }
-  &__legends {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
+  &__legend {
     color: $black-37;
     @include font-size(12px);
   }
@@ -141,8 +135,8 @@ label {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  height: $slider-thumb-size;
-  width: $slider-thumb-size;
+  height: 15px;
+  width: 15px;
   background-color: $slider-color;
   border-radius: 50%;
   border: none;
@@ -150,8 +144,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
-  height: $slider-thumb-size;
-  width: $slider-thumb-size;
+  height: 15px;
+  width: 15px;
   background-color: $slider-color;
   border-radius: 50%;
   border: none;
