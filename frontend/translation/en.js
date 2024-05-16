@@ -7,7 +7,6 @@ export default {
   minimize: "Minimize",
   select: "Select",
   search: "Search",
-  searchPlaceholder: "Introduce a query",
   searchDatasets: "Search datasets",
   expand: "Expand",
   copied: "Copied",
@@ -15,7 +14,6 @@ export default {
   copyLink: "Copy link",
   refresh: "Refresh",
   typeYourText: "Type your text",
-  all: "All",
   sidebar: {
     progressTooltip: "Progress",
     refreshTooltip: "Refresh",
