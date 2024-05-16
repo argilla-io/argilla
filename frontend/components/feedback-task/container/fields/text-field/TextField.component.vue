@@ -60,6 +60,9 @@ export default {
 <style lang="scss" scoped>
 .text_field_component {
   $this: &;
+  height: 88%;
+  width: 92%;
+  position: absolute;
   display: flex;
   flex-direction: column;
   gap: $base-space;

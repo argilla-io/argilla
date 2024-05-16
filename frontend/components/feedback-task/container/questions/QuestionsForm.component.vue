@@ -6,7 +6,7 @@
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
   >
-    <div class="questions-form__content">
+    <div class="questions-form__content" v-show="false">
       <div class="questions-form__header">
         <p class="questions-form__guidelines-link">
           <NuxtLink
@@ -28,44 +28,35 @@
         @on-focus="updateQuestionAutofocus"
       />
     </div>
-    <div class="footer-form">
+    <div v-if="isRunningTransition" class="commands">
+      <div class="commands__content">
+        <div>
+          <span class="font">Swipe left for Bad response</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotLeft" />
+            <span class="handIcon swipeLeft" />
+          </div>
+        </div>
+
+        <div>
+          <span class="font">Swipe up to Discard</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotUp" />
+            <span class="handIcon swipeUp" />
+          </div>
+        </div>
+
+        <div>
+          <span class="font">Swipe right for Right response</span>
+          <div class="commands__content--buttons">
+            <span class="dot swipeDotRight" />
+            <span class="handIcon swipeRight" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-form" v-show="false">
       <div class="footer-form__content">
-        <BaseButton
-          v-if="showDiscardButton || isDiscarding"
-          type="button"
-          class="button--discard"
-          :class="isDiscarding ? '--button--discarding' : null"
-          :loading="isDiscarding"
-          :loading-progress="progress"
-          :disabled="isDiscardDisabled || isSaving"
-          :data-title="!isSaving ? draftSavingTooltip : null"
-          @on-click="onDiscard"
-        >
-          <span
-            v-if="!isDiscarding"
-            class="button__shortcuts"
-            v-text="'⌫'"
-          /><span v-text="$t('questions_form.discard')" />
-        </BaseButton>
-        <BaseButton
-          type="button"
-          class="button--draft"
-          :class="isDraftSaving ? '--button--saving-draft' : null"
-          :loading="isDraftSaving"
-          :loading-progress="progress"
-          :disabled="isDraftSaveDisabled || isSaving"
-          :data-title="!isSaving ? draftSavingTooltip : null"
-          @on-click="onSaveDraft"
-        >
-          <span v-if="!isDraftSaving"
-            ><span
-              class="button__shortcuts"
-              v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
-              class="button__shortcuts"
-              v-text="'S'"
-          /></span>
-          <span v-text="$t('questions_form.draft')" />
-        </BaseButton>
         <BaseButton
           type="submit"
           class="button--submit"
@@ -74,7 +65,6 @@
             isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
           ]"
           :loading-progress="progress"
-          :loading="isSubmitting"
           :disabled="
             !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
           "
@@ -87,8 +77,48 @@
           "
           @on-click="onSubmit"
         >
-          <span v-if="!isSubmitting" class="button__shortcuts" v-text="'↵'" />
-          <span v-text="$t('questions_form.submit')" />
+          <span>Bad</span>
+          <span v-if="isRunningTransition" class="dot swipeDotLeft" />
+          <span v-if="isRunningTransition" class="handIcon swipeLeft" />
+        </BaseButton>
+        <BaseButton
+          v-if="showDiscardButton || isDiscarding"
+          type="button"
+          class="button--discard"
+          :class="isDiscarding ? '--button--discarding' : null"
+          :loading="isDiscarding"
+          :loading-progress="progress"
+          :disabled="isDiscardDisabled || isSaving"
+          :data-title="!isSaving ? draftSavingTooltip : null"
+          @on-click="onDiscard"
+        >
+          <span>Discard</span>
+          <span v-if="isRunningTransition" class="dot swipeDotUp" />
+          <span v-if="isRunningTransition" class="handIcon swipeUp" />
+        </BaseButton>
+        <BaseButton
+          type="submit"
+          class="button--submit"
+          :class="[
+            isSubmitting ? '--button--submitting' : null,
+            isDiscarding || isDraftSaving ? '--button--remove-bg' : null,
+          ]"
+          :loading-progress="progress"
+          :disabled="
+            !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
+          "
+          :data-title="
+            !isSaving
+              ? !questionAreCompletedCorrectly && !isSubmitDisabled
+                ? $t('to_submit_complete_required')
+                : submitTooltip
+              : null
+          "
+          @on-click="onSubmit"
+        >
+          <span>Good</span>
+          <span v-if="isRunningTransition" class="dot swipeDotRight" />
+          <span v-if="isRunningTransition" class="handIcon swipeRight" />
         </BaseButton>
       </div>
     </div>
@@ -168,6 +198,7 @@ export default {
   },
   data() {
     return {
+      isRunningTransition: window.isRunningTransition ?? true,
       autofocusPosition: 0,
       interactionCount: 0,
       isSubmittedTouched: false,
@@ -200,6 +231,9 @@ export default {
     },
   },
   watch: {
+    isRunningTransition() {
+      window.isRunningTransition = this.isRunningTransition;
+    },
     record: {
       deep: true,
       immediate: true,
@@ -211,6 +245,14 @@ export default {
   },
   mounted() {
     document.addEventListener("keydown", this.handleGlobalKeys);
+
+    setTimeout(() => {
+      this.isRunningTransition = false;
+    }, 4500);
+
+    this.$root.$on("swipeLeft", () => this.onSubmit());
+    this.$root.$on("swipeRight", () => this.onSubmit());
+    this.$root.$on("swipeUp", () => this.onDiscard());
   },
   destroyed() {
     document.removeEventListener("keydown", this.handleGlobalKeys);
@@ -317,7 +359,6 @@ export default {
 .questions-form {
   display: flex;
   flex-direction: column;
-  flex-basis: clamp(33%, 520px, 40%);
   gap: $base-space;
   max-height: 100%;
   min-width: 0;
@@ -404,6 +445,7 @@ export default {
 }
 
 .button {
+  @include font-size(16px);
   &__shortcuts {
     display: inline-flex;
     align-items: center;
@@ -418,7 +460,6 @@ export default {
     box-sizing: content-box;
     color: $black-87;
     background: palette(white);
-    @include font-size(11px);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Open Sans", "Helvetica Neue", sans-serif;
     padding: 0 4px;
@@ -435,7 +476,7 @@ export default {
     width: 100%;
     justify-content: center;
     color: $black-87;
-    min-height: $base-space * 6;
+    min-height: $base-space * 10;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
     &:hover {
@@ -451,12 +492,7 @@ export default {
     }
   }
   &--submit {
-    &:not([disabled]) {
-      background: $submitted-color-light;
-    }
-    &:hover:not([disabled]) {
-      background: darken($submitted-color-light, 2%);
-    }
+    background: darken($submitted-color-light, 2%);
     &:active:not([disabled]),
     &.--button--submitting,
     &.--button--submitting:hover {
@@ -467,9 +503,7 @@ export default {
     }
   }
   &--draft {
-    &:hover:not([disabled]) {
-      background: $draft-color-light;
-    }
+    background: $draft-color-light;
     &:active:not([disabled]),
     &.--button--saving-draft,
     &.--button--saving-draft:hover {
@@ -477,9 +511,7 @@ export default {
     }
   }
   &--discard {
-    &:hover:not([disabled]) {
-      background: $discarded-color-light;
-    }
+    background: $discarded-color-light;
     &:active:not([disabled]),
     &.--button--discarding,
     &.--button--discarding:hover {
@@ -500,6 +532,160 @@ export default {
     &--draft,
     &--discard {
       flex-direction: column;
+    }
+  }
+}
+
+.dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: rgba(149, 147, 241, 0.8);
+  border-radius: 40px;
+  left: 40px;
+  visibility: hidden;
+}
+
+.handIcon {
+  background-image: url("https://i.postimg.cc/8556gm60/hand.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 50px;
+  height: 50px;
+  transform-origin: 52% 62%;
+}
+
+.swipeDotLeft {
+  animation: swipeDotLeft 2s 0.5s infinite;
+}
+.swipeLeft {
+  animation: swipeHandLeft 2s infinite;
+}
+
+.swipeDotRight {
+  animation: swipeDotRight 2s 0.5s infinite;
+}
+.swipeRight {
+  animation: swipeHandRight 2s infinite;
+}
+
+.swipeDotUp {
+  animation: swipeDotUp 2s 0.5s infinite;
+}
+.swipeUp {
+  animation: swipeHandUp 2s infinite;
+}
+
+@keyframes swipeHandLeft {
+  25% {
+    transform: translate(20px) rotate(30deg);
+  }
+  50% {
+    transform: translate(-20px) rotate(-15deg);
+  }
+  100% {
+    transform: translate(0px) rotate(0);
+  }
+}
+
+@keyframes swipeDotLeft {
+  12% {
+    visibility: visible;
+    width: 40px;
+  }
+  25% {
+    visibility: visible;
+    transform: translate(-65px);
+    width: 20px;
+  }
+  26% {
+    visibility: hidden;
+  }
+}
+
+@keyframes swipeHandRight {
+  25% {
+    transform: translate(-20px) rotate(-15deg);
+  }
+  50% {
+    transform: translate(20px) rotate(30deg);
+  }
+  100% {
+    transform: translate(0px) rotate(0);
+  }
+}
+
+@keyframes swipeDotRight {
+  0% {
+    transform: translate(-40px);
+    width: 20px;
+  }
+  25% {
+    width: 50px;
+    visibility: visible;
+  }
+  26% {
+    visibility: hidden;
+  }
+}
+
+@keyframes swipeHandUp {
+  0% {
+    transform: translate(-20px) rotate(90deg) translateX(20px);
+  }
+  100% {
+    transform: translate(-20px) rotate(60deg) translateX(-15px);
+  }
+}
+
+@keyframes swipeDotUp {
+  0% {
+    transform: translate(-20px) translateY(30px);
+    height: 20px;
+  }
+  25% {
+    transform: translate(-20px) translateY(-5px);
+    height: 45px;
+    visibility: visible;
+  }
+  26% {
+    transform: translate(-20px) translateY(-5px);
+    visibility: hidden;
+  }
+}
+
+.font {
+  color: white;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.commands {
+  background: rgba(149, 147, 241, 0.5);
+  position: absolute;
+  width: 110vw;
+  left: -20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  top: 0;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    height: 70%;
+    width: 100%;
+
+    &--buttons {
+      margin-top: 20px;
+      margin-left: 30%;
+      position: relative;
+      display: flex;
+      gap: 1em;
     }
   }
 }

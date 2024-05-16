@@ -20,6 +20,7 @@
       </div>
       <Record
         v-if="records.hasRecordsToAnnotate"
+        :class="swipeClass"
         :datasetVectors="datasetVectors"
         :recordCriteria="recordCriteria"
         :record="record"
@@ -90,6 +91,34 @@ export default {
       await this.saveAsDraft(this.record);
     },
   },
+  data() {
+    return {
+      swipeClass: "",
+    };
+  },
+  mounted() {
+    this.$root.$on("swipeLeft", () => {
+      this.swipeClass = "swipeLeft";
+
+      setTimeout(() => {
+        this.swipeClass = "";
+      }, 500);
+    });
+    this.$root.$on("swipeRight", () => {
+      this.swipeClass = "swipeRight";
+
+      setTimeout(() => {
+        this.swipeClass = "";
+      }, 500);
+    });
+    this.$root.$on("swipeUp", () => {
+      this.swipeClass = "swipeUp";
+
+      setTimeout(() => {
+        this.swipeClass = "";
+      }, 500);
+    });
+  },
   setup() {
     return useFocusAnnotationViewModel();
   },
@@ -97,8 +126,74 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.swipeLeft {
+  animation: swipeLeft 0.5s ease-in-out forwards;
+}
+.swipeRight {
+  animation: swipeRight 0.5s ease-in-out forwards;
+}
+.swipeUp {
+  animation: swipeUp 0.5s ease-in-out forwards;
+}
+
+@keyframes swipeUp {
+  0% {
+    transform: translateY(-20px);
+  }
+  25% {
+    transform: translateY(-10vh);
+  }
+  50% {
+    transform: translateY(-30vh);
+  }
+  75% {
+    transform: translateY(-60vh);
+  }
+  100% {
+    transform: translateY(-100vh);
+  }
+}
+
+@keyframes swipeRight {
+  0% {
+    transform: rotate(10deg) translate(10vw);
+  }
+  25% {
+    transform: rotate(20deg) translate(30vw);
+  }
+  50% {
+    transform: rotate(20deg) translate(60vw);
+  }
+  75% {
+    transform: rotate(70deg) translate(80vw);
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+
+@keyframes swipeLeft {
+  0% {
+    transform: rotate(-10deg) translate(-10vw);
+  }
+  25% {
+    transform: rotate(-20deg) translate(-30vw);
+  }
+  50% {
+    transform: rotate(-20deg) translate(-60vw);
+  }
+  75% {
+    transform: rotate(-70deg) translate(-80vw);
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+
 .wrapper {
+  overflow: hidden;
   position: relative;
+  flex-direction: column;
   display: flex;
   flex-wrap: wrap;
   height: 100%;
@@ -106,7 +201,7 @@ export default {
   padding: $base-space * 2;
   @include media("<desktop") {
     flex-flow: column;
-    overflow: auto;
+    overflow: hidden;
   }
   &__records,
   &__form {
@@ -124,7 +219,7 @@ export default {
     height: 100%;
     min-width: 0;
     @include media("<desktop") {
-      flex: 0;
+      flex: 1;
       height: auto;
     }
     &__header {
