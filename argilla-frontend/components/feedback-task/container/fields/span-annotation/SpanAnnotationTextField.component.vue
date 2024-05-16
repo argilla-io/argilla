@@ -21,7 +21,7 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div class="text_field_component__area --body1">
+    <div id="fields-content" class="text_field_component__area --body1">
       <p
         :class="[
           allowOverlapping
@@ -36,8 +36,6 @@
         @mousedown="onMouseDown"
         @mouseup="onMouseUp"
         @mousemove="onMouseMove"
-        @keydown="onKeyDown"
-        @keyup="onKeyUp"
       />
       <SpanAnnotationCursor
         v-if="hasSelectedEntity"
@@ -100,6 +98,10 @@ export default {
     spanQuestion: {
       type: Object,
       required: true,
+    },
+    searchText: {
+      type: String,
+      default: "",
     },
   },
   data() {
@@ -177,15 +179,23 @@ export default {
       }, 500);
     },
     onKeyDown(event) {
-      if (!this.spanQuestion.settings.allow_character_annotation) return;
-
       this.keyPressing(event, true);
     },
     onKeyUp(event) {
-      if (!this.spanQuestion.settings.allow_character_annotation) return;
-
       this.keyPressing(event, false);
     },
+  },
+  mounted() {
+    if (!this.spanQuestion.settings.allow_character_annotation) return;
+
+    document.addEventListener("keydown", this.onKeyDown);
+    document.addEventListener("keyup", this.onKeyUp);
+  },
+  beforeDestroy() {
+    if (!this.spanQuestion.settings.allow_character_annotation) return;
+
+    document.removeEventListener("keydown", this.onKeyDown);
+    document.removeEventListener("keyup", this.onKeyUp);
   },
   setup(props) {
     return useSpanAnnotationTextFieldViewModel(props);
@@ -270,5 +280,8 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
+}
+::highlight(search-text-highlight) {
+  color: $highlight;
 }
 </style>

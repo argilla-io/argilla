@@ -220,7 +220,7 @@ export class SpanSelection {
       if (
         this.isEmpty(nextCharacter) ||
         this.isSymbol(nextCharacter) ||
-        selection.to === selection.node.text.length - 1
+        selection.to === selection.node.text.length
       ) {
         break;
       }

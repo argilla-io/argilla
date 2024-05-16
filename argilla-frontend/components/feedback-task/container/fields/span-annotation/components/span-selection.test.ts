@@ -55,6 +55,10 @@ const DUMMY_TEXT = `What is Lorem Ipsum? Lorem Ipsum is simply dummy text of the
       Cicero are also reproduced in their exact original form, accompanied by
       English versions from the 1914 translation by H. Rackham.`;
 
+const ISSUES = {
+  NOT_SELECTING_WHOLE_WORD: "Apple10dollars",
+};
+
 type TestSelection = {
   from: number;
   to: number;
@@ -66,7 +70,10 @@ const node = {
   textContent: DUMMY_TEXT,
 } as HTMLElement;
 
-const createTextSelection = (selection: TestSelection): TextSelection => {
+const createTextSelection = (
+  selection: TestSelection,
+  nodeSelecting: HTMLElement = node
+): TextSelection => {
   return {
     from: selection.from,
     to: selection.to,
@@ -75,15 +82,16 @@ const createTextSelection = (selection: TestSelection): TextSelection => {
       id: selection.entity,
     },
     node: {
-      element: node,
+      element: nodeSelecting,
       id: "node-id",
-      text: DUMMY_TEXT,
+      text: nodeSelecting.textContent,
     },
   };
 };
 
 const createSpan = (
-  selection: TestSelection & { level?: number }
+  selection: TestSelection & { level?: number },
+  nodeSelecting: HTMLElement = node
 ): OverlappedSpan => {
   const level = selection.level || 1;
 
@@ -95,7 +103,7 @@ const createSpan = (
       id: selection.entity,
     },
     node: {
-      element: node,
+      element: nodeSelecting,
       id: "node-id",
     },
     overlap: {
@@ -488,6 +496,39 @@ describe("Span Selection", () => {
         spanSelection.addSpan(textSelection1);
 
         expect(spanSelection.spans).toEqual([]);
+      });
+    });
+
+    describe("Unexpected issues", () => {
+      test("should select whole word", () => {
+        const node = {
+          textContent: ISSUES.NOT_SELECTING_WHOLE_WORD,
+        } as HTMLElement;
+
+        const spanSelection = new SpanSelection();
+        const textSelection = createTextSelection(
+          {
+            from: 0,
+            to: 5,
+            text: "Apple",
+            entity: "TOKEN",
+          },
+          node
+        );
+
+        const expectedSpan = createSpan(
+          {
+            from: 0,
+            to: 14,
+            text: ISSUES.NOT_SELECTING_WHOLE_WORD,
+            entity: "TOKEN",
+          },
+          node
+        );
+
+        spanSelection.addSpan(textSelection);
+
+        expect(spanSelection.spans[0]).toEqual(expectedSpan);
       });
     });
   });
