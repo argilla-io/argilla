@@ -53,7 +53,9 @@ https://github.com/argilla-io/argilla/assets/1107111/49e28d64-9799-4cac-be49-19d
 
 ## 🚀 Quickstart
 
-Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
+Argilla is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models
+through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle,
+from data labeling to model monitoring.
 
 There are different options to get started:
 
@@ -64,6 +66,12 @@ There are different options to get started:
 3. Skip some steps with our [cheatsheet](#🎼-cheatsheet) 🎼
 
 ## 🖥️ FRONTEND
+
+- Before running Argilla frontend server, you need to install Node version 18:
+
+```bash
+brew install node@18
+```
 
 <h3>💣 Install dependencies</h3>
 
@@ -89,17 +97,33 @@ npm run generate
 
 ## 📏 Principles
 
-- **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers, spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without implementing any specific interface.
+- **Open**: Argilla is free, open-source, and 100% compatible with major NLP libraries (Hugging Face transformers,
+  spaCy, Stanford Stanza, Flair, etc.). In fact, you can **use and combine your preferred libraries** without
+  implementing any specific interface.
 
-- **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model goes into production, you want to monitor and analyze its predictions and collect more data to improve your model over time. Argilla is designed to close this gap, enabling you to **iterate as much as you need**.
+- **End-to-end**: Most annotation tools treat data collection as a one-off activity at the beginning of each project. In
+  real-world projects, data collection is a key activity of the iterative process of ML model development. Once a model
+  goes into production, you want to monitor and analyze its predictions and collect more data to improve your model over
+  time. Argilla is designed to close this gap, enabling you to **iterate as much as you need**.
 
-- **User and Developer Experience**: The key to sustainable NLP solutions are to make it easier for everyone to contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_ should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Argilla optimizes the experience for these core users to **make your teams more productive**.
+- **User and Developer Experience**: The key to sustainable NLP solutions are to make it easier for everyone to
+  contribute to projects. _Domain experts_ should feel comfortable interpreting and annotating data. _Data scientists_
+  should feel free to experiment and iterate. _Engineers_ should feel in control of data pipelines. Argilla optimizes
+  the experience for these core users to **make your teams more productive**.
 
-- **Beyond hand-labeling**: Classical hand-labeling workflows are costly and inefficient, but having humans in the loop is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision in **novel** data annotation workflows\*\*.
+- **Beyond hand-labeling**: Classical hand-labeling workflows are costly and inefficient, but having humans in the loop
+  is essential. Easily combine hand-labeling with active learning, bulk-labeling, zero-shot models, and weak supervision
+  in **novel** data annotation workflows\*\*.
 
 ## 🫱🏾‍🫲🏼 Contribute
 
-We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
+We love contributors and have launched
+a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very
+own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we
+have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html)
+and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can
+always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they
+can get you up to speed.
 
 ## 🥇 Contributors
 
@@ -111,4 +135,5 @@ We love contributors and have launched a [collaboration with JustDiggit](https:/
 
 ## 🗺️ Roadmap
 
-We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
+We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and
+we love to discuss those with our community. Feel encouraged to participate.
