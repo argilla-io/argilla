@@ -333,7 +333,6 @@ class Argilla:
         if workspace is not None:
             self.set_workspace(workspace)
 
-        _LOGGER.info(f"Dataset {name} is being delete by {self._user.id}")
         datasets_api.delete_dataset(client=self.http_client, name=name)
 
     def log(
