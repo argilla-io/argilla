@@ -32,7 +32,7 @@ export default {
 
   &__content {
     flex: 1;
-    max-width: 800px;
+    max-width: 1000px;
     padding-top: $base-space;
   }
 }

@@ -7,7 +7,6 @@ export default {
   minimize: "Minimieren",
   select: "Auswählen",
   search: "Suchen",
-  searchPlaceholder: "Eingabe einer Abfrage",
   searchDatasets: "Durchsuche Datensätze",
   expand: "Erweitern",
   copied: "Kopiert",
@@ -15,7 +14,6 @@ export default {
   copyLink: "Link kopieren",
   refresh: "Refresh",
   typeYourText: "Type your text",
-  all: "Alle",
   sidebar: {
     progressTooltip: "Fortschritt",
     refreshTooltip: "Aktualisieren",

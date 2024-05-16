@@ -112,7 +112,6 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 800px;
   .dataset-description {
     display: flex;
     align-items: center;
