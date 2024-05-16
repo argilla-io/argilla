@@ -8,14 +8,14 @@
         :title="title"
         :fieldText="content"
         :spanQuestion="getSpanQuestion(name)"
-        :searchText="recordCriteria.committed.searchText"
+        :searchText="recordCriteria.committed.searchText.value.text"
       />
       <TextFieldComponent
         v-else
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
-        :searchText="recordCriteria.committed.searchText"
+        :searchText="recordCriteria.committed.searchText.value.text"
       />
     </div>
   </div>
