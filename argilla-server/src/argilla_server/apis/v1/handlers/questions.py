@@ -1,0 +1,74 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Security, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import argilla_server.errors.future as errors
+from argilla_server.contexts import questions
+from argilla_server.database import get_async_db
+from argilla_server.models import Question, User
+from argilla_server.policies import QuestionPolicyV1, authorize
+from argilla_server.schemas.v1.questions import Question as QuestionSchema
+from argilla_server.schemas.v1.questions import QuestionUpdate
+from argilla_server.security import auth
+from argilla_server.validators.questions import InvalidQuestionSettings
+
+router = APIRouter(tags=["questions"])
+
+
+async def _get_question(db: "AsyncSession", question_id: UUID) -> Question:
+    question = await questions.get_question_by_id(db, question_id)
+    if not question:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with id `{question_id}` not found",
+        )
+    return question
+
+
+@router.patch("/questions/{question_id}", response_model=QuestionSchema)
+async def update_question(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    question_id: UUID,
+    question_update: QuestionUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    try:
+        return await questions.update_question(db, question_id, question_update, current_user)
+    except errors.NotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Question with id `{question_id}` not found")
+    except InvalidQuestionSettings as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+
+@router.delete("/questions/{question_id}", response_model=QuestionSchema)
+async def delete_question(
+    *, db: AsyncSession = Depends(get_async_db), question_id: UUID, current_user: User = Security(auth.get_current_user)
+):
+    question = await _get_question(db, question_id)
+
+    await authorize(current_user, QuestionPolicyV1.delete(question))
+
+    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
+    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
+    try:
+        await questions.delete_question(db, question)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+
+    return question

@@ -1,0 +1,36 @@
+name: Teardown all the PR environments
+
+on:
+  schedule:
+    - cron: "0 8,20 * * *" # every day at 8:00 and 20:00 UTC
+
+jobs:
+  teardown_pr_environments:
+    name: Teardown Cloud Run PR environments
+    runs-on: ubuntu-latest
+
+    # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WIP }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: ">= 435.0.0"
+
+      - name: Remove running PR environments
+        run: |
+          services=$(gcloud run services list --project=argilla-ci --format="value(metadata.name)")
+          for service in $services; do
+            gcloud run services delete $service --project=argilla-ci --region=europe-southwest1 --quiet
+          done
