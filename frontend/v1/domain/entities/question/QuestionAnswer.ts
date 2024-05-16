@@ -60,7 +60,7 @@ type Option = {
 
 export class SpanQuestionAnswer extends QuestionAnswer {
   public readonly options: Option[] = [];
-  public values: SpanAnswer[] = [];
+  private values: SpanAnswer[] = [];
 
   constructor(
     public readonly type: QuestionType,

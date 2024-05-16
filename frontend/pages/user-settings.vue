@@ -1,5 +1,5 @@
 <template>
-  <InternalPage>
+  <HeaderAndTopAndTwoColumns>
     <template v-slot:header>
       <HeaderFeedbackTaskComponent
         :breadcrumbs="[
@@ -8,22 +8,22 @@
         ]"
       />
     </template>
-    <template v-slot:page-header>
-      <UserSettingsHeader />
+    <template v-slot:top>
+      <TopUserSettingsContent />
     </template>
-    <template v-slot:page-content>
-      <UserSettingsContent />
+    <template v-slot:left>
+      <LeftUserSettingsContent />
     </template>
-  </InternalPage>
+  </HeaderAndTopAndTwoColumns>
 </template>
 
 <script>
-import InternalPage from "@/layouts/InternalPage";
+import HeaderAndTopAndTwoColumns from "@/layouts/HeaderAndTopAndTwoColumns";
 
 export default {
   name: "UserSettingsPage",
   components: {
-    InternalPage,
+    HeaderAndTopAndTwoColumns,
   },
 };
 </script>

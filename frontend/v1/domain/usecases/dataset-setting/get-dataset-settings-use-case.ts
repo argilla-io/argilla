@@ -2,7 +2,6 @@ import { DatasetSetting } from "../../entities/dataset/DatasetSetting";
 import { Field } from "../../entities/field/Field";
 import { Metadata } from "../../entities/metadata/Metadata";
 import { Question } from "../../entities/question/Question";
-import { Suggestion } from "../../entities/question/Suggestion";
 import { Vector } from "../../entities/vector/Vector";
 import { IDatasetRepository } from "../../services/IDatasetRepository";
 import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
@@ -77,12 +76,9 @@ export class GetDatasetSettingsUseCase {
         datasetId,
         question.title,
         question.required,
-
         question.settings
       );
     });
-
-    this.setUpFakeSuggestion(questions);
 
     const fields = backendFields.map((field) => {
       return new Field(
@@ -124,24 +120,5 @@ export class GetDatasetSettingsUseCase {
       vectors,
       metadataProperties
     );
-  }
-
-  private setUpFakeSuggestion(questions: Question[]) {
-    for (const question of questions) {
-      if (!question.isMultiLabelType) continue;
-
-      if (question.settings.options.length > 3) {
-        const suggestion = new Suggestion(
-          question.id,
-          question.id,
-          question.type,
-          question.settings.options.map((o) => o.value).slice(0, 2),
-          [0.5, 0.7],
-          "system"
-        );
-        question.addSuggestion(suggestion);
-        question.response(suggestion);
-      }
-    }
   }
 }
