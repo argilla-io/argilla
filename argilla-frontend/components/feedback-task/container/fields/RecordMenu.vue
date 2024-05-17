@@ -1,0 +1,109 @@
+<template>
+  <div class="record-menu">
+    <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
+      <template slot="dropdown-header">
+        <BaseButton class="record-menu__header">
+          <svgicon name="kebab" width="20" height="20" />
+        </BaseButton>
+      </template>
+      <template slot="dropdown-content">
+        <RecordMetadataInfo v-if="visibleMetadataInfo" :record="record" />
+        <ul v-else class="record-menu__content">
+          <li>
+            <BaseButton @on-click="viewMetadata">
+              {{ $t("viewMetadata") }}
+            </BaseButton>
+          </li>
+          <li>
+            <BaseButton @on-click="copyRecord">
+              {{ $t("copyRecord") }}
+            </BaseButton>
+          </li>
+        </ul>
+      </template>
+    </BaseDropdown>
+  </div>
+</template>
+
+<script>
+import "assets/icons/kebab";
+export default {
+  props: {
+    record: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      dropdownIsVisible: false,
+      visibleMetadataInfo: false,
+    };
+  },
+  methods: {
+    viewMetadata() {
+      this.visibleMetadataInfo = true;
+      console.log("viewMetadata", this.record);
+    },
+    copyRecord() {
+      this.dropdownIsVisible = false;
+      this.$copyToClipboard(
+        this.record.fields
+          .map((field) => `${field.title}\n${field.content}`)
+          .join("\n")
+      );
+    },
+    onVisibility(isVisible) {
+      this.visibleMetadataInfo = false;
+      this.dropdownIsVisible = isVisible;
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.record-menu {
+  &__header {
+    padding: 0;
+    color: $black-54;
+    &:hover {
+      color: $black-87;
+    }
+  }
+  &__content {
+    list-style: none;
+    padding: $base-space;
+    margin: 0;
+    li {
+      padding: $base-space;
+      border-radius: $border-radius-s;
+      transition: background-color 0.3s ease;
+      &:hover {
+        background: $black-4;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+    }
+    .button {
+      display: block;
+      max-width: 200px;
+      text-align: left;
+      padding: 0;
+      font-weight: normal;
+      @include truncate;
+    }
+  }
+  :deep(.dropdown__content) {
+    min-width: 100%;
+    left: auto;
+    right: 0;
+    top: calc(100% + $base-space * 2);
+  }
+  //   :deep(.dropdown__header) {
+  //     &:hover,
+  //     &:focus {
+  //       background: none;
+  //     }
+  //   }
+}
+</style>
