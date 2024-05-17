@@ -29,7 +29,7 @@ from starlette.responses import RedirectResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
-from argilla_server.apis.routes import api_v0, api_v1
+from argilla_server.apis.routes import api_v1
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
 from argilla_server.daos.backend import GenericElasticEngineBackend
@@ -60,11 +60,11 @@ def create_server_app() -> FastAPI:
 
     @app.get("/docs", include_in_schema=False)
     async def redirect_docs():
-        return RedirectResponse(url=f"{settings.base_url}api/docs")
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
     @app.get("/api", include_in_schema=False)
     async def redirect_api():
-        return RedirectResponse(url=f"{settings.base_url}api/docs")
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
     for app_configure in [
         configure_app_logging,
@@ -105,7 +105,6 @@ def configure_middleware(app: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.mount("/api/v1", api_v1)
-    app.mount("/api", api_v0)
 
 
 def configure_app_statics(app: FastAPI):

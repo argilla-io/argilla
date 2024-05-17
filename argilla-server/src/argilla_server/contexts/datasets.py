@@ -49,11 +49,11 @@ from argilla_server.models import (
     Response,
     ResponseStatus,
     Suggestion,
+    User,
     Vector,
     VectorSettings,
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
-from argilla_server.schemas.v0.users import User
 from argilla_server.schemas.v1.datasets import (
     DatasetCreate,
     DatasetProgress,
@@ -415,7 +415,9 @@ async def get_records_by_ids(
     return ordered_records
 
 
-async def _configure_query_relationships(query: Select, dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None) -> Select:
+async def _configure_query_relationships(
+    query: Select, dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
+) -> Select:
     if not include_params:
         return query
 

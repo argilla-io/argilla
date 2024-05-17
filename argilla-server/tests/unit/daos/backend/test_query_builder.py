@@ -13,8 +13,6 @@
 #  limitations under the License.
 
 import pytest
-from argilla_server.apis.v0.models.commons.model import ScoreRange
-from argilla_server.apis.v0.models.text_classification import TextClassificationQuery
 from argilla_server.daos.backend.search.model import (
     SortableField,
     SortConfig,
@@ -93,23 +91,3 @@ def test_build_sort_without_sort_config():
         }
     }
     assert builder.map_2_es_sort_configuration(sort=SortConfig(), schema=index_schema) is None
-
-
-def test_query_builder_with_query_range():
-    es_query = EsQueryBuilder().map_2_es_query(
-        schema=None,
-        query=TextClassificationQuery(score=ScoreRange(range_from=10)),
-    )
-    assert es_query == {
-        "query": {
-            "bool": {
-                "filter": {
-                    "bool": {
-                        "minimum_should_match": 1,
-                        "should": [{"range": {"score": {"gte": 10.0}}}],
-                    }
-                },
-                "must": {"match_all": {}},
-            }
-        }
-    }

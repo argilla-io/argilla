@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Dict, Generator
 import pytest
 import pytest_asyncio
 from argilla_server import telemetry
-from argilla_server.apis.routes import api_v0, api_v1
+from argilla_server.apis.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.daos.backend import GenericElasticEngineBackend
 from argilla_server.daos.datasets import DatasetsDAO
@@ -95,7 +95,7 @@ async def async_client(
 
     mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
-    for api in [api_v0, api_v1]:
+    for api in [api_v1]:
         api.dependency_overrides[get_async_db] = override_get_async_db
         api.dependency_overrides[get_search_engine] = override_get_search_engine
 
