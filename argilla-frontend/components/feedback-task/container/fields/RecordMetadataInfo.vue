@@ -14,6 +14,16 @@
           <div v-for="(value, key) in data" :key="key" class="table-info__row">
             <div class="table-info__key" v-text="key" />
             <div class="table-info__value" v-text="value" />
+            <BaseActionTooltip
+              class="table-info__copy"
+              tooltip="Copied"
+              tooltip-position="left"
+            >
+              <BaseButton
+                class="table-info__copy__button"
+                @click="$copyToClipboard(value)"
+                ><svgicon name="copy" /></BaseButton
+            ></BaseActionTooltip>
           </div>
         </div>
       </div>
