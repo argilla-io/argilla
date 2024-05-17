@@ -66,6 +66,7 @@ export default {
   &__header {
     padding: 0;
     color: $black-54;
+    margin-right: -$base-info;
     &:hover {
       color: $black-87;
     }
@@ -90,6 +91,7 @@ export default {
       text-align: left;
       padding: 0;
       font-weight: normal;
+      line-height: 1.2;
       @include truncate;
     }
   }
@@ -99,11 +101,5 @@ export default {
     right: 0;
     top: calc(100% + $base-space * 2);
   }
-  //   :deep(.dropdown__header) {
-  //     &:hover,
-  //     &:focus {
-  //       background: none;
-  //     }
-  //   }
 }
 </style>
