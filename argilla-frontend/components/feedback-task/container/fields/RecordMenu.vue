@@ -43,7 +43,6 @@ export default {
   methods: {
     viewMetadata() {
       this.visibleMetadataInfo = true;
-      console.log("viewMetadata", this.record);
     },
     copyRecord() {
       this.dropdownIsVisible = false;
