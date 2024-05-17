@@ -18,11 +18,6 @@ from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-from tests.database import TestSession
-from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
-
 from argilla_server import telemetry
 from argilla_server.apis.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
@@ -31,6 +26,11 @@ from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+
+from tests.database import TestSession
+from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
