@@ -22,7 +22,8 @@ export class Record {
     score: number,
     public readonly page: number,
     public readonly metadataInsertedAt: string,
-    public readonly metadataUpdatedAt: string
+    public readonly metadataUpdatedAt: string,
+    public readonly metadata: Object
   ) {
     this.completeQuestion();
     this.updatedAt = answer?.updatedAt;

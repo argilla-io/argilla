@@ -99,7 +99,8 @@ export class GetRecordsByCriteriaUseCase {
           record.query_score,
           recordPage,
           record.inserted_at,
-          record.updated_at
+          record.updated_at,
+          record.metadata
         );
       }
     );
@@ -139,7 +140,8 @@ export class GetRecordsByCriteriaUseCase {
           0,
           0,
           "2024-04-24T14:05:37.802484",
-          "2024-04-24T14:05:37.802484"
+          "2024-04-24T14:05:37.802484",
+          {},
         );
       }
 
