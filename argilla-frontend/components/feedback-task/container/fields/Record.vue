@@ -61,10 +61,6 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
-  &--focus {
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
   &__wrapper {
     flex: 1;
     display: flex;
@@ -86,6 +82,10 @@ export default {
     .record--bulk & {
       height: 100%;
       overflow: auto;
+    }
+    .record--focus & {
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
   &__fixed-header {
