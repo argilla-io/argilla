@@ -141,7 +141,7 @@ export class GetRecordsByCriteriaUseCase {
           0,
           "2024-04-24T14:05:37.802484",
           "2024-04-24T14:05:37.802484",
-          {},
+          {}
         );
       }
 

@@ -33,7 +33,7 @@ export default {
     tableInfo() {
       return [
         this.recordInfo,
-        ...(!!this.record.metadata ? [this.metadataInfo] : []),
+        ...(this.record.metadata ? [this.metadataInfo] : []),
       ];
     },
     recordInfo() {
