@@ -97,7 +97,9 @@ export class GetRecordsByCriteriaUseCase {
           answer,
           suggestions,
           record.query_score,
-          recordPage
+          recordPage,
+          record.inserted_at,
+          record.updated_at
         );
       }
     );
@@ -135,7 +137,9 @@ export class GetRecordsByCriteriaUseCase {
           null,
           [],
           0,
-          0
+          0,
+          "2024-04-24T14:05:37.802484",
+          "2024-04-24T14:05:37.802484"
         );
       }
 

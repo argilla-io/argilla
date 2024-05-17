@@ -20,7 +20,9 @@ export class Record {
     public answer: RecordAnswer,
     private readonly suggestions: Suggestion[],
     score: number,
-    public readonly page: number
+    public readonly page: number,
+    public readonly metadataInsertedAt: string,
+    public readonly metadataUpdatedAt: string
   ) {
     this.completeQuestion();
     this.updatedAt = answer?.updatedAt;

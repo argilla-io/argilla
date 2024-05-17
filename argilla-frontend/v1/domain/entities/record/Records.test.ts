@@ -7,8 +7,30 @@ import { Records } from "./Records";
 describe("Records", () => {
   describe("records order", () => {
     test("should ordered by page", () => {
-      const firstRecord = new Record("1", "1", [], [], null, [], 1, 1);
-      const secondRecord = new Record("2", "1", [], [], null, [], 1, 2);
+      const firstRecord = new Record(
+        "1",
+        "1",
+        [],
+        [],
+        null,
+        [],
+        1,
+        1,
+        "2021-01-01",
+        "2021-01-02"
+      );
+      const secondRecord = new Record(
+        "2",
+        "1",
+        [],
+        [],
+        null,
+        [],
+        1,
+        2,
+        "2021-01-01",
+        "2021-01-02"
+      );
       const records = new Records([secondRecord, firstRecord]);
 
       const first = records.records[0];
@@ -20,7 +42,18 @@ describe("Records", () => {
   describe("hasRecordsToAnnotate", () => {
     test("should return true when the records has records to annotate", () => {
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 1),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const hasRecordsToAnnotate = records.hasRecordsToAnnotate;
@@ -46,7 +79,18 @@ describe("Records", () => {
       };
 
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 1),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const exists = records.existsRecordOn(page);
@@ -62,7 +106,18 @@ describe("Records", () => {
       };
 
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 2),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const exists = records.existsRecordOn(page);
@@ -80,12 +135,25 @@ describe("Records", () => {
       };
 
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 1),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const record = records.getRecordOn(page);
 
-      expect(record).toEqual(new Record("1", "1", [], [], null, [], 1, 1));
+      expect(record).toEqual(
+        new Record("1", "1", [], [], null, [], 1, 1, "2021-01-01", "2021-01-02")
+      );
     });
 
     test("should return undefined when the record not exists in this page", () => {
@@ -96,7 +164,18 @@ describe("Records", () => {
       };
 
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 2),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const record = records.getRecordOn(page);
@@ -107,7 +186,18 @@ describe("Records", () => {
 
   describe("getById", () => {
     test("should return the record when the record exists", () => {
-      const existingRecord = new Record("1", "1", [], [], null, [], 1, 1);
+      const existingRecord = new Record(
+        "1",
+        "1",
+        [],
+        [],
+        null,
+        [],
+        1,
+        1,
+        "2021-01-01",
+        "2021-01-02"
+      );
       const records = new Records([existingRecord]);
 
       const record = records.getById("1");
@@ -157,16 +247,126 @@ describe("Records", () => {
         null
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 1),
-        new Record("2", "1", [], [], null, [], 1, 2),
-        new Record("3", "1", [], [], null, [], 1, 3),
-        new Record("4", "1", [], [], null, [], 1, 4),
-        new Record("5", "1", [], [], null, [], 1, 5),
-        new Record("6", "1", [], [], null, [], 1, 6),
-        new Record("7", "1", [], [], null, [], 1, 7),
-        new Record("8", "1", [], [], null, [], 1, 8),
-        new Record("9", "1", [], [], null, [], 1, 9),
-        new Record("10", "1", [], [], null, [], 1, 10),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "5",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          5,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "6",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          6,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "7",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          7,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "8",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          8,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "9",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          9,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "10",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          10,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       records.records[0].submit({
         id: "1",
@@ -195,16 +395,126 @@ describe("Records", () => {
         null
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 1),
-        new Record("2", "1", [], [], null, [], 1, 2),
-        new Record("3", "1", [], [], null, [], 1, 3),
-        new Record("4", "1", [], [], null, [], 1, 4),
-        new Record("5", "1", [], [], null, [], 1, 5),
-        new Record("6", "1", [], [], null, [], 1, 6),
-        new Record("7", "1", [], [], null, [], 1, 7),
-        new Record("8", "1", [], [], null, [], 1, 8),
-        new Record("9", "1", [], [], null, [], 1, 9),
-        new Record("10", "1", [], [], null, [], 1, 10),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "5",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          5,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "6",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          6,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "7",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          7,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "8",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          8,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "9",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          9,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "10",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          10,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       records.records[0].submit({
         id: "1",
@@ -239,8 +549,30 @@ describe("Records", () => {
         null
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 3),
-        new Record("2", "1", [], [], null, [], 1, 4),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       criteria.previousPage();
 
@@ -281,8 +613,30 @@ describe("Records", () => {
         "record.1.vector.2.limit.50.order.most"
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 3),
-        new Record("2", "1", [], [], null, [], 1, 4),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       criteria.previousPage();
 
@@ -312,7 +666,9 @@ describe("Records", () => {
           { status: "draft", id: "1", updatedAt: "", value: "" },
           [],
           1,
-          1
+          1,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "2",
@@ -322,7 +678,9 @@ describe("Records", () => {
           { status: "draft", id: "2", updatedAt: "", value: "" },
           [],
           1,
-          2
+          2,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "3",
@@ -332,7 +690,9 @@ describe("Records", () => {
           { status: "draft", id: "3", updatedAt: "", value: "" },
           [],
           1,
-          3
+          3,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "4",
@@ -342,7 +702,9 @@ describe("Records", () => {
           { status: "draft", id: "4", updatedAt: "", value: "" },
           [],
           1,
-          4
+          4,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "5",
@@ -352,7 +714,9 @@ describe("Records", () => {
           { status: "draft", id: "5", updatedAt: "", value: "" },
           [],
           1,
-          5
+          5,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "6",
@@ -362,7 +726,9 @@ describe("Records", () => {
           { status: "draft", id: "6", updatedAt: "", value: "" },
           [],
           1,
-          6
+          6,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "7",
@@ -372,7 +738,9 @@ describe("Records", () => {
           { status: "draft", id: "7", updatedAt: "", value: "" },
           [],
           1,
-          7
+          7,
+          "2021-01-01",
+          "2021-01-02"
         ),
         new Record(
           "8",
@@ -382,7 +750,9 @@ describe("Records", () => {
           { status: "draft", id: "8", updatedAt: "", value: "" },
           [],
           1,
-          8
+          8,
+          "2021-01-01",
+          "2021-01-02"
         ),
       ]);
 
@@ -404,7 +774,18 @@ describe("Records", () => {
         ""
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 5),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          5,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       criteria.page.bulkMode();
@@ -427,7 +808,18 @@ describe("Records", () => {
         ""
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 55),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          55,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       criteria.page.bulkMode();
@@ -453,7 +845,18 @@ describe("Records", () => {
         ""
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 55),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          55,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       const similarityCriteria = new SimilarityCriteria();
@@ -483,7 +886,18 @@ describe("Records", () => {
         ""
       );
       const records = new Records([
-        new Record("1", "1", [], [], null, [], 1, 11),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          11,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       criteria.page.bulkMode();
@@ -499,36 +913,137 @@ describe("Records", () => {
   describe("append", () => {
     test("should append the new records to the current records when not exists", () => {
       const records = new Records([
-        new Record("2", "1", [], [], null, [], 1, 4),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       const newRecords = new Records([
-        new Record("1", "1", [], [], null, [], 1, 3),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       records.append(newRecords);
 
       expect(records.records).toEqual([
-        new Record("1", "1", [], [], null, [], 1, 3),
-        new Record("2", "1", [], [], null, [], 1, 4),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
     });
 
     test("should replace the new records to the current records when exists and never change the total", () => {
       const records = new Records(
-        [new Record("2", "1", [], [], null, [], 1, 4)],
+        [
+          new Record(
+            "2",
+            "1",
+            [],
+            [],
+            null,
+            [],
+            1,
+            4,
+            "2021-01-01",
+            "2021-01-02"
+          ),
+        ],
         200
       );
 
       const newRecords = new Records([
-        new Record("1", "1", [], [], null, [], 1, 3),
-        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "REPLACED",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
 
       records.append(newRecords);
 
       expect(records.records).toEqual([
-        new Record("1", "1", [], [], null, [], 1, 3),
-        new Record("2", "REPLACED", [], [], null, [], 1, 4),
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          "2021-01-01",
+          "2021-01-02"
+        ),
+        new Record(
+          "2",
+          "REPLACED",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          "2021-01-01",
+          "2021-01-02"
+        ),
       ]);
       expect(records.total).toBe(200);
     });

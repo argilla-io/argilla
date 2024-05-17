@@ -27,22 +27,23 @@ export interface BackendResponseResponse {
   updated_at: string;
 }
 
-export interface BackedRecord {
+export interface BackendRecord {
   id: string;
   suggestions: BackendSuggestion[];
   responses: BackendResponseResponse[];
   fields: { [key: string]: string };
   updated_at: string;
+  inserted_at: string;
   query_score: number;
 }
 
-export interface BackedRecords {
-  records: BackedRecord[];
+export interface BackendRecords {
+  records: BackendRecord[];
   total: number;
 }
 
 export interface BackendSearchRecords {
-  record: BackedRecord;
+  record: BackendRecord;
   query_score: number;
 }
 
