@@ -42,10 +42,6 @@ async def list_dataset_records_by_external_ids(
     return (await db.execute(query)).unique().scalars().all()
 
 
-async def delete_suggestions_by_record_ids(db: AsyncSession, record_ids: Iterable[UUID]) -> None:
-    await db.execute(sql.delete(Suggestion).filter(Suggestion.record_id.in_(record_ids)))
-
-
 async def fetch_records_by_ids_as_dict(
     db: AsyncSession, dataset: Dataset, record_ids: Sequence[UUID]
 ) -> Dict[UUID, Record]:
