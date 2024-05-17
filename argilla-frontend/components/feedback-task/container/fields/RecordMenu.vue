@@ -65,7 +65,7 @@ export default {
   &__header {
     padding: 0;
     color: $black-54;
-    margin-right: -$base-info;
+    margin-right: -$base-space;
     &:hover {
       color: $black-87;
     }
