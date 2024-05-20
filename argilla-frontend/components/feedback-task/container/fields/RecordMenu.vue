@@ -1,6 +1,10 @@
 <template>
   <div class="record-menu">
-    <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
+    <BaseDropdown
+      :freezing-page="visibleMetadataInfo"
+      :visible="dropdownIsVisible"
+      @visibility="onVisibility"
+    >
       <template slot="dropdown-header">
         <BaseButton class="record-menu__header">
           <svgicon name="kebab" width="20" height="20" />
@@ -75,7 +79,6 @@ export default {
     padding: $base-space;
     margin: 0;
     li {
-      padding: $base-space;
       border-radius: $border-radius-s;
       transition: background-color 0.3s ease;
       &:hover {
@@ -88,9 +91,8 @@ export default {
       display: block;
       max-width: 200px;
       text-align: left;
-      padding: 0;
+      padding: $base-space;
       font-weight: normal;
-      line-height: 1.2;
       @include truncate;
     }
   }
