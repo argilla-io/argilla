@@ -1,5 +1,9 @@
 <template>
-  <div class="record-metadata-info">
+  <div
+    class="record-metadata-info"
+    ref="recordMetadataInfo"
+    :style="{ marginTop: `${-topPosition}px` }"
+  >
     <div class="table-info">
       <div
         v-for="{ titleKey, titleValue, data, classType } in tableInfo"
@@ -39,6 +43,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      topPosition: 0,
+    };
+  },
   computed: {
     tableInfo() {
       return [
@@ -65,6 +74,13 @@ export default {
         data: this.record.metadata,
       };
     },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const { bottom } = this.$refs.recordMetadataInfo.getBoundingClientRect();
+      this.topPosition =
+        bottom > window.innerHeight ? bottom - window.innerHeight + 24 : 0;
+    });
   },
 };
 </script>
