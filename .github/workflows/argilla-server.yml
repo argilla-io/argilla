@@ -6,23 +6,27 @@ concurrency:
 
 on:
   workflow_dispatch:
-
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+      - develop
+      - releases/**
   pull_request:
     paths:
-      - "argilla-server/**"
+      - argilla-server/**
     types:
       - opened
       - edited
       - reopened
       - synchronize
       - ready_for_review
-
   release:
     types:
       - published
 
 jobs:
-
   build:
     name: Build `argilla-server` package
     runs-on: ubuntu-latest

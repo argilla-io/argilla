@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
@@ -20,19 +19,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
-from argilla_server.models import User
+from argilla_server.models import Field, User
 from argilla_server.policies import FieldPolicyV1, authorize
 from argilla_server.schemas.v1.fields import Field as FieldSchema
 from argilla_server.schemas.v1.fields import FieldUpdate
 from argilla_server.security import auth
 
-if TYPE_CHECKING:
-    from argilla_server.models import Field
-
 router = APIRouter(tags=["fields"])
 
 
-async def _get_field(db: "AsyncSession", field_id: UUID) -> "Field":
+async def _get_field(db: AsyncSession, field_id: UUID) -> Field:
     field = await datasets.get_field_by_id(db, field_id)
     if not field:
         raise HTTPException(
