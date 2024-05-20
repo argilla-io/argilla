@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "NotUniqueError", "AuthenticationError"]
+__all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError"]
+
+UNPROCESSABLE_ENTITY_ERROR_CODE = "unprocessable_entity"
 
 
 class NotFoundError(Exception):
@@ -25,6 +27,14 @@ class NotUniqueError(Exception):
     """Custom Argilla not unique error. Use it for situations where an Argilla domain entity already exists violating a constraint."""
 
     pass
+
+
+class UnprocessableEntityError(Exception):
+    """Custom Argilla unprocessable entity error. Use it for situations where an Argilla domain entity can not be processed."""
+
+    def __init__(self, message, code=UNPROCESSABLE_ENTITY_ERROR_CODE):
+        self.message = message
+        self.code = code
 
 
 class AuthenticationError(Exception):
