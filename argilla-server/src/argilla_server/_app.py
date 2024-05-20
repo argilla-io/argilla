@@ -32,10 +32,6 @@ from argilla_server._version import __version__ as argilla_version
 from argilla_server.apis.routes import api_v1
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
-from argilla_server.daos.backend import GenericElasticEngineBackend
-from argilla_server.daos.backend.base import GenericSearchError
-from argilla_server.daos.datasets import DatasetsDAO
-from argilla_server.daos.records import DatasetRecordsDAO
 from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
@@ -69,7 +65,7 @@ def create_server_app() -> FastAPI:
     for app_configure in [
         configure_app_logging,
         configure_database,
-        configure_storage,
+        wait_for_search_engine,
         configure_telemetry,
         configure_middleware,
         configure_app_security,
@@ -151,41 +147,10 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_storage(app: FastAPI):
-    def _on_backoff(event):
-        _LOGGER.warning(
-            f"Connection to {settings.obfuscated_elasticsearch()} is not ready. "
-            f"Tried {event['tries']} times. Retrying..."
-        )
+def wait_for_search_engine(app: FastAPI):
+    # TODO: Ping search engine to check if it is available
+    pass
 
-    @backoff.on_exception(
-        lambda: backoff.constant(interval=15),
-        ConfigError,
-        max_time=60,
-        on_backoff=_on_backoff,
-    )
-    def _setup_elasticsearch():
-        try:
-            backend = GenericElasticEngineBackend.get_instance()
-            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(backend)
-            datasets: DatasetsDAO = DatasetsDAO.get_instance(
-                es=backend,
-                records_dao=dataset_records,
-            )
-            datasets.init()
-            dataset_records.init()
-        except GenericSearchError as error:
-            raise ConfigError(
-                f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
-                "is not available or not responding.\n"
-                "Please make sure your Elasticsearch instance is launched and correctly running and\n"
-                "you have the necessary access permissions. "
-                "Once you have verified this, restart the argilla server.\n"
-            ) from error
-
-    @app.on_event("startup")
-    async def setup_elasticsearch():
-        _setup_elasticsearch()
 
 
 def configure_app_security(app: FastAPI):
