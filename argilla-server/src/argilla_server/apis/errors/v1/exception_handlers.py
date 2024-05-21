@@ -22,5 +22,6 @@ def add_exception_handlers(app: FastAPI):
     @app.exception_handler(errors.UnprocessableEntityError)
     async def unprocessable_entity_error_exception_handler(request, exc):
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content={"code": exc.code, "message": exc.message}
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"code": exc.code, "message": exc.message},
         )
