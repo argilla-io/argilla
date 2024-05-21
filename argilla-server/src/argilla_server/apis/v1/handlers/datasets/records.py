@@ -17,7 +17,6 @@ from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import Annotated
 
@@ -577,24 +576,18 @@ async def search_current_user_dataset_records(
 
     await _validate_search_records_query(db, body, dataset_id)
 
-    try:
-        search_responses = await _get_search_responses(
-            db=db,
-            search_engine=search_engine,
-            dataset=dataset,
-            search_records_query=body,
-            parsed_metadata=metadata.metadata_parsed,
-            limit=limit,
-            offset=offset,
-            user=current_user,
-            response_statuses=response_statuses,
-            sort_by_query_param=sort_by_query_param,
-        )
-    except errors.UnprocessableEntityError as e:
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"code": e.code, "message": e.message},
-        )
+    search_responses = await _get_search_responses(
+        db=db,
+        search_engine=search_engine,
+        dataset=dataset,
+        search_records_query=body,
+        parsed_metadata=metadata.metadata_parsed,
+        limit=limit,
+        offset=offset,
+        user=current_user,
+        response_statuses=response_statuses,
+        sort_by_query_param=sort_by_query_param,
+    )
 
     record_id_score_map = {
         response.record_id: {"query_score": response.score, "search_record": None}
@@ -645,23 +638,17 @@ async def search_dataset_records(
 
     await _validate_search_records_query(db, body, dataset_id)
 
-    try:
-        search_responses = await _get_search_responses(
-            db=db,
-            search_engine=search_engine,
-            dataset=dataset,
-            search_records_query=body,
-            limit=limit,
-            offset=offset,
-            parsed_metadata=metadata.metadata_parsed,
-            response_statuses=response_statuses,
-            sort_by_query_param=sort_by_query_param,
-        )
-    except errors.UnprocessableEntityError as e:
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"code": e.code, "message": e.message},
-        )
+    search_responses = await _get_search_responses(
+        db=db,
+        search_engine=search_engine,
+        dataset=dataset,
+        search_records_query=body,
+        limit=limit,
+        offset=offset,
+        parsed_metadata=metadata.metadata_parsed,
+        response_statuses=response_statuses,
+        sort_by_query_param=sort_by_query_param,
+    )
 
     record_id_score_map = {
         response.record_id: {"query_score": response.score, "search_record": None}
