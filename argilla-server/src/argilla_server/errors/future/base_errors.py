@@ -15,6 +15,7 @@
 __all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError"]
 
 UNPROCESSABLE_ENTITY_ERROR_CODE = "unprocessable_entity"
+MISSING_VECTOR_ERROR_CODE = "missing_vector"
 
 
 class NotFoundError(Exception):
