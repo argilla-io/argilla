@@ -46,6 +46,7 @@ export default {
   data() {
     return {
       topPosition: 0,
+      bottomGap: 24,
     };
   },
   computed: {
@@ -79,7 +80,9 @@ export default {
     this.$nextTick(() => {
       const { bottom } = this.$refs.recordMetadataInfo.getBoundingClientRect();
       this.topPosition =
-        bottom > window.innerHeight ? bottom - window.innerHeight + 24 : 0;
+        bottom > window.innerHeight
+          ? bottom - window.innerHeight + this.bottomGap
+          : 0;
     });
   },
 };
