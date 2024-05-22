@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added support for rating questions to include `0` as a valid value. ([#4860](https://github.com/argilla-io/argilla/pull/4860))
+
 ### Fixed
 
 - Fix issue on character level ([#4836](https://github.com/argilla-io/argilla/pull/4836))
