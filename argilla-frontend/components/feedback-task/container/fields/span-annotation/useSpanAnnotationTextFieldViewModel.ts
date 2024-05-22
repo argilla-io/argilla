@@ -9,15 +9,17 @@ import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer
 import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = ({
+  name,
   spanQuestion,
   id,
   searchText,
 }: {
+  name: string;
   spanQuestion: Question;
   id: string;
   searchText: string;
 }) => {
-  const searchTextHighlight = useSearchTextHighlight();
+  const searchTextHighlight = useSearchTextHighlight(name);
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
   const initialConfiguration = {
@@ -143,8 +145,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
   watch(
     () => searchText,
     (newValue) => {
-      const fieldContent = document.getElementById("fields-content");
-      searchTextHighlight.highlightText(fieldContent, newValue);
+      searchTextHighlight.highlightText(newValue);
     }
   );
 
@@ -157,8 +158,7 @@ export const useSpanAnnotationTextFieldViewModel = ({
       spanAnnotationSupported.value = false;
     }
 
-    const fieldContent = document.getElementById("fields-content");
-    searchTextHighlight.highlightText(fieldContent, searchText);
+    searchTextHighlight.highlightText(searchText);
   });
 
   onUnmounted(() => {
