@@ -93,8 +93,8 @@ export default {
   background: palette(white);
   min-width: 440px;
   border-radius: $border-radius-s;
-  @include font-size(13px);
   overflow: hidden;
+  @include font-size(13px);
   &__content {
     max-height: 320px;
     overflow: auto;
@@ -134,9 +134,9 @@ export default {
   }
   &__value {
     width: 100%;
+    padding-right: $base-space * 3;
     font-family: $quaternary-font-family;
     word-break: break-all;
-    padding-right: $base-space * 3;
   }
   &__copy {
     position: absolute;
