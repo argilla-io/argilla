@@ -66,32 +66,12 @@ export class SpanSelection {
 
     const newSelection = { ...selection };
 
-    const filteredSelections = this.selections.filter(
-      (s) => s.node.id === newSelection.node.id
-    );
-
     if (!config?.allowCharacter) {
       if (this.isEmpty(newSelection.text)) return;
 
       this.completeLeftSide(newSelection);
 
       this.completeRightSide(newSelection);
-    }
-
-    const overlaps = this.selections.filter((s) => {
-      return (
-        (newSelection.from <= s.from && newSelection.to >= s.to) ||
-        (newSelection.from >= s.from && newSelection.to <= s.to) ||
-        (newSelection.from < s.from && newSelection.to > s.from) ||
-        (newSelection.from < s.to && newSelection.to > s.to)
-      );
-    });
-
-    if (!config?.allowOverlap) {
-      this.selections = [
-        ...this.selections.filter((s) => s.node.id !== newSelection.node.id),
-        ...filteredSelections.filter((s) => !overlaps.includes(s)),
-      ];
     }
 
     const { from, to, entity, text, node } = newSelection;
@@ -114,6 +94,26 @@ export class SpanSelection {
     const span = this.crateSpan(selection, config);
 
     if (!span) return;
+
+    const filteredSelections = this.selections.filter(
+      (s) => s.node.id === span.node.id
+    );
+
+    const overlaps = this.selections.filter((s) => {
+      return (
+        (span.from <= s.from && span.to >= s.to) ||
+        (span.from >= s.from && span.to <= s.to) ||
+        (span.from < s.from && span.to > s.from) ||
+        (span.from < s.to && span.to > s.to)
+      );
+    });
+
+    if (!config?.allowOverlap) {
+      this.selections = [
+        ...this.selections.filter((s) => s.node.id !== span.node.id),
+        ...filteredSelections.filter((s) => !overlaps.includes(s)),
+      ];
+    }
 
     this.select(span);
   }

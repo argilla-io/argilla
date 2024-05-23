@@ -5,7 +5,7 @@ import { settingsFake, settingsFakeWith12Elements } from "../ranking-fakes";
 
 let wrapper = null;
 const options = {
-  stubs: ["draggable"],
+  stubs: ["draggable", "BaseTooltip"],
   propsData: { ranking: {} },
 };
 
