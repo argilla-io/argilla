@@ -69,7 +69,7 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
 
-- `ARGILA_SEARCH_ENGINE`: (Only for Feedback datasets) Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").
+- `ARGILLA_SEARCH_ENGINE`: (Only for Feedback datasets) Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").
 
 - `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connecting to the Elasticsearch backend.
 
