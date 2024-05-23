@@ -12,6 +12,7 @@
       />
       <TextFieldComponent
         v-else
+        :name="name"
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"

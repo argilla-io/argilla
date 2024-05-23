@@ -67,6 +67,9 @@
             .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
               background: {{color}};
             }
+            ::highlight(search-text-highlight-{{name}}) {
+              color: #ff675f;
+            }
           </style>
         </template>
       </template>
