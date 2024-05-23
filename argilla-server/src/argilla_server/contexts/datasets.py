@@ -49,11 +49,11 @@ from argilla_server.models import (
     Response,
     ResponseStatus,
     Suggestion,
+    User,
     Vector,
     VectorSettings,
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
-from argilla_server.schemas.v0.users import User
 from argilla_server.schemas.v1.datasets import (
     DatasetCreate,
     DatasetProgress,
@@ -96,8 +96,6 @@ if TYPE_CHECKING:
     from argilla_server.schemas.v1.records import RecordUpdate
     from argilla_server.schemas.v1.suggestions import SuggestionCreate
     from argilla_server.schemas.v1.vector_settings import VectorSettingsUpdate
-
-LIST_RECORDS_LIMIT = 20
 
 VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
 NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
@@ -418,8 +416,8 @@ async def get_records_by_ids(
 
 
 async def _configure_query_relationships(
-    query: "Select", dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
-) -> "Select":
+    query: Select, dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
+) -> Select:
     if not include_params:
         return query
 
@@ -627,11 +625,6 @@ async def _load_users_from_responses(responses: Union[Response, Iterable[Respons
     # something similar to what we are already doing in _preload_suggestion_relationships_before_index.
     for response in responses:
         await response.awaitable_attrs.user
-
-
-async def _load_users_from_record_responses(records: Iterable[Record]) -> None:
-    for record in records:
-        await _load_users_from_responses(record.responses)
 
 
 async def _validate_record_metadata(

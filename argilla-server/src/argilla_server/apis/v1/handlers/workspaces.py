@@ -27,7 +27,6 @@ from argilla_server.policies import WorkspacePolicyV1, WorkspaceUserPolicyV1, au
 from argilla_server.schemas.v1.users import User, Users
 from argilla_server.schemas.v1.workspaces import Workspace, WorkspaceCreate, Workspaces, WorkspaceUserCreate
 from argilla_server.security import auth
-from argilla_server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["workspaces"])
 
@@ -72,7 +71,6 @@ async def create_workspace(
 async def delete_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
-    datasets_service: DatasetsService = Depends(DatasetsService.get_instance),
     workspace_id: UUID,
     current_user: models.User = Security(auth.get_current_user),
 ):
@@ -89,12 +87,6 @@ async def delete_workspace(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Cannot delete the workspace {workspace_id}. This workspace has some feedback datasets linked",
-        )
-
-    if await datasets_service.list(current_user, workspaces=[workspace.name]):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Cannot delete the workspace {workspace_id}. This workspace has some datasets linked",
         )
 
     return await accounts.delete_workspace(db, workspace)
