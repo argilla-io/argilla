@@ -363,7 +363,7 @@ class DatasetBase:
             seed: Random state.
 
         Returns:
-            A datasets Dataset with a *ner_tags* or a *label* column and and several *inputs* columns.
+            A datasets Dataset with a *ner_tags* or a *label* column and several *inputs* columns.
             returned by ``to_datasets`` for "transformers" framework or a spaCy DocBin for "spacy" framework.
 
         Examples:
