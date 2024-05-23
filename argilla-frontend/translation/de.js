@@ -216,6 +216,11 @@ export default {
   },
 
   validations: {
+    businessLogic: {
+      missing_vector: {
+        message: "Vektor nicht im ausgewählten Datensatz gefunden",
+      },
+    },
     http: {
       401: {
         message: "Anmeldedaten konnten nicht überprüft werden",

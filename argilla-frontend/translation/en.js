@@ -228,6 +228,11 @@ export default {
       "Persistent storage is not enabled. All data will be lost if this space restarts.",
   },
   validations: {
+    businessLogic: {
+      missing_vector: {
+        message: "Vector not found in selected record",
+      },
+    },
     http: {
       401: {
         message: "Could not validate credentials",

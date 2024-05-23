@@ -28,6 +28,8 @@ type BackendError = {
       detail: string;
     };
   };
+  code?: string;
+  message?: string;
 };
 
 export default ({ $axios, app }) => {
@@ -48,7 +50,7 @@ export default ({ $axios, app }) => {
   });
 
   $axios.onError((error: AxiosError<BackendError>) => {
-    const { status } = error.response ?? {};
+    const { status, data } = error.response ?? {};
     const t = (key: string) => app.i18n.t(key);
 
     Notification.dispatch("clear");
@@ -67,6 +69,18 @@ export default ({ $axios, app }) => {
         message: handledTranslatedError,
         type: "error",
       });
+    }
+
+    if (data.code) {
+      const errorHandledKey = `validations.businessLogic.${data.code}.message`;
+      const handledTranslatedError = t(errorHandledKey);
+
+      if (handledTranslatedError !== errorHandledKey) {
+        Notification.dispatch("notify", {
+          message: handledTranslatedError,
+          type: "error",
+        });
+      }
     }
 
     throw error;
