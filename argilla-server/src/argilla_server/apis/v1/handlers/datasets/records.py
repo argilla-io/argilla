@@ -26,6 +26,7 @@ from argilla_server.apis.v1.handlers.datasets.datasets import _get_dataset_or_ra
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset as DatasetModel
 from argilla_server.models import Record, User
 from argilla_server.policies import DatasetPolicyV1, authorize
@@ -214,9 +215,9 @@ async def _get_search_responses(
             await record.awaitable_attrs.vectors
 
             if not record.vector_value_by_vector_settings(vector_settings):
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
+                raise errors.UnprocessableEntityError(
+                    message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
+                    code=MISSING_VECTOR_ERROR_CODE,
                 )
 
     if (

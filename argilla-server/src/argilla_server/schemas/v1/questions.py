@@ -53,9 +53,9 @@ RANKING_OPTIONS_MIN_ITEMS = 2
 RANKING_OPTIONS_MAX_ITEMS = 50
 
 RATING_OPTIONS_MIN_ITEMS = 2
-RATING_OPTIONS_MAX_ITEMS = 10
-RATING_LOWER_VALUE_ALLOWED = 1
-RATING_UPPER_VALUE_ALLOWED = 10
+RATING_OPTIONS_MAX_ITEMS = 11
+RATING_VALUE_GREATER_THAN_OR_EQUAL = 0
+RATING_VALUE_LESS_THAN_OR_EQUAL = 10
 
 SPAN_OPTIONS_MIN_ITEMS = 1
 SPAN_MIN_VISIBLE_OPTIONS = 3
@@ -124,29 +124,21 @@ class RatingQuestionSettingsOption(BaseModel):
     value: int
 
 
+class RatingQuestionSettingsOptionCreate(BaseModel):
+    value: int = Field(ge=RATING_VALUE_GREATER_THAN_OR_EQUAL, le=RATING_VALUE_LESS_THAN_OR_EQUAL)
+
+
 class RatingQuestionSettings(BaseModel):
     type: Literal[QuestionType.rating]
-    options: conlist(item_type=RatingQuestionSettingsOption)
+    options: List[RatingQuestionSettingsOption]
 
 
 class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
-    options: conlist(
-        item_type=RatingQuestionSettingsOption,
+    options: List[RatingQuestionSettingsOptionCreate] = Field(
         min_items=RATING_OPTIONS_MIN_ITEMS,
         max_items=RATING_OPTIONS_MAX_ITEMS,
     )
-
-    @validator("options")
-    def check_option_value_range(cls, options: List[RatingQuestionSettingsOption]):
-        """Validator to control all values are in allowed range 1 <= x <= 10"""
-        for option in options:
-            if not RATING_LOWER_VALUE_ALLOWED <= option.value <= RATING_UPPER_VALUE_ALLOWED:
-                raise ValueError(
-                    f"Option value {option.value!r} out of range "
-                    f"[{RATING_LOWER_VALUE_ALLOWED!r}, {RATING_UPPER_VALUE_ALLOWED!r}]"
-                )
-        return options
 
 
 class RatingQuestionSettingsUpdate(UpdateSchema):

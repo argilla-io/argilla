@@ -10,14 +10,16 @@ declare namespace CSS {
   };
 }
 
-const HIGHLIGHT_CLASS = "search-text-highlight";
+export const useSearchTextHighlight = (fieldId: string) => {
+  const FIELD_ID_TO_HIGHLIGHT = `fields-content-${fieldId}`;
+  const HIGHLIGHT_CLASS = `search-text-highlight-${fieldId}`;
 
-export const useSearchTextHighlight = () => {
   const createRangesToHighlight = (
     fieldComponent: HTMLElement,
     searchText: string
   ) => {
     CSS.highlights.delete(HIGHLIGHT_CLASS);
+
     const ranges = [];
 
     const getTextNodesUnder = (el) => {
@@ -102,7 +104,8 @@ export const useSearchTextHighlight = () => {
     return ranges;
   };
 
-  const highlightText = (fieldComponent: HTMLElement, searchText: string) => {
+  const highlightText = (searchText: string) => {
+    const fieldComponent = document.getElementById(FIELD_ID_TO_HIGHLIGHT);
     if (!searchText || !fieldComponent) return;
 
     const ranges = createRangesToHighlight(fieldComponent, searchText);

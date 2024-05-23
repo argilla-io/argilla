@@ -112,3 +112,63 @@ class TestCreateDatasetQuestion:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Question.id)))).scalar_one() == 0
+
+    async def test_create_dataset_rating_question(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {
+                    "type": QuestionType.rating,
+                    "options": [
+                        {"value": 0},
+                        {"value": 1},
+                        {"value": 2},
+                        {"value": 3},
+                        {"value": 4},
+                        {"value": 5},
+                        {"value": 6},
+                        {"value": 7},
+                        {"value": 8},
+                        {"value": 9},
+                        {"value": 10},
+                    ],
+                },
+            },
+        )
+
+        question = (await db.execute(select(Question))).scalar_one()
+
+        assert response.status_code == 201
+        assert response.json() == {
+            "id": str(question.id),
+            "name": "name",
+            "title": "title",
+            "description": None,
+            "required": False,
+            "settings": {
+                "type": QuestionType.rating,
+                "options": [
+                    {"value": 0},
+                    {"value": 1},
+                    {"value": 2},
+                    {"value": 3},
+                    {"value": 4},
+                    {"value": 5},
+                    {"value": 6},
+                    {"value": 7},
+                    {"value": 8},
+                    {"value": 9},
+                    {"value": 10},
+                ],
+            },
+            "dataset_id": str(dataset.id),
+            "inserted_at": question.inserted_at.isoformat(),
+            "updated_at": question.updated_at.isoformat(),
+        }

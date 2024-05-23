@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added support for rating questions to include `0` as a valid value. ([#4858](https://github.com/argilla-io/argilla/pull/4858))
 - Added `POST /api/v1/token` endpoint to generate a new API token for a user. ([#138](https://github.com/argilla-io/argilla-server/pull/138))
 - Added `GET /api/v1/me` endpoint to get the current user information. ([#140](https://github.com/argilla-io/argilla-server/pull/140))
 - Added `GET /api/v1/users` endpoint to get a list of all users. ([#142](https://github.com/argilla-io/argilla-server/pull/142))

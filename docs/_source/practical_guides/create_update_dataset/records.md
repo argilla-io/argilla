@@ -324,7 +324,7 @@ dataset.add_records(records)
 ```
 
 ```{note}
-As soon as you add records to a remote dataset, these should be available in the Argila UI. If you cannot see them, try hitting the `Refresh` button on the sidebar.
+As soon as you add records to a remote dataset, these should be available in the Argilla UI. If you cannot see them, try hitting the `Refresh` button on the sidebar.
 ```
 
 ### Update records
@@ -351,7 +351,7 @@ dataset.update_records(modified_records)
 ```
 
 ```{note}
-As soon as you update the records in a remote dataset, the changes should be available in the Argila UI. If you cannot see them, try hitting the `Refresh` button on the sidebar.
+As soon as you update the records in a remote dataset, the changes should be available in the Argilla UI. If you cannot see them, try hitting the `Refresh` button on the sidebar.
 ```
 
 ```{note}
