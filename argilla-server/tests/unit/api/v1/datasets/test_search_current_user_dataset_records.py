@@ -53,7 +53,8 @@ class TestSearchCurrentUserDatasetRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`"
+            "code": "missing_vector",
+            "message": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`",
         }
 
     async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):

@@ -21,6 +21,7 @@ set the required security dependencies if api security is enabled
 from fastapi import FastAPI
 
 from argilla_server._version import __version__ as argilla_version
+from argilla_server.apis.errors.v1.exception_handlers import add_exception_handlers as add_exception_handlers_v1
 from argilla_server.apis.v0.handlers import (
     authentication,
     datasets,
@@ -113,6 +114,8 @@ def create_api_v1():
     # Now, we can control the error responses for the API v1.
     # We keep the same error responses as the API v0 for the moment
     APIErrorHandler.configure_app(api_v1)
+
+    add_exception_handlers_v1(api_v1)
 
     for router in [
         info_v1.router,
