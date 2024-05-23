@@ -790,7 +790,7 @@ class TestSuiteRecords:
                         "rating_question_1": {"value": "wrong-rating-value"},
                     },
                 },
-                "'wrong-rating-value' is not a valid rating for rating question.\nValid ratings are: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+                "'wrong-rating-value' is not a valid rating for rating question.\nValid ratings are: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
             ),
             (
                 create_label_selection_questions,
