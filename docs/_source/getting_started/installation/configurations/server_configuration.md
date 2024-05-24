@@ -36,11 +36,13 @@ NGINX and Traefik have been tested and are known to work with Argilla:
 Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:
 
 ```bash
-uvicorn argilla:app
+uvicorn argilla_server:app --port 6900
 ```
 
 :::{note}
 For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
+
+You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
 :::
 
 ## Environment variables
