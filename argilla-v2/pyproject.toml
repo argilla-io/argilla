@@ -1,0 +1,22 @@
+[project]
+name = "argilla-v2"
+version = "0.1.0"
+description = "Poc for argilla v1 and v2 SDKs"
+authors = [
+    { name = "Francisco Aranda", email = "francis@argilla.io" },
+]
+dependencies = [
+    "argilla>=1.28.0, <2.0.0",
+    "argilla-sdk>=0.1.0a3",
+]
+requires-python = ">=3.10,<3.12"
+readme = "README.md"
+license = { text = "MIT" }
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
