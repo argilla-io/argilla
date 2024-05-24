@@ -57,6 +57,7 @@ async def delete_workspace_user(db: AsyncSession, workspace_user: WorkspaceUser)
     return await workspace_user.delete(db)
 
 
+# TODO: Once we delete API v0 we can delete this function
 async def get_workspace_by_id(db: AsyncSession, workspace_id: UUID) -> Workspace:
     return await Workspace.read(db, id=workspace_id)
 
@@ -92,6 +93,7 @@ async def delete_workspace(db: AsyncSession, workspace: Workspace):
     return await workspace.delete(db)
 
 
+# TODO: Delete this function once we remove API v0 code
 async def get_user_by_id(db: AsyncSession, user_id: UUID) -> Union[User, None]:
     return await User.read(db, id=user_id)
 

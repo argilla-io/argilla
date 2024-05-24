@@ -109,33 +109,6 @@ async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) ->
     )
 
 
-async def get_dataset_by_id(
-    db: AsyncSession,
-    dataset_id: UUID,
-    with_fields: bool = False,
-    with_questions: bool = False,
-    with_metadata_properties: bool = False,
-    with_vectors_settings: bool = False,
-) -> Union[Dataset, None]:
-    query = select(Dataset).filter_by(id=dataset_id)
-
-    options = []
-    if with_fields:
-        options.append(selectinload(Dataset.fields))
-    if with_questions:
-        options.append(selectinload(Dataset.questions))
-    if with_metadata_properties:
-        options.append(selectinload(Dataset.metadata_properties))
-    if with_vectors_settings:
-        options.append(selectinload(Dataset.vectors_settings))
-    if options:
-        query = query.options(*options)
-
-    result = await db.execute(query)
-
-    return result.scalar_one_or_none()
-
-
 async def get_dataset_by_name_and_workspace_id(db: AsyncSession, name: str, workspace_id: UUID) -> Union[Dataset, None]:
     result = await db.execute(select(Dataset).filter_by(name=name, workspace_id=workspace_id))
     return result.scalar_one_or_none()
@@ -212,11 +185,6 @@ async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset:
 async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
     params = dataset_update.dict(exclude_unset=True)
     return await dataset.update(db, **params)
-
-
-async def get_field_by_id(db: AsyncSession, field_id: UUID) -> Union[Field, None]:
-    result = await db.execute(select(Field).filter_by(id=field_id).options(selectinload(Field.dataset)))
-    return result.scalar_one_or_none()
 
 
 async def get_field_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_id: UUID) -> Union[Field, None]:
@@ -311,13 +279,6 @@ async def update_metadata_property(
 
 async def count_vectors_settings_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
     return (await db.execute(select(func.count(VectorSettings.id)).filter_by(dataset_id=dataset_id))).scalar_one()
-
-
-async def get_vector_settings_by_id(db: AsyncSession, vector_settings_id: UUID) -> Union[VectorSettings, None]:
-    result = await db.execute(
-        select(VectorSettings).filter_by(id=vector_settings_id).options(selectinload(VectorSettings.dataset))
-    )
-    return result.scalar_one_or_none()
 
 
 async def get_vector_settings_by_name_and_dataset_id(
@@ -965,15 +926,6 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
     return record
 
 
-async def get_response_by_id(db: AsyncSession, response_id: UUID) -> Union[Response, None]:
-    result = await db.execute(
-        select(Response)
-        .filter_by(id=response_id)
-        .options(selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions))
-    )
-    return result.scalar_one_or_none()
-
-
 async def get_response_by_record_id_and_user_id(
     db: AsyncSession, record_id: UUID, user_id: UUID
 ) -> Union[Response, None]:
@@ -1157,19 +1109,6 @@ async def delete_suggestions(
     await db.commit()
 
 
-async def get_suggestion_by_id(db: AsyncSession, suggestion_id: "UUID") -> Union[Suggestion, None]:
-    result = await db.execute(
-        select(Suggestion)
-        .filter_by(id=suggestion_id)
-        .options(
-            selectinload(Suggestion.record).selectinload(Record.dataset),
-            selectinload(Suggestion.question),
-        )
-    )
-
-    return result.scalar_one_or_none()
-
-
 async def list_suggestions_by_id_and_record_id(
     db: AsyncSession, suggestion_ids: List[UUID], record_id: UUID
 ) -> Sequence[Suggestion]:
@@ -1193,10 +1132,3 @@ async def delete_suggestion(db: AsyncSession, search_engine: SearchEngine, sugge
     await db.commit()
 
     return suggestion
-
-
-async def get_metadata_property_by_id(db: AsyncSession, metadata_property_id: UUID) -> Optional[MetadataProperty]:
-    result = await db.execute(
-        select(MetadataProperty).filter_by(id=metadata_property_id).options(selectinload(MetadataProperty.dataset))
-    )
-    return result.scalar_one_or_none()

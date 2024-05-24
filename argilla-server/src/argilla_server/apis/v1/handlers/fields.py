@@ -16,6 +16,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
@@ -28,16 +29,6 @@ from argilla_server.security import auth
 router = APIRouter(tags=["fields"])
 
 
-async def _get_field(db: AsyncSession, field_id: UUID) -> Field:
-    field = await datasets.get_field_by_id(db, field_id)
-    if not field:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Field with id `{field_id}` not found",
-        )
-    return field
-
-
 @router.patch("/fields/{field_id}", response_model=FieldSchema)
 async def update_field(
     *,
@@ -46,7 +37,7 @@ async def update_field(
     field_update: FieldUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await _get_field(db, field_id)
+    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
 
     await authorize(current_user, FieldPolicyV1.update(field))
 
@@ -61,9 +52,12 @@ async def update_field(
 
 @router.delete("/fields/{field_id}", response_model=FieldSchema)
 async def delete_field(
-    *, db: AsyncSession = Depends(get_async_db), field_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    field_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    field = await _get_field(db, field_id)
+    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
 
     await authorize(current_user, FieldPolicyV1.delete(field))
 

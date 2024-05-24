@@ -123,11 +123,17 @@ class TestSuiteRecords:
         assert response.status_code == 403
 
     async def test_get_record_with_nonexistent_record_id(self, async_client: "AsyncClient", owner_auth_header: dict):
+        record_id = uuid4()
+
         await RecordFactory.create()
 
-        response = await async_client.get(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/records/{record_id}",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Record with id `{record_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
@@ -1178,20 +1184,25 @@ class TestSuiteRecords:
     async def test_create_record_response_with_nonexistent_record_id(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
+        record_id = uuid4()
+
         await RecordFactory.create()
-        response_json = {
-            "values": {
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            "status": "submitted",
-        }
 
         response = await async_client.post(
-            f"/api/v1/records/{uuid4()}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record_id}/responses",
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "input_ok": {"value": "yes"},
+                    "output_ok": {"value": "yes"},
+                },
+                "status": "submitted",
+            },
         )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Record with id `{record_id}` not found"}
+
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
@@ -1414,8 +1425,15 @@ class TestSuiteRecords:
         assert response.status_code == 403
 
     async def test_delete_record_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
-        response = await async_client.delete(f"/api/v1/records/{uuid4()}", headers=owner_auth_header)
+        record_id = uuid4()
+
+        response = await async_client.delete(
+            f"/api/v1/records/{record_id}",
+            headers=owner_auth_header,
+        )
+
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Record with id `{record_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(

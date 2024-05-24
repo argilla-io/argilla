@@ -18,10 +18,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from fastapi import Response as HTTPResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
-from argilla_server.models import Record, User
+from argilla_server.models import Dataset, Record, User
 from argilla_server.policies import RecordPolicyV1, authorize
 from argilla_server.schemas.v1.records import Record as RecordSchema
 from argilla_server.schemas.v1.records import RecordUpdate
@@ -36,22 +37,6 @@ DELETE_RECORD_SUGGESTIONS_LIMIT = 100
 router = APIRouter(tags=["records"])
 
 
-async def _get_record(
-    db: AsyncSession,
-    record_id: UUID,
-    with_dataset: bool = False,
-    with_suggestions: bool = False,
-    with_vectors: bool = False,
-) -> Record:
-    record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions, with_vectors)
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Record with id `{record_id}` not found",
-        )
-    return record
-
-
 @router.get("/records/{record_id}", response_model=RecordSchema)
 async def get_record(
     *,
@@ -59,7 +44,15 @@ async def get_record(
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.get(record))
 
@@ -75,7 +68,16 @@ async def update_record(
     record_update: RecordUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True, with_vectors=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+            selectinload(Record.vectors),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.update(record))
 
@@ -94,7 +96,14 @@ async def create_record_response(
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.create_response(record))
 
@@ -114,9 +123,20 @@ async def create_record_response(
 
 @router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
 async def get_record_suggestions(
-    *, db: AsyncSession = Depends(get_async_db), record_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.get_suggestions(record))
 
@@ -142,7 +162,14 @@ async def upsert_suggestion(
     current_user: User = Security(auth.get_current_user),
     response: HTTPResponse,
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.create_suggestion(record))
 
@@ -178,7 +205,14 @@ async def delete_record_suggestions(
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
 
@@ -205,7 +239,14 @@ async def delete_record(
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.delete(record))
 

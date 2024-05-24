@@ -18,40 +18,37 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import models, telemetry
+from argilla_server import telemetry
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotUniqueError
+from argilla_server.models import User
 from argilla_server.policies import UserPolicyV1, authorize
-from argilla_server.schemas.v1.users import User, UserCreate, Users
+from argilla_server.schemas.v1.users import User as UserSchema
+from argilla_server.schemas.v1.users import UserCreate, Users
 from argilla_server.schemas.v1.workspaces import Workspaces
 from argilla_server.security import auth
 
 router = APIRouter(tags=["users"])
 
 
-@router.get("/me", response_model=User)
-async def get_current_user(request: Request, current_user: models.User = Security(auth.get_current_user)):
+@router.get("/me", response_model=UserSchema)
+async def get_current_user(request: Request, current_user: User = Security(auth.get_current_user)):
     await telemetry.track_login(request, current_user)
 
     return current_user
 
 
-@router.get("/users/{user_id}", response_model=User)
+@router.get("/users/{user_id}", response_model=UserSchema)
 async def get_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicyV1.get)
 
-    user = await accounts.get_user_by_id(db, user_id)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id `{user_id}` not found",
-        )
+    user = await User.get_or_raise(db, user_id)
 
     return user
 
@@ -60,7 +57,7 @@ async def get_user(
 async def list_users(
     *,
     db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicyV1.list)
 
@@ -69,12 +66,12 @@ async def list_users(
     return Users(items=users)
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=User)
+@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserSchema)
 async def create_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_create: UserCreate,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicyV1.create)
 
@@ -90,19 +87,14 @@ async def create_user(
     return user
 
 
-@router.delete("/users/{user_id}", response_model=User)
+@router.delete("/users/{user_id}", response_model=UserSchema)
 async def delete_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
-    user = await accounts.get_user_by_id(db, user_id)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id `{user_id}` not found",
-        )
+    user = await User.get_or_raise(db, user_id)
 
     await authorize(current_user, UserPolicyV1.delete)
 
@@ -116,16 +108,11 @@ async def list_user_workspaces(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicyV1.list_workspaces)
 
-    user = await accounts.get_user_by_id(db, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id `{user_id}` not found",
-        )
+    user = await User.get_or_raise(db, user_id)
 
     if user.is_owner:
         workspaces = await accounts.list_workspaces(db)

@@ -31,6 +31,7 @@ from argilla_server.enums import (
     SuggestionType,
     UserRole,
 )
+from argilla_server.errors.future import NotFoundError
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value

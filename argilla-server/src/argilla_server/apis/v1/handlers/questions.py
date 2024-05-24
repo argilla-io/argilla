@@ -16,6 +16,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 import argilla_server.errors.future as errors
 from argilla_server.contexts import questions
@@ -30,16 +31,6 @@ from argilla_server.validators.questions import InvalidQuestionSettings
 router = APIRouter(tags=["questions"])
 
 
-async def _get_question(db: "AsyncSession", question_id: UUID) -> Question:
-    question = await questions.get_question_by_id(db, question_id)
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with id `{question_id}` not found",
-        )
-    return question
-
-
 @router.patch("/questions/{question_id}", response_model=QuestionSchema)
 async def update_question(
     *,
@@ -48,19 +39,24 @@ async def update_question(
     question_update: QuestionUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
+    question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
+
+    await authorize(current_user, QuestionPolicyV1.update(question))
+
     try:
-        return await questions.update_question(db, question_id, question_update, current_user)
-    except errors.NotFoundError as err:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Question with id `{question_id}` not found")
+        return await questions.update_question(db, question, question_update)
     except InvalidQuestionSettings as err:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
 
 
 @router.delete("/questions/{question_id}", response_model=QuestionSchema)
 async def delete_question(
-    *, db: AsyncSession = Depends(get_async_db), question_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    question_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    question = await _get_question(db, question_id)
+    question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
 
     await authorize(current_user, QuestionPolicyV1.delete(question))
 

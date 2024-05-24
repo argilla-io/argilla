@@ -211,13 +211,16 @@ class TestSearchDatasetRecords:
         assert response.status_code == 422
 
     async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset_id = uuid4()
+
         response = await async_client.post(
-            self.url(uuid4()),
+            self.url(dataset_id),
             headers=owner_auth_header,
             json={"query": {"text": {"q": "text"}}},
         )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
     async def test_with_text_query_using_non_existent_field(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()

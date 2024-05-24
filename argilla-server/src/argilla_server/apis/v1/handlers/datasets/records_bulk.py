@@ -16,12 +16,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from starlette import status
 
-from argilla_server.apis.v1.handlers.datasets.datasets import _get_dataset_or_raise
 from argilla_server.bulk.records_bulk import CreateRecordsBulk, UpsertRecordsBulk
 from argilla_server.database import get_async_db
-from argilla_server.models import User
+from argilla_server.models import Dataset, User
 from argilla_server.policies import DatasetPolicyV1, authorize
 from argilla_server.schemas.v1.records_bulk import RecordsBulk, RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.search_engine import SearchEngine, get_search_engine
@@ -45,13 +45,15 @@ async def create_dataset_records_bulk(
     current_user: User = Security(auth.get_current_user),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
-    dataset = await _get_dataset_or_raise(
+    dataset = await Dataset.get_or_raise(
         db,
         dataset_id,
-        with_fields=True,
-        with_questions=True,
-        with_metadata_properties=True,
-        with_vectors_settings=True,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+            selectinload(Dataset.vectors_settings),
+        ],
     )
 
     try:
@@ -75,13 +77,15 @@ async def upsert_dataset_records_bulk(
     current_user: User = Security(auth.get_current_user),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
-    dataset = await _get_dataset_or_raise(
+    dataset = await Dataset.get_or_raise(
         db,
         dataset_id,
-        with_fields=True,
-        with_questions=True,
-        with_metadata_properties=True,
-        with_vectors_settings=True,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+            selectinload(Dataset.vectors_settings),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.upsert_records(dataset))

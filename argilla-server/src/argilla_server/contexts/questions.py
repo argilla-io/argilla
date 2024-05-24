@@ -65,15 +65,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
     )
 
 
-async def update_question(
-    db: AsyncSession, question_id: UUID, question_update: QuestionUpdate, current_user: User
-) -> Question:
-    question = await get_question_by_id(db, question_id)
-    if not question:
-        raise errors.NotFoundError()
-
-    await authorize(current_user, QuestionPolicyV1.update(question))
-
+async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
     QuestionUpdateValidator(question_update).validate_for(question)
 
     params = question_update.dict(exclude_unset=True)

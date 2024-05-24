@@ -19,6 +19,16 @@ import argilla_server.errors.future as errors
 
 
 def add_exception_handlers(app: FastAPI):
+    @app.exception_handler(errors.NotFoundError)
+    async def not_found_error_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            # TODO: Once we move to v2.0 we can remove the content using detail attribute
+            # and use the new one using code and message.
+            # content={"code": exc.code, "message": exc.message},
+            content={"detail": exc.message},
+        )
+
     @app.exception_handler(errors.UnprocessableEntityError)
     async def unprocessable_entity_error_exception_handler(request, exc):
         return JSONResponse(

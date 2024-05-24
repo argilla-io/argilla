@@ -18,19 +18,18 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from typing_extensions import Annotated
 
 import argilla_server.errors.future as errors
 import argilla_server.search_engine as search_engine
-from argilla_server.apis.v1.handlers.datasets.datasets import _get_dataset_or_raise
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset as DatasetModel
-from argilla_server.models import Record, User
+from argilla_server.models import Dataset, Record, User
 from argilla_server.policies import DatasetPolicyV1, authorize
-from argilla_server.schemas.v1.datasets import Dataset
+from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.schemas.v1.records import (
     Filters,
     FilterScope,
@@ -117,7 +116,7 @@ async def _filter_records_using_search_engine(
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
-) -> Tuple[List["Record"], int]:
+) -> Tuple[List[Record], int]:
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
@@ -185,7 +184,7 @@ def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[sear
 async def _get_search_responses(
     db: "AsyncSession",
     search_engine: "SearchEngine",
-    dataset: DatasetModel,
+    dataset: Dataset,
     parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
@@ -369,7 +368,7 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
 
-async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> "Record":
+async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> Record:
     record = await datasets.get_record_by_id(db, record_id)
     if record is None or record.dataset_id != dataset.id:
         raise HTTPException(
@@ -410,7 +409,7 @@ async def list_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
@@ -444,7 +443,7 @@ async def list_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
 
@@ -478,8 +477,15 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(
-        db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True, with_vectors_settings=True
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+            selectinload(Dataset.vectors_settings),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
@@ -508,8 +514,14 @@ async def update_dataset_records(
     records_update: RecordsUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(
-        db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.update_records(dataset))
@@ -530,7 +542,7 @@ async def delete_dataset_records(
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
 
@@ -570,7 +582,7 @@ async def search_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
@@ -632,7 +644,7 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
     await authorize(current_user, DatasetPolicyV1.search_records_with_all_responses(dataset))
 
@@ -683,7 +695,7 @@ async def list_dataset_records_search_suggestions_options(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 

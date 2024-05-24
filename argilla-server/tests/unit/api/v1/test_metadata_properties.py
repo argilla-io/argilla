@@ -135,13 +135,17 @@ class TestSuiteMetadataProperties:
     async def test_get_metadata_property_metrics_with_nonexistent_metadata_property(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
+        metadata_property_id = uuid4()
+
         await TermsMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/metadata-properties/{uuid.uuid4()}/metrics", headers=owner_auth_header
+            f"/api/v1/metadata-properties/{metadata_property_id}/metrics",
+            headers=owner_auth_header,
         )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_get_metadata_property_metrics_as_restricted_user_role_from_different_workspace(
@@ -370,15 +374,18 @@ async def test_update_metadata_property_with_empty_payload(
 async def test_update_metadata_property_with_nonexistent_metadata_property_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
+    metadata_property_id = uuid4()
+
     await IntegerMetadataPropertyFactory.create()
 
     response = await async_client.patch(
-        f"/api/v1/metadata-properties/{uuid4()}",
+        f"/api/v1/metadata-properties/{metadata_property_id}",
         headers=owner_auth_header,
         json={},
     )
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
 
 
 @pytest.mark.parametrize("user_role", [UserRole.owner, UserRole.admin])
@@ -450,9 +457,16 @@ async def test_delete_metadata_property_as_annotator(async_client: "AsyncClient"
 async def test_delete_metadata_property_with_nonexistent_metadata_property_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
+    metadata_property_id = uuid4()
+
     await IntegerMetadataPropertyFactory.create()
 
-    response = await async_client.delete(f"/api/v1/metadata-properties/{uuid4()}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/v1/metadata-properties/{metadata_property_id}",
+        headers=owner_auth_header,
+    )
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
+
     assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
