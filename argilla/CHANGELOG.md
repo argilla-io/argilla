@@ -22,7 +22,7 @@ These are the section headers that we use:
 
 ### Fixed
 
-- Fix wildcard import for the whole argilla module. ([#4874](https://github.com/argilla-io/argilla/pull/4874)) 
+- Fix wildcard import for the whole argilla module. ([#4874](https://github.com/argilla-io/argilla/pull/4874))
 - Fix issue when record does not have vectors related. ([#4856](https://github.com/argilla-io/argilla/pull/4856))
 - Fix issue on character level. ([#4836](https://github.com/argilla-io/argilla/pull/4836))
 
