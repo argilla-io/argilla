@@ -96,6 +96,7 @@ export default {
   border-radius: $border-radius-s;
   overflow: hidden;
   @include font-size(13px);
+  box-shadow: $shadow;
   &__content {
     max-height: 320px;
     overflow: auto;
@@ -153,6 +154,9 @@ export default {
       padding: 0;
       color: $black-37;
     }
+  }
+  :deep(.dropdown__content) {
+    box-shadow: none;
   }
 }
 </style>
