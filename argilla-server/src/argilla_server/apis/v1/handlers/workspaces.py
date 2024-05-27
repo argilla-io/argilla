@@ -17,46 +17,48 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import models
 from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.errors import EntityAlreadyExistsError
 from argilla_server.errors.future import NotUniqueError
-from argilla_server.models import User
+from argilla_server.models import User, Workspace
 from argilla_server.policies import WorkspacePolicyV1, WorkspaceUserPolicyV1, authorize
-from argilla_server.schemas.v1.users import User, Users
-from argilla_server.schemas.v1.workspaces import Workspace, WorkspaceCreate, Workspaces, WorkspaceUserCreate
+from argilla_server.schemas.v1.users import User as UserSchema
+from argilla_server.schemas.v1.users import Users
+from argilla_server.schemas.v1.workspaces import (
+    Workspace as WorkspaceSchema,
+)
+from argilla_server.schemas.v1.workspaces import (
+    WorkspaceCreate,
+    Workspaces,
+    WorkspaceUserCreate,
+)
 from argilla_server.security import auth
 from argilla_server.services.datasets import DatasetsService
 
 router = APIRouter(tags=["workspaces"])
 
 
-@router.get("/workspaces/{workspace_id}", response_model=Workspace)
+@router.get("/workspaces/{workspace_id}", response_model=WorkspaceSchema)
 async def get_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, WorkspacePolicyV1.get(workspace_id))
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
-    if not workspace:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Workspace with id `{workspace_id}` not found",
-        )
+    workspace = await Workspace.get_or_raise(db, workspace_id)
 
     return workspace
 
 
-@router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=Workspace)
+@router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema)
 async def create_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
     workspace_create: WorkspaceCreate,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, WorkspacePolicyV1.create)
 
@@ -68,22 +70,17 @@ async def create_workspace(
     return workspace
 
 
-@router.delete("/workspaces/{workspace_id}", response_model=Workspace)
+@router.delete("/workspaces/{workspace_id}", response_model=WorkspaceSchema)
 async def delete_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
     datasets_service: DatasetsService = Depends(DatasetsService.get_instance),
     workspace_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, WorkspacePolicyV1.delete)
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
-    if not workspace:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Workspace with id `{workspace_id}` not found",
-        )
+    workspace = await Workspace.get_or_raise(db, workspace_id)
 
     if await datasets.list_datasets_by_workspace_id(db, workspace_id):
         raise HTTPException(
@@ -104,7 +101,7 @@ async def delete_workspace(
 async def list_workspaces_me(
     *,
     db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ) -> Workspaces:
     await authorize(current_user, WorkspacePolicyV1.list_workspaces_me)
 
@@ -121,40 +118,30 @@ async def list_workspace_users(
     *,
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, WorkspaceUserPolicyV1.list(workspace_id))
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
-    if workspace is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Workspace with id `{workspace_id}` not found",
-        )
+    workspace = await Workspace.get_or_raise(db, workspace_id)
 
     await workspace.awaitable_attrs.users
 
     return Users(items=workspace.users)
 
 
-@router.post("/workspaces/{workspace_id}/users", status_code=status.HTTP_201_CREATED, response_model=User)
+@router.post("/workspaces/{workspace_id}/users", status_code=status.HTTP_201_CREATED, response_model=UserSchema)
 async def create_workspace_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     workspace_user_create: WorkspaceUserCreate,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, WorkspaceUserPolicyV1.create)
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
-    if workspace is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Workspace with id `{workspace_id}` not found",
-        )
+    workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    user = await accounts.get_user_by_id(db, workspace_user_create.user_id)
+    user = await User.get(db, workspace_user_create.user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -169,14 +156,15 @@ async def create_workspace_user(
     return workspace_user.user
 
 
-@router.delete("/workspaces/{workspace_id}/users/{user_id}", response_model=User)
+@router.delete("/workspaces/{workspace_id}/users/{user_id}", response_model=UserSchema)
 async def delete_workspace_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     user_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
+    # TODO: Maybe add a new get_by and get_by_or_raise class functions
     workspace_user = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
     if workspace_user is None:
         raise HTTPException(

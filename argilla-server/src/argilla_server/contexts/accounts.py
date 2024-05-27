@@ -57,10 +57,6 @@ async def delete_workspace_user(db: AsyncSession, workspace_user: WorkspaceUser)
     return await workspace_user.delete(db)
 
 
-async def get_workspace_by_id(db: AsyncSession, workspace_id: UUID) -> Workspace:
-    return await Workspace.read(db, id=workspace_id)
-
-
 async def get_workspace_by_name(db: AsyncSession, workspace_name: str) -> Union[Workspace, None]:
     result = await db.execute(select(Workspace).filter_by(name=workspace_name))
     return result.scalar_one_or_none()
@@ -90,10 +86,6 @@ async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace
 
 async def delete_workspace(db: AsyncSession, workspace: Workspace):
     return await workspace.delete(db)
-
-
-async def get_user_by_id(db: AsyncSession, user_id: UUID) -> Union[User, None]:
-    return await User.read(db, id=user_id)
 
 
 async def user_exists(db: AsyncSession, user_id: UUID) -> bool:

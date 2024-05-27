@@ -19,24 +19,26 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import models, telemetry
+from argilla_server import telemetry
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla_server.errors.future import NotUniqueError
+from argilla_server.models import User
 from argilla_server.policies import UserPolicy, authorize
 from argilla_server.pydantic_v1 import parse_obj_as
-from argilla_server.schemas.v0.users import User, UserCreate
+from argilla_server.schemas.v0.users import User as UserSchema
+from argilla_server.schemas.v0.users import UserCreate
 from argilla_server.security import auth
 
 router = APIRouter(tags=["users"])
 
 
-@router.get("/me", response_model=User, response_model_exclude_none=True, operation_id="whoami")
+@router.get("/me", response_model=UserSchema, response_model_exclude_none=True, operation_id="whoami")
 async def whoami(
     request: Request,
     db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     """
     User info endpoint
@@ -56,7 +58,7 @@ async def whoami(
 
     await telemetry.track_login(request, current_user)
 
-    user = User.from_orm(current_user)
+    user = UserSchema.from_orm(current_user)
     # TODO: The current client checks if a user can work on a specific workspace
     #  by using workspaces info returning in `/api/me`.
     #  Returning all workspaces from the `/api/me` for owner users keeps the
@@ -71,23 +73,25 @@ async def whoami(
     return user
 
 
-@router.get("/users", response_model=List[User], response_model_exclude_none=True)
+@router.get("/users", response_model=List[UserSchema], response_model_exclude_none=True)
 async def list_users(
-    *, db: AsyncSession = Depends(get_async_db), current_user: models.User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicy.list)
 
     users = await accounts.list_users(db)
 
-    return parse_obj_as(List[User], users)
+    return parse_obj_as(List[UserSchema], users)
 
 
-@router.post("/users", response_model=User, response_model_exclude_none=True)
+@router.post("/users", response_model=UserSchema, response_model_exclude_none=True)
 async def create_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_create: UserCreate,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicy.create)
 
@@ -96,32 +100,32 @@ async def create_user(
 
         telemetry.track_user_created(user)
     except NotUniqueError:
-        raise EntityAlreadyExistsError(name=user_create.username, type=User)
+        raise EntityAlreadyExistsError(name=user_create.username, type=UserSchema)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
     await user.awaitable_attrs.workspaces
 
-    return User.from_orm(user)
+    return user
 
 
-@router.delete("/users/{user_id}", response_model=User, response_model_exclude_none=True)
+@router.delete("/users/{user_id}", response_model=UserSchema, response_model_exclude_none=True)
 async def delete_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
-    current_user: models.User = Security(auth.get_current_user),
+    current_user: User = Security(auth.get_current_user),
 ):
-    user = await accounts.get_user_by_id(db, user_id)
+    user = await User.get(db, user_id)
     if not user:
         # TODO: Forcing here user_id to be an string.
         # Not casting it is causing a `Object of type UUID is not JSON serializable`.
         # Possible solution redefining JSONEncoder.default here:
         # https://github.com/jazzband/django-push-notifications/issues/586
-        raise EntityNotFoundError(name=str(user_id), type=User)
+        raise EntityNotFoundError(name=str(user_id), type=UserSchema)
 
     await authorize(current_user, UserPolicy.delete(user))
 
     await accounts.delete_user(db, user)
 
-    return User.from_orm(user)
+    return user

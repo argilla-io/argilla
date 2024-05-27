@@ -62,9 +62,15 @@ class TestSuiteSuggestions:
         mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
 
     async def test_delete_suggestion_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
-        response = await async_client.delete(f"/api/v1/suggestions/{uuid4()}", headers=owner_auth_header)
+        suggestion_id = uuid4()
+
+        response = await async_client.delete(
+            f"/api/v1/suggestions/{suggestion_id}",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Suggestion with id `{suggestion_id}` not found"}
 
     async def test_delete_suggestion_as_admin_from_another_workspace(self, async_client: "AsyncClient") -> None:
         suggestion = await SuggestionFactory.create()

@@ -1457,8 +1457,14 @@ class TestSuiteListDatasetRecords:
     async def test_list_current_user_dataset_records_with_nonexistent_dataset_id(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
+        dataset_id = uuid4()
+
         await DatasetFactory.create()
 
-        response = await async_client.get(f"/api/v1/me/datasets/{uuid4()}/records", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset_id}/records",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
