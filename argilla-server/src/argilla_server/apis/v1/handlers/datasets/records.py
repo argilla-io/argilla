@@ -369,7 +369,7 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
 
 
 async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> Record:
-    record = await datasets.get_record_by_id(db, record_id)
+    record = await Record.get(db, record_id)
     if record is None or record.dataset_id != dataset.id:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

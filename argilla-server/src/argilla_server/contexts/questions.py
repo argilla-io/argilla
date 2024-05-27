@@ -33,12 +33,6 @@ from argilla_server.validators.questions import (
 )
 
 
-async def get_question_by_id(db: AsyncSession, question_id: UUID) -> Union[Question, None]:
-    return (
-        await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
-    ).scalar_one_or_none()
-
-
 async def get_question_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_id: UUID) -> Union[Question, None]:
     return (await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))).scalar_one_or_none()
 

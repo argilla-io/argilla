@@ -321,29 +321,6 @@ async def create_vector_settings(
     return vector_settings
 
 
-async def get_record_by_id(
-    db: AsyncSession,
-    record_id: UUID,
-    with_dataset: bool = False,
-    with_suggestions: bool = False,
-    with_vectors: bool = False,
-) -> Union[Record, None]:
-    query = select(Record).filter_by(id=record_id)
-    if with_dataset:
-        query = query.options(
-            selectinload(Record.dataset).selectinload(Dataset.questions),
-            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
-        )
-
-    if with_suggestions:
-        query = query.options(selectinload(Record.suggestions))
-    if with_vectors:
-        query = query.options(selectinload(Record.vectors))
-    result = await db.execute(query)
-
-    return result.scalar_one_or_none()
-
-
 async def get_records_by_ids(
     db: AsyncSession,
     records_ids: Iterable[UUID],
@@ -662,7 +639,9 @@ async def _build_record_suggestions(
 
             question = questions_cache.get(suggestion_create.question_id, None)
             if not question:
-                question = await questions.get_question_by_id(db, suggestion_create.question_id)
+                question = await Question.get(
+                    db, suggestion_create.question_id, options=[selectinload(Question.dataset)]
+                )
                 if not question:
                     raise ValueError(f"question_id={str(suggestion_create.question_id)} does not exist")
                 questions_cache[suggestion_create.question_id] = question

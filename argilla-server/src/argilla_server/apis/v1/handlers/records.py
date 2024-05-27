@@ -22,7 +22,7 @@ from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
-from argilla_server.models import Dataset, Record, User
+from argilla_server.models import Dataset, Question, Record, User
 from argilla_server.policies import RecordPolicyV1, authorize
 from argilla_server.schemas.v1.records import Record as RecordSchema
 from argilla_server.schemas.v1.records import RecordUpdate
@@ -173,7 +173,7 @@ async def upsert_suggestion(
 
     await authorize(current_user, RecordPolicyV1.create_suggestion(record))
 
-    question = await questions.get_question_by_id(db, suggestion_create.question_id)
+    question = await Question.get(db, suggestion_create.question_id, options=[selectinload(Question.dataset)])
     if not question:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

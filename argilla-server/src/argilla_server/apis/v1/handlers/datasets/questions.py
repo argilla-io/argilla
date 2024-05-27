@@ -53,7 +53,10 @@ async def create_dataset_question(
     dataset = await Dataset.get_or_raise(
         db,
         dataset_id,
-        options=[selectinload(Dataset.fields), selectinload(Dataset.questions)],
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.create_question(dataset))
