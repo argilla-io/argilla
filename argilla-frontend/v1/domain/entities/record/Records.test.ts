@@ -16,9 +16,9 @@ describe("Records", () => {
         [],
         1,
         1,
+        {},
         new Date("2021-01-01"),
-        new Date("2021-01-01"),
-        {}
+        new Date("2021-01-02")
       );
       const secondRecord = new Record(
         "2",
@@ -29,9 +29,9 @@ describe("Records", () => {
         [],
         1,
         2,
+        {},
         new Date("2021-01-01"),
-        new Date("2021-01-01"),
-        {}
+        new Date("2021-01-02")
       );
       const records = new Records([secondRecord, firstRecord]);
 
@@ -53,9 +53,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -91,9 +91,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -119,9 +119,9 @@ describe("Records", () => {
           [],
           1,
           2,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -149,9 +149,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -167,9 +167,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         )
       );
     });
@@ -191,9 +191,9 @@ describe("Records", () => {
           [],
           1,
           2,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -214,9 +214,9 @@ describe("Records", () => {
         [],
         1,
         1,
+        {},
         new Date("2021-01-01"),
-        new Date("2021-01-01"),
-        {}
+        new Date("2021-01-02")
       );
       const records = new Records([existingRecord]);
 
@@ -276,9 +276,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -289,9 +289,9 @@ describe("Records", () => {
           [],
           1,
           2,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "3",
@@ -302,9 +302,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "4",
@@ -315,9 +315,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "5",
@@ -328,9 +328,9 @@ describe("Records", () => {
           [],
           1,
           5,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "6",
@@ -341,9 +341,9 @@ describe("Records", () => {
           [],
           1,
           6,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "7",
@@ -354,9 +354,9 @@ describe("Records", () => {
           [],
           1,
           7,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "8",
@@ -367,9 +367,9 @@ describe("Records", () => {
           [],
           1,
           8,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "9",
@@ -380,9 +380,9 @@ describe("Records", () => {
           [],
           1,
           9,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "10",
@@ -393,9 +393,9 @@ describe("Records", () => {
           [],
           1,
           10,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       records.records[0].submit({
@@ -434,9 +434,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -447,9 +447,9 @@ describe("Records", () => {
           [],
           1,
           2,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "3",
@@ -460,9 +460,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "4",
@@ -473,9 +473,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "5",
@@ -486,9 +486,9 @@ describe("Records", () => {
           [],
           1,
           5,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "6",
@@ -499,9 +499,9 @@ describe("Records", () => {
           [],
           1,
           6,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "7",
@@ -512,9 +512,9 @@ describe("Records", () => {
           [],
           1,
           7,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "8",
@@ -525,9 +525,9 @@ describe("Records", () => {
           [],
           1,
           8,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "9",
@@ -538,9 +538,9 @@ describe("Records", () => {
           [],
           1,
           9,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "10",
@@ -551,9 +551,9 @@ describe("Records", () => {
           [],
           1,
           10,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       records.records[0].submit({
@@ -598,9 +598,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -611,9 +611,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       criteria.previousPage();
@@ -664,9 +664,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -677,9 +677,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       criteria.previousPage();
@@ -711,9 +711,9 @@ describe("Records", () => {
           [],
           1,
           1,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -724,9 +724,9 @@ describe("Records", () => {
           [],
           1,
           2,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "3",
@@ -737,9 +737,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "4",
@@ -750,9 +750,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "5",
@@ -763,9 +763,9 @@ describe("Records", () => {
           [],
           1,
           5,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "6",
@@ -776,9 +776,9 @@ describe("Records", () => {
           [],
           1,
           6,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "7",
@@ -789,9 +789,9 @@ describe("Records", () => {
           [],
           1,
           7,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "8",
@@ -802,9 +802,9 @@ describe("Records", () => {
           [],
           1,
           8,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -835,9 +835,9 @@ describe("Records", () => {
           [],
           1,
           5,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -870,9 +870,9 @@ describe("Records", () => {
           [],
           1,
           55,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -908,9 +908,9 @@ describe("Records", () => {
           [],
           1,
           55,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -950,9 +950,9 @@ describe("Records", () => {
           [],
           1,
           11,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -978,9 +978,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       const newRecords = new Records([
@@ -993,9 +993,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -1011,9 +1011,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -1024,9 +1024,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
     });
@@ -1043,9 +1043,9 @@ describe("Records", () => {
             [],
             1,
             4,
+            {},
             new Date("2021-01-01"),
-            new Date("2021-01-01"),
-            {}
+            new Date("2021-01-01")
           ),
         ],
         200
@@ -1061,9 +1061,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -1074,9 +1074,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
 
@@ -1092,9 +1092,9 @@ describe("Records", () => {
           [],
           1,
           3,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
         new Record(
           "2",
@@ -1105,9 +1105,9 @@ describe("Records", () => {
           [],
           1,
           4,
+          {},
           new Date("2021-01-01"),
-          new Date("2021-01-01"),
-          {}
+          new Date("2021-01-02")
         ),
       ]);
       expect(records.total).toBe(200);
