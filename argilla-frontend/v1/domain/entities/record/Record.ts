@@ -3,6 +3,7 @@ import { Field } from "../field/Field";
 import { Question } from "../question/Question";
 import { Suggestion } from "../question/Suggestion";
 import { Score } from "../similarity/Score";
+import { MetadataRecord } from "../metadata/MetadataRecord";
 import { RecordAnswer } from "./RecordAnswer";
 
 const DEFAULT_STATUS = "pending";
@@ -10,7 +11,6 @@ const DEFAULT_STATUS = "pending";
 export class Record {
   // eslint-disable-next-line no-use-before-define
   private original: Record;
-  public updatedAt?: string;
   public readonly score: Score;
   constructor(
     public readonly id: string,
@@ -21,12 +21,11 @@ export class Record {
     private readonly suggestions: Suggestion[],
     score: number,
     public readonly page: number,
-    public readonly metadataInsertedAt: Date,
-    public readonly metadataUpdatedAt: Date,
-    public readonly metadata: Object
+    public readonly metadata: MetadataRecord,
+    public readonly insertedAt: Date,
+    public readonly updatedAt?: Date
   ) {
     this.completeQuestion();
-    this.updatedAt = answer?.updatedAt;
     this.score = new Score(score);
   }
 
@@ -58,14 +57,12 @@ export class Record {
 
   discard(answer: RecordAnswer) {
     this.answer = answer;
-    this.updatedAt = answer.updatedAt;
 
     this.initialize();
   }
 
   submit(answer: RecordAnswer) {
     this.answer = answer;
-    this.updatedAt = answer.updatedAt;
 
     this.initialize();
   }
