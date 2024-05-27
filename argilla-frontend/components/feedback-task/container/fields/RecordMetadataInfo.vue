@@ -105,7 +105,6 @@ export default {
     display: flex;
     gap: $base-space;
     padding: $base-space $base-space * 2;
-    background: $black-10;
     font-weight: 600;
     & > div:first-child {
       min-width: 100px;
