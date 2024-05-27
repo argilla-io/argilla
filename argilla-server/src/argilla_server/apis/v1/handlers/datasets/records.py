@@ -214,7 +214,8 @@ async def _get_search_responses(
             await record.awaitable_attrs.vectors
 
             if not record.vector_value_by_vector_settings(vector_settings):
-                raise errors.UnprocessableEntityError(
+                # TODO: Once we move to v2.0 we can use here UnprocessableEntityError instead of MissingVectorError
+                raise errors.MissingVectorError(
                     message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
                     code=MISSING_VECTOR_ERROR_CODE,
                 )

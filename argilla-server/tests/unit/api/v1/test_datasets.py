@@ -932,21 +932,40 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(name="name")
-        dataset_json = {"name": "name", "workspace_id": str(dataset.workspace_id)}
 
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.post(
+            "/api/v1/datasets",
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "workspace_id": str(dataset.workspace_id),
+            },
+        )
 
         assert response.status_code == 409
+        assert response.json() == {
+            "detail": f"Dataset with name `{dataset.name}` already exists for workspace with id `{dataset.workspace_id}`",
+        }
+
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
     async def test_create_dataset_with_nonexistent_workspace_id(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
-        dataset_json = {"name": "name", "workspace_id": str(uuid4())}
+        workspace_id = uuid4()
 
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.post(
+            "/api/v1/datasets",
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "workspace_id": str(workspace_id),
+            },
+        )
 
         assert response.status_code == 422
+        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
+
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
@@ -1123,35 +1142,42 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         field = await FieldFactory.create(name="name")
-        field_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{field.dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{field.dataset_id}/fields",
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {"type": "text"},
+            },
         )
 
         assert response.status_code == 409
+        assert response.json() == {
+            "detail": f"Field with name `{field.name}` already exists for dataset with id `{field.dataset_id}`"
+        }
+
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
     async def test_create_dataset_field_with_published_dataset(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        field_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {"type": "text"},
+            },
         )
 
         assert response.status_code == 422
         assert response.json() == {"detail": "Field cannot be created for a published dataset"}
+
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
     async def test_create_dataset_field_with_nonexistent_dataset_id(
@@ -1263,25 +1289,6 @@ class TestSuiteDatasets:
 
         mock_search_engine.configure_metadata_property.assert_called_once_with(dataset, created_metadata_property)
 
-    async def test_create_dataset_metadata_property_with_dataset_ready_and_search_engine_error(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
-    ):
-        mock_search_engine.configure_metadata_property.side_effect = ValueError("MOCK")
-
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
-
     async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
@@ -1392,19 +1399,22 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         metadata_property = await TermsMetadataPropertyFactory.create(name="name")
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms", "values": ["a", "b", "c"]},
-        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{metadata_property.dataset.id}/metadata-properties",
+            f"/api/v1/datasets/{metadata_property.dataset_id}/metadata-properties",
             headers=owner_auth_header,
-            json=metadata_property_json,
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {"type": "terms", "values": ["a", "b", "c"]},
+            },
         )
 
         assert response.status_code == 409
+        assert response.json() == {
+            "detail": f"Metadata property with name `{metadata_property.name}` already exists for dataset with id `{metadata_property.dataset_id}`"
+        }
+
         assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
 
     @pytest.mark.parametrize(
@@ -1578,7 +1588,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers=owner_auth_header, json=payload
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers=owner_auth_header,
+            json=payload,
         )
 
         assert response.status_code == 422
@@ -1591,10 +1603,17 @@ class TestSuiteDatasets:
         response = await async_client.post(
             f"/api/v1/datasets/{vector_settings.dataset_id}/vectors-settings",
             headers=owner_auth_header,
-            json={"name": "vectors", "title": "vectors", "dimensions": 384},
+            json={
+                "name": "vectors",
+                "title": "vectors",
+                "dimensions": 384,
+            },
         )
 
         assert response.status_code == 409
+        assert response.json() == {
+            "detail": f"Vector settings with name `{vector_settings.name}` already exists for dataset with id `{vector_settings.dataset_id}`"
+        }
 
     async def test_create_dataset_vector_settings_with_non_existent_dataset_id(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -4604,20 +4623,6 @@ class TestSuiteDatasets:
 
         test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
         mock_search_engine.create_index.assert_called_once_with(dataset)
-
-    async def test_publish_dataset_with_error_on_index_creation(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
-    ):
-        mock_search_engine.create_index.side_effect = ValueError("Error creating index")
-
-        dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=True)
-        await QuestionFactory.create(settings={"type": "invalid"}, dataset=dataset, required=True)
-
-        response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()

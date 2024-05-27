@@ -29,8 +29,29 @@ def add_exception_handlers(app: FastAPI):
             content={"detail": exc.message},
         )
 
+    @app.exception_handler(errors.NotUniqueError)
+    async def not_unique_error_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            # TODO: Once we move to v2.0 we can remove the content using detail attribute
+            # and use the new one using code and message.
+            # content={"code": exc.code, "message": exc.message},
+            content={"detail": exc.message},
+        )
+
     @app.exception_handler(errors.UnprocessableEntityError)
     async def unprocessable_entity_error_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            # TODO: Once we move to v2.0 we can remove the content using detail attribute
+            # and use the new one using code and message.
+            # content={"code": exc.code, "message": exc.message},
+            content={"detail": exc.message},
+        )
+
+    # TODO: Once we move to v2.0 we can remove this exception handler and use UnprocessableEntityError
+    @app.exception_handler(errors.MissingVectorError)
+    async def missing_vector_error_exception_handler(request, exc):
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"code": exc.code, "message": exc.message},
