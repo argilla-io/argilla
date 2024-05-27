@@ -32,8 +32,8 @@ export interface BackendRecord {
   suggestions: BackendSuggestion[];
   responses: BackendResponseResponse[];
   fields: { [key: string]: string };
-  updated_at: string;
-  inserted_at: string;
+  updated_at: Date;
+  inserted_at: Date;
   metadata?: { [key: string]: string };
   query_score: number;
 }

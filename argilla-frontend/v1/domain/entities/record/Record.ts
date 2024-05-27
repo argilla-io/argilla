@@ -21,8 +21,8 @@ export class Record {
     private readonly suggestions: Suggestion[],
     score: number,
     public readonly page: number,
-    public readonly metadataInsertedAt: string,
-    public readonly metadataUpdatedAt: string,
+    public readonly metadataInsertedAt: Date,
+    public readonly metadataUpdatedAt: Date,
     public readonly metadata: Object
   ) {
     this.completeQuestion();
