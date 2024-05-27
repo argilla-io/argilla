@@ -133,14 +133,14 @@ export default {
     }
   }
   &__key {
-    flex-basis: 40%;
+    flex-basis: 44%;
     margin: 0;
     @include truncate;
   }
   &__value {
     display: flex;
-    gap: $base-space * 2;
-    flex-basis: 60%;
+    gap: $base-space;
+    flex-basis: 56%;
     align-items: center;
     justify-content: space-between;
     margin: 0;
