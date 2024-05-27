@@ -233,6 +233,7 @@ async def test_delete_field_belonging_to_published_dataset(
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
+
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 

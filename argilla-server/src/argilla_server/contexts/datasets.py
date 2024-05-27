@@ -223,13 +223,18 @@ async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCr
 
 
 async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdate") -> Field:
+    if field_update.settings and field_update.settings.type != field.settings["type"]:
+        raise errors.UnprocessableEntityError(
+            f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
+        )
+
     params = field_update.dict(exclude_unset=True)
     return await field.update(db, **params)
 
 
 async def delete_field(db: AsyncSession, field: Field) -> Field:
     if field.dataset.is_ready:
-        raise ValueError("Fields cannot be deleted for a published dataset")
+        raise errors.UnprocessableEntityError("Fields cannot be deleted for a published dataset")
 
     return await field.delete(db)
 

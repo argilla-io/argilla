@@ -41,12 +41,6 @@ async def update_field(
 
     await authorize(current_user, FieldPolicyV1.update(field))
 
-    if field_update.settings and field_update.settings.type != field.settings["type"]:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'",
-        )
-
     return await datasets.update_field(db, field, field_update)
 
 
@@ -61,11 +55,6 @@ async def delete_field(
 
     await authorize(current_user, FieldPolicyV1.delete(field))
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        await datasets.delete_field(db, field)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    await datasets.delete_field(db, field)
 
     return field
