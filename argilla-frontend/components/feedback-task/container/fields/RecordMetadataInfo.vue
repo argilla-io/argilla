@@ -11,23 +11,25 @@
         :class="classType"
       >
         <div class="table-info__header">
-          <div v-text="titleKey" />
+          <div class="table-info__key" v-text="titleKey" />
           <div v-if="titleValue" v-text="titleValue" />
         </div>
         <div class="table-info__content">
           <div v-for="(value, key) in data" :key="key" class="table-info__row">
-            <div class="table-info__key" v-text="key" />
-            <div class="table-info__value" v-text="value" />
-            <BaseActionTooltip
-              class="table-info__copy"
-              tooltip="Copied"
-              tooltip-position="left"
-            >
-              <BaseButton
-                class="table-info__copy__button"
-                @click="$copyToClipboard(value)"
-                ><svgicon name="copy" /></BaseButton
-            ></BaseActionTooltip>
+            <p class="table-info__key" :title="key" v-text="key" />
+            <p class="table-info__value">
+              {{ value }}
+              <BaseActionTooltip
+                class="table-info__copy"
+                tooltip="Copied"
+                tooltip-position="left"
+              >
+                <BaseButton
+                  class="table-info__copy__button"
+                  @click="$copyToClipboard(value)"
+                  ><svgicon name="copy" /></BaseButton
+              ></BaseActionTooltip>
+            </p>
           </div>
         </div>
       </div>
@@ -90,7 +92,7 @@ export default {
 <style lang="scss" scoped>
 .table-info {
   background: palette(white);
-  min-width: 440px;
+  min-width: 460px;
   border-radius: $border-radius-s;
   overflow: hidden;
   @include font-size(13px);
@@ -100,6 +102,7 @@ export default {
   }
   &__header {
     display: flex;
+    gap: $base-space;
     padding: $base-space $base-space * 2;
     background: $black-10;
     font-weight: 600;
@@ -114,6 +117,7 @@ export default {
   &__row {
     position: relative;
     display: flex;
+    gap: $base-space * 2;
     padding: $base-space $base-space * 2;
     .--table & {
       border-top: 1px solid $black-10;
@@ -123,25 +127,27 @@ export default {
     }
     &:hover {
       .table-info__copy {
-        display: block;
-        z-index: 1;
+        opacity: 1;
       }
     }
   }
   &__key {
-    min-width: 100px;
+    flex-basis: 40%;
+    margin: 0;
+    @include truncate;
   }
   &__value {
-    width: 100%;
-    padding-right: $base-space * 3;
+    display: flex;
+    gap: $base-space * 2;
+    flex-basis: 60%;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
     font-family: $quaternary-font-family;
     word-break: break-all;
   }
   &__copy {
-    position: absolute;
-    right: $base-space;
-    top: $base-space;
-    display: none;
+    opacity: 0;
     flex-shrink: 0;
     &__button {
       padding: 0;
