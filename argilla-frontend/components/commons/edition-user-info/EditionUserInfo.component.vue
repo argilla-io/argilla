@@ -36,12 +36,13 @@
         class="--heading5 --medium description__title"
         v-text="$t('userSettings.fields.workspaces')"
       />
-      <div class="workspaces" v-if="userInfo.workspaces.length">
+      <BaseBadgeSkeleton v-if="isLoadingWorkspaces" quantity="5" />
+      <div class="workspaces" v-else-if="workspaces.length">
         <BaseBadge
-          v-for="workspace in userInfo.workspaces"
-          :key="workspace"
-          :text="workspace"
-          @on-click="goToWorkspace(workspace)"
+          v-for="workspace in workspaces"
+          :key="workspace.id"
+          :text="workspace.name"
+          @on-click="goToWorkspace(workspace.name)"
         />
       </div>
       <p v-else class="--body1 description__text">-</p>
@@ -50,6 +51,8 @@
 </template>
 
 <script>
+import { useUserInfoViewModel } from "./useUserInfoViewModel";
+
 export default {
   name: "EditionUserInfoComponent",
   props: {
@@ -62,6 +65,9 @@ export default {
     goToWorkspace(workspace) {
       this.$router.push(`/datasets?workspaces=${workspace}`);
     },
+  },
+  setup() {
+    return useUserInfoViewModel();
   },
 };
 </script>
