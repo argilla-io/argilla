@@ -98,9 +98,9 @@ export class GetRecordsByCriteriaUseCase {
           suggestions,
           record.query_score,
           recordPage,
+          record.metadata,
           record.inserted_at,
-          record.updated_at,
-          record.metadata
+          record.updated_at
         );
       }
     );
@@ -139,9 +139,9 @@ export class GetRecordsByCriteriaUseCase {
           [],
           0,
           0,
-          "2024-04-24T14:05:37.802484",
-          "2024-04-24T14:05:37.802484",
-          {}
+          referenceRecordFromBackend.metadata,
+          referenceRecordFromBackend.inserted_at,
+          referenceRecordFromBackend.updated_at
         );
       }
 

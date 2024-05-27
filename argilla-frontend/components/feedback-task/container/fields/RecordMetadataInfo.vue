@@ -51,10 +51,7 @@ export default {
   },
   computed: {
     tableInfo() {
-      return [
-        this.recordInfo,
-        ...(this.record.metadata ? [this.metadataInfo] : []),
-      ];
+      return [this.recordInfo, this.metadataInfo];
     },
     recordInfo() {
       return {
@@ -62,12 +59,14 @@ export default {
         classType: "--intro",
         data: {
           ID: this.record.id,
-          inserted_at: this.record.metadataInsertedAt,
-          updated_at: this.record.metadataUpdatedAt,
+          inserted_at: this.record.insertedAt,
+          updated_at: this.record.updatedAt,
         },
       };
     },
     metadataInfo() {
+      if (!this.record.metadata) return [];
+
       return {
         titleKey: $nuxt.$t("metadata"),
         titleValue: $nuxt.$t("value"),
