@@ -14,14 +14,22 @@ on:
         default: false
 
   push:
-    branches: [ "main" ]
+    paths:
+      - "argilla-sdk/**"
+    branches: [ "develop" ]
 
   pull_request:
-    branches: [ "main" ]
+    paths:
+      - "argilla-sdk/**"
+    branches: [ "develop" ]
 
   release:
     types:
       - "published"
+
+defaults:
+  run:
+    working-directory: argilla-sdk
 
 jobs:
   build:
@@ -71,7 +79,7 @@ jobs:
         if: ${{ matrix.python-version == '3.8' }}
         with:
           name: argilla-sdk
-          path: dist
+          path: argilla-sdk/dist
 
   # This job will publish argilla-sdk package into PyPI repository
   publish_release:
@@ -101,7 +109,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: argilla-sdk
-          path: dist
+          path: argilla-sdk/dist
 
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
