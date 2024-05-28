@@ -2,11 +2,11 @@
   <div class="wrapper">
     <BaseSpinner v-if="!user" />
 
-    <div class="left-content" v-if="user">
-      <div class="left-content-item edition-user-info-component">
+    <div class="user-settings" v-if="user">
+      <div class="user-settings-item edition-user-info-component">
         <EditionUserInfoComponent :userInfo="user" />
       </div>
-      <div class="left-content-item user-token-component">
+      <div class="user-settings-item user-token-component">
         <UserTokenComponent :userToken="user.api_key" />
       </div>
     </div>
@@ -25,7 +25,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.left-content-item {
+.user-settings-item {
   border-bottom: 1px solid $black-10;
 }
 </style>

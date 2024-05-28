@@ -2,7 +2,6 @@
   <div>
     <label :for="id"><slot /></label>
     <div class="range__wrapper">
-      <span class="range__legend" v-text="min" />
       <div class="range">
         <span class="range__progress-value" ref="progress" v-text="range" />
         <input
@@ -15,7 +14,10 @@
           v-model.number="range"
         />
       </div>
-      <span class="range__legend" v-text="max" />
+      <div class="range__legends">
+        <span v-text="min" />
+        <span v-text="max" />
+      </div>
     </div>
   </div>
 </template>
@@ -65,7 +67,7 @@ export default {
       this.$refs.progress.style.left = `calc(${this.progress}% + (${
         8 - this.progress * 0.15
       }px))`;
-      this.$refs.slider.style.background = `linear-gradient(to right, #3e5cc9 ${this.progress}%, #ccc ${this.progress}%)`;
+      this.$refs.slider.style.background = `linear-gradient(to right, #3e5cc9 ${this.progress}%, rgba(0, 0, 0, 0.2) ${this.progress}%)`;
     },
   },
   created() {
@@ -76,6 +78,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$slider-color: $primary-color;
+$slider-light-color: rgba(0, 26, 255, 0.1);
+$slider-thumb-size: 16px;
 label {
   width: fit-content;
   height: 14px;
@@ -88,22 +93,38 @@ label {
   min-width: 240px;
   &__wrapper {
     display: flex;
-    gap: $base-space;
+    flex-direction: column;
     align-items: center;
     margin-top: $base-space;
   }
-  &__legend {
+  &__legends {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
     color: $black-37;
     @include font-size(12px);
   }
   &__progress-value {
+    display: none;
     position: absolute;
     top: $base-space * 3;
-    margin-left: -20px;
-    width: 40px;
+    margin-left: -15px;
+    width: 30px;
     text-align: center;
-    color: $black-54;
+    color: palette(white);
+    background: palette(grey, 200);
+    border-radius: $border-radius-s;
     @include font-size(12px);
+    &:before {
+      position: absolute;
+      left: calc(50% - 6px);
+      top: 0;
+      transform: translateY(-50%);
+      @include triangle(top, 6px, 6px, palette(grey, 200));
+    }
+    .range:hover & {
+      display: block;
+    }
   }
   &__slider {
     -webkit-appearance: none;
@@ -120,39 +141,39 @@ label {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  height: 15px;
-  width: 15px;
-  background-color: $primary-color;
+  height: $slider-thumb-size;
+  width: $slider-thumb-size;
+  background-color: $slider-color;
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;
 }
 
 input[type="range"]::-moz-range-thumb {
-  height: 15px;
-  width: 15px;
-  background-color: $primary-color;
+  height: $slider-thumb-size;
+  width: $slider-thumb-size;
+  background-color: $slider-color;
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 4px $slider-light-color;
 }
 input[type="range"]:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $slider-light-color;
 }
 input[type="range"]:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $slider-light-color;
 }
 input[type="range"]::-moz-range-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 4px $slider-light-color;
 }
 input[type="range"]:active::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $slider-light-color;
 }
 input[type="range"]:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $slider-light-color;
 }
 </style>

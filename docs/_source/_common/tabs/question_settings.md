@@ -24,8 +24,7 @@ rg.MultiLabelQuestion(
     description="Select all that apply",
     labels={"hate": "Hate Speech" , "sexual": "Sexual content", "violent": "Violent content", "pii": "Personal information", "untruthful": "Untruthful info", "not_english": "Not English", "inappropriate": "Inappropriate content"}, # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
     required=False,
-    visible_labels=4,
-    labels_order="natural"
+    visible_labels=4
 )
 ```
 
