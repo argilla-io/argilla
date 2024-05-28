@@ -1,0 +1,149 @@
+# Project information
+site_name: Argilla Docs
+site_url: https://argilla-io.github.io/argilla-python
+site_author: Argilla, Inc.
+site_description: The Argilla python server SDK
+copyright: Copyright &copy; 2017 - 2024 Argilla
+
+# Repository
+repo_name: argilla-io/argilla-python
+repo_url: https://github.com/argilla-io/argilla-python
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/argilla-io
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/argilla_io
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/rubrixworkspace/shared_invite/zt-20wllqq29-Z11~kp2SeFYjJ0qevJRiPg
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme)"
+      primary: white
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+watch:
+  - src/argilla_sdk
+
+# Extensions
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  # activating permalink: true makes the anchor link works in the notebooks
+  - toc:
+      permalink: true
+
+
+plugins:
+  - search
+  - open-in-new-tab
+  # - gen-files:
+  #     scripts:
+  #       - docs/scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            inherited_members: true # Allow looking up inherited methods
+          rendering:
+            show_root_heading: true # actually display anything at all...
+            # show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
+            show_if_no_docstring: true
+            show_signature_annotations: true
+            show_source: false # don't include source code
+            members_order: source # order methods according to their order of definition in the source code, not alphabetical order
+            heading_level: 4
+            # hide private members
+            private: true
+  - social
+  - mknotebooks
+  - tags:
+      tags_file: tutorials/index.md
+
+
+nav:
+  - Argilla: index.md
+  - Getting started:
+    - Quickstart: getting_started/quickstart.md
+    - Installation: getting_started/installation.md
+    # - FAQ: getting_started/faq.md
+  - How-to guides:
+    - how_to_guides/index.md
+    - Manage users and credentials: how_to_guides/user.md
+    - Manage workspaces: how_to_guides/workspace.md
+    - Manage and create datasets: how_to_guides/dataset.md
+    - Add, update, and delete records: how_to_guides/record.md
+    - Query, filter, and export records: how_to_guides/query_export.md
+    # - Distribute annotation work: how_to_guides/distribute.md
+    # - Compute metrics and KPIs:
+    #   - how_to_guides/metrics/index.md
+    #   - Dataset progress: how_to_guides/metrics/dataset.md
+    #   - Model performance: how_to_guides/metrics/model.md
+    #   - Annotator performance: how_to_guides/metrics/annotator.md
+    # - Fine-tune a model: fine_tune.md
+  # - Tutorials:
+  #   - tutorials/index.md
+  #   - tutorials/rag_llm.md
+  #   - tutorials/rag_rankers_and_retrievers.md
+  # - Integrations:
+  #   - integrations/index.md
+  - API Reference:
+    - Python SDK: reference/argilla_sdk/
+  - UI Demo ↗:
+    - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==

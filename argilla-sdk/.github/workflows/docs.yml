@@ -1,0 +1,70 @@
+name: Publish documentation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+      - gh-pages
+    tags:
+      - "**"
+
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+    steps:
+
+      - name: checkout docs-site
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: true
+          cache-dependency-path: |
+            pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          pdm install
+
+      - name: Set git credentials
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - run: pdm run mike deploy dev --push
+        if: github.ref == 'refs/heads/main'
+
+      - run: pdm run mike deploy ${{ github.ref_name }} latest --update-aliases --push
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
+        id: extract_branch_name
+
+      - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --push
+        if: startsWith(github.head_ref, 'docs/')
