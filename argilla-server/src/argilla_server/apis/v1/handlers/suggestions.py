@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -48,7 +48,4 @@ async def delete_suggestion(
 
     await authorize(current_user, SuggestionPolicyV1.delete(suggestion))
 
-    try:
-        return await datasets.delete_suggestion(db, search_engine, suggestion)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.delete_suggestion(db, search_engine, suggestion)
