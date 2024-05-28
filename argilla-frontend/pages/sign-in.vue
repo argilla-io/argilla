@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div class="container">
+  <!-- <div class="container">
     <BaseLoading v-if="hasAuthToken" />
 
     <div class="login--left">
@@ -74,14 +74,56 @@
         v-html="$t('login.support', { link: $config.slackCommunity })"
       />
     </div>
-  </div>
+  </div> -->
+  <AuthenticationLayout>
+    <div class="login--left__form">
+      <form class="form" @submit.prevent="onLoginUser">
+        <div>
+          <p class="form__title" v-text="$t('login.title')" />
+          <div class="form__input" :class="{ active: login.username }">
+            <label class="form__label" v-text="$t('login.username')"></label>
+            <input
+              v-model="login.username"
+              type="text"
+              :placeholder="$t('login.usernameDescription')"
+            />
+          </div>
+          <div class="form__input" :class="{ active: login.password }">
+            <label class="form__label" v-text="$t('login.password')"></label>
+            <input
+              v-model="login.password"
+              type="password"
+              :placeholder="$t('login.passwordDescription')"
+            />
+          </div>
+          <p
+            v-if="deployment == 'quickstart'"
+            v-html="
+              $t('login.quickstart', {
+                link: $config.documentationSiteQuickStart,
+              })
+            "
+          />
+          <base-button
+            type="submit"
+            :disabled="!isButtonEnabled"
+            class="form__button primary"
+            >{{ $t("button.login") }}</base-button
+          >
+          <p class="form__error" v-if="error">{{ formattedError }}</p>
+        </div>
+      </form>
+
+      <OAuthLogin />
+    </div>
+  </AuthenticationLayout>
 </template>
 
 <script>
+import AuthenticationLayout from "@/layouts/AuthenticationLayout";
 import { Notification } from "@/models/Notifications";
 
 export default {
-  layout: "app",
   data() {
     return {
       error: undefined,
@@ -92,6 +134,9 @@ export default {
       deployment: false,
       hasAuthToken: false,
     };
+  },
+  components: {
+    AuthenticationLayout,
   },
   async created() {
     const rawAuthToken = this.$route.query.auth;
