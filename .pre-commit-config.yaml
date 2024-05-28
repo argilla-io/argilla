@@ -1,42 +1,83 @@
 repos:
+  ##############################################################################
+  # argilla specific hooks
+  ##############################################################################
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: check-yaml
+        files: '^argilla/.*\.py$'
       - id: end-of-file-fixer
+        files: '^argilla/.*\.py$'
         exclude_types: [ text, jupyter ]
       - id: trailing-whitespace
-
+        files: '^argilla/.*\.py$'
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.4
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
-        files: '^argilla/.*\.py'
+        files: '^argilla/.*\.py$'
         args:
           - --license-filepath
           - license_header.txt
           - --fuzzy-match-generates-todo
           # - --remove-header
-
   - repo: https://github.com/psf/black
     rev: 23.10.1
     hooks:
       - id: black
         additional_dependencies: [ "typer==0.7.0" ]
         # only run for argilla/ files
-        files: '^argilla/.*\.py'
+        files: '^argilla/.*\.py$'
         args: [ --line-length=120 ]
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.3
     hooks:
       # Simulate isort via (the much faster) ruff
       - id: ruff
-        files: '^argilla/.*\.py'
+        files: '^argilla/.*\.py$'
         args:
           - --select=I
           - --fix
+  ##############################################################################
+  # argilla-sdk specific hooks
+  ##############################################################################
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: insert-license
+        name: "Insert license header in Python source files"
+        files: '^argilla-sdk/.*\.py$'
+        exclude: ^argilla-sdk/docs/snippets/
+        args:
+          - --license-filepath
+          - argilla-sdk/LICENSE_HEADER
+          - --fuzzy-match-generates-todo
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.1.4
+    hooks:
+      - id: ruff
+        files: '^argilla-sdk/.*\.py$'
+        args:
+          - --fix
+      - id: ruff-format
+        files: '^argilla-sdk/.*\.py$'
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        files: '^argilla-sdk/.*\.ipynb$'
+        args:
+          - --keep-count
+          - --keep-output
+          # - --keep-prompt-number
+          # - --keep-cell-ids
+          # - --keep-markdown
+          # - --keep-output-timestamp
+          # - --keep-execution-count
+          # - --keep-metadata
+          # - --keep-version
 
 ci:
   autofix_commit_msg: |
