@@ -12,9 +12,11 @@ export const useRecordFeedbackTaskViewModel = ({
   recordCriteria: RecordCriteria;
 }) => {
   const getDatasetVectorsUseCase = useResolve(GetDatasetVectorsUseCase);
+
   const loadRecordsUseCase = useResolve(LoadRecordsToAnnotateUseCase);
 
   const datasetVectors = ref<DatasetVector[]>([]);
+
   const { state: records } = useRecords();
 
   const loadRecords = async (criteria: RecordCriteria) => {
