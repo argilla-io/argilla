@@ -15,7 +15,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -44,8 +44,6 @@ from argilla_server.search_engine import (
 )
 from argilla_server.security import auth
 from argilla_server.telemetry import TelemetryClient, get_telemetry_client
-
-CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
 
 router = APIRouter()
 
@@ -188,21 +186,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicyV1.create(dataset_create.workspace_id))
 
-    if await Workspace.get(db, dataset_create.workspace_id) is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Workspace with id `{dataset_create.workspace_id}` not found",
-        )
-
-    if await datasets.get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Dataset with name `{dataset_create.name}` already exists for workspace with id `{dataset_create.workspace_id}`",
-        )
-
-    dataset = await datasets.create_dataset(db, dataset_create)
-
-    return dataset
+    return await datasets.create_dataset(db, dataset_create)
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
@@ -217,19 +201,7 @@ async def create_dataset_field(
 
     await authorize(current_user, DatasetPolicyV1.create_field(dataset))
 
-    if await datasets.get_field_by_name_and_dataset_id(db, field_create.name, dataset_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Field with name `{field_create.name}` already exists for dataset with id `{dataset_id}`",
-        )
-
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        field = await datasets.create_field(db, dataset, field_create)
-        return field
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.create_field(db, dataset, field_create)
 
 
 @router.post(
@@ -247,22 +219,7 @@ async def create_dataset_metadata_property(
 
     await authorize(current_user, DatasetPolicyV1.create_metadata_property(dataset))
 
-    if await datasets.get_metadata_property_by_name_and_dataset_id(db, metadata_property_create.name, dataset_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Metadata property with name `{metadata_property_create.name}` "
-            f"already exists for dataset with id `{dataset_id}`",
-        )
-
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        metadata_property = await datasets.create_metadata_property(
-            db, search_engine, dataset, metadata_property_create
-        )
-        return metadata_property
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.create_metadata_property(db, search_engine, dataset, metadata_property_create)
 
 
 @router.post(
@@ -280,27 +237,7 @@ async def create_dataset_vector_settings(
 
     await authorize(current_user, DatasetPolicyV1.create_vector_settings(dataset))
 
-    count_vectors_settings_by_dataset_id = await datasets.count_vectors_settings_by_dataset_id(db, dataset_id)
-    if count_vectors_settings_by_dataset_id >= CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"The maximum number of vector settings has been reached for dataset with id `{dataset_id}`",
-        )
-
-    if await datasets.get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id"
-            f" `{dataset_id}`",
-        )
-
-    try:
-        vector_settings = await datasets.create_vector_settings(
-            db, search_engine, dataset=dataset, vector_settings_create=vector_settings_create
-        )
-        return vector_settings
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.create_vector_settings(db, search_engine, dataset, vector_settings_create)
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=DatasetSchema)
@@ -324,19 +261,15 @@ async def publish_dataset(
     )
 
     await authorize(current_user, DatasetPolicyV1.publish(dataset))
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        dataset = await datasets.publish_dataset(db, search_engine, dataset)
 
-        telemetry_client.track_data(
-            action="PublishedDataset",
-            data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
-        )
+    dataset = await datasets.publish_dataset(db, search_engine, dataset)
 
-        return dataset
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    telemetry_client.track_data(
+        action="PublishedDataset",
+        data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
+    )
+
+    return dataset
 
 
 @router.delete("/datasets/{dataset_id}", response_model=DatasetSchema)
@@ -351,7 +284,7 @@ async def delete_dataset(
 
     await authorize(current_user, DatasetPolicyV1.delete(dataset))
 
-    await datasets.delete_dataset(db, search_engine, dataset=dataset)
+    await datasets.delete_dataset(db, search_engine, dataset)
 
     return dataset
 
@@ -368,4 +301,4 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicyV1.update(dataset))
 
-    return await datasets.update_dataset(db, dataset=dataset, dataset_update=dataset_update)
+    return await datasets.update_dataset(db, dataset, dataset_update)
