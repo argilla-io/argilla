@@ -35,13 +35,11 @@ export default {
 
 <style lang="scss" scoped>
 .dataset-progress {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: calc($base-space / 2);
   max-width: 160px;
-  z-index: 0;
   &__bar {
     width: 100%;
     max-width: 160px;

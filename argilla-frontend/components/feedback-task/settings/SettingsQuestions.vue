@@ -40,7 +40,7 @@
             </Validation>
 
             <div
-              class="settings__edition-form__group --subcategories"
+              class="settings__edition-form__group"
               v-if="
                 question.isMultiLabelType ||
                 question.isSingleLabelType ||
@@ -48,28 +48,6 @@
               "
             >
               <label :for="`options-${question.id}`" v-text="$t('labels')" />
-              <BaseSwitch
-                v-if="question.isMultiLabelType"
-                class="settings__edition-form__switch --subcategory"
-                :id="`options-order-${question.id}`"
-                v-model="question.settings.suggestionFirst"
-                >{{ $t("suggestionFirst") }}</BaseSwitch
-              >
-
-              <BaseRangeSlider
-                v-if="question.settings.shouldShowVisibleOptions"
-                class="settings__edition-form__slider --subcategory"
-                :id="`visible_options-${question.id}`"
-                :min="3"
-                :max="question.settings.options.length"
-                v-model="question.settings.visible_options"
-                >{{ $t("visibleLabels") }}</BaseRangeSlider
-              >
-
-              <label
-                v-text="$t('order')"
-                class="settings__edition-form__label --subcategory"
-              />
               <draggable
                 class="label__container"
                 ghost-class="label__item__ghost"
@@ -95,10 +73,25 @@
 
             <BaseSwitch
               v-if="question.isTextType"
-              class="settings__edition-form__switch"
               :id="`use-markdown-${question.id}`"
               v-model="question.settings.use_markdown"
               >{{ $t("useMarkdown") }}</BaseSwitch
+            >
+
+            <BaseSwitch
+              v-if="question.isMultiLabelType"
+              :id="`options-order-${question.id}`"
+              v-model="question.settings.suggestionFirst"
+              >{{ $t("suggestionFirst") }}</BaseSwitch
+            >
+
+            <BaseRangeSlider
+              v-if="question.settings.shouldShowVisibleOptions"
+              :id="`visible_options-${question.id}`"
+              :min="3"
+              :max="question.settings.options.length"
+              v-model="question.settings.visible_options"
+              >{{ $t("visibleLabels") }}</BaseRangeSlider
             >
 
             <div class="settings__edition-form__footer">
@@ -170,20 +163,11 @@ export default {
     overflow: auto;
     padding-right: $base-space * 2;
 
-    &__label {
-      &.--subcategory {
-        display: block;
-        @include font-size(13px);
-        color: $black-87;
-      }
-    }
-
     &__content {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
       width: 100%;
-      max-width: 800px;
       margin-top: $base-space;
     }
 
@@ -207,70 +191,16 @@ export default {
       }
     }
 
-    &__switch.re-switch {
-      :deep(label) {
-        color: $black-87;
-      }
-      @include media(">desktop") {
-        :deep(label) {
-          min-width: 180px;
-        }
-      }
-      &.--subcategory {
-        @include font-size(13px);
-      }
-    }
-
-    &__slider {
-      :deep(label) {
-        color: $black-87;
-        line-height: 1;
-        margin-right: 1em;
-      }
-      @include media(">desktop") {
-        :deep(label) {
-          min-width: 180px;
-          margin-right: 1em;
-        }
-      }
-      &.--subcategory {
-        @include font-size(13px);
-        @include media(">desktop") {
-          display: flex;
-          align-items: center;
-        }
-      }
-    }
-
     &__group {
       display: flex;
       flex-direction: column;
       width: 100%;
-      gap: 12px;
-
-      &.--subcategories {
-        & > label:first-child {
-          margin-bottom: $base-space * 2;
-        }
-        @include media(">desktop") {
-          gap: 0;
-        }
-      }
-
-      .--subcategory {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        @include media(">desktop") {
-          flex-wrap: nowrap;
-          height: 32px;
-        }
-      }
+      gap: $base-space;
 
       & > label {
         width: fit-content;
         height: 14px;
-        color: $black-87;
+        color: $black-54;
       }
 
       & input {

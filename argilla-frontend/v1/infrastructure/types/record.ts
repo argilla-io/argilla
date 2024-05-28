@@ -80,7 +80,6 @@ export interface BackendAdvanceSearchQuery {
     };
     text?: {
       q: string;
-      field?: string;
     };
   };
   filters?: {
