@@ -61,9 +61,9 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
-  &--focus {
-    overflow-y: auto;
-    overflow-x: hidden;
+  &:has(.dropdown__content),
+  &:has(.checkbox.checked) {
+    border-color: $black-20;
   }
   &__wrapper {
     flex: 1;
@@ -86,6 +86,10 @@ export default {
     .record--bulk & {
       height: 100%;
       overflow: auto;
+    }
+    .record--focus & {
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
   &__fixed-header {
