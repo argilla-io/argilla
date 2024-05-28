@@ -39,12 +39,12 @@ for dataset in my_workspace.datasets:
 ```
 
 
---- 
+---
 
 ## Class Reference
 
 ### `rg.Argilla`
 
 ::: argilla_sdk.client.Argilla
-    options: 
+    options:
         heading_level: 3

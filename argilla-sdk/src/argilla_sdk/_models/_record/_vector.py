@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,12 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from typing import List
 
-from argilla_sdk._models import ResourceModel
-
-import re
 from pydantic import field_validator
+
+from argilla_sdk._models import ResourceModel
 
 __all__ = ["VectorModel"]
 

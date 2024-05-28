@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, List, Any, Union, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from argilla_sdk._models import SearchQueryModel
 from argilla_sdk._models._search import (
-    TextQueryModel,
-    ResponseFilterScopeModel,
-    SuggestionFilterScopeModel,
-    MetadataFilterScopeModel,
-    ScopeModel,
-    RangeFilterModel,
-    TermsFilterModel,
-    FilterModel,
     AndFilterModel,
+    FilterModel,
+    MetadataFilterScopeModel,
     QueryModel,
+    RangeFilterModel,
+    ResponseFilterScopeModel,
+    ScopeModel,
+    SuggestionFilterScopeModel,
+    TermsFilterModel,
+    TextQueryModel,
 )
 
 
@@ -78,13 +80,13 @@ class Filter:
 
     def __init__(self, conditions: Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None] = None):
         """ Create a filter object for use in Argilla search requests.
-        
+
         Parameters:
             conditions (Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None], optional): \
                 The conditions that will be used to filter the search results. \
                 The conditions should be a list of tuples where each tuple contains \
                 the field, operator, and value. For example `("label", "in", ["positive","happy"])`.\
-        
+
         """
 
         if isinstance(conditions, tuple):

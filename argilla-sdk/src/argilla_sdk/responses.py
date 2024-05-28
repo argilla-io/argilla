@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, TYPE_CHECKING, List, Dict, Optional, Iterable
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 from uuid import UUID
 
-from argilla_sdk._models import UserResponseModel, ResponseStatus
+from argilla_sdk._models import ResponseStatus, UserResponseModel
 from argilla_sdk._resource import Resource
 from argilla_sdk.settings import RankingQuestion
 
@@ -57,12 +59,12 @@ class Response:
     def serialize(self) -> dict[str, Any]:
         """Serializes the Response to a dictionary. This is principally used for sending the response to the API, \
             but can be used for data wrangling or manual export.
-        
+
         Returns:
             dict[str, Any]: The serialized response as a dictionary with keys `question_name`, `value`, and `user_id`.
-            
+
         Examples:
-        
+
         ```python
         response = rg.Response("label", "negative", user_id=user.id)
         response.serialize()

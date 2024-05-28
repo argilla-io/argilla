@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +21,10 @@ from pathlib import Path
 from string import ascii_lowercase
 from tempfile import TemporaryDirectory
 
-import pytest
-from datasets import Dataset as HFDataset
-
 import argilla_sdk as rg
+import pytest
 from argilla_sdk import Argilla
+from datasets import Dataset as HFDataset
 
 
 @pytest.fixture

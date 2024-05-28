@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +15,7 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import List, Literal, Optional, Union, Annotated
+from typing import Annotated, List, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator

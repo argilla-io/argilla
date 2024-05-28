@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Tuple, Union, Optional
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 import httpx
@@ -20,7 +22,7 @@ from typing_extensions import deprecated
 
 from argilla_sdk._api._base import ResourceAPI
 from argilla_sdk._exceptions import api_error_handler
-from argilla_sdk._models import RecordModel, UserResponseModel, SearchQueryModel
+from argilla_sdk._models import RecordModel, SearchQueryModel, UserResponseModel
 
 __all__ = ["RecordsAPI"]
 

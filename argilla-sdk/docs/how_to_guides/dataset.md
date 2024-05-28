@@ -206,7 +206,7 @@ To collect feedback for your dataset, you need to formulate questions that annot
 
 === "Ranking"
     A `RankingQuestion` asks annotators to order a list of options. It is useful to gather information on the preference or relevance of a set of options. Ties are allowed and all options will need to be ranked. It has the following configuration:
-    
+
     - `name`: The name of the question.
     - `title` (optional): The name of the question, as it will be displayed in the UI. Defaults to the `name` value.
     - `description` (optional): The text to be displayed in the question tooltip in the UI. You can use it to give more context or information to annotators.
@@ -308,7 +308,7 @@ To collect feedback for your dataset, you need to formulate questions that annot
 Metadata properties allow you to configure the use of metadata information for the filtering and sorting features available in the UI and Python SDK. There exist three types of metadata you can add: `TermsMetadataProperty`, `IntegerMetadataProperty` and `FloatMetadataProperty`.
 
 === "Terms"
-    A `TermsMetadataProperty` allows to add a list of strings as metadata options. It has the following configuration:	
+    A `TermsMetadataProperty` allows to add a list of strings as metadata options. It has the following configuration:
 
     - `name`: The name of the metadata property.
     - `title` (optional): The name of the metadata property, as it will be displayed in the UI. Defaults to the `name` value, but capitalized.
