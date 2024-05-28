@@ -195,6 +195,8 @@ async def test_create_user_with_non_existent_workspaces(
     response = await async_client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
+    assert response.json() == {"detail": "Workspace 'i do not exist' does not exist"}
+
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
