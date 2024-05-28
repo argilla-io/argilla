@@ -62,7 +62,7 @@ export const useAnnotationModeViewModel = () => {
       },
       {
         key: "search",
-        value: recordCriteria.value.committed.searchText,
+        value: recordCriteria.value.committed.searchText.urlParams,
       },
       {
         key: "metadata",

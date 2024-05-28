@@ -45,5 +45,8 @@ export default {
   align-items: center;
   height: 100%;
   border-bottom: 1px solid #e6e6e6;
+  @include media(">tablet") {
+    min-height: 100px;
+  }
 }
 </style>

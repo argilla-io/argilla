@@ -16,7 +16,7 @@
         class="span-entity__input"
         type="text"
         autocomplete="off"
-        :placeholder="$nuxt.$t('search')"
+        placeholder=""
         autofocus
         v-model="searchText"
         @keydown.stop=""
