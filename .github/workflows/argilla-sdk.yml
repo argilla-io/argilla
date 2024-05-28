@@ -62,7 +62,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: true
           cache-dependency-path: |
-            pyproject.toml
+            argilla-sdk/pyproject.toml
       - name: Install dependencies
         run: |
           pdm install
