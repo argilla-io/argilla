@@ -230,7 +230,7 @@ export default {
   validations: {
     businessLogic: {
       missing_vector: {
-        message: "Vector not found in selected record",
+        message: "Vector not found for the selected record",
       },
     },
     http: {
