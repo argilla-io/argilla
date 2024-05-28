@@ -46,6 +46,11 @@ async def get_question_by_name_and_dataset_id_or_raise(db: AsyncSession, name: s
 
 
 async def create_question(db: AsyncSession, dataset: Dataset, question_create: QuestionCreate) -> Question:
+    if await get_question_by_name_and_dataset_id(db, question_create.name, dataset.id):
+        raise errors.NotUniqueError(
+            f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
+        )
+
     QuestionCreateValidator(question_create).validate_for(dataset)
 
     return await Question.create(

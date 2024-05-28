@@ -15,6 +15,7 @@
 from typing import List
 
 from argilla_server.enums import QuestionType
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models.database import Dataset, Question
 from argilla_server.schemas.v1.questions import (
     QuestionCreate,
@@ -39,7 +40,7 @@ class QuestionCreateValidator:
 
     def _validate_dataset_is_not_ready(self, dataset):
         if dataset.is_ready:
-            raise ValueError("questions cannot be created for a published dataset")
+            raise UnprocessableEntityError("questions cannot be created for a published dataset")
 
     def _validate_span_question_settings(self, dataset: Dataset):
         if self._question_create.settings.type != QuestionType.span:
@@ -49,11 +50,13 @@ class QuestionCreateValidator:
         field_names = [field.name for field in dataset.fields]
 
         if field not in field_names:
-            raise ValueError(f"'{field}' is not a valid field name.\nValid field names are {field_names!r}")
+            raise UnprocessableEntityError(
+                f"'{field}' is not a valid field name.\nValid field names are {field_names!r}"
+            )
 
         for question in dataset.questions:
             if question.type == QuestionType.span and field == question.parsed_settings.field:
-                raise ValueError(f"'{field}' is already used by span question with id '{question.id}'")
+                raise UnprocessableEntityError(f"'{field}' is already used by span question with id '{question.id}'")
 
 
 class QuestionUpdateValidator:
