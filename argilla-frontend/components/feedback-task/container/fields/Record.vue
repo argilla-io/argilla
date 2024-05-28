@@ -61,6 +61,10 @@ export default {
   background: palette(white);
   border: 1px solid palette(grey, 600);
   border-radius: $border-radius-m;
+  &:has(.dropdown__content),
+  &:has(.checkbox.checked) {
+    border-color: $black-20;
+  }
   &__wrapper {
     flex: 1;
     display: flex;
