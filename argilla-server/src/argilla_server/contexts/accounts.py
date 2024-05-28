@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 
 from argilla_server.enums import UserRole
-from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
+from argilla_server.errors.future import NotUniqueError
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.schemas.v0.users import UserCreate
 from argilla_server.schemas.v0.workspaces import WorkspaceCreate
