@@ -19,8 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
-from argilla_server.errors import EntityAlreadyExistsError
-from argilla_server.errors.future import NotUniqueError
+from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace
 from argilla_server.policies import WorkspacePolicyV1, WorkspaceUserPolicyV1, authorize
 from argilla_server.schemas.v1.users import User as UserSchema
@@ -48,9 +47,7 @@ async def get_workspace(
 ):
     await authorize(current_user, WorkspacePolicyV1.get(workspace_id))
 
-    workspace = await Workspace.get_or_raise(db, workspace_id)
-
-    return workspace
+    return await Workspace.get_or_raise(db, workspace_id)
 
 
 @router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema)
@@ -62,12 +59,7 @@ async def create_workspace(
 ):
     await authorize(current_user, WorkspacePolicyV1.create)
 
-    try:
-        workspace = await accounts.create_workspace(db, workspace_create.dict())
-    except NotUniqueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-
-    return workspace
+    return await accounts.create_workspace(db, workspace_create.dict())
 
 
 @router.delete("/workspaces/{workspace_id}", response_model=WorkspaceSchema)
@@ -82,12 +74,7 @@ async def delete_workspace(
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    if await datasets.list_datasets_by_workspace_id(db, workspace_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Cannot delete the workspace {workspace_id}. This workspace has some feedback datasets linked",
-        )
-
+    # TODO: Once we move to v2.0 remove the following check because it's only required by old datasets
     if await datasets_service.list(current_user, workspaces=[workspace.name]):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -141,17 +128,12 @@ async def create_workspace_user(
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    user = await User.get(db, workspace_user_create.user_id)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"User with id `{workspace_user_create.user_id}` not found",
-        )
-
     try:
-        workspace_user = await accounts.create_workspace_user(db, {"workspace_id": workspace.id, "user_id": user.id})
-    except NotUniqueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        user = await User.get_or_raise(db, workspace_user_create.user_id)
+    except NotFoundError as e:
+        raise UnprocessableEntityError(e.message)
+
+    workspace_user = await accounts.create_workspace_user(db, {"workspace_id": workspace.id, "user_id": user.id})
 
     return workspace_user.user
 
