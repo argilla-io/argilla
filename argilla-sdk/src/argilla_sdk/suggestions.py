@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any, Optional, Literal, Union, List, TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from argilla_sdk._models import SuggestionModel
@@ -19,7 +21,7 @@ from argilla_sdk._resource import Resource
 from argilla_sdk.settings import RankingQuestion
 
 if TYPE_CHECKING:
-    from argilla_sdk import QuestionType, Record, Dataset
+    from argilla_sdk import Dataset, QuestionType, Record
 
 __all__ = ["Suggestion"]
 

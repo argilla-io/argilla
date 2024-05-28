@@ -71,5 +71,5 @@ for record in dataset.records(with_suggestions=True):
 ### `rg.Suggestion`
 
 ::: argilla_sdk.suggestions.Suggestion
-    options: 
+    options:
         heading_level: 3

@@ -70,5 +70,5 @@ dataset.records.add(
 ### `rg.Vector`
 
 ::: argilla_sdk.vectors.Vector
-    options: 
+    options:
         heading_level: 3

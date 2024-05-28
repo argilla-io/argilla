@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +17,18 @@
 import warnings
 from abc import abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, overload, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union, overload
 
 from argilla_sdk import _api
 from argilla_sdk._api._client import DEFAULT_HTTP_CONFIG
 from argilla_sdk._helpers import GenericIterator
 from argilla_sdk._helpers._resource_repr import ResourceHTMLReprMixin
-from argilla_sdk._models import UserModel, WorkspaceModel, DatasetModel
+from argilla_sdk._models import DatasetModel, UserModel, WorkspaceModel
 
 if TYPE_CHECKING:
-    from argilla_sdk import Workspace
-    from argilla_sdk import Dataset
-    from argilla_sdk import User
-
     from IPython.display import HTML
+
+    from argilla_sdk import Dataset, User, Workspace
 
 __all__ = ["Argilla"]
 

@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +23,7 @@ from argilla_sdk._api import RecordsAPI
 from argilla_sdk._helpers._mixins import LoggingMixin
 from argilla_sdk._models import RecordModel
 from argilla_sdk.client import Argilla
-from argilla_sdk.records._io import HFDatasetsIO, GenericIO, JsonIO, HFDataset
+from argilla_sdk.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
 from argilla_sdk.records._resource import Record
 from argilla_sdk.records._search import Query
 from argilla_sdk.responses import Response
@@ -449,7 +451,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                     sub_attribute = attribute_mapping[2]
             elif schema_item is mapping is None and attribute != "id":
                 warnings.warn(
-                    message=f"""Record attribute {attribute} is not in the schema so skipping. 
+                    message=f"""Record attribute {attribute} is not in the schema so skipping.
                         Define a mapping to map source data fields to Argilla Fields, Questions, and ids
                         """
                 )

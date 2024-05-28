@@ -36,5 +36,5 @@ dataset.create()
 ### `rg.Settings`
 
 ::: argilla_sdk.settings.Settings
-    options: 
+    options:
         heading_level: 3

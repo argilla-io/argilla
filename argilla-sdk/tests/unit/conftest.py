@@ -1,3 +1,5 @@
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 # Copyright 2024-present, Argilla, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

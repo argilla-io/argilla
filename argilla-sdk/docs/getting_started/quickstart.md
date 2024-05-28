@@ -20,7 +20,7 @@ To work with Argilla datasets, you need to use the Argilla SDK. You can install 
 
 ```console
 pip install git+https://github.com/argilla-io/argilla-python.git
-```	
+```
 
 ### Run the Argilla server
 
@@ -115,7 +115,7 @@ Now you can add the data to your dataset. Use `mapping` to indicate which keys i
 ```python
 # Add records to the dataset
 dataset.records.add(records=data, mapping={"text": "review"})
-```	
+```
 
 🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
 

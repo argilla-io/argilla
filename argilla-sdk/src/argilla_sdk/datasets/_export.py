@@ -1,4 +1,6 @@
 # Copyright 2024-present, Argilla, Inc.
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC
 import json
 import logging
 import os
-from pathlib import Path
 import warnings
-from typing import Optional, Union, TYPE_CHECKING, Tuple, Type
+from abc import ABC
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 from uuid import uuid4
 
 from argilla_sdk._models import DatasetModel
 from argilla_sdk.client import Argilla
 from argilla_sdk.settings import Settings
 from argilla_sdk.workspaces._resource import Workspace
-
 
 if TYPE_CHECKING:
     from argilla_sdk import Dataset
