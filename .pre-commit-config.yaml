@@ -12,7 +12,7 @@ repos:
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
-        files: \.py$
+        files: '^argilla/.*\.py'
         args:
           - --license-filepath
           - license_header.txt
@@ -33,6 +33,7 @@ repos:
     hooks:
       # Simulate isort via (the much faster) ruff
       - id: ruff
+        files: '^argilla/.*\.py'
         args:
           - --select=I
           - --fix
