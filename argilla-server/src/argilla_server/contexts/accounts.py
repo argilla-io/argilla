@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 
 from argilla_server.enums import UserRole
-from argilla_server.errors.future import NotUniqueError
+from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.schemas.v0.users import UserCreate
 from argilla_server.schemas.v0.workspaces import WorkspaceCreate
@@ -125,8 +125,8 @@ async def list_users_by_ids(db: AsyncSession, ids: Iterable[UUID]) -> Sequence[U
 # TODO: After removing API v0 implementation we can remove the workspaces attribute.
 # With API v1 the workspaces will be created doing additional requests to other endpoints for it.
 async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List[str], None] = None) -> User:
-    if (await get_user_by_username(db, user_attrs["username"])) is not None:
-        raise NotUniqueError(f"Username `{user_attrs['username']}` is not unique")
+    if await get_user_by_username(db, user_attrs["username"]) is not None:
+        raise NotUniqueError(f"User with name `{user_attrs['username']}` is not unique")
 
     async with db.begin_nested():
         user = await User.create(
