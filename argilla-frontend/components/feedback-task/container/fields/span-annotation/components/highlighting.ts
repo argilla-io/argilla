@@ -73,7 +73,7 @@ export class Highlighting {
   ) {
     this.styles = {
       entitiesGap: 16,
-      lineHeight: 32,
+      lineHeight: config.allowOverlap ? 48 : 32,
       spanContainerId: `entity-span-container-${nodeId}`,
       entityCssKey: "hl",
       ...styles,
@@ -171,8 +171,10 @@ export class Highlighting {
     );
 
     const lineHeight =
-      this.styles.lineHeight +
-      this.styles.entitiesGap * Math.max(0, maxOverlappedLevels - 1);
+      maxOverlappedLevels > 2
+        ? this.styles.lineHeight +
+          this.styles.entitiesGap * Math.max(0, maxOverlappedLevels - 2)
+        : this.styles.lineHeight;
 
     this.config.lineHeight = lineHeight;
   }

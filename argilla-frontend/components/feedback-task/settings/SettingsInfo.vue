@@ -94,11 +94,11 @@ export default {
 
   &__content {
     flex: 1;
-    max-width: 1000px;
+    max-width: 800px;
     padding-top: $base-space;
   }
   &__area {
-    max-width: 1000px;
+    max-width: 800px;
     padding-bottom: $base-space * 3;
     border-bottom: 1px solid $black-10;
   }

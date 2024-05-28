@@ -243,7 +243,10 @@ export class RecordRepository {
 
       if (isFilteringByText) {
         body.query.text = {
-          q: searchText,
+          q: searchText.value.text,
+          field: searchText.isFilteringByField
+            ? searchText.value.field
+            : undefined,
         };
       }
 
