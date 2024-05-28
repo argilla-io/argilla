@@ -45,10 +45,6 @@ These are the section headers that we use:
 
 - Fixed Korean character reversed. ([#4753](https://github.com/argilla-io/argilla/pull/4753))
 
-### Fixed
-
-- Fixed requirements for version of wrapt library conflicting with Python 3.11 ([#4693](https://github.com/argilla-io/argilla/pull/4693))
-
 ## [1.27.0](https://github.com/argilla-io/argilla/compare/v1.26.1...v1.27.0)
 
 ### Added

@@ -447,7 +447,6 @@ export default {
   &__body {
     overflow: auto;
     padding-bottom: 0.5em;
-    min-height: 250px;
     @extend %hide-scrollbar;
     #{$this}__item {
       margin-bottom: -1px;

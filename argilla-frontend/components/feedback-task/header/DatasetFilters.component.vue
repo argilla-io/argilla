@@ -1,9 +1,9 @@
 <template>
   <div class="filters__wrapper">
     <div class="filters">
-      <SearchBarFilter
+      <SearchBarBase
         v-model="recordCriteria.searchText"
-        :fields="datasetFields"
+        :placeholder="'Introduce a query'"
       />
       <StatusFilter class="filters__status" v-model="recordCriteria.status" />
       <FilterButton
@@ -40,8 +40,8 @@
             v-model="recordCriteria.metadata.value"
           />
           <ResponsesFilter
-            :datasetQuestions="datasetQuestions"
             v-model="recordCriteria.response.value"
+            :datasetQuestions="datasetQuestions"
           />
           <SuggestionFilter
             v-model="recordCriteria.suggestion.value"
@@ -102,7 +102,7 @@ export default {
     },
   },
   watch: {
-    "recordCriteria.searchText.value"() {
+    "recordCriteria.searchText"() {
       this.newFiltersChanged();
     },
     "recordCriteria.status"() {
