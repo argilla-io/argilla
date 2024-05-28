@@ -6,13 +6,18 @@ concurrency:
 
 on:
   push:
+    paths:
+      - "argilla-sdk/**"
     branches:
-      - main
-      - gh-pages
+      - "main"
+      - "develop"
+      - "gh-pages"
     tags:
       - "**"
 
   pull_request:
+    paths:
+      - "argilla-sdk/**"
     types:
       - opened
       - edited
@@ -20,7 +25,13 @@ on:
       - synchronize
       - ready_for_review
     branches:
-      - main
+      - "main"
+      - "develop"
+      - "feat/**"
+
+defaults:
+  run:
+    working-directory: argilla-sdk
 
 jobs:
   publish:
@@ -28,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10"]
+        python-version: [ "3.10" ]
     steps:
 
       - name: checkout docs-site
@@ -44,7 +55,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: true
           cache-dependency-path: |
-            pyproject.toml
+            argilla-sdk/pyproject.toml
 
       - name: Install dependencies
         run: |
