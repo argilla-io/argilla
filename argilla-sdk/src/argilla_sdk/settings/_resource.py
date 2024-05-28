@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,15 +16,15 @@ import json
 import os
 from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import List, Optional, TYPE_CHECKING, Dict, Union
 from uuid import UUID
 
-from argilla_sdk._exceptions import ArgillaAPIError, ArgillaSerializeError, SettingsError
-from argilla_sdk._models import DatasetModel, TextFieldModel, TextQuestionModel
+from argilla_sdk._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
+from argilla_sdk._models import TextFieldModel, TextQuestionModel, DatasetModel
 from argilla_sdk._resource import Resource
-from argilla_sdk.settings._field import FieldType, VectorField, field_from_dict, field_from_model
+from argilla_sdk.settings._field import FieldType, VectorField, field_from_model, field_from_dict
 from argilla_sdk.settings._metadata import MetadataType
-from argilla_sdk.settings._question import QuestionType, question_from_dict, question_from_model
+from argilla_sdk.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
 
 if TYPE_CHECKING:
     from argilla_sdk.datasets import Dataset
@@ -192,7 +190,7 @@ class Settings(Resource):
 
     def question_by_id(self, question_id: UUID) -> QuestionType:
         property = self.schema_by_id.get(question_id)
-        if isinstance(property, QuestionType):
+        if isinstance(property, QuestionPropertyBase):
             return property
         raise ValueError(f"Question with id {question_id} not found")
 

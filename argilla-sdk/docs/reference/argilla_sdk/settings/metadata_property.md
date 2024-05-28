@@ -1,4 +1,4 @@
-# Metadata Properties
+# Metadata Properties   
 
 Metadata properties are used to define metadata fields in a dataset. Metadata fields are used to store additional information about the records in the dataset. For example, the category of a record, the price of a product, or any other information that is relevant to the record.
 
@@ -66,17 +66,17 @@ dataset = rg.Dataset(
 ### `rg.FloatMetadataProperty`
 
 ::: argilla_sdk.settings.FloatMetadataProperty
-    options:
+    options: 
         heading_level: 3
 
 ### `rg.IntegerMetadataProperty`
 
 ::: argilla_sdk.settings.IntegerMetadataProperty
-    options:
+    options: 
         heading_level: 3
 
 ### `rg.TermsMetadataProperty`
 
 ::: argilla_sdk.settings.TermsMetadataProperty
-    options:
+    options: 
         heading_level: 3

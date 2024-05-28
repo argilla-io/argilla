@@ -44,11 +44,11 @@ for record in dataset.records(query=query):
 ### `rg.Query`
 
 ::: argilla_sdk.records._search.Query
-    options:
+    options: 
         heading_level: 3
 
 ### `rg.Filter`
 
-::: argilla_sdk.records._search.Filter
-    options:
+::: argilla_sdk.records._search.Filter        
+    options: 
         heading_level: 3

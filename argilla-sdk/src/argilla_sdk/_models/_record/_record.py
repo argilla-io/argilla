@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +16,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import Field, field_serializer, field_validator
 
+from argilla_sdk._models._resource import ResourceModel
 from argilla_sdk._models._record._metadata import MetadataModel, MetadataValue
 from argilla_sdk._models._record._response import UserResponseModel
 from argilla_sdk._models._record._suggestion import SuggestionModel
 from argilla_sdk._models._record._vector import VectorModel
-from argilla_sdk._models._resource import ResourceModel
 
 
 class RecordModel(ResourceModel):

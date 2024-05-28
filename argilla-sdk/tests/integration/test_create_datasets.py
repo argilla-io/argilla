@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +14,8 @@
 import uuid
 
 import pytest
-from argilla_sdk import Argilla, Dataset, RatingQuestion, Settings, TextField
+
+from argilla_sdk import Argilla, Dataset, Settings, TextField, RatingQuestion
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -6,13 +6,13 @@ The `Record` object is used to represent a single record in Argilla. It contains
 
 ### Creating a Record
 
-To add records, you can pass dictionaries to the `Dataset.records.add` method. Argilla will instantiate the `Record` class based on the input data and `mapping` property. The input data keys must match the names in `rg.Settings` object, or be mapped via the dictionary passed to the `mapping` parameter.
+To add records, you can pass dictionaries to the `Dataset.records.add` method. Argilla will instantiate the `Record` class based on the input data and `mapping` property. The input data keys must match the names in `rg.Settings` object, or be mapped via the dictionary passed to the `mapping` parameter. 
 
 ```python
 dataset.records.add(
     records=[
     {
-        "question": "What is the capital of France?",
+        "question": "What is the capital of France?", 
         "answer": "Paris"
     },
 ])
@@ -36,9 +36,9 @@ The `Record` object has suggestions, responses, metadata, and vectors attributes
 
 ```python
 for record in dataset.records(
-    with_suggestions=True,
-    with_responses=True,
-    with_metadata=True,
+    with_suggestions=True, 
+    with_responses=True, 
+    with_metadata=True, 
     with_vectors=True
     ):
     print(record.suggestions)
@@ -64,5 +64,5 @@ For changes to take effect, the user must call the `update` method on the `Datas
 ### `rg.Record`
 
 ::: argilla_sdk.records.Record
-    options:
+    options: 
         heading_level: 3

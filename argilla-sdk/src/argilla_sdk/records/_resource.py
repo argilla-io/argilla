@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,16 +13,16 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
 from uuid import UUID, uuid4
 
 from argilla_sdk._models import (
     MetadataModel,
-    MetadataValue,
     RecordModel,
-    SuggestionModel,
     UserResponseModel,
+    SuggestionModel,
     VectorModel,
+    MetadataValue,
 )
 from argilla_sdk._resource import Resource
 from argilla_sdk.responses import Response, UserResponse

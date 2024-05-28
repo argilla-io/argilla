@@ -37,7 +37,7 @@ dataset.records.add(
         "answer": "Paris" # 'answer' matches the `rg.TextQuestion` name
     },
     {
-        "question": "What is the capital of Germany?",
+        "question": "What is the capital of Germany?", 
         "answer": "Berlin"
     },
 ])
@@ -128,5 +128,5 @@ dataset.records.to_list()
 ### `rg.Dataset.records`
 
 ::: argilla_sdk.records.DatasetRecords
-    options:
+    options: 
         heading_level: 3

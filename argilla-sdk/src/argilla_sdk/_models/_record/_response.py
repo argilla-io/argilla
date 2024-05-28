@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +14,10 @@
 
 import warnings
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_serializer, field_validator
+from pydantic import BaseModel, field_serializer, field_validator, Field
 
 
 class ResponseStatus(str, Enum):

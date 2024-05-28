@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +14,9 @@
 
 from typing import List
 
-from pydantic import Field, field_validator
+from pydantic import field_validator, Field
 
-from argilla_sdk._models._settings._questions._base import QuestionBaseModel, QuestionSettings
+from argilla_sdk._models._settings._questions._base import QuestionSettings, QuestionBaseModel
 
 
 class RatingQuestionSettings(QuestionSettings):

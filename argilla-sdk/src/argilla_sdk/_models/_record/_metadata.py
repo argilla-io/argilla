@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Annotated, List, Union
+from typing import Annotated, Union, List
 
 from pydantic import BaseModel
+
 
 MetadataValue = Annotated[Union[str, List[str], float, int, None], "The value of the metadata field dictionary"]
 

@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +15,9 @@
 import json
 import uuid
 
-import argilla_sdk as rg
 import pytest
+
+import argilla_sdk as rg
 from argilla_sdk.records._resource import Record
 
 

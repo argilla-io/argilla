@@ -18,9 +18,9 @@ A **workspace** is a *space* inside your Argilla instance where authorized users
 
 Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.
 
-| Environment                   | Name |
+| Environment                   | Name | 
 |-------------------------------|----------|
-| Quickstart Docker and HF Space | admin    |
+| Quickstart Docker and HF Space | admin    | 
 | Server image                  | argilla  |
 
 !!! info "Main Class"

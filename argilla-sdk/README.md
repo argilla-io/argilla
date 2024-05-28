@@ -1,4 +1,4 @@
-## `argilla-sdk`
+## `argilla-sdk` 
 
 The argilla-sdk is an experimental project to rebuild Argilla's python client in a simpler and friendlier way. The goal is to have a minimal set of core features that are easy to use and understand, but also contribute to feedback task that build quality data.
 
@@ -50,6 +50,6 @@ To generate the docs you will need to install the development dependencies, and 
 mkdocs serve
 ```
 
-You will find the built documentation in `http://localhost:8000/argilla-python/`.
+You will find the built documentation in `http://localhost:8000/argilla-python/`. 
 
 The docs will be deployed for pull request branches automatically.

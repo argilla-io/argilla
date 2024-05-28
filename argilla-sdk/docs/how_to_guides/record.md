@@ -49,7 +49,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     You can add the data directly as a dictionary, where the keys correspond to the names of fields, questions, metadata or vectors in the dataset and the values are the data to be added. However, you can also use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
 
-    ```python
+    ```python	
     import argilla_sdk as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -110,13 +110,13 @@ You can add records to a dataset in two different ways: either by using a dictio
 
 
         dataset.records.add(records=records)
-        ```
+        ```	
 
 === "As a `Record` object"
 
     You can also add records to a dataset by initializing a `Record` object directly.
 
-    ```python
+    ```python	
     import argilla_sdk as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -172,7 +172,7 @@ You can add records to a dataset in two different ways: either by using a dictio
         ]
 
         dataset.records.add(records)
-        ```
+        ```	
 
 ### Metadata
 
@@ -413,8 +413,8 @@ To list records in a dataset, you can use the `records` method on the `Dataset` 
 
 ```python
 for record in dataset.records(
-    with_suggestions=True,
-    with_responses=True,
+    with_suggestions=True, 
+    with_responses=True, 
     with_vectors=True
     ):
 
@@ -459,7 +459,7 @@ dataset.records.update(records=updated_data)
 
         # With metadata.update
         record.metadata.update({"my_metadata": "new_value", "my_new_metadata": "new_value"})
-
+        
         updated_records.append(record)
 
     dataset.records.update(records=updated_records)

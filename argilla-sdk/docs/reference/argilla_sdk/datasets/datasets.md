@@ -41,5 +41,5 @@ dataset = client.datasets("my_dataset")
 ### `rg.Dataset`
 
 ::: argilla_sdk.datasets.Dataset
-    options:
+    options: 
         heading_level: 3

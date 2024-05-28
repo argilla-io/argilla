@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +16,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from argilla_sdk._models._settings._questions._label_selection import LabelQuestionModel, LabelQuestionSettings
+from argilla_sdk._models._settings._questions._label_selection import LabelQuestionSettings, LabelQuestionModel
 
 
 class OptionsOrder(str, Enum):

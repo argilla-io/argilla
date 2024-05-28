@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,16 +13,16 @@
 # limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, TYPE_CHECKING, Optional
 from uuid import UUID
 
 from argilla_sdk._exceptions import ArgillaSerializeError
 from argilla_sdk._helpers._mixins import LoggingMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from argilla_sdk._api._base import ResourceAPI
-    from argilla_sdk._models import ResourceModel
     from argilla_sdk.client import Argilla
+    from argilla_sdk._models import ResourceModel
+    from argilla_sdk._api._base import ResourceAPI
 
 
 class Resource(LoggingMixin, UUIDMixin):

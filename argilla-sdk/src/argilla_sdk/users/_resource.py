@@ -1,6 +1,4 @@
 # Copyright 2024-present, Argilla, Inc.
-# TODO: This license is not consistent with the license used in the project.
-#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +17,7 @@ from uuid import UUID
 
 from argilla_sdk import Workspace
 from argilla_sdk._api import UsersAPI
-from argilla_sdk._models import Role, UserModel
+from argilla_sdk._models import UserModel, Role
 from argilla_sdk._resource import Resource
 from argilla_sdk.client import Argilla
 
@@ -27,7 +25,7 @@ from argilla_sdk.client import Argilla
 class User(Resource):
     """Class for interacting with Argilla users in the Argilla server. User profiles \
         are used to manage access to the Argilla server and track responses to records.
-
+        
     Attributes:
         username (str): The username of the user.
         first_name (str): The first name of the user.
