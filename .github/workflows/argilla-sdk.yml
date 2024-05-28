@@ -16,12 +16,17 @@ on:
   push:
     paths:
       - "argilla-sdk/**"
-    branches: [ "develop" ]
+    branches:
+      - "develop"
+      - "main"
 
   pull_request:
     paths:
       - "argilla-sdk/**"
-    branches: [ "develop" ]
+    branches:
+      - "develop"
+      - "main"
+      - "feat/**"
 
   release:
     types:
