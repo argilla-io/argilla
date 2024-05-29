@@ -25,6 +25,7 @@ from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
     fetch_records_by_ids_as_dict,
 )
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.schemas.v1.records import RecordCreate, RecordUpsert
 from argilla_server.schemas.v1.records_bulk import (
@@ -99,10 +100,10 @@ class CreateRecordsBulk:
                     try:
                         SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
                         upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
-                    except ValueError as ex:
+                    except (UnprocessableEntityError, ValueError) as ex:
                         raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
 
-            except ValueError as ex:
+            except (UnprocessableEntityError, ValueError) as ex:
                 raise ValueError(f"Record at position {idx} does not have valid suggestions because {ex}") from ex
 
         if not upsert_many_suggestions:
@@ -131,7 +132,7 @@ class CreateRecordsBulk:
 
                     ResponseCreateValidator(response_create).validate_for(record)
                     upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
-            except ValueError as ex:
+            except (UnprocessableEntityError, ValueError) as ex:
                 raise ValueError(f"Record at position {idx} does not have valid responses because {ex}") from ex
 
         if not upsert_many_responses:
@@ -158,7 +159,7 @@ class CreateRecordsBulk:
 
                     VectorValidator(value).validate_for(settings)
                     upsert_many_vectors.append(dict(value=value, record_id=record.id, vector_settings_id=settings.id))
-            except ValueError as ex:
+            except (UnprocessableEntityError, ValueError) as ex:
                 raise ValueError(f"Record at position {idx} does not have valid vectors because {ex}") from ex
 
         if not upsert_many_vectors:
