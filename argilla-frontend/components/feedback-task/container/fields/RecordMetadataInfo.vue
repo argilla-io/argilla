@@ -98,7 +98,7 @@ export default {
   @include font-size(13px);
   box-shadow: $shadow;
   &__content {
-    max-height: 320px;
+    max-height: 280px;
     overflow: auto;
   }
   &__header {
