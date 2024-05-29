@@ -3,13 +3,13 @@
     <LoadLine v-if="isSubmitting || isDraftSaving || isDiscarding" />
     <div class="wrapper">
       <section class="wrapper__records">
-        <DatasetFiltersComponent :recordCriteria="recordCriteria">
+        <DatasetFilters :recordCriteria="recordCriteria">
           <ToggleAnnotationType
             v-if="
               records.hasRecordsToAnnotate && recordCriteria.committed.isPending
             "
             :recordCriteria="recordCriteria"
-        /></DatasetFiltersComponent>
+        /></DatasetFilters>
         <SimilarityRecordReference
           v-show="recordCriteria.isFilteringBySimilarity"
           v-if="!!records.reference"
@@ -68,7 +68,7 @@
             v-if="records.hasRecordsToAnnotate"
             v-model="recordHeight"
           />
-          <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+          <PaginationFeedbackTask :recordCriteria="recordCriteria" />
         </div>
         <div
           ref="bulkScrollableArea"
@@ -94,7 +94,7 @@
         </div>
       </section>
 
-      <QuestionsFormComponent
+      <QuestionsForm
         v-if="!!record"
         :key="`${recordCriteria.committed.page.client.page}_${record.id}_questions`"
         class="wrapper__form"

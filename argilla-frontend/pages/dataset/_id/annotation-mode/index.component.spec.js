@@ -27,11 +27,11 @@ describe("AnnotationModePage", () => {
   it("render the layout while the data are in fetching state", () => {
     const options = {
       stubs: [
-        "HeaderFeedbackTaskComponent",
-        "SidebarFeedbackTaskComponent",
-        "RecordFeedbackTaskAndQuestionnaireContent",
-        "DatasetFiltersComponent",
-        "PaginationFeedbackTaskComponent",
+        "HeaderFeedbackTask",
+        "SidebarFeedbackTaskContainer",
+        "RecordFeedbackTaskAndQuestionnaire",
+        "DatasetFilters",
+        "PaginationFeedbackTask",
         "BaseModal",
         "DatasetTrainComponent",
         "BaseLoading",
@@ -61,11 +61,11 @@ describe("AnnotationModePage", () => {
   it("render the layout when data are fetched and no error", () => {
     const options = {
       stubs: [
-        "HeaderFeedbackTaskComponent",
-        "SidebarFeedbackTaskComponent",
-        "RecordFeedbackTaskAndQuestionnaireContent",
-        "DatasetFiltersComponent",
-        "PaginationFeedbackTaskComponent",
+        "HeaderFeedbackTask",
+        "SidebarFeedbackTaskContainer",
+        "RecordFeedbackTaskAndQuestionnaire",
+        "DatasetFilters",
+        "PaginationFeedbackTask",
         "BaseModal",
         "DatasetTrainComponent",
         "BaseLoading",

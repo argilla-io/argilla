@@ -3,7 +3,7 @@
     <BaseLoading v-if="isLoadingDataset" />
     <HeaderAndTopAndOneColumn :key="refreshKey">
       <template v-slot:header>
-        <HeaderFeedbackTaskComponent
+        <HeaderFeedbackTask
           :key="datasetId"
           :datasetId="datasetId"
           :breadcrumbs="breadcrumbs"
@@ -29,16 +29,14 @@
         </BaseModal>
       </template>
       <template v-slot:sidebar-right>
-        <SidebarFeedbackTaskComponent
+        <SidebarFeedbackTaskContainer
           :datasetId="datasetId"
           @refresh="refresh()"
         />
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />
-        <RecordFeedbackTaskAndQuestionnaireContent
-          :recordCriteria="recordCriteria"
-        />
+        <RecordFeedbackTaskAndQuestionnaire :recordCriteria="recordCriteria" />
       </template>
     </HeaderAndTopAndOneColumn>
   </div>

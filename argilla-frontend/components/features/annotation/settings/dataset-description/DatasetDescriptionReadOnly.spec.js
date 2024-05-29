@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import DatasetDescriptionReadOnly from "./DatasetDescriptionReadOnly.component";
+import DatasetDescriptionReadOnly from "./DatasetDescriptionReadOnly";
 
 let wrapper = null;
 const options = {

@@ -58,7 +58,7 @@
 import { useDatasetsFiltersViewModel } from "./useDatasetsFiltersViewModel";
 
 export default {
-  name: "DatasetFiltersComponent",
+  name: "DatasetFilters",
   props: {
     recordCriteria: {
       type: Object,

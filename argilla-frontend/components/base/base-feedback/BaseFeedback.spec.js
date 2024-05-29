@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import BaseFeedBackComponent from "./BaseFeedback.component";
+import BaseFeedBackComponent from "./BaseFeedback";
 import BaseFeedbackErrorComponent from "./base-feedback-error/BaseFeedbackError.component";
 
 let wrapper = null;

@@ -25,7 +25,7 @@ afterEach(() => {
   wrapper.destroy();
 });
 
-describe("BasePaginationComponent", () => {
+describe("BasePagination", () => {
   it("render the component", () => {
     expect(wrapper.is(BasePagination)).toBe(true);
   });

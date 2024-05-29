@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import SelectOptions from "@/components/commons/header/filters/SelectOptions";
+import SelectOptions from "@/components/base/base-table/filters/SelectOptions.vue";
 
 function mountSelectOptions() {
   return mount(SelectOptions, {

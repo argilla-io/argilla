@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import HeaderFeedbackTask from "./HeaderFeedbackTask.component";
+import HeaderFeedbackTask from "./HeaderFeedbackTask";
 import * as useRole from "~/v1/infrastructure/services/useRole";
 
 const options = {
@@ -7,7 +7,7 @@ const options = {
     "BaseTopbarBrand",
     "BaseBreadcrumbs",
     "BaseButton",
-    "DatasetSettingsIconFeedbackTaskComponent",
+    "DatasetSettingsIconFeedbackTask",
     "UserAvatarTooltip",
     "NuxtLink",
   ],

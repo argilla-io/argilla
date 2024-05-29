@@ -62,7 +62,7 @@ export default {
 
       try {
         const libraries = require.context(
-          `../../../../docs/_source/_common/snippets/training`,
+          `../../../../../../docs/_source/_common/snippets/training`,
           true,
           /^[^_]+\.md$/,
           "lazy"

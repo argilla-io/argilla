@@ -1,13 +1,13 @@
 <template>
   <div class="wrapper">
     <section class="wrapper__records">
-      <DatasetFiltersComponent :recordCriteria="recordCriteria">
+      <DatasetFilters :recordCriteria="recordCriteria">
         <ToggleAnnotationType
           v-if="
             records.hasRecordsToAnnotate && recordCriteria.committed.isPending
           "
           :recordCriteria="recordCriteria"
-      /></DatasetFiltersComponent>
+      /></DatasetFilters>
       <SimilarityRecordReference
         v-show="recordCriteria.isFilteringBySimilarity"
         v-if="!!records.reference"
@@ -16,7 +16,7 @@
         :availableVectors="datasetVectors"
       />
       <div class="wrapper__records__header">
-        <PaginationFeedbackTaskComponent :recordCriteria="recordCriteria" />
+        <PaginationFeedbackTask :recordCriteria="recordCriteria" />
       </div>
       <Record
         v-if="records.hasRecordsToAnnotate"
@@ -29,7 +29,7 @@
       </div>
     </section>
 
-    <QuestionsFormComponent
+    <QuestionsForm
       v-if="!!record"
       :key="`${record.id}_questions`"
       class="wrapper__form"

@@ -24,7 +24,7 @@
 
 <script>
 export default {
-  name: "PaginationComponent",
+  name: "Pagination",
   props: {
     recordCriteria: {
       type: Object,

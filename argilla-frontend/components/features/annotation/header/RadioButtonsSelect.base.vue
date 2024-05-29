@@ -31,7 +31,7 @@
       <span slot="dropdown-content">
         <ul class="options" role="radiogroup">
           <li
-            v-for="{ id, name } in options"
+            v-for="{ id, name, color } in options"
             class="option"
             :class="id"
             :key="id"
@@ -43,7 +43,7 @@
           >
             <BaseRadioButton
               class="option__radio"
-              :color="getRadioColor(id)"
+              :color="color"
               :id="id"
               :model="id"
               :value="selectedOption"
@@ -98,18 +98,6 @@ export default {
     changeOption(id) {
       this.$emit("change", id);
       this.dropdownIsVisible = false;
-    },
-    getRadioColor(status) {
-      switch (status) {
-        case "discarded":
-          return "#B7B7B7";
-        case "pending":
-          return "#BB720A";
-        case "submitted":
-          return "#3E5CC9";
-        case "draft":
-          return "#73BFBD";
-      }
     },
   },
 };

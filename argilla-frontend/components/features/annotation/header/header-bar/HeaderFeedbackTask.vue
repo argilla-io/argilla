@@ -19,7 +19,7 @@
         v-if="showSettingButton"
         :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
       >
-        <DatasetSettingsIconFeedbackTaskComponent v-if="datasetId" />
+        <DatasetSettingsIconFeedbackTask v-if="datasetId" />
       </NuxtLink>
     </template>
     <user-avatar-tooltip />
@@ -30,7 +30,7 @@
 import { useRole } from "~/v1/infrastructure/services";
 
 export default {
-  name: "HeaderFeedbackTaskComponent",
+  name: "HeaderFeedbackTask",
   props: {
     datasetId: {
       type: String,

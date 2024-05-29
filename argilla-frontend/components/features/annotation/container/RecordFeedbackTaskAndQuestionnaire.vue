@@ -33,7 +33,7 @@ import { Notification } from "@/models/Notifications";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
-  name: "RecordFeedbackTaskAndQuestionnaireComponent",
+  name: "RecordFeedbackTaskAndQuestionnaire",
   props: {
     recordCriteria: {
       type: Object,

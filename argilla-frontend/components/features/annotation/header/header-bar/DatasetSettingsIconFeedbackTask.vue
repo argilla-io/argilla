@@ -12,7 +12,7 @@
 
 <script>
 export default {
-  name: "DatasetSettingsIconFeedbackTaskComponent",
+  name: "DatasetSettingsIconFeedbackTask",
   props: {
     showBadge: {
       type: Boolean,

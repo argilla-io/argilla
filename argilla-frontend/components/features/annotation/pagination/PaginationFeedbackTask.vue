@@ -13,10 +13,7 @@
       >
       <span>of {{ records.total }}</span>
     </span>
-    <PaginationComponent
-      :recordCriteria="recordCriteria"
-      :total="records.total"
-    />
+    <Pagination :recordCriteria="recordCriteria" :total="records.total" />
   </div>
 </template>
 
@@ -24,7 +21,7 @@
 import { usePaginationFeedbackTaskViewModel } from "./usePaginationFeedbackTaskViewModel";
 
 export default {
-  name: "PaginationFeedbackTaskComponent",
+  name: "PaginationFeedbackTask",
   props: {
     recordCriteria: {
       type: Object,

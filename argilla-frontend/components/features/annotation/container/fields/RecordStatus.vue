@@ -18,13 +18,6 @@ export default {
   computed: {
     getStatusInfo() {
       switch (this.recordStatus) {
-        case "edited":
-          return {
-            name: this.$t("recordStatus.pending"),
-            icon: "time",
-            class: "--edited",
-          };
-
         case "pending":
           return {
             name: this.$t("recordStatus.pending"),
@@ -86,8 +79,7 @@ export default {
       background: $submitted-color;
     }
   }
-  &.--pending,
-  &.--edited {
+  &.--pending {
     color: $pending-color;
     .bullet:before {
       @extend %bullet;

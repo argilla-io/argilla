@@ -50,10 +50,7 @@
             class="color-bullet"
             :style="{ backgroundColor: status.color }"
           ></span>
-          <label
-            class="metrics__list__name"
-            v-text="getFormattedName(status.name)"
-          />
+          <label class="metrics__list__name" v-text="status.name" />
           <span
             class="metrics__list__counter"
             v-text="getFormattedProgress(status.progress)"
@@ -66,10 +63,7 @@
 </template>
 
 <script>
-import {
-  RECORD_STATUS,
-  RECORD_STATUS_COLOR,
-} from "@/models/feedback-task-model/record/record.queries";
+import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
 
 export default {
   props: {
@@ -82,44 +76,41 @@ export default {
     progressItems() {
       return [
         {
-          name: RECORD_STATUS.PENDING,
+          name: RecordStatus.pending.name,
           color: this.pendingColor,
           progress: this.metrics.pending,
         },
         {
-          name: RECORD_STATUS.DRAFT,
+          name: RecordStatus.draft.name,
           color: this.draftColor,
           progress: this.metrics.draft,
         },
         {
-          name: RECORD_STATUS.SUBMITTED,
+          name: RecordStatus.submitted.name,
           color: this.submittedColor,
           progress: this.metrics.submitted,
         },
         {
-          name: RECORD_STATUS.DISCARDED,
+          name: RecordStatus.discarded.name,
           color: this.discardedColor,
           progress: this.metrics.discarded,
         },
       ];
     },
     pendingColor() {
-      return RECORD_STATUS_COLOR.PENDING;
+      return RecordStatus.pending.color;
     },
     draftColor() {
-      return RECORD_STATUS_COLOR.DRAFT;
+      return RecordStatus.draft.color;
     },
     submittedColor() {
-      return RECORD_STATUS_COLOR.SUBMITTED;
+      return RecordStatus.submitted.color;
     },
     discardedColor() {
-      return RECORD_STATUS_COLOR.DISCARDED;
+      return RecordStatus.discarded.color;
     },
   },
   methods: {
-    getFormattedName(name) {
-      return name && this.$options.filters.capitalize(name);
-    },
     getFormattedProgress(progress) {
       return progress && this.$options.filters.formatNumber(progress);
     },
@@ -188,6 +179,7 @@ export default {
       @include font-size(13px);
     }
     &__name {
+      text-transform: capitalize;
       display: block;
       width: calc(100% - 40px);
       hyphens: auto;
