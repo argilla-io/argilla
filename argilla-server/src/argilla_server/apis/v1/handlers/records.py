@@ -162,7 +162,9 @@ async def upsert_suggestion(
 
     try:
         question = await Question.get_or_raise(
-            db, suggestion_create.question_id, options=[selectinload(Question.dataset)]
+            db,
+            suggestion_create.question_id,
+            options=[selectinload(Question.dataset)],
         )
     except NotFoundError as e:
         raise UnprocessableEntityError(e.message)
