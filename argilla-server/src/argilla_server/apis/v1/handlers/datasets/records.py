@@ -570,7 +570,6 @@ async def search_current_user_dataset_records(
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True, with_metadata_properties=True)
-    print(dataset.metadata_properties)
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     await _validate_search_records_query(db, body, dataset_id)
