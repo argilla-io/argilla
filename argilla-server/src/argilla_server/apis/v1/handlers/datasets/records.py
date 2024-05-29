@@ -29,7 +29,7 @@ from argilla_server.enums import MetadataPropertyType, RecordSortField, Response
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset as DatasetModel
 from argilla_server.models import Record, User
-from argilla_server.policies import DatasetPolicyV1, authorize
+from argilla_server.policies import DatasetPolicyV1, RecordPolicyV1, authorize, is_authorized
 from argilla_server.schemas.v1.datasets import Dataset
 from argilla_server.schemas.v1.records import (
     Filters,
@@ -83,7 +83,6 @@ _RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
 _VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
 _METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
 
-
 SortByQueryParamParsed = Annotated[
     Dict[str, str],
     Depends(
@@ -107,16 +106,16 @@ router = APIRouter()
 
 
 async def _filter_records_using_search_engine(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: Dataset,
-    parsed_metadata: List[MetadataParsedQueryParam],
-    limit: int,
-    offset: int,
-    user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
-    include: Optional[RecordIncludeParam] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
+        db: "AsyncSession",
+        search_engine: "SearchEngine",
+        dataset: Dataset,
+        parsed_metadata: List[MetadataParsedQueryParam],
+        limit: int,
+        offset: int,
+        user: Optional[User] = None,
+        response_statuses: Optional[List[ResponseStatusFilter]] = None,
+        include: Optional[RecordIncludeParam] = None,
+        sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List["Record"], int]:
     search_responses = await _get_search_responses(
         db=db,
@@ -183,16 +182,16 @@ def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[sear
 
 
 async def _get_search_responses(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: DatasetModel,
-    parsed_metadata: List[MetadataParsedQueryParam],
-    limit: int,
-    offset: int,
-    search_records_query: Optional[SearchRecordsQuery] = None,
-    user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
+        db: "AsyncSession",
+        search_engine: "SearchEngine",
+        dataset: DatasetModel,
+        parsed_metadata: List[MetadataParsedQueryParam],
+        limit: int,
+        offset: int,
+        search_records_query: Optional[SearchRecordsQuery] = None,
+        user: Optional[User] = None,
+        response_statuses: Optional[List[ResponseStatusFilter]] = None,
+        sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
     search_records_query = search_records_query or SearchRecordsQuery()
 
@@ -221,9 +220,9 @@ async def _get_search_responses(
                 )
 
     if (
-        text_query
-        and text_query.field
-        and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
+            text_query
+            and text_query.field
+            and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
     ):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -274,7 +273,7 @@ async def _get_search_responses(
 
 
 async def _build_metadata_filters(
-    db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
+        db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
 ) -> List["MetadataFilter"]:
     try:
         metadata_filters = []
@@ -303,7 +302,7 @@ async def _build_metadata_filters(
 
 
 async def _build_response_status_filter_for_search(
-    response_statuses: Optional[List[ResponseStatusFilter]] = None, user: Optional[User] = None
+        response_statuses: Optional[List[ResponseStatusFilter]] = None, user: Optional[User] = None
 ) -> Optional[UserResponseStatusFilter]:
     user_response_status_filter = None
 
@@ -315,7 +314,7 @@ async def _build_response_status_filter_for_search(
 
 
 async def _build_sort_by(
-    db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
+        db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
 ) -> Union[List[SortBy], None]:
     if sort_by_query_param is None:
         return None
@@ -381,7 +380,7 @@ async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Datase
 
 
 async def _get_vector_settings_by_name_or_raise(
-    db: "AsyncSession", dataset: Dataset, vector_name: str
+        db: "AsyncSession", dataset: Dataset, vector_name: str
 ) -> VectorSettings:
     vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
         db, name=vector_name, dataset_id=dataset.id
@@ -398,17 +397,17 @@ async def _get_vector_settings_by_name_or_raise(
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_current_user_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        dataset_id: UUID,
+        metadata: MetadataQueryParams = Depends(),
+        sort_by_query_param: SortByQueryParamParsed,
+        include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
+        response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+        offset: int = 0,
+        limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id)
 
@@ -432,17 +431,17 @@ async def list_current_user_dataset_records(
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        dataset_id: UUID,
+        metadata: MetadataQueryParams = Depends(),
+        sort_by_query_param: SortByQueryParamParsed,
+        include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
+        response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+        offset: int = 0,
+        limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id)
 
@@ -470,13 +469,13 @@ async def list_dataset_records(
     description="Deprecated in favor of POST /datasets/{dataset_id}/records/bulk",
 )
 async def create_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    records_create: RecordsCreate,
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+        dataset_id: UUID,
+        records_create: RecordsCreate,
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(
         db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True, with_vectors_settings=True
@@ -500,13 +499,13 @@ async def create_dataset_records(
     description="Deprecated in favor of PUT /datasets/{dataset_id}/records/bulk",
 )
 async def update_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    records_update: RecordsUpdate,
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+        dataset_id: UUID,
+        records_update: RecordsUpdate,
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(
         db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True
@@ -523,12 +522,12 @@ async def update_dataset_records(
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
-    ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        dataset_id: UUID,
+        current_user: User = Security(auth.get_current_user),
+        ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id)
 
@@ -556,22 +555,22 @@ async def delete_dataset_records(
     response_model_exclude_unset=True,
 )
 async def search_current_user_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    body: SearchRecordsQuery,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = Query(0, ge=0),
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+        dataset_id: UUID,
+        body: SearchRecordsQuery,
+        metadata: MetadataQueryParams = Depends(),
+        sort_by_query_param: SortByQueryParamParsed,
+        include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
+        response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+        offset: int = Query(0, ge=0),
+        limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
+        current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True)
-
+    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True, with_metadata_properties=True)
+    print(dataset.metadata_properties)
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     await _validate_search_records_query(db, body, dataset_id)
@@ -589,7 +588,7 @@ async def search_current_user_dataset_records(
         sort_by_query_param=sort_by_query_param,
     )
 
-    record_id_score_map = {
+    record_id_score_map: Dict[UUID, Dict[str, Union[float, SearchRecord, None]]] = {
         response.record_id: {"query_score": response.score, "search_record": None}
         for response in search_responses.items
     }
@@ -603,6 +602,13 @@ async def search_current_user_dataset_records(
     )
 
     for record in records:
+        record.dataset = dataset
+
+        for metadata_name in list(record.metadata_.keys()) or {}:
+            if not await is_authorized(current_user, RecordPolicyV1.get_metadata(record, metadata_name)):
+                print(f"not authorized for {metadata_name}")
+                record.metadata_.pop(metadata_name)
+
         record_id_score_map[record.id]["search_record"] = SearchRecord(
             record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
         )
@@ -619,18 +625,18 @@ async def search_current_user_dataset_records(
     response_model_exclude_unset=True,
 )
 async def search_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    body: SearchRecordsQuery,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = Query(0, ge=0),
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
+        dataset_id: UUID,
+        body: SearchRecordsQuery,
+        metadata: MetadataQueryParams = Depends(),
+        sort_by_query_param: SortByQueryParamParsed,
+        include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
+        response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
+        offset: int = Query(0, ge=0),
+        limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True)
 
@@ -678,10 +684,10 @@ async def search_dataset_records(
     response_model=SearchSuggestionsOptions,
 )
 async def list_dataset_records_search_suggestions_options(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+        *,
+        db: AsyncSession = Depends(get_async_db),
+        dataset_id: UUID,
+        current_user: User = Security(auth.get_current_user),
 ):
     dataset = await _get_dataset_or_raise(db, dataset_id)
 
