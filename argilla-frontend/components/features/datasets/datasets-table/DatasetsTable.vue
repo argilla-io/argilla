@@ -60,13 +60,6 @@ export default {
           filtrable: "true",
         },
         {
-          name: this.$t("datasetTable.task"),
-          field: "task",
-          class: "task",
-          type: "task",
-          filtrable: "true",
-        },
-        {
           name: "Global progress",
           field: "progress",
           class: "progress",
