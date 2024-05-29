@@ -70,6 +70,7 @@ import {
   RECORD_STATUS,
   RECORD_STATUS_COLOR,
 } from "@/models/feedback-task-model/record/record.queries";
+
 export default {
   props: {
     metrics: {

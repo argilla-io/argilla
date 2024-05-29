@@ -16,59 +16,21 @@
   -->
 
 <template>
-  <section
-    id="header"
-    ref="header"
-    :class="['header', sticky && dataset ? 'sticky' : null]"
-  >
+  <section id="header" ref="header" class="header">
     <base-topbar-brand>
       <base-breadcrumbs
         :breadcrumbs="breadcrumbs"
-        :copy-button="copyButton"
-        @breadcrumb-action="$emit('breadcrumb-action', $event)"
+        @breadcrumb-action="onBreadcrumbAction"
       />
-      <template v-if="datasetId && datasetName">
-        <BaseButton
-          class="header__button small"
-          @on-click="onClickTrain"
-          v-if="isAdminOrOwnerRole"
-        >
-          <svgicon name="code" width="20" height="20" />Train
-        </BaseButton>
-        <DatasetSettingsIcon
-          :datasetId="datasetId"
-          @click-settings-icon="goToSettings()"
-        />
-      </template>
+
       <user-avatar-tooltip />
     </base-topbar-brand>
-    <loading-line v-if="showRecordsLoader" />
-    <task-sidebar
-      v-if="dataset"
-      :dataset="dataset"
-      @view-mode-changed="onViewModeChanged"
-    />
-    <component
-      v-if="dataset"
-      :is="currentTaskHeader"
-      :datasetId="dataset.id"
-      :datasetName="dataset.name"
-      :datasetTask="dataset.task"
-      :enableSimilaritySearch="isReferenceRecord"
-      @search-records="searchRecords"
-    />
   </section>
 </template>
 
 <script>
 import "assets/icons/code";
-import { DatasetViewSettings } from "@/models/DatasetViewSettings";
-import { Vector as VectorModel } from "@/models/Vector";
-import { getDatasetFromORM } from "@/models/dataset.utilities";
-import {
-  isExistAnyLabelsNotSavedInBackByDatasetId,
-  getTotalLabelsInGlobalLabel,
-} from "@/models/globalLabel.queries";
+
 export default {
   data() {
     return {
@@ -76,51 +38,11 @@ export default {
     };
   },
   props: {
-    datasetId: {
-      type: Array,
-    },
-    datasetName: {
-      type: String,
-    },
-    datasetTask: {
-      type: String,
-      validator(value) {
-        // The value must match one of these strings
-        return [
-          "TextClassification",
-          "TokenClassification",
-          "Text2Text",
-        ].includes(value);
-      },
-    },
     breadcrumbs: {
       type: Array,
     },
-    sticky: {
-      type: Boolean,
-      default: true,
-    },
-    copyButton: {
-      type: Boolean,
-      default: true,
-    },
   },
   computed: {
-    dataset() {
-      //TODO - when refactor of filter part from header, remove this computed/and get only what is necessary as props
-      return this.datasetId && this.datasetTask
-        ? getDatasetFromORM(this.datasetId, this.datasetTask, true)
-        : null;
-    },
-    currentTaskHeader() {
-      return this.datasetTask && `${this.datasetTask}Header`;
-    },
-    workspace() {
-      return this.$route.params.workspace;
-    },
-    viewSettings() {
-      return DatasetViewSettings.query().whereId(this.datasetName).first();
-    },
     /**
      * @deprecated Replace with useRole
      */
@@ -128,85 +50,10 @@ export default {
       const role = this.$auth.user.role;
       return role === "admin" || role === "owner";
     },
-    globalHeaderHeight() {
-      if (this.sticky && this.dataset) {
-        return this.viewSettings?.headerHeight;
-      }
-    },
-    showRecordsLoader() {
-      return this.viewSettings?.loading;
-    },
-    isReferenceRecord() {
-      return VectorModel.query()
-        .where("dataset_id", this.datasetId.join("."))
-        .where("is_active", true)
-        .exists();
-    },
-    datasetSettingsPageUrl() {
-      if (this.datasetName) {
-        const { fullPath } = this.$route;
-        const datasetSettingsPageUrl = fullPath.replace("?", "/settings?");
-        return datasetSettingsPageUrl;
-      }
-      return null;
-    },
-    isNoLabelInGlobalLabelModel() {
-      return !getTotalLabelsInGlobalLabel(this.datasetId);
-    },
-    isAnyLabelsInGlobalLabelsModelNotSavedInBack() {
-      return isExistAnyLabelsNotSavedInBackByDatasetId(this.datasetId);
-    },
-  },
-  mounted() {
-    if (this.sticky && this.dataset) {
-      this.setHeaderHeight();
-    }
-  },
-  watch: {
-    globalHeaderHeight() {
-      if (this.dataset && this.globalHeaderHeight !== this.headerHeight) {
-        this.headerHeightUpdate();
-      }
-    },
   },
   methods: {
-    onViewModeChanged(viewMode) {
-      if (viewMode === "labelling-rules" && this.isReferenceRecord) {
-        this.removeSimilarityFilter();
-      }
-    },
-    removeSimilarityFilter() {
-      this.searchRecords({ query: { vector: null } });
-    },
-    async setHeaderHeight() {
-      const header = this.$refs.header;
-      const resize_ob = new ResizeObserver(() => {
-        this.headerHeight = header.offsetHeight;
-        this.headerHeightUpdate();
-      });
-      resize_ob.observe(header);
-    },
-    headerHeightUpdate() {
-      DatasetViewSettings.update({
-        where: this.datasetName,
-        data: {
-          headerHeight: this.headerHeight,
-        },
-      });
-    },
-    searchRecords(query) {
-      this.$emit("on-search-or-on-filter-records", query);
-    },
-    onClickTrain() {
-      this.$emit("on-click-train");
-    },
-    goToSettings() {
-      const currentRoute = this.$route.path;
-      const newRoute = `/datasets/${this.workspace}/${this.datasetName}/settings`;
-      const allowNavigate = currentRoute !== newRoute;
-      if (this.datasetName && allowNavigate) {
-        this.$router.push(newRoute);
-      }
+    onBreadcrumbAction(action) {
+      this.$emit("breadcrumb-action", action);
     },
   },
 };

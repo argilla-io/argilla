@@ -5,6 +5,7 @@
       <div class="interactions">
         <base-search-bar
           @input="onSearch"
+          :querySearch="querySearch"
           :placeholder="$t('searchDatasets')"
         />
       </div>
@@ -29,7 +30,6 @@
 </template>
 
 <script>
-import { Base64 } from "js-base64";
 import { useRoutes } from "@/v1/infrastructure/services";
 
 export default {
@@ -105,24 +105,10 @@ export default {
   computed: {
     activeFilters() {
       const workspaces = this.workspaces;
-      const tasks = this.tasks;
-      const tags = this.tags;
-      return [
-        { column: "workspace", values: workspaces },
-        { column: "task", values: tasks },
-        { column: "tags", values: tags },
-      ];
+      return [{ column: "workspace", values: workspaces }];
     },
     workspaces() {
       return this.$route.query.workspaces?.split(",") ?? [];
-    },
-    tasks() {
-      return this.$route.query.tasks?.split(",") ?? [];
-    },
-    tags() {
-      return this.$route.query.tags
-        ? JSON.parse(Base64.decode(this.$route.query.tags))
-        : [];
     },
   },
   methods: {
@@ -132,7 +118,7 @@ export default {
           this.$refs.table.onApplyFilters({ field: filter.column }, []);
         });
 
-        this.goToDatasetsList();
+        this.querySearch = undefined;
       }
     },
     onSearch(event) {
@@ -171,17 +157,6 @@ export default {
             "workspaces",
             this.workspaces,
             values.join(",")
-          );
-          break;
-        case "task":
-          updateUrlParamsFor(values, "tasks", this.tasks, values.join(","));
-          break;
-        case "tags":
-          updateUrlParamsFor(
-            values,
-            "tags",
-            this.tags,
-            Base64.encodeURI(JSON.stringify(values))
           );
           break;
       }
@@ -256,7 +231,7 @@ export default {
   width: clamp(300px, 30vw, 800px);
 }
 
-:deep(.table-info__item__col:nth-last-of-type(-n + 5)) {
+:deep(.table-info__item__col:nth-last-of-type(-n + 4)) {
   @include media("<desktop") {
     display: none;
   }
