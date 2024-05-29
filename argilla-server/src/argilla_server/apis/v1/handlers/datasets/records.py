@@ -706,7 +706,6 @@ async def list_dataset_records_search_suggestions_options(
 
 
 async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:
-    print(record.metadata_)
     if record.metadata_ is None:
         return None
 
