@@ -92,7 +92,7 @@ export default {
 <style lang="scss" scoped>
 .table-info {
   background: palette(white);
-  min-width: 460px;
+  min-width: 440px;
   border-radius: $border-radius-s;
   overflow: hidden;
   @include font-size(13px);
