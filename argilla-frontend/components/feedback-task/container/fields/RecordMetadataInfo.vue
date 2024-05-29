@@ -135,6 +135,9 @@ export default {
     flex-basis: 44%;
     margin: 0;
     @include truncate;
+    .--intro & {
+      flex-basis: 100px;
+    }
   }
   &__value {
     display: flex;
@@ -145,6 +148,9 @@ export default {
     margin: 0;
     font-family: $quaternary-font-family;
     word-break: break-all;
+    .--intro & {
+      flex-basis: 100%;
+    }
   }
   &__copy {
     opacity: 0;
