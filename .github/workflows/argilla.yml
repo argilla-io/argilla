@@ -8,6 +8,14 @@ on:
   workflow_dispatch:
   workflow_call:
 
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+      - develop
+      - releases/**
+
   pull_request:
     paths:
       - "argilla/**"
