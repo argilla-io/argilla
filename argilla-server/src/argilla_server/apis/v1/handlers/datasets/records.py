@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -409,7 +409,7 @@ async def list_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await _get_dataset_or_raise(db, dataset_id, with_metadata_properties=True)
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
@@ -425,6 +425,10 @@ async def list_current_user_dataset_records(
         include=include,
         sort_by_query_param=sort_by_query_param,
     )
+
+    for record in records:
+        record.dataset = dataset
+        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
     return Records(items=records, total=total)
 
@@ -602,11 +606,7 @@ async def search_current_user_dataset_records(
 
     for record in records:
         record.dataset = dataset
-
-        record_metadata = record.metadata_ or {}
-        for metadata_name in list(record_metadata.keys()):
-            if not await is_authorized(current_user, RecordPolicyV1.get_metadata(record, metadata_name)):
-                record.metadata_.pop(metadata_name)
+        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
         record_id_score_map[record.id]["search_record"] = SearchRecord(
             record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
@@ -703,3 +703,15 @@ async def list_dataset_records_search_suggestions_options(
             for sa in suggestion_agents_by_question
         ]
     )
+
+
+async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:
+    print(record.metadata_)
+    if record.metadata_ is None:
+        return None
+
+    metadata = {}
+    for metadata_name in list(record.metadata_.keys()):
+        if await is_authorized(user, RecordPolicyV1.get_metadata(record, metadata_name)):
+            metadata[metadata_name] = record.metadata_[metadata_name]
+    return metadata

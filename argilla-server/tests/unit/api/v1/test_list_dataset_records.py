@@ -48,6 +48,7 @@ from tests.factories import (
     VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
+    WorkspaceUserFactory,
 )
 
 
@@ -793,13 +794,21 @@ class TestSuiteListDatasetRecords:
 
         return dataset, questions, records, responses, suggestions
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_current_user_dataset_records(
-        self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
         dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
         record_a, record_b, record_c = records
+
+        mock_search_engine.search.return_value = SearchResponses(
+            total=3,
+            items=[
+                SearchResponseItem(record_id=record_a.id, score=14.2),
+                SearchResponseItem(record_id=record_b.id, score=12.2),
+                SearchResponseItem(record_id=record_c.id, score=10.2),
+            ],
+        )
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -814,6 +823,7 @@ class TestSuiteListDatasetRecords:
                     "id": str(record_a.id),
                     "fields": {"input": "input_a", "output": "output_a"},
                     "metadata": None,
+                    "dataset_id": str(dataset.id),
                     "external_id": record_a.external_id,
                     "inserted_at": record_a.inserted_at.isoformat(),
                     "updated_at": record_a.updated_at.isoformat(),
@@ -822,6 +832,7 @@ class TestSuiteListDatasetRecords:
                     "id": str(record_b.id),
                     "fields": {"input": "input_b", "output": "output_b"},
                     "metadata": {"unit": "test"},
+                    "dataset_id": str(dataset.id),
                     "external_id": record_b.external_id,
                     "inserted_at": record_b.inserted_at.isoformat(),
                     "updated_at": record_b.updated_at.isoformat(),
@@ -830,10 +841,70 @@ class TestSuiteListDatasetRecords:
                     "id": str(record_c.id),
                     "fields": {"input": "input_c", "output": "output_c"},
                     "metadata": None,
+                    "dataset_id": str(dataset.id),
                     "external_id": record_c.external_id,
                     "inserted_at": record_c.inserted_at.isoformat(),
                     "updated_at": record_c.updated_at.isoformat(),
                 },
+            ],
+        }
+
+    async def test_list_current_user_dataset_records_with_filtered_metadata_as_annotator(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User
+    ):
+        workspace = await WorkspaceFactory.create()
+        user = await AnnotatorFactory.create()
+        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
+
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+
+        await TermsMetadataPropertyFactory.create(
+            name="key1",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin, UserRole.annotator],
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="key2",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin],
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="key3",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin],
+        )
+
+        record = await RecordFactory.create(
+            dataset=dataset,
+            fields={"input": "input_b", "output": "output_b"},
+            metadata_={"key1": "value1", "key2": "value2", "key3": "value3", "extra": "extra"},
+        )
+
+        mock_search_engine.search.return_value = SearchResponses(
+            total=1,
+            items=[SearchResponseItem(record_id=record.id, score=14.2)],
+        )
+
+        other_dataset = await DatasetFactory.create()
+        await RecordFactory.create_batch(size=2, dataset=other_dataset)
+
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "total": 1,
+            "items": [
+                {
+                    "id": str(record.id),
+                    "fields": {"input": "input_b", "output": "output_b"},
+                    "metadata": {"key1": "value1"},
+                    "dataset_id": str(dataset.id),
+                    "external_id": record.external_id,
+                    "inserted_at": record.inserted_at.isoformat(),
+                    "updated_at": record.updated_at.isoformat(),
+                }
             ],
         }
 
