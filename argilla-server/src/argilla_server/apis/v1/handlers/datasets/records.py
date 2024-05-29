@@ -603,7 +603,8 @@ async def search_current_user_dataset_records(
     for record in records:
         record.dataset = dataset
 
-        for metadata_name in list(record.metadata_.keys()) or {}:
+        record_metadata = record.metadata_ or {}
+        for metadata_name in list(record_metadata.keys()):
             if not await is_authorized(current_user, RecordPolicyV1.get_metadata(record, metadata_name)):
                 record.metadata_.pop(metadata_name)
 
