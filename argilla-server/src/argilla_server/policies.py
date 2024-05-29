@@ -589,9 +589,7 @@ class RecordPolicyV1:
                 return True
 
             metadata_property = record.dataset.metadata_property_by_name(metadata_name)
-            print(metadata_property, f"for {metadata_name}")
             if metadata_property:
-                print(metadata_property, metadata_property.allowed_roles)
                 return await is_authorized(actor, MetadataPropertyPolicyV1.get(metadata_property))
 
             return actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(

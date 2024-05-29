@@ -606,7 +606,6 @@ async def search_current_user_dataset_records(
 
         for metadata_name in list(record.metadata_.keys()) or {}:
             if not await is_authorized(current_user, RecordPolicyV1.get_metadata(record, metadata_name)):
-                print(f"not authorized for {metadata_name}")
                 record.metadata_.pop(metadata_name)
 
         record_id_score_map[record.id]["search_record"] = SearchRecord(
