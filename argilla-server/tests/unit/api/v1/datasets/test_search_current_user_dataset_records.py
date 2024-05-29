@@ -39,7 +39,7 @@ class TestSearchCurrentUserDatasetRecords:
         return f"/api/v1/me/datasets/{dataset_id}/records/search"
 
     async def test_search_with_filtered_metadata(
-            self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
@@ -47,12 +47,8 @@ class TestSearchCurrentUserDatasetRecords:
         await TermsMetadataPropertyFactory.create(
             name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
         )
-        await TermsMetadataPropertyFactory.create(
-            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
-        )
-        await TermsMetadataPropertyFactory.create(
-            name="owner_meta", dataset=dataset, allowed_roles=[]
-        )
+        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
+        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
         record = await RecordFactory.create(
             metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
             dataset=dataset,
@@ -70,17 +66,28 @@ class TestSearchCurrentUserDatasetRecords:
         )
 
         assert response.status_code == 200
-        assert response.json() == {'items': [{'record': {'id': str(record.id),
-                                                         'fields': record.fields,
-                                                         'metadata': record.metadata_,
-                                                         'external_id': record.external_id,
-                                                         'dataset_id': str(dataset.id),
-                                                         'inserted_at': record.inserted_at.isoformat(),
-                                                         'updated_at': record.updated_at.isoformat()},
-                                              'query_score': 1.0}], 'total': 1}
+        assert response.json() == {
+            "items": [
+                {
+                    "record": {
+                        "id": str(record.id),
+                        "fields": record.fields,
+                        "metadata": record.metadata_,
+                        "external_id": record.external_id,
+                        "dataset_id": str(dataset.id),
+                        "inserted_at": record.inserted_at.isoformat(),
+                        "updated_at": record.updated_at.isoformat(),
+                    },
+                    "query_score": 1.0,
+                }
+            ],
+            "total": 1,
+        }
 
     async def test_search_with_filtered_metadata_as_annotator(
-            self, async_client: AsyncClient, mock_search_engine: SearchEngine,
+        self,
+        async_client: AsyncClient,
+        mock_search_engine: SearchEngine,
     ):
         user = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
@@ -90,12 +97,8 @@ class TestSearchCurrentUserDatasetRecords:
         await TermsMetadataPropertyFactory.create(
             name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
         )
-        await TermsMetadataPropertyFactory.create(
-            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
-        )
-        await TermsMetadataPropertyFactory.create(
-            name="owner_meta", dataset=dataset, allowed_roles=[]
-        )
+        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
+        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
 
         record = await RecordFactory.create(
             metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
@@ -114,17 +117,28 @@ class TestSearchCurrentUserDatasetRecords:
         )
 
         assert response.status_code == 200
-        assert response.json() == {'items': [{'record': {'id': str(record.id),
-                                                         'fields': record.fields,
-                                                         'metadata': {"annotator_meta": "value"},
-                                                         'external_id': record.external_id,
-                                                         'dataset_id': str(dataset.id),
-                                                         'inserted_at': record.inserted_at.isoformat(),
-                                                         'updated_at': record.updated_at.isoformat()},
-                                              'query_score': 1.0}], 'total': 1}
+        assert response.json() == {
+            "items": [
+                {
+                    "record": {
+                        "id": str(record.id),
+                        "fields": record.fields,
+                        "metadata": {"annotator_meta": "value"},
+                        "external_id": record.external_id,
+                        "dataset_id": str(dataset.id),
+                        "inserted_at": record.inserted_at.isoformat(),
+                        "updated_at": record.updated_at.isoformat(),
+                    },
+                    "query_score": 1.0,
+                }
+            ],
+            "total": 1,
+        }
 
     async def test_search_with_filtered_metadata_as_admin(
-            self, async_client: AsyncClient, mock_search_engine: SearchEngine,
+        self,
+        async_client: AsyncClient,
+        mock_search_engine: SearchEngine,
     ):
         dataset = await DatasetFactory.create()
 
@@ -135,12 +149,8 @@ class TestSearchCurrentUserDatasetRecords:
         await TermsMetadataPropertyFactory.create(
             name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
         )
-        await TermsMetadataPropertyFactory.create(
-            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
-        )
-        await TermsMetadataPropertyFactory.create(
-            name="owner_meta", dataset=dataset, allowed_roles=[]
-        )
+        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
+        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
         record = await RecordFactory.create(
             metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
             dataset=dataset,
@@ -158,18 +168,26 @@ class TestSearchCurrentUserDatasetRecords:
         )
 
         assert response.status_code == 200
-        assert response.json() == {'items': [{'record': {'id': str(record.id),
-                                                         'fields': record.fields,
-                                                         'metadata': {"admin_meta": "value", "annotator_meta": "value",
-                                                                      "extra": "value"},
-                                                         'external_id': record.external_id,
-                                                         'dataset_id': str(dataset.id),
-                                                         'inserted_at': record.inserted_at.isoformat(),
-                                                         'updated_at': record.updated_at.isoformat()},
-                                              'query_score': 1.0}], 'total': 1}
+        assert response.json() == {
+            "items": [
+                {
+                    "record": {
+                        "id": str(record.id),
+                        "fields": record.fields,
+                        "metadata": {"admin_meta": "value", "annotator_meta": "value", "extra": "value"},
+                        "external_id": record.external_id,
+                        "dataset_id": str(dataset.id),
+                        "inserted_at": record.inserted_at.isoformat(),
+                        "updated_at": record.updated_at.isoformat(),
+                    },
+                    "query_score": 1.0,
+                }
+            ],
+            "total": 1,
+        }
 
     async def test_with_vector_query_using_record_without_vector(
-            self, async_client: AsyncClient, owner_auth_header: dict
+        self, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
