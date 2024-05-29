@@ -20,7 +20,7 @@ export default {
   },
   async fetch() {
     const folderContent = require.context(
-      `../../../../../../docs/_source/_common/snippets`,
+      `../../../../../docs/_source/_common/snippets`,
       false,
       /.start_page.md/,
       "lazy"

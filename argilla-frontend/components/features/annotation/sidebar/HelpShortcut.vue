@@ -23,7 +23,7 @@ export default {
   methods: {
     async getShortcutsDocumentation() {
       const folderContent = require.context(
-        `../../../../docs/_source/_common/`,
+        `../../../../../docs/_source/_common/`,
         false,
         /^[^_]+\.md$/,
         "lazy"
