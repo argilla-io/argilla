@@ -4,6 +4,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash -l {0}
+    working-directory: argilla-server
+
 on:
   workflow_dispatch:
   push:
@@ -30,11 +35,6 @@ jobs:
   build:
     name: Build `argilla-server` package
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: argilla-server
 
     services:
       elasticsearch:
@@ -155,19 +155,14 @@ jobs:
 
     needs:
       - build
-      - build_server_docker_image
-      - build_quickstart_docker_image
+      # - build_server_docker_image
+      # - build_quickstart_docker_image
 
     permissions:
       # This permission is needed for private repositories.
       # contents: read
       # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
       id-token: write
-
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: ./argilla-server
 
     steps:
       - name: Checkout Code 🛎
@@ -185,10 +180,13 @@ jobs:
           cache: true
 
       - name: Publish Package to PyPI test environment 🥪
-        run: pdm publish --no-build --repository testpypi
+        run: |
+          pdm publish --no-build --repository testpypi
 
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
+        run: |
+          pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
 
       - name: Publish Package to PyPI 🥩
-        run: pdm publish --no-build
+        run: |
+          pdm publish --no-build
