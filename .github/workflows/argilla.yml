@@ -127,7 +127,7 @@ jobs:
       - name: Download python package
         uses: actions/download-artifact@v4
         with:
-          name: python-package
+          name: argilla
           path: dist
 
       - name: Publish Package to TestPyPI 🥪
