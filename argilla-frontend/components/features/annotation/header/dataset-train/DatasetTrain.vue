@@ -8,10 +8,6 @@
 <script>
 export default {
   props: {
-    datasetTask: {
-      type: String,
-      required: true,
-    },
     workspaceName: {
       type: String,
       required: true,
@@ -53,13 +49,6 @@ export default {
         );
       };
 
-      const tasks = {
-        TextClassification: "text-classification",
-        TokenClassification: "token-classification",
-        Text2Text: "text2text",
-        FeedbackTask: "feedback-task",
-      };
-
       try {
         const libraries = require.context(
           `../../../../../../docs/_source/_common/snippets/training`,
@@ -69,8 +58,8 @@ export default {
         );
 
         return Promise.all(
-          getCurrentTaskLibraries(libraries, tasks[this.datasetTask]).map(
-            (library) => libraries(library)
+          getCurrentTaskLibraries(libraries, "feedback-task").map((library) =>
+            libraries(library)
           )
         );
       } catch (e) {

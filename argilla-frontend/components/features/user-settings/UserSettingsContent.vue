@@ -4,7 +4,7 @@
 
     <div class="user-settings" v-if="user">
       <div class="user-settings-item edition-user-info-component">
-        <EditionUserInfoComponent :userInfo="user" />
+        <EditionUserInfo :userInfo="user" />
       </div>
       <div class="user-settings-item user-token-component">
         <UserTokenComponent :userToken="user.api_key" />
@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: "LeftUserSettingsContent",
+  name: "UserSettingsContent",
   computed: {
     user() {
       return this.$auth.user;

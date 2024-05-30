@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "TopDatasetSettingsFeedbackTaskContent",
+  name: "TopDatasetSettingsFeedbackTask",
   props: {
     separator: {
       type: Boolean,
