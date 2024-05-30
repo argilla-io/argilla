@@ -177,6 +177,8 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
+          python-version-file: argilla-server/pyproject.toml
+          cache-dependency-path: argilla-server/pdm.lock
           cache: true
 
       - name: Publish Package to PyPI test environment 🥪

@@ -119,6 +119,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+        working-directory: argilla
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
