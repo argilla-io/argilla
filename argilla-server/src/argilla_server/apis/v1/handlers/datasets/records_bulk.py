@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette import status
@@ -56,15 +56,11 @@ async def create_dataset_records_bulk(
         ],
     )
 
-    try:
-        await authorize(current_user, DatasetPolicyV1.create_records(dataset))
+    records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
 
-        records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
-        telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_bulk.items)})
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_bulk.items)})
 
-        return records_bulk
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return records_bulk
 
 
 @router.put("/datasets/{dataset_id}/records/bulk", response_model=RecordsBulk)
@@ -90,15 +86,12 @@ async def upsert_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicyV1.upsert_records(dataset))
 
-    try:
-        records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_create)
+    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_create)
 
-        updated = len(records_bulk.updated_item_ids)
-        created = len(records_bulk.items) - updated
+    updated = len(records_bulk.updated_item_ids)
+    created = len(records_bulk.items) - updated
 
-        telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": created})
-        telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": updated})
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": created})
+    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": updated})
 
-        return records_bulk
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return records_bulk

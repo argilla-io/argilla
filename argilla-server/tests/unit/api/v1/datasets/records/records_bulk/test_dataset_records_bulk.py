@@ -152,7 +152,11 @@ class TestDatasetRecordsBulk:
         response = await async_client.put(
             self.url(other_dataset.id),
             headers=owner_auth_header,
-            json={"items": [{"id": str(record.id), "metadata": {"terms_metadata": "b"}}]},
+            json={
+                "items": [
+                    {"id": str(record.id), "metadata": {"terms_metadata": "b"}},
+                ],
+            },
         )
 
         assert response.status_code == 422, response.json()
