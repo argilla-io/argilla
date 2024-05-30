@@ -1,7 +1,7 @@
 <template>
   <section class="auth__wrapper">
     <div class="auth__info">
-      <DecorationShape class="auth__info__shape" />
+      <DecorationShape />
       <h1 class="auth__info__claim">
         <slot name="claim">
           <span v-html="$t('login.claim')" />
@@ -46,9 +46,6 @@ export default {
       justify-content: center;
       width: 60vw;
     }
-    &__shape {
-      width: 50%;
-    }
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
@@ -76,7 +73,7 @@ export default {
     }
     &__text {
       position: absolute;
-      bottom: $base-space * 2;
+      bottom: $base-space;
       font-weight: 400;
       @include font-size(16px);
       line-height: 1.4em;
