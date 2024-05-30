@@ -820,6 +820,15 @@ class TestSuiteRecords:
                 create_multi_label_selection_questions,
                 {
                     "values": {
+                        "multi_label_selection_question_1": {"value": ["option1", "option2", "option1"]},
+                    },
+                },
+                "multi label selection questions expect a list of unique values, but duplicates were found",
+            ),
+            (
+                create_multi_label_selection_questions,
+                {
+                    "values": {
                         "multi_label_selection_question_1": {"value": ["option4", "option5"]},
                     },
                 },
