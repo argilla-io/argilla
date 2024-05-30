@@ -17,6 +17,7 @@
 
 <template>
   <AuthenticationLayout>
+    <BaseLoading v-if="hasAuthToken" />
     <div class="login__form">
       <form class="form" @submit.prevent="onLoginUser">
         <p class="form__title" v-text="$t('login.title')" />
@@ -56,7 +57,6 @@
 </template>
 
 <script>
-
 import AuthenticationLayout from "@/layouts/AuthenticationLayout";
 
 export default {
