@@ -67,15 +67,16 @@ jobs:
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - run: pdm run mike deploy dev --push
-      #   if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/feat/v2.0.0'
+        # if: github.ref == 'refs/heads/main'
 
-      # - run: pdm run mike deploy ${{ github.ref_name }} latest --update-aliases --push
-      #   if: startsWith(github.ref, 'refs/tags/')
+      - run: pdm run mike deploy ${{ github.ref_name }} latest --update-aliases --push
+        if: startsWith(github.ref, 'refs/tags/')
 
-      # - name: Extract branch name
-      #   shell: bash
-      #   run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
-      #   id: extract_branch_name
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
+        id: extract_branch_name
 
-      # - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --push
-      #   if: startsWith(github.head_ref, 'docs/')
+      - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --push
+        # if: startsWith(github.head_ref, 'docs/')
