@@ -49,6 +49,17 @@ def add_exception_handlers(app: FastAPI):
             content={"detail": exc.message},
         )
 
+    # TODO: This is a temporary exception handler for ValueError exceptions.
+    # This is because we are using ValueError exceptions in some places and we want to
+    # return a 422 status code instead of a 500 status code.
+    # This exception handler should be removed once we move to v2.0 and we use UnprocessableEntityError.
+    @app.exception_handler(ValueError)
+    async def value_error_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"detail": str(exc)},
+        )
+
     # TODO: Once we move to v2.0 we can remove this exception handler and use UnprocessableEntityError
     @app.exception_handler(errors.MissingVectorError)
     async def missing_vector_error_exception_handler(request, exc):
