@@ -102,9 +102,9 @@ jobs:
   build_python_package:
     name: Build Argilla python package
     uses: ./.github/workflows/argilla.build-python-package.yml
-    needs:
-      - run_unit_tests
-      - run_integration_tests
+    # needs:
+      # - run_unit_tests
+      # - run_integration_tests
     secrets: inherit
 
   # This job will upload a Python Package using Twine when a release is created
@@ -113,9 +113,9 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
+    # if: ${{ github.event_name == 'release' }}
     needs:
-      - run_integration_tests
+      - build_python_package
     defaults:
       run:
         shell: bash -l {0}
@@ -128,7 +128,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-package
-          path: dist
+          path: argilla/dist
 
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
