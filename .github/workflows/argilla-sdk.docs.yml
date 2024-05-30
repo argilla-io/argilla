@@ -9,8 +9,8 @@ on:
     paths:
       - "argilla-sdk/**"
     branches:
-      - "main"
-      - "develop"
+      # - "main"
+      - "feat/**"
       - "gh-pages"
     tags:
       - "**"
@@ -25,8 +25,8 @@ on:
       - synchronize
       - ready_for_review
     branches:
-      - "main"
-      - "develop"
+      # - "main"
+      # - "develop"
       - "feat/**"
 
 defaults:
