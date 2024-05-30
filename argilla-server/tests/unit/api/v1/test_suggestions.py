@@ -77,7 +77,8 @@ class TestSuiteSuggestions:
         user = await UserFactory.create(role=UserRole.admin)
 
         response = await async_client.delete(
-            f"/api/v1/suggestions/{suggestion.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/suggestions/{suggestion.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -87,7 +88,8 @@ class TestSuiteSuggestions:
         user = await UserFactory.create(role=UserRole.annotator, workspaces=[suggestion.record.dataset.workspace])
 
         response = await async_client.delete(
-            f"/api/v1/suggestions/{suggestion.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/suggestions/{suggestion.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
