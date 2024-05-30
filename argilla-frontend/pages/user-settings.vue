@@ -1,7 +1,7 @@
 <template>
   <InternalPage>
     <template v-slot:header>
-      <HeaderFeedbackTaskComponent
+      <HeaderFeedbackTask
         :breadcrumbs="[
           { link: { name: 'datasets' }, name: $t('breadcrumbs.home') },
           { link: {}, name: $t('breadcrumbs.userSettings') },

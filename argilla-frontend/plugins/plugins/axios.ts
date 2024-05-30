@@ -20,8 +20,6 @@ import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { AxiosError } from "axios";
 import { Notification } from "@/models/Notifications";
 
-import { currentWorkspace } from "@/models/Workspace";
-
 type BackendError = {
   detail: {
     params: {
@@ -42,10 +40,6 @@ export default ({ $axios, app }) => {
       return config;
     }
 
-    const ws = currentWorkspace(app.context.route);
-    if (ws) {
-      config.headers["X-Argilla-Workspace"] = ws;
-    }
     return config;
   });
 

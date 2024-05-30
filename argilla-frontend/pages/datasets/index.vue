@@ -22,22 +22,14 @@
       <div class="home__main">
         <app-header
           class="home__header"
-          :copy-button="false"
-          :sticky="false"
           :breadcrumbs="[
             { action: 'clearFilters', name: $t('breadcrumbs.home') },
           ]"
-          @breadcrumb-action="onBreadcrumbAction($event)"
+          @breadcrumb-action="onBreadcrumbAction"
         />
         <PersistentStorageBanner class="home__banner" />
-        <error
-          v-if="$fetchState.error"
-          where="workspace datasets"
-          :error="$fetchState.error"
-        />
         <datasets-table
           class="home__table"
-          v-else
           ref="table"
           :datasets="datasets.datasets"
         />
