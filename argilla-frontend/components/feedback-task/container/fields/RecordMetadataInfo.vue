@@ -112,6 +112,7 @@ export default {
     .--table & {
       background: $black-6;
       border-top: 1px solid $black-10;
+      border-bottom: 1px solid $black-10;
     }
   }
   &__row {
@@ -120,7 +121,7 @@ export default {
     gap: $base-space * 2;
     padding: $base-space $base-space * 2;
     .--table & {
-      border-top: 1px solid $black-10;
+      border-bottom: 1px solid $black-10;
       &:nth-child(even) {
         background: $black-4;
       }
