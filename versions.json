@@ -1,5 +1,10 @@
 [
   {
+    "version": "feat_add-new-sdk-project",
+    "title": "feat_add-new-sdk-project",
+    "aliases": []
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
