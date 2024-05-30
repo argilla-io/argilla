@@ -21,8 +21,7 @@
           allow-close
           @close-modal="showTrainModal(false)"
         >
-          <DatasetTrainComponent
-            datasetTask="FeedbackTask"
+          <DatasetTrain
             :datasetName="dataset.name"
             :workspaceName="dataset.workspace"
           />

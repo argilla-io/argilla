@@ -56,8 +56,8 @@
 </template>
 
 <script>
+
 import AuthenticationLayout from "@/layouts/AuthenticationLayout";
-import { Notification } from "@/models/Notifications";
 
 export default {
   data() {
@@ -127,12 +127,11 @@ export default {
     },
     async loginUser(authData) {
       await this.$auth.logout();
-      await this.$store.dispatch("entities/deleteAll");
       await this.$auth.loginWith("basic", {
         data: this.encodedLoginData(authData),
       });
 
-      Notification.dispatch("clear");
+      this.$notification.clear();
 
       this.nextRedirect();
     },
@@ -151,57 +150,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-// .form {
-//   display: flex;
-//   flex-flow: column;
-//   &__label {
-//     display: block;
-//     margin-bottom: $base-space;
-//     font-weight: 500;
-//   }
-//   &__title {
-//     @include font-size(36px);
-//     line-height: 1.2em;
-//     margin: 0 auto $base-space * 5 auto;
-//     color: $black-87;
-//     font-weight: 500;
-//     letter-spacing: 0.03em;
-//     font-family: "raptor_v2_premiumbold", "Helvetica", "Arial", sans-serif;
-//   }
-//   &__input {
-//     border: 1px solid palette(grey, 600);
-//     border-radius: $border-radius;
-//     padding: 0 1em;
-//     outline: none;
-//     background: transparent;
-//     min-height: 40px;
-//     width: 100%;
-//     .active:focus-within & {
-//       border-color: $primary-color;
-//     }
-//   }
-//   &__error {
-//     color: palette(orange-red-crayola);
-//   }
-// }
-
-// input:-webkit-autofill {
-//   box-shadow: 0 0 0px 1000px palette(white) inset;
-// }
-// .login {
-//   &__form {
-//     width: 340px;
-//     margin: auto;
-//     height: 90%;
-//     display: flex;
-//     flex-direction: column;
-//     justify-content: center;
-//     @include media("<=tablet") {
-//       width: 100%;
-//       margin: auto 0;
-//     }
-//   }
-// }
-</style>

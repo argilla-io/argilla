@@ -1,6 +1,5 @@
 import { useResolve } from "ts-injecty";
 import { ref } from "vue-demi";
-import { Notification } from "~/models/Notifications";
 import { Record } from "~/v1/domain/entities/record/Record";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
 import { Records } from "~/v1/domain/entities/record/Records";
@@ -9,6 +8,7 @@ import {
   BulkAnnotationUseCase,
 } from "~/v1/domain/usecases/bulk-annotation-use-case";
 import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
 export const useBulkAnnotationViewModel = ({
@@ -16,6 +16,7 @@ export const useBulkAnnotationViewModel = ({
 }: {
   records: Records;
 }) => {
+  const notification = useNotifications();
   const debounceForSubmit = useDebounce(300);
 
   const affectAllRecords = ref(false);
@@ -59,12 +60,12 @@ export const useBulkAnnotationViewModel = ({
       );
 
       if (!allSuccessful) {
-        Notification.dispatch("notify", {
+        notification.notify({
           message: t("some_records_failed_to_annotate"),
           type: "error",
         });
       } else if (isAffectingAllRecords) {
-        Notification.dispatch("notify", {
+        notification.notify({
           message: t("bulkAnnotation.allRecordsAnnotated", {
             total: totalRecords,
             action: t(`bulkAnnotation.affectedAll.${status}`).toLowerCase(),

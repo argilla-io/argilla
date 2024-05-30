@@ -44,6 +44,8 @@
 import "assets/icons/external";
 import "assets/icons/log-out";
 
+import { useRoutes } from "~/v1/infrastructure/services/useRoutes";
+
 export default {
   data: () => {
     return {
@@ -74,8 +76,12 @@ export default {
     },
     async logout() {
       await this.$auth.logout();
-      await this.$auth.strategy.token.reset();
+
+      this.goToSignIn();
     },
+  },
+  setup() {
+    return useRoutes();
   },
 };
 </script>
