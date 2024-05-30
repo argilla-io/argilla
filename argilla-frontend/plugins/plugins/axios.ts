@@ -32,16 +32,6 @@ type BackendError = {
 export default ({ $axios, app }) => {
   const notification = useNotifications();
 
-  $axios.interceptors.request.use((config) => {
-    const currentUser = app.$auth.user;
-
-    if (!currentUser) {
-      return config;
-    }
-
-    return config;
-  });
-
   $axios.onError((error: AxiosError<BackendError>) => {
     const { status, data } = error.response ?? {};
     const t = (key: string) => app.i18n.t(key);

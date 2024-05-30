@@ -74,7 +74,6 @@ export default {
     },
     async logout() {
       await this.$auth.logout();
-      await this.$auth.strategy.token.reset();
     },
   },
 };
