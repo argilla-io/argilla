@@ -170,6 +170,8 @@ export default {
     username: "Benutzername",
     usernameDescription: "Gebe Sie ihren Benutzernamen ein",
     password: "Passwort",
+    show: "Anzeigen",
+    hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
     support:

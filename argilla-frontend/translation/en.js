@@ -177,6 +177,8 @@ export default {
     username: "Username",
     usernameDescription: "Enter your username",
     password: "Password",
+    show: "Show",
+    hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
     support:

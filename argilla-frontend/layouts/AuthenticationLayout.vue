@@ -7,6 +7,10 @@
           <span v-html="$t('login.claim')" />
         </slot>
       </h1>
+      <p
+        class="auth__info__text"
+        v-html="$t('login.support', { link: $config.slackCommunity })"
+      />
     </div>
     <div class="auth__form">
       <BrandLogo class="auth__form__logo" />
@@ -48,13 +52,13 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      max-width: min(74%, 540px);
+      max-width: min(80%, 580px);
       color: palette(white);
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
         @include font-size(40px);
-        padding-right: $base-space * 3;
+        padding-right: $base-space * 8;
         padding-top: $base-space * 4;
       }
       &--mobile {
@@ -67,6 +71,22 @@ export default {
         font-family: $secondary-font-family;
         @include media(">desktop") {
           display: none;
+        }
+      }
+    }
+    &__text {
+      position: absolute;
+      bottom: $base-space * 2;
+      font-weight: 400;
+      @include font-size(16px);
+      line-height: 1.4em;
+      a,
+      :deep(a) {
+        outline: none;
+        color: $brand-primary-color;
+        text-decoration: none;
+        &:hover {
+          color: darken($brand-primary-color, 10%);
         }
       }
     }
@@ -114,8 +134,7 @@ export default {
     }
   }
 }
-:deep(.form),
-:deep(.form__confirmation) {
+:deep(.form) {
   display: flex;
   flex-direction: column;
   gap: $base-space * 2;
@@ -145,7 +164,7 @@ export default {
 }
 :deep(.form__button.button) {
   @include font-size(16px);
-  padding: $base-space * 2.3;
+  padding: $base-space * 2;
 }
 :deep(.form__link.button) {
   display: inline-flex;
@@ -165,6 +184,9 @@ export default {
     }
   }
 }
+:deep(.form__error) {
+  color: palette(orange-red-crayola);
+}
 :deep(.form__extra-info) {
   @include font-size(14px);
   margin-bottom: 0;
@@ -174,19 +196,6 @@ export default {
     &:hover {
       color: darken($primary-color, 10%);
     }
-  }
-}
-:deep(.form__confirmation__badge) {
-  width: $base-space * 6;
-  height: $base-space * 6;
-  background: palette(apricot);
-  flex-shrink: 0;
-  border-radius: $border-radius-rounded;
-  fill: palette(white);
-  padding: calc($base-space / 2);
-  &.--error {
-    background: palette(orange-red-crayola);
-    padding: calc($base-space / 1.2);
   }
 }
 </style>
