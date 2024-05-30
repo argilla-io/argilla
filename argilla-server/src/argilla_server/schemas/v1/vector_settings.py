@@ -55,7 +55,7 @@ class VectorSettings(BaseModel):
         num_elements = len(value)
 
         if num_elements != self.dimensions:
-            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+            raise UnprocessableEntityError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
 
 
 class VectorsSettings(BaseModel):

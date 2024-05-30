@@ -16,16 +16,16 @@ import re
 from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from typing_extensions import Annotated
 
-import argilla_server.errors.future as errors
 import argilla_server.search_engine as search_engine
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Record, User
 from argilla_server.policies import DatasetPolicyV1, authorize
@@ -215,7 +215,7 @@ async def _get_search_responses(
 
             if not record.vector_value_by_vector_settings(vector_settings):
                 # TODO: Once we move to v2.0 we can use here UnprocessableEntityError instead of MissingVectorError
-                raise errors.MissingVectorError(
+                raise MissingVectorError(
                     message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
                     code=MISSING_VECTOR_ERROR_CODE,
                 )
@@ -225,10 +225,7 @@ async def _get_search_responses(
         and text_query.field
         and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
     ):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Field `{text_query.field}` not found in dataset `{dataset.id}`.",
-        )
+        raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
@@ -295,10 +292,9 @@ async def _build_metadata_filters(
                 raise ValueError(f"Not found filter for type {metadata_property.type}")
 
             metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
-    except ValueError as ex:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse provided metadata filters: {ex}"
-        )
+    except (UnprocessableEntityError, ValueError) as ex:
+        raise UnprocessableEntityError(f"Cannot parse provided metadata filters: {ex}")
+
     return metadata_filters
 
 
@@ -330,31 +326,22 @@ async def _build_sort_by(
                 db, name=metadata_property_name, dataset_id=dataset.id
             )
             if not metadata_property:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(
-                        f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in"
-                        f" dataset with '{dataset.id}'."
-                    ),
+                raise UnprocessableEntityError(
+                    f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in "
+                    f"dataset with '{dataset.id}'."
                 )
+
             field = metadata_property
         else:
             valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
-                    f" {valid_sort_fields} or `metadata.metadata-property-name`"
-                ),
+            raise UnprocessableEntityError(
+                f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
+                f" {valid_sort_fields} or `metadata.metadata-property-name`"
             )
 
         if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not"
-                    " valid."
-                ),
+            raise UnprocessableEntityError(
+                f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not valid.",
             )
 
         sorts_by.append(SortBy(field=field, order=sort_order or SortOrder.asc.value))
@@ -365,17 +352,16 @@ async def _build_sort_by(
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
-    except (ValueError, errors.NotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    except (ValueError, NotFoundError) as e:
+        raise UnprocessableEntityError(str(e))
 
 
 async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> Record:
+    # TODO: This can be changed to a query including the record_id and the dataset_id.
+    # Once that we add the get_by_or_raise method we can replace calls to this method with that one.
     record = await Record.get(db, record_id)
     if record is None or record.dataset_id != dataset.id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Record with id `{record_id}` not found in dataset `{dataset.id}`.",
-        )
+        raise UnprocessableEntityError(f"Record with id `{record_id}` not found in dataset `{dataset.id}`.")
 
     return record
 
@@ -386,12 +372,8 @@ async def _get_vector_settings_by_name_or_raise(
     vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
         db, name=vector_name, dataset_id=dataset.id
     )
-
     if vector_settings is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Vector `{vector_name}` not found in dataset `{dataset.id}`.",
-        )
+        raise UnprocessableEntityError(f"Vector `{vector_name}` not found in dataset `{dataset.id}`.")
 
     return vector_settings
 
@@ -491,13 +473,9 @@ async def create_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
-        telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    await datasets.create_records(db, search_engine, dataset, records_create)
+
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
 
 
 @router.patch(
@@ -527,11 +505,9 @@ async def update_dataset_records(
 
     await authorize(current_user, DatasetPolicyV1.update_records(dataset))
 
-    try:
-        await datasets.update_records(db, search_engine, dataset, records_update)
-        telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    await datasets.update_records(db, search_engine, dataset, records_update)
+
+    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -551,13 +527,10 @@ async def delete_dataset_records(
     num_records = len(record_ids)
 
     if num_records == 0:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No record IDs provided")
+        raise UnprocessableEntityError("No record IDs provided")
 
     if num_records > DELETE_DATASET_RECORDS_LIMIT:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once",
-        )
+        raise UnprocessableEntityError(f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once")
 
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
@@ -617,11 +590,13 @@ async def search_current_user_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+            record=RecordSchema.from_orm(record),
+            query_score=record_id_score_map[record.id]["query_score"],
         )
 
     return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+        items=[record["search_record"] for record in record_id_score_map.values()],
+        total=search_responses.total,
     )
 
 
@@ -677,11 +652,13 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+            record=RecordSchema.from_orm(record),
+            query_score=record_id_score_map[record.id]["query_score"],
         )
 
     return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+        items=[record["search_record"] for record in record_id_score_map.values()],
+        total=search_responses.total,
     )
 
 
