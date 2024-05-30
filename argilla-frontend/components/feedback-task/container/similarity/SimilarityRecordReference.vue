@@ -21,6 +21,7 @@
       v-if="visibleReferenceRecord"
       class="record-reference"
       :fields="fields"
+      :recordCriteria="recordCriteria"
     />
   </div>
 </template>
