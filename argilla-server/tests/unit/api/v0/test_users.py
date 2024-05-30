@@ -195,6 +195,8 @@ async def test_create_user_with_non_existent_workspaces(
     response = await async_client.post("/api/users", headers=owner_auth_header, json=user)
 
     assert response.status_code == 422
+    assert response.json() == {"detail": "Workspace 'i do not exist' does not exist"}
+
     assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
 
@@ -301,9 +303,16 @@ async def test_create_user_with_existent_username(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
     await UserFactory.create(username="username")
-    user = {"first_name": "first-name", "username": "username", "password": "12345678"}
 
-    response = await async_client.post("/api/users", headers=owner_auth_header, json=user)
+    response = await async_client.post(
+        "/api/users",
+        headers=owner_auth_header,
+        json={
+            "first_name": "first-name",
+            "username": "username",
+            "password": "12345678",
+        },
+    )
 
     assert response.status_code == 409
     assert (await db.execute(select(func.count(User.id)))).scalar() == 2

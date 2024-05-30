@@ -15,7 +15,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
+from fastapi import APIRouter, Depends, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server import telemetry
@@ -48,9 +48,7 @@ async def get_user(
 ):
     await authorize(current_user, UserPolicyV1.get)
 
-    user = await User.get_or_raise(db, user_id)
-
-    return user
+    return await User.get_or_raise(db, user_id)
 
 
 @router.get("/users", response_model=Users)
@@ -75,14 +73,9 @@ async def create_user(
 ):
     await authorize(current_user, UserPolicyV1.create)
 
-    try:
-        user = await accounts.create_user(db, user_create.dict())
+    user = await accounts.create_user(db, user_create.dict())
 
-        telemetry.track_user_created(user)
-    except NotUniqueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    telemetry.track_user_created(user)
 
     return user
 
@@ -98,9 +91,7 @@ async def delete_user(
 
     await authorize(current_user, UserPolicyV1.delete)
 
-    await accounts.delete_user(db, user)
-
-    return user
+    return await accounts.delete_user(db, user)
 
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)
