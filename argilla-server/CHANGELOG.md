@@ -34,6 +34,10 @@ These are the section headers that we use:
 - Added `GET /api/v1/version` endpoint to get the current Argilla version. ([#162](https://github.com/argilla-io/argilla-server/pull/162))
 - Added `GET /api/v1/status` endpoint to get Argilla service status. ([#165](https://github.com/argilla-io/argilla-server/pull/165))
 
+## Fixed
+
+- Fixed error when fetching record with metadata values with visibility restrictions. ([#4906](https://github.com/argilla-io/argilla/pull/4906))
+
 ## [1.28.0](https://github.com/argilla-io/argilla-server/compare/v1.27.0...v1.28.0)
 
 ### Added
