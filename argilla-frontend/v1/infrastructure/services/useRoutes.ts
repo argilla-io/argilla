@@ -46,7 +46,7 @@ export const useRoutes = () => {
     return false;
   };
 
-  const getDatasetLink = ({ task, name, workspace, id }: Dataset): string => {
+  const getDatasetLink = ({ id }: Dataset): string => {
     return ROUTES.annotationPage.feedbackDataset(id);
   };
 
@@ -54,7 +54,7 @@ export const useRoutes = () => {
     router.push(ROUTES.annotationPage.feedbackDataset(datasetId));
   };
 
-  const goToSetting = ({ task, workspace, name, id }: Dataset) => {
+  const goToSetting = ({ id }: Dataset) => {
     router.push({
       name: "dataset-id-settings",
       params: { id },
