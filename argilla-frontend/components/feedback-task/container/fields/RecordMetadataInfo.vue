@@ -92,13 +92,13 @@ export default {
 <style lang="scss" scoped>
 .table-info {
   background: palette(white);
-  min-width: 460px;
+  min-width: 440px;
   border-radius: $border-radius-s;
   overflow: hidden;
   @include font-size(13px);
   box-shadow: $shadow;
   &__content {
-    max-height: 320px;
+    max-height: 280px;
     overflow: auto;
   }
   &__header {
@@ -135,6 +135,9 @@ export default {
     flex-basis: 44%;
     margin: 0;
     @include truncate;
+    .--intro & {
+      flex-basis: 100px;
+    }
   }
   &__value {
     display: flex;
@@ -145,6 +148,9 @@ export default {
     margin: 0;
     font-family: $quaternary-font-family;
     word-break: break-all;
+    .--intro & {
+      flex-basis: 100%;
+    }
   }
   &__copy {
     opacity: 0;

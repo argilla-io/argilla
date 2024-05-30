@@ -99,8 +99,8 @@ export default {
   :deep(.dropdown__content) {
     min-width: 100%;
     left: auto;
-    right: 0;
-    top: calc(100% + $base-space * 2);
+    right: 100%;
+    top: 0;
   }
 }
 </style>
