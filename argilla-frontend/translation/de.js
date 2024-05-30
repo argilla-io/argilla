@@ -174,8 +174,6 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
-    support:
-      "Um Unterstützung von der Community zu erhalten, folgen Sie uns auf <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "Sie verwenden die Quickstart-Version von Argilla. Überprüfen Sie <a href='{link}' target='_blank'>diesen Leitfaden</a> um mehr über Nutzung und Konfigurationsoptionen zu erfahren.",
     hf: {

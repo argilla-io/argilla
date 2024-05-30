@@ -7,10 +7,6 @@
           <span v-html="$t('login.claim')" />
         </slot>
       </h1>
-      <p
-        class="auth__info__text"
-        v-html="$t('login.support', { link: $config.slackCommunity })"
-      />
     </div>
     <div class="auth__form">
       <BrandLogo class="auth__form__logo" />
@@ -68,22 +64,6 @@ export default {
         font-family: $secondary-font-family;
         @include media(">desktop") {
           display: none;
-        }
-      }
-    }
-    &__text {
-      position: absolute;
-      bottom: $base-space;
-      font-weight: 400;
-      @include font-size(16px);
-      line-height: 1.4em;
-      a,
-      :deep(a) {
-        outline: none;
-        color: $brand-primary-color;
-        text-decoration: none;
-        &:hover {
-          color: darken($brand-primary-color, 10%);
         }
       }
     }
