@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line import/no-named-as-default
-import VuexORM from "@vuex-orm/core";
-import VuexORMAxios from "@vuex-orm/plugin-axios";
-import database from "@/database";
+import { Inject } from "@nuxt/types/app";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
-VuexORM.use(VuexORMAxios, {
-  database,
-});
+export default (_, inject: Inject) => {
+  const notification = useNotifications();
 
-export const plugins = [VuexORM.install(database)];
+  inject("notification", notification);
+};

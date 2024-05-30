@@ -71,7 +71,7 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/vue-vega.js" },
     { src: "~/plugins/plugins/click-outside.js" },
     { src: "~/plugins/plugins/virtual-scroller.js" },
-    { src: "~/plugins/plugins/toast.js" },
+    { src: "~/plugins/plugins/toast.ts" },
     { src: "~/plugins/plugins/highlight-search.js" },
     { src: "~/plugins/plugins/copy-to-clipboard.js" },
     { src: "~/plugins/plugins/filters.js" },

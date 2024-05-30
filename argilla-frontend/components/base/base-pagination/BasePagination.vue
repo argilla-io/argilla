@@ -103,10 +103,10 @@
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
 import "assets/icons/chevron-left";
 import "assets/icons/chevron-right";
 import "assets/icons/chevron-up";
+
 export default {
   props: {
     totalItems: {
@@ -182,8 +182,8 @@ export default {
       start = start > 0 ? start : 1;
       let end = this.currentPage + rangeOfPages;
       end = end < this.totalPages ? end : this.totalPages;
-      var pages = [];
-      for (var i = start; i <= end; i++) {
+      let pages = [];
+      for (let i = start; i <= end; i++) {
         pages.push(i);
       }
       return pages;
@@ -265,9 +265,8 @@ export default {
       );
     },
     showNotification() {
-      Notification.dispatch("notify", {
+      this.$notification.notify({
         message: this.message,
-        numberOfChars: 194,
         type: "warning",
       });
     },

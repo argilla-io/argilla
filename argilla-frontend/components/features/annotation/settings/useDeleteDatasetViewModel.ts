@@ -1,12 +1,13 @@
 import { useResolve } from "ts-injecty";
 import { ref } from "vue-demi";
-import { Notification } from "~/models/Notifications";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { DeleteDatasetUseCase } from "~/v1/domain/usecases/delete-dataset-use-case";
 import { useRoutes } from "~/v1/infrastructure/services";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 export const useDeleteDatasetViewModel = () => {
   const showDeleteModal = ref(false);
+  const notification = useNotifications();
   const deleteDatasetUseCase = useResolve(DeleteDatasetUseCase);
   const routes = useRoutes();
 
@@ -18,7 +19,7 @@ export const useDeleteDatasetViewModel = () => {
     try {
       await deleteDatasetUseCase.execute(dataset.id);
 
-      Notification.dispatch("notify", {
+      notification.notify({
         message: `${dataset.name} has been deleted`,
         type: "success",
       });
@@ -27,7 +28,7 @@ export const useDeleteDatasetViewModel = () => {
     } catch {
       toggleDeleteModal(false);
 
-      Notification.dispatch("notify", {
+      notification.notify({
         message: `It is not possible to delete ${dataset.name}`,
         type: "error",
       });

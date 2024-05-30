@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
 import { useRecordFeedbackTaskViewModel } from "./useRecordFeedbackTaskViewModel";
 
 export default {
@@ -83,7 +82,7 @@ export default {
     async paginate() {
       if (this.fetching) return Promise.resolve();
 
-      Notification.dispatch("clear");
+      this.$notification.clear();
 
       this.fetching = true;
 
@@ -91,7 +90,7 @@ export default {
 
       if (!isNextRecordExist) {
         setTimeout(() => {
-          Notification.dispatch("notify", {
+          this.$notification.notify({
             message: this.noMoreDataMessage,
             numberOfChars: this.noMoreDataMessage.length,
             type: "info",
@@ -125,13 +124,13 @@ export default {
       this.paginate();
     },
     showNotificationForNewFilterWhenIfNeeded(onFilter, onClose) {
-      Notification.dispatch("clear");
+      this.$notification.clear();
 
       if (!this.shouldShowNotification) {
         return onFilter();
       }
 
-      Notification.dispatch("notify", {
+      this.$notification.notify({
         message: this.$t("changes_no_submit"),
         buttonText: this.$t("button.ignore_and_continue"),
         permanent: true,
@@ -159,7 +158,7 @@ export default {
   destroyed() {
     this.$root.$off("on-change-record-page");
     this.$root.$off("on-change-record-criteria-filter");
-    Notification.dispatch("clear");
+    this.$notification.clear();
   },
 };
 </script>

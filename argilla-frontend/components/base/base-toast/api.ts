@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import Vue from "vue";
 import Toast from "./Toast.vue";
-import eventBus from "./bus.js";
+import eventBus from "./bus";
 
-const Api = (Vue, globalOptions = {}) => {
+export const toastService = (globalOptions = {}) => {
   return {
     open(options) {
       let message;
@@ -106,4 +107,4 @@ const Api = (Vue, globalOptions = {}) => {
   };
 };
 
-export default Api;
+export default toastService;
