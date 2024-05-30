@@ -19,7 +19,7 @@ import Vue from "vue";
 import Toast from "./Toast.vue";
 import eventBus from "./bus";
 
-export const toastService = (globalOptions = {}) => {
+export const toast = (globalOptions = {}) => {
   return {
     open(options) {
       let message;
@@ -106,5 +106,3 @@ export const toastService = (globalOptions = {}) => {
     },
   };
 };
-
-export default toastService;

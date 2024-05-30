@@ -1,8 +1,8 @@
-import toastService from "~/components/base/base-toast/api";
+import { toast } from "~/components/base/base-toast/api";
 
 export const useNotifications = () => {
   const clear = () => {
-    toastService().clear();
+    toast().clear();
   };
 
   const notify = ({
@@ -21,7 +21,7 @@ export const useNotifications = () => {
     onClose?: () => void;
   }) => {
     return setTimeout(() => {
-      toastService().open({
+      toast().open({
         message,
         permanent,
         numberOfChars: message.length,
