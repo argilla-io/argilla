@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -88,11 +88,4 @@ async def delete_metadata_property(
 
     await authorize(current_user, MetadataPropertyPolicyV1.delete(metadata_property))
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        await datasets.delete_metadata_property(db, metadata_property)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
-
-    return metadata_property
+    return await datasets.delete_metadata_property(db, metadata_property)
