@@ -53,7 +53,7 @@ class AnnotatorMetric(MetricBase):
 
     Example:
         >>> import argilla as rg
-        >>> from argilla.client.feedback.metrics import AnnotatorMetric
+        >>> from argilla.client.feedback.metrics.annotator_metrics import AnnotatorMetric
         >>> metric = AnnotatorMetric(dataset=dataset, question_name=question)
         >>> metrics_report = metric.compute("accuracy")
 
@@ -171,7 +171,7 @@ class UnifiedAnnotatorMetric(AnnotatorMetric):
 
     Example:
         >>> import argilla as rg
-        >>> from argilla.client.feedback.metrics import UnifiedAnnotatorMetric
+        >>> from argilla.client.feedback.metrics.annotator_metrics import UnifiedAnnotatorMetric
         >>> metric = UnifiedAnnotatorMetric(dataset=dataset, question_name=question)
         >>> metrics_report = metric.compute("accuracy")
     """
