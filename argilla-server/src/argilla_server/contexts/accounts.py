@@ -132,7 +132,7 @@ async def list_users_by_ids(db: AsyncSession, ids: Iterable[UUID]) -> Sequence[U
 # With API v1 the workspaces will be created doing additional requests to other endpoints for it.
 async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List[str], None] = None) -> User:
     if await get_user_by_username(db, user_attrs["username"]) is not None:
-        raise NotUniqueError(f"User with name `{user_attrs['username']}` is not unique")
+        raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
     async with db.begin_nested():
         user = await User.create(
