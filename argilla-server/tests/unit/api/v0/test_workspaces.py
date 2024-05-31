@@ -375,7 +375,8 @@ async def test_delete_workspace_user_with_nonexistent_workspace_id(
     workspace_user = await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
 
     response = await async_client.delete(
-        f"/api/workspaces/{uuid4()}/users/{workspace_user.user_id}", headers=owner_auth_header
+        f"/api/workspaces/{uuid4()}/users/{workspace_user.user_id}",
+        headers=owner_auth_header,
     )
 
     assert response.status_code == 404

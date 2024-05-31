@@ -23,12 +23,13 @@ from sqlalchemy.orm import selectinload
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
 from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
-from argilla_server.models import Dataset, Question, Record, User
+from argilla_server.models import Dataset, Question, Record, Suggestion, User
 from argilla_server.policies import RecordPolicyV1, authorize
 from argilla_server.schemas.v1.records import Record as RecordSchema
 from argilla_server.schemas.v1.records import RecordUpdate
 from argilla_server.schemas.v1.responses import Response, ResponseCreate
-from argilla_server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
+from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
+from argilla_server.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.utils import parse_uuids
@@ -134,11 +135,11 @@ async def get_record_suggestions(
     "/records/{record_id}/suggestions",
     summary="Create or update a suggestion",
     responses={
-        status.HTTP_200_OK: {"model": Suggestion, "description": "Suggestion updated"},
-        status.HTTP_201_CREATED: {"model": Suggestion, "description": "Suggestion created"},
+        status.HTTP_200_OK: {"model": SuggestionSchema, "description": "Suggestion updated"},
+        status.HTTP_201_CREATED: {"model": SuggestionSchema, "description": "Suggestion created"},
     },
     status_code=status.HTTP_201_CREATED,
-    response_model=Suggestion,
+    response_model=SuggestionSchema,
 )
 async def upsert_suggestion(
     *,
@@ -171,7 +172,7 @@ async def upsert_suggestion(
 
     # NOTE: If there is already a suggestion for this record and question, we update it instead of creating a new one.
     # So we set the correct status code here.
-    if await datasets.get_suggestion_by_record_id_and_question_id(db, record_id, suggestion_create.question_id):
+    if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
         response.status_code = status.HTTP_200_OK
 
     return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)

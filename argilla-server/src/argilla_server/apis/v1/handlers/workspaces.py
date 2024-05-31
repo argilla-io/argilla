@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
-from argilla_server.models import User, Workspace
+from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.policies import WorkspacePolicyV1, WorkspaceUserPolicyV1, authorize
 from argilla_server.schemas.v1.users import User as UserSchema
 from argilla_server.schemas.v1.users import Users
@@ -146,13 +146,7 @@ async def delete_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    # TODO: Maybe add a new get_by and get_by_or_raise class functions
-    workspace_user = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
-    if workspace_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id `{user_id}` not found in workspace with id `{workspace_id}`",
-        )
+    workspace_user = await WorkspaceUser.get_by_or_raise(db, workspace_id=workspace_id, user_id=user_id)
 
     await authorize(current_user, WorkspaceUserPolicyV1.delete(workspace_user))
 

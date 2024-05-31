@@ -18,9 +18,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.contexts.datasets import get_metadata_property_by_name_and_dataset_id_or_raise
-from argilla_server.contexts.questions import get_question_by_name_and_dataset_id_or_raise
-from argilla_server.models import Question, Suggestion
+from argilla_server.models import MetadataProperty, Question, Suggestion
 from argilla_server.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
@@ -62,14 +60,16 @@ class SearchRecordsQueryValidator:
         if filter_scope.question is None:
             return
 
-        await get_question_by_name_and_dataset_id_or_raise(self._db, filter_scope.question, self._dataset_id)
+        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
 
     async def _validate_suggestion_filter_scope(self, filter_scope: SuggestionFilterScope) -> None:
-        await get_question_by_name_and_dataset_id_or_raise(self._db, filter_scope.question, self._dataset_id)
+        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
 
     async def _validate_metadata_filter_scope(self, filter_scope: MetadataFilterScope) -> None:
-        await get_metadata_property_by_name_and_dataset_id_or_raise(
-            self._db, filter_scope.metadata_property, self._dataset_id
+        await MetadataProperty.get_by_or_raise(
+            self._db,
+            name=filter_scope.metadata_property,
+            dataset_id=self._dataset_id,
         )
 
 

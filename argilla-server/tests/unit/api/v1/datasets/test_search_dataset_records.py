@@ -394,7 +394,7 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         }
 
     async def test_with_invalid_sort(self, async_client: AsyncClient, owner_auth_header: dict):
@@ -413,5 +413,5 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Question with name `non-existent` not found for dataset with id `{dataset.id}`"
+            "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         }
