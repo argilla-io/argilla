@@ -20,6 +20,7 @@ from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 
+from argilla_server.contexts import datasets
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
@@ -42,7 +43,7 @@ async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) ->
     workspace_id = workspace_user_attrs["workspace_id"]
     user_id = workspace_user_attrs["user_id"]
 
-    if (await get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)) is not None:
+    if await get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id) is not None:
         raise NotUniqueError(f"Workspace user with workspace_id `{workspace_id}` and user_id `{user_id}` is not unique")
 
     workspace_user = await WorkspaceUser.create(db, workspace_id=workspace_id, user_id=user_id)
@@ -78,13 +79,18 @@ async def list_workspaces_by_user_id(db: AsyncSession, user_id: UUID) -> List[Wo
 
 
 async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace:
-    if (await get_workspace_by_name(db, workspace_attrs["name"])) is not None:
+    if await get_workspace_by_name(db, workspace_attrs["name"]) is not None:
         raise NotUniqueError(f"Workspace name `{workspace_attrs['name']}` is not unique")
 
     return await Workspace.create(db, name=workspace_attrs["name"])
 
 
 async def delete_workspace(db: AsyncSession, workspace: Workspace):
+    if await datasets.list_datasets_by_workspace_id(db, workspace.id):
+        raise NotUniqueError(
+            f"Cannot delete the workspace {workspace.id}. This workspace has some feedback datasets linked"
+        )
+
     return await workspace.delete(db)
 
 
