@@ -25,6 +25,7 @@
         :recordId="record.id"
       />
       <RecordStatus :recordStatus="record.status" />
+      <RecordMenu :record="record" />
     </div>
   </div>
 </template>

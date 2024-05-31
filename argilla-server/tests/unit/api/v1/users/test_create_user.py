@@ -198,7 +198,8 @@ class TestCreateUser:
         )
 
         assert response.status_code == 409
-        assert response.json() == {"detail": "User with name `username` is not unique"}
+        assert response.json() == {"detail": "User username `username` is not unique"}
+
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 

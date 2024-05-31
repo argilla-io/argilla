@@ -97,7 +97,10 @@ export class GetRecordsByCriteriaUseCase {
           answer,
           suggestions,
           record.query_score,
-          recordPage
+          recordPage,
+          record.metadata,
+          record.inserted_at,
+          record.updated_at
         );
       }
     );
@@ -135,7 +138,10 @@ export class GetRecordsByCriteriaUseCase {
           null,
           [],
           0,
-          0
+          0,
+          referenceRecordFromBackend.metadata,
+          referenceRecordFromBackend.inserted_at,
+          referenceRecordFromBackend.updated_at
         );
       }
 
