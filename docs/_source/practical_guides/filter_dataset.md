@@ -15,7 +15,7 @@ The `filter_by` method returns a new instance which is a `FeedbackDataset` with 
 
 #### By `fields` content
 
-In the UI, you can filter records based on their content using the searchbar in the top left corner on top of the record card. For example, you may read or annotate all records mentioning John Wick by simply typing "John Wick" in the searchbar.
+In the UI, you can filter records based on the content in their fields using the searchbar in the top left corner on top of the record card. For example, you may read or annotate all records mentioning John Wick by simply typing "John Wick" in the searchbar. If your records have multiple fields, you will be able to select a specific field for the search or select "All" if you'd like to search on all fields. Matches are shown in <span style="color:#ff675f">coral</span>.
 
 #### By metadata property
 

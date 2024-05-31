@@ -5,7 +5,7 @@
   >
     <slot></slot>
     <span
-      v-if="showTooltip && tooltip"
+      v-if="tooltip && showTooltip"
       class="tooltip"
       :class="tooltipClass"
       v-text="tooltip"
@@ -48,7 +48,7 @@ export default {
 <style scoped lang="scss">
 .tooltip {
   position: absolute;
-  top: 100%;
+  top: 0;
   background: palette(grey, 100);
   display: inline-block;
   border-radius: $border-radius-s;
@@ -59,10 +59,10 @@ export default {
   white-space: nowrap;
   font-family: $primary-font-family !important;
   &.--left {
-    right: 0;
+    right: 100%;
   }
   &.--right {
-    left: 0;
+    left: 100%;
   }
   &__container {
     position: relative;
