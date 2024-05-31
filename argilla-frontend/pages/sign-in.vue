@@ -78,8 +78,6 @@
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
-
 export default {
   layout: "app",
   data() {
@@ -146,12 +144,11 @@ export default {
     },
     async loginUser(authData) {
       await this.$auth.logout();
-      await this.$store.dispatch("entities/deleteAll");
       await this.$auth.loginWith("basic", {
         data: this.encodedLoginData(authData),
       });
 
-      Notification.dispatch("clear");
+      this.$notification.clear();
 
       this.nextRedirect();
     },

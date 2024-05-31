@@ -26,9 +26,9 @@
           >{{ breadcrumb.name }}
         </nuxt-link>
         <span
-          class="breadcrumbs__item --action"
           v-else
-          @click="$emit('breadcrumb-action', breadcrumb.action)"
+          class="breadcrumbs__item --action"
+          @click="onBreadcrumbAction(breadcrumb)"
           >{{ breadcrumb.name }}</span
         >
       </li>
@@ -54,7 +54,7 @@ export default {
   props: {
     breadcrumbs: {
       type: Array,
-      required: true,
+      default: () => [],
     },
     copyButton: {
       type: Boolean,
@@ -64,6 +64,11 @@ export default {
   computed: {
     filteredBreadcrumbs() {
       return this.breadcrumbs.filter((breadcrumb) => breadcrumb.name);
+    },
+  },
+  methods: {
+    onBreadcrumbAction(breadcrumb) {
+      this.$emit("breadcrumb-action", breadcrumb.action);
     },
   },
 };

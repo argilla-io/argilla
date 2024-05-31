@@ -82,6 +82,7 @@ export default {
     },
     backgroundStyles() {
       return {
+        width: "100%",
         backgroundColor: this.progressBg,
       };
     },
