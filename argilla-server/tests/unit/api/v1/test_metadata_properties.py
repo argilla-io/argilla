@@ -396,14 +396,12 @@ async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncS
     user = await UserFactory.create(role=user_role, workspaces=[metadata_property.dataset.workspace])
 
     response = await async_client.delete(
-        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+        f"/api/v1/metadata-properties/{metadata_property.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
     )
 
     assert response.status_code == 200
-    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
-
-    response_body = response.json()
-    assert response_body == {
+    assert response.json() == {
         "id": str(metadata_property.id),
         "name": "name",
         "title": "title",
@@ -413,6 +411,8 @@ async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncS
         "inserted_at": metadata_property.inserted_at.isoformat(),
         "updated_at": metadata_property.updated_at.isoformat(),
     }
+
+    assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
 
 @pytest.mark.asyncio
@@ -433,7 +433,8 @@ async def test_delete_metadata_property_as_admin_from_different_workspace(
     metadata_property = await IntegerMetadataPropertyFactory.create()
 
     response = await async_client.delete(
-        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+        f"/api/v1/metadata-properties/{metadata_property.id}",
+        headers={API_KEY_HEADER_NAME: admin.api_key},
     )
 
     assert response.status_code == 403
@@ -446,7 +447,8 @@ async def test_delete_metadata_property_as_annotator(async_client: "AsyncClient"
     metadata_property = await IntegerMetadataPropertyFactory.create()
 
     response = await async_client.delete(
-        f"/api/v1/metadata-properties/{metadata_property.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+        f"/api/v1/metadata-properties/{metadata_property.id}",
+        headers={API_KEY_HEADER_NAME: annotator.api_key},
     )
 
     assert response.status_code == 403
