@@ -37,9 +37,9 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-import argilla_server.errors.future as errors
 from argilla_server.contexts import accounts, questions
 from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
+from argilla_server.errors.future import NotFoundError, NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
     Dataset,
     Field,
@@ -131,10 +131,10 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
 
 async def create_dataset(db: AsyncSession, dataset_create: DatasetCreate):
     if await Workspace.get(db, dataset_create.workspace_id) is None:
-        raise errors.UnprocessableEntityError(f"Workspace with id `{dataset_create.workspace_id}` not found")
+        raise UnprocessableEntityError(f"Workspace with id `{dataset_create.workspace_id}` not found")
 
     if await get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
-        raise errors.NotUniqueError(
+        raise NotUniqueError(
             f"Dataset with name `{dataset_create.name}` already exists for workspace with id `{dataset_create.workspace_id}`"
         )
 
@@ -166,13 +166,13 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     if dataset.is_ready:
-        raise errors.UnprocessableEntityError("Dataset is already published")
+        raise UnprocessableEntityError("Dataset is already published")
 
     if await _count_required_fields_by_dataset_id(db, dataset.id) == 0:
-        raise errors.UnprocessableEntityError("Dataset cannot be published without required fields")
+        raise UnprocessableEntityError("Dataset cannot be published without required fields")
 
     if await _count_required_questions_by_dataset_id(db, dataset.id) == 0:
-        raise errors.UnprocessableEntityError("Dataset cannot be published without required questions")
+        raise UnprocessableEntityError("Dataset cannot be published without required questions")
 
     async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
@@ -205,12 +205,10 @@ async def get_field_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_
 
 async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCreate) -> Field:
     if dataset.is_ready:
-        raise errors.UnprocessableEntityError("Field cannot be created for a published dataset")
+        raise UnprocessableEntityError("Field cannot be created for a published dataset")
 
     if await get_field_by_name_and_dataset_id(db, field_create.name, dataset.id):
-        raise errors.NotUniqueError(
-            f"Field with name `{field_create.name}` already exists for dataset with id `{dataset.id}`"
-        )
+        raise NotUniqueError(f"Field with name `{field_create.name}` already exists for dataset with id `{dataset.id}`")
 
     return await Field.create(
         db,
@@ -224,7 +222,7 @@ async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCr
 
 async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdate") -> Field:
     if field_update.settings and field_update.settings.type != field.settings["type"]:
-        raise errors.UnprocessableEntityError(
+        raise UnprocessableEntityError(
             f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
         )
 
@@ -234,7 +232,7 @@ async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdat
 
 async def delete_field(db: AsyncSession, field: Field) -> Field:
     if field.dataset.is_ready:
-        raise errors.UnprocessableEntityError("Fields cannot be deleted for a published dataset")
+        raise UnprocessableEntityError("Fields cannot be deleted for a published dataset")
 
     return await field.delete(db)
 
@@ -252,7 +250,7 @@ async def get_metadata_property_by_name_and_dataset_id_or_raise(
 ) -> MetadataProperty:
     metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name, dataset_id)
     if metadata_property is None:
-        raise errors.NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
+        raise NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
 
     return metadata_property
 
@@ -268,7 +266,7 @@ async def create_metadata_property(
     metadata_property_create: MetadataPropertyCreate,
 ) -> MetadataProperty:
     if await get_metadata_property_by_name_and_dataset_id(db, metadata_property_create.name, dataset.id):
-        raise errors.NotUniqueError(
+        raise NotUniqueError(
             f"Metadata property with name `{metadata_property_create.name}` already exists for dataset with id `{dataset.id}`"
         )
 
@@ -330,12 +328,12 @@ async def create_vector_settings(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, vector_settings_create: "VectorSettingsCreate"
 ) -> VectorSettings:
     if await count_vectors_settings_by_dataset_id(db, dataset.id) >= CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT:
-        raise errors.UnprocessableEntityError(
+        raise UnprocessableEntityError(
             f"The maximum number of vector settings has been reached for dataset with id `{dataset.id}`"
         )
 
     if await get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset.id):
-        raise errors.NotUniqueError(
+        raise NotUniqueError(
             f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id `{dataset.id}`"
         )
 
@@ -696,7 +694,7 @@ async def _build_record_suggestions(
                 )
             )
 
-        except ValueError as e:
+        except (UnprocessableEntityError, ValueError) as e:
             raise ValueError(f"suggestion for question_id={suggestion_create.question_id} is not valid: {e}") from e
 
     return suggestions

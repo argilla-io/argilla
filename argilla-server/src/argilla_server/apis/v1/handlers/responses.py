@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -69,12 +69,7 @@ async def update_response(
 
     await authorize(current_user, ResponsePolicyV1.update(response))
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    #   After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        return await datasets.update_response(db, search_engine, response, response_update)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.update_response(db, search_engine, response, response_update)
 
 
 @router.delete("/responses/{response_id}", response_model=ResponseSchema)
@@ -93,6 +88,4 @@ async def delete_response(
 
     await authorize(current_user, ResponsePolicyV1.delete(response))
 
-    await datasets.delete_response(db, search_engine, response)
-
-    return response
+    return await datasets.delete_response(db, search_engine, response)
