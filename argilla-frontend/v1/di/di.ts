@@ -14,6 +14,7 @@ import {
   AgentRepository,
   OAuthRepository,
   EnvironmentRepository,
+  WorkspaceRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -47,6 +48,7 @@ import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dat
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
 import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
+import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -65,8 +67,11 @@ export const loadDependencyContainer = (context: Context) => {
     register(OAuthRepository)
       .withDependencies(useAxios, useRoutes, useAuth)
       .build(),
+    register(WorkspaceRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
+
+    register(GetWorkspacesUseCase).withDependency(WorkspaceRepository).build(),
 
     register(GetDatasetsUseCase)
       .withDependencies(DatasetRepository, useDatasets)
