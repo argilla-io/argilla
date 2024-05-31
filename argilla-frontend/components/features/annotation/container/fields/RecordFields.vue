@@ -1,7 +1,7 @@
 <template>
   <div class="fields">
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
-      <SpanAnnotationTextFieldComponent
+      <SpanAnnotationTextField
         v-if="hasSpanQuestion(name)"
         :id="`${id}-${record.id}-span-field`"
         :name="name"

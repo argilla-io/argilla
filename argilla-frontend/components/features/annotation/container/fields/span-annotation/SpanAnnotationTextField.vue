@@ -80,7 +80,7 @@
 <script>
 import { useSpanAnnotationTextFieldViewModel } from "./useSpanAnnotationTextFieldViewModel";
 export default {
-  name: "SpanAnnotationTextFieldComponent",
+  name: "SpanAnnotationTextField",
   props: {
     id: {
       type: String,
