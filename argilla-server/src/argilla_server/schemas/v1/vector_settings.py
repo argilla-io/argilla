@@ -18,6 +18,7 @@ from uuid import UUID
 
 from typing_extensions import Annotated
 
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
 from argilla_server.schemas.base import UpdateSchema
 

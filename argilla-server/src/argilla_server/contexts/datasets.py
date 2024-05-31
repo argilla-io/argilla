@@ -486,8 +486,8 @@ async def _validate_metadata(
         try:
             if value is not None:
                 metadata_property.parsed_settings.check_metadata(value)
-        except ValueError as e:
-            raise ValueError(f"'{name}' metadata property validation failed because {e}") from e
+        except (UnprocessableEntityError, ValueError) as e:
+            raise UnprocessableEntityError(f"'{name}' metadata property validation failed because {e}") from e
 
     return metadata_properties
 
@@ -579,8 +579,9 @@ async def create_records(
                 cache=caches["vectors_settings_cache"],
             )
 
-        except ValueError as e:
-            raise ValueError(f"Record at position {record_i} is not valid because {e}") from e
+        except (UnprocessableEntityError, ValueError) as e:
+            raise UnprocessableEntityError(f"Record at position {record_i} is not valid because {e}") from e
+
         records.append(record)
 
     async with db.begin_nested():
@@ -620,8 +621,8 @@ async def _validate_record_metadata(
     try:
         cache = await _validate_metadata(db, dataset=dataset, metadata=metadata, metadata_properties=cache)
         return cache
-    except ValueError as e:
-        raise ValueError(f"metadata is not valid: {e}") from e
+    except (UnprocessableEntityError, ValueError) as e:
+        raise UnprocessableEntityError(f"metadata is not valid: {e}") from e
 
 
 async def _build_record_responses(
@@ -695,7 +696,9 @@ async def _build_record_suggestions(
             )
 
         except (UnprocessableEntityError, ValueError) as e:
-            raise ValueError(f"suggestion for question_id={suggestion_create.question_id} is not valid: {e}") from e
+            raise UnprocessableEntityError(
+                f"suggestion for question_id={suggestion_create.question_id} is not valid: {e}"
+            ) from e
 
     return suggestions
 
@@ -719,8 +722,8 @@ async def _build_record_vectors(
         try:
             cache = await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
             vectors.append(build_vector_func(vector_value, cache[vector_name].id))
-        except ValueError as e:
-            raise ValueError(f"vector with name={vector_name} is not valid: {e}") from e
+        except (UnprocessableEntityError, ValueError) as e:
+            raise UnprocessableEntityError(f"vector with name={vector_name} is not valid: {e}") from e
 
     return vectors
 
@@ -757,7 +760,7 @@ async def _build_record_update(
         params.pop("suggestions")
         questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
         if len(questions_ids) != len(set(questions_ids)):
-            raise ValueError("found duplicate suggestions question IDs")
+            raise UnprocessableEntityError("found duplicate suggestions question IDs")
         suggestions = await _build_record_suggestions(db, record, record_update.suggestions, caches["questions"])
 
     if record_update.vectors is not None:
@@ -853,8 +856,8 @@ async def update_records(
             # Only update the record if there are params to update
             if len(params) > 1:
                 records_update_objects.append(params)
-        except ValueError as e:
-            raise ValueError(f"Record at position {record_i} is not valid because {e}") from e
+        except (UnprocessableEntityError, ValueError) as e:
+            raise UnprocessableEntityError(f"Record at position {record_i} is not valid because {e}") from e
 
     async with db.begin_nested():
         if records_delete_suggestions:
@@ -927,6 +930,7 @@ async def update_record(
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
+
     return record
 
 
@@ -966,6 +970,11 @@ async def count_responses_by_dataset_id_and_user_id(
 async def create_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
 ) -> Response:
+    if await get_response_by_record_id_and_user_id(db, record.id, user.id):
+        raise NotUniqueError(
+            f"Response already exists for record with id `{record.id}` and by user with id `{user.id}`"
+        )
+
     ResponseCreateValidator(response_create).validate_for(record)
 
     async with db.begin_nested():

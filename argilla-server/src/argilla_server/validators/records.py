@@ -20,6 +20,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.contexts import records
+from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
 from argilla_server.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
 from argilla_server.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
@@ -47,8 +48,8 @@ class RecordValidatorBase(ABC):
             if metadata_property and value is not None:
                 try:
                     metadata_property.parsed_settings.check_metadata(value)
-                except ValueError as e:
-                    raise ValueError(
+                except (UnprocessableEntityError, ValueError) as e:
+                    raise UnprocessableEntityError(
                         f"metadata is not valid: '{name}' metadata property validation failed because {e}"
                     ) from e
 
