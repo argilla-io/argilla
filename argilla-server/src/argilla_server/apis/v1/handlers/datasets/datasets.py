@@ -284,9 +284,7 @@ async def delete_dataset(
 
     await authorize(current_user, DatasetPolicyV1.delete(dataset))
 
-    await datasets.delete_dataset(db, search_engine, dataset)
-
-    return dataset
+    return await datasets.delete_dataset(db, search_engine, dataset)
 
 
 @router.patch("/datasets/{dataset_id}", response_model=DatasetSchema)

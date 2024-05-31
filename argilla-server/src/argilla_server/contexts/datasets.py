@@ -498,7 +498,8 @@ async def validate_user_exists(db: AsyncSession, user_id: UUID, users_ids: Optio
 
     if user_id not in users_ids:
         if not await accounts.user_exists(db, user_id):
-            raise ValueError(f"user_id={str(user_id)} does not exist")
+            raise UnprocessableEntityError(f"user_id={str(user_id)} does not exist")
+
         users_ids.add(user_id)
 
     return users_ids
@@ -518,7 +519,9 @@ async def _validate_vector(
     if not vector_settings:
         vector_settings = await get_vector_settings_by_name_and_dataset_id(db, vector_name, dataset_id)
         if not vector_settings:
-            raise ValueError(f"vector with name={str(vector_name)} does not exist for dataset_id={str(dataset_id)}")
+            raise UnprocessableEntityError(
+                f"vector with name={str(vector_name)} does not exist for dataset_id={str(dataset_id)}"
+            )
 
         vector_settings = VectorSettingsSchema.from_orm(vector_settings)
         vectors_settings[vector_name] = vector_settings
@@ -546,7 +549,7 @@ async def create_records(
     db: AsyncSession, search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
 ):
     if not dataset.is_ready:
-        raise ValueError("Records cannot be created for a non published dataset")
+        raise UnprocessableEntityError("Records cannot be created for a non published dataset")
 
     records = []
 
@@ -651,8 +654,8 @@ async def _build_record_responses(
                     record=record,
                 )
             )
-        except ValueError as e:
-            raise ValueError(f"response at position {idx} is not valid: {e}") from e
+        except (UnprocessableEntityError, ValueError) as e:
+            raise UnprocessableEntityError(f"response at position {idx} is not valid: {e}") from e
 
     return responses
 
@@ -679,7 +682,7 @@ async def _build_record_suggestions(
                     db, suggestion_create.question_id, options=[selectinload(Question.dataset)]
                 )
                 if not question:
-                    raise ValueError(f"question_id={str(suggestion_create.question_id)} does not exist")
+                    raise UnprocessableEntityError(f"question_id={str(suggestion_create.question_id)} does not exist")
                 questions_cache[suggestion_create.question_id] = question
 
             SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
@@ -812,7 +815,7 @@ async def update_records(
     records_ids = [record_update.id for record_update in records_update.items]
 
     if len(records_ids) != len(set(records_ids)):
-        raise ValueError("Found duplicate records IDs")
+        raise UnprocessableEntityError("Found duplicate records IDs")
 
     existing_records_ids = await _exists_records_with_ids(db, dataset_id=dataset.id, records_ids=records_ids)
     non_existing_records_ids = set(records_ids) - set(existing_records_ids)
@@ -820,7 +823,7 @@ async def update_records(
     if len(non_existing_records_ids) > 0:
         sorted_non_existing_records_ids = sorted(non_existing_records_ids, key=lambda x: records_ids.index(x))
         records_str = ", ".join([str(record_id) for record_id in sorted_non_existing_records_ids])
-        raise ValueError(f"Found records that do not exist: {records_str}")
+        raise UnprocessableEntityError(f"Found records that do not exist: {records_str}")
 
     # Lists to store the records that will be updated in the database or in the search engine
     records_update_objects: List[Dict[str, Any]] = []
@@ -1064,16 +1067,16 @@ def _validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
     fields_copy = copy.copy(fields or {})
     for field in dataset.fields:
         if field.required and not (field.name in fields_copy and fields_copy.get(field.name) is not None):
-            raise ValueError(f"missing required value for field: {field.name!r}")
+            raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
 
         value = fields_copy.pop(field.name, None)
         if value and not isinstance(value, str):
-            raise ValueError(
+            raise UnprocessableEntityError(
                 f"wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
             )
 
     if fields_copy:
-        raise ValueError(f"found fields values for non configured fields: {list(fields_copy.keys())!r}")
+        raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
 async def get_suggestion_by_record_id_and_question_id(
