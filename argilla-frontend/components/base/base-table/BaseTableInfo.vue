@@ -244,6 +244,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$greyColor: palette(grey, 700);
+
 .table-info {
   $this: &;
   display: flex;
@@ -258,8 +260,10 @@ export default {
     margin: 0;
   }
   &__header {
-    background: palette(white);
-    min-height: 50px;
+    border: 1px solid $greyColor;
+    border-radius: var(--m, 10px) var(--m, 10px) 0px 0px;
+    background: $greyColor;
+    min-height: 49px;
     position: relative;
     margin-top: $base-space * 2;
     &__checkbox {
@@ -272,6 +276,7 @@ export default {
       margin-bottom: 0 !important;
     }
     #{$this}__item {
+      border: unset;
       min-height: 50px;
       background: none;
       padding-top: 0.2em;
@@ -326,6 +331,7 @@ export default {
     text-decoration: none;
     outline: none;
     border: 1px solid palette(grey, 700);
+
     &__col {
       text-align: left;
       margin-right: 1em;
