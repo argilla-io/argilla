@@ -13,6 +13,7 @@ export default {
   copied: "Kopiert",
   copyClipboard: "In Zwischenablage kopieren",
   copyLink: "Link kopieren",
+  copyRecord: "Eintrag kopieren",
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "Alle",
