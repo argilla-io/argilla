@@ -4,6 +4,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash -l {0}
+    working-directory: argilla-server
+
 on:
   workflow_dispatch:
   push:
@@ -30,11 +35,6 @@ jobs:
   build:
     name: Build `argilla-server` package
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: argilla-server
 
     services:
       elasticsearch:
@@ -164,11 +164,6 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
       id-token: write
 
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: ./argilla-server
-
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
@@ -182,13 +177,18 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
+          python-version-file: argilla-server/pyproject.toml
+          cache-dependency-path: argilla-server/pdm.lock
           cache: true
 
       - name: Publish Package to PyPI test environment 🥪
-        run: pdm publish --no-build --repository testpypi
+        run: |
+          pdm publish --no-build --repository testpypi
 
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
+        run: |
+          pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
 
       - name: Publish Package to PyPI 🥩
-        run: pdm publish --no-build
+        run: |
+          pdm publish --no-build

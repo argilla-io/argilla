@@ -30,6 +30,11 @@ Add text descriptives to your metadata to simplify the data annotation and filte
 
 Add semantic representations to your records using vector embeddings to simplify the data annotation and search process.
 ```
+```{grid-item-card} llama-index: Build LLM applications with LlamaIndex.
+:link: llama_index.html
+
+Build LLM applications with LlamaIndex and automatically log and monitor the predictions with Argilla.
+```
 ````
 
 ```{toctree}
@@ -40,4 +45,5 @@ process_documents_with_unstructured
 monitor_endpoints with_fastapi
 add_text_descriptives_as_metadata
 add_sentence_transformers_embeddings_as_vectors
+llama_index
 ```

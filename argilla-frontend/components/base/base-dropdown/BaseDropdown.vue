@@ -42,6 +42,11 @@
         <slot name="dropdown-content" />
       </div>
     </transition>
+    <div
+      @click="onClose"
+      v-if="visible && freezingPage"
+      class="dropdown--frozen-page"
+    ></div>
   </div>
 </template>
 <script>
@@ -60,6 +65,10 @@ export default {
       default: "parent",
       validator: (value) => ["parent", "viewport"].includes(value),
     },
+    freezingPage: {
+      type: Boolean,
+      default: false,
+    },
     gap: {
       type: Number,
       default: 8,
@@ -70,6 +79,7 @@ export default {
       dropdownTop: 0,
       dropdownLeft: 0,
       inViewport: true,
+      frozenScrollParent: null,
     };
   },
   computed: {
@@ -82,6 +92,14 @@ export default {
       this.$nextTick(() => {
         this.setViewportPosition();
       });
+    },
+    freezingPage(value) {
+      if (value) {
+        this.frozenScrollParent = this.getScrollableParent(this.$refs.dropdown);
+        this.frozenScrollParent.style.overflow = "hidden";
+      } else {
+        this.frozenScrollParent.style.overflow = "auto";
+      }
     },
   },
   methods: {
@@ -108,21 +126,21 @@ export default {
 
       this.dropdownLeft = left;
     },
-    isScrollable(el) {
-      const hasScrollableContent =
-        el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth;
-      const overflowYStyle = window.getComputedStyle(el).overflow;
-      const isOverflowHidden = overflowYStyle.indexOf("hidden") !== -1;
-      return hasScrollableContent && !isOverflowHidden;
-    },
     getScrollableParent(element) {
-      const isBody = !element || element === document.body;
+      if (!element) {
+        return undefined;
+      }
 
-      if (isBody) return document.body;
+      let parent = element.parentElement;
+      while (parent) {
+        const { overflow } = window.getComputedStyle(parent);
+        if (overflow.split(" ").every((o) => o === "auto" || o === "scroll")) {
+          return parent;
+        }
+        parent = parent.parentElement;
+      }
 
-      if (this.isScrollable(element)) return element;
-
-      return this.getScrollableParent(element.parentNode);
+      return document.documentElement;
     },
     isInViewport(element) {
       const rect = element.getBoundingClientRect();
@@ -188,6 +206,19 @@ export default {
     box-shadow: $shadow;
     border-radius: $border-radius;
     background: palette(white);
+  }
+  &--frozen-page {
+    &:before {
+      content: "";
+      position: fixed;
+      height: 100vh;
+      width: 100vw;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+    }
   }
 }
 </style>
