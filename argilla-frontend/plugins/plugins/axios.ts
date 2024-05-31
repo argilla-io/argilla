@@ -15,12 +15,9 @@
  * limitations under the License.
  */
 
-import { Model } from "@vuex-orm/core";
 import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { AxiosError } from "axios";
-import { Notification } from "@/models/Notifications";
-
-import { currentWorkspace } from "@/models/Workspace";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 type BackendError = {
   detail: {
@@ -33,27 +30,13 @@ type BackendError = {
 };
 
 export default ({ $axios, app }) => {
-  Model.setAxios($axios);
-
-  $axios.interceptors.request.use((config) => {
-    const currentUser = app.$auth.user;
-
-    if (!currentUser) {
-      return config;
-    }
-
-    const ws = currentWorkspace(app.context.route);
-    if (ws) {
-      config.headers["X-Argilla-Workspace"] = ws;
-    }
-    return config;
-  });
+  const notification = useNotifications();
 
   $axios.onError((error: AxiosError<BackendError>) => {
     const { status, data } = error.response ?? {};
     const t = (key: string) => app.i18n.t(key);
 
-    Notification.dispatch("clear");
+    notification.clear();
 
     switch (status) {
       case 401: {
@@ -65,7 +48,7 @@ export default ({ $axios, app }) => {
     const handledTranslatedError = t(errorHandledKey);
 
     if (handledTranslatedError !== errorHandledKey) {
-      Notification.dispatch("notify", {
+      notification.notify({
         message: handledTranslatedError,
         type: "error",
       });
@@ -76,7 +59,7 @@ export default ({ $axios, app }) => {
       const handledTranslatedError = t(errorHandledKey);
 
       if (handledTranslatedError !== errorHandledKey) {
-        Notification.dispatch("notify", {
+        notification.notify({
           message: handledTranslatedError,
           type: "error",
         });

@@ -1,6 +1,6 @@
 import { Answer } from "../IAnswer";
 import { Guard } from "../error";
-import { Color } from "./Color";
+import { Color } from "../color/Color";
 import {
   QuestionAnswer,
   TextQuestionAnswer,

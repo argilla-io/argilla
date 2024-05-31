@@ -2,13 +2,10 @@
   <BaseLoading v-if="isLoadingDataset" />
   <InternalPage v-else>
     <template v-slot:header>
-      <HeaderFeedbackTaskComponent
-        :datasetId="datasetId"
-        :breadcrumbs="breadcrumbs"
-      />
+      <HeaderFeedbackTask :datasetId="datasetId" :breadcrumbs="breadcrumbs" />
     </template>
     <template v-slot:page-header>
-      <TopDatasetSettingsFeedbackTaskContent
+      <TopDatasetSettingsFeedbackTask
         :separator="!isAdminOrOwnerRole"
         @goToDataset="goToDataset"
       />

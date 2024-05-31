@@ -52,11 +52,10 @@ import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-ca
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
-  const useStore = () => context.store;
   const useAuth = () => context.$auth;
 
   const dependencies = [
-    register(DatasetRepository).withDependencies(useAxios, useStore).build(),
+    register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
