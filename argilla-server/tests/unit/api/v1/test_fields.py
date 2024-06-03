@@ -127,13 +127,16 @@ async def test_update_field_with_invalid_payload(async_client: "AsyncClient", ow
 
 @pytest.mark.asyncio
 async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
+    field_id = uuid4()
+
     response = await async_client.patch(
-        f"/api/v1/fields/{uuid4()}",
+        f"/api/v1/fields/{field_id}",
         headers=owner_auth_header,
         json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"Field with id `{field_id}` not found"}
 
 
 @pytest.mark.asyncio
@@ -230,6 +233,7 @@ async def test_delete_field_belonging_to_published_dataset(
 
     assert response.status_code == 422
     assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
+
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
 
@@ -237,9 +241,13 @@ async def test_delete_field_belonging_to_published_dataset(
 async def test_delete_field_with_nonexistent_field_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
+    field_id = uuid4()
+
     await TextFieldFactory.create()
 
-    response = await async_client.delete(f"/api/v1/fields/{uuid4()}", headers=owner_auth_header)
+    response = await async_client.delete(f"/api/v1/fields/{field_id}", headers=owner_auth_header)
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"Field with id `{field_id}` not found"}
+
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1

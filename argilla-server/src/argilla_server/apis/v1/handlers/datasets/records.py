@@ -16,21 +16,20 @@ import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from typing_extensions import Annotated
 
-import argilla_server.errors.future as errors
 import argilla_server.search_engine as search_engine
-from argilla_server.apis.v1.handlers.datasets.datasets import _get_dataset_or_raise
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset as DatasetModel
-from argilla_server.models import Record, User
+from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
 from argilla_server.policies import DatasetPolicyV1, RecordPolicyV1, authorize, is_authorized
-from argilla_server.schemas.v1.datasets import Dataset
+from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.schemas.v1.records import (
     Filters,
     FilterScope,
@@ -57,7 +56,6 @@ from argilla_server.schemas.v1.suggestions import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
 )
-from argilla_server.schemas.v1.vector_settings import VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
     FloatMetadataFilter,
@@ -116,7 +114,7 @@ async def _filter_records_using_search_engine(
     response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
-) -> Tuple[List["Record"], int]:
+) -> Tuple[List[Record], int]:
     search_responses = await _get_search_responses(
         db=db,
         search_engine=search_engine,
@@ -184,7 +182,7 @@ def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[sear
 async def _get_search_responses(
     db: "AsyncSession",
     search_engine: "SearchEngine",
-    dataset: DatasetModel,
+    dataset: Dataset,
     parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
@@ -208,26 +206,28 @@ async def _get_search_responses(
     record = None
 
     if vector_query:
-        vector_settings = await _get_vector_settings_by_name_or_raise(db, dataset, vector_query.name)
+        vector_settings = await VectorSettings.get_by(db, name=vector_query.name, dataset_id=dataset.id)
+        if vector_settings is None:
+            raise UnprocessableEntityError(f"Vector `{vector_query.name}` not found in dataset `{dataset.id}`.")
+
         if vector_query.record_id is not None:
-            record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
+            record = await Record.get_by(db, id=vector_query.record_id, dataset_id=dataset.id)
+            if record is None:
+                raise UnprocessableEntityError(
+                    f"Record with id `{vector_query.record_id}` not found in dataset `{dataset.id}`."
+                )
+
             await record.awaitable_attrs.vectors
 
             if not record.vector_value_by_vector_settings(vector_settings):
-                raise errors.UnprocessableEntityError(
+                # TODO: Once we move to v2.0 we can use here UnprocessableEntityError instead of MissingVectorError
+                raise MissingVectorError(
                     message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
                     code=MISSING_VECTOR_ERROR_CODE,
                 )
 
-    if (
-        text_query
-        and text_query.field
-        and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Field `{text_query.field}` not found in dataset `{dataset.id}`.",
-        )
+    if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
+        raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
     response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
@@ -278,9 +278,7 @@ async def _build_metadata_filters(
     try:
         metadata_filters = []
         for metadata_param in parsed_metadata:
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_param.name, dataset_id=dataset.id
-            )
+            metadata_property = await MetadataProperty.get_by(db, name=metadata_param.name, dataset_id=dataset.id)
             if metadata_property is None:
                 continue  # won't fail on unknown metadata filter name
 
@@ -294,10 +292,9 @@ async def _build_metadata_filters(
                 raise ValueError(f"Not found filter for type {metadata_property.type}")
 
             metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
-    except ValueError as ex:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Cannot parse provided metadata filters: {ex}"
-        )
+    except (UnprocessableEntityError, ValueError) as ex:
+        raise UnprocessableEntityError(f"Cannot parse provided metadata filters: {ex}")
+
     return metadata_filters
 
 
@@ -325,35 +322,24 @@ async def _build_sort_by(
             field = sort_field
         elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
             metadata_property_name = match.group("name")
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_property_name, dataset_id=dataset.id
-            )
+            metadata_property = await MetadataProperty.get_by(db, name=metadata_property_name, dataset_id=dataset.id)
             if not metadata_property:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(
-                        f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in"
-                        f" dataset with '{dataset.id}'."
-                    ),
+                raise UnprocessableEntityError(
+                    f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in "
+                    f"dataset with '{dataset.id}'."
                 )
+
             field = metadata_property
         else:
             valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
-                    f" {valid_sort_fields} or `metadata.metadata-property-name`"
-                ),
+            raise UnprocessableEntityError(
+                f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
+                f" {valid_sort_fields} or `metadata.metadata-property-name`"
             )
 
         if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(
-                    f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not"
-                    " valid."
-                ),
+            raise UnprocessableEntityError(
+                f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not valid.",
             )
 
         sorts_by.append(SortBy(field=field, order=sort_order or SortOrder.asc.value))
@@ -364,35 +350,8 @@ async def _build_sort_by(
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
-    except (ValueError, errors.NotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
-
-
-async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> "Record":
-    record = await datasets.get_record_by_id(db, record_id)
-    if record is None or record.dataset_id != dataset.id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Record with id `{record_id}` not found in dataset `{dataset.id}`.",
-        )
-
-    return record
-
-
-async def _get_vector_settings_by_name_or_raise(
-    db: "AsyncSession", dataset: Dataset, vector_name: str
-) -> VectorSettings:
-    vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
-        db, name=vector_name, dataset_id=dataset.id
-    )
-
-    if vector_settings is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Vector `{vector_name}` not found in dataset `{dataset.id}`.",
-        )
-
-    return vector_settings
+    except (ValueError, NotFoundError) as e:
+        raise UnprocessableEntityError(str(e))
 
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -409,7 +368,7 @@ async def list_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_metadata_properties=True)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
@@ -447,7 +406,7 @@ async def list_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
 
@@ -481,19 +440,22 @@ async def create_dataset_records(
     records_create: RecordsCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(
-        db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True, with_vectors_settings=True
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+            selectinload(Dataset.vectors_settings),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.create_records(dataset))
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    #  After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        await datasets.create_records(db, search_engine, dataset=dataset, records_create=records_create)
-        telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    await datasets.create_records(db, search_engine, dataset, records_create)
+
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
 
 
 @router.patch(
@@ -511,17 +473,21 @@ async def update_dataset_records(
     records_update: RecordsUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(
-        db, dataset_id, with_fields=True, with_questions=True, with_metadata_properties=True
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+            selectinload(Dataset.metadata_properties),
+        ],
     )
 
     await authorize(current_user, DatasetPolicyV1.update_records(dataset))
 
-    try:
-        await datasets.update_records(db, search_engine, dataset, records_update)
-        telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    await datasets.update_records(db, search_engine, dataset, records_update)
+
+    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -533,7 +499,7 @@ async def delete_dataset_records(
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
 
@@ -541,13 +507,10 @@ async def delete_dataset_records(
     num_records = len(record_ids)
 
     if num_records == 0:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No record IDs provided")
+        raise UnprocessableEntityError("No record IDs provided")
 
     if num_records > DELETE_DATASET_RECORDS_LIMIT:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once",
-        )
+        raise UnprocessableEntityError(f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once")
 
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
@@ -573,7 +536,15 @@ async def search_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True, with_metadata_properties=True)
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.metadata_properties),
+        ],
+    )
+
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
     await _validate_search_records_query(db, body, dataset_id)
@@ -609,11 +580,13 @@ async def search_current_user_dataset_records(
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+            record=RecordSchema.from_orm(record),
+            query_score=record_id_score_map[record.id]["query_score"],
         )
 
     return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+        items=[record["search_record"] for record in record_id_score_map.values()],
+        total=search_responses.total,
     )
 
 
@@ -637,7 +610,7 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
     await authorize(current_user, DatasetPolicyV1.search_records_with_all_responses(dataset))
 
@@ -669,11 +642,13 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record), query_score=record_id_score_map[record.id]["query_score"]
+            record=RecordSchema.from_orm(record),
+            query_score=record_id_score_map[record.id]["query_score"],
         )
 
     return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()], total=search_responses.total
+        items=[record["search_record"] for record in record_id_score_map.values()],
+        total=search_responses.total,
     )
 
 
@@ -688,7 +663,7 @@ async def list_dataset_records_search_suggestions_options(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 

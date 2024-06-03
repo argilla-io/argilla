@@ -403,17 +403,22 @@ class TestDatasetQuestions:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         question = await QuestionFactory.create(name="name")
-        question_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{question.dataset.id}/questions", headers=owner_auth_header, json=question_json
+            f"/api/v1/datasets/{question.dataset.id}/questions",
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {"type": "text"},
+            },
         )
 
         assert response.status_code == 409
+        assert response.json() == {
+            "detail": f"Question with name `{question.name}` already exists for dataset with id `{question.dataset_id}`"
+        }
+
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
     async def test_create_dataset_question_with_published_dataset(
@@ -437,6 +442,8 @@ class TestDatasetQuestions:
     async def test_create_dataset_question_with_nonexistent_dataset_id(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
+        dataset_id = uuid4()
+
         await DatasetFactory.create()
         question_json = {
             "name": "text",
@@ -445,10 +452,14 @@ class TestDatasetQuestions:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{uuid4()}/questions", headers=owner_auth_header, json=question_json
+            f"/api/v1/datasets/{dataset_id}/questions",
+            headers=owner_auth_header,
+            json=question_json,
         )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
     @pytest.mark.parametrize(

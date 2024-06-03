@@ -22,16 +22,18 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla_server.errors.future import NotUniqueError
+from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla_server.pydantic_v1 import parse_obj_as
-from argilla_server.schemas.v0.users import User
-from argilla_server.schemas.v0.workspaces import Workspace, WorkspaceCreate
+from argilla_server.schemas.v0.users import User as UserSchema
+from argilla_server.schemas.v0.workspaces import Workspace as WorkspaceSchema
+from argilla_server.schemas.v0.workspaces import WorkspaceCreate
 from argilla_server.security import auth
 
 router = APIRouter(tags=["workspaces"])
 
 
-@router.post("/workspaces", response_model=Workspace, response_model_exclude_none=True)
+@router.post("/workspaces", response_model=WorkspaceSchema, response_model_exclude_none=True)
 async def create_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -45,10 +47,10 @@ async def create_workspace(
     except NotUniqueError:
         raise EntityAlreadyExistsError(name=workspace_create.name, type=Workspace)
 
-    return Workspace.from_orm(workspace)
+    return workspace
 
 
-@router.get("/workspaces/{workspace_id}/users", response_model=List[User], response_model_exclude_none=True)
+@router.get("/workspaces/{workspace_id}/users", response_model=List[UserSchema], response_model_exclude_none=True)
 async def list_workspace_users(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -57,17 +59,18 @@ async def list_workspace_users(
 ):
     await authorize(current_user, WorkspaceUserPolicy.list(workspace_id))
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
+    workspace = await Workspace.get(db, workspace_id)
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
 
     await workspace.awaitable_attrs.users
     for user in workspace.users:
         await user.awaitable_attrs.workspaces
-    return parse_obj_as(List[User], workspace.users)
+
+    return parse_obj_as(List[UserSchema], workspace.users)
 
 
-@router.post("/workspaces/{workspace_id}/users/{user_id}", response_model=User, response_model_exclude_none=True)
+@router.post("/workspaces/{workspace_id}/users/{user_id}", response_model=UserSchema, response_model_exclude_none=True)
 async def create_workspace_user(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -77,25 +80,27 @@ async def create_workspace_user(
 ):
     await authorize(current_user, WorkspaceUserPolicy.create)
 
-    workspace = await accounts.get_workspace_by_id(db, workspace_id)
+    workspace = await Workspace.get(db, workspace_id)
     if not workspace:
         raise EntityNotFoundError(name=str(workspace_id), type=Workspace)
 
-    user = await accounts.get_user_by_id(db, user_id)
+    user = await User.get(db, user_id)
     if not user:
-        raise EntityNotFoundError(name=str(user_id), type=User)
+        raise EntityNotFoundError(name=str(user_id), type=UserSchema)
 
     try:
         workspace_user = await accounts.create_workspace_user(db, {"workspace_id": workspace_id, "user_id": user_id})
     except NotUniqueError:
-        raise EntityAlreadyExistsError(name=str(user_id), type=User)
+        raise EntityAlreadyExistsError(name=str(user_id), type=UserSchema)
 
     await db.refresh(user, attribute_names=["workspaces"])
 
-    return User.from_orm(workspace_user.user)
+    return workspace_user.user
 
 
-@router.delete("/workspaces/{workspace_id}/users/{user_id}", response_model=User, response_model_exclude_none=True)
+@router.delete(
+    "/workspaces/{workspace_id}/users/{user_id}", response_model=UserSchema, response_model_exclude_none=True
+)
 async def delete_workspace_user(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -103,9 +108,9 @@ async def delete_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    workspace_user = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
+    workspace_user = await WorkspaceUser.get_by(db, workspace_id=workspace_id, user_id=user_id)
     if not workspace_user:
-        raise EntityNotFoundError(name=str(user_id), type=User)
+        raise EntityNotFoundError(name=str(user_id), type=UserSchema)
 
     await authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 
@@ -113,4 +118,4 @@ async def delete_workspace_user(
     await accounts.delete_workspace_user(db, workspace_user)
     await db.refresh(user, attribute_names=["workspaces"])
 
-    return User.from_orm(user)
+    return user

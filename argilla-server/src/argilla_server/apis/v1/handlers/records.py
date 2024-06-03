@@ -15,18 +15,21 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status
 from fastapi import Response as HTTPResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
-from argilla_server.models import Record, User
+from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
+from argilla_server.models import Dataset, Question, Record, Suggestion, User
 from argilla_server.policies import RecordPolicyV1, authorize
 from argilla_server.schemas.v1.records import Record as RecordSchema
 from argilla_server.schemas.v1.records import RecordUpdate
 from argilla_server.schemas.v1.responses import Response, ResponseCreate
-from argilla_server.schemas.v1.suggestions import Suggestion, SuggestionCreate, Suggestions
+from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
+from argilla_server.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.utils import parse_uuids
@@ -36,22 +39,6 @@ DELETE_RECORD_SUGGESTIONS_LIMIT = 100
 router = APIRouter(tags=["records"])
 
 
-async def _get_record(
-    db: AsyncSession,
-    record_id: UUID,
-    with_dataset: bool = False,
-    with_suggestions: bool = False,
-    with_vectors: bool = False,
-) -> Record:
-    record = await datasets.get_record_by_id(db, record_id, with_dataset, with_suggestions, with_vectors)
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Record with id `{record_id}` not found",
-        )
-    return record
-
-
 @router.get("/records/{record_id}", response_model=RecordSchema)
 async def get_record(
     *,
@@ -59,7 +46,15 @@ async def get_record(
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.get(record))
 
@@ -75,14 +70,20 @@ async def update_record(
     record_update: RecordUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True, with_vectors=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+            selectinload(Record.vectors),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.update(record))
 
-    try:
-        return await datasets.update_record(db, search_engine, record, record_update)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.update_record(db, search_engine, record, record_update)
 
 
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
@@ -94,29 +95,36 @@ async def create_record_response(
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.create_response(record))
 
-    if await datasets.get_response_by_record_id_and_user_id(db, record_id, current_user.id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Response already exists for record with id `{record_id}` and by user with id `{current_user.id}`",
-        )
-
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        return await datasets.create_response(db, search_engine, record, current_user, response_create)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.create_response(db, search_engine, record, current_user, response_create)
 
 
 @router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
 async def get_record_suggestions(
-    *, db: AsyncSession = Depends(get_async_db), record_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    record_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True, with_suggestions=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.suggestions),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.get_suggestions(record))
 
@@ -127,11 +135,11 @@ async def get_record_suggestions(
     "/records/{record_id}/suggestions",
     summary="Create or update a suggestion",
     responses={
-        status.HTTP_200_OK: {"model": Suggestion, "description": "Suggestion updated"},
-        status.HTTP_201_CREATED: {"model": Suggestion, "description": "Suggestion created"},
+        status.HTTP_200_OK: {"model": SuggestionSchema, "description": "Suggestion updated"},
+        status.HTTP_201_CREATED: {"model": SuggestionSchema, "description": "Suggestion created"},
     },
     status_code=status.HTTP_201_CREATED,
-    response_model=Suggestion,
+    response_model=SuggestionSchema,
 )
 async def upsert_suggestion(
     *,
@@ -142,27 +150,32 @@ async def upsert_suggestion(
     current_user: User = Security(auth.get_current_user),
     response: HTTPResponse,
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.create_suggestion(record))
 
-    question = await questions.get_question_by_id(db, suggestion_create.question_id)
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Question with id `{suggestion_create.question_id}` not found",
+    try:
+        question = await Question.get_or_raise(
+            db,
+            suggestion_create.question_id,
+            options=[selectinload(Question.dataset)],
         )
+    except NotFoundError as e:
+        raise UnprocessableEntityError(e.message)
 
-    if await datasets.get_suggestion_by_record_id_and_question_id(db, record_id, suggestion_create.question_id):
-        # There is already a suggestion for this record and question, so we update it.
+    # NOTE: If there is already a suggestion for this record and question, we update it instead of creating a new one.
+    # So we set the correct status code here.
+    if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
         response.status_code = status.HTTP_200_OK
 
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
 
 @router.delete(
@@ -178,7 +191,14 @@ async def delete_record_suggestions(
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
 
@@ -186,13 +206,10 @@ async def delete_record_suggestions(
     num_suggestions = len(suggestion_ids)
 
     if num_suggestions == 0:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No suggestions IDs provided")
+        raise UnprocessableEntityError("No suggestions IDs provided")
 
     if num_suggestions > DELETE_RECORD_SUGGESTIONS_LIMIT:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once",
-        )
+        raise UnprocessableEntityError(f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once")
 
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
@@ -205,7 +222,14 @@ async def delete_record(
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    record = await _get_record(db, record_id, with_dataset=True)
+    record = await Record.get_or_raise(
+        db,
+        record_id,
+        options=[
+            selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, RecordPolicyV1.delete(record))
 

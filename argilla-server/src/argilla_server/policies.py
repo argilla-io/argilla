@@ -39,17 +39,19 @@ PolicyAction = Callable[[User], Awaitable[bool]]
 
 
 async def _exists_workspace_user_by_user_and_workspace_id(user: User, workspace_id: UUID) -> bool:
-    db = async_object_session(user)
-    workspace = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user.id)
-    return workspace is not None
+    return (
+        await WorkspaceUser.get_by(async_object_session(user), workspace_id=workspace_id, user_id=user.id) is not None
+    )
 
 
 async def _exists_workspace_user_by_user_and_workspace_name(user: User, workspace_name: str) -> bool:
     db = async_object_session(user)
-    workspace = await accounts.get_workspace_by_name(db, workspace_name)
+
+    workspace = await Workspace.get_by(db, name=workspace_name)
     if workspace is None:
         return False
-    return await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id) is not None
+
+    return await WorkspaceUser.get_by(db, workspace_id=workspace.id, user_id=user.id) is not None
 
 
 class WorkspaceUserPolicy:

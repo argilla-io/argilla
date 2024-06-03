@@ -14,14 +14,14 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, Security
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from starlette import status
 
-from argilla_server.apis.v1.handlers.datasets.datasets import _get_dataset_or_raise
 from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
-from argilla_server.models import User
+from argilla_server.models import Dataset, User
 from argilla_server.policies import DatasetPolicyV1, authorize
 from argilla_server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.security import auth
@@ -33,7 +33,7 @@ router = APIRouter()
 async def list_dataset_questions(
     *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_questions=True)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.questions)])
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
@@ -50,19 +50,15 @@ async def create_dataset_question(
 ):
     # TODO: Review this flow since we're putting logic here that will be used internally by the context
     #  Fields and questions are required to apply validations.
-    dataset = await _get_dataset_or_raise(db, dataset_id, with_fields=True, with_questions=True)
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.questions),
+        ],
+    )
 
     await authorize(current_user, DatasetPolicyV1.create_question(dataset))
 
-    if await questions.get_question_by_name_and_dataset_id(db, question_create.name, dataset_id):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Question with name `{question_create.name}` already exists for dataset with id `{dataset_id}`",
-        )
-
-    # TODO: We should split API v1 into different FastAPI apps so we can customize error management.
-    # After mapping ValueError to 422 errors for API v1 then we can remove this try except.
-    try:
-        return await questions.create_question(db, dataset, question_create)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await questions.create_question(db, dataset, question_create)
