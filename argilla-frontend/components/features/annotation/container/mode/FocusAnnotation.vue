@@ -1,50 +1,71 @@
 <template>
   <div class="wrapper">
-    <section class="wrapper__records">
-      <DatasetFilters :recordCriteria="recordCriteria">
-        <ToggleAnnotationType
-          v-if="
-            records.hasRecordsToAnnotate && recordCriteria.committed.isPending
-          "
-          :recordCriteria="recordCriteria"
-      /></DatasetFilters>
-      <SimilarityRecordReference
-        v-show="recordCriteria.isFilteringBySimilarity"
-        v-if="!!records.reference"
-        :fields="records.reference.fields"
-        :recordCriteria="recordCriteria"
-        :availableVectors="datasetVectors"
-      />
-      <div class="wrapper__records__header">
-        <PaginationFeedbackTask :recordCriteria="recordCriteria" />
-      </div>
-      <Record
-        v-if="records.hasRecordsToAnnotate"
-        :datasetVectors="datasetVectors"
-        :recordCriteria="recordCriteria"
-        :record="record"
-      />
-      <div v-else class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </section>
+    <VerticalResizable>
+      <template #left>
+        <HorizontalResizable>
+          <template #up>
+            <section class="wrapper__records">
+              <DatasetFilters :recordCriteria="recordCriteria">
+                <ToggleAnnotationType
+                  v-if="
+                    records.hasRecordsToAnnotate &&
+                    recordCriteria.committed.isPending
+                  "
+                  :recordCriteria="recordCriteria"
+              /></DatasetFilters>
+              <SimilarityRecordReference
+                v-show="recordCriteria.isFilteringBySimilarity"
+                v-if="!!records.reference"
+                :fields="records.reference.fields"
+                :recordCriteria="recordCriteria"
+                :availableVectors="datasetVectors"
+              />
+              <div class="wrapper__records__header">
+                <PaginationFeedbackTask :recordCriteria="recordCriteria" />
+              </div>
+              <Record
+                v-if="records.hasRecordsToAnnotate"
+                :datasetVectors="datasetVectors"
+                :recordCriteria="recordCriteria"
+                :record="record"
+              />
+              <div v-else class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+              </div>
+            </section>
+          </template>
+          <template #down>
+            <h2>Guidelines</h2>
+          </template>
+        </HorizontalResizable>
+      </template>
 
-    <QuestionsForm
-      v-if="!!record"
-      :key="`${record.id}_questions`"
-      class="wrapper__form"
-      :class="statusClass"
-      :datasetId="recordCriteria.datasetId"
-      :record="record"
-      :show-discard-button="!record.isDiscarded"
-      :is-draft-saving="isDraftSaving"
-      :is-submitting="isSubmitting"
-      :is-discarding="isDiscarding"
-      :enableAutoSubmitWithKeyboard="true"
-      @on-submit-responses="onSubmit"
-      @on-discard-responses="onDiscard"
-      @on-save-draft="onSaveDraft"
-    />
+      <template #right>
+        <HorizontalResizable>
+          <template #up>
+            <QuestionsForm
+              v-if="!!record"
+              :key="`${record.id}_questions`"
+              class="wrapper__form"
+              :class="statusClass"
+              :datasetId="recordCriteria.datasetId"
+              :record="record"
+              :show-discard-button="!record.isDiscarded"
+              :is-draft-saving="isDraftSaving"
+              :is-submitting="isSubmitting"
+              :is-discarding="isDiscarding"
+              :enableAutoSubmitWithKeyboard="true"
+              @on-submit-responses="onSubmit"
+              @on-discard-responses="onDiscard"
+              @on-save-draft="onSaveDraft"
+            />
+          </template>
+          <template #down>
+            <h2>Progress</h2>
+          </template>
+        </HorizontalResizable>
+      </template>
+    </VerticalResizable>
   </div>
 </template>
 <script>

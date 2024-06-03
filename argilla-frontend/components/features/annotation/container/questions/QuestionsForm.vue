@@ -320,7 +320,7 @@ export default {
   flex-basis: clamp(33%, 520px, 40%);
   gap: $base-space;
   max-height: 100%;
-  min-width: 0;
+  min-width: 100%;
   justify-content: space-between;
   margin-bottom: auto;
   @include media("<desktop") {
