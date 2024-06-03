@@ -15,22 +15,12 @@
 from typing import Optional, Union
 from uuid import UUID
 
-from argilla_sdk._helpers._log import log
 
+class UUIDUtilities:
+    """A utility for UUID operations with error handling."""
 
-class LoggingMixin:
-    """A utility mixin for logging."""
-
-    def log(self, message: str, level: str = "info") -> None:
-        class_name = self.__class__.__name__
-        message = f"{class_name}: {message}"
-        log(level=level, message=message)
-
-
-class UUIDMixin:
-    """A utility mixin for UUID operations with error handling."""
-
-    def _uuid_as_str(self, uuid: UUID) -> str:
+    @staticmethod
+    def _uuid_as_str(uuid: UUID) -> str:
         """Converts UUID to string
         Args:
             uuid (UUID): The UUID to convert
@@ -42,7 +32,8 @@ class UUIDMixin:
         except AttributeError as e:
             raise ValueError(f"Invalid UUID to be converted into string: {uuid}") from e
 
-    def _str_as_uuid(self, uuid: str) -> UUID:
+    @staticmethod
+    def _str_as_uuid(uuid: str) -> UUID:
         """Converts string to UUID with and without hyphens.
         Args:
             uuid (str): The string to convert
@@ -54,7 +45,8 @@ class UUIDMixin:
         except AttributeError as e:
             raise ValueError(f"Invalid str to be converted into UUID: {uuid}") from e
 
-    def _convert_optional_uuid(self, uuid: Optional[Union[UUID, str]]) -> Optional[UUID]:
+    @classmethod
+    def convert_optional_uuid(cls, uuid: Optional[Union[UUID, str]]) -> Optional[UUID]:
         """Converts optional UUID to UUID or leaves as none
         Args:
             uuid (Optional[Union[UUID, str]]): The UUID to convert
@@ -66,6 +58,6 @@ class UUIDMixin:
         elif uuid is None:
             return None
         elif isinstance(uuid, str):
-            return self._str_as_uuid(uuid)
+            return cls._str_as_uuid(uuid)
         else:
             raise ValueError(f"Invalid type for UUID: {type(uuid)}")

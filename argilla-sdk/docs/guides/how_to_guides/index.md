@@ -1,5 +1,6 @@
 ---
 description: These are the how-to guides for the Argilla-python SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+hide: toc
 ---
 
 # How-to guides

@@ -65,7 +65,7 @@ def test_export_records_dict_flattened(client: Argilla, dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=True)
     assert isinstance(exported_records, dict)
     assert isinstance(exported_records["id"], list)
@@ -92,7 +92,7 @@ def test_export_records_list_flattened(client: Argilla, dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_list(flatten=True)
     assert len(exported_records) == len(mock_data)
     assert isinstance(exported_records, list)
@@ -123,7 +123,7 @@ def test_export_records_list_nested(client: Argilla, dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_list(flatten=False)
     assert len(exported_records) == len(mock_data)
     assert exported_records[0]["fields"]["text"] == "Hello World, how are you?"
@@ -150,7 +150,7 @@ def test_export_records_dict_nested(client: Argilla, dataset: rg.Dataset):
         },
     ]
 
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=False)
     assert isinstance(exported_records, dict)
     assert exported_records["fields"][0]["text"] == "Hello World, how are you?"
@@ -175,7 +175,7 @@ def test_export_records_dict_nested_orient_index(client: Argilla, dataset: rg.Da
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=False, orient="index")
     assert isinstance(exported_records, dict)
     for mock_record, (id_, exported_record) in zip(mock_data, exported_records.items()):
@@ -203,7 +203,7 @@ def test_export_records_to_json(dataset: rg.Dataset):
             "external_id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = Path(temp_dir) / "records.json"
@@ -233,7 +233,7 @@ def test_export_records_from_json(dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = Path(temp_dir) / "records.json"
@@ -264,7 +264,7 @@ def test_export_records_to_hf_datasets(dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
     hf_dataset = dataset.records.to_datasets()
 
     assert isinstance(hf_dataset, HFDataset)
@@ -294,7 +294,7 @@ def test_import_records_from_hf_dataset(dataset: rg.Dataset) -> None:
         },
     ]
     mock_hf_dataset = HFDataset.from_list(mock_data)
-    dataset.records.add(records=mock_hf_dataset)
+    dataset.records.log(records=mock_hf_dataset)
 
     for i, record in enumerate(dataset.records(with_suggestions=True)):
         assert record.fields.text == mock_data[i]["text"]

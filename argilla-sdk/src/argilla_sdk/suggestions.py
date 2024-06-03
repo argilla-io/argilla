@@ -125,7 +125,7 @@ class Suggestion(Resource):
         model.question_name = question.name
         model.value = cls.__from_model_value(model.value, question)
 
-        return cls(**model.dict())
+        return cls(**model.model_dump())
 
     def api_model(self) -> SuggestionModel:
         if self.record is None or self.record.dataset is None:

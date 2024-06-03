@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.Response`
 
 Class for interacting with Argilla Responses of records. Responses are answers to questions by a user. Therefore, a recod question can have multiple responses, one for each user that has answered the question. A `Response` is typically created by a user in the UI or consumed from a data source as a label, unlike a `Suggestion` which is typically created by a model prediction.
@@ -9,7 +12,7 @@ Responses can be added to an instantiated `Record` directly or as a dictionary a
 Instantiate the `Record` and related `Response` objects:
 
 ```python
-dataset.records.add(
+dataset.records.log(
     [
         rg.Record(
             fields={"text": "Hello World, how are you?"},
@@ -24,7 +27,7 @@ Or, add a response from a dictionary where key is the question name and value is
 
 ```python
 
-dataset.records.add(
+dataset.records.log(
     [
         {
             "text": "Hello World, how are you?",
@@ -62,5 +65,5 @@ for record in dataset.records:
 ### `rg.Response`
 
 ::: argilla_sdk.responses.Response
-    options: 
+    options:
         heading_level: 3

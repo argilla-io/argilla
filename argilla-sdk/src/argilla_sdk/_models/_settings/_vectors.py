@@ -15,18 +15,17 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, field_validator, field_serializer
+from pydantic import field_validator, field_serializer
 from pydantic_core.core_schema import ValidationInfo
 
-from argilla_sdk._helpers._log import log
+from argilla_sdk._models import ResourceModel
+from argilla_sdk._helpers import log_message
 
 
-class VectorFieldModel(BaseModel):
+class VectorFieldModel(ResourceModel):
     name: str
     title: Optional[str] = None
     dimensions: int
-
-    id: Optional[UUID] = None
     dataset_id: Optional[UUID] = None
 
     @field_serializer("id", "dataset_id", when_used="unless-none")
@@ -44,7 +43,7 @@ class VectorFieldModel(BaseModel):
     def _title_default(cls, title: str, info: ValidationInfo) -> str:
         data = info.data
         validated_title = title or data["name"]
-        log(f"TextField title is {validated_title}")
+        log_message(f"TextField title is {validated_title}")
         return validated_title
 
     @field_validator("dimensions")

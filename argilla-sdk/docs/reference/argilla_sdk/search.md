@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.Query`
 
 To collect records based on searching criteria, you can use the `Query` and `Filter` classes. The `Query` class is used to define the search criteria, while the `Filter` class is used to filter the search results. `Filter` is passed to a `Query` object so you can combine multiple filters to create complex search queries. A `Query` object can also be passed to `Dataset.records` to fetch records based on the search criteria.
@@ -44,11 +47,11 @@ for record in dataset.records(query=query):
 ### `rg.Query`
 
 ::: argilla_sdk.records._search.Query
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.Filter`
 
-::: argilla_sdk.records._search.Filter        
-    options: 
+::: argilla_sdk.records._search.Filter
+    options:
         heading_level: 3

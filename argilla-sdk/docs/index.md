@@ -3,27 +3,27 @@ description: Argilla is a **collaboration platform for AI engineers and domain e
 hide: navigation
 ---
 
-# Welcome to Argilla Docs
+# Welcome to Argilla
 
 Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
 <div class="grid cards" markdown>
 
--  __Get started in 5 minutes__
+-  __Get started in 5 minutes!__
 
     ---
 
     Install `argilla` with `pip` and deploy a `Docker` locally or for free on Hugging Face to get up and running in minutes.
 
-    [:octicons-arrow-right-24: Quickstart](getting_started/quickstart/)
+    [:octicons-arrow-right-24: Quickstart](getting_started/quickstart.md)
 
--  __How-to guides__
+-  __Educational guides__
 
     ---
 
-    Get familiar with common workflows for Argilla. From managing [`Users`](how_to_guides/user.md), [`Workspaces`](how_to_guides/workspace.md). [`Datasets`](how_to_guides/dataset.md) and [`Records`](how_to_guides/record.md) to fine-tuning a model.
+    Get familiar with basic and complex workflows for Argilla. From managing `Users`, `Workspaces`. `Datasets` and `Records` to fine-tuning a model.
 
-    [:octicons-arrow-right-24: How-to guides](how_to_guides)
+    [:octicons-arrow-right-24: Learn more](guides/how_to_guides/index.md)
 
 </div>
 

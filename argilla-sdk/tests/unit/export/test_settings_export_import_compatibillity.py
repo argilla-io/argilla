@@ -76,6 +76,22 @@ def dataset(httpx_mock: HTTPXMock, settings) -> rg.Dataset:
         yield dataset
 
 
+def test_settings_to_json(settings):
+    with TemporaryDirectory() as temp_dir:
+        temp_file_path = f"{temp_dir}/settings.json"
+        settings.to_json(temp_file_path)
+        with open(temp_file_path, "r") as f:
+            settings_json = f.read()
+
+            assert "fields" in settings_json
+            assert "questions" in settings_json
+            assert "metadata" in settings_json
+            assert "vectors" in settings_json
+
+        loaded_settings = rg.Settings.from_json(temp_file_path)
+        assert settings == loaded_settings
+
+
 def test_export_settings_from_disk(settings):
     with TemporaryDirectory() as temp_dir:
         temp_file_path = f"{temp_dir}/settings.json"

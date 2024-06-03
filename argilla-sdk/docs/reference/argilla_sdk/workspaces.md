@@ -1,6 +1,8 @@
+---
+hide: footer
+---
+
 # `rg.Workspace`
-
-
 
 In Argilla, workspaces are used to organize datasets in to groups. For example, you might have a workspace for each project or team.
 

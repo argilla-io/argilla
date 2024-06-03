@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.Suggestion`
 
 Class for interacting with Argilla Suggestions of records. Suggestions are typically created by a model prediction, unlike a `Response` which is typically created by a user in the UI or consumed from a data source as a label.
@@ -11,7 +14,7 @@ Suggestions can be added to a record directly or via a dictionary structure. The
 Add a response from a dictionary where key is the question name and value is the response:
 
 ```python
-dataset.records.add(
+dataset.records.log(
     [
         {
             "text": "Hello World, how are you?",
@@ -24,7 +27,7 @@ dataset.records.add(
 If your data contains scores for suggestions you can add them as well via the `mapping` parameter. The following example demonstrates how to add a suggestion with a score to a record object:
 
 ```python
-dataset.records.add(
+dataset.records.log(
     [
         {
             "prompt": "Hello World, how are you?",
@@ -45,7 +48,7 @@ dataset.records.add(
 Or, instantiate the `Record` and related `Suggestions` objects directly, like this:
 
 ```python
-dataset.records.add(
+dataset.records.log(
     [
         rg.Record(
             fields={"text": "Hello World, how are you?"},
@@ -71,5 +74,5 @@ for record in dataset.records(with_suggestions=True):
 ### `rg.Suggestion`
 
 ::: argilla_sdk.suggestions.Suggestion
-    options: 
+    options:
         heading_level: 3

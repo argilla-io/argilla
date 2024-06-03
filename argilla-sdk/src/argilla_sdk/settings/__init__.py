@@ -14,5 +14,6 @@
 
 from argilla_sdk.settings._field import *  # noqa: F403
 from argilla_sdk.settings._metadata import *  # noqa: F403
+from argilla_sdk.settings._vector import *  # noqa: F403
 from argilla_sdk.settings._question import *  # noqa: F403
 from argilla_sdk.settings._resource import *  # noqa: F403

@@ -39,7 +39,7 @@ class UsersAPI(ResourceAPI[UserModel]):
         json_body = user.model_dump()
         response = self.http_client.post("/api/users", json=json_body).raise_for_status()
         user_created = self._model_from_json(response_json=response.json())
-        self.log(message=f"Created user {user_created.username}")
+        self._log_message(message=f"Created user {user_created.username}")
 
         return user_created
 
@@ -50,7 +50,7 @@ class UsersAPI(ResourceAPI[UserModel]):
         response.raise_for_status()
         response_json = response.json()
         user = self._model_from_json(response_json=response_json)
-        self.log(message=f"Got user {user.username}")
+        self._log_message(message=f"Got user {user.username}")
         return user
 
     def exist(self, user_id: UUID) -> bool:
@@ -61,7 +61,7 @@ class UsersAPI(ResourceAPI[UserModel]):
     @api_error_handler
     def delete(self, user_id: UUID) -> None:
         self.http_client.delete(url=f"/api/users/{user_id}").raise_for_status()
-        self.log(message=f"Deleted user {id}")
+        self._log_message(message=f"Deleted user {id}")
 
     ####################
     # V0 API methods #
@@ -73,7 +73,7 @@ class UsersAPI(ResourceAPI[UserModel]):
         response.raise_for_status()
         response_json = response.json()
         users = self._model_from_jsons(response_jsons=response_json)
-        self.log(message=f"Listed {len(users)} users")
+        self._log_message(message=f"Listed {len(users)} users")
         return users
 
     @api_error_handler
@@ -82,7 +82,7 @@ class UsersAPI(ResourceAPI[UserModel]):
         response.raise_for_status()
         response_json = response.json()
         users = self._model_from_jsons(response_jsons=response_json)
-        self.log(message=f"Listed {len(users)} users")
+        self._log_message(message=f"Listed {len(users)} users")
         return users
 
     @api_error_handler
@@ -91,19 +91,19 @@ class UsersAPI(ResourceAPI[UserModel]):
         response.raise_for_status()
         response_json = response.json()
         user = self._model_from_json(response_json=response_json)
-        self.log(message=f"Got user {user.username}")
+        self._log_message(message=f"Got user {user.username}")
         return user
 
     @api_error_handler
     def add_to_workspace(self, workspace_id: UUID, user_id: UUID) -> "UserModel":
         response = self.http_client.post(url=f"/api/workspaces/{workspace_id}/users/{user_id}").raise_for_status()
-        self.log(message=f"Added user {user_id} to workspace {workspace_id}")
+        self._log_message(message=f"Added user {user_id} to workspace {workspace_id}")
         return self._model_from_json(response_json=response.json())
 
     @api_error_handler
     def delete_from_workspace(self, workspace_id: UUID, user_id: UUID) -> "UserModel":
         response = self.http_client.delete(url=f"/api/workspaces/{workspace_id}/users/{user_id}").raise_for_status()
-        self.log(message=f"Deleted user {user_id} from workspace {workspace_id}")
+        self._log_message(message=f"Deleted user {user_id} from workspace {workspace_id}")
         return self._model_from_json(response_json=response.json())
 
     ####################

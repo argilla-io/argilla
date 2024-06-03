@@ -24,7 +24,7 @@ LOG_LEVEL_MAP = {
 }
 
 
-def log(message: str, level: str = "info") -> None:
+def log_message(message: str, level: str = "info") -> None:
     """Log a message at the specified level.
     Args:
         message (str): The message to log.
@@ -32,3 +32,12 @@ def log(message: str, level: str = "info") -> None:
     """
     level_int = LOG_LEVEL_MAP.get(level, logging.INFO)
     logging.log(level=level_int, msg=message)
+
+
+class LoggingMixin:
+    """A utility mixin for logging from a `Resource` class."""
+
+    def _log_message(self, message: str, level: str = "info") -> None:
+        class_name = self.__class__.__name__
+        message = f"{class_name}: {message}"
+        log_message(level=level, message=message)

@@ -57,7 +57,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
     def delete(self, record_id: UUID) -> None:
         response = self.http_client.delete(f"/api/v1/records/{record_id}")
         response.raise_for_status()
-        self.log(message=f"Deleted record {record_id}")
+        self._log_message(message=f"Deleted record {record_id}")
 
     ####################
     # Utility methods #
@@ -140,7 +140,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
             json={"items": record_dicts},
         )
         response.raise_for_status()
-        self.log(message=f"Created {len(records)} records in dataset {dataset_id}")
+        self._log_message(message=f"Created {len(records)} records in dataset {dataset_id}")
         # TODO: Once server returns the records, return them here
 
     @api_error_handler
@@ -152,7 +152,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
             json={"items": record_dicts},
         )
         response.raise_for_status()
-        self.log(message=f"Updated {len(records)} records in dataset {dataset_id}")
+        self._log_message(message=f"Updated {len(records)} records in dataset {dataset_id}")
 
     @api_error_handler
     def bulk_create(
@@ -167,7 +167,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
         )
         response.raise_for_status()
         response_json = response.json()
-        self.log(message=f"Created {len(records)} in dataset {dataset_id}")
+        self._log_message(message=f"Created {len(records)} in dataset {dataset_id}")
         return self._model_from_jsons(response_jsons=response_json["items"])
 
     @api_error_handler
@@ -182,7 +182,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
         response.raise_for_status()
         response_json = response.json()
         updated = len(response_json.get("updated_item_ids", []))
-        self.log(
+        self._log_message(
             message=f"Updated {updated} records and create {len(records) - updated} records in dataset {dataset_id}"
         )
         return self._model_from_jsons(response_jsons=response_json["items"]), updated

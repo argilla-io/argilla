@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.Dataset`
 
 `Dataset` is a class that represents a collection of records. It is used to store and manage records in Argilla.
@@ -23,7 +26,7 @@ dataset = rg.Dataset(
 dataset.create()
 ```
 
-For a detail guide of the dataset creation and publication process, see the [Dataset how to guide](/argilla-python/how_to_guides/dataset).
+For a detail guide of the dataset creation and publication process, see the [Dataset how to guide](/argilla-python/guides/how_to_guides/dataset).
 
 ### Retrieving an existing Dataset
 
@@ -41,5 +44,5 @@ dataset = client.datasets("my_dataset")
 ### `rg.Dataset`
 
 ::: argilla_sdk.datasets.Dataset
-    options: 
+    options:
         heading_level: 3

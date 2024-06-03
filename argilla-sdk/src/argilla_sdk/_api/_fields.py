@@ -16,14 +16,15 @@ from typing import List, Dict
 from uuid import UUID
 
 import httpx
+
 from argilla_sdk._api._base import ResourceAPI
 from argilla_sdk._exceptions import api_error_handler
-from argilla_sdk._models import FieldBaseModel, TextFieldModel, FieldModel
+from argilla_sdk._models import FieldModel
 
 __all__ = ["FieldsAPI"]
 
 
-class FieldsAPI(ResourceAPI[FieldBaseModel]):
+class FieldsAPI(ResourceAPI[FieldModel]):
     """Manage datasets via the API"""
 
     http_client: httpx.Client
@@ -33,35 +34,38 @@ class FieldsAPI(ResourceAPI[FieldBaseModel]):
     ################
 
     @api_error_handler
-    def create(self, dataset_id: UUID, field: FieldModel) -> FieldModel:
-        url = f"/api/v1/datasets/{dataset_id}/fields"
+    def get(self, id: UUID) -> FieldModel:
+        raise NotImplementedError()
+
+    @api_error_handler
+    def create(self, field: FieldModel) -> FieldModel:
+        url = f"/api/v1/datasets/{field.dataset_id}/fields"
         response = self.http_client.post(url=url, json=field.model_dump())
         response.raise_for_status()
         response_json = response.json()
-        field_model = self._model_from_json(response_json=response_json)
-        self.log(message=f"Created field {field_model.name} in dataset {dataset_id}")
-        return field_model
+        created_field = self._model_from_json(response_json=response_json)
+        self._log_message(message=f"Created field {created_field.name} in dataset {field.dataset_id}")
+        return created_field
 
     @api_error_handler
     def update(self, field: FieldModel) -> FieldModel:
-        # TODO: Implement update method for fields with server side ID
-        raise NotImplementedError
+        url = f"/api/v1/fields/{field.id}"
+        response = self.http_client.patch(url, json=field.model_dump())
+        response.raise_for_status()
+        response_json = response.json()
+        updated_field = self._model_from_json(response_json)
+        self._log_message(message=f"Update field {updated_field.name} with id {field.id}")
+        return updated_field
 
     @api_error_handler
-    def delete(self, dataset_id: UUID) -> None:
-        # TODO: Implement delete method for fields with server side ID
-        raise NotImplementedError
+    def delete(self, field_id: UUID) -> None:
+        url = f"/api/v1/fields/{field_id}"
+        self.http_client.delete(url).raise_for_status()
+        self._log_message(message=f"Deleted field {field_id}")
 
     ####################
     # Utility methods #
     ####################
-
-    def create_many(self, dataset_id: UUID, fields: List[FieldModel]) -> List[FieldModel]:
-        field_models = []
-        for field in fields:
-            field_model = self.create(dataset_id=dataset_id, field=field)
-            field_models.append(field_model)
-        return field_models
 
     @api_error_handler
     def list(self, dataset_id: UUID) -> List[FieldModel]:
@@ -78,19 +82,7 @@ class FieldsAPI(ResourceAPI[FieldBaseModel]):
     def _model_from_json(self, response_json: Dict) -> FieldModel:
         response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
         response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
-        return self._get_model_from_response(response_json=response_json)
+        return FieldModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[FieldModel]:
         return list(map(self._model_from_json, response_jsons))
-
-    def _get_model_from_response(self, response_json: Dict) -> FieldModel:
-        try:
-            field_type = response_json.get("settings", {}).get("type")
-        except Exception as e:
-            raise ValueError("Invalid response type: missing 'settings.type' in response") from e
-        if field_type == "text":
-            # TODO: Avoid apply validations here (check_fields=False?)
-            return TextFieldModel(**response_json)
-        else:
-            # TODO: Add more field types
-            raise ValueError(f"Invalid field type: {field_type}")

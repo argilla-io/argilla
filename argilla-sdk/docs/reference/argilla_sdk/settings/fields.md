@@ -1,3 +1,7 @@
+---
+hide: footer
+---
+
 # Fields
 
 Fields in Argilla are define the content of a record that will be reviewed by a user.
@@ -36,5 +40,5 @@ data = rg.Dataset(
 ### `rg.TextField`
 
 ::: argilla_sdk.settings.TextField
-    options: 
+    options:
         heading_level: 3

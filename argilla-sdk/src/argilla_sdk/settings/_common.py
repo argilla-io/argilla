@@ -14,7 +14,7 @@
 
 from typing import Any, Optional, Union
 
-from argilla_sdk._models import FieldBaseModel, QuestionBaseModel
+from argilla_sdk._models import FieldModel, QuestionBaseModel
 from argilla_sdk._resource import Resource
 
 __all__ = ["SettingsPropertyBase"]
@@ -23,7 +23,7 @@ __all__ = ["SettingsPropertyBase"]
 class SettingsPropertyBase(Resource):
     """Base class for dataset fields or questions in Settings class"""
 
-    _model: Union[FieldBaseModel, QuestionBaseModel]
+    _model: Union[FieldModel, QuestionBaseModel]
 
     def __repr__(self) -> str:
         return (

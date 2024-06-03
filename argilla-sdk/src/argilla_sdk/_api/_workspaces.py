@@ -39,7 +39,7 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         response.raise_for_status()
         response_json = response.json()
         workspace = self._model_from_json(json_workspace=response_json)
-        self.log(message=f"Created workspace {workspace.name}")
+        self._log_message(message=f"Created workspace {workspace.name}")
         return workspace
 
     @api_error_handler
@@ -69,7 +69,7 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         response.raise_for_status()
         response_json = response.json()
         workspaces = self._model_from_jsons(json_workspaces=response_json["items"])
-        self.log(message=f"Got {len(workspaces)} workspaces")
+        self._log_message(message=f"Got {len(workspaces)} workspaces")
         return workspaces
 
     @api_error_handler
@@ -78,7 +78,7 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         response.raise_for_status()
         response_json = response.json()
         workspaces = self._model_from_jsons(json_workspaces=response_json["items"])
-        self.log(message=f"Got {len(workspaces)} workspaces")
+        self._log_message(message=f"Got {len(workspaces)} workspaces")
         return workspaces
 
     @api_error_handler
@@ -87,14 +87,14 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         response.raise_for_status()
         response_json = response.json()
         workspaces = self._model_from_jsons(json_workspaces=response_json["items"])
-        self.log(message=f"Got {len(workspaces)} workspaces")
+        self._log_message(message=f"Got {len(workspaces)} workspaces")
         return workspaces
 
     @api_error_handler
     def get_by_name(self, name: str) -> Optional[WorkspaceModel]:
         for workspace in self.list():
             if workspace.name == name:
-                self.log(message=f"Got workspace {workspace.name}")
+                self._log_message(message=f"Got workspace {workspace.name}")
                 return workspace
 
     @api_error_handler
@@ -102,14 +102,14 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         # TODO: This method is already defined in UsersAPI and should be removed from here
         response = self.http_client.post(f"{self.url_stub}/{workspace_id}/users/{user_id}")
         response.raise_for_status()
-        self.log(message=f"Added user {user_id} to workspace {workspace_id}")
+        self._log_message(message=f"Added user {user_id} to workspace {workspace_id}")
 
     @api_error_handler
     def remove_user(self, workspace_id: UUID, user_id: UUID) -> None:
         # TODO: This method is already defined in UsersAPI and should be removed from here
         response = self.http_client.delete(f"{self.url_stub}/{workspace_id}/users/{user_id}")
         response.raise_for_status()
-        self.log(message=f"Removed user {user_id} from workspace {workspace_id}")
+        self._log_message(message=f"Removed user {user_id} from workspace {workspace_id}")
 
     ####################
     # Private methods #

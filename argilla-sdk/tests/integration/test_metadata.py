@@ -114,7 +114,7 @@ def test_add_record_with_metadata(dataset_with_metadata: Dataset):
         {"text": "text", "label": "negative", "category": "B"},
     ]
 
-    dataset_with_metadata.records.add(records)
+    dataset_with_metadata.records.log(records)
 
     for idx, record in enumerate(dataset_with_metadata.records):
         assert record.metadata.category == records[idx]["category"]
@@ -131,7 +131,7 @@ def test_add_record_with_mapped_metadata(dataset_with_metadata: Dataset):
         {"text": "text", "label": "negative", "my_category": "B"},
     ]
 
-    dataset_with_metadata.records.add(records, mapping={"my_category": "category"})
+    dataset_with_metadata.records.log(records, mapping={"my_category": "category"})
 
     for idx, record in enumerate(dataset_with_metadata.records):
         assert record.metadata.category == records[idx]["my_category"]

@@ -93,7 +93,7 @@ class Filter:
 
     @property
     def model(self) -> AndFilterModel:
-        return AndFilterModel.parse_obj({"and": [condition.model for condition in self.conditions]})
+        return AndFilterModel.model_validate({"and": [condition.model for condition in self.conditions]})
 
 
 class Query:

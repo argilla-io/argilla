@@ -54,7 +54,7 @@ class Record(Resource):
     def __init__(
         self,
         id: Optional[Union[UUID, str]] = None,
-        fields: Dict[str, Union[str, None]] = None,
+        fields: Optional[Dict[str, Union[str, None]]] = None,
         metadata: Optional[Dict[str, MetadataValue]] = None,
         vectors: Optional[List[Vector]] = None,
         responses: Optional[List[Response]] = None,
@@ -76,6 +76,12 @@ class Record(Resource):
             _server_id: An id for the record. (Read-only and set by the server)
             _dataset: The dataset object to which the record belongs.
         """
+        if fields is None and metadata is None and vectors is None and responses is None and suggestions is None:
+            raise ValueError("At least one of fields, metadata, vectors, responses, or suggestions must be provided.")
+        if fields is None and id is None:
+            raise ValueError("If fields are not provided, an id must be provided.")
+        if fields == {} and id is None:
+            raise ValueError("If fields are an empty dictionary, an id must be provided.")
         self._dataset = _dataset
 
         self._model = RecordModel(

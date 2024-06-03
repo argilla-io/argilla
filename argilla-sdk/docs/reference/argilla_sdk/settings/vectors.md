@@ -1,6 +1,9 @@
+---
+hide: footer
+---
 # Vectors
 
-Vector fields in Argilla are used to define the vector form of a record that will be reviewed by a user. 
+Vector fields in Argilla are used to define the vector form of a record that will be reviewed by a user.
 
 ## Usage Examples
 
@@ -30,5 +33,5 @@ settings = rg.Settings(
 ### `rg.VectorField`
 
 ::: argilla_sdk.settings.VectorField
-    options: 
+    options:
         heading_level: 3

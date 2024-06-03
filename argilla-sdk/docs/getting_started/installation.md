@@ -19,9 +19,6 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 !!! note
     You can use this SDK with any stable release of argilla server >= 1.27.
 
-!!! warning
-    These images are used for introductory purposes, so the data will be lost after restarting.
-
 * Using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 * Locally with Docker.
 

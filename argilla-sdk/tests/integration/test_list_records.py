@@ -55,7 +55,7 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
 
 
 def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
-    dataset.records.add(
+    dataset.records.log(
         [
             {"text": "The record text field", "id": 1},
             {"text": "The record text field", "id": 2},
@@ -67,7 +67,7 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
 
 
 def test_list_records_with_responses(client: Argilla, dataset: Dataset):
-    dataset.records.add(
+    dataset.records.log(
         [
             {"text": "The record text field", "id": 1, "comment": "The comment", "sentiment": "positive"},
             {"text": "The record text field", "id": 2, "comment": "The comment", "sentiment": "negative"},

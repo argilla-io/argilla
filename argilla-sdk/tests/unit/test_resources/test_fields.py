@@ -19,11 +19,11 @@ import httpx
 from pytest_httpx import HTTPXMock
 
 import argilla_sdk as rg
-from argilla_sdk._models import TextFieldModel
+from argilla_sdk._models import FieldModel
 
 
 class TestFieldsAPI:
-    def test_create_many_fields(self, httpx_mock: HTTPXMock):
+    def test_create_field(self, httpx_mock: HTTPXMock):
         # TODO: Add a test for the delete method in client
         mock_dataset_id = uuid.uuid4()
         mock_return_value = {
@@ -42,7 +42,7 @@ class TestFieldsAPI:
             "required": True,
             "settings": {"type": "text", "use_markdown": False},
         }
-        mock_field = TextFieldModel(**mock_field)
+        mock_field = FieldModel(**mock_field, dataset_id=mock_dataset_id)
         httpx_mock.add_response(
             json=mock_return_value,
             url=f"http://test_url/api/v1/datasets/{mock_dataset_id}/fields",
@@ -51,4 +51,4 @@ class TestFieldsAPI:
         )
         with httpx.Client() as client:
             client = rg.Argilla(api_url="http://test_url")
-            client.api.fields.create_many(dataset_id=mock_dataset_id, fields=[mock_field])
+            client.api.fields.create(mock_field)

@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, Union, List
+from typing import Optional, Union, List, TYPE_CHECKING
 
+from argilla_sdk._api._metadata import MetadataAPI
 from argilla_sdk._exceptions import MetadataError
 from argilla_sdk._models import (
     MetadataPropertyType,
@@ -22,8 +23,11 @@ from argilla_sdk._models import (
     IntegerMetadataPropertySettings,
     MetadataFieldModel,
 )
-from argilla_sdk.settings._common import SettingsPropertyBase
+from argilla_sdk._resource import Resource
+from argilla_sdk.client import Argilla
 
+if TYPE_CHECKING:
+    from argilla_sdk import Dataset
 
 __all__ = [
     "TermsMetadataProperty",
@@ -33,18 +37,31 @@ __all__ = [
 ]
 
 
-class MetadataPropertyBase(SettingsPropertyBase):
+class MetadataPropertyBase(Resource):
     _model: MetadataFieldModel
+    _api: MetadataAPI
+
+    _dataset: "Dataset"
+
+    def __init__(self, client: Optional[Argilla] = None) -> None:
+        client = client or Argilla._get_default()
+        super().__init__(client=client, api=client.api.metadata)
 
     @property
-    def required(self) -> bool:
-        # This attribute is not present in the MetadataFieldModel
-        return False
+    def name(self) -> str:
+        return self._model.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._model.name = value
 
     @property
-    def description(self) -> Optional[str]:
-        # This attribute is not present in the MetadataFieldModel
-        return None
+    def title(self) -> Optional[str]:
+        return self._model.title
+
+    @title.setter
+    def title(self, value: Optional[str]) -> None:
+        self._model.title = value
 
     @property
     def visible_for_annotators(self) -> Optional[bool]:
@@ -54,6 +71,20 @@ class MetadataPropertyBase(SettingsPropertyBase):
     def visible_for_annotators(self, value: Optional[bool]) -> None:
         self._model.visible_for_annotators = value
 
+    @property
+    def dataset(self) -> Optional["Dataset"]:
+        return self._dataset
+
+    @dataset.setter
+    def dataset(self, value: "Dataset") -> None:
+        self._dataset = value
+        self._model.dataset_id = value.id
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
+        )
+
 
 class TermsMetadataProperty(MetadataPropertyBase):
     def __init__(
@@ -62,6 +93,7 @@ class TermsMetadataProperty(MetadataPropertyBase):
         options: Optional[List[str]] = None,
         title: Optional[str] = None,
         visible_for_annotators: Optional[bool] = True,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with terms settings.
 
@@ -73,7 +105,7 @@ class TermsMetadataProperty(MetadataPropertyBase):
         Raises:
             MetadataError: If an error occurs while defining metadata settings
         """
-        super().__init__()
+        super().__init__(client=client)
 
         try:
             settings = TermsMetadataPropertySettings(values=options, type=MetadataPropertyType.terms)
@@ -106,7 +138,12 @@ class TermsMetadataProperty(MetadataPropertyBase):
 
 class FloatMetadataProperty(MetadataPropertyBase):
     def __init__(
-        self, name: str, min: Optional[float] = None, max: Optional[float] = None, title: Optional[str] = None
+        self,
+        name: str,
+        min: Optional[float] = None,
+        max: Optional[float] = None,
+        title: Optional[str] = None,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with float settings.
 
@@ -115,11 +152,14 @@ class FloatMetadataProperty(MetadataPropertyBase):
             min (Optional[float]): The minimum value
             max (Optional[float]): The maximum value
             title (Optional[str]): The title of the metadata field
+            client (Optional[Argilla]): The client to use for API requests
         Raises:
             MetadataError: If an error occurs while defining metadata settings
 
-
         """
+
+        super().__init__(client=client)
+
         try:
             settings = FloatMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.float)
         except ValueError as e:
@@ -158,7 +198,12 @@ class FloatMetadataProperty(MetadataPropertyBase):
 
 class IntegerMetadataProperty(MetadataPropertyBase):
     def __init__(
-        self, name: str, min: Optional[int] = None, max: Optional[int] = None, title: Optional[str] = None
+        self,
+        name: str,
+        min: Optional[int] = None,
+        max: Optional[int] = None,
+        title: Optional[str] = None,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with integer settings.
 
@@ -170,6 +215,7 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         Raises:
             MetadataError: If an error occurs while defining metadata settings
         """
+        super().__init__(client=client)
 
         try:
             settings = IntegerMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.integer)
@@ -207,7 +253,11 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         return instance
 
 
-MetadataType = Union[TermsMetadataProperty, FloatMetadataProperty, IntegerMetadataProperty]
+MetadataType = Union[
+    TermsMetadataProperty,
+    FloatMetadataProperty,
+    IntegerMetadataProperty,
+]
 
 
 class MetadataField:
@@ -233,6 +283,7 @@ class MetadataField:
         }
         metadata_type = data["type"]
         try:
-            return switch[metadata_type](**data)
+            metadata_model = MetadataFieldModel(**data)
+            return switch[metadata_type].from_model(metadata_model)
         except KeyError as e:
             raise MetadataError(f"Unknown metadata property type: {metadata_type}") from e

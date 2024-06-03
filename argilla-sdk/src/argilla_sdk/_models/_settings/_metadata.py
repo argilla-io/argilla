@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 from argilla_sdk._exceptions import MetadataError
+from argilla_sdk._models import ResourceModel
 
 
 class MetadataPropertyType(str, Enum):
@@ -36,9 +37,7 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
     type: Literal[MetadataPropertyType.terms]
     values: Optional[List[str]] = None
 
-    @field_validator(
-        "values",
-    )
+    @field_validator("values")
     @classmethod
     def __validate_values(cls, values):
         if values is None:
@@ -94,16 +93,17 @@ MetadataPropertySettings = Annotated[
 ]
 
 
-class MetadataFieldModel(BaseModel):
+class MetadataFieldModel(ResourceModel):
     """The schema definition of a metadata field in an Argilla dataset."""
 
-    id: Optional[UUID] = None
     name: str
     settings: MetadataPropertySettings
 
     type: Optional[MetadataPropertyType] = Field(None, validate_default=True)
     title: Optional[str] = None
     visible_for_annotators: Optional[bool] = True
+
+    dataset_id: Optional[UUID] = None
 
     @field_validator("name")
     @classmethod
@@ -117,7 +117,7 @@ class MetadataFieldModel(BaseModel):
         validated_title = title or values.data["name"]
         return validated_title
 
-    @field_serializer("id", when_used="unless-none")
+    @field_serializer("id", "dataset_id", when_used="unless-none")
     def serialize_id(self, value: UUID) -> str:
         return str(value)
 

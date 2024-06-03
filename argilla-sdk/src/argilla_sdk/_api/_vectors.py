@@ -16,6 +16,7 @@ from typing import List, Dict
 from uuid import UUID
 
 import httpx
+
 from argilla_sdk._api._base import ResourceAPI
 from argilla_sdk._exceptions import api_error_handler
 from argilla_sdk._models import VectorFieldModel
@@ -33,35 +34,35 @@ class VectorsAPI(ResourceAPI[VectorFieldModel]):
     ################
 
     @api_error_handler
-    def create(self, dataset_id: UUID, vector: VectorFieldModel) -> VectorFieldModel:
-        url = f"/api/v1/datasets/{dataset_id}/vectors-settings"
+    def create(self, vector: VectorFieldModel) -> VectorFieldModel:
+        url = f"/api/v1/datasets/{vector.dataset_id}/vectors-settings"
         response = self.http_client.post(url=url, json=vector.model_dump())
         response.raise_for_status()
         response_json = response.json()
-        vector_model = self._model_from_json(response_json=response_json)
-        self.log(message=f"Created vector {vector_model.name} in dataset {dataset_id}")
-        return vector_model
+        created_vector = self._model_from_json(response_json=response_json)
+        self._log_message(message=f"Created vector {created_vector.name} in dataset {created_vector.dataset_id}")
+        return created_vector
 
     @api_error_handler
     def update(self, vector: VectorFieldModel) -> VectorFieldModel:
-        # TODO: Implement update method for vectors with server side ID
-        raise NotImplementedError
+        url = f"/api/v1/vectors-settings/{vector.id}"
+        response = self.http_client.patch(url, json=vector.model_dump())
+        response.raise_for_status()
+        response_json = response.json()
+        updated_vector = self._model_from_json(response_json)
+        self._log_message(message=f"Updated vector {updated_vector.name} with id {updated_vector.id}")
+        return updated_vector
 
     @api_error_handler
     def delete(self, vector_id: UUID) -> None:
-        # TODO: Implement delete method for vectors with server side ID
-        raise NotImplementedError
+        url = f"/api/v1/vectors-settings/{vector_id}"
+        response = self.http_client.delete(url)
+        response.raise_for_status()
+        self._log_message(message=f"Deleted vector with id {vector_id}")
 
     ####################
     # Utility methods #
     ####################
-
-    def create_many(self, dataset_id: UUID, vectors: List[VectorFieldModel]) -> List[VectorFieldModel]:
-        vector_models = []
-        for vector in vectors:
-            vector_model = self.create(dataset_id=dataset_id, vector=vector)
-            vector_models.append(vector_model)
-        return vector_models
 
     @api_error_handler
     def list(self, dataset_id: UUID) -> List[VectorFieldModel]:

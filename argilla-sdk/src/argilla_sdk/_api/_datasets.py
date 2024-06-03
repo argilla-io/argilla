@@ -43,7 +43,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
-        self.log(message=f"Created dataset {dataset.name}")
+        self._log_message(message=f"Created dataset {dataset.name}")
         return dataset
 
     @api_error_handler
@@ -54,7 +54,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
-        self.log(message=f"Updated dataset {dataset.url}")
+        self._log_message(message=f"Updated dataset {dataset.url}")
         return dataset
 
     @api_error_handler
@@ -63,14 +63,14 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
-        self.log(message=f"Got dataset {dataset.url}")
+        self._log_message(message=f"Got dataset {dataset.url}")
         return dataset
 
     @api_error_handler
     def delete(self, dataset_id: UUID) -> None:
         response = self.http_client.delete(f"{self.url_stub}/{dataset_id}")
         response.raise_for_status()
-        self.log(message=f"Deleted dataset {dataset_id}")
+        self._log_message(message=f"Deleted dataset {dataset_id}")
 
     def exists(self, dataset_id: UUID) -> bool:
         response = self.http_client.get(f"{self.url_stub}/{dataset_id}")
@@ -85,7 +85,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response = self.http_client.put(url=f"{self.url_stub}/{dataset_id}/publish")
         response.raise_for_status()
         response_json = response.json()
-        self.log(message=f"Published dataset {dataset_id}")
+        self._log_message(message=f"Published dataset {dataset_id}")
         return self._model_from_json(response_json=response_json)
 
     @api_error_handler
@@ -96,14 +96,14 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         datasets = self._model_from_jsons(response_jsons=response_json["items"])
         if workspace_id:
             datasets = [dataset for dataset in datasets if dataset.workspace_id == workspace_id]
-        self.log(message=f"Listed {len(datasets)} datasets")
+        self._log_message(message=f"Listed {len(datasets)} datasets")
         return datasets
 
     def get_by_name_and_workspace_id(self, name: str, workspace_id: UUID) -> Optional["DatasetModel"]:
         datasets = self.list(workspace_id=workspace_id)
         for dataset in datasets:
             if dataset.name == name:
-                self.log(message=f"Got dataset {dataset.name}")
+                self._log_message(message=f"Got dataset {dataset.name}")
                 return dataset
 
     def name_exists(self, name: str, workspace_id: UUID) -> bool:

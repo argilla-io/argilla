@@ -68,7 +68,7 @@ def test_vectors(client: rg.Argilla, dataset: rg.Dataset):
             "vector": [random.random() for _ in range(10)],
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     dataset_records = list(dataset.records(with_responses=True, with_suggestions=True, with_vectors=["vector"]))
     assert dataset_records[0].id == str(mock_data[0]["id"])
@@ -100,7 +100,7 @@ def test_vectors_return_with_bool(client: rg.Argilla, dataset: rg.Dataset):
             "vector": [random.random() for _ in range(10)],
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     dataset_records = list(dataset.records(with_responses=True, with_suggestions=True, with_vectors=True))
     assert dataset_records[0].id == str(mock_data[0]["id"])
@@ -132,7 +132,7 @@ def test_vectors_return_with_name(client: rg.Argilla, dataset: rg.Dataset):
             "vector": [random.random() for _ in range(10)],
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     dataset_records = list(dataset.records(with_responses=True, with_suggestions=True, with_vectors="vector"))
     assert dataset_records[0].id == str(mock_data[0]["id"])

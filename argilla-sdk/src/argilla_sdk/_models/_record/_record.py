@@ -26,7 +26,7 @@ from argilla_sdk._models._record._vector import VectorModel
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
-    fields: Dict[str, Union[str, None]]
+    fields: Optional[Dict[str, Union[str, None]]] = None
     metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
@@ -47,6 +47,13 @@ class RecordModel(ResourceModel):
     def serialize_metadata(self, value: List[MetadataModel]) -> Dict[str, Any]:
         """Serialize metadata to a dictionary of key-value pairs based on the metadata name and value."""
         return {metadata.name: metadata.value for metadata in value}
+
+    @field_serializer("fields", when_used="always")
+    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Dict[str, Union[str, None]]:
+        """Serialize empty fields to None."""
+        if isinstance(value, dict) and len(value) == 0:
+            return None
+        return value
 
     @field_validator("metadata", mode="before")
     @classmethod

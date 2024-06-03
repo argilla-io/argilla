@@ -32,11 +32,14 @@ class TestTermsMetadata:
 
         assert property.api_model().model_dump() == {
             "id": None,
+            "dataset_id": None,
             "name": "metadata",
             "settings": {"type": "terms", "values": ["option1", "option2"], "visible_for_annotators": True},
             "title": "A metadata property",
             "type": "terms",
             "visible_for_annotators": True,
+            "inserted_at": None,
+            "updated_at": None,
         }
 
     def test_create_terms_metadata_without_options(self):
@@ -51,11 +54,14 @@ class TestTermsMetadata:
         assert model.type == "terms"
         assert model.model_dump() == {
             "id": None,
+            "dataset_id": None,
             "name": "metadata",
             "title": "metadata",
             "settings": {"type": "terms", "values": None, "visible_for_annotators": True},
             "type": "terms",
             "visible_for_annotators": True,
+            "inserted_at": None,
+            "updated_at": None,
         }
 
     def test_create_from_model(self):

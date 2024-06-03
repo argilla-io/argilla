@@ -50,20 +50,20 @@ def test_export_dataset_to_disk(dataset: rg.Dataset):
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "label": "negative",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
         output_dir = dataset.to_disk(path=temp_dir)
@@ -111,7 +111,7 @@ def test_import_dataset_from_disk(dataset: rg.Dataset, client):
             "external_id": uuid.uuid4(),
         },
     ]
-    dataset.records.add(records=mock_data)
+    dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
         output_dir = dataset.to_disk(path=temp_dir)

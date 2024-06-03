@@ -75,8 +75,8 @@ class User(Resource):
                 role=role or Role.annotator,
                 id=id,
             )
-            self.log(f"Initialized user with username {username}")
-        self._sync(model=_model)
+            self._log_message(f"Initialized user with username {username}")
+        self._model = _model
 
     def create(self) -> "User":
         """Creates the user in Argilla. After creating a user, it will be able to log in to the Argilla server.
@@ -89,7 +89,7 @@ class User(Resource):
         model = self._api.create(model_create)
         # The password is not returned in the response
         model.password = model_create.password
-        self._sync(model=model)
+        self._model = model
         return self
 
     def delete(self) -> None:
@@ -117,8 +117,7 @@ class User(Resource):
         Returns:
             User: The user that was added to the workspace.
         """
-        model = self._api.add_to_workspace(workspace.id, self.id)
-        self._sync(model=model)
+        self._model = self._api.add_to_workspace(workspace.id, self.id)
         return self
 
     def remove_from_workspace(self, workspace: "Workspace") -> "User":
@@ -132,9 +131,7 @@ class User(Resource):
             User: The user that was removed from the workspace.
 
         """
-        model = self._api.delete_from_workspace(workspace.id, self.id)
-        self._sync(model=model)
-
+        self._model = self._api.delete_from_workspace(workspace.id, self.id)
         return self
 
     ############################

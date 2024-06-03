@@ -8,6 +8,7 @@ copyright: Copyright &copy; 2017 - 2024 Argilla
 # Repository
 repo_name: argilla-io/argilla-python
 repo_url: https://github.com/argilla-io/argilla-python
+edit_uri: edit/main/docs/
 
 extra:
   version:
@@ -31,10 +32,19 @@ theme:
   favicon: assets/favicon.ico
   features:
     - navigation.instant
+    - navigation.sections
     - navigation.tabs
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - navigation.path
     - toc.follow
     - content.code.copy
     - content.code.annotate
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+    - search.share
   icon:
     repo: fontawesome/brands/github
   palette:
@@ -75,6 +85,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true
   - footnotes
@@ -113,37 +124,25 @@ plugins:
             private: true
   - social
   - mknotebooks
-  - tags:
-      tags_file: tutorials/index.md
-
 
 nav:
   - Argilla: index.md
   - Getting started:
     - Quickstart: getting_started/quickstart.md
     - Installation: getting_started/installation.md
-    # - FAQ: getting_started/faq.md
-  - How-to guides:
-    - how_to_guides/index.md
-    - Manage users and credentials: how_to_guides/user.md
-    - Manage workspaces: how_to_guides/workspace.md
-    - Manage and create datasets: how_to_guides/dataset.md
-    - Add, update, and delete records: how_to_guides/record.md
-    - Query, filter, and export records: how_to_guides/query_export.md
-    # - Distribute annotation work: how_to_guides/distribute.md
-    # - Compute metrics and KPIs:
-    #   - how_to_guides/metrics/index.md
-    #   - Dataset progress: how_to_guides/metrics/dataset.md
-    #   - Model performance: how_to_guides/metrics/model.md
-    #   - Annotator performance: how_to_guides/metrics/annotator.md
-    # - Fine-tune a model: fine_tune.md
-  # - Tutorials:
-  #   - tutorials/index.md
-  #   - tutorials/rag_llm.md
-  #   - tutorials/rag_rankers_and_retrievers.md
-  # - Integrations:
-  #   - integrations/index.md
+    - FAQ: getting_started/faq.md
+  - Guides:
+    - How-to guides:
+      - guides/how_to_guides/index.md
+      - Manage users and credentials: guides/how_to_guides/user.md
+      - Manage workspaces: guides/how_to_guides/workspace.md
+      - Manage and create datasets: guides/how_to_guides/dataset.md
+      - Add, update, and delete records: guides/how_to_guides/record.md
+      - Query, filter, and export records: guides/how_to_guides/query_export.md
   - API Reference:
     - Python SDK: reference/argilla_sdk/
+  - Community:
+    - community/index.md
+    - How to contribute?: community/contributor.md
   - UI Demo ↗:
     - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==

@@ -53,7 +53,7 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
 
 
 def test_query_records_by_text(client: Argilla, dataset: Dataset):
-    dataset.records.add(
+    dataset.records.log(
         [
             {"text": "First record", "id": 1},
             {"text": "Second record", "id": 2},
@@ -94,7 +94,7 @@ def test_query_records_by_suggestion_value(client: Argilla, dataset: Dataset):
         },
     ]
 
-    dataset.records.add(data)
+    dataset.records.log(data)
 
     query = rg.Query(filter=rg.Filter([("label", "==", "positive")]))
     records = list(dataset.records(query=query))

@@ -8,7 +8,7 @@ This guide provides an overview of workspaces, explaining how to set up and mana
 
 A **workspace** is a *space* inside your Argilla instance where authorized users can collaborate on datasets. It is accessible through the Python SDK and the UI.
 
-!!! Question "Question: Who can manage workspaces?"
+??? Question "Question: Who can manage workspaces?"
 
     Only users with the `owner` role can manage (create, read and delete) workspaces.
 
@@ -18,9 +18,9 @@ A **workspace** is a *space* inside your Argilla instance where authorized users
 
 Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.
 
-| Environment                   | Name | 
+| Environment                   | Name |
 |-------------------------------|----------|
-| Quickstart Docker and HF Space | admin    | 
+| Quickstart Docker and HF Space | admin    |
 | Server image                  | argilla  |
 
 !!! info "Main Class"
@@ -31,13 +31,13 @@ Argilla provides a default workspace to help you get started in Python and the U
         client=client
     )
     ```
-    > Check the [Workspace - Python Reference](../reference/argilla_sdk/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
+    > Check the [Workspace - Python Reference](../../reference/argilla_sdk/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
 
 ## Create a new workspace
 
 To create a new workspace in Argilla, you can define it in the `Workspace` class and then call the `create` method. This method is inherited from the `Resource` base class and operates without modifications.
 
-> When you create a new workspace, it will be empty. To create and add a new dataset, check these [guides](../dataset.md).
+> When you create a new workspace, it will be empty. To create and add a new dataset, check these [guides](dataset.md).
 
 ```python
 import argilla_sdk as rg

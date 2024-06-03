@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.User`
 
 A user in Argilla is a profile that uses the SDK or UI. Their profile can be used to track their feedback activity and to manage their access to the Argilla server.
@@ -30,5 +33,5 @@ client.me
 ### `rg.User`
 
 ::: argilla_sdk.users.User
-    options: 
+    options:
         heading_level: 3

@@ -44,7 +44,7 @@ A **user** in Argilla is an authorized person, who depending on their role, can 
     - **Annotation**: It can annotate the assigned datasets in the Argilla UI.
     - **Feedback**: It can provide feedback with the Argilla UI.
 
-!!! Question "Question: Who can manage users?"
+??? Question "Question: Who can manage users?"
 
     Only users with the `owner` role can manage (create, retrieve, delete) other users.
 
@@ -69,7 +69,7 @@ Argilla provides a default user with the `owner` role to help you get started in
         client=client
     )
     ```
-    > Check the [User - Python Reference](../reference/argilla_sdk/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
+    > Check the [User - Python Reference](../../reference/argilla_sdk/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
 
 ## Get current user
 
@@ -81,7 +81,6 @@ import argilla_sdk as rg
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 current_user = client.me
-current_user
 ```
 
 ## Create a user
@@ -133,7 +132,7 @@ import argilla_sdk as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-retrieved_user = client.users('my_username')
+retrieved_user = client.users("my_username")
 ```
 
 ## List users in a workspace

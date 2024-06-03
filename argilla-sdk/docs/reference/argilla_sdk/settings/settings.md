@@ -1,3 +1,6 @@
+---
+hide: footer
+---
 # `rg.Settings`
 
 `rg.Settings` is used to define the setttings of an Argilla `Dataset`. The settings can be used to configure the
@@ -36,5 +39,5 @@ dataset.create()
 ### `rg.Settings`
 
 ::: argilla_sdk.settings.Settings
-    options: 
+    options:
         heading_level: 3

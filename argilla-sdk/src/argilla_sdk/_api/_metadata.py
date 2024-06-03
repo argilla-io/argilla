@@ -16,6 +16,7 @@ from typing import List, Dict
 from uuid import UUID
 
 import httpx
+
 from argilla_sdk._api._base import ResourceAPI
 from argilla_sdk._exceptions import api_error_handler
 from argilla_sdk._models import MetadataFieldModel
@@ -33,53 +34,44 @@ class MetadataAPI(ResourceAPI[MetadataFieldModel]):
     ################
 
     @api_error_handler
-    def create(self, dataset_id: UUID, metadata_field: MetadataFieldModel) -> MetadataFieldModel:
-        url = f"/api/v1/datasets/{dataset_id}/metadata-properties"
-        response = self.http_client.post(url=url, json=metadata_field.model_dump())
-        response.raise_for_status()
-        response_json = response.json()
-        metadata_field_model = self._model_from_json(response_json=response_json)
-        self.log(message=f"Created metadata field {metadata_field_model.name} in dataset {dataset_id}")
-        return metadata_field_model
-
-    @api_error_handler
-    def update(self, metadata_field: MetadataFieldModel) -> MetadataFieldModel:
-        url = f"/api/v1/metadata-properties/{metadata_field.id}"
-        response = self.http_client.patch(url=url, json=metadata_field.model_dump())
-        response.raise_for_status()
-        response_json = response.json()
-        metadata_field_model = self._model_from_json(response_json=response_json)
-        self.log(message=f"Updated field {metadata_field_model.name}")
-        return metadata_field_model
-
-    @api_error_handler
-    def delete(self, id: UUID) -> None:
-        url = f"/api/v1/metadata-properties/{id}"
-        self.http_client.delete(url=url).raise_for_status()
-        self.log(message=f"Deleted field {id}")
-
-    @api_error_handler
-    def get(self, id: UUID) -> MetadataFieldModel:
+    def get(self, metadata_id: UUID) -> MetadataFieldModel:
         raise NotImplementedError()
+
+    @api_error_handler
+    def create(self, metadata: MetadataFieldModel) -> MetadataFieldModel:
+        url = f"/api/v1/datasets/{metadata.dataset_id}/metadata-properties"
+        response = self.http_client.post(url=url, json=metadata.model_dump())
+        response.raise_for_status()
+        response_json = response.json()
+        created_metadata = self._model_from_json(response_json=response_json)
+        self._log_message(message=f"Created metadata field {created_metadata.name} in dataset {metadata.dataset_id}")
+        return created_metadata
+
+    @api_error_handler
+    def update(self, metadata: MetadataFieldModel) -> MetadataFieldModel:
+        url = f"/api/v1/metadata-properties/{metadata.id}"
+        response = self.http_client.patch(url=url, json=metadata.model_dump())
+        response.raise_for_status()
+        response_json = response.json()
+        updated_metadata = self._model_from_json(response_json=response_json)
+        self._log_message(message=f"Updated metadata field {updated_metadata.name}")
+        return updated_metadata
+
+    def delete(self, metadata_id: UUID) -> None:
+        url = f"/api/v1/metadata-properties/{metadata_id}"
+        self.http_client.delete(url=url).raise_for_status()
+        self._log_message(message=f"Deleted metadata field {metadata_id}")
 
     ####################
     # Utility methods #
     ####################
-
-    def create_many(self, dataset_id: UUID, metadata_fields: List[MetadataFieldModel]) -> List[MetadataFieldModel]:
-        metadata_field_models = []
-        for metadata_field in metadata_fields:
-            metadata_field_model = self.create(dataset_id=dataset_id, metadata_field=metadata_field)
-            metadata_field_models.append(metadata_field_model)
-        return metadata_field_models
 
     @api_error_handler
     def list(self, dataset_id: UUID) -> List[MetadataFieldModel]:
         response = self.http_client.get(f"/api/v1/me/datasets/{dataset_id}/metadata-properties")
         response.raise_for_status()
         response_json = response.json()
-        metadata_field_model = self._model_from_jsons(response_jsons=response_json["items"])
-        return metadata_field_model
+        return self._model_from_jsons(response_jsons=response_json["items"])
 
     ####################
     # Private methods #

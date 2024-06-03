@@ -1,3 +1,7 @@
+---
+hide: footer
+---
+
 # Questions
 
 Questions in Argilla are the questions that will be answered as feedback. They are used to define the questions that will be answered by users or models.
@@ -54,35 +58,35 @@ dataset = rg.Dataset(
 ### `rg.LabelQuestion`
 
 ::: argilla_sdk.settings.LabelQuestion
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.MultiLabelQuestion`
 
 ::: argilla_sdk.settings.MultiLabelQuestion
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.RankingQuestion`
 
 ::: argilla_sdk.settings.RankingQuestion
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.TextQuestion`
 
 ::: argilla_sdk.settings.TextQuestion
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.RatingQuestion`
 
 ::: argilla_sdk.settings.RatingQuestion
-    options: 
+    options:
         heading_level: 3
 
 ### `rg.SpanQuestion`
 
 ::: argilla_sdk.settings.SpanQuestion
-    options: 
+    options:
         heading_level: 3

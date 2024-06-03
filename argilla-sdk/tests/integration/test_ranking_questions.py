@@ -43,7 +43,7 @@ def dataset(client: rg.Argilla):
 
 
 def test_ranking_question_with_suggestions(dataset: rg.Dataset):
-    dataset.records.add(
+    dataset.records.log(
         [
             {"text": "This is a test text", "label": "positive", "ranking": ["2", "1", "3"]},
         ],
@@ -52,7 +52,7 @@ def test_ranking_question_with_suggestions(dataset: rg.Dataset):
 
 
 def test_ranking_question_with_responses(dataset: rg.Dataset):
-    dataset.records.add(
+    dataset.records.log(
         [
             {"text": "This is a test text", "label": "positive", "ranking_": ["2"]},
         ],

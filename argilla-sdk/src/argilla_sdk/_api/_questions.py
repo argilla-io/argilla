@@ -61,7 +61,7 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
         response.raise_for_status()
         response_json = response.json()
         question_model = self._model_from_json(response_json=response_json)
-        self.log(message=f"Created question {question_model.name} in dataset {dataset_id}")
+        self._log_message(message=f"Created question {question_model.name} in dataset {dataset_id}")
         return question_model
 
     @api_error_handler
@@ -117,7 +117,7 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
 
         question_class = self._TYPE_TO_MODEL_CLASS.get(question_type)
         if question_class is None:
-            self.log(message=f"Unknown question type: {question_type}")
+            self._log_message(message=f"Unknown question type: {question_type}")
             question_class = QuestionBaseModel
 
         return question_class(**response_json, check_fields=False)

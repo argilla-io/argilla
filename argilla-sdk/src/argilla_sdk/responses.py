@@ -169,7 +169,7 @@ class UserResponse(Resource):
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns the UserResponse as a dictionary"""
-        return self._model.dict()
+        return self._model.model_dump()
 
     @staticmethod
     def __responses_as_model_values(answers: List[Response]) -> Dict[str, Dict[str, Any]]:

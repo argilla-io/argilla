@@ -20,8 +20,8 @@ from argilla_sdk._exceptions import SettingsError
 class TestSettings:
     def test_init_settings(self):
         settings = rg.Settings()
-        assert settings.fields == []
-        assert settings.questions == []
+        assert len(settings.fields) == 0
+        assert len(settings.questions) == 0
 
     def test_with_guidelines(self):
         mock_guidelines = "This is a guideline"

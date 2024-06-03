@@ -12,27 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
+from typing import Optional, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, field_serializer, field_validator, Field
+from pydantic import BaseModel, field_serializer, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
-from argilla_sdk._helpers._log import log
+from argilla_sdk._helpers import log_message
+from argilla_sdk._models import ResourceModel
 
 
-class FieldSettings(BaseModel):
-    type: str = Field(validate_default=True)
+class TextFieldSettings(BaseModel):
+    type: Literal["text"] = "text"
     use_markdown: Optional[bool] = False
 
 
-class FieldBaseModel(BaseModel):
-    id: Optional[UUID] = None
+class FieldModel(ResourceModel):
     name: str
-
     title: Optional[str] = None
     required: bool = True
     description: Optional[str] = None
+    settings: TextFieldSettings = TextFieldSettings(use_markdown=False)
+    dataset_id: Optional[UUID] = None
 
     @field_validator("name")
     @classmethod
@@ -45,16 +46,9 @@ class FieldBaseModel(BaseModel):
     def __title_default(cls, title: str, info: ValidationInfo) -> str:
         data = info.data
         validated_title = title or data["name"]
-        log(f"TextField title is {validated_title}")
+        log_message(f"TextField title is {validated_title}")
         return validated_title
 
-    @field_serializer("id", when_used="unless-none")
+    @field_serializer("id", "dataset_id", when_used="unless-none")
     def serialize_id(self, value: UUID) -> str:
         return str(value)
-
-
-class TextFieldModel(FieldBaseModel):
-    settings: FieldSettings = FieldSettings(type="text", use_markdown=False)
-
-
-FieldModel = TextFieldModel

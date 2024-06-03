@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence,
 from uuid import UUID
 
 from argilla_sdk._api import RecordsAPI
-from argilla_sdk._helpers._mixins import LoggingMixin
+from argilla_sdk._helpers import LoggingMixin
 from argilla_sdk._models import RecordModel, MetadataValue
 from argilla_sdk.client import Argilla
-from argilla_sdk.records._io import HFDatasetsIO, GenericIO, JsonIO, HFDataset
+from argilla_sdk.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
 from argilla_sdk.records._resource import Record
 from argilla_sdk.records._search import Query
 from argilla_sdk.responses import Response
@@ -150,7 +150,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         with_suggestions: bool = True,
         with_responses: bool = True,
         with_vectors: Optional[Union[List, bool, str]] = None,
-    ):
+    ) -> DatasetRecordsIterator:
         """Returns an iterator over the records in the dataset on the server.
 
         Parameters:
@@ -191,70 +191,24 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     # Public methods
     ############################
 
-    def add(
+    def log(
         self,
-        records: Union[dict, List[dict], Record, List[Record], HFDataset],
+        records: Union[List[dict], List[Record], HFDataset],
         mapping: Optional[Dict[str, str]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> List[Record]:
-        """
-        Add new records to a dataset on the server.
+        """Add or update records in a dataset on the server using the provided records.
+        If the record includes a known `id` field, the record will be updated.
+        If the record does not include a known `id` field, the record will be added as a new record.
+        See `rg.Record` for more information on the record definition.
 
         Parameters:
-            records: A dictionary or a list of dictionaries representing the records
-                     to be added to the dataset. Records are defined as dictionaries
-                     with keys corresponding to the fields in the dataset schema.
-            mapping: A dictionary that maps the keys in the records to the fields in the dataset schema.
-            user_id: The user id to be associated with the records. If not provided, the current user id is used.
-            batch_size: The number of records to send in each batch. The default is 256.
-
-        Returns:
-            A list of Record objects representing the added records.
-
-        Examples:
-
-        Add generic records to a dataset as dictionaries:
-
-        """
-        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
-        batch_size = self._normalize_batch_size(
-            batch_size=batch_size,
-            records_length=len(record_models),
-            max_value=self._api.MAX_RECORDS_PER_CREATE_BULK,
-        )
-
-        created_records = []
-        for batch in range(0, len(record_models), batch_size):
-            self.log(message=f"Sending records from {batch} to {batch + batch_size}.")
-            batch_records = record_models[batch : batch + batch_size]
-            models = self._api.bulk_create(dataset_id=self.__dataset.id, records=batch_records)
-            created_records.extend([Record.from_model(model=model, dataset=self.__dataset) for model in models])
-
-        self.log(
-            message=f"Added {len(created_records)} records to dataset {self.__dataset.name}",
-            level="info",
-        )
-
-        return created_records
-
-    def update(
-        self,
-        records: Union[dict, List[dict], Record, List[Record], HFDataset],
-        mapping: Optional[Dict[str, str]] = None,
-        user_id: Optional[UUID] = None,
-        batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> List[Record]:
-        """Update records in a dataset on the server using the provided records
-            and matching based on the external_id or id.
-
-        Parameters:
-            records: A dictionary or a list of dictionaries representing the records
-                     to be updated in the dataset. Records are defined as dictionaries
-                     with keys corresponding to the fields in the dataset schema. Ids or
-                     external_ids should be provided to identify the records to be updated.
-            mapping: A dictionary that maps the keys in the records to the fields in the dataset schema.
-            user_id: The user id to be associated with the records. If not provided, the current user id is used.
+            records: A list of `Record` objects, a Hugging Face Dataset, or a list of dictionaries representing the records.
+                     If records are defined as a dictionaries or a dataset, the keys/ column names should correspond to the
+                     fields in the Argilla dataset's fields and questions. `id` should be provided to identify the records when updating.
+            mapping: A dictionary that maps the keys/ column names in the records to the fields or questions in the Argilla dataset.
+            user_id: The user id to be associated with the records' response. If not provided, the current user id is used.
             batch_size: The number of records to send in each batch. The default is 256.
 
         Returns:
@@ -271,14 +225,14 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         created_or_updated = []
         records_updated = 0
         for batch in range(0, len(records), batch_size):
-            self.log(message=f"Sending records from {batch} to {batch + batch_size}.")
+            self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
             batch_records = record_models[batch : batch + batch_size]
             models, updated = self._api.bulk_upsert(dataset_id=self.__dataset.id, records=batch_records)
             created_or_updated.extend([Record.from_model(model=model, dataset=self.__dataset) for model in models])
             records_updated += updated
 
         records_created = len(created_or_updated) - records_updated
-        self.log(
+        self._log_message(
             message=f"Updated {records_updated} records and added {records_created} records to dataset {self.__dataset.name}",
             level="info",
         )
@@ -324,7 +278,6 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         Parameters:
             path (str): The path to the file to save the records.
-            orient (str): The structure of the exported dictionary.
 
         Returns:
             The path to the file where the records were saved.
@@ -333,7 +286,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         records = list(self(with_suggestions=True, with_responses=True))
         return JsonIO.to_json(records=records, path=path)
 
-    def from_json(self, path: Union[Path, str]) -> "DatasetRecords":
+    def from_json(self, path: Union[Path, str]) -> List[Record]:
         """Creates a DatasetRecords object from a disk path to a JSON file.
             The JSON file should be defined by `DatasetRecords.to_json`.
 
@@ -345,19 +298,14 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         """
         records = JsonIO._records_from_json(path=path)
-        return self.update(records=records)
-        return self
+        return self.log(records=records)
 
     def to_datasets(self) -> HFDataset:
         """
-        Export the records to a file on disk.
-
-        Parameters:
-            path (str): The path to the file to save the records.
-            orient (str): The structure of the exported dictionary.
+        Export the records to a HFDataset.
 
         Returns:
-            The path to the file where the records were saved.
+            The dataset containing the records.
 
         """
         records = list(self(with_suggestions=True, with_responses=True))
@@ -373,8 +321,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, str]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
-        if isinstance(records, (Record, dict)):
-            records = [records]
+        if len(records) == 0:
+            raise ValueError("No records provided to ingest.")
         if HFDatasetsIO._is_hf_dataset(dataset=records):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
         if all(map(lambda r: isinstance(r, dict), records)):
@@ -385,8 +333,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 record.dataset = self.__dataset
         else:
             raise ValueError(
-                "Records should be a dictionary, a list of dictionaries, a Record instance, "
-                "a list of Record instances, or `datasets.Dataset`."
+                "Records should be a a list Record instances, "
+                "a Hugging Face Dataset, or a list of dictionaries representing the records."
             )
         return [record.api_model() for record in records]
 
@@ -394,7 +342,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         norm_batch_size = min(batch_size, records_length, max_value)
 
         if batch_size != norm_batch_size:
-            self.log(
+            self._log_message(
                 message=f"The provided batch size {batch_size} was normalized. Using value {norm_batch_size}.",
                 level="warning",
             )
@@ -451,7 +399,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                     sub_attribute = attribute_mapping[2]
             elif schema_item is mapping is None and attribute != "id":
                 warnings.warn(
-                    message=f"""Record attribute {attribute} is not in the schema so skipping. 
+                    message=f"""Record attribute {attribute} is not in the schema so skipping.
                         Define a mapping to map source data fields to Argilla Fields, Questions, and ids
                         """
                 )

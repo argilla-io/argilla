@@ -32,9 +32,8 @@ from argilla_sdk._models._search import (
     ScopeModel,
 )
 from argilla_sdk._models._settings._fields import (
-    TextFieldModel,
-    FieldSettings,
-    FieldBaseModel,
+    FieldModel,
+    TextFieldSettings,
     FieldModel,
 )
 from argilla_sdk._models._settings._questions import (

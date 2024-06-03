@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Generic, TYPE_CHECKING, TypeVar
 from uuid import UUID
 
-from argilla_sdk._helpers._mixins import LoggingMixin
+from argilla_sdk._helpers import LoggingMixin
 
 
 if TYPE_CHECKING:

@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 
-from argilla_sdk._models import FieldSettings, MetadataFieldModel, TextFieldModel, VectorFieldModel
+from argilla_sdk import Argilla
+from argilla_sdk._api import FieldsAPI
+from argilla_sdk._models import FieldModel, TextFieldSettings
 from argilla_sdk.settings._common import SettingsPropertyBase
 from argilla_sdk.settings._metadata import MetadataField, MetadataType
+from argilla_sdk.settings._vector import VectorField
 
-__all__ = ["TextField", "FieldType", "VectorField"]
+if TYPE_CHECKING:
+    from argilla_sdk.datasets import Dataset
+
+__all__ = ["TextField"]
 
 
 class TextField(SettingsPropertyBase):
     """Text field for use in Argilla `Dataset` `Settings`"""
 
-    _model: TextFieldModel
+    _model: FieldModel
+    _api: FieldsAPI
+
+    _dataset: "Dataset"
 
     def __init__(
         self,
@@ -33,6 +42,7 @@ class TextField(SettingsPropertyBase):
         use_markdown: Optional[bool] = False,
         required: Optional[bool] = True,
         description: Optional[str] = None,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Text field for use in Argilla `Dataset` `Settings`
         Parameters:
@@ -43,20 +53,19 @@ class TextField(SettingsPropertyBase):
             description (Optional[str], optional): The description of the field. Defaults to None.
 
         """
-        self._model = TextFieldModel(
+        client = client or Argilla._get_default()
+
+        super().__init__(api=client.api.fields, client=client)
+        self._model = FieldModel(
             name=name,
             title=title,
             required=required or True,
             description=description,
-            settings=FieldSettings(type="text", use_markdown=use_markdown),
+            settings=TextFieldSettings(use_markdown=use_markdown),
         )
 
-    @property
-    def use_markdown(self) -> Optional[bool]:
-        return self._model.settings.use_markdown
-
     @classmethod
-    def from_model(cls, model: TextFieldModel) -> "TextField":
+    def from_model(cls, model: FieldModel) -> "TextField":
         instance = cls(name=model.name)
         instance._model = model
 
@@ -64,90 +73,28 @@ class TextField(SettingsPropertyBase):
 
     @classmethod
     def from_dict(cls, data: dict) -> "TextField":
-        model = TextFieldModel(**data)
-        return cls.from_model(model=model)
-
-
-class VectorField(SettingsPropertyBase):
-    """Vector field for use in Argilla `Dataset` `Settings`"""
-
-    _model: VectorFieldModel
-
-    def __init__(
-        self,
-        name: str,
-        dimensions: int,
-        title: Optional[str] = None,
-    ) -> None:
-        """Vector field for use in Argilla `Dataset` `Settings`
-
-        Parameters:
-            name (str): The name of the field
-            dimensions (int): The number of dimensions in the vector
-            title (Optional[str], optional): The title of the field. Defaults to None.
-        """
-        self._model = VectorFieldModel(
-            name=name,
-            title=title,
-            dimensions=dimensions,
-        )
-
-    @classmethod
-    def from_model(cls, model: VectorFieldModel) -> "VectorField":
-        instance = cls(name=model.name, dimensions=model.dimensions)
-        instance._model = model
-
-        return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "VectorField":
-        model = VectorFieldModel(**data)
+        model = FieldModel(**data)
         return cls.from_model(model=model)
 
     @property
-    def dimensions(self) -> int:
-        return self._model.dimensions
+    def use_markdown(self) -> Optional[bool]:
+        return self._model.settings.use_markdown
+
+    @use_markdown.setter
+    def use_markdown(self, value: bool) -> None:
+        self._model.settings.use_markdown = value
 
     @property
-    def title(self) -> Optional[str]:
-        return self._model.title
+    def dataset(self) -> "Dataset":
+        return self._dataset
 
-    @property
-    def name(self) -> str:
-        return self._model.name
-
-    @property
-    def description(self) -> Optional[str]:
-        # TODO: Setting resources should be aligned at the API level
-        return None
-
-    @property
-    def required(self) -> bool:
-        # TODO: Setting resources should be aligned at the API level
-        return False
-
-    @property
-    def type(self) -> str:
-        # TODO: Setting resources should be aligned at the API level
-        return "vector"
+    @dataset.setter
+    def dataset(self, value: "Dataset") -> None:
+        self._dataset = value
+        self._model.dataset_id = self._dataset.id
 
 
-FieldType = Union[TextField, VectorField, MetadataType]
-
-
-def field_from_model(model: Union[TextFieldModel, VectorFieldModel, MetadataFieldModel]) -> FieldType:
-    """Create a field instance from a field model"""
-    if isinstance(model, TextFieldModel):
-        return TextField.from_model(model)
-    elif isinstance(model, VectorFieldModel):
-        return VectorField.from_model(model)
-    elif isinstance(model, MetadataFieldModel):
-        return MetadataField.from_model(model)
-    else:
-        raise ValueError(f"Unsupported field model type: {type(model)}")
-
-
-def field_from_dict(data: dict) -> FieldType:
+def field_from_dict(data: dict) -> Union[TextField, VectorField, MetadataType]:
     """Create a field instance from a field dictionary"""
     if data["type"] == "text":
         return TextField.from_dict(data)
