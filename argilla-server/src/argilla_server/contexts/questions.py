@@ -33,25 +33,12 @@ from argilla_server.validators.questions import (
 )
 
 
-async def get_question_by_id(db: AsyncSession, question_id: UUID) -> Union[Question, None]:
-    return (
-        await db.execute(select(Question).filter_by(id=question_id).options(selectinload(Question.dataset)))
-    ).scalar_one_or_none()
-
-
-async def get_question_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_id: UUID) -> Union[Question, None]:
-    return (await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))).scalar_one_or_none()
-
-
-async def get_question_by_name_and_dataset_id_or_raise(db: AsyncSession, name: str, dataset_id: UUID) -> Question:
-    question = await get_question_by_name_and_dataset_id(db, name, dataset_id)
-    if question is None:
-        raise errors.NotFoundError(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
-
-    return question
-
-
 async def create_question(db: AsyncSession, dataset: Dataset, question_create: QuestionCreate) -> Question:
+    if await Question.get_by(db, name=question_create.name, dataset_id=dataset.id):
+        raise errors.NotUniqueError(
+            f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
+        )
+
     QuestionCreateValidator(question_create).validate_for(dataset)
 
     return await Question.create(
@@ -65,15 +52,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
     )
 
 
-async def update_question(
-    db: AsyncSession, question_id: UUID, question_update: QuestionUpdate, current_user: User
-) -> Question:
-    question = await get_question_by_id(db, question_id)
-    if not question:
-        raise errors.NotFoundError()
-
-    await authorize(current_user, QuestionPolicyV1.update(question))
-
+async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
     QuestionUpdateValidator(question_update).validate_for(question)
 
     params = question_update.dict(exclude_unset=True)

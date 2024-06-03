@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import uuid
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
@@ -78,6 +78,15 @@ class TestsUsersV1Endpoints:
 
         assert response.status_code == 403
 
-    async def test_list_user_for_non_existing_user(self, async_client: "AsyncClient", owner_auth_header: dict):
-        response = await async_client.get(f"/api/v1/users/{uuid.uuid4()}/workspaces", headers=owner_auth_header)
+    async def test_list_user_workspaces_for_non_existing_user(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        user_id = uuid4()
+
+        response = await async_client.get(
+            f"/api/v1/users/{user_id}/workspaces",
+            headers=owner_auth_header,
+        )
+
         assert response.status_code == 404
+        assert response.json() == {"detail": f"User with id `{user_id}` not found"}

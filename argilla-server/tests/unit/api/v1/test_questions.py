@@ -435,13 +435,16 @@ async def test_update_question_with_invalid_payload(async_client: "AsyncClient",
 
 @pytest.mark.asyncio
 async def test_update_question_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
+    question_id = uuid4()
+
     response = await async_client.patch(
-        f"/api/v1/questions/{uuid4()}",
+        f"/api/v1/questions/{question_id}",
         headers=owner_auth_header,
         json={"title": "New Title", "settings": {"type": "text", "use_markdown": True}},
     )
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"Question with id `{question_id}` not found"}
 
 
 @pytest.mark.asyncio
@@ -553,9 +556,16 @@ async def test_delete_question_belonging_to_published_dataset(
 async def test_delete_question_with_nonexistent_question_id(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
+    question_id = uuid4()
+
     await TextQuestionFactory.create()
 
-    response = await async_client.delete(f"/api/v1/questions/{uuid4()}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/v1/questions/{question_id}",
+        headers=owner_auth_header,
+    )
 
     assert response.status_code == 404
+    assert response.json() == {"detail": f"Question with id `{question_id}` not found"}
+
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1

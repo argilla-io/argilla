@@ -14,29 +14,19 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
-from argilla_server.models import Suggestion, User
+from argilla_server.models import Record, Suggestion, User
 from argilla_server.policies import SuggestionPolicyV1, authorize
 from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 
 router = APIRouter(tags=["suggestions"])
-
-
-async def _get_suggestion(db: "AsyncSession", suggestion_id: UUID) -> Suggestion:
-    suggestion = await datasets.get_suggestion_by_id(db, suggestion_id)
-    if not suggestion:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Suggestion with id `{suggestion_id}` not found",
-        )
-
-    return suggestion
 
 
 @router.delete("/suggestions/{suggestion_id}", response_model=SuggestionSchema)
@@ -47,11 +37,15 @@ async def delete_suggestion(
     suggestion_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    suggestion = await _get_suggestion(db, suggestion_id)
+    suggestion = await Suggestion.get_or_raise(
+        db,
+        suggestion_id,
+        options=[
+            selectinload(Suggestion.record).selectinload(Record.dataset),
+            selectinload(Suggestion.question),
+        ],
+    )
 
     await authorize(current_user, SuggestionPolicyV1.delete(suggestion))
 
-    try:
-        return await datasets.delete_suggestion(db, search_engine, suggestion)
-    except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
+    return await datasets.delete_suggestion(db, search_engine, suggestion)
