@@ -44,7 +44,6 @@ from argilla_server.validators.vectors import VectorValidator
 
 
 class CreateRecordsBulk:
-
     def __init__(self, db: AsyncSession, search_engine: SearchEngine):
         self._db = db
         self._search_engine = search_engine
@@ -71,6 +70,7 @@ class CreateRecordsBulk:
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
+
         return RecordsBulk(items=records)
 
     async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
@@ -104,7 +104,9 @@ class CreateRecordsBulk:
                         raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
 
             except (UnprocessableEntityError, ValueError) as ex:
-                raise ValueError(f"Record at position {idx} does not have valid suggestions because {ex}") from ex
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid suggestions because {ex}"
+                ) from ex
 
         if not upsert_many_suggestions:
             return []
@@ -133,7 +135,9 @@ class CreateRecordsBulk:
                     ResponseCreateValidator(response_create).validate_for(record)
                     upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
             except (UnprocessableEntityError, ValueError) as ex:
-                raise ValueError(f"Record at position {idx} does not have valid responses because {ex}") from ex
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid responses because {ex}"
+                ) from ex
 
         if not upsert_many_responses:
             return []
@@ -160,7 +164,9 @@ class CreateRecordsBulk:
                     VectorValidator(value).validate_for(settings)
                     upsert_many_vectors.append(dict(value=value, record_id=record.id, vector_settings_id=settings.id))
             except (UnprocessableEntityError, ValueError) as ex:
-                raise ValueError(f"Record at position {idx} does not have valid vectors because {ex}") from ex
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid vectors because {ex}"
+                ) from ex
 
         if not upsert_many_vectors:
             return []
@@ -177,9 +183,7 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-
     async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
-
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator

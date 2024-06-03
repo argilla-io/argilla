@@ -48,13 +48,13 @@ class RecordValidatorBase(ABC):
             if metadata_property and value is not None:
                 try:
                     metadata_property.parsed_settings.check_metadata(value)
-                except (UnprocessableEntityError, ValueError) as e:
+                except UnprocessableEntityError as e:
                     raise UnprocessableEntityError(
                         f"metadata is not valid: '{name}' metadata property validation failed because {e}"
                     ) from e
 
             elif metadata_property is None and not dataset.allow_extra_metadata:
-                raise ValueError(
+                raise UnprocessableEntityError(
                     f"metadata is not valid: '{name}' metadata property does not exists for dataset '{dataset.id}' "
                     "and extra metadata is not allowed for this dataset"
                 )
@@ -62,14 +62,14 @@ class RecordValidatorBase(ABC):
     def _validate_required_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in dataset.fields:
             if field.required and not (field.name in fields and fields.get(field.name) is not None):
-                raise ValueError(f"missing required value for field: {field.name!r}")
+                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
 
     def _validate_extra_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
         fields_copy = copy.copy(fields)
         for field in dataset.fields:
             fields_copy.pop(field.name, None)
         if fields_copy:
-            raise ValueError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
+            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
 
 class RecordCreateValidator(RecordValidatorBase):
@@ -94,7 +94,7 @@ class RecordUpdateValidator(RecordValidatorBase):
             return
         question_ids = [s.question_id for s in self._record_change.suggestions]
         if len(question_ids) != len(set(question_ids)):
-            raise ValueError("found duplicate suggestions question IDs")
+            raise UnprocessableEntityError("found duplicate suggestions question IDs")
 
 
 class RecordsBulkCreateValidator:
@@ -109,7 +109,7 @@ class RecordsBulkCreateValidator:
 
     def _validate_dataset_is_ready(self, dataset: Dataset) -> None:
         if not dataset.is_ready:
-            raise ValueError("records cannot be created for a non published dataset")
+            raise UnprocessableEntityError("records cannot be created for a non published dataset")
 
     async def _validate_external_ids_are_not_present_in_db(self, dataset: Dataset):
         external_ids = [r.external_id for r in self._records_create.items if r.external_id is not None]
@@ -117,14 +117,14 @@ class RecordsBulkCreateValidator:
 
         found_records = [str(external_id) for external_id in external_ids if external_id in records_by_external_id]
         if found_records:
-            raise ValueError(f"found records with same external ids: {', '.join(found_records)}")
+            raise UnprocessableEntityError(f"found records with same external ids: {', '.join(found_records)}")
 
     def _validate_all_bulk_records(self, dataset: Dataset, records_create: List[RecordCreate]):
         for idx, record_create in enumerate(records_create):
             try:
                 RecordCreateValidator(record_create).validate_for(dataset)
-            except ValueError as ex:
-                raise ValueError(f"record at position {idx} is not valid because {ex}") from ex
+            except UnprocessableEntityError as ex:
+                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
 
 
 class RecordsBulkUpsertValidator:
@@ -144,7 +144,7 @@ class RecordsBulkUpsertValidator:
 
     def validate_dataset_is_ready(self, dataset: Dataset) -> None:
         if not dataset.is_ready:
-            raise ValueError("records cannot be created or updated for a non published dataset")
+            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
 
     def _validate_all_bulk_records(self, dataset: Dataset, records_upsert: List[RecordUpsert]):
         for idx, record_upsert in enumerate(records_upsert):
@@ -156,5 +156,5 @@ class RecordsBulkUpsertValidator:
                     RecordUpdateValidator(RecordUpdate.parse_obj(record_upsert)).validate_for(dataset)
                 else:
                     RecordCreateValidator(RecordCreate.parse_obj(record_upsert)).validate_for(dataset)
-            except ValueError as ex:
-                raise ValueError(f"record at position {idx} is not valid because {ex}") from ex
+            except (UnprocessableEntityError, ValueError) as ex:
+                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
