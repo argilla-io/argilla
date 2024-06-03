@@ -68,8 +68,8 @@
                         <span v-else>{{ itemValue(item, column) }}</span>
                         <div class="table-info__actions__buttons">
                           <base-action-tooltip
-                            v-for="action in column.actions"
-                            :key="action.name"
+                            v-for="(action, idx) in column.actions"
+                            :key="idx"
                             :tooltip="action.tooltip"
                           >
                             <base-button
