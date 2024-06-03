@@ -68,11 +68,17 @@ class TestSuiteWorkspaces:
     async def test_get_workspace_with_nonexistent_workspace_id(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
+        workspace_id = uuid4()
+
         await WorkspaceFactory.create()
 
-        response = await async_client.get(f"/api/v1/workspaces/{uuid4()}", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/workspaces/{workspace_id}",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
 
     async def test_delete_workspace(self, async_client: AsyncClient, owner_auth_header: dict):
         workspace = await WorkspaceFactory.create(name="workspace_delete")
@@ -96,11 +102,16 @@ class TestSuiteWorkspaces:
             "detail": f"Cannot delete the workspace {workspace.id}. This workspace has some feedback datasets linked"
         }
 
-    async def test_delete_missing_workspace(self, async_client: AsyncClient, owner_auth_header: dict):
-        async_client.headers.update(owner_auth_header)
-        response = await async_client.delete(f"/api/v1/workspaces/{uuid4()}")
+    async def test_delete_missing_workspace(self, async_client: "AsyncClient", owner_auth_header: dict):
+        workspace_id = uuid4()
+
+        response = await async_client.delete(
+            f"/api/v1/workspaces/{workspace_id}",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_delete_workspace_without_permissions(self, async_client: AsyncClient, role: UserRole):

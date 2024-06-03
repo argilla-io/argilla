@@ -16,6 +16,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Generic, List, Literal, Optional, TypeVar, Union
 
 from argilla_server.enums import MetadataPropertyType
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.pydantic_v1 import BaseModel, Field
 from argilla_server.pydantic_v1.generics import GenericModel
 
@@ -52,7 +53,7 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
 
         for v in values:
             if v not in self.values:
-                raise ValueError(f"'{v}' is not an allowed term.")
+                raise UnprocessableEntityError(f"'{v}' is not an allowed term.")
 
 
 NT = TypeVar("NT", int, float)
@@ -64,10 +65,10 @@ class NumericMetadataPropertySettings(BaseMetadataPropertySettings, GenericModel
 
     def check_metadata(self, value: NT) -> None:
         if self.min is not None and value < self.min:
-            raise ValueError(f"'{value}' is less than the minimum value of '{self.min}'.")
+            raise UnprocessableEntityError(f"'{value}' is less than the minimum value of '{self.min}'.")
 
         if self.max is not None and value > self.max:
-            raise ValueError(f"'{value}' is greater than the maximum value of '{self.max}'.")
+            raise UnprocessableEntityError(f"'{value}' is greater than the maximum value of '{self.max}'.")
 
 
 class IntegerMetadataPropertySettings(NumericMetadataPropertySettings[int]):
@@ -75,7 +76,8 @@ class IntegerMetadataPropertySettings(NumericMetadataPropertySettings[int]):
 
     def check_metadata(self, value: int) -> None:
         if not isinstance(value, int):
-            raise ValueError(f"'{value}' is not an integer.")
+            raise UnprocessableEntityError(f"'{value}' is not an integer.")
+
         return super().check_metadata(value)
 
 
@@ -84,7 +86,8 @@ class FloatMetadataPropertySettings(NumericMetadataPropertySettings[float]):
 
     def check_metadata(self, value: float) -> None:
         if not isinstance(value, float):
-            raise ValueError(f"'{value}' is not a float.")
+            raise UnprocessableEntityError(f"'{value}' is not a float.")
+
         return super().check_metadata(value)
 
 

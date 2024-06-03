@@ -103,10 +103,10 @@
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
 import "assets/icons/chevron-left";
 import "assets/icons/chevron-right";
 import "assets/icons/chevron-up";
+
 export default {
   props: {
     totalItems: {
@@ -125,7 +125,7 @@ export default {
       type: Number,
       default: 5,
       validator: function (value) {
-        return value > 1 && !(value % 2 == 0);
+        return value > 1 && value % 2 != 0;
       },
     },
   },
@@ -182,8 +182,8 @@ export default {
       start = start > 0 ? start : 1;
       let end = this.currentPage + rangeOfPages;
       end = end < this.totalPages ? end : this.totalPages;
-      var pages = [];
-      for (var i = start; i <= end; i++) {
+      const pages = [];
+      for (let i = start; i <= end; i++) {
         pages.push(i);
       }
       return pages;
@@ -234,12 +234,13 @@ export default {
       this.$emit("changePage", pageNumber, this.paginationSize);
     },
     changePageSize(pageSize) {
-      (this.showOptions = false),
-        this.$emit(
-          "changePage",
-          this.paginationSize === pageSize ? this.currentPage : 1,
-          pageSize
-        );
+      this.showOptions = false;
+
+      this.$emit(
+        "changePage",
+        this.paginationSize === pageSize ? this.currentPage : 1,
+        pageSize
+      );
     },
     closePageSizeSelector() {
       this.showOptions = false;
@@ -265,9 +266,8 @@ export default {
       );
     },
     showNotification() {
-      Notification.dispatch("notify", {
+      this.$notification.notify({
         message: this.message,
-        numberOfChars: 194,
         type: "warning",
       });
     },
@@ -307,7 +307,6 @@ $pagination-size: 30px;
     }
   }
   &__arrow {
-    transition: all 0.3s ease-in-out;
     background: transparent;
     text-decoration: none;
     display: flex;

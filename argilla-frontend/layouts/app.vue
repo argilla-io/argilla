@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
 export default {
   name: "Index",
   computed: {
@@ -44,7 +43,7 @@ export default {
   },
   methods: {
     showNotification(message) {
-      Notification.dispatch("notify", {
+      this.$notification.notify({
         message: message,
         type: "error",
       });

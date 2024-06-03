@@ -130,10 +130,6 @@
                         {{ itemValue(item, column)[key] }}
                       </p>
                     </span>
-                    <!-- TODO: remove references to task -->
-                    <span v-else-if="column.type === 'task'">
-                      {{ itemValue(item, column) }}
-                    </span>
                     <span v-else>{{ itemValue(item, column) }}</span>
                   </span>
                 </span>

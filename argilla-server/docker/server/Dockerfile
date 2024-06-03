@@ -6,6 +6,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN apt-get update && \
   apt-get install -y python-dev-is-python3 libpq-dev gcc && \
+  pip install --upgrade pip && \
   pip install uvicorn[standard] && \
   for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
   apt-get remove -y python-dev-is-python3 libpq-dev gcc && \

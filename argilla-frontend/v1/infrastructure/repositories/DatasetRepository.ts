@@ -1,5 +1,4 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Store } from "vuex";
 import {
   BackendDatasetFeedbackTaskResponse,
   BackendProgress,
@@ -21,10 +20,7 @@ export const DATASET_API_ERRORS = {
 };
 
 export class DatasetRepository implements IDatasetRepository {
-  constructor(
-    private readonly axios: NuxtAxiosInstance,
-    private readonly store: Store<unknown>
-  ) {}
+  constructor(private readonly axios: NuxtAxiosInstance) {}
 
   async getById(id: string): Promise<Dataset> {
     const dataset = await this.getDatasetById(id);
@@ -49,23 +45,6 @@ export class DatasetRepository implements IDatasetRepository {
   async getAll(): Promise<Dataset[]> {
     const response = await this.getDatasets();
 
-    const otherDatasets = response.oldDatasets.map((dataset) => {
-      return new Dataset(
-        dataset.id,
-        dataset.name,
-        dataset.task,
-        "",
-        "",
-        "",
-        dataset.workspace,
-        dataset.tags,
-        dataset.created_at,
-        dataset.last_updated,
-        dataset.last_updated,
-        false
-      );
-    });
-
     const feedbackDatasets = response.feedbackDatasetsWithWorkspaces.map(
       (datasetFromBackend) => {
         return new Dataset(
@@ -85,7 +64,7 @@ export class DatasetRepository implements IDatasetRepository {
       }
     );
 
-    return [...otherDatasets, ...feedbackDatasets];
+    return [...feedbackDatasets];
   }
 
   async update({ id, allowExtraMetadata, guidelines }: Dataset) {
@@ -220,8 +199,7 @@ export class DatasetRepository implements IDatasetRepository {
   };
 
   private getDatasets = async () => {
-    const [oldDatasets, newDatasets, workspaces] = await Promise.all([
-      this.store.dispatch("entities/datasets/fetchAll"),
+    const [newDatasets, workspaces] = await Promise.all([
       this.fetchFeedbackDatasets(this.axios),
       this.fetchWorkspaces(this.axios),
     ]);
@@ -234,6 +212,6 @@ export class DatasetRepository implements IDatasetRepository {
         workspaces
       );
 
-    return { oldDatasets, feedbackDatasetsWithWorkspaces };
+    return { feedbackDatasetsWithWorkspaces };
   };
 }

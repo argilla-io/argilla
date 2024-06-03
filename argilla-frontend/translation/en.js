@@ -13,6 +13,7 @@ export default {
   copied: "Copied",
   copyClipboard: "Copy to clipboard",
   copyLink: "Copy link",
+  copyRecord: "Copy record",
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "All",
@@ -21,6 +22,7 @@ export default {
     refreshTooltip: "Refresh",
     shortcutsTooltip: "Shortcuts",
   },
+  value: "Value",
   title: "Title",
   description: "Description",
   labels: "Labels",
@@ -28,6 +30,8 @@ export default {
   useMarkdown: "Use Markdown",
   suggestionFirst: "Show suggestions first",
   visibleForAnnotators: "Visible for annotators",
+  recordInfo: "Record info",
+  viewMetadata: "View metadata",
   allowExtraMetadata: "Allow extra metadata",
   extraMetadata: "Extra metadata",
   dimension: "Dimension",
@@ -177,10 +181,10 @@ export default {
     username: "Username",
     usernameDescription: "Enter your username",
     password: "Password",
+    show: "Show",
+    hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
-    support:
-      "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
@@ -230,7 +234,7 @@ export default {
   validations: {
     businessLogic: {
       missing_vector: {
-        message: "Vector not found in selected record",
+        message: "Vector not found for the selected record",
       },
     },
     http: {

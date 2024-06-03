@@ -166,6 +166,9 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         assert response.status_code == 403
 
     async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
-        response = await async_client.get(self.url(uuid4()), headers=owner_auth_header)
+        dataset_id = uuid4()
+
+        response = await async_client.get(self.url(dataset_id), headers=owner_auth_header)
 
         assert response.status_code == 404
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}

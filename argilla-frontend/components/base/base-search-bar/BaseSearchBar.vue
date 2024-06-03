@@ -40,6 +40,10 @@ import "assets/icons/close";
 
 export default {
   props: {
+    querySearch: {
+      type: String,
+      default: "",
+    },
     placeholder: {
       type: String,
       default: "Search",
@@ -51,6 +55,9 @@ export default {
     };
   },
   watch: {
+    querySearch(val) {
+      this.filter = val;
+    },
     filter(val) {
       this.$emit("input", val);
     },
