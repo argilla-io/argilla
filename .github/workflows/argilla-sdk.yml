@@ -16,6 +16,7 @@ on:
   push:
     paths:
       - "argilla-sdk/**"
+      - "!argilla-sdk/docs/**"
     branches:
       - "develop"
       - "main"
@@ -23,6 +24,7 @@ on:
   pull_request:
     paths:
       - "argilla-sdk/**"
+      - "!argilla-sdk/docs/**"
     branches:
       - "develop"
       - "main"
