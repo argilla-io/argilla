@@ -124,7 +124,7 @@ class TestDeleteWorkspaceUser:
 
         assert response.status_code == 404
         assert response.json() == {
-            "detail": f"User with id `{user.id}` not found in workspace with id `{non_existent_workspace_id}`"
+            "detail": f"WorkspaceUser not found filtering by workspace_id={non_existent_workspace_id}, user_id={user.id}",
         }
 
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
@@ -144,7 +144,7 @@ class TestDeleteWorkspaceUser:
 
         assert response.status_code == 404
         assert response.json() == {
-            "detail": f"User with id `{non_existent_user_id}` not found in workspace with id `{workspace.id}`"
+            "detail": f"WorkspaceUser not found filtering by workspace_id={workspace.id}, user_id={non_existent_user_id}",
         }
 
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1

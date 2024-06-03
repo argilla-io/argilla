@@ -27,7 +27,7 @@ from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset, Record, User
+from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
 from argilla_server.policies import DatasetPolicyV1, RecordPolicyV1, authorize, is_authorized
 from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.schemas.v1.records import (
@@ -56,7 +56,6 @@ from argilla_server.schemas.v1.suggestions import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
 )
-from argilla_server.schemas.v1.vector_settings import VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
     FloatMetadataFilter,
@@ -207,9 +206,17 @@ async def _get_search_responses(
     record = None
 
     if vector_query:
-        vector_settings = await _get_vector_settings_by_name_or_raise(db, dataset, vector_query.name)
+        vector_settings = await VectorSettings.get_by(db, name=vector_query.name, dataset_id=dataset.id)
+        if vector_settings is None:
+            raise UnprocessableEntityError(f"Vector `{vector_query.name}` not found in dataset `{dataset.id}`.")
+
         if vector_query.record_id is not None:
-            record = await _get_dataset_record_by_id_or_raise(db, dataset, vector_query.record_id)
+            record = await Record.get_by(db, id=vector_query.record_id, dataset_id=dataset.id)
+            if record is None:
+                raise UnprocessableEntityError(
+                    f"Record with id `{vector_query.record_id}` not found in dataset `{dataset.id}`."
+                )
+
             await record.awaitable_attrs.vectors
 
             if not record.vector_value_by_vector_settings(vector_settings):
@@ -219,11 +226,7 @@ async def _get_search_responses(
                     code=MISSING_VECTOR_ERROR_CODE,
                 )
 
-    if (
-        text_query
-        and text_query.field
-        and not await datasets.get_field_by_name_and_dataset_id(db, text_query.field, dataset.id)
-    ):
+    if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
         raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
     metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
@@ -275,9 +278,7 @@ async def _build_metadata_filters(
     try:
         metadata_filters = []
         for metadata_param in parsed_metadata:
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_param.name, dataset_id=dataset.id
-            )
+            metadata_property = await MetadataProperty.get_by(db, name=metadata_param.name, dataset_id=dataset.id)
             if metadata_property is None:
                 continue  # won't fail on unknown metadata filter name
 
@@ -321,9 +322,7 @@ async def _build_sort_by(
             field = sort_field
         elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
             metadata_property_name = match.group("name")
-            metadata_property = await datasets.get_metadata_property_by_name_and_dataset_id(
-                db, name=metadata_property_name, dataset_id=dataset.id
-            )
+            metadata_property = await MetadataProperty.get_by(db, name=metadata_property_name, dataset_id=dataset.id)
             if not metadata_property:
                 raise UnprocessableEntityError(
                     f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in "
@@ -353,28 +352,6 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
         await search.validate_search_records_query(db, query, dataset_id)
     except (ValueError, NotFoundError) as e:
         raise UnprocessableEntityError(str(e))
-
-
-async def _get_dataset_record_by_id_or_raise(db: "AsyncSession", dataset: Dataset, record_id: UUID) -> Record:
-    # TODO: This can be changed to a query including the record_id and the dataset_id.
-    # Once that we add the get_by_or_raise method we can replace calls to this method with that one.
-    record = await Record.get(db, record_id)
-    if record is None or record.dataset_id != dataset.id:
-        raise UnprocessableEntityError(f"Record with id `{record_id}` not found in dataset `{dataset.id}`.")
-
-    return record
-
-
-async def _get_vector_settings_by_name_or_raise(
-    db: "AsyncSession", dataset: Dataset, vector_name: str
-) -> VectorSettings:
-    vector_settings = await datasets.get_vector_settings_by_name_and_dataset_id(
-        db, name=vector_name, dataset_id=dataset.id
-    )
-    if vector_settings is None:
-        raise UnprocessableEntityError(f"Vector `{vector_name}` not found in dataset `{dataset.id}`.")
-
-    return vector_settings
 
 
 @router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)

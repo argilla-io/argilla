@@ -22,7 +22,7 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors import EntityAlreadyExistsError, EntityNotFoundError
 from argilla_server.errors.future import NotUniqueError
-from argilla_server.models import User, Workspace
+from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.policies import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla_server.pydantic_v1 import parse_obj_as
 from argilla_server.schemas.v0.users import User as UserSchema
@@ -108,7 +108,7 @@ async def delete_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    workspace_user = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id)
+    workspace_user = await WorkspaceUser.get_by(db, workspace_id=workspace_id, user_id=user_id)
     if not workspace_user:
         raise EntityNotFoundError(name=str(user_id), type=UserSchema)
 

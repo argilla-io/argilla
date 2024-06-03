@@ -84,18 +84,21 @@ class CRUDMixin:
         if instance is not None:
             return instance
 
-        raise NotFoundError(message=f"{cls.__name__} with id `{id}` not found")
+        raise NotFoundError(f"{cls.__name__} with id `{id}` not found")
 
     @classmethod
-    async def read(cls, db: AsyncSession, id: Any, key: str = "id") -> Union[Self, None]:
-        params = {key: id}
-        return await cls.read_by(db, **params)
+    async def get_by(cls, db: AsyncSession, **conditions) -> Union[Self, None]:
+        return (await db.execute(select(cls).filter_by(**conditions))).scalar_one_or_none()
 
     @classmethod
-    async def read_by(cls, db: AsyncSession, **params: Any) -> Union[Self, None]:
-        query = sql.select(cls).filter_by(**params)
-        result = await db.execute(query)
-        return result.scalars().unique().one_or_none()
+    async def get_by_or_raise(cls, db: AsyncSession, **conditions) -> Self:
+        instance = await cls.get_by(db, **conditions)
+        if instance is not None:
+            return instance
+
+        conditions_str = ", ".join([f"{key}={value}" for key, value in conditions.items()])
+
+        raise NotFoundError(f"{cls.__name__} not found filtering by {conditions_str}")
 
     async def update(
         self,

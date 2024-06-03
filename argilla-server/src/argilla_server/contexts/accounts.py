@@ -32,18 +32,11 @@ from argilla_server.security.authentication.userinfo import UserInfo
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_workspace_user_by_workspace_id_and_user_id(
-    db: AsyncSession, workspace_id: UUID, user_id: UUID
-) -> Union[WorkspaceUser, None]:
-    result = await db.execute(select(WorkspaceUser).filter_by(workspace_id=workspace_id, user_id=user_id))
-    return result.scalar_one_or_none()
-
-
 async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) -> WorkspaceUser:
     workspace_id = workspace_user_attrs["workspace_id"]
     user_id = workspace_user_attrs["user_id"]
 
-    if await get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user_id) is not None:
+    if await WorkspaceUser.get_by(db, workspace_id=workspace_id, user_id=user_id) is not None:
         raise NotUniqueError(f"Workspace user with workspace_id `{workspace_id}` and user_id `{user_id}` is not unique")
 
     workspace_user = await WorkspaceUser.create(db, workspace_id=workspace_id, user_id=user_id)
@@ -56,11 +49,6 @@ async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) ->
 
 async def delete_workspace_user(db: AsyncSession, workspace_user: WorkspaceUser) -> WorkspaceUser:
     return await workspace_user.delete(db)
-
-
-async def get_workspace_by_name(db: AsyncSession, workspace_name: str) -> Union[Workspace, None]:
-    result = await db.execute(select(Workspace).filter_by(name=workspace_name))
-    return result.scalar_one_or_none()
 
 
 async def list_workspaces(db: AsyncSession) -> List[Workspace]:
@@ -79,7 +67,7 @@ async def list_workspaces_by_user_id(db: AsyncSession, user_id: UUID) -> List[Wo
 
 
 async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace:
-    if await get_workspace_by_name(db, workspace_attrs["name"]) is not None:
+    if await Workspace.get_by(db, name=workspace_attrs["name"]) is not None:
         raise NotUniqueError(f"Workspace name `{workspace_attrs['name']}` is not unique")
 
     return await Workspace.create(db, name=workspace_attrs["name"])
@@ -147,7 +135,7 @@ async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List
 
         if workspaces is not None:
             for workspace_name in workspaces:
-                workspace = await get_workspace_by_name(db, workspace_name)
+                workspace = await Workspace.get_by(db, name=workspace_name)
                 if not workspace:
                     raise UnprocessableEntityError(f"Workspace '{workspace_name}' does not exist")
 

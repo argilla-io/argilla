@@ -33,20 +33,8 @@ from argilla_server.validators.questions import (
 )
 
 
-async def get_question_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_id: UUID) -> Union[Question, None]:
-    return (await db.execute(select(Question).filter_by(name=name, dataset_id=dataset_id))).scalar_one_or_none()
-
-
-async def get_question_by_name_and_dataset_id_or_raise(db: AsyncSession, name: str, dataset_id: UUID) -> Question:
-    question = await get_question_by_name_and_dataset_id(db, name, dataset_id)
-    if question is None:
-        raise errors.NotFoundError(f"Question with name `{name}` not found for dataset with id `{dataset_id}`")
-
-    return question
-
-
 async def create_question(db: AsyncSession, dataset: Dataset, question_create: QuestionCreate) -> Question:
-    if await get_question_by_name_and_dataset_id(db, question_create.name, dataset.id):
+    if await Question.get_by(db, name=question_create.name, dataset_id=dataset.id):
         raise errors.NotUniqueError(
             f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
         )

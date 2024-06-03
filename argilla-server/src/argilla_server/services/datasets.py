@@ -52,7 +52,7 @@ class DatasetsService:
         self.__dao__ = dao
 
     async def create_dataset(self, user: User, dataset: CreateDatasetRequest) -> BaseDatasetDB:
-        if not await accounts.get_workspace_by_name(self._db, workspace_name=dataset.workspace):
+        if not await Workspace.get_by(self._db, name=dataset.workspace):
             raise EntityNotFoundError(name=dataset.workspace, type=Workspace)
 
         if not await is_authorized(user, DatasetPolicy.create(workspace_name=dataset.workspace)):
@@ -176,7 +176,7 @@ class DatasetsService:
     ) -> ServiceDataset:
         target_workspace_name = copy_workspace or dataset.workspace
 
-        target_workspace = await accounts.get_workspace_by_name(self._db, target_workspace_name)
+        target_workspace = await Workspace.get_by(self._db, name=target_workspace_name)
         if not target_workspace:
             raise EntityNotFoundError(name=target_workspace_name, type=Workspace)
 

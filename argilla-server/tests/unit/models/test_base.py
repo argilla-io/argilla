@@ -72,20 +72,6 @@ class TestDatabaseModel:
         model = await Model.create(db, autocommit=False)
         assert inspect(model).pending
 
-    async def test_database_model_read_by(self, db: "AsyncSession"):
-        await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
-        model = await Model.read_by(db, str_col="unit-test")
-        assert model.id is not None
-        assert model.str_col == "unit-test"
-        assert model.int_col == 1
-
-    async def test_database_model_read(self, db: "AsyncSession"):
-        model = await Model.create(db, str_col="unit-test", int_col=1, autocommit=True)
-        model = await Model.read(db, model.id)
-        assert model.id is not None
-        assert model.str_col == "unit-test"
-        assert model.int_col == 1
-
     async def test_database_model_update(self, db: "AsyncSession"):
         model = await Model.create(
             db, str_col="unit-test", int_col=1, dict_col={"a": 1, "b": 2, "c": 3}, autocommit=True

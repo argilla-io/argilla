@@ -112,11 +112,6 @@ async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) ->
     )
 
 
-async def get_dataset_by_name_and_workspace_id(db: AsyncSession, name: str, workspace_id: UUID) -> Union[Dataset, None]:
-    result = await db.execute(select(Dataset).filter_by(name=name, workspace_id=workspace_id))
-    return result.scalar_one_or_none()
-
-
 async def list_datasets(db: AsyncSession) -> Sequence[Dataset]:
     result = await db.execute(select(Dataset).order_by(Dataset.inserted_at.asc()))
     return result.scalars().all()
@@ -133,7 +128,7 @@ async def create_dataset(db: AsyncSession, dataset_create: DatasetCreate):
     if await Workspace.get(db, dataset_create.workspace_id) is None:
         raise UnprocessableEntityError(f"Workspace with id `{dataset_create.workspace_id}` not found")
 
-    if await get_dataset_by_name_and_workspace_id(db, dataset_create.name, dataset_create.workspace_id):
+    if await Dataset.get_by(db, name=dataset_create.name, workspace_id=dataset_create.workspace_id):
         raise NotUniqueError(
             f"Dataset with name `{dataset_create.name}` already exists for workspace with id `{dataset_create.workspace_id}`"
         )
@@ -198,16 +193,11 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_update: "Da
     return await dataset.update(db, **params)
 
 
-async def get_field_by_name_and_dataset_id(db: AsyncSession, name: str, dataset_id: UUID) -> Union[Field, None]:
-    result = await db.execute(select(Field).filter_by(name=name, dataset_id=dataset_id))
-    return result.scalar_one_or_none()
-
-
 async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCreate) -> Field:
     if dataset.is_ready:
         raise UnprocessableEntityError("Field cannot be created for a published dataset")
 
-    if await get_field_by_name_and_dataset_id(db, field_create.name, dataset.id):
+    if await Field.get_by(db, name=field_create.name, dataset_id=dataset.id):
         raise NotUniqueError(f"Field with name `{field_create.name}` already exists for dataset with id `{dataset.id}`")
 
     return await Field.create(
@@ -237,24 +227,6 @@ async def delete_field(db: AsyncSession, field: Field) -> Field:
     return await field.delete(db)
 
 
-async def get_metadata_property_by_name_and_dataset_id(
-    db: AsyncSession, name: str, dataset_id: UUID
-) -> Union[MetadataProperty, None]:
-    result = await db.execute(select(MetadataProperty).filter_by(name=name, dataset_id=dataset_id))
-
-    return result.scalar_one_or_none()
-
-
-async def get_metadata_property_by_name_and_dataset_id_or_raise(
-    db: AsyncSession, name: str, dataset_id: UUID
-) -> MetadataProperty:
-    metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name, dataset_id)
-    if metadata_property is None:
-        raise NotFoundError(f"Metadata property with name `{name}` not found for dataset with id `{dataset_id}`")
-
-    return metadata_property
-
-
 async def delete_metadata_property(db: AsyncSession, metadata_property: MetadataProperty) -> MetadataProperty:
     return await metadata_property.delete(db)
 
@@ -265,7 +237,7 @@ async def create_metadata_property(
     dataset: Dataset,
     metadata_property_create: MetadataPropertyCreate,
 ) -> MetadataProperty:
-    if await get_metadata_property_by_name_and_dataset_id(db, metadata_property_create.name, dataset.id):
+    if await MetadataProperty.get_by(db, name=metadata_property_create.name, dataset_id=dataset.id):
         raise NotUniqueError(
             f"Metadata property with name `{metadata_property_create.name}` already exists for dataset with id `{dataset.id}`"
         )
@@ -306,12 +278,6 @@ async def count_vectors_settings_by_dataset_id(db: AsyncSession, dataset_id: UUI
     return (await db.execute(select(func.count(VectorSettings.id)).filter_by(dataset_id=dataset_id))).scalar_one()
 
 
-async def get_vector_settings_by_name_and_dataset_id(
-    db: AsyncSession, name: str, dataset_id: UUID
-) -> Union[VectorSettings, None]:
-    return await VectorSettings.read_by(db, name=name, dataset_id=dataset_id)
-
-
 async def update_vector_settings(
     db: AsyncSession, vector_settings: VectorSettings, vector_settings_update: "VectorSettingsUpdate"
 ) -> VectorSettings:
@@ -332,7 +298,7 @@ async def create_vector_settings(
             f"The maximum number of vector settings has been reached for dataset with id `{dataset.id}`"
         )
 
-    if await get_vector_settings_by_name_and_dataset_id(db, vector_settings_create.name, dataset.id):
+    if await VectorSettings.get_by(db, name=vector_settings_create.name, dataset_id=dataset.id):
         raise NotUniqueError(
             f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id `{dataset.id}`"
         )
@@ -464,7 +430,7 @@ async def _validate_metadata(
         metadata_property = metadata_properties.get(name)
 
         if metadata_property is None:
-            metadata_property = await get_metadata_property_by_name_and_dataset_id(db, name=name, dataset_id=dataset.id)
+            metadata_property = await MetadataProperty.get_by(db, name=name, dataset_id=dataset.id)
 
             # If metadata property does not exists but extra metadata is allowed, then we set a flag value to
             # avoid querying the database again
@@ -517,7 +483,7 @@ async def _validate_vector(
 
     vector_settings = vectors_settings.get(vector_name, None)
     if not vector_settings:
-        vector_settings = await get_vector_settings_by_name_and_dataset_id(db, vector_name, dataset_id)
+        vector_settings = await VectorSettings.get_by(db, name=vector_name, dataset_id=dataset_id)
         if not vector_settings:
             raise UnprocessableEntityError(
                 f"vector with name={str(vector_name)} does not exist for dataset_id={str(dataset_id)}"
@@ -947,13 +913,6 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
     return record
 
 
-async def get_response_by_record_id_and_user_id(
-    db: AsyncSession, record_id: UUID, user_id: UUID
-) -> Union[Response, None]:
-    result = await db.execute(select(Response).filter_by(record_id=record_id, user_id=user_id))
-    return result.scalar_one_or_none()
-
-
 async def count_responses_by_dataset_id_and_user_id(
     db: AsyncSession, dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
 ) -> int:
@@ -973,7 +932,7 @@ async def count_responses_by_dataset_id_and_user_id(
 async def create_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
 ) -> Response:
-    if await get_response_by_record_id_and_user_id(db, record.id, user.id):
+    if await Response.get_by(db, record_id=record.id, user_id=user.id):
         raise NotUniqueError(
             f"Response already exists for record with id `{record.id}` and by user with id `{user.id}`"
         )
@@ -1077,13 +1036,6 @@ def _validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
 
     if fields_copy:
         raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())!r}")
-
-
-async def get_suggestion_by_record_id_and_question_id(
-    db: AsyncSession, record_id: UUID, question_id: UUID
-) -> Union[Suggestion, None]:
-    result = await db.execute(select(Suggestion).filter_by(record_id=record_id, question_id=question_id))
-    return result.scalar_one_or_none()
 
 
 async def _preload_suggestion_relationships_before_index(db: AsyncSession, suggestion: Suggestion) -> None:
