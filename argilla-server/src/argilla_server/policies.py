@@ -584,6 +584,22 @@ class RecordPolicyV1:
 
         return is_allowed
 
+    @classmethod
+    def get_metadata(cls, record: Record, metadata_name: str):
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner:
+                return True
+
+            metadata_property = record.dataset.metadata_property_by_name(metadata_name)
+            if metadata_property:
+                return await is_authorized(actor, MetadataPropertyPolicyV1.get(metadata_property))
+
+            return actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(
+                actor, record.dataset.workspace_id
+            )
+
+        return is_allowed
+
 
 class ResponsePolicyV1:
     @classmethod

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Security, status
@@ -28,7 +28,7 @@ from argilla_server.enums import MetadataPropertyType, RecordSortField, Response
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
-from argilla_server.policies import DatasetPolicyV1, authorize
+from argilla_server.policies import DatasetPolicyV1, RecordPolicyV1, authorize, is_authorized
 from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.schemas.v1.records import (
     Filters,
@@ -80,7 +80,6 @@ DELETE_DATASET_RECORDS_LIMIT = 100
 _RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
 _VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
 _METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
-
 
 SortByQueryParamParsed = Annotated[
     Dict[str, str],
@@ -369,7 +368,7 @@ async def list_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id)
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
 
     await authorize(current_user, DatasetPolicyV1.get(dataset))
 
@@ -385,6 +384,10 @@ async def list_current_user_dataset_records(
         include=include,
         sort_by_query_param=sort_by_query_param,
     )
+
+    for record in records:
+        record.dataset = dataset
+        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
     return Records(items=records, total=total)
 
@@ -533,7 +536,14 @@ async def search_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
+    dataset = await Dataset.get_or_raise(
+        db,
+        dataset_id,
+        options=[
+            selectinload(Dataset.fields),
+            selectinload(Dataset.metadata_properties),
+        ],
+    )
 
     await authorize(current_user, DatasetPolicyV1.search_records(dataset))
 
@@ -552,7 +562,7 @@ async def search_current_user_dataset_records(
         sort_by_query_param=sort_by_query_param,
     )
 
-    record_id_score_map = {
+    record_id_score_map: Dict[UUID, Dict[str, Union[float, SearchRecord, None]]] = {
         response.record_id: {"query_score": response.score, "search_record": None}
         for response in search_responses.items
     }
@@ -566,6 +576,9 @@ async def search_current_user_dataset_records(
     )
 
     for record in records:
+        record.dataset = dataset
+        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
+
         record_id_score_map[record.id]["search_record"] = SearchRecord(
             record=RecordSchema.from_orm(record),
             query_score=record_id_score_map[record.id]["query_score"],
@@ -665,3 +678,14 @@ async def list_dataset_records_search_suggestions_options(
             for sa in suggestion_agents_by_question
         ]
     )
+
+
+async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:
+    if record.metadata_ is None:
+        return None
+
+    metadata = {}
+    for metadata_name in list(record.metadata_.keys()):
+        if await is_authorized(user, RecordPolicyV1.get_metadata(record, metadata_name)):
+            metadata[metadata_name] = record.metadata_[metadata_name]
+    return metadata

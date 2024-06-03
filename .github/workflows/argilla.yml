@@ -8,6 +8,14 @@ on:
   workflow_dispatch:
   workflow_call:
 
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+      - develop
+      - releases/**
+
   pull_request:
     paths:
       - "argilla/**"
@@ -111,6 +119,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+        working-directory: argilla
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
@@ -118,7 +127,7 @@ jobs:
       - name: Download python package
         uses: actions/download-artifact@v4
         with:
-          name: python-package
+          name: argilla
           path: dist
 
       - name: Publish Package to TestPyPI 🥪
