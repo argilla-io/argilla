@@ -14,7 +14,6 @@ on:
       # - "develop"
       - "feat/v2.0.0" # Fixing this branch until we merge everything into develop
       - "docs/**" # When we create a new branch only for docs
-      - "chore/review-docs-generation-workflowOD" # add this current branch for testing
     tags:
       - "**"
 
