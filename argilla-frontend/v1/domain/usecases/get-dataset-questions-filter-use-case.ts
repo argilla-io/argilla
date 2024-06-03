@@ -4,7 +4,7 @@ import { QuestionRepository } from "~/v1/infrastructure/repositories";
 export class GetDatasetQuestionsFilterUseCase {
   constructor(private readonly questionRepository: QuestionRepository) {}
 
-  async execute(datasetId: string): Promise<Question[]> {
+  async execute(datasetId: string, applyFilter = true): Promise<Question[]> {
     const backendQuestions = await this.questionRepository.getQuestions(
       datasetId
     );
@@ -20,6 +20,8 @@ export class GetDatasetQuestionsFilterUseCase {
         question.settings
       );
     });
+
+    if (!applyFilter) return questions;
 
     return questions.filter(this.visibleTypeOfQuestions);
   }

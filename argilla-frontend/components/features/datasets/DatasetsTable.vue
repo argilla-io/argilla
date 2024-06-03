@@ -37,9 +37,6 @@ export default {
       required: true,
     },
   },
-  created() {
-    this.setDatasetsLink();
-  },
   data() {
     return {
       querySearch: undefined,
@@ -49,6 +46,13 @@ export default {
           field: "name",
           class: "table-info__title",
           type: "action",
+          link: (dataset) => this.getDatasetLink(dataset),
+          component: {
+            name: "DatasetQuestions",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
           actions: [
             {
               name: "copy",
@@ -93,9 +97,13 @@ export default {
         },
         {
           name: "Global progress",
-          field: "progress",
           class: "progress",
-          type: "progress",
+          component: {
+            name: "DatasetProgress",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
         },
       ],
       emptySearchInfo: {
@@ -188,19 +196,6 @@ export default {
     },
     copyName({ name }) {
       this.copy(name);
-    },
-    setDatasetsLink() {
-      this.datasets.forEach((dataset) => {
-        dataset.link = this.getDatasetLink(dataset);
-      });
-    },
-  },
-  watch: {
-    datasets: {
-      deep: true,
-      handler() {
-        this.setDatasetsLink();
-      },
     },
   },
   setup() {

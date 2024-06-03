@@ -50,9 +50,9 @@
       </div>
       <results-empty v-if="tableIsEmpty" :title="emptySearchInfo.title" />
       <template v-else>
-        <div class="table-info__body">
+        <div class="table-info__body" ref="table">
           <ul>
-            <li v-for="item in filteredResults" :key="String(item.id)">
+            <li v-for="item in filteredResults" :key="item.id" :id="item.id">
               <div class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
@@ -60,10 +60,10 @@
                   :class="[`table-info__item__col`, column.class]"
                 >
                   <span :class="column.class">
-                    <span v-if="column.type === 'action'">
+                    <span v-if="column.actions">
                       <div class="table-info__actions">
-                        <nuxt-link v-if="item.link" :to="item.link"
-                          >{{ itemValue(item, column) }}
+                        <nuxt-link v-if="column.link" :to="column.link(item)">
+                          {{ itemValue(item, column) }}
                         </nuxt-link>
                         <span v-else>{{ itemValue(item, column) }}</span>
                         <div class="table-info__actions__buttons">
@@ -88,15 +88,22 @@
                         </div>
                       </div>
                     </span>
-                    <span v-else-if="column.type === 'progress'">
-                      <DatasetProgress :dataset="item" />
-                    </span>
                     <base-date
-                      format="date-relative-now"
                       v-else-if="column.type === 'date'"
+                      format="date-relative-now"
                       :date="itemValue(item, column)"
                     />
+                    <nuxt-link v-else-if="column.link" :to="column.link(item)">
+                      {{ itemValue(item, column) }}
+                    </nuxt-link>
                     <span v-else>{{ itemValue(item, column) }}</span>
+                    <span v-if="column.component">
+                      <component
+                        v-if="hydrate[item.id]"
+                        :is="column.component.name"
+                        v-bind="{ ...column.component.props(item) }"
+                      />
+                    </span>
                   </span>
                 </span>
               </div>
@@ -157,6 +164,7 @@ export default {
       sortOrder: this.sortedOrder,
       sortedBy: this.sortedByField,
       filters: {},
+      hydrate: {},
     };
   },
   computed: {
@@ -239,6 +247,48 @@ export default {
         values: selectedOptions,
       });
     },
+    changeVisibility() {
+      this.filteredResults.forEach((item) => {
+        if (this.isVisible(item.id)) {
+          this.$set(this.hydrate, item.id, true);
+        }
+      });
+    },
+    isVisible(id) {
+      const element = document.getElementById(id);
+      if (!element) return false;
+
+      const item = element.getBoundingClientRect();
+      return (
+        item.top >= 0 &&
+        item.left >= 0 &&
+        item.bottom <=
+          (window.innerHeight || document.documentElement.clientHeight) &&
+        item.right <=
+          (window.innerWidth || document.documentElement.clientWidth)
+      );
+    },
+  },
+  watch: {
+    querySearch() {
+      this.changeVisibility();
+    },
+    sortOrder() {
+      this.changeVisibility();
+    },
+    sortedBy() {
+      this.changeVisibility();
+    },
+  },
+  mounted() {
+    this.$refs.table.addEventListener("scroll", this.changeVisibility);
+    window.addEventListener("resize", this.changeVisibility);
+
+    this.changeVisibility();
+  },
+  beforeDestroy() {
+    this.$refs.table.removeEventListener("scroll", this.changeVisibility);
+    window.removeEventListener("resize", this.changeVisibility);
   },
 };
 </script>
