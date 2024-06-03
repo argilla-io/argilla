@@ -35,7 +35,7 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
     @api_error_handler
     def create(self, workspace: WorkspaceModel) -> WorkspaceModel:
         # TODO: Unify API endpoint
-        response = self.http_client.post(url="/api/workspaces", json={"name": workspace.name})
+        response = self.http_client.post(url="/api/v1/workspaces", json={"name": workspace.name})
         response.raise_for_status()
         response_json = response.json()
         workspace = self._model_from_json(json_workspace=response_json)
