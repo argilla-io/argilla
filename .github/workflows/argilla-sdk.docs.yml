@@ -8,6 +8,7 @@ on:
   push:
     paths:
       - "argilla-sdk/docs/**"
+      - "argilla-sdk/src/**"
     branches:
       # - "main"
       # - "develop"
