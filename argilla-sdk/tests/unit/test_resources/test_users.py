@@ -214,12 +214,23 @@ class TestUsersAPI:
     def test_remove_user_from_workspace(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
         workspace_id = uuid.uuid4()
+        mock_return_value = {
+            "id": str(user_id),
+            "username": "test-user",
+            "first_name": "Test",
+            "last_name": "User",
+            "role": "admin",
+            "inserted_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
+        }
         httpx_mock.add_response(
-            url=f"http://test_url/api/v1/workspaces/{workspace_id}/users/{user_id}", method="DELETE"
+            url=f"http://test_url/api/v1/workspaces/{workspace_id}/users/{user_id}",
+            method="DELETE",
+            json=mock_return_value,
         )
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
-            client.api.workspaces.remove_user(workspace_id, user_id)
+            client.api.users.delete_from_workspace(workspace_id, user_id)
 
     def test_delete_user(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
