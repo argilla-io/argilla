@@ -16,8 +16,8 @@ from uuid import uuid4
 
 import argilla_server.errors.future as errors
 import pytest
+from argilla_server.api.schemas.v1.records import SearchRecordsQuery
 from argilla_server.contexts.search import SearchRecordsQueryValidator
-from argilla_server.schemas.v1.records import SearchRecordsQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -33,7 +33,9 @@ class TestSearchRecordsQueryValidator:
     async def test_validate(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
         text_question = await TextQuestionFactory.create(dataset=dataset)
-        label_selection_question = await LabelSelectionQuestionFactory.create(dataset=dataset)
+        label_selection_question = await LabelSelectionQuestionFactory.create(
+            dataset=dataset
+        )
         metadata_property = await FloatMetadataPropertyFactory.create(dataset=dataset)
 
         query = SearchRecordsQuery.parse_obj(
@@ -45,60 +47,106 @@ class TestSearchRecordsQueryValidator:
                     "and": [
                         {
                             "type": "terms",
-                            "scope": {"entity": "response", "question": text_question.name, "property": "status"},
+                            "scope": {
+                                "entity": "response",
+                                "question": text_question.name,
+                                "property": "status",
+                            },
                             "values": ["submitted", "draft"],
                         },
                         {
                             "type": "terms",
-                            "scope": {"entity": "suggestion", "question": text_question.name, "property": "agent"},
+                            "scope": {
+                                "entity": "suggestion",
+                                "question": text_question.name,
+                                "property": "agent",
+                            },
                             "values": ["GPT-3.5", "GPT-4"],
                         },
                         {
                             "type": "terms",
-                            "scope": {"entity": "suggestion", "question": label_selection_question.name},
+                            "scope": {
+                                "entity": "suggestion",
+                                "question": label_selection_question.name,
+                            },
                             "values": ["politics", "news"],
                         },
                         {
                             "type": "range",
-                            "scope": {"entity": "suggestion", "question": text_question.name, "property": "score"},
+                            "scope": {
+                                "entity": "suggestion",
+                                "question": text_question.name,
+                                "property": "score",
+                            },
                             "ge": 0.8,
                             "le": 1.0,
                         },
                         {
                             "type": "range",
-                            "scope": {"entity": "metadata", "metadata_property": metadata_property.name},
+                            "scope": {
+                                "entity": "metadata",
+                                "metadata_property": metadata_property.name,
+                            },
                             "ge": 0.5,
                             "le": 0.8,
                         },
                     ]
                 },
                 "sort": [
-                    {"scope": {"entity": "record", "property": "inserted_at"}, "order": "desc"},
-                    {"scope": {"entity": "record", "property": "updated_at"}, "order": "desc"},
                     {
-                        "scope": {"entity": "suggestion", "question": text_question.name, "property": "score"},
+                        "scope": {"entity": "record", "property": "inserted_at"},
                         "order": "desc",
                     },
-                    {"scope": {"entity": "metadata", "metadata_property": metadata_property.name}, "order": "asc"},
+                    {
+                        "scope": {"entity": "record", "property": "updated_at"},
+                        "order": "desc",
+                    },
+                    {
+                        "scope": {
+                            "entity": "suggestion",
+                            "question": text_question.name,
+                            "property": "score",
+                        },
+                        "order": "desc",
+                    },
+                    {
+                        "scope": {
+                            "entity": "metadata",
+                            "metadata_property": metadata_property.name,
+                        },
+                        "order": "asc",
+                    },
                 ],
             }
         )
 
         await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
-    async def test_validate_response_filter_scope_in_filters_without_question(self, db: AsyncSession):
+    async def test_validate_response_filter_scope_in_filters_without_question(
+        self, db: AsyncSession
+    ):
         query = SearchRecordsQuery.parse_obj(
             {
                 "query": {
                     "text": {"q": "query"},
                 },
-                "filters": {"and": [{"type": "terms", "scope": {"entity": "response"}, "values": ["value"]}]},
+                "filters": {
+                    "and": [
+                        {
+                            "type": "terms",
+                            "scope": {"entity": "response"},
+                            "values": ["value"],
+                        }
+                    ]
+                },
             }
         )
 
         await SearchRecordsQueryValidator(db, query, uuid4()).validate()
 
-    async def test_validate_response_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
+    async def test_validate_response_filter_scope_in_filters_with_non_existent_question(
+        self, db: AsyncSession
+    ):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -122,10 +170,13 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value)
+            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
+    async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(
+        self, db: AsyncSession
+    ):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -137,7 +188,10 @@ class TestSearchRecordsQueryValidator:
                     "and": [
                         {
                             "type": "terms",
-                            "scope": {"entity": "suggestion", "question": "non-existent"},
+                            "scope": {
+                                "entity": "suggestion",
+                                "question": "non-existent",
+                            },
                             "values": ["value"],
                         }
                     ]
@@ -149,7 +203,8 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value)
+            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
     async def test_validate_metadata_filter_scope_in_filters_with_non_existent_metadata_property(
@@ -166,7 +221,10 @@ class TestSearchRecordsQueryValidator:
                     "and": [
                         {
                             "type": "terms",
-                            "scope": {"entity": "metadata", "metadata_property": "non-existent"},
+                            "scope": {
+                                "entity": "metadata",
+                                "metadata_property": "non-existent",
+                            },
                             "values": ["value"],
                         }
                     ]
@@ -182,7 +240,9 @@ class TestSearchRecordsQueryValidator:
             == f"MetadataProperty not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_response_filter_scope_in_sort_without_question(self, db: AsyncSession):
+    async def test_validate_response_filter_scope_in_sort_without_question(
+        self, db: AsyncSession
+    ):
         query = SearchRecordsQuery.parse_obj(
             {
                 "query": {
@@ -194,7 +254,9 @@ class TestSearchRecordsQueryValidator:
 
         await SearchRecordsQueryValidator(db, query, uuid4()).validate()
 
-    async def test_validate_response_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
+    async def test_validate_response_filter_scope_in_sort_with_non_existent_question(
+        self, db: AsyncSession
+    ):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -202,7 +264,12 @@ class TestSearchRecordsQueryValidator:
                 "query": {
                     "text": {"q": "query"},
                 },
-                "sort": [{"scope": {"entity": "response", "question": "non-existent"}, "order": "asc"}],
+                "sort": [
+                    {
+                        "scope": {"entity": "response", "question": "non-existent"},
+                        "order": "asc",
+                    }
+                ],
             }
         )
 
@@ -210,10 +277,13 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value)
+            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
+    async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(
+        self, db: AsyncSession
+    ):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -221,7 +291,12 @@ class TestSearchRecordsQueryValidator:
                 "query": {
                     "text": {"q": "query"},
                 },
-                "sort": [{"scope": {"entity": "suggestion", "question": "non-existent"}, "order": "asc"}],
+                "sort": [
+                    {
+                        "scope": {"entity": "suggestion", "question": "non-existent"},
+                        "order": "asc",
+                    }
+                ],
             }
         )
 
@@ -229,10 +304,13 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value)
+            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(self, db: AsyncSession):
+    async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(
+        self, db: AsyncSession
+    ):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -240,7 +318,15 @@ class TestSearchRecordsQueryValidator:
                 "query": {
                     "text": {"q": "query"},
                 },
-                "sort": [{"scope": {"entity": "metadata", "metadata_property": "non-existent"}, "order": "asc"}],
+                "sort": [
+                    {
+                        "scope": {
+                            "entity": "metadata",
+                            "metadata_property": "non-existent",
+                        },
+                        "order": "asc",
+                    }
+                ],
             }
         )
 

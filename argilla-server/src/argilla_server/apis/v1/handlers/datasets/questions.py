@@ -20,10 +20,10 @@ from sqlalchemy.orm import selectinload
 from starlette import status
 
 from argilla_server.api.policies.v1 import DatasetPolicy, authorize
+from argilla_server.api.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
-from argilla_server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.security import auth
 
 router = APIRouter()
@@ -31,16 +31,25 @@ router = APIRouter()
 
 @router.get("/datasets/{dataset_id}/questions", response_model=Questions)
 async def list_dataset_questions(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.questions)])
+    dataset = await Dataset.get_or_raise(
+        db, dataset_id, options=[selectinload(Dataset.questions)]
+    )
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
     return Questions(items=dataset.questions)
 
 
-@router.post("/datasets/{dataset_id}/questions", status_code=status.HTTP_201_CREATED, response_model=Question)
+@router.post(
+    "/datasets/{dataset_id}/questions",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Question,
+)
 async def create_dataset_question(
     *,
     db: AsyncSession = Depends(get_async_db),

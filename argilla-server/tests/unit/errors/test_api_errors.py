@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import pytest
+from argilla_server.api.schemas.v1.datasets import Dataset
 from argilla_server.errors import APIErrorHandler
 from argilla_server.errors.base_errors import (
     EntityAlreadyExistsError,
@@ -20,7 +21,6 @@ from argilla_server.errors.base_errors import (
     GenericServerError,
     ServerError,
 )
-from argilla_server.schemas.v1.datasets import Dataset
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
@@ -42,7 +42,9 @@ class TestAPIErrorHandler:
                 },
             ),
             (
-                EntityAlreadyExistsError(name="mock-name", type=Dataset, workspace="mock-workspace"),
+                EntityAlreadyExistsError(
+                    name="mock-name", type=Dataset, workspace="mock-workspace"
+                ),
                 {
                     "accept-language": None,
                     "code": "argilla.api.errors::EntityAlreadyExistsError",
@@ -72,4 +74,6 @@ class TestAPIErrorHandler:
     async def test_track_error(self, test_telemetry, error, expected_event):
         await APIErrorHandler.track_error(error, request=mock_request)
 
-        test_telemetry.track_data.assert_called_once_with(action="ServerErrorFound", data=expected_event)
+        test_telemetry.track_data.assert_called_once_with(
+            action="ServerErrorFound", data=expected_event
+        )

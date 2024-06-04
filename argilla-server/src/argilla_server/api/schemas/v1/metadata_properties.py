@@ -13,15 +13,30 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Annotated, Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import (
+    Annotated,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+)
 from uuid import UUID
 
-from typing_extensions import Annotated
-
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import MetadataPropertyType
-from argilla_server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
+from argilla_server.pydantic_v1 import (
+    BaseModel,
+    Field,
+    constr,
+    root_validator,
+    validator,
+)
 from argilla_server.pydantic_v1.generics import GenericModel
-from argilla_server.schemas.base import UpdateSchema
+from typing_extensions import Annotated
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -46,7 +61,9 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
+    type: Literal[MetadataPropertyType.terms] = Field(
+        MetadataPropertyType.terms, const=True
+    )
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -60,11 +77,15 @@ class NumericMetadataMetrics(GenericModel, Generic[NT]):
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
+    type: Literal[MetadataPropertyType.integer] = Field(
+        MetadataPropertyType.integer, const=True
+    )
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+    type: Literal[MetadataPropertyType.float] = Field(
+        MetadataPropertyType.float, const=True
+    )
 
     @validator("min", "max")
     def round_result(cls, v: float):
@@ -74,7 +95,8 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
 
 
 MetadataMetrics = Annotated[
-    Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics], Field(..., discriminator="type")
+    Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics],
+    Field(..., discriminator="type"),
 ]
 
 
@@ -113,7 +135,10 @@ MetadataPropertyName = Annotated[
 
 
 MetadataPropertyTitle = Annotated[
-    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    constr(
+        min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH,
+        max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
+    ),
     Field(..., description="The title of the metadata property"),
 ]
 
@@ -136,7 +161,9 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
     values: Optional[List[str]] = Field(
-        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+        None,
+        min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS,
+        max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     )
 
 
@@ -149,7 +176,11 @@ class FloatMetadataPropertyCreate(NumericMetadataProperty[float]):
 
 
 MetadataPropertySettingsCreate = Annotated[
-    Union[TermsMetadataPropertyCreate, IntegerMetadataPropertyCreate, FloatMetadataPropertyCreate],
+    Union[
+        TermsMetadataPropertyCreate,
+        IntegerMetadataPropertyCreate,
+        FloatMetadataPropertyCreate,
+    ],
     Field(..., discriminator="type"),
 ]
 

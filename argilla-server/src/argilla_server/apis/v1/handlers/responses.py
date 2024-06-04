@@ -19,17 +19,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import ResponsePolicy, authorize
-from argilla_server.contexts import datasets
-from argilla_server.database import get_async_db
-from argilla_server.models import Dataset, Record, Response, User
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     Response as ResponseSchema,
 )
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     ResponsesBulk,
     ResponsesBulkCreate,
     ResponseUpdate,
 )
+from argilla_server.contexts import datasets
+from argilla_server.database import get_async_db
+from argilla_server.models import Dataset, Record, Response, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.use_cases.responses.upsert_responses_in_bulk import (
@@ -45,7 +45,9 @@ async def create_current_user_responses_bulk(
     *,
     body: ResponsesBulkCreate,
     current_user: User = Security(auth.get_current_user),
-    use_case: UpsertResponsesInBulkUseCase = Depends(UpsertResponsesInBulkUseCaseFactory()),
+    use_case: UpsertResponsesInBulkUseCase = Depends(
+        UpsertResponsesInBulkUseCaseFactory()
+    ),
 ):
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
 
@@ -64,7 +66,11 @@ async def update_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record)
+            .selectinload(Record.dataset)
+            .selectinload(Dataset.questions)
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.update(response))
@@ -83,7 +89,11 @@ async def delete_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record)
+            .selectinload(Record.dataset)
+            .selectinload(Dataset.questions)
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.delete(response))

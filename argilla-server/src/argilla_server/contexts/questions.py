@@ -20,11 +20,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 import argilla_server.errors.future as errors
-from argilla_server.models import Dataset, Question, User
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionUpdate,
 )
+from argilla_server.models import Dataset, Question, User
 from argilla_server.validators.questions import (
     QuestionCreateValidator,
     QuestionDeleteValidator,
@@ -32,7 +32,9 @@ from argilla_server.validators.questions import (
 )
 
 
-async def create_question(db: AsyncSession, dataset: Dataset, question_create: QuestionCreate) -> Question:
+async def create_question(
+    db: AsyncSession, dataset: Dataset, question_create: QuestionCreate
+) -> Question:
     if await Question.get_by(db, name=question_create.name, dataset_id=dataset.id):
         raise errors.NotUniqueError(
             f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
@@ -51,7 +53,9 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
     )
 
 
-async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
+async def update_question(
+    db: AsyncSession, question: Question, question_update: QuestionUpdate
+) -> Question:
     QuestionUpdateValidator(question_update).validate_for(question)
 
     params = question_update.dict(exclude_unset=True)

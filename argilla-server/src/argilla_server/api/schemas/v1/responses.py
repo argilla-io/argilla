@@ -16,12 +16,17 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+from argilla_server.api.schemas.v1.questions import QuestionName
+from argilla_server.models import ResponseStatus
+from argilla_server.pydantic_v1 import (
+    BaseModel,
+    Field,
+    StrictInt,
+    StrictStr,
+    root_validator,
+)
 from fastapi import Body
 from typing_extensions import Annotated
-
-from argilla_server.models import ResponseStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
-from argilla_server.schemas.v1.questions import QuestionName
 
 try:
     from typing import Annotated
@@ -44,22 +49,29 @@ class RankingQuestionResponseValueItem(BaseModel):
 
 class SpanQuestionResponseValueItem(BaseModel):
     label: str
-    start: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL)
-    end: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL)
+    start: int = Field(
+        ..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL
+    )
+    end: int = Field(
+        ..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL
+    )
 
     @root_validator(skip_on_failure=True)
     def check_start_and_end(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         start, end = values.get("start"), values.get("end")
 
         if start is not None and end is not None and end <= start:
-            raise ValueError("span question response value 'end' must have a value greater than 'start'")
+            raise ValueError(
+                "span question response value 'end' must have a value greater than 'start'"
+            )
 
         return values
 
 
 RankingQuestionResponseValue = List[RankingQuestionResponseValueItem]
 SpanQuestionResponseValue = Annotated[
-    List[SpanQuestionResponseValueItem], Field(..., max_items=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
+    List[SpanQuestionResponseValueItem],
+    Field(..., max_items=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS),
 ]
 MultiLabelSelectionQuestionResponseValue = List[str]
 RatingQuestionResponseValue = StrictInt
@@ -96,7 +108,9 @@ class Response(BaseModel):
     values: Optional[ResponseValues]
     status: ResponseStatus
     record_id: UUID
-    user_id: Optional[UUID] = None  # Responses for delete users will have this field as None but still be present
+    user_id: Optional[UUID] = (
+        None  # Responses for delete users will have this field as None but still be present
+    )
     inserted_at: datetime
     updated_at: datetime
 
@@ -204,6 +218,10 @@ class UserSubmittedResponseCreate(BaseModel):
 
 
 UserResponseCreate = Annotated[
-    Union[UserSubmittedResponseCreate, UserDraftResponseCreate, UserDiscardedResponseCreate],
+    Union[
+        UserSubmittedResponseCreate,
+        UserDraftResponseCreate,
+        UserDiscardedResponseCreate,
+    ],
     Field(discriminator="status"),
 ]

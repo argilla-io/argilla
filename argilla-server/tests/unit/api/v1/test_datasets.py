@@ -19,7 +19,30 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
-from argilla_server.apis.v1.handlers.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla_server.api.schemas.v1.datasets import (
+    DATASET_GUIDELINES_MAX_LENGTH,
+    DATASET_NAME_MAX_LENGTH,
+)
+from argilla_server.api.schemas.v1.fields import (
+    FIELD_CREATE_NAME_MAX_LENGTH,
+    FIELD_CREATE_TITLE_MAX_LENGTH,
+)
+from argilla_server.api.schemas.v1.metadata_properties import (
+    METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
+    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
+    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
+)
+from argilla_server.api.schemas.v1.records import (
+    RECORDS_CREATE_MAX_ITEMS,
+    RECORDS_CREATE_MIN_ITEMS,
+)
+from argilla_server.api.schemas.v1.vector_settings import (
+    VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
+    VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+)
+from argilla_server.apis.v1.handlers.datasets.records import (
+    LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+)
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import (
     DatasetStatus,
@@ -41,21 +64,6 @@ from argilla_server.models import (
     UserRole,
     Vector,
     VectorSettings,
-)
-from argilla_server.schemas.v1.datasets import (
-    DATASET_GUIDELINES_MAX_LENGTH,
-    DATASET_NAME_MAX_LENGTH,
-)
-from argilla_server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
-from argilla_server.schemas.v1.metadata_properties import (
-    METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
-    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
-)
-from argilla_server.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
-from argilla_server.schemas.v1.vector_settings import (
-    VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
-    VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
 from argilla_server.search_engine import (
     FloatMetadataFilter,
@@ -103,12 +111,20 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestSuiteDatasets:
-    async def test_list_current_user_datasets(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
+    async def test_list_current_user_datasets(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ) -> None:
         dataset_a = await DatasetFactory.create(name="dataset-a")
-        dataset_b = await DatasetFactory.create(name="dataset-b", guidelines="guidelines")
-        dataset_c = await DatasetFactory.create(name="dataset-c", status=DatasetStatus.ready)
+        dataset_b = await DatasetFactory.create(
+            name="dataset-b", guidelines="guidelines"
+        )
+        dataset_c = await DatasetFactory.create(
+            name="dataset-c", status=DatasetStatus.ready
+        )
 
-        response = await async_client.get("/api/v1/me/datasets", headers=owner_auth_header)
+        response = await async_client.get(
+            "/api/v1/me/datasets", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -149,7 +165,9 @@ class TestSuiteDatasets:
             ]
         }
 
-    async def test_list_current_user_datasets_without_authentication(self, async_client: "AsyncClient") -> None:
+    async def test_list_current_user_datasets_without_authentication(
+        self, async_client: "AsyncClient"
+    ) -> None:
         response = await async_client.get("/api/v1/me/datasets")
 
         assert response.status_code == 401
@@ -165,14 +183,21 @@ class TestSuiteDatasets:
         await DatasetFactory.create(name="dataset-b", workspace=workspace)
         await DatasetFactory.create(name="dataset-c")
 
-        response = await async_client.get("/api/v1/me/datasets", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            "/api/v1/me/datasets", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 200
 
         response_body = response.json()
-        assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a", "dataset-b"]
+        assert [dataset["name"] for dataset in response_body["items"]] == [
+            "dataset-a",
+            "dataset-b",
+        ]
 
-    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.annotator, UserRole.admin])
+    @pytest.mark.parametrize(
+        "role", [UserRole.owner, UserRole.annotator, UserRole.admin]
+    )
     async def test_list_current_user_datasets_by_workspace_id(
         self, async_client: "AsyncClient", role: UserRole
     ) -> None:
@@ -189,7 +214,9 @@ class TestSuiteDatasets:
         await DatasetFactory.create(name="dataset-b", workspace=another_workspace)
 
         response = await async_client.get(
-            "/api/v1/me/datasets", params={"workspace_id": workspace.id}, headers={API_KEY_HEADER_NAME: user.api_key}
+            "/api/v1/me/datasets",
+            params={"workspace_id": workspace.id},
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -197,17 +224,23 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a"]
 
-    async def test_list_dataset_fields(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_fields(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         text_field_a = await TextFieldFactory.create(
             name="text-field-a", title="Text Field A", required=True, dataset=dataset
         )
-        text_field_b = await TextFieldFactory.create(name="text-field-b", title="Text Field B", dataset=dataset)
+        text_field_b = await TextFieldFactory.create(
+            name="text-field-b", title="Text Field B", dataset=dataset
+        )
 
         other_dataset = await DatasetFactory.create()
         await TextFieldFactory.create_batch(size=2, dataset=other_dataset)
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -235,7 +268,9 @@ class TestSuiteDatasets:
             ],
         }
 
-    async def test_list_dataset_fields_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_dataset_fields_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}/fields")
@@ -243,7 +278,9 @@ class TestSuiteDatasets:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_list_dataset_fields_as_restricted_user_role(self, async_client: "AsyncClient", role: UserRole):
+    async def test_list_dataset_fields_as_restricted_user_role(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
         await TextFieldFactory.create(name="text-field-a", dataset=dataset)
@@ -253,13 +290,17 @@ class TestSuiteDatasets:
         await TextFieldFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
 
         response_body = response.json()
-        assert [field["name"] for field in response_body["items"]] == ["text-field-a", "text-field-b"]
+        assert [field["name"] for field in response_body["items"]] == [
+            "text-field-a",
+            "text-field-b",
+        ]
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_dataset_fields_as_restricted_user_from_different_workspace(
@@ -270,7 +311,8 @@ class TestSuiteDatasets:
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/fields", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -288,9 +330,13 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
-    async def test_list_dataset_questions(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_questions(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         text_question = await TextQuestionFactory.create(
             name="text-question",
@@ -307,7 +353,9 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create()
         await RatingQuestionFactory.create()
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/questions", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -355,7 +403,10 @@ class TestSuiteDatasets:
     @pytest.mark.parametrize(
         "QuestionFactory, settings",
         [
-            (RatingQuestionFactory, {"options": [{"value": 1}, {"value": 2}, {"value": 2}]}),
+            (
+                RatingQuestionFactory,
+                {"options": [{"value": 1}, {"value": 2}, {"value": 2}]},
+            ),
             (
                 LabelSelectionQuestionFactory,
                 {
@@ -391,7 +442,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         question = await QuestionFactory.create(dataset=dataset, settings=settings)
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/questions", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/questions", headers=owner_auth_header
+        )
         assert response.status_code == 200
         assert response.json() == {
             "items": [
@@ -409,7 +462,9 @@ class TestSuiteDatasets:
             ]
         }
 
-    async def test_list_dataset_questions_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_dataset_questions_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}/questions")
@@ -417,7 +472,9 @@ class TestSuiteDatasets:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_list_dataset_questions_as_restricted_user(self, async_client: "AsyncClient", role: UserRole):
+    async def test_list_dataset_questions_as_restricted_user(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
         await TextQuestionFactory.create(name="text-question", dataset=dataset)
@@ -426,13 +483,17 @@ class TestSuiteDatasets:
         await RatingQuestionFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/datasets/{dataset.id}/questions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
 
         response_body = response.json()
-        assert [question["name"] for question in response_body["items"]] == ["text-question", "rating-question"]
+        assert [question["name"] for question in response_body["items"]] == [
+            "text-question",
+            "rating-question",
+        ]
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_dataset_questions_as_restricted_user_from_different_workspace(
@@ -443,7 +504,8 @@ class TestSuiteDatasets:
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/questions", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/datasets/{dataset.id}/questions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -461,23 +523,32 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     async def test_list_current_user_dataset_metadata_properties(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
-        terms_property = await TermsMetadataPropertyFactory.create(name="terms", dataset=dataset)
-        integer_property = await IntegerMetadataPropertyFactory.create(name="integer", dataset=dataset)
-        float_property = await FloatMetadataPropertyFactory.create(name="float", dataset=dataset)
+        terms_property = await TermsMetadataPropertyFactory.create(
+            name="terms", dataset=dataset
+        )
+        integer_property = await IntegerMetadataPropertyFactory.create(
+            name="integer", dataset=dataset
+        )
+        float_property = await FloatMetadataPropertyFactory.create(
+            name="float", dataset=dataset
+        )
 
         await TermsMetadataPropertyFactory.create()
         await IntegerMetadataPropertyFactory.create()
         await FloatMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
         )
 
         assert response.status_code == 200, response.json()
@@ -521,7 +592,9 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metadata-properties")
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties"
+        )
 
         assert response.status_code == 401
 
@@ -530,25 +603,34 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
 
-        await TermsMetadataPropertyFactory.create(name="property-01", dataset=dataset, allowed_roles=[])
-        await TermsMetadataPropertyFactory.create(name="property-02", dataset=dataset, allowed_roles=[UserRole.admin])
+        await TermsMetadataPropertyFactory.create(
+            name="property-01", dataset=dataset, allowed_roles=[]
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="property-02", dataset=dataset, allowed_roles=[UserRole.admin]
+        )
         await IntegerMetadataPropertyFactory.create(
             name="property-03", dataset=dataset, allowed_roles=[UserRole.annotator]
         )
         await IntegerMetadataPropertyFactory.create(
-            name="property-04", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
+            name="property-04",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin, UserRole.annotator],
         )
         await TermsMetadataPropertyFactory.create()
         await IntegerMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
         )
 
         assert response.status_code == 200
 
         response_body = response.json()
-        assert [metadata_property["name"] for metadata_property in response_body["items"]] == [
+        assert [
+            metadata_property["name"] for metadata_property in response_body["items"]
+        ] == [
             "property-01",
             "property-02",
             "property-03",
@@ -562,21 +644,32 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
 
-        await TermsMetadataPropertyFactory.create(name="allowed-property-01", dataset=dataset, allowed_roles=[role])
-        await TermsMetadataPropertyFactory.create(name="allowed-property-02", dataset=dataset, allowed_roles=[role])
-        await IntegerMetadataPropertyFactory.create(name="not-allowed-property-03", dataset=dataset, allowed_roles=[])
-        await IntegerMetadataPropertyFactory.create(name="not-allowed-property-04", dataset=dataset, allowed_roles=[])
+        await TermsMetadataPropertyFactory.create(
+            name="allowed-property-01", dataset=dataset, allowed_roles=[role]
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="allowed-property-02", dataset=dataset, allowed_roles=[role]
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="not-allowed-property-03", dataset=dataset, allowed_roles=[]
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="not-allowed-property-04", dataset=dataset, allowed_roles=[]
+        )
         await TermsMetadataPropertyFactory.create()
         await IntegerMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metadata-properties", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
 
         response_body = response.json()
-        assert [metadata_property["name"] for metadata_property in response_body["items"]] == [
+        assert [
+            metadata_property["name"] for metadata_property in response_body["items"]
+        ] == [
             "allowed-property-01",
             "allowed-property-02",
         ]
@@ -590,7 +683,8 @@ class TestSuiteDatasets:
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metadata-properties", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/metadata-properties",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -608,16 +702,23 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_list_dataset_vectors_settings(self, async_client: "AsyncClient", role: UserRole):
+    async def test_list_dataset_vectors_settings(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
-        vectors_settings = await VectorSettingsFactory.create_batch(size=3, dataset=dataset)
+        vectors_settings = await VectorSettingsFactory.create_batch(
+            size=3, dataset=dataset
+        )
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -644,24 +745,33 @@ class TestSuiteDatasets:
         annotator = await UserFactory.create(role=role)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/vectors-settings", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/datasets/{dataset.id}/vectors-settings",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
 
         assert response.status_code == 403
 
-    async def test_list_dataset_vectors_settings_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_dataset_vectors_settings_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/vectors-settings")
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/vectors-settings"
+        )
 
         assert response.status_code == 401
 
     # Helper function to create records with responses
 
-    async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_get_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create(name="dataset")
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -676,7 +786,9 @@ class TestSuiteDatasets:
             "updated_at": dataset.updated_at.isoformat(),
         }
 
-    async def test_get_dataset_without_authentication(self, async_client: "AsyncClient"):
+    async def test_get_dataset_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}")
@@ -684,11 +796,16 @@ class TestSuiteDatasets:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_get_dataset_as_restricted_user(self, async_client: "AsyncClient", role: UserRole):
+    async def test_get_dataset_as_restricted_user(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create(name="dataset")
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+        )
 
         assert response.status_code == 200
         assert response.json()["name"] == "dataset"
@@ -701,11 +818,16 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+        )
 
         assert response.status_code == 403
 
-    async def test_get_dataset_with_nonexistent_dataset_id(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_get_dataset_with_nonexistent_dataset_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset_id = uuid4()
 
         await DatasetFactory.create()
@@ -716,7 +838,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     async def test_get_current_user_dataset_metrics(
         self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
@@ -728,9 +852,15 @@ class TestSuiteDatasets:
         record_d = await RecordFactory.create(dataset=dataset)
         await RecordFactory.create_batch(3, dataset=dataset)
         await ResponseFactory.create(record=record_a, user=owner)
-        await ResponseFactory.create(record=record_b, user=owner, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_c, user=owner, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_d, user=owner, status=ResponseStatus.draft)
+        await ResponseFactory.create(
+            record=record_b, user=owner, status=ResponseStatus.discarded
+        )
+        await ResponseFactory.create(
+            record=record_c, user=owner, status=ResponseStatus.discarded
+        )
+        await ResponseFactory.create(
+            record=record_d, user=owner, status=ResponseStatus.draft
+        )
 
         other_dataset = await DatasetFactory.create()
         other_record_a = await RecordFactory.create(dataset=other_dataset)
@@ -739,9 +869,13 @@ class TestSuiteDatasets:
         await RecordFactory.create_batch(2, dataset=other_dataset)
         await ResponseFactory.create(record=other_record_a, user=owner)
         await ResponseFactory.create(record=other_record_b)
-        await ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+        await ResponseFactory.create(
+            record=other_record_c, status=ResponseStatus.discarded
+        )
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -756,7 +890,9 @@ class TestSuiteDatasets:
             },
         }
 
-    async def test_get_current_user_dataset_metrics_without_authentication(self, async_client: "AsyncClient"):
+    async def test_get_current_user_dataset_metrics_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
@@ -764,7 +900,9 @@ class TestSuiteDatasets:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_get_current_user_dataset_metrics_as_annotator(self, async_client: "AsyncClient", role: UserRole):
+    async def test_get_current_user_dataset_metrics_as_annotator(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
         record_a = await RecordFactory.create(dataset=dataset)
@@ -774,8 +912,12 @@ class TestSuiteDatasets:
         await RecordFactory.create_batch(2, dataset=dataset)
         await ResponseFactory.create(record=record_a, user=user)
         await ResponseFactory.create(record=record_b, user=user)
-        await ResponseFactory.create(record=record_c, user=user, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_d, user=user, status=ResponseStatus.draft)
+        await ResponseFactory.create(
+            record=record_c, user=user, status=ResponseStatus.discarded
+        )
+        await ResponseFactory.create(
+            record=record_d, user=user, status=ResponseStatus.draft
+        )
 
         other_dataset = await DatasetFactory.create()
         other_record_a = await RecordFactory.create(dataset=other_dataset)
@@ -784,10 +926,13 @@ class TestSuiteDatasets:
         await RecordFactory.create_batch(3, dataset=other_dataset)
         await ResponseFactory.create(record=other_record_a, user=user)
         await ResponseFactory.create(record=other_record_b)
-        await ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+        await ResponseFactory.create(
+            record=other_record_c, status=ResponseStatus.discarded
+        )
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -805,7 +950,8 @@ class TestSuiteDatasets:
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -823,9 +969,13 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
-    async def test_create_dataset(self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+    async def test_create_dataset(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+    ):
         workspace = await WorkspaceFactory.create()
         dataset_json = {
             "name": "name",
@@ -834,7 +984,9 @@ class TestSuiteDatasets:
             "workspace_id": str(workspace.id),
         }
 
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.post(
+            "/api/v1/datasets", headers=owner_auth_header, json=dataset_json
+        )
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
@@ -850,11 +1002,21 @@ class TestSuiteDatasets:
             "allow_extra_metadata": False,
             "status": "draft",
             "workspace_id": str(workspace.id),
-            "last_activity_at": datetime.fromisoformat(response_body["last_activity_at"]).isoformat(),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "last_activity_at": datetime.fromisoformat(
+                response_body["last_activity_at"]
+            ).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
-        assert response_body["last_activity_at"] == response_body["inserted_at"] == response_body["updated_at"]
+        assert (
+            response_body["last_activity_at"]
+            == response_body["inserted_at"]
+            == response_body["updated_at"]
+        )
 
     async def test_create_dataset_with_invalid_length_guidelines(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -866,7 +1028,9 @@ class TestSuiteDatasets:
             "workspace_id": str(workspace.id),
         }
 
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.post(
+            "/api/v1/datasets", headers=owner_auth_header, json=dataset_json
+        )
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
@@ -881,21 +1045,32 @@ class TestSuiteDatasets:
             {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
-            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+            {
+                "name": "test-dataset",
+                "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1),
+            },
         ],
     )
     async def test_create_dataset_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        dataset_json: dict,
     ):
         workspace = await WorkspaceFactory.create()
         dataset_json.update({"workspace_id": str(workspace.id)})
 
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+        response = await async_client.post(
+            "/api/v1/datasets", headers=owner_auth_header, json=dataset_json
+        )
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
-    async def test_create_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         workspace = await WorkspaceFactory.create()
         dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
 
@@ -904,25 +1079,33 @@ class TestSuiteDatasets:
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
-    async def test_create_dataset_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_as_admin(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
 
         dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
         response = await async_client.post(
-            "/api/v1/datasets", headers={API_KEY_HEADER_NAME: admin.api_key}, json=dataset_json
+            "/api/v1/datasets",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
+            json=dataset_json,
         )
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
-    async def test_create_dataset_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         annotator = await AnnotatorFactory.create()
         workspace = await WorkspaceFactory.create()
         dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
 
         response = await async_client.post(
-            "/api/v1/datasets", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=dataset_json
+            "/api/v1/datasets",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json=dataset_json,
         )
 
         assert response.status_code == 403
@@ -964,7 +1147,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
+        assert response.json() == {
+            "detail": f"Workspace with id `{workspace_id}` not found"
+        }
 
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
@@ -972,8 +1157,14 @@ class TestSuiteDatasets:
         ("settings", "expected_settings"),
         [
             ({"type": "text"}, {"type": "text", "use_markdown": False}),
-            ({"type": "text", "discarded": "value"}, {"type": "text", "use_markdown": False}),
-            ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
+            (
+                {"type": "text", "discarded": "value"},
+                {"type": "text", "use_markdown": False},
+            ),
+            (
+                {"type": "text", "use_markdown": False},
+                {"type": "text", "use_markdown": False},
+            ),
         ],
     )
     async def test_create_dataset_field(
@@ -988,7 +1179,9 @@ class TestSuiteDatasets:
         field_json = {"name": "name", "title": "title", "settings": settings}
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json=field_json,
         )
 
         assert response.status_code == 201
@@ -1003,11 +1196,17 @@ class TestSuiteDatasets:
             "required": False,
             "settings": expected_settings,
             "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
-    async def test_create_dataset_field_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_field_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         field_json = {
             "name": "name",
@@ -1015,12 +1214,16 @@ class TestSuiteDatasets:
             "settings": {"type": "text"},
         }
 
-        response = await async_client.post(f"/api/v1/datasets/{dataset.id}/fields", json=field_json)
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/fields", json=field_json
+        )
 
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
-    async def test_create_dataset_field_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_field_as_admin(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
@@ -1039,7 +1242,9 @@ class TestSuiteDatasets:
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
-    async def test_create_dataset_field_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_field_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
         field_json = {
@@ -1057,9 +1262,15 @@ class TestSuiteDatasets:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
+    @pytest.mark.parametrize(
+        "invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"]
+    )
     async def test_create_dataset_field_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        invalid_name: str,
     ):
         dataset = await DatasetFactory.create()
         field_json = {
@@ -1069,7 +1280,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json=field_json,
         )
 
         assert response.status_code == 422
@@ -1086,7 +1299,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json=field_json,
         )
 
         assert response.status_code == 422
@@ -1104,7 +1319,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json=field_json,
         )
 
         assert response.status_code == 422
@@ -1122,7 +1339,11 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_field_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        settings: dict,
     ):
         dataset = await DatasetFactory.create()
         field_json = {
@@ -1132,7 +1353,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
+            f"/api/v1/datasets/{dataset.id}/fields",
+            headers=owner_auth_header,
+            json=field_json,
         )
 
         assert response.status_code == 422
@@ -1176,7 +1399,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Field cannot be created for a published dataset"}
+        assert response.json() == {
+            "detail": "Field cannot be created for a published dataset"
+        }
 
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
@@ -1198,7 +1423,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
@@ -1213,13 +1440,25 @@ class TestSuiteDatasets:
             ),
             ({"type": "integer"}, {"type": "integer", "min": None, "max": None}),
             ({"type": "integer", "min": 2}, {"type": "integer", "min": 2, "max": None}),
-            ({"type": "integer", "max": 10}, {"type": "integer", "min": None, "max": 10}),
-            ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
+            (
+                {"type": "integer", "max": 10},
+                {"type": "integer", "min": None, "max": 10},
+            ),
+            (
+                {"type": "integer", "min": 2, "max": 10},
+                {"type": "integer", "min": 2, "max": 10},
+            ),
             ({"type": "float"}, {"type": "float", "min": None, "max": None}),
             ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
             ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
-            ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
-            ({"type": "float", "min": 0.3, "max": 1.0}, {"type": "float", "min": 0.3, "max": 1.0}),
+            (
+                {"type": "float", "min": 2, "max": 10},
+                {"type": "float", "min": 2, "max": 10},
+            ),
+            (
+                {"type": "float", "min": 0.3, "max": 1.0},
+                {"type": "float", "min": 0.3, "max": 1.0},
+            ),
         ],
     )
     async def test_create_dataset_metadata_property(
@@ -1231,10 +1470,16 @@ class TestSuiteDatasets:
         expected_settings: dict,
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": settings,
+        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 201
@@ -1249,8 +1494,12 @@ class TestSuiteDatasets:
             "settings": expected_settings,
             "visible_for_annotators": True,
             "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_dataset_metadata_property_with_dataset_ready(
@@ -1268,28 +1517,40 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
 
         response_body = response.json()
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
+        created_metadata_property = await db.get(
+            MetadataProperty, UUID(response_body["id"])
+        )
 
         assert created_metadata_property
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "visible_for_annotators": True,
             "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
             **metadata_property_json,
         }
 
-        mock_search_engine.configure_metadata_property.assert_called_once_with(dataset, created_metadata_property)
+        mock_search_engine.configure_metadata_property.assert_called_once_with(
+            dataset, created_metadata_property
+        )
 
-    async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_metadata_property_as_admin(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
@@ -1321,13 +1582,23 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_metadata_property_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        settings: dict,
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": settings,
+        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 422
@@ -1355,10 +1626,16 @@ class TestSuiteDatasets:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
-    async def test_create_dataset_metadata_property_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_metadata_property_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
-        question_json = {"name": "name", "title": "title", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
+        question_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms", "values": ["a", "b", "c"]},
+        }
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
@@ -1383,13 +1660,23 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_metadata_property_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        invalid_name: str,
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": invalid_name, "title": "title", "settings": {"type": "terms"}}
+        metadata_property_json = {
+            "name": invalid_name,
+            "title": "title",
+            "settings": {"type": "terms"},
+        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 422
@@ -1422,13 +1709,23 @@ class TestSuiteDatasets:
         ["", "a" * (METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH + 1)],
     )
     async def test_create_dataset_metadata_property_with_invalid_title(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        title: str,
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": title, "settings": {"type": "terms"}}
+        metadata_property_json = {
+            "name": "name",
+            "title": title,
+            "settings": {"type": "terms"},
+        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 422
@@ -1446,7 +1743,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 201
@@ -1455,9 +1754,14 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["visible_for_annotators"] == True
 
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
+        created_metadata_property = await db.get(
+            MetadataProperty, UUID(response_body["id"])
+        )
         assert created_metadata_property
-        assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
+        assert created_metadata_property.allowed_roles == [
+            UserRole.admin,
+            UserRole.annotator,
+        ]
 
     async def test_create_dataset_metadata_property_not_visible_for_annotators(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -1471,7 +1775,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 201
@@ -1480,7 +1786,9 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["visible_for_annotators"] == False
 
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
+        created_metadata_property = await db.get(
+            MetadataProperty, UUID(response_body["id"])
+        )
         assert created_metadata_property
         assert created_metadata_property.allowed_roles == [UserRole.admin]
 
@@ -1488,10 +1796,16 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": {"type": "terms"}}
+        metadata_property_json = {
+            "name": "name",
+            "title": "title",
+            "settings": {"type": "terms"},
+        }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
+            f"/api/v1/datasets/{dataset.id}/metadata-properties",
+            headers=owner_auth_header,
+            json=metadata_property_json,
         )
 
         assert response.status_code == 201
@@ -1500,27 +1814,44 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["visible_for_annotators"] == True
 
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
+        created_metadata_property = await db.get(
+            MetadataProperty, UUID(response_body["id"])
+        )
         assert created_metadata_property
-        assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
+        assert created_metadata_property.allowed_roles == [
+            UserRole.admin,
+            UserRole.annotator,
+        ]
 
-    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)])
+    @pytest.mark.parametrize(
+        "values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)]
+    )
     async def test_create_dataset_terms_metadata_property_with_invalid_number_of_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, values: List[str]
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        values: List[str],
     ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/metadata-properties",
             headers=owner_auth_header,
-            json={"name": "name", "title": "title", "settings": {"type": "terms", "values": values}},
+            json={
+                "name": "name",
+                "title": "title",
+                "settings": {"type": "terms", "values": values},
+            },
         )
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    @pytest.mark.parametrize("dataset_status", [DatasetStatus.draft, DatasetStatus.ready])
+    @pytest.mark.parametrize(
+        "dataset_status", [DatasetStatus.draft, DatasetStatus.ready]
+    )
     async def test_create_dataset_vector_settings(
         self,
         async_client: "AsyncClient",
@@ -1560,13 +1891,19 @@ class TestSuiteDatasets:
         if dataset_status == DatasetStatus.draft:
             mock_search_engine.configure_index_vectors.assert_not_called()
         else:
-            mock_search_engine.configure_index_vectors.assert_called_once_with(vector_settings)
+            mock_search_engine.configure_index_vectors.assert_called_once_with(
+                vector_settings
+            )
 
     @pytest.mark.parametrize(
         "payload",
         [
             {"name": "", "title": "vectors", "dimensions": 5},
-            {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "title": "vectors", "dimensions": 5},
+            {
+                "name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1),
+                "title": "vectors",
+                "dimensions": 5,
+            },
             {"name": " invalid", "title": "vectors", "dimensions": 5},
             {"name": "vectors", "title": "", "dimensions": 5},
             {
@@ -1627,9 +1964,13 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
-    async def test_create_dataset_vector_settings_as_annotator(self, async_client: "AsyncClient"):
+    async def test_create_dataset_vector_settings_as_annotator(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
         annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
 
@@ -1645,7 +1986,9 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_create_dataset_vector_settings_as_admin_from_different_workspace(self, async_client: "AsyncClient"):
+    async def test_create_dataset_vector_settings_as_admin_from_different_workspace(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
         admin = await AdminFactory.create()
 
@@ -1661,7 +2004,9 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_create_dataset_vector_settings_without_authentication(self, async_client: "AsyncClient"):
+    async def test_create_dataset_vector_settings_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -1691,9 +2036,15 @@ class TestSuiteDatasets:
         question_a = await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         question_b = await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        await TermsMetadataPropertyFactory.create(name="terms-metadata", dataset=dataset)
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata", dataset=dataset)
-        await FloatMetadataPropertyFactory.create(name="float-metadata", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata", dataset=dataset
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="integer-metadata", dataset=dataset
+        )
+        await FloatMetadataPropertyFactory.create(
+            name="float-metadata", dataset=dataset
+        )
 
         records_json = {
             "items": [
@@ -1702,7 +2053,10 @@ class TestSuiteDatasets:
                     "external_id": "1",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         }
@@ -1738,7 +2092,10 @@ class TestSuiteDatasets:
                     "external_id": "3",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "no"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         }
@@ -1748,7 +2105,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Good Morning"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "discarded",
                             "user_id": str(owner.id),
                         }
@@ -1767,7 +2127,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204, response.json()
@@ -1792,7 +2154,9 @@ class TestSuiteDatasets:
     ):
         workspace = await WorkspaceFactory.create()
 
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready, workspace=workspace)
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, workspace=workspace
+        )
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TextFieldFactory.create(name="output", dataset=dataset)
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -1807,7 +2171,10 @@ class TestSuiteDatasets:
                     "external_id": "1",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         },
@@ -1822,7 +2189,10 @@ class TestSuiteDatasets:
                     "external_id": "3",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "no"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "submitted",
                             "user_id": str(annotator.id),
                         }
@@ -1832,7 +2202,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         await db.refresh(annotator)
@@ -1840,8 +2212,16 @@ class TestSuiteDatasets:
 
         assert response.status_code == 204, response.json()
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 2
-        assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == annotator.id))).scalar() == 2
-        assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == owner.id))).scalar() == 1
+        assert (
+            await db.execute(
+                select(func.count(Response.id)).where(Response.user_id == annotator.id)
+            )
+        ).scalar() == 2
+        assert (
+            await db.execute(
+                select(func.count(Response.id)).where(Response.user_id == owner.id)
+            )
+        ).scalar() == 1
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
@@ -1862,7 +2242,10 @@ class TestSuiteDatasets:
                     "external_id": "1",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(uuid4()),
                         },
@@ -1872,7 +2255,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422, response.json()
@@ -1880,7 +2265,11 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     async def test_create_dataset_records_with_duplicated_response_for_an_user(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner: "User", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: "User",
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="input", dataset=dataset)
@@ -1895,12 +2284,18 @@ class TestSuiteDatasets:
                     "external_id": "1",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         },
                         {
-                            "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "no"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         },
@@ -1910,7 +2305,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422, response.json()
@@ -1940,7 +2337,11 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_records_with_not_valid_suggestion(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, payload: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        payload: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         question = await TextFieldFactory.create(name="input", dataset=dataset)
@@ -1980,7 +2381,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2014,7 +2417,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2052,7 +2457,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2070,7 +2477,11 @@ class TestSuiteDatasets:
         ],
     )
     async def test_create_dataset_records_with_optional_fields(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, record_json: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        record_json: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
@@ -2080,7 +2491,9 @@ class TestSuiteDatasets:
         records_json = {"items": [record_json]}
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204, response.json()
@@ -2105,7 +2518,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
         assert response.status_code == 422
         assert response.json() == {
@@ -2151,7 +2566,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
-        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
+        await MetadataPropertyFactoryType.create(
+            name="metadata-property", settings=settings, dataset=dataset
+        )
 
         records_json = {
             "items": [
@@ -2163,7 +2580,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
@@ -2190,7 +2609,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
-        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
+        await MetadataPropertyFactoryType.create(
+            name="metadata-property", settings=settings, dataset=dataset
+        )
 
         records_json = {
             "items": [
@@ -2202,7 +2623,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2228,7 +2651,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
-        await MetadataPropertyFactoryType.create(name="metadata-property", dataset=dataset, settings=settings)
+        await MetadataPropertyFactoryType.create(
+            name="metadata-property", dataset=dataset, settings=settings
+        )
 
         records_json = {
             "items": [
@@ -2240,7 +2665,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2252,7 +2679,9 @@ class TestSuiteDatasets:
     async def test_create_dataset_records_with_extra_metadata_allowed(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready, allow_extra_metadata=True)
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, allow_extra_metadata=True
+        )
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
         await TermsMetadataPropertyFactory.create(name="terms-metadata")
@@ -2261,24 +2690,34 @@ class TestSuiteDatasets:
             "items": [
                 {
                     "fields": {"completion": "text-input"},
-                    "metadata": {"terms-metadata": "a", "extra": {"this": {"is": "extra metadata"}}},
+                    "metadata": {
+                        "terms-metadata": "a",
+                        "extra": {"this": {"is": "extra metadata"}},
+                    },
                 }
             ]
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
 
         record = (await db.execute(select(Record))).scalar()
-        assert record.metadata_ == {"terms-metadata": "a", "extra": {"this": {"is": "extra metadata"}}}
+        assert record.metadata_ == {
+            "terms-metadata": "a",
+            "extra": {"this": {"is": "extra metadata"}},
+        }
 
     async def test_create_dataset_records_with_extra_metadata_not_allowed(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready, allow_extra_metadata=False)
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, allow_extra_metadata=False
+        )
         await TextFieldFactory.create(name="completion", dataset=dataset)
         await TextQuestionFactory.create(name="corrected", dataset=dataset)
 
@@ -2292,7 +2731,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2312,8 +2753,12 @@ class TestSuiteDatasets:
         await TextFieldFactory.create(name="text", dataset=dataset)
         await TextQuestionFactory.create(name="text_ok", dataset=dataset)
 
-        vector_settings_a = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_b = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_a = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -2339,8 +2784,12 @@ class TestSuiteDatasets:
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Vector.id)))).scalar() == 3
 
-        vector_a, vector_b, vector_c = (await db.execute(select(Vector))).scalars().all()
-        record_a, record_b, record_c = (await db.execute(select(Record))).scalars().all()
+        vector_a, vector_b, vector_c = (
+            (await db.execute(select(Vector))).scalars().all()
+        )
+        record_a, record_b, record_c = (
+            (await db.execute(select(Record))).scalars().all()
+        )
         assert (
             vector_a.record_id == record_a.id
             and vector_a.vector_settings_id == vector_settings_a.id
@@ -2364,7 +2813,9 @@ class TestSuiteDatasets:
         await TextFieldFactory.create(name="text", dataset=dataset)
         await TextQuestionFactory.create(name="text_ok", dataset=dataset)
 
-        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
 
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -2441,7 +2892,11 @@ class TestSuiteDatasets:
         )
 
     async def test_create_dataset_records_with_index_error(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        db: "AsyncSession",
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
@@ -2454,7 +2909,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2462,7 +2919,9 @@ class TestSuiteDatasets:
 
         assert not mock_search_engine.create_index.called
 
-    async def test_create_dataset_records_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_records_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         records_json = {
             "items": [
@@ -2470,14 +2929,19 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Hello"},
                     "external_id": "1",
                     "response": {
-                        "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                        "values": {
+                            "input_ok": {"value": "yes"},
+                            "output_ok": {"value": "yes"},
+                        },
                         "status": "submitted",
                     },
                 },
             ],
         }
 
-        response = await async_client.post(f"/api/v1/datasets/{dataset.id}/records", json=records_json)
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records", json=records_json
+        )
 
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
@@ -2506,7 +2970,10 @@ class TestSuiteDatasets:
                     "external_id": "1",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(admin.id),
                         }
@@ -2520,7 +2987,10 @@ class TestSuiteDatasets:
                     "external_id": "3",
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "no"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "no"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "submitted",
                             "user_id": str(admin.id),
                         }
@@ -2530,7 +3000,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Good Morning"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "no"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "no"},
+                            },
                             "status": "discarded",
                             "user_id": str(admin.id),
                         }
@@ -2549,7 +3022,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
+            json=records_json,
         )
 
         assert response.status_code == 204, response.json()
@@ -2563,7 +3038,9 @@ class TestSuiteDatasets:
             action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
         )
 
-    async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_dataset_records_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         records_json = {
@@ -2592,7 +3069,9 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
-    async def test_create_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+    async def test_create_dataset_records_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ):
         admin = await AdminFactory.create()
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         records_json = {
@@ -2612,13 +3091,19 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
+            json=records_json,
         )
 
         assert response.status_code == 403
 
     async def test_create_dataset_records_with_submitted_response(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextFieldFactory.create(name="input", dataset=dataset)
@@ -2633,7 +3118,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "submitted",
                             "user_id": str(owner.id),
                         }
@@ -2643,7 +3131,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
@@ -2674,7 +3164,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2701,7 +3193,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "discarded",
                             "user_id": str(owner.id),
                         }
@@ -2711,13 +3206,19 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
         assert (
-            await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.discarded))
+            await db.execute(
+                select(func.count(Response.id)).filter(
+                    Response.status == ResponseStatus.discarded
+                )
+            )
         ).scalar() == 1
 
     async def test_create_dataset_records_with_draft_response(
@@ -2740,7 +3241,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "draft",
                             "user_id": str(owner.id),
                         }
@@ -2750,13 +3254,19 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
         assert (
-            await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.draft))
+            await db.execute(
+                select(func.count(Response.id)).filter(
+                    Response.status == ResponseStatus.draft
+                )
+            )
         ).scalar() == 1
 
     async def test_create_dataset_records_with_invalid_response_status(
@@ -2773,7 +3283,10 @@ class TestSuiteDatasets:
                     "fields": {"input": "Say Hello", "output": "Hello"},
                     "responses": [
                         {
-                            "values": {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}},
+                            "values": {
+                                "input_ok": {"value": "yes"},
+                                "output_ok": {"value": "yes"},
+                            },
                             "status": "invalid",
                             "user_id": str(owner.id),
                         }
@@ -2783,7 +3296,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2819,7 +3334,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 204
@@ -2832,16 +3349,23 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.draft)
         records_json = {
             "items": [
-                {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": "1"},
+                {
+                    "fields": {"input": "Say Hello", "output": "Hello"},
+                    "external_id": "1",
+                },
             ],
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Records cannot be created for a non published dataset"}
+        assert response.json() == {
+            "detail": "Records cannot be created for a non published dataset"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
@@ -2860,7 +3384,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2882,7 +3408,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2902,7 +3430,9 @@ class TestSuiteDatasets:
         }
 
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            json=records_json,
         )
 
         assert response.status_code == 422
@@ -2921,31 +3451,52 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 1},
-                    {"fields": {"input": "Say Hello", "output": "Hello"}, "external_id": 2},
+                    {
+                        "fields": {"input": "Say Hello", "output": "Hello"},
+                        "external_id": 1,
+                    },
+                    {
+                        "fields": {"input": "Say Hello", "output": "Hello"},
+                        "external_id": 2,
+                    },
                 ],
             },
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update_dataset_records(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        role: UserRole,
     ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
-        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata-property", dataset=dataset
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="integer-metadata-property", dataset=dataset
+        )
+        await FloatMetadataPropertyFactory.create(
+            name="float-metadata-property", dataset=dataset
+        )
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            metadata_={"terms-metadata-property": "z", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+            metadata_={
+                "terms-metadata-property": "z",
+                "integer-metadata-property": 1,
+                "float-metadata-property": 1.0,
+            },
         )
 
         response = await async_client.patch(
@@ -3024,7 +3575,10 @@ class TestSuiteDatasets:
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:3])
 
     async def test_update_dataset_records_with_suggestions(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         question_0 = await TextQuestionFactory.create(dataset=dataset)
@@ -3034,23 +3588,41 @@ class TestSuiteDatasets:
 
         # Record 0 suggestions (should be deleted)
         suggestions_records_0 = [
-            await SuggestionFactory.create(question=question_0, record=records[0], value="suggestion 0 1"),
-            await SuggestionFactory.create(question=question_1, record=records[0], value="suggestion 0 2"),
-            await SuggestionFactory.create(question=question_2, record=records[0], value="suggestion 0 3"),
+            await SuggestionFactory.create(
+                question=question_0, record=records[0], value="suggestion 0 1"
+            ),
+            await SuggestionFactory.create(
+                question=question_1, record=records[0], value="suggestion 0 2"
+            ),
+            await SuggestionFactory.create(
+                question=question_2, record=records[0], value="suggestion 0 3"
+            ),
         ]
 
         # Record 1 suggestions (should be deleted)
         suggestions_records_1 = [
-            await SuggestionFactory.create(question=question_0, record=records[1], value="suggestion 1 1"),
-            await SuggestionFactory.create(question=question_1, record=records[1], value="suggestion 1 2"),
-            await SuggestionFactory.create(question=question_2, record=records[1], value="suggestion 1 3"),
+            await SuggestionFactory.create(
+                question=question_0, record=records[1], value="suggestion 1 1"
+            ),
+            await SuggestionFactory.create(
+                question=question_1, record=records[1], value="suggestion 1 2"
+            ),
+            await SuggestionFactory.create(
+                question=question_2, record=records[1], value="suggestion 1 3"
+            ),
         ]
 
         # Record 2 suggestions (should be kept)
         suggestions_records_2 = [
-            await SuggestionFactory.create(question=question_0, record=records[2], value="suggestion 2 1"),
-            await SuggestionFactory.create(question=question_1, record=records[2], value="suggestion 2 2"),
-            await SuggestionFactory.create(question=question_2, record=records[2], value="suggestion 2 3"),
+            await SuggestionFactory.create(
+                question=question_0, record=records[2], value="suggestion 2 1"
+            ),
+            await SuggestionFactory.create(
+                question=question_1, record=records[2], value="suggestion 2 2"
+            ),
+            await SuggestionFactory.create(
+                question=question_2, record=records[2], value="suggestion 2 3"
+            ),
         ]
 
         response = await async_client.patch(
@@ -3069,7 +3641,10 @@ class TestSuiteDatasets:
                                 "question_id": str(question_1.id),
                                 "value": "suggestion updated 0 2",
                             },
-                            {"question_id": str(question_2.id), "value": "suggestion updated 0 3"},
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 0 3",
+                            },
                         ],
                     },
                     {
@@ -3095,7 +3670,10 @@ class TestSuiteDatasets:
                                 "question_id": str(question_1.id),
                                 "value": "suggestion updated 3 2",
                             },
-                            {"question_id": str(question_2.id), "value": "suggestion updated 3 3"},
+                            {
+                                "question_id": str(question_2.id),
+                                "value": "suggestion updated 3 3",
+                            },
                         ],
                     },
                 ]
@@ -3140,9 +3718,15 @@ class TestSuiteDatasets:
         record = await RecordFactory.create(dataset=dataset)
 
         suggestions_records_0 = [
-            await SuggestionFactory.create(question=question_0, record=record, value="suggestion 0 1"),
-            await SuggestionFactory.create(question=question_1, record=record, value="suggestion 0 2"),
-            await SuggestionFactory.create(question=question_2, record=record, value="suggestion 0 3"),
+            await SuggestionFactory.create(
+                question=question_0, record=record, value="suggestion 0 1"
+            ),
+            await SuggestionFactory.create(
+                question=question_1, record=record, value="suggestion 0 2"
+            ),
+            await SuggestionFactory.create(
+                question=question_2, record=record, value="suggestion 0 3"
+            ),
         ]
 
         response = await async_client.patch(
@@ -3158,23 +3742,44 @@ class TestSuiteDatasets:
             assert inspect(suggestion).deleted
 
     async def test_update_dataset_records_with_vectors(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings_0 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        vector_settings_1 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        vector_settings_2 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
         records = await RecordFactory.create_batch(10, dataset=dataset)
 
         # Record 0 vectors (all should be updated)
-        await VectorFactory.create(vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0])
-        await VectorFactory.create(vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1])
-        await VectorFactory.create(vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2])
+        await VectorFactory.create(
+            vector_settings=vector_settings_0, record=records[0], value=[0, 0, 0, 0, 0]
+        )
+        await VectorFactory.create(
+            vector_settings=vector_settings_1, record=records[0], value=[1, 1, 1, 1, 1]
+        )
+        await VectorFactory.create(
+            vector_settings=vector_settings_2, record=records[0], value=[2, 2, 2, 2, 2]
+        )
 
         # Record 1 vectors (just the first one should be updated)
-        await VectorFactory.create(vector_settings=vector_settings_0, record=records[1], value=[3, 3, 3, 3, 3])
-        await VectorFactory.create(vector_settings=vector_settings_1, record=records[1], value=[4, 4, 4, 4, 4])
-        await VectorFactory.create(vector_settings=vector_settings_2, record=records[1], value=[5, 5, 5, 5, 5])
+        await VectorFactory.create(
+            vector_settings=vector_settings_0, record=records[1], value=[3, 3, 3, 3, 3]
+        )
+        await VectorFactory.create(
+            vector_settings=vector_settings_1, record=records[1], value=[4, 4, 4, 4, 4]
+        )
+        await VectorFactory.create(
+            vector_settings=vector_settings_2, record=records[1], value=[5, 5, 5, 5, 5]
+        )
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -3306,10 +3911,20 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(records[0].id), "suggestions": [{"question_id": str(question.id), "value": "option-a"}]},
+                    {
+                        "id": str(records[0].id),
+                        "suggestions": [
+                            {"question_id": str(question.id), "value": "option-a"}
+                        ],
+                    },
                     {
                         "id": str(records[1].id),
-                        "suggestions": [{"question_id": str(question.id), "value": "not-valid-option"}],
+                        "suggestions": [
+                            {
+                                "question_id": str(question.id),
+                                "value": "not-valid-option",
+                            }
+                        ],
                     },
                 ]
             },
@@ -3324,7 +3939,9 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
         records = await RecordFactory.create_batch(5, dataset=dataset)
 
         response = await async_client.patch(
@@ -3332,7 +3949,12 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(records[1].id), "vectors": {vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]}},
+                    {
+                        "id": str(records[1].id),
+                        "vectors": {
+                            vector_settings.name: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]
+                        },
+                    },
                 ]
             },
         )
@@ -3361,7 +3983,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     async def test_update_dataset_records_with_nonexistent_records(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -3369,7 +3993,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
 
-        records = [{"id": str(uuid4()), "metadata": {"i exists": False}} for _ in range(3)]
+        records = [
+            {"id": str(uuid4()), "metadata": {"i exists": False}} for _ in range(3)
+        ]
 
         records.append({"id": str(record.id), "metadata": {"i exists": True}})
 
@@ -3397,7 +4023,10 @@ class TestSuiteDatasets:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(record.id), "suggestions": [{"question_id": question_id, "value": "shit"}]},
+                    {
+                        "id": str(record.id),
+                        "suggestions": [{"question_id": question_id, "value": "shit"}],
+                    },
                 ]
             },
         )
@@ -3417,7 +4046,11 @@ class TestSuiteDatasets:
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
             headers=owner_auth_header,
-            json={"items": [{"id": str(record.id), "vectors": {"i-do-not-exist": [1, 2, 3, 4]}}]},
+            json={
+                "items": [
+                    {"id": str(record.id), "vectors": {"i-do-not-exist": [1, 2, 3, 4]}}
+                ]
+            },
         )
 
         assert response.status_code == 422
@@ -3474,7 +4107,9 @@ class TestSuiteDatasets:
             "detail": "Record at position 0 is not valid because found duplicate suggestions question IDs"
         }
 
-    async def test_update_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+    async def test_update_dataset_records_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
 
@@ -3492,9 +4127,13 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_update_dataset_records_as_annotator(self, async_client: "AsyncClient"):
+    async def test_update_dataset_records_as_annotator(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
-        user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
+        user = await UserFactory.create(
+            role=UserRole.annotator, workspaces=[dataset.workspace]
+        )
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -3510,18 +4149,25 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_update_dataset_records_without_authentication(self, async_client: "AsyncClient"):
+    async def test_update_dataset_records_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(
-            f"/api/v1/datasets/{dataset.id}/records", json={"items": [{"id": str(uuid4())}]}
+            f"/api/v1/datasets/{dataset.id}/records",
+            json={"items": [{"id": str(uuid4())}]},
         )
 
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
     ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -3542,9 +4188,13 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         # `delete_records` is called with the records returned by the delete statement, which are different ORM objects
         # than the ones created by the factory
-        mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=ANY)
+        mock_search_engine.delete_records.assert_called_once_with(
+            dataset=dataset, records=ANY
+        )
 
-    async def test_delete_dataset_records_with_no_ids(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_delete_dataset_records_with_no_ids(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.delete(
@@ -3555,7 +4205,9 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
-    async def test_delete_dataset_records_exceeding_limit(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_delete_dataset_records_exceeding_limit(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         records = await RecordFactory.create_batch(200, dataset=dataset)
 
@@ -3583,12 +4235,16 @@ class TestSuiteDatasets:
         uuids_str = ",".join(records_ids_a + records_ids_b)
 
         response = await async_client.delete(
-            f"/api/v1/datasets/{dataset_a.id}/records", headers=owner_auth_header, params={"ids": uuids_str}
+            f"/api/v1/datasets/{dataset_a.id}/records",
+            headers=owner_auth_header,
+            params={"ids": uuids_str},
         )
 
         assert response.status_code == 204
 
-    async def test_delete_dataset_records_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+    async def test_delete_dataset_records_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
 
@@ -3600,9 +4256,13 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
 
-    async def test_delete_dataset_records_as_annotator(self, async_client: "AsyncClient"):
+    async def test_delete_dataset_records_as_annotator(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
-        user = await UserFactory.create(workspaces=[dataset.workspace], role=UserRole.annotator)
+        user = await UserFactory.create(
+            workspaces=[dataset.workspace], role=UserRole.annotator
+        )
 
         response = await async_client.delete(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -3613,10 +4273,16 @@ class TestSuiteDatasets:
         assert response.status_code == 403
 
     async def test_search_current_user_dataset_records(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         mock_search_engine.search.return_value = SearchResponses(
             items=[
@@ -3628,7 +4294,9 @@ class TestSuiteDatasets:
 
         query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
         response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search", headers=owner_auth_header, json=query_json
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
         )
 
         mock_search_engine.search.assert_called_once_with(
@@ -3673,7 +4341,12 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        (
+            "property_config",
+            "param_value",
+            "expected_filter_class",
+            "expected_filter_args",
+        ),
         [
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
@@ -3737,7 +4410,9 @@ class TestSuiteDatasets:
         expected_filter_args: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         metadata_property = await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -3767,7 +4442,11 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
+            metadata_filters=[
+                expected_filter_class(
+                    metadata_property=metadata_property, **expected_filter_args
+                )
+            ],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3784,8 +4463,14 @@ class TestSuiteDatasets:
             ({"name": "terms_prop", "settings": {"type": "terms"}}, "wrong-value"),
             ({"name": "integer_prop", "settings": {"type": "integer"}}, None),
             ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:{}"),
+            (
+                {"name": "integer_prop", "settings": {"type": "integer"}},
+                "integer_prop:",
+            ),
+            (
+                {"name": "integer_prop", "settings": {"type": "integer"}},
+                "integer_prop:{}",
+            ),
             ({"name": "integer_prop", "settings": {"type": "integer"}}, "wrong-value"),
             ({"name": "float_prop", "settings": {"type": "float"}}, None),
             ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop"),
@@ -3804,7 +4489,9 @@ class TestSuiteDatasets:
         wrong_value: str,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -3849,9 +4536,21 @@ class TestSuiteDatasets:
             [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
             [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
             [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "desc"),
+                ("metadata.terms-metadata-property", "asc"),
+            ],
+            [
+                ("inserted_at", "desc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
         ],
     )
     async def test_search_current_user_dataset_records_with_sort_by(
@@ -3863,12 +4562,16 @@ class TestSuiteDatasets:
         sorts: List[Tuple[str, Union[str, None]]],
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(
+                    name=field.split(".")[-1], dataset=dataset
+                )
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -3880,7 +4583,10 @@ class TestSuiteDatasets:
         )
 
         query_params = {
-            "sort_by": [f"{field}:{order}" if order is not None else f"{field}:asc" for field, order in sorts]
+            "sort_by": [
+                f"{field}:{order}" if order is not None else f"{field}:asc"
+                for field, order in sorts
+            ]
         }
 
         query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
@@ -3974,7 +4680,11 @@ class TestSuiteDatasets:
         ],
     )
     async def test_search_current_user_dataset_records_with_include(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: "User", includes: List[str]
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: "User",
+        includes: List[str],
     ):
         workspace = await WorkspaceFactory.create()
         (
@@ -4110,18 +4820,31 @@ class TestSuiteDatasets:
         )
 
     async def test_search_current_user_dataset_records_with_include_vectors(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
 
         await TextFieldFactory.create(name="input", dataset=dataset)
 
@@ -4200,22 +4923,49 @@ class TestSuiteDatasets:
         }
 
     async def test_search_current_user_dataset_records_with_include_specific_vectors(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
-        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
+        vector_settings_c = await VectorSettingsFactory.create(
+            name="vector-c", dimensions=4, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
-        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
-        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[6.0, 7.0, 8.0, 9.0],
+            vector_settings=vector_settings_c,
+            record=record_a,
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
+        await VectorFactory.create(
+            value=[10.0, 11.0, 12.0, 13.0],
+            vector_settings=vector_settings_c,
+            record=record_b,
+        )
+        await VectorFactory.create(
+            value=[14.0, 15.0, 16.0, 17.0],
+            vector_settings=vector_settings_c,
+            record=record_c,
+        )
 
         await TextFieldFactory.create(name="input", dataset=dataset)
 
@@ -4231,7 +4981,9 @@ class TestSuiteDatasets:
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
-            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            params={
+                "include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"
+            },
             json={
                 "query": {
                     "text": {
@@ -4294,7 +5046,11 @@ class TestSuiteDatasets:
         }
 
     async def test_search_current_user_dataset_records_with_response_status_filter(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
@@ -4312,7 +5068,9 @@ class TestSuiteDatasets:
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
             metadata_filters=[],
-            user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
+            user_response_status_filter=UserResponseStatusFilter(
+                user=owner, statuses=[ResponseStatusFilter.submitted]
+            ),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=None,
@@ -4321,12 +5079,20 @@ class TestSuiteDatasets:
         assert response.status_code == 200
 
     async def test_search_current_user_dataset_records_with_record_vector(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
-        vector = await VectorFactory(record=records[0], vector_settings=vector_settings, value=[1, 2, 3])
+        vector = await VectorFactory(
+            record=records[0], vector_settings=vector_settings, value=[1, 2, 3]
+        )
 
         mock_search_engine.similarity_search.return_value = SearchResponses(
             items=[
@@ -4336,7 +5102,14 @@ class TestSuiteDatasets:
             total=2,
         )
 
-        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": str(records[0].id)}}}
+        query_json = {
+            "query": {
+                "vector": {
+                    "name": vector_settings.name,
+                    "record_id": str(records[0].id),
+                }
+            }
+        }
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
@@ -4363,10 +5136,16 @@ class TestSuiteDatasets:
         )
 
     async def test_search_current_user_dataset_records_with_vector_value(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
         selected_vector = await VectorFactory.create(
             vector_settings=vector_settings, record=records[0], value=[1, 2, 3]
@@ -4380,7 +5159,11 @@ class TestSuiteDatasets:
             total=2,
         )
 
-        query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
+        query_json = {
+            "query": {
+                "vector": {"name": vector_settings.name, "value": selected_vector.value}
+            }
+        }
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
@@ -4407,10 +5190,16 @@ class TestSuiteDatasets:
         )
 
     async def test_search_current_user_dataset_records_with_vector_value_and_query(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
         selected_vector = await VectorFactory.create(
             vector_settings=vector_settings, record=records[0], value=[1.0, 2.0, 3.0]
@@ -4427,7 +5216,10 @@ class TestSuiteDatasets:
         query_json = {
             "query": {
                 "text": {"q": "Test query"},
-                "vector": {"name": vector_settings.name, "value": selected_vector.value},
+                "vector": {
+                    "name": vector_settings.name,
+                    "value": selected_vector.value,
+                },
             }
         }
         response = await async_client.post(
@@ -4456,13 +5248,23 @@ class TestSuiteDatasets:
         )
 
     async def test_search_current_user_dataset_records_with_wrong_vector(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
 
-        query_json = {"query": {"vector": {"name": "wrong_vector", "record_id": str(records[0].id)}}}
+        query_json = {
+            "query": {
+                "vector": {"name": "wrong_vector", "record_id": str(records[0].id)}
+            }
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
@@ -4473,17 +5275,29 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         response_json = response.json()
-        assert response_json == {"detail": f"Vector `wrong_vector` not found in dataset `{dataset.id}`."}
+        assert response_json == {
+            "detail": f"Vector `wrong_vector` not found in dataset `{dataset.id}`."
+        }
 
     async def test_search_current_user_dataset_records_with_nonexistent_vector_record_id(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
         wrong_record_id = str(uuid.uuid4())
 
-        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": wrong_record_id}}}
+        query_json = {
+            "query": {
+                "vector": {"name": vector_settings.name, "record_id": wrong_record_id}
+            }
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
@@ -4494,17 +5308,29 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         response_json = response.json()
-        assert response_json == {"detail": f"Record with id `{wrong_record_id}` not found in dataset `{dataset.id}`."}
+        assert response_json == {
+            "detail": f"Record with id `{wrong_record_id}` not found in dataset `{dataset.id}`."
+        }
 
     async def test_search_current_user_dataset_records_with_vector_record_id_from_other_dataset(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         vector_settings = await VectorSettingsFactory.create(dataset=dataset)
         record = await RecordFactory.create()
 
-        query_json = {"query": {"vector": {"name": vector_settings.name, "record_id": str(record.id)}}}
+        query_json = {
+            "query": {
+                "vector": {"name": vector_settings.name, "record_id": str(record.id)}
+            }
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
@@ -4515,13 +5341,21 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         response_json = response.json()
-        assert response_json == {"detail": f"Record with id `{record.id}` not found in dataset `{dataset.id}`."}
+        assert response_json == {
+            "detail": f"Record with id `{record.id}` not found in dataset `{dataset.id}`."
+        }
 
     async def test_search_current_user_dataset_records_with_offset_and_limit(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         mock_search_engine.search.return_value = SearchResponses(
             items=[
@@ -4582,7 +5416,9 @@ class TestSuiteDatasets:
 
         query_json = {"query": {"text": {"q": "unit test", "field": "i do not exist"}}}
         response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search", headers=owner_auth_header, json=query_json
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
         )
 
         assert response.status_code == 422
@@ -4599,7 +5435,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     async def test_publish_dataset(
         self,
@@ -4613,7 +5451,9 @@ class TestSuiteDatasets:
         await TextFieldFactory.create(dataset=dataset, required=True)
         await RatingQuestionFactory.create(dataset=dataset, required=True)
 
-        response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
@@ -4621,10 +5461,14 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+        test_telemetry.track_data.assert_called_once_with(
+            action="PublishedDataset", data={"questions": ["rating"]}
+        )
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
-    async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_publish_dataset_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         await QuestionFactory.create(dataset=dataset)
 
@@ -4633,14 +5477,17 @@ class TestSuiteDatasets:
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_publish_dataset_as_admin(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset, required=True)
         await RatingQuestionFactory.create(dataset=dataset, required=True)
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/datasets/{dataset.id}/publish",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
         assert response.status_code == 200
@@ -4649,13 +5496,16 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-    async def test_publish_dataset_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_publish_dataset_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         await QuestionFactory.create(dataset=dataset, required=True)
         annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/datasets/{dataset.id}/publish",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
 
         assert response.status_code == 403
@@ -4667,7 +5517,9 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await QuestionFactory.create(dataset=dataset)
 
-        response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header
+        )
 
         assert response.status_code == 422
         assert response.json() == {"detail": "Dataset is already published"}
@@ -4680,10 +5532,14 @@ class TestSuiteDatasets:
         await TextFieldFactory.create(dataset=dataset, required=False)
         await TextQuestionFactory.create(dataset=dataset, required=True)
 
-        response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header
+        )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset cannot be published without required fields"}
+        assert response.json() == {
+            "detail": "Dataset cannot be published without required fields"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_without_questions(
@@ -4693,10 +5549,14 @@ class TestSuiteDatasets:
         await TextFieldFactory.create(dataset=dataset, required=True)
         await TextQuestionFactory.create(dataset=dataset, required=False)
 
-        response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
+        response = await async_client.put(
+            f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header
+        )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset cannot be published without required questions"}
+        assert response.json() == {
+            "detail": "Dataset cannot be published without required questions"
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_with_nonexistent_dataset_id(
@@ -4713,14 +5573,20 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
         "payload",
         [
-            {"name": "New Name", "guidelines": "New Guidelines", "allow_extra_metadata": False},
+            {
+                "name": "New Name",
+                "guidelines": "New Guidelines",
+                "allow_extra_metadata": False,
+            },
             {"name": "New Name"},
             {"guidelines": "New Guidelines"},
             {},
@@ -4728,9 +5594,17 @@ class TestSuiteDatasets:
         ],
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-    async def test_update_dataset(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict):
+    async def test_update_dataset(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        role: UserRole,
+        payload: dict,
+    ):
         dataset = await DatasetFactory.create(
-            name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
+            name="Current Name",
+            guidelines="Current Guidelines",
+            status=DatasetStatus.ready,
         )
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
@@ -4745,7 +5619,9 @@ class TestSuiteDatasets:
             guidelines = payload["guidelines"]
         else:
             guidelines = dataset.guidelines
-        allow_extra_metadata = payload.get("allow_extra_metadata") or dataset.allow_extra_metadata
+        allow_extra_metadata = (
+            payload.get("allow_extra_metadata") or dataset.allow_extra_metadata
+        )
 
         assert response.status_code == 200
         response_body = response.json()
@@ -4777,38 +5653,56 @@ class TestSuiteDatasets:
             {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
-            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+            {
+                "name": "test-dataset",
+                "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1),
+            },
             {"allow_extra_metadata": None},
         ],
     )
     @pytest.mark.asyncio
     async def test_update_dataset_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        dataset_json: dict,
     ):
         dataset = await DatasetFactory.create(
-            name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
+            name="Current Name",
+            guidelines="Current Guidelines",
+            status=DatasetStatus.ready,
         )
 
         response = await async_client.patch(
-            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json
+            f"/api/v1/datasets/{dataset.id}",
+            headers=owner_auth_header,
+            json=dataset_json,
         )
 
         assert response.status_code == 422
 
     @pytest.mark.asyncio
-    async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_dataset_with_invalid_payload(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}",
             headers=owner_auth_header,
-            json={"name": {"this": {"is": "invalid"}}, "guidelines": {"this": {"is": "invalid"}}},
+            json={
+                "name": {"this": {"is": "invalid"}},
+                "guidelines": {"this": {"is": "invalid"}},
+            },
         )
 
         assert response.status_code == 422
 
     @pytest.mark.asyncio
-    async def test_update_dataset_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_dataset_non_existent(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset_id = uuid4()
 
         response = await async_client.patch(
@@ -4818,10 +5712,14 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
     @pytest.mark.asyncio
-    async def test_update_dataset_as_admin_from_different_workspace(self, async_client: "AsyncClient"):
+    async def test_update_dataset_as_admin_from_different_workspace(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
 
@@ -4836,7 +5734,9 @@ class TestSuiteDatasets:
     @pytest.mark.asyncio
     async def test_update_dataset_as_annotator(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
-        user = await UserFactory.create(role=UserRole.annotator, workspaces=[dataset.workspace])
+        user = await UserFactory.create(
+            role=UserRole.annotator, workspaces=[dataset.workspace]
+        )
 
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}",
@@ -4847,7 +5747,9 @@ class TestSuiteDatasets:
         assert response.status_code == 403
 
     @pytest.mark.asyncio
-    async def test_update_dataset_without_authentication(self, async_client: "AsyncClient"):
+    async def test_update_dataset_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(
@@ -4875,7 +5777,9 @@ class TestSuiteDatasets:
         other_record = await RecordFactory.create(dataset=other_dataset)
         other_response = await ResponseFactory.create(record=other_record, user=owner)
 
-        response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
 
@@ -4892,7 +5796,11 @@ class TestSuiteDatasets:
         mock_search_engine.delete_index.assert_called_once_with(dataset)
 
     async def test_delete_published_dataset(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset)
@@ -4906,7 +5814,9 @@ class TestSuiteDatasets:
         other_record = await RecordFactory.create(dataset=other_dataset)
         other_response = await ResponseFactory.create(record=other_record, user=owner)
 
-        response = await async_client.delete(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
+        response = await async_client.delete(
+            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         # assert [dataset.id for dataset in db.query(Dataset).all()] == [other_dataset.id]
@@ -4920,7 +5830,10 @@ class TestSuiteDatasets:
         # ]
 
     async def test_delete_dataset_without_authentication(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
     ):
         dataset = await DatasetFactory.create()
 
@@ -4931,23 +5844,29 @@ class TestSuiteDatasets:
 
         assert not mock_search_engine.delete_index.called
 
-    async def test_delete_dataset_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_delete_dataset_as_admin(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.delete(
-            f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/datasets/{dataset.id}",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
         assert response.status_code == 200
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
-    async def test_delete_dataset_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_delete_dataset_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
 
         response = await async_client.delete(
-            f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/datasets/{dataset.id}",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
 
         assert response.status_code == 403
@@ -4966,7 +5885,9 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }
 
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
 
@@ -4986,11 +5907,17 @@ class TestSuiteDatasets:
         ]
 
         records = [
-            await RecordFactory.create(fields={"input": "input_a", "output": "output_a"}, dataset=dataset),
             await RecordFactory.create(
-                fields={"input": "input_b", "output": "output_b"}, metadata_={"unit": "test"}, dataset=dataset
+                fields={"input": "input_a", "output": "output_a"}, dataset=dataset
             ),
-            await RecordFactory.create(fields={"input": "input_c", "output": "output_c"}, dataset=dataset),
+            await RecordFactory.create(
+                fields={"input": "input_b", "output": "output_b"},
+                metadata_={"unit": "test"},
+                dataset=dataset,
+            ),
+            await RecordFactory.create(
+                fields={"input": "input_c", "output": "output_c"}, dataset=dataset
+            ),
         ]
 
         responses = [
@@ -5002,7 +5929,9 @@ class TestSuiteDatasets:
                 record=records[0],
                 user=annotator,
             ),
-            await ResponseFactory.create(status="discarded", record=records[0], user=user),
+            await ResponseFactory.create(
+                status="discarded", record=records[0], user=user
+            ),
             await ResponseFactory.create(
                 values={
                     "input_ok": {"value": "yes"},
@@ -5029,10 +5958,14 @@ class TestSuiteDatasets:
         ]
 
         # Add some responses from other users
-        await ResponseFactory.create_batch(10, record=records[0], status=ResponseStatus.submitted)
+        await ResponseFactory.create_batch(
+            10, record=records[0], status=ResponseStatus.submitted
+        )
 
         suggestions = [
-            await SuggestionFactory.create(record=records[0], question=questions[0], value="option-1"),
+            await SuggestionFactory.create(
+                record=records[0], question=questions[0], value="option-1"
+            ),
             await SuggestionFactory.create(
                 record=records[1],
                 question=questions[0],

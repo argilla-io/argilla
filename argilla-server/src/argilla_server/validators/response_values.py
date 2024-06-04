@@ -14,10 +14,7 @@
 
 from typing import Optional
 
-from argilla_server.enums import QuestionType, ResponseStatus
-from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models import Record
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     LabelSelectionQuestionSettings,
     MultiLabelSelectionQuestionSettings,
     QuestionSettings,
@@ -25,7 +22,7 @@ from argilla_server.schemas.v1.questions import (
     RatingQuestionSettings,
     SpanQuestionSettings,
 )
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     MultiLabelSelectionQuestionResponseValue,
     RankingQuestionResponseValue,
     RatingQuestionResponseValue,
@@ -33,6 +30,9 @@ from argilla_server.schemas.v1.responses import (
     SpanQuestionResponseValue,
     TextAndLabelSelectionQuestionResponseValue,
 )
+from argilla_server.enums import QuestionType, ResponseStatus
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models import Record
 
 
 class ResponseValueValidator:
@@ -40,22 +40,37 @@ class ResponseValueValidator:
         self._response_value = response_value
 
     def validate_for(
-        self, question_settings: QuestionSettings, record: Record, response_status: Optional[ResponseStatus] = None
+        self,
+        question_settings: QuestionSettings,
+        record: Record,
+        response_status: Optional[ResponseStatus] = None,
     ) -> None:
         if question_settings.type == QuestionType.text:
             TextQuestionResponseValueValidator(self._response_value).validate()
         elif question_settings.type == QuestionType.label_selection:
-            LabelSelectionQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            LabelSelectionQuestionResponseValueValidator(
+                self._response_value
+            ).validate_for(question_settings)
         elif question_settings.type == QuestionType.multi_label_selection:
-            MultiLabelSelectionQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            MultiLabelSelectionQuestionResponseValueValidator(
+                self._response_value
+            ).validate_for(question_settings)
         elif question_settings.type == QuestionType.rating:
-            RatingQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            RatingQuestionResponseValueValidator(self._response_value).validate_for(
+                question_settings
+            )
         elif question_settings.type == QuestionType.ranking:
-            RankingQuestionResponseValueValidator(self._response_value).validate_for(question_settings, response_status)
+            RankingQuestionResponseValueValidator(self._response_value).validate_for(
+                question_settings, response_status
+            )
         elif question_settings.type == QuestionType.span:
-            SpanQuestionResponseValueValidator(self._response_value).validate_for(question_settings, record)
+            SpanQuestionResponseValueValidator(self._response_value).validate_for(
+                question_settings, record
+            )
         else:
-            raise UnprocessableEntityError(f"unknown question type f{question_settings.type!r}")
+            raise UnprocessableEntityError(
+                f"unknown question type f{question_settings.type!r}"
+            )
 
 
 class TextQuestionResponseValueValidator:
@@ -67,20 +82,28 @@ class TextQuestionResponseValueValidator:
 
     def _validate_value_type(self) -> None:
         if not isinstance(self._response_value, str):
-            raise UnprocessableEntityError(f"text question expects a text value, found {type(self._response_value)}")
+            raise UnprocessableEntityError(
+                f"text question expects a text value, found {type(self._response_value)}"
+            )
 
 
 class LabelSelectionQuestionResponseValueValidator:
     def __init__(self, response_value: TextAndLabelSelectionQuestionResponseValue):
         self._response_value = response_value
 
-    def validate_for(self, label_selection_question_settings: LabelSelectionQuestionSettings) -> None:
-        self._validate_label_is_available_at_question_settings(label_selection_question_settings)
+    def validate_for(
+        self, label_selection_question_settings: LabelSelectionQuestionSettings
+    ) -> None:
+        self._validate_label_is_available_at_question_settings(
+            label_selection_question_settings
+        )
 
     def _validate_label_is_available_at_question_settings(
         self, label_selection_question_settings: LabelSelectionQuestionSettings
     ) -> None:
-        available_labels = [option.value for option in label_selection_question_settings.options]
+        available_labels = [
+            option.value for option in label_selection_question_settings.options
+        ]
 
         if self._response_value not in available_labels:
             raise UnprocessableEntityError(
@@ -92,11 +115,16 @@ class MultiLabelSelectionQuestionResponseValueValidator:
     def __init__(self, response_value: MultiLabelSelectionQuestionResponseValue):
         self._response_value = response_value
 
-    def validate_for(self, multi_label_selection_question_settings: MultiLabelSelectionQuestionSettings) -> None:
+    def validate_for(
+        self,
+        multi_label_selection_question_settings: MultiLabelSelectionQuestionSettings,
+    ) -> None:
         self._validate_value_type()
         self._validate_labels_are_not_empty()
         self._validate_labels_are_unique()
-        self._validate_labels_are_available_at_question_settings(multi_label_selection_question_settings)
+        self._validate_labels_are_available_at_question_settings(
+            multi_label_selection_question_settings
+        )
 
     def _validate_value_type(self) -> None:
         if not isinstance(self._response_value, list):
@@ -106,7 +134,9 @@ class MultiLabelSelectionQuestionResponseValueValidator:
 
     def _validate_labels_are_not_empty(self) -> None:
         if len(self._response_value) == 0:
-            raise UnprocessableEntityError("multi label selection questions expects a list of values, found empty list")
+            raise UnprocessableEntityError(
+                "multi label selection questions expects a list of values, found empty list"
+            )
 
     def _validate_labels_are_unique(self) -> None:
         if len(self._response_value) != len(set(self._response_value)):
@@ -115,9 +145,12 @@ class MultiLabelSelectionQuestionResponseValueValidator:
             )
 
     def _validate_labels_are_available_at_question_settings(
-        self, multi_label_selection_question_settings: MultiLabelSelectionQuestionSettings
+        self,
+        multi_label_selection_question_settings: MultiLabelSelectionQuestionSettings,
     ) -> None:
-        available_labels = [option.value for option in multi_label_selection_question_settings.options]
+        available_labels = [
+            option.value for option in multi_label_selection_question_settings.options
+        ]
         invalid_labels = sorted(list(set(self._response_value) - set(available_labels)))
 
         if invalid_labels:
@@ -131,12 +164,16 @@ class RatingQuestionResponseValueValidator:
         self._response_value = response_value
 
     def validate_for(self, rating_question_settings: RatingQuestionSettings) -> None:
-        self._validate_rating_is_available_at_question_settings(rating_question_settings)
+        self._validate_rating_is_available_at_question_settings(
+            rating_question_settings
+        )
 
     def _validate_rating_is_available_at_question_settings(
         self, rating_question_settings: RatingQuestionSettings
     ) -> None:
-        available_options = [option.value for option in rating_question_settings.options]
+        available_options = [
+            option.value for option in rating_question_settings.options
+        ]
 
         if self._response_value not in available_options:
             raise UnprocessableEntityError(
@@ -149,12 +186,20 @@ class RankingQuestionResponseValueValidator:
         self._response_value = response_value
 
     def validate_for(
-        self, ranking_question_settings: RankingQuestionSettings, response_status: Optional[ResponseStatus] = None
+        self,
+        ranking_question_settings: RankingQuestionSettings,
+        response_status: Optional[ResponseStatus] = None,
     ) -> None:
         self._validate_value_type()
-        self._validate_all_rankings_are_present_when_submitted(ranking_question_settings, response_status)
-        self._validate_all_rankings_are_valid_when_submitted(ranking_question_settings, response_status)
-        self._validate_values_are_available_at_question_settings(ranking_question_settings)
+        self._validate_all_rankings_are_present_when_submitted(
+            ranking_question_settings, response_status
+        )
+        self._validate_all_rankings_are_valid_when_submitted(
+            ranking_question_settings, response_status
+        )
+        self._validate_values_are_available_at_question_settings(
+            ranking_question_settings
+        )
         self._validate_values_are_unique()
 
     def _validate_value_type(self) -> None:
@@ -164,12 +209,16 @@ class RankingQuestionResponseValueValidator:
             )
 
     def _validate_all_rankings_are_present_when_submitted(
-        self, ranking_question_settings: RankingQuestionSettings, response_status: Optional[ResponseStatus] = None
+        self,
+        ranking_question_settings: RankingQuestionSettings,
+        response_status: Optional[ResponseStatus] = None,
     ) -> None:
         if response_status != ResponseStatus.submitted:
             return
 
-        available_values = [option.value for option in ranking_question_settings.options]
+        available_values = [
+            option.value for option in ranking_question_settings.options
+        ]
         available_values_len = len(available_values)
 
         if len(self._response_value) != available_values_len:
@@ -187,7 +236,9 @@ class RankingQuestionResponseValueValidator:
 
         available_rankings = list(range(1, len(ranking_question_settings.options) + 1))
         response_rankings = [value_item.rank for value_item in self._response_value]
-        invalid_rankings = sorted(list(set(response_rankings) - set(available_rankings)))
+        invalid_rankings = sorted(
+            list(set(response_rankings) - set(available_rankings))
+        )
 
         if invalid_rankings:
             raise UnprocessableEntityError(
@@ -197,7 +248,9 @@ class RankingQuestionResponseValueValidator:
     def _validate_values_are_available_at_question_settings(
         self, ranking_question_settings: RankingQuestionSettings
     ) -> None:
-        available_values = [option.value for option in ranking_question_settings.options]
+        available_values = [
+            option.value for option in ranking_question_settings.options
+        ]
         response_values = [value_item.value for value_item in self._response_value]
         invalid_values = sorted(list(set(response_values) - set(available_values)))
 
@@ -219,10 +272,16 @@ class SpanQuestionResponseValueValidator:
     def __init__(self, response_value: SpanQuestionResponseValue):
         self._response_value = response_value
 
-    def validate_for(self, span_question_settings: SpanQuestionSettings, record: Record) -> None:
+    def validate_for(
+        self, span_question_settings: SpanQuestionSettings, record: Record
+    ) -> None:
         self._validate_value_type()
-        self._validate_question_settings_field_is_present_at_record(span_question_settings, record)
-        self._validate_start_end_are_within_record_field_limits(span_question_settings, record)
+        self._validate_question_settings_field_is_present_at_record(
+            span_question_settings, record
+        )
+        self._validate_start_end_are_within_record_field_limits(
+            span_question_settings, record
+        )
         self._validate_labels_are_available_at_question_settings(span_question_settings)
         self._validate_values_are_not_overlapped(span_question_settings)
 
@@ -256,7 +315,9 @@ class SpanQuestionResponseValueValidator:
                     f"span question response value `end` must have a value lower or equal than record field `{span_question_settings.field}` length that is `{field_len}`"
                 )
 
-    def _validate_labels_are_available_at_question_settings(self, span_question_settings: SpanQuestionSettings) -> None:
+    def _validate_labels_are_available_at_question_settings(
+        self, span_question_settings: SpanQuestionSettings
+    ) -> None:
         available_labels = [option.value for option in span_question_settings.options]
 
         for value_item in self._response_value:
@@ -265,7 +326,9 @@ class SpanQuestionResponseValueValidator:
                     f"undefined label '{value_item.label}' for span question.\nValid labels are: {available_labels!r}"
                 )
 
-    def _validate_values_are_not_overlapped(self, span_question_settings: SpanQuestionSettings) -> None:
+    def _validate_values_are_not_overlapped(
+        self, span_question_settings: SpanQuestionSettings
+    ) -> None:
         if span_question_settings.allow_overlapping:
             return
 

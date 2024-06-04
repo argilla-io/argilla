@@ -12,10 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
+from typing import Optional
 
-from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+import pytest
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 
 
-class SuggestionCreateWithRecordId(SuggestionCreate):
-    record_id: UUID
+def test_update_schema():
+    class UnitTestUpdateSchema(UpdateSchema):
+        unit: Optional[str]
+        test: Optional[bool]
+
+        __non_nullable_fields__ = {"unit", "test"}
+
+    with pytest.raises(ValueError):
+        UnitTestUpdateSchema(unit=None, test=None)

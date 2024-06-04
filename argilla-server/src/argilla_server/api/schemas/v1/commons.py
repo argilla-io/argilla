@@ -36,6 +36,8 @@ class UpdateSchema(BaseModel):
                 invalid_keys.append(key)
 
         if invalid_keys:
-            raise ValueError(f"The following keys must have non-null values: {', '.join(invalid_keys)}")
+            raise ValueError(
+                f"The following keys must have non-null values: {', '.join(invalid_keys)}"
+            )
 
         return values

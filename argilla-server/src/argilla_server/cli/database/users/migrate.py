@@ -18,11 +18,11 @@ from typing import TYPE_CHECKING, List, Optional
 import typer
 import yaml
 
+from argilla_server.api.schemas.v1.users import USER_USERNAME_REGEX
+from argilla_server.api.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
-from argilla_server.schemas.v1.users import USER_USERNAME_REGEX
-from argilla_server.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 
 from .utils import get_or_new_workspace
 
@@ -51,7 +51,9 @@ class UsersMigrator:
             self._users = yaml.safe_load(users_file.read())
 
     async def migrate(self):
-        typer.echo(f"Starting users migration process using file {self._users_filename!r}")
+        typer.echo(
+            f"Starting users migration process using file {self._users_filename!r}"
+        )
 
         async with AsyncSessionLocal() as session:
             try:
@@ -77,7 +79,10 @@ class UsersMigrator:
             role=user_create.role,
             api_key=user_create.api_key,
             password_hash=user_create.password_hash,
-            workspaces=[await get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
+            workspaces=[
+                await get_or_new_workspace(session, workspace.name)
+                for workspace in user_create.workspaces
+            ],
             autocommit=False,
         )
 
@@ -88,7 +93,10 @@ class UsersMigrator:
             role=self._user_role(user),
             api_key=user["api_key"],
             password_hash=user["hashed_password"],
-            workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in self._user_workspace_names(user)],
+            workspaces=[
+                WorkspaceCreate(name=workspace_name)
+                for workspace_name in self._user_workspace_names(user)
+            ],
         )
 
     def _user_role(self, user: dict) -> UserRole:
@@ -98,7 +106,9 @@ class UsersMigrator:
         return UserRole.annotator
 
     def _user_workspace_names(self, user: dict) -> List[str]:
-        workspace_names = [workspace_name for workspace_name in user.get("workspaces", [])]
+        workspace_names = [
+            workspace_name for workspace_name in user.get("workspaces", [])
+        ]
 
         if user["username"] in workspace_names:
             return workspace_names

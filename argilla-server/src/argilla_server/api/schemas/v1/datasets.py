@@ -16,9 +16,9 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import DatasetStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
-from argilla_server.schemas.base import UpdateSchema
 
 try:
     from typing import Annotated
@@ -33,13 +33,20 @@ DATASET_GUIDELINES_MAX_LENGTH = 10000
 
 
 DatasetName = Annotated[
-    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
+    constr(
+        regex=DATASET_NAME_REGEX,
+        min_length=DATASET_NAME_MIN_LENGTH,
+        max_length=DATASET_NAME_MAX_LENGTH,
+    ),
     Field(..., description="Dataset name"),
 ]
 
 
 DatasetGuidelines = Annotated[
-    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
+    constr(
+        min_length=DATASET_GUIDELINES_MIN_LENGTH,
+        max_length=DATASET_GUIDELINES_MAX_LENGTH,
+    ),
     Field(..., description="Dataset guidelines"),
 ]
 

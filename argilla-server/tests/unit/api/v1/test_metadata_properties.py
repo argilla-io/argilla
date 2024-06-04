@@ -17,11 +17,17 @@ from typing import TYPE_CHECKING, Type
 from uuid import uuid4
 
 import pytest
+from argilla_server.api.schemas.v1.metadata_properties import (
+    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
+)
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import MetadataPropertyType, UserRole
 from argilla_server.models import MetadataProperty, UserRole
-from argilla_server.schemas.v1.metadata_properties import METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH
-from argilla_server.search_engine import FloatMetadataMetrics, IntegerMetadataMetrics, TermsMetadataMetrics
+from argilla_server.search_engine import (
+    FloatMetadataMetrics,
+    IntegerMetadataMetrics,
+    TermsMetadataMetrics,
+)
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -47,8 +53,15 @@ class TestSuiteMetadataProperties:
         [
             (
                 TermsMetadataPropertyFactory,
-                TermsMetadataMetrics(total=10, values=[TermsMetadataMetrics.TermCount(term="term", count=10)]),
-                {"type": "terms", "total": 10, "values": [{"term": "term", "count": 10}]},
+                TermsMetadataMetrics(
+                    total=10,
+                    values=[TermsMetadataMetrics.TermCount(term="term", count=10)],
+                ),
+                {
+                    "type": "terms",
+                    "total": 10,
+                    "values": [{"term": "term", "count": 10}],
+                },
             ),
             (
                 IntegerMetadataPropertyFactory,
@@ -81,53 +94,74 @@ class TestSuiteMetadataProperties:
         mock_search_engine.compute_metrics_for.return_value = expected_metric
 
         response = await async_client.get(
-            f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers=owner_auth_header
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics",
+            headers=owner_auth_header,
         )
 
         assert response.status_code == 200
         assert response.json() == expected_json
 
-    async def test_get_metadata_property_metrics_without_authentication(self, async_client: "AsyncClient"):
+    async def test_get_metadata_property_metrics_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         metadata_property = await TermsMetadataPropertyFactory.create()
 
-        response = await async_client.get(f"/api/v1/metadata-properties/{metadata_property.id}/metrics")
+        response = await async_client.get(
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics"
+        )
 
         assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_get_metadata_property_metrics_as_allowed_role(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        role: UserRole,
     ):
-        metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[role])
+        metadata_property = await IntegerMetadataPropertyFactory.create(
+            allowed_roles=[role]
+        )
         workspace = metadata_property.dataset.workspace
 
         user = await UserFactory.create(role=role)
 
         await WorkspaceUserFactory.create(user_id=user.id, workspace_id=workspace.id)
 
-        mock_search_engine.compute_metrics_for.return_value = IntegerMetadataMetrics(min=0, max=10)
+        mock_search_engine.compute_metrics_for.return_value = IntegerMetadataMetrics(
+            min=0, max=10
+        )
 
         response = await async_client.get(
-            f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_get_metadata_property_metrics_as_non_allowed_role(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        role: UserRole,
     ):
-        metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[])
+        metadata_property = await IntegerMetadataPropertyFactory.create(
+            allowed_roles=[]
+        )
         workspace = metadata_property.dataset.workspace
 
         user = await UserFactory.create(role=role)
 
         await WorkspaceUserFactory.create(user_id=user.id, workspace_id=workspace.id)
 
-        mock_search_engine.compute_metrics_for.return_value = IntegerMetadataMetrics(min=0, max=10)
+        mock_search_engine.compute_metrics_for.return_value = IntegerMetadataMetrics(
+            min=0, max=10
+        )
 
         response = await async_client.get(
-            f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -145,7 +179,9 @@ class TestSuiteMetadataProperties:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
+        assert response.json() == {
+            "detail": f"MetadataProperty with id `{metadata_property_id}` not found"
+        }
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_get_metadata_property_metrics_as_restricted_user_role_from_different_workspace(
@@ -155,13 +191,16 @@ class TestSuiteMetadataProperties:
         metadata_property = await TermsMetadataPropertyFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/metadata-properties/{metadata_property.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/metadata-properties/{metadata_property.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
         assert response.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_update_metadata_property(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     metadata_property = await IntegerMetadataPropertyFactory.create(
         name="name", title="title", allowed_roles=[UserRole.admin, UserRole.annotator]
     )
@@ -193,16 +232,22 @@ async def test_update_metadata_property(async_client: "AsyncClient", db: "AsyncS
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_update_metadata_property_without_authentication(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     metadata_property = await IntegerMetadataPropertyFactory.create()
 
-    response = await async_client.patch(f"/api/v1/metadata-properties/{metadata_property.id}")
+    response = await async_client.patch(
+        f"/api/v1/metadata-properties/{metadata_property.id}"
+    )
 
     assert response.status_code == 401
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property_title(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_update_metadata_property_title(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     metadata_property = await IntegerMetadataPropertyFactory.create(title="title")
 
     response = await async_client.patch(
@@ -246,7 +291,9 @@ async def test_update_metadata_property_with_invalid_title(
 async def test_update_metadata_property_enabling_visible_for_annotators(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
-    metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[UserRole.admin])
+    metadata_property = await IntegerMetadataPropertyFactory.create(
+        allowed_roles=[UserRole.admin]
+    )
 
     assert metadata_property.visible_for_annotators == False
 
@@ -270,7 +317,9 @@ async def test_update_metadata_property_enabling_visible_for_annotators(
 async def test_update_metadata_property_disabling_visible_for_annotators(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
-    metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[UserRole.admin, UserRole.annotator])
+    metadata_property = await IntegerMetadataPropertyFactory.create(
+        allowed_roles=[UserRole.admin, UserRole.annotator]
+    )
 
     assert metadata_property.visible_for_annotators == True
 
@@ -294,7 +343,9 @@ async def test_update_metadata_property_disabling_visible_for_annotators(
 async def test_update_metadata_property_with_visible_for_annotators_as_none(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
 ):
-    metadata_property = await IntegerMetadataPropertyFactory.create(allowed_roles=[UserRole.admin, UserRole.annotator])
+    metadata_property = await IntegerMetadataPropertyFactory.create(
+        allowed_roles=[UserRole.admin, UserRole.annotator]
+    )
 
     assert metadata_property.visible_for_annotators == True
 
@@ -312,7 +363,9 @@ async def test_update_metadata_property_with_visible_for_annotators_as_none(
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property_as_admin(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_update_metadata_property_as_admin(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     metadata_property = await IntegerMetadataPropertyFactory.create()
     admin = await AdminFactory.create(workspaces=[metadata_property.dataset.workspace])
 
@@ -342,9 +395,13 @@ async def test_update_metadata_property_as_admin_from_different_workspace(
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_update_metadata_property_as_annotator(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     metadata_property = await IntegerMetadataPropertyFactory.create()
-    annotator = await AnnotatorFactory.create(workspaces=[metadata_property.dataset.workspace])
+    annotator = await AnnotatorFactory.create(
+        workspaces=[metadata_property.dataset.workspace]
+    )
 
     response = await async_client.patch(
         f"/api/v1/metadata-properties/{metadata_property.id}",
@@ -385,15 +442,23 @@ async def test_update_metadata_property_with_nonexistent_metadata_property_id(
     )
 
     assert response.status_code == 404
-    assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
+    assert response.json() == {
+        "detail": f"MetadataProperty with id `{metadata_property_id}` not found"
+    }
 
 
 @pytest.mark.parametrize("user_role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncSession", user_role: UserRole):
-    metadata_property = await IntegerMetadataPropertyFactory.create(name="name", title="title")
+async def test_delete_metadata_property(
+    async_client: "AsyncClient", db: "AsyncSession", user_role: UserRole
+):
+    metadata_property = await IntegerMetadataPropertyFactory.create(
+        name="name", title="title"
+    )
 
-    user = await UserFactory.create(role=user_role, workspaces=[metadata_property.dataset.workspace])
+    user = await UserFactory.create(
+        role=user_role, workspaces=[metadata_property.dataset.workspace]
+    )
 
     response = await async_client.delete(
         f"/api/v1/metadata-properties/{metadata_property.id}",
@@ -416,10 +481,14 @@ async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncS
 
 
 @pytest.mark.asyncio
-async def test_delete_metadata_property_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_delete_metadata_property_without_authentication(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     metadata_property = await IntegerMetadataPropertyFactory.create()
 
-    response = await async_client.delete(f"/api/v1/metadata-properties/{metadata_property.id}")
+    response = await async_client.delete(
+        f"/api/v1/metadata-properties/{metadata_property.id}"
+    )
 
     assert response.status_code == 401
     assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
@@ -442,7 +511,9 @@ async def test_delete_metadata_property_as_admin_from_different_workspace(
 
 
 @pytest.mark.asyncio
-async def test_delete_metadata_property_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_delete_metadata_property_as_annotator(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     annotator = await AnnotatorFactory.create()
     metadata_property = await IntegerMetadataPropertyFactory.create()
 
@@ -469,6 +540,8 @@ async def test_delete_metadata_property_with_nonexistent_metadata_property_id(
     )
 
     assert response.status_code == 404
-    assert response.json() == {"detail": f"MetadataProperty with id `{metadata_property_id}` not found"}
+    assert response.json() == {
+        "detail": f"MetadataProperty with id `{metadata_property_id}` not found"
+    }
 
     assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1

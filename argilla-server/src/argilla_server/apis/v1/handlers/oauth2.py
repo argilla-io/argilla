@@ -17,12 +17,12 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server import telemetry
+from argilla_server.api.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import AuthenticationError
 from argilla_server.models import User
-from argilla_server.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
@@ -39,7 +39,11 @@ def list_providers(_request: Request) -> Providers:
     if not settings.oauth.enabled:
         return Providers(items=[])
 
-    return Providers(items=[Provider(name=provider_name) for provider_name in settings.oauth.providers])
+    return Providers(
+        items=[
+            Provider(name=provider_name) for provider_name in settings.oauth.providers
+        ]
+    )
 
 
 @router.get("/providers/{provider}/authentication")
@@ -72,7 +76,9 @@ async def get_access_token(
                 username=username,
                 first_name=user_info.name,
                 role=_USER_ROLE_ON_CREATION,
-                workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
+                workspaces=[
+                    workspace.name for workspace in settings.oauth.allowed_workspaces
+                ],
             )
             telemetry.track_user_created(user, is_oauth=True)
         elif not _is_user_created_by_oauth_provider(user):
@@ -93,7 +99,9 @@ def _check_oauth_enabled_or_raise() -> None:
 
 def _get_provider_by_name_or_raise(provider_name: str) -> OAuth2ClientProvider:
     if not provider_name in settings.oauth.providers:
-        raise HTTPException(status_code=404, detail=f"Provider '{provider_name}' not found")
+        raise HTTPException(
+            status_code=404, detail=f"Provider '{provider_name}' not found"
+        )
     return settings.oauth.providers[provider_name]
 
 

@@ -18,15 +18,15 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import MetadataProperty, Question, Suggestion
-from argilla_server.schemas.v1.records import (
+from argilla_server.api.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
     RecordFilterScope,
     SearchRecordsQuery,
 )
-from argilla_server.schemas.v1.responses import ResponseFilterScope
-from argilla_server.schemas.v1.suggestions import SuggestionFilterScope
+from argilla_server.api.schemas.v1.responses import ResponseFilterScope
+from argilla_server.api.schemas.v1.suggestions import SuggestionFilterScope
+from argilla_server.models import MetadataProperty, Question, Suggestion
 
 
 class SearchRecordsQueryValidator:
@@ -56,16 +56,26 @@ class SearchRecordsQueryValidator:
         else:
             raise ValueError(f"Unknown filter scope entity `{filter_scope.entity}`")
 
-    async def _validate_response_filter_scope(self, filter_scope: ResponseFilterScope) -> None:
+    async def _validate_response_filter_scope(
+        self, filter_scope: ResponseFilterScope
+    ) -> None:
         if filter_scope.question is None:
             return
 
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
+        await Question.get_by_or_raise(
+            self._db, name=filter_scope.question, dataset_id=self._dataset_id
+        )
 
-    async def _validate_suggestion_filter_scope(self, filter_scope: SuggestionFilterScope) -> None:
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
+    async def _validate_suggestion_filter_scope(
+        self, filter_scope: SuggestionFilterScope
+    ) -> None:
+        await Question.get_by_or_raise(
+            self._db, name=filter_scope.question, dataset_id=self._dataset_id
+        )
 
-    async def _validate_metadata_filter_scope(self, filter_scope: MetadataFilterScope) -> None:
+    async def _validate_metadata_filter_scope(
+        self, filter_scope: MetadataFilterScope
+    ) -> None:
         await MetadataProperty.get_by_or_raise(
             self._db,
             name=filter_scope.metadata_property,
@@ -73,13 +83,19 @@ class SearchRecordsQueryValidator:
         )
 
 
-async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID) -> None:
+async def validate_search_records_query(
+    db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID
+) -> None:
     await SearchRecordsQueryValidator(db, query, dataset_id).validate()
 
 
-async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
+async def get_dataset_suggestion_agents_by_question(
+    db: AsyncSession, dataset_id: UUID
+) -> List[Mapping[str, Any]]:
     if db.bind.dialect.name == postgresql.dialect.name:
-        return await _get_dataset_suggestion_agents_by_question_postgresql(db, dataset_id)
+        return await _get_dataset_suggestion_agents_by_question_postgresql(
+            db, dataset_id
+        )
     else:
         return await _get_dataset_suggestion_agents_by_question_sqlite(db, dataset_id)
 
@@ -91,7 +107,9 @@ async def _get_dataset_suggestion_agents_by_question_postgresql(
         select(
             Question.id.label("question_id"),
             Question.name.label("question_name"),
-            func.array_remove(func.array_agg(Suggestion.agent.distinct()), None).label("suggestion_agents"),
+            func.array_remove(func.array_agg(Suggestion.agent.distinct()), None).label(
+                "suggestion_agents"
+            ),
         )
         .outerjoin(Suggestion)
         .where(Question.dataset_id == dataset_id)
@@ -123,7 +141,9 @@ async def _get_dataset_suggestion_agents_by_question_sqlite(
         {
             "question_id": row["question_id"],
             "question_name": row["question_name"],
-            "suggestion_agents": row["suggestion_agents"].split(",") if row["suggestion_agents"] else [],
+            "suggestion_agents": (
+                row["suggestion_agents"].split(",") if row["suggestion_agents"] else []
+            ),
         }
         for row in rows
     ]

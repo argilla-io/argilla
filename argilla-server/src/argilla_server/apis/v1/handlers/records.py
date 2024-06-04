@@ -21,15 +21,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import RecordPolicy, authorize
+from argilla_server.api.schemas.v1.records import Record as RecordSchema
+from argilla_server.api.schemas.v1.records import RecordUpdate
+from argilla_server.api.schemas.v1.responses import Response, ResponseCreate
+from argilla_server.api.schemas.v1.suggestions import Suggestion as SuggestionSchema
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
-from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
+from argilla_server.errors.future.base_errors import (
+    NotFoundError,
+    UnprocessableEntityError,
+)
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
-from argilla_server.schemas.v1.records import Record as RecordSchema
-from argilla_server.schemas.v1.records import RecordUpdate
-from argilla_server.schemas.v1.responses import Response, ResponseCreate
-from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
-from argilla_server.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.utils import parse_uuids
@@ -61,7 +64,9 @@ async def get_record(
     return record
 
 
-@router.patch("/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema)
+@router.patch(
+    "/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema
+)
 async def update_record(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -86,7 +91,11 @@ async def update_record(
     return await datasets.update_record(db, search_engine, record, record_update)
 
 
-@router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
+@router.post(
+    "/records/{record_id}/responses",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Response,
+)
 async def create_record_response(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -106,10 +115,16 @@ async def create_record_response(
 
     await authorize(current_user, RecordPolicy.create_response(record))
 
-    return await datasets.create_response(db, search_engine, record, current_user, response_create)
+    return await datasets.create_response(
+        db, search_engine, record, current_user, response_create
+    )
 
 
-@router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
+@router.get(
+    "/records/{record_id}/suggestions",
+    status_code=status.HTTP_200_OK,
+    response_model=Suggestions,
+)
 async def get_record_suggestions(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -135,8 +150,14 @@ async def get_record_suggestions(
     "/records/{record_id}/suggestions",
     summary="Create or update a suggestion",
     responses={
-        status.HTTP_200_OK: {"model": SuggestionSchema, "description": "Suggestion updated"},
-        status.HTTP_201_CREATED: {"model": SuggestionSchema, "description": "Suggestion created"},
+        status.HTTP_200_OK: {
+            "model": SuggestionSchema,
+            "description": "Suggestion updated",
+        },
+        status.HTTP_201_CREATED: {
+            "model": SuggestionSchema,
+            "description": "Suggestion created",
+        },
     },
     status_code=status.HTTP_201_CREATED,
     response_model=SuggestionSchema,
@@ -172,10 +193,14 @@ async def upsert_suggestion(
 
     # NOTE: If there is already a suggestion for this record and question, we update it instead of creating a new one.
     # So we set the correct status code here.
-    if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
+    if await Suggestion.get_by(
+        db, record_id=record_id, question_id=suggestion_create.question_id
+    ):
         response.status_code = status.HTTP_200_OK
 
-    return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
+    return await datasets.upsert_suggestion(
+        db, search_engine, record, question, suggestion_create
+    )
 
 
 @router.delete(
@@ -189,7 +214,10 @@ async def delete_record_suggestions(
     search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
+    ids: str = Query(
+        ...,
+        description="A comma separated list with the IDs of the suggestions to be removed",
+    ),
 ):
     record = await Record.get_or_raise(
         db,
@@ -209,12 +237,18 @@ async def delete_record_suggestions(
         raise UnprocessableEntityError("No suggestions IDs provided")
 
     if num_suggestions > DELETE_RECORD_SUGGESTIONS_LIMIT:
-        raise UnprocessableEntityError(f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once")
+        raise UnprocessableEntityError(
+            f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once"
+        )
 
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
 
-@router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)
+@router.delete(
+    "/records/{record_id}",
+    response_model=RecordSchema,
+    response_model_exclude_unset=True,
+)
 async def delete_record(
     *,
     db: AsyncSession = Depends(get_async_db),

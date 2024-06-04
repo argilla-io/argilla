@@ -19,11 +19,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import FieldPolicy, authorize
+from argilla_server.api.schemas.v1.fields import Field as FieldSchema
+from argilla_server.api.schemas.v1.fields import FieldUpdate
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Field, User
-from argilla_server.schemas.v1.fields import Field as FieldSchema
-from argilla_server.schemas.v1.fields import FieldUpdate
 from argilla_server.security import auth
 
 router = APIRouter(tags=["fields"])
@@ -37,7 +37,9 @@ async def update_field(
     field_update: FieldUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
+    field = await Field.get_or_raise(
+        db, field_id, options=[selectinload(Field.dataset)]
+    )
 
     await authorize(current_user, FieldPolicy.update(field))
 
@@ -51,7 +53,9 @@ async def delete_field(
     field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
+    field = await Field.get_or_raise(
+        db, field_id, options=[selectinload(Field.dataset)]
+    )
 
     await authorize(current_user, FieldPolicy.delete(field))
 

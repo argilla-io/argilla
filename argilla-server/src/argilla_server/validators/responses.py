@@ -14,15 +14,21 @@
 
 from typing import Union
 
+from argilla_server.api.schemas.v1.responses import (
+    ResponseCreate,
+    ResponseUpdate,
+    ResponseUpsert,
+)
 from argilla_server.enums import QuestionType, ResponseStatus
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Record
-from argilla_server.schemas.v1.responses import ResponseCreate, ResponseUpdate, ResponseUpsert
 from argilla_server.validators.response_values import ResponseValueValidator
 
 
 class ResponseValidator:
-    def __init__(self, response_change: Union[ResponseCreate, ResponseUpdate, ResponseUpsert]):
+    def __init__(
+        self, response_change: Union[ResponseCreate, ResponseUpdate, ResponseUpsert]
+    ):
         self._response_change = response_change
 
     def validate_for(self, record: Record) -> None:
@@ -37,11 +43,17 @@ class ResponseValidator:
 
     def _validate_values_are_present_when_submitted(self) -> None:
         if self._is_submitted_response and not self._response_change.values:
-            raise UnprocessableEntityError("missing response values for submitted response")
+            raise UnprocessableEntityError(
+                "missing response values for submitted response"
+            )
 
     def _validate_required_questions_have_values(self, record: Record) -> None:
         for question in record.dataset.questions:
-            if self._is_submitted_response and question.required and question.name not in self._response_change.values:
+            if (
+                self._is_submitted_response
+                and question.required
+                and question.name not in self._response_change.values
+            ):
                 raise UnprocessableEntityError(
                     f"missing response value for required question with name={question.name!r}"
                 )

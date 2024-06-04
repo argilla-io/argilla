@@ -15,8 +15,8 @@
 from typing import List
 from uuid import UUID
 
+from argilla_server.api.schemas.v1.records import Record, RecordCreate, RecordUpsert
 from argilla_server.pydantic_v1 import BaseModel, Field, validator
-from argilla_server.schemas.v1.records import Record, RecordCreate, RecordUpsert
 
 RECORDS_BULK_CREATE_MIN_ITEMS = 1
 RECORDS_BULK_CREATE_MAX_ITEMS = 500
@@ -35,14 +35,18 @@ class RecordsBulkWithUpdateInfo(RecordsBulk):
 
 class RecordsBulkCreate(BaseModel):
     items: List[RecordCreate] = Field(
-        ..., min_items=RECORDS_BULK_CREATE_MIN_ITEMS, max_items=RECORDS_BULK_CREATE_MAX_ITEMS
+        ...,
+        min_items=RECORDS_BULK_CREATE_MIN_ITEMS,
+        max_items=RECORDS_BULK_CREATE_MAX_ITEMS,
     )
 
     @validator("items")
     @classmethod
     def check_unique_external_ids(cls, items: List[RecordCreate]) -> List[RecordCreate]:
         """Check that external_ids are unique"""
-        external_ids = [item.external_id for item in items if item.external_id is not None]
+        external_ids = [
+            item.external_id for item in items if item.external_id is not None
+        ]
         if len(external_ids) != len(set(external_ids)):
             raise ValueError("External IDs must be unique")
 
@@ -51,5 +55,7 @@ class RecordsBulkCreate(BaseModel):
 
 class RecordsBulkUpsert(RecordsBulkCreate):
     items: List[RecordUpsert] = Field(
-        ..., min_items=RECORDS_BULK_UPSERT_MIN_ITEMS, max_items=RECORDS_BULK_UPSERT_MAX_ITEMS
+        ...,
+        min_items=RECORDS_BULK_UPSERT_MIN_ITEMS,
+        max_items=RECORDS_BULK_UPSERT_MAX_ITEMS,
     )
