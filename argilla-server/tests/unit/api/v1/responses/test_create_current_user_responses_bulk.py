@@ -53,14 +53,10 @@ class TestCreateCurrentUserResponsesBulk:
         mock_search_engine: SearchEngine,
     ):
         dataset = await DatasetFactory.create()
-        await RatingQuestionFactory.create(
-            name="prompt-quality", required=True, dataset=dataset
-        )
+        await RatingQuestionFactory.create(name="prompt-quality", required=True, dataset=dataset)
 
         annotator = await AnnotatorFactory.create()
-        await WorkspaceUserFactory.create(
-            user_id=annotator.id, workspace_id=dataset.workspace.id
-        )
+        await WorkspaceUserFactory.create(user_id=annotator.id, workspace_id=dataset.workspace.id)
 
         records = await RecordFactory.create_batch(3, dataset=dataset)
 
@@ -123,12 +119,8 @@ class TestCreateCurrentUserResponsesBulk:
                         "status": ResponseStatus.submitted.value,
                         "record_id": str(records[0].id),
                         "user_id": str(annotator.id),
-                        "inserted_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["inserted_at"]
-                        ).isoformat(),
-                        "updated_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["updated_at"]
-                        ).isoformat(),
+                        "inserted_at": datetime.fromisoformat(resp_json["items"][0]["item"]["inserted_at"]).isoformat(),
+                        "updated_at": datetime.fromisoformat(resp_json["items"][0]["item"]["updated_at"]).isoformat(),
                     },
                     "error": None,
                 },
@@ -139,12 +131,8 @@ class TestCreateCurrentUserResponsesBulk:
                         "status": ResponseStatus.submitted.value,
                         "record_id": str(records[1].id),
                         "user_id": str(annotator.id),
-                        "inserted_at": datetime.fromisoformat(
-                            resp_json["items"][1]["item"]["inserted_at"]
-                        ).isoformat(),
-                        "updated_at": datetime.fromisoformat(
-                            resp_json["items"][1]["item"]["updated_at"]
-                        ).isoformat(),
+                        "inserted_at": datetime.fromisoformat(resp_json["items"][1]["item"]["inserted_at"]).isoformat(),
+                        "updated_at": datetime.fromisoformat(resp_json["items"][1]["item"]["updated_at"]).isoformat(),
                     },
                     "error": None,
                 },
@@ -165,9 +153,7 @@ class TestCreateCurrentUserResponsesBulk:
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 2
 
-        response_to_create = (
-            await db.execute(select(Response).filter_by(id=response_to_create_id))
-        ).scalar_one()
+        response_to_create = (await db.execute(select(Response).filter_by(id=response_to_create_id))).scalar_one()
         await db.refresh(response_to_update)
         expected_calls = [
             call(response_to_create),
@@ -184,9 +170,7 @@ class TestCreateCurrentUserResponsesBulk:
         owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        await RatingQuestionFactory.create(
-            name="prompt-quality", required=True, dataset=dataset
-        )
+        await RatingQuestionFactory.create(name="prompt-quality", required=True, dataset=dataset)
 
         record = await RecordFactory.create(dataset=dataset)
 
@@ -217,12 +201,8 @@ class TestCreateCurrentUserResponsesBulk:
                         "status": ResponseStatus.submitted.value,
                         "record_id": str(record.id),
                         "user_id": str(owner.id),
-                        "inserted_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["inserted_at"]
-                        ).isoformat(),
-                        "updated_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["updated_at"]
-                        ).isoformat(),
+                        "inserted_at": datetime.fromisoformat(resp_json["items"][0]["item"]["inserted_at"]).isoformat(),
+                        "updated_at": datetime.fromisoformat(resp_json["items"][0]["item"]["updated_at"]).isoformat(),
                     },
                     "error": None,
                 },
@@ -231,9 +211,7 @@ class TestCreateCurrentUserResponsesBulk:
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
-        response = (
-            await db.execute(select(Response).filter_by(id=response_id))
-        ).scalar_one()
+        response = (await db.execute(select(Response).filter_by(id=response_id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
     async def test_response_to_create_with_non_existent_record(
@@ -282,9 +260,7 @@ class TestCreateCurrentUserResponsesBulk:
         owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        await RatingQuestionFactory.create(
-            name="prompt-quality", required=True, dataset=dataset
-        )
+        await RatingQuestionFactory.create(name="prompt-quality", required=True, dataset=dataset)
 
         record = await RecordFactory.create(dataset=dataset)
         response = await ResponseFactory.create(
@@ -320,12 +296,8 @@ class TestCreateCurrentUserResponsesBulk:
                         "status": ResponseStatus.submitted.value,
                         "record_id": str(record.id),
                         "user_id": str(owner.id),
-                        "inserted_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["inserted_at"]
-                        ).isoformat(),
-                        "updated_at": datetime.fromisoformat(
-                            resp_json["items"][0]["item"]["updated_at"]
-                        ).isoformat(),
+                        "inserted_at": datetime.fromisoformat(resp_json["items"][0]["item"]["inserted_at"]).isoformat(),
+                        "updated_at": datetime.fromisoformat(resp_json["items"][0]["item"]["updated_at"]).isoformat(),
                     },
                     "error": None,
                 },
@@ -414,9 +386,7 @@ class TestCreateCurrentUserResponsesBulk:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
         assert not mock_search_engine.update_record_response.called
 
-    async def test_no_responses(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_no_responses(self, async_client: AsyncClient, owner_auth_header: dict):
         resp = await async_client.post(
             self.url(),
             headers=owner_auth_header,
@@ -425,9 +395,7 @@ class TestCreateCurrentUserResponsesBulk:
 
         assert resp.status_code == 422
 
-    async def test_too_many_responses(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_too_many_responses(self, async_client: AsyncClient, owner_auth_header: dict):
         resp = await async_client.post(
             self.url(),
             headers=owner_auth_header,
@@ -440,9 +408,7 @@ class TestCreateCurrentUserResponsesBulk:
         reason="Profiling is not active",
         condition=not bool(os.getenv("TEST_PROFILING", None)),
     )
-    async def test_create_responses_in_bulk_profiling(
-        self, db: "AsyncSession", elasticsearch_config: dict
-    ):
+    async def test_create_responses_in_bulk_profiling(self, db: "AsyncSession", elasticsearch_config: dict):
         from argilla_server.api.schemas.v1.responses import DraftResponseUpsert
         from argilla_server.search_engine import ElasticSearchEngine
         from pyinstrument import Profiler
@@ -464,17 +430,13 @@ class TestCreateCurrentUserResponsesBulk:
         dataset = await DatasetFactory.create()
         user = await OwnerFactory.create()
 
-        await RatingQuestionFactory.create(
-            name="prompt-quality", required=True, dataset=dataset
-        )
+        await RatingQuestionFactory.create(name="prompt-quality", required=True, dataset=dataset)
         await TextFieldFactory.create(name="text", required=True, dataset=dataset)
         await TextFieldFactory.create(name="sentiment", required=True, dataset=dataset)
 
         records = await RecordFactory.create_batch(dataset=dataset, size=500)
 
-        engine = ElasticSearchEngine(
-            config=elasticsearch_config, number_of_replicas=0, number_of_shards=1
-        )
+        engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
 
         await refresh_dataset(dataset)
         await refresh_records(records)

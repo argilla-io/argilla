@@ -61,9 +61,7 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: Literal[MetadataPropertyType.terms] = Field(
-        MetadataPropertyType.terms, const=True
-    )
+    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -77,15 +75,11 @@ class NumericMetadataMetrics(GenericModel, Generic[NT]):
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: Literal[MetadataPropertyType.integer] = Field(
-        MetadataPropertyType.integer, const=True
-    )
+    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: Literal[MetadataPropertyType.float] = Field(
-        MetadataPropertyType.float, const=True
-    )
+    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
 
     @validator("min", "max")
     def round_result(cls, v: float):

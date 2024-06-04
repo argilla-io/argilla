@@ -45,9 +45,7 @@ class UserCreate(BaseModel):
     last_name: Optional[constr(min_length=1, strip_whitespace=True)]
     username: str = Field(regex=USER_USERNAME_REGEX, min_length=1)
     role: Optional[UserRole]
-    password: str = Field(
-        min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH
-    )
+    password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
 
 
 class Users(BaseModel):

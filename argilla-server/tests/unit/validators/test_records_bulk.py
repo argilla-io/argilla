@@ -47,9 +47,7 @@ class TestRecordsBulkValidators:
 
         records_create = RecordsBulkCreate(
             items=[
-                RecordCreate(
-                    fields={"text": "hello world"}, metadata={"source": "test"}
-                ),
+                RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
             ]
         )
 
@@ -64,18 +62,12 @@ class TestRecordsBulkValidators:
         ):
             records_create = RecordsBulkCreate(
                 items=[
-                    RecordCreate(
-                        fields={"text": "hello world"}, metadata={"source": "test"}
-                    ),
+                    RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
                 ]
             )
-            await RecordsBulkCreateValidator(records_create, db=db).validate_for(
-                dataset
-            )
+            await RecordsBulkCreateValidator(records_create, db=db).validate_for(dataset)
 
-    async def test_records_bulk_create_validator_with_existing_external_id_in_db(
-        self, db: AsyncSession
-    ):
+    async def test_records_bulk_create_validator_with_existing_external_id_in_db(self, db: AsyncSession):
         dataset = await self.configure_dataset()
         created_record = await RecordFactory.create(external_id="1", dataset=dataset)
 
@@ -93,20 +85,14 @@ class TestRecordsBulkValidators:
             ],
         )
 
-        with pytest.raises(
-            UnprocessableEntityError, match="found records with same external ids: 1"
-        ):
+        with pytest.raises(UnprocessableEntityError, match="found records with same external ids: 1"):
             await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
 
-    async def test_records_bulk_create_validator_with_record_errors(
-        self, db: AsyncSession
-    ):
+    async def test_records_bulk_create_validator_with_record_errors(self, db: AsyncSession):
         dataset = await self.configure_dataset()
         records_create = RecordsBulkCreate(
             items=[
-                RecordCreate(
-                    fields={"text": "hello world"}, metadata={"source": "test"}
-                ),
+                RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
                 RecordCreate(fields={"wrong-field": "hello world"}),
             ]
         )
@@ -122,17 +108,13 @@ class TestRecordsBulkValidators:
 
         records_upsert = RecordsBulkUpsert(
             items=[
-                RecordUpsert(
-                    fields={"text": "hello world"}, metadata={"source": "test"}
-                ),
+                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
             ]
         )
 
         RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
 
-    async def test_records_bulk_upsert_validator_with_draft_dataset(
-        self, db: AsyncSession
-    ):
+    async def test_records_bulk_upsert_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
 
         with pytest.raises(
@@ -141,26 +123,18 @@ class TestRecordsBulkValidators:
         ):
             records_upsert = RecordsBulkUpsert(
                 items=[
-                    RecordUpsert(
-                        fields={"text": "hello world"}, metadata={"source": "test"}
-                    ),
+                    RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
                 ]
             )
 
             RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
 
-    async def test_records_bulk_upsert_validator_with_record_error(
-        self, db: AsyncSession
-    ):
+    async def test_records_bulk_upsert_validator_with_record_error(self, db: AsyncSession):
         dataset = await self.configure_dataset()
         records_upsert = RecordsBulkUpsert(
             items=[
-                RecordUpsert(
-                    fields={"text": "hello world"}, metadata={"source": "test"}
-                ),
-                RecordUpsert(
-                    fields={"text": "hello world"}, metadata={"source": "test"}
-                ),
+                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
+                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
                 RecordUpsert(fields={"wrong-field": "hello world"}),
             ]
         )

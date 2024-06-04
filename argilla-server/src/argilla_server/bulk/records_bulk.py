@@ -58,9 +58,7 @@ class CreateRecordsBulk:
         self._db = db
         self._search_engine = search_engine
 
-    async def create_records_bulk(
-        self, dataset: Dataset, bulk_create: RecordsBulkCreate
-    ) -> RecordsBulk:
+    async def create_records_bulk(self, dataset: Dataset, bulk_create: RecordsBulkCreate) -> RecordsBulk:
         await RecordsBulkCreateValidator(bulk_create, db=self._db).validate_for(dataset)
 
         async with self._db.begin_nested():
@@ -85,16 +83,10 @@ class CreateRecordsBulk:
 
         return RecordsBulk(items=records)
 
-    async def _upsert_records_relationships(
-        self, records: List[Record], records_create: List[RecordCreate]
-    ) -> None:
+    async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
 
-        records_and_suggestions = list(
-            zip(records, [r.suggestions for r in records_create])
-        )
-        records_and_responses = list(
-            zip(records, [r.responses for r in records_create])
-        )
+        records_and_suggestions = list(zip(records, [r.suggestions for r in records_create]))
+        records_and_responses = list(zip(records, [r.responses for r in records_create]))
         records_and_vectors = list(zip(records, [r.vectors for r in records_create]))
         # The asyncio.gather version is replaced by the following three await calls to avoid the following error:
         # https://github.com/sqlalchemy/sqlalchemy/discussions/9312
@@ -111,25 +103,15 @@ class CreateRecordsBulk:
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             try:
                 for suggestion_create in suggestions or []:
-                    question = record.dataset.question_by_id(
-                        suggestion_create.question_id
-                    )
+                    question = record.dataset.question_by_id(suggestion_create.question_id)
                     if question is None:
-                        raise ValueError(
-                            f"question with question_id={suggestion_create.question_id} does not exist"
-                        )
+                        raise ValueError(f"question with question_id={suggestion_create.question_id} does not exist")
 
                     try:
-                        SuggestionCreateValidator(suggestion_create).validate_for(
-                            question.parsed_settings, record
-                        )
-                        upsert_many_suggestions.append(
-                            dict(**suggestion_create.dict(), record_id=record.id)
-                        )
+                        SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+                        upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
                     except (UnprocessableEntityError, ValueError) as ex:
-                        raise ValueError(
-                            f"suggestion for question name={question.name} is not valid: {ex}"
-                        )
+                        raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
 
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
@@ -150,11 +132,7 @@ class CreateRecordsBulk:
         self, records_and_responses: List[Tuple[Record, List[UserResponseCreate]]]
     ) -> List[Response]:
 
-        user_ids = [
-            response.user_id
-            for _, responses in records_and_responses
-            for response in responses or []
-        ]
+        user_ids = [response.user_id for _, responses in records_and_responses for response in responses or []]
         users_by_id = await fetch_users_by_ids_as_dict(self._db, user_ids)
 
         upsert_many_responses = []
@@ -162,14 +140,10 @@ class CreateRecordsBulk:
             try:
                 for response_create in responses or []:
                     if response_create.user_id not in users_by_id:
-                        raise ValueError(
-                            f"user with id {response_create.user_id} not found"
-                        )
+                        raise ValueError(f"user with id {response_create.user_id} not found")
 
                     ResponseCreateValidator(response_create).validate_for(record)
-                    upsert_many_responses.append(
-                        dict(**response_create.dict(), record_id=record.id)
-                    )
+                    upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
                     f"Record at position {idx} does not have valid responses because {ex}"
@@ -195,9 +169,7 @@ class CreateRecordsBulk:
                 for name, value in (vectors or {}).items():
                     settings = _get_vector_settings_by_name(record.dataset, name)
                     if not settings:
-                        raise ValueError(
-                            f"vector with name={name} does not exist for dataset_id={record.dataset.id}"
-                        )
+                        raise ValueError(f"vector with name={name} does not exist for dataset_id={record.dataset.id}")
 
                     VectorValidator(value).validate_for(settings)
                     upsert_many_vectors.append(
@@ -227,24 +199,16 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-    async def upsert_records_bulk(
-        self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert
-    ) -> RecordsBulkWithUpdateInfo:
-        found_records = await self._fetch_existing_dataset_records(
-            dataset, bulk_upsert.items
-        )
+    async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
+        found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
-        RecordsBulkUpsertValidator(bulk_upsert, self._db, found_records).validate_for(
-            dataset
-        )
+        RecordsBulkUpsertValidator(bulk_upsert, self._db, found_records).validate_for(dataset)
 
         records = []
         async with self._db.begin_nested():
             for record_upsert in bulk_upsert.items:
-                record = found_records.get(
-                    record_upsert.external_id or record_upsert.id
-                )
+                record = found_records.get(record_upsert.external_id or record_upsert.id)
                 if not record:
                     record = Record(
                         fields=record_upsert.fields,
@@ -290,9 +254,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         return {**records_by_external_id, **records_by_id}
 
 
-async def _preload_records_relationships_before_index(
-    db: "AsyncSession", records: Sequence[Record]
-) -> None:
+async def _preload_records_relationships_before_index(db: "AsyncSession", records: Sequence[Record]) -> None:
     await db.execute(
         select(Record)
         .filter(Record.id.in_([record.id for record in records]))
@@ -304,9 +266,7 @@ async def _preload_records_relationships_before_index(
     )
 
 
-def _get_vector_settings_by_name(
-    dataset: Dataset, name: str
-) -> Union[VectorSettings, None]:
+def _get_vector_settings_by_name(dataset: Dataset, name: str) -> Union[VectorSettings, None]:
     for vector_settings in dataset.vectors_settings:
         if vector_settings.name == name:
             return vector_settings

@@ -28,9 +28,7 @@ class TestGetSettings:
     def url(self) -> str:
         return "/api/v1/settings"
 
-    async def test_get_settings_for_argilla_settings_running_on_huggingface(
-        self, async_client: AsyncClient
-    ):
+    async def test_get_settings_for_argilla_settings_running_on_huggingface(self, async_client: AsyncClient):
         with mock.patch.object(HUGGINGFACE_SETTINGS, "space_id", "space-id"):
             response = await async_client.get(self.url())
 
@@ -55,20 +53,13 @@ class TestGetSettings:
                     "show_huggingface_space_persistent_storage_warning": False,
                 }
 
-    async def test_get_settings_for_argilla_settings_not_running_on_huggingface(
-        self, async_client: AsyncClient
-    ):
+    async def test_get_settings_for_argilla_settings_not_running_on_huggingface(self, async_client: AsyncClient):
         response = await async_client.get(self.url())
 
         assert response.status_code == 200
-        assert (
-            "show_huggingface_space_persistent_storage_warning"
-            not in response.json()["argilla"]
-        )
+        assert "show_huggingface_space_persistent_storage_warning" not in response.json()["argilla"]
 
-    async def test_get_settings_for_huggingface_settings_running_on_huggingface(
-        self, async_client: AsyncClient
-    ):
+    async def test_get_settings_for_huggingface_settings_running_on_huggingface(self, async_client: AsyncClient):
         huggingface_os_environ = {
             "SPACE_ID": "space-id",
             "SPACE_TITLE": "space-title",
@@ -80,9 +71,7 @@ class TestGetSettings:
         }
 
         with mock.patch.dict(os.environ, huggingface_os_environ):
-            with mock.patch.object(
-                settings_context, "HUGGINGFACE_SETTINGS", HuggingfaceSettings()
-            ):
+            with mock.patch.object(settings_context, "HUGGINGFACE_SETTINGS", HuggingfaceSettings()):
                 response = await async_client.get(self.url())
 
                 assert response.status_code == 200
@@ -96,9 +85,7 @@ class TestGetSettings:
                     "space_persistent_storage_enabled": True,
                 }
 
-    async def test_get_settings_for_huggingface_settings_not_running_on_huggingface(
-        self, async_client: AsyncClient
-    ):
+    async def test_get_settings_for_huggingface_settings_not_running_on_huggingface(self, async_client: AsyncClient):
         response = await async_client.get(self.url())
 
         assert response.status_code == 200

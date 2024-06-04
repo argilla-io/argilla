@@ -337,12 +337,8 @@ class TestDatasetQuestions:
             "required": False,
             "settings": expected_settings,
             "dataset_id": str(UUID(response_body["dataset_id"])),
-            "inserted_at": datetime.fromisoformat(
-                response_body["inserted_at"]
-            ).isoformat(),
-            "updated_at": datetime.fromisoformat(
-                response_body["updated_at"]
-            ).isoformat(),
+            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
     async def test_create_dataset_question_with_description(
@@ -379,16 +375,12 @@ class TestDatasetQuestions:
             "settings": {"type": "text"},
         }
 
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/questions", json=question_json
-        )
+        response = await async_client.post(f"/api/v1/datasets/{dataset.id}/questions", json=question_json)
 
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
-    async def test_create_dataset_question_as_admin(
-        self, async_client: "AsyncClient", db: "AsyncSession"
-    ):
+    async def test_create_dataset_question_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
@@ -429,9 +421,7 @@ class TestDatasetQuestions:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
-    async def test_create_dataset_question_as_annotator(
-        self, async_client: "AsyncClient", db: "AsyncSession"
-    ):
+    async def test_create_dataset_question_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
         question_json = {
@@ -449,9 +439,7 @@ class TestDatasetQuestions:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
-    @pytest.mark.parametrize(
-        "invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"]
-    )
+    @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
     async def test_create_dataset_question_with_invalid_name(
         self,
         async_client: "AsyncClient",
@@ -572,9 +560,7 @@ class TestDatasetQuestions:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "questions cannot be created for a published dataset"
-        }
+        assert response.json() == {"detail": "questions cannot be created for a published dataset"}
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
     async def test_create_dataset_question_with_nonexistent_dataset_id(
@@ -596,9 +582,7 @@ class TestDatasetQuestions:
         )
 
         assert response.status_code == 404
-        assert response.json() == {
-            "detail": f"Dataset with id `{dataset_id}` not found"
-        }
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
 
@@ -621,15 +605,11 @@ class TestDatasetQuestions:
             },
             {
                 "type": "rating",
-                "options": [
-                    {"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)
-                ],
+                "options": [{"value": value} for value in range(0, RATING_OPTIONS_MIN_ITEMS - 1)],
             },
             {
                 "type": "rating",
-                "options": [
-                    {"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)
-                ],
+                "options": [{"value": value} for value in range(0, RATING_OPTIONS_MAX_ITEMS + 1)],
             },
             {"type": "rating", "options": "invalid"},
             {"type": "rating", "options": [{"value": 1}, {"value": 1}]},
@@ -658,9 +638,7 @@ class TestDatasetQuestions:
                 "type": "label_selection",
                 "options": [
                     {
-                        "value": "".join(
-                            ["a" for _ in range(VALUE_TEXT_OPTION_VALUE_MAX_LENGTH + 1)]
-                        ),
+                        "value": "".join(["a" for _ in range(VALUE_TEXT_OPTION_VALUE_MAX_LENGTH + 1)]),
                         "text": "a",
                     },
                     {"value": "b", "text": "b"},
@@ -675,9 +653,7 @@ class TestDatasetQuestions:
                 "options": [
                     {
                         "value": "a",
-                        "text": "".join(
-                            ["a" for _ in range(VALUE_TEXT_OPTION_TEXT_MAX_LENGTH + 1)]
-                        ),
+                        "text": "".join(["a" for _ in range(VALUE_TEXT_OPTION_TEXT_MAX_LENGTH + 1)]),
                     },
                     {"value": "b", "text": "b"},
                 ],
@@ -695,14 +671,7 @@ class TestDatasetQuestions:
                     {
                         "value": "a",
                         "text": "a",
-                        "description": "".join(
-                            [
-                                "a"
-                                for _ in range(
-                                    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1
-                                )
-                            ]
-                        ),
+                        "description": "".join(["a" for _ in range(VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1)]),
                     },
                     {"value": "b", "text": "b"},
                 ],
@@ -760,14 +729,7 @@ class TestDatasetQuestions:
                     {
                         "value": "a",
                         "text": "a",
-                        "description": "".join(
-                            [
-                                "a"
-                                for _ in range(
-                                    VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1
-                                )
-                            ]
-                        ),
+                        "description": "".join(["a" for _ in range(VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH + 1)]),
                     },
                     {"value": "b", "text": "b", "description": "b"},
                 ],
@@ -775,10 +737,7 @@ class TestDatasetQuestions:
             {"type": "span", "options": []},
             {
                 "type": "span",
-                "options": [
-                    {"value": value, "text": value}
-                    for value in range(0, settings.span_options_max_items + 1)
-                ],
+                "options": [{"value": value, "text": value} for value in range(0, settings.span_options_max_items + 1)],
             },
         ],
     )

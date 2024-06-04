@@ -342,9 +342,7 @@ async def test_update_question(
     assert question.settings == expected_settings
 
 
-@pytest.mark.parametrize(
-    "title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)]
-)
+@pytest.mark.parametrize("title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)])
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_title(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
@@ -382,9 +380,7 @@ async def test_update_question_with_description_as_none(
     assert question.description == None
 
 
-@pytest.mark.parametrize(
-    "description", ["", "d" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1)]
-)
+@pytest.mark.parametrize("description", ["", "d" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1)])
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_description(
     async_client: "AsyncClient",
@@ -425,9 +421,7 @@ async def test_update_question_with_invalid_description(
             {
                 "settings": {
                     "type": "label_selection",
-                    "options": [
-                        {"value": "undefined-option", "text": "Undefined option"}
-                    ],
+                    "options": [{"value": "undefined-option", "text": "Undefined option"}],
                 }
             },
         ),
@@ -453,9 +447,7 @@ async def test_update_question_with_invalid_description(
             {
                 "settings": {
                     "type": "multi_label_selection",
-                    "options": [
-                        {"value": "undefined-option", "text": "Undefined option"}
-                    ],
+                    "options": [{"value": "undefined-option", "text": "Undefined option"}],
                 }
             },
         ),
@@ -530,17 +522,13 @@ async def test_update_question_with_invalid_settings(
 ):
     question = await QuestionFactory.create()
 
-    response = await async_client.patch(
-        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload
-    )
+    response = await async_client.patch(f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload)
 
     assert response.status_code == 422, payload
 
 
 @pytest.mark.asyncio
-async def test_update_question_with_invalid_payload(
-    async_client: "AsyncClient", owner_auth_header: dict
-):
+async def test_update_question_with_invalid_payload(async_client: "AsyncClient", owner_auth_header: dict):
     question = await TextQuestionFactory.create()
 
     response = await async_client.patch(
@@ -556,9 +544,7 @@ async def test_update_question_with_invalid_payload(
 
 
 @pytest.mark.asyncio
-async def test_update_question_non_existent(
-    async_client: "AsyncClient", owner_auth_header: dict
-):
+async def test_update_question_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
     question_id = uuid4()
 
     response = await async_client.patch(
@@ -603,12 +589,8 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_question(
-    async_client: "AsyncClient", db: "AsyncSession", role: UserRole
-):
-    question = await TextQuestionFactory.create(
-        name="name", title="title", description="description"
-    )
+async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
+    question = await TextQuestionFactory.create(name="name", title="title", description="description")
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
 
     response = await async_client.delete(
@@ -633,9 +615,7 @@ async def test_delete_question(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_as_admin_from_different_workspace(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_as_admin_from_different_workspace(async_client: "AsyncClient", db: "AsyncSession"):
     user = await UserFactory.create(role=UserRole.admin)
     question = await TextQuestionFactory.create()
 
@@ -648,9 +628,7 @@ async def test_delete_question_as_admin_from_different_workspace(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_without_authentication(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     question = await TextQuestionFactory.create()
 
     response = await async_client.delete(f"/api/v1/questions/{question.id}")
@@ -660,9 +638,7 @@ async def test_delete_question_without_authentication(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_as_annotator(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     question = await TextQuestionFactory.create()
 
@@ -682,14 +658,10 @@ async def test_delete_question_belonging_to_published_dataset(
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     question = await TextQuestionFactory.create(dataset=dataset)
 
-    response = await async_client.delete(
-        f"/api/v1/questions/{question.id}", headers=owner_auth_header
-    )
+    response = await async_client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
-    assert response.json() == {
-        "detail": "questions cannot be deleted for a published dataset"
-    }
+    assert response.json() == {"detail": "questions cannot be deleted for a published dataset"}
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 

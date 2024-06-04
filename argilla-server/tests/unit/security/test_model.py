@@ -22,9 +22,7 @@ from tests.factories import UserFactory, WorkspaceFactory
 from tests.pydantic_v1 import ValidationError
 
 
-@pytest.mark.parametrize(
-    "invalid_name", ["work space", "work/space", "work.space", "_", "-"]
-)
+@pytest.mark.parametrize("invalid_name", ["work space", "work/space", "work.space", "_", "-"])
 def test_workspace_create_invalid_name(invalid_name: str):
     with pytest.raises(ValidationError):
         WorkspaceCreate(name=invalid_name)
@@ -68,9 +66,7 @@ def test_user_create(username: str):
 )
 def test_user_create_invalid_username(invalid_username: str):
     with pytest.raises(ValidationError):
-        UserCreate(
-            first_name="first-name", username=invalid_username, password="12345678"
-        )
+        UserCreate(first_name="first-name", username=invalid_username, password="12345678")
 
 
 @pytest.mark.asyncio

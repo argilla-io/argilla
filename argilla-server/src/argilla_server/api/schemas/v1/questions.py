@@ -80,9 +80,7 @@ class UniqueValuesCheckerMixin(BaseModel):
             else:
                 seen.add(option.value)
         if duplicates:
-            raise ValueError(
-                f"Option values must be unique, found duplicates: {duplicates}"
-            )
+            raise ValueError(f"Option values must be unique, found duplicates: {duplicates}")
         return values
 
 
@@ -134,9 +132,7 @@ class RatingQuestionSettingsOption(BaseModel):
 
 
 class RatingQuestionSettingsOptionCreate(BaseModel):
-    value: int = Field(
-        ge=RATING_VALUE_GREATER_THAN_OR_EQUAL, le=RATING_VALUE_LESS_THAN_OR_EQUAL
-    )
+    value: int = Field(ge=RATING_VALUE_GREATER_THAN_OR_EQUAL, le=RATING_VALUE_LESS_THAN_OR_EQUAL)
 
 
 class RatingQuestionSettings(BaseModel):
@@ -242,12 +238,8 @@ class SpanQuestionSettings(BaseModel):
     options: List[OptionSettings]
     visible_options: Optional[int] = None
     # These attributes are read-only for now
-    allow_overlapping: bool = Field(
-        default=False, description="Allow spans overlapping"
-    )
-    allow_character_annotation: bool = Field(
-        default=True, description="Allow character-level annotation"
-    )
+    allow_overlapping: bool = Field(default=False, description="Allow spans overlapping")
+    allow_character_annotation: bool = Field(default=True, description="Allow character-level annotation")
 
 
 class SpanQuestionSettingsCreate(UniqueValuesCheckerMixin):

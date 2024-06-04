@@ -152,7 +152,6 @@ def wait_for_search_engine(app: FastAPI):
     pass
 
 
-
 def configure_app_security(app: FastAPI):
     auth.configure_app(app)
 

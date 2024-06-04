@@ -44,9 +44,7 @@ class RecordsBulkCreate(BaseModel):
     @classmethod
     def check_unique_external_ids(cls, items: List[RecordCreate]) -> List[RecordCreate]:
         """Check that external_ids are unique"""
-        external_ids = [
-            item.external_id for item in items if item.external_id is not None
-        ]
+        external_ids = [item.external_id for item in items if item.external_id is not None]
         if len(external_ids) != len(set(external_ids)):
             raise ValueError("External IDs must be unique")
 

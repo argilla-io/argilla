@@ -75,10 +75,7 @@ class RecordGetterDict(GetterDict):
 
         if key == "vectors":
             if self._obj.is_relationship_loaded("vectors"):
-                return {
-                    vector.vector_settings.name: vector.value
-                    for vector in self._obj.vectors
-                }
+                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
             else:
                 return default
 
@@ -123,26 +120,20 @@ class RecordCreate(BaseModel):
         user_ids = {}
         for value in responses:
             if user_ids.get(value.user_id):
-                raise ValueError(
-                    f"'responses' contains several responses for the same user_id={str(value.user_id)!r}"
-                )
+                raise ValueError(f"'responses' contains several responses for the same user_id={str(value.user_id)!r}")
             user_ids.setdefault(value.user_id, True)
 
         return responses
 
     @validator("metadata")
     @classmethod
-    def prevent_nan_values(
-        cls, metadata: Optional[Dict[str, Any]]
-    ) -> Optional[Dict[str, Any]]:
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
 
         for k, v in metadata.items():
             if v != v:
-                raise ValueError(
-                    f"NaN is not allowed as metadata value, found NaN for key {k!r}"
-                )
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
 
         return metadata
 
@@ -160,21 +151,15 @@ class RecordUpdate(UpdateSchema):
 
     @validator("metadata_")
     @classmethod
-    def prevent_nan_values(
-        cls, metadata: Optional[Dict[str, Any]]
-    ) -> Optional[Dict[str, Any]]:
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
 
         for k, v in metadata.items():
             if v != v:
-                raise ValueError(
-                    f"NaN is not allowed as metadata value, found NaN for key {k!r}"
-                )
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
 
-        return {
-            k: v for k, v in metadata.items() if v == v
-        }  # By definition, NaN != NaN
+        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
 
 class RecordUpdateWithId(RecordUpdate):
@@ -197,11 +182,7 @@ class RecordIncludeParam(BaseModel):
             return values
 
         vectors = values.get("vectors")
-        if (
-            vectors is not None
-            and len(vectors) > 0
-            and RecordInclude.vectors in relationships
-        ):
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
             # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
             # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
             raise ValueError(
@@ -216,17 +197,11 @@ class RecordIncludeParam(BaseModel):
 
     @property
     def with_suggestions(self) -> bool:
-        return (
-            self._has_relationships and RecordInclude.suggestions in self.relationships
-        )
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
 
     @property
     def with_all_vectors(self) -> bool:
-        return (
-            self._has_relationships
-            and not self.vectors
-            and RecordInclude.vectors in self.relationships
-        )
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
 
     @property
     def with_some_vector(self) -> bool:
@@ -239,9 +214,7 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[
-        Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]
-    ]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
 
 
 class Records(BaseModel):
@@ -251,16 +224,12 @@ class Records(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = Field(
-        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
-    )
+    items: List[RecordCreate] = Field(..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordsUpdate(BaseModel):
     # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(
-        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
-    )
+    items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
 
 
 class MetadataParsedQueryParam:
@@ -272,9 +241,7 @@ class MetadataParsedQueryParam:
 
 
 class MetadataQueryParams(BaseModel):
-    metadata: List[str] = Field(
-        fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$")
-    )
+    metadata: List[str] = Field(fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
 
     @property
     def metadata_parsed(self) -> List[MetadataParsedQueryParam]:

@@ -36,9 +36,7 @@ class QuestionCreateValidator:
 
     def _validate_dataset_is_not_ready(self, dataset):
         if dataset.is_ready:
-            raise UnprocessableEntityError(
-                "questions cannot be created for a published dataset"
-            )
+            raise UnprocessableEntityError("questions cannot be created for a published dataset")
 
     def _validate_span_question_settings(self, dataset: Dataset):
         if self._question_create.settings.type != QuestionType.span:
@@ -53,13 +51,8 @@ class QuestionCreateValidator:
             )
 
         for question in dataset.questions:
-            if (
-                question.type == QuestionType.span
-                and field == question.parsed_settings.field
-            ):
-                raise UnprocessableEntityError(
-                    f"'{field}' is already used by span question with id '{question.id}'"
-                )
+            if question.type == QuestionType.span and field == question.parsed_settings.field:
+                raise UnprocessableEntityError(f"'{field}' is already used by span question with id '{question.id}'")
 
 
 class QuestionUpdateValidator:
@@ -85,18 +78,10 @@ class QuestionUpdateValidator:
         if not self._question_update.settings:
             return
 
-        self._validate_question_settings_type_is_the_same(
-            question_settings, self._question_update.settings
-        )
-        self._validate_question_settings_label_options(
-            question_settings, self._question_update.settings
-        )
-        self._validate_question_settings_visible_options(
-            question_settings, self._question_update.settings
-        )
-        self._validate_span_question_settings(
-            question_settings, self._question_update.settings
-        )
+        self._validate_question_settings_type_is_the_same(question_settings, self._question_update.settings)
+        self._validate_question_settings_label_options(question_settings, self._question_update.settings)
+        self._validate_question_settings_visible_options(question_settings, self._question_update.settings)
+        self._validate_span_question_settings(question_settings, self._question_update.settings)
 
     def _validate_question_settings_type_is_the_same(
         self,
@@ -124,12 +109,8 @@ class QuestionUpdateValidator:
                 f"the number of options cannot be modified. expected {len(question_settings.options)} but got {len(question_settings_update.options)}"
             )
 
-        sorted_options = sorted(
-            question_settings.options, key=lambda option: option.value
-        )
-        sorted_update_options = sorted(
-            question_settings_update.options, key=lambda option: option.value
-        )
+        sorted_options = sorted(question_settings.options, key=lambda option: option.value)
+        sorted_update_options = sorted(question_settings_update.options, key=lambda option: option.value)
 
         unexpected_options: List[str] = []
         for option, update_option in zip(sorted_options, sorted_update_options):
@@ -146,10 +127,7 @@ class QuestionUpdateValidator:
         question_settings: QuestionSettings,
         question_settings_update: QuestionSettingsUpdate,
     ):
-        if (
-            question_settings_update.type
-            not in self.QUESTION_TYPES_WITH_VISIBLE_OPTIONS
-        ):
+        if question_settings_update.type not in self.QUESTION_TYPES_WITH_VISIBLE_OPTIONS:
             return
 
         if question_settings_update.visible_options is None:
@@ -169,10 +147,7 @@ class QuestionUpdateValidator:
         if question_settings_update.type != QuestionType.span:
             return
 
-        if (
-            question_settings.allow_overlapping
-            and not question_settings_update.allow_overlapping
-        ):
+        if question_settings.allow_overlapping and not question_settings_update.allow_overlapping:
             raise UnprocessableEntityError(
                 "'allow_overlapping' can't be disabled because responses may become inconsistent"
             )
@@ -184,6 +159,4 @@ class QuestionDeleteValidator:
 
     def _validate_dataset_is_not_ready(self, dataset):
         if dataset.is_ready:
-            raise UnprocessableEntityError(
-                "questions cannot be deleted for a published dataset"
-            )
+            raise UnprocessableEntityError("questions cannot be deleted for a published dataset")

@@ -33,9 +33,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
         text_question = await TextQuestionFactory.create(dataset=dataset)
-        label_selection_question = await LabelSelectionQuestionFactory.create(
-            dataset=dataset
-        )
+        label_selection_question = await LabelSelectionQuestionFactory.create(dataset=dataset)
         metadata_property = await FloatMetadataPropertyFactory.create(dataset=dataset)
 
         query = SearchRecordsQuery.parse_obj(
@@ -122,9 +120,7 @@ class TestSearchRecordsQueryValidator:
 
         await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
-    async def test_validate_response_filter_scope_in_filters_without_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_response_filter_scope_in_filters_without_question(self, db: AsyncSession):
         query = SearchRecordsQuery.parse_obj(
             {
                 "query": {
@@ -144,9 +140,7 @@ class TestSearchRecordsQueryValidator:
 
         await SearchRecordsQueryValidator(db, query, uuid4()).validate()
 
-    async def test_validate_response_filter_scope_in_filters_with_non_existent_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_response_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -170,13 +164,10 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value)
-            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -203,8 +194,7 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value)
-            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
     async def test_validate_metadata_filter_scope_in_filters_with_non_existent_metadata_property(
@@ -240,9 +230,7 @@ class TestSearchRecordsQueryValidator:
             == f"MetadataProperty not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_response_filter_scope_in_sort_without_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_response_filter_scope_in_sort_without_question(self, db: AsyncSession):
         query = SearchRecordsQuery.parse_obj(
             {
                 "query": {
@@ -254,9 +242,7 @@ class TestSearchRecordsQueryValidator:
 
         await SearchRecordsQueryValidator(db, query, uuid4()).validate()
 
-    async def test_validate_response_filter_scope_in_sort_with_non_existent_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_response_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -277,13 +263,10 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value)
-            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(
-        self, db: AsyncSession
-    ):
+    async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
@@ -304,13 +287,10 @@ class TestSearchRecordsQueryValidator:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
-            str(not_found_error.value)
-            == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
+            str(not_found_error.value) == f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         )
 
-    async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(
-        self, db: AsyncSession
-    ):
+    async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
         query = SearchRecordsQuery.parse_obj(
