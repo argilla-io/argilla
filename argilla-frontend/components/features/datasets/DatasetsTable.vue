@@ -13,6 +13,7 @@
         ref="table"
         :data="datasets"
         :columns="tableColumns"
+        :row-link="datasetLink"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
         search-on="name"
@@ -40,13 +41,13 @@ export default {
   data() {
     return {
       querySearch: undefined,
+      datasetLink: (dataset) => this.getDatasetLink(dataset),
       tableColumns: [
         {
           name: this.$t("datasetTable.name"),
           field: "name",
           class: "table-info__title",
-          type: "action",
-          link: (dataset) => this.getDatasetLink(dataset),
+          type: "main",
           component: {
             name: "DatasetQuestions",
             props: (item) => ({

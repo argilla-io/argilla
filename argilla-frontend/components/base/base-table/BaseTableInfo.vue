@@ -53,7 +53,7 @@
         <div class="table-info__body" ref="table">
           <ul>
             <li v-for="item in filteredResults" :key="item.id" :id="item.id">
-              <div class="table-info__item">
+              <nuxt-link :to="rowLink(item)" class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
@@ -62,9 +62,9 @@
                   <span :class="column.class">
                     <span v-if="column.actions">
                       <div class="table-info__actions">
-                        <nuxt-link v-if="column.link" :to="column.link(item)">
+                        <p v-if="column.main">
                           {{ itemValue(item, column) }}
-                        </nuxt-link>
+                        </p>
                         <span v-else>{{ itemValue(item, column) }}</span>
                         <div class="table-info__actions__buttons">
                           <base-action-tooltip
@@ -75,7 +75,9 @@
                             <base-button
                               :title="action.title"
                               class="table-info__actions__button button-icon"
-                              @click="onActionClicked(action.name, item)"
+                              @click.prevent="
+                                onActionClicked(action.name, item)
+                              "
                             >
                               <svgicon
                                 v-if="action.icon !== undefined"
@@ -106,7 +108,7 @@
                     </span>
                   </span>
                 </span>
-              </div>
+              </nuxt-link>
             </li>
           </ul>
         </div>
@@ -156,6 +158,12 @@ export default {
       type: Array,
       default: () => {
         return [];
+      },
+    },
+    rowLink: {
+      type: Function,
+      default: () => {
+        return () => {};
       },
     },
   },
@@ -392,7 +400,7 @@ $greyColor: palette(grey, 700);
       &:first-child {
         width: auto;
         min-width: auto;
-        flex-grow: 1.5;
+        flex-grow: 2.5;
       }
       &.progress {
         min-width: 160px;
