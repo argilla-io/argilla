@@ -1,5 +1,5 @@
 <template>
-  <BaseBadgeSkeleton v-if="isQuestionsLoading" :quantity="5" />
+  <BaseBadgeSkeleton v-if="isQuestionsLoading" :quantity="3" />
   <div class="questions" v-else>
     <BaseBadge
       v-for="question in questions"
