@@ -16,11 +16,9 @@ import json
 import uuid
 from datetime import datetime
 
+import argilla_sdk as rg
 import httpx
 import pytest
-from pytest_httpx import HTTPXMock
-
-import argilla_sdk as rg
 from argilla_sdk._exceptions import (
     BadRequestError,
     ConflictError,
@@ -30,6 +28,7 @@ from argilla_sdk._exceptions import (
     UnprocessableEntityError,
 )
 from argilla_sdk._models import UserModel
+from pytest_httpx import HTTPXMock
 
 
 class TestUserSerialization:
@@ -98,7 +97,7 @@ class TestUsers:
 
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/users", method="POST", status_code=status_code
+            json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=status_code
         )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
@@ -141,7 +140,7 @@ class TestUsers:
 
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/users", method="POST", status_code=status_code
+            json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=status_code
         )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
@@ -158,36 +157,38 @@ class TestUsers:
                 assert user.id == gotten_user.id
 
     def test_list_users(self, httpx_mock: HTTPXMock):
-        mock_return_value = [
-            {
-                "id": str(uuid.uuid4()),
-                "username": "test-user",
-                "first_name": "Test",
-                "last_name": "User",
-                "role": "admin",
-                "inserted_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "username": "another-test-user",
-                "role": "annotator",
-                "first_name": "First",
-                "last_name": "Last",
-                "inserted_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
-            },
-        ]
+        mock_return_value = {
+            "items": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "username": "test-user",
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "role": "admin",
+                    "inserted_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "username": "another-test-user",
+                    "role": "annotator",
+                    "first_name": "First",
+                    "last_name": "Last",
+                    "inserted_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                },
+            ]
+        }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/users")
+        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/users")
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
             users = client.users
             assert len(users) == 2
             for i in range(len(users)):
-                assert users[i].username == mock_return_value[i]["username"]
-                assert users[i].role == mock_return_value[i]["role"]
-                assert users[i].id == uuid.UUID(mock_return_value[i]["id"])
+                assert users[i].username == mock_return_value["items"][i]["username"]
+                assert users[i].role == mock_return_value["items"][i]["role"]
+                assert users[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
 
 
 class TestUsersAPI:
@@ -203,7 +204,7 @@ class TestUsersAPI:
         }
 
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/me")
+        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/me")
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             user = client.api.users.get_me()
@@ -234,43 +235,45 @@ class TestUsersAPI:
 
     def test_delete_user(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
-        httpx_mock.add_response(url=f"http://test_url/api/users/{user_id}", method="DELETE")
+        httpx_mock.add_response(url=f"http://test_url/api/v1/users/{user_id}", method="DELETE")
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
             client.api.users.delete(user_id)
 
     def test_list_workspace_users(self, httpx_mock: HTTPXMock):
         workspace_id = uuid.uuid4()
-        mock_return_value = [
-            {
-                "id": str(uuid.uuid4()),
-                "username": "test-user",
-                "first_name": "Test",
-                "last_name": "User",
-                "role": "admin",
-                "inserted_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "username": "another-test-user",
-                "first_name": "Another",
-                "last_name": "User",
-                "role": "admin",
-                "inserted_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
-            },
-        ]
+        mock_return_value = {
+            "items": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "username": "test-user",
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "role": "admin",
+                    "inserted_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "username": "another-test-user",
+                    "first_name": "Another",
+                    "last_name": "User",
+                    "role": "admin",
+                    "inserted_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                },
+            ]
+        }
 
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/workspaces/{workspace_id}/users")
+        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/workspaces/{workspace_id}/users")
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             users = client.api.users.list_by_workspace_id(workspace_id)
             assert len(users) == 2
             for i in range(len(users)):
-                assert users[i].username == mock_return_value[i]["username"]
-                assert users[i].id == uuid.UUID(mock_return_value[i]["id"])
+                assert users[i].username == mock_return_value["items"][i]["username"]
+                assert users[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
 
     def test_create_user(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
@@ -285,7 +288,7 @@ class TestUsersAPI:
         }
         api_url = "http://test_url"
 
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/users", method="POST", status_code=200)
+        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=200)
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             user_create = UserModel(username="test-user", password="test-password")
