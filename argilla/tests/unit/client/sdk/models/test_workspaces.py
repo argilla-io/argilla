@@ -17,6 +17,4 @@ from argilla_server.api.schemas.v1.workspaces import Workspace as ServerSchema
 
 
 def test_users_schema(helpers):
-    assert helpers.are_compatible_api_schemas(
-        ClientSchema.schema(), ServerSchema.schema()
-    )
+    assert helpers.are_compatible_api_schemas(ClientSchema.schema(), ServerSchema.schema())
