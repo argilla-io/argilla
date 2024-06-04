@@ -36,9 +36,7 @@ async def list_dataset_questions(
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(
-        db, dataset_id, options=[selectinload(Dataset.questions)]
-    )
+    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.questions)])
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 

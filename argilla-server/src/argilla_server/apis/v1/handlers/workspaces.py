@@ -17,11 +17,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.api.policies.v1 import (
-    WorkspacePolicy,
-    WorkspaceUserPolicy,
-    authorize,
-)
+from argilla_server.api.policies.v1 import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla_server.api.schemas.v1.users import User as UserSchema
 from argilla_server.api.schemas.v1.users import Users
 from argilla_server.api.schemas.v1.workspaces import (
@@ -32,7 +28,7 @@ from argilla_server.api.schemas.v1.workspaces import (
     Workspaces,
     WorkspaceUserCreate,
 )
-from argilla_server.contexts import accounts, datasets
+from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
@@ -53,9 +49,7 @@ async def get_workspace(
     return await Workspace.get_or_raise(db, workspace_id)
 
 
-@router.post(
-    "/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema
-)
+@router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema)
 async def create_workspace(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -134,9 +128,7 @@ async def create_workspace_user(
     except NotFoundError as e:
         raise UnprocessableEntityError(e.message)
 
-    workspace_user = await accounts.create_workspace_user(
-        db, {"workspace_id": workspace.id, "user_id": user.id}
-    )
+    workspace_user = await accounts.create_workspace_user(db, {"workspace_id": workspace.id, "user_id": user.id})
 
     return workspace_user.user
 
@@ -149,9 +141,7 @@ async def delete_workspace_user(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    workspace_user = await WorkspaceUser.get_by_or_raise(
-        db, workspace_id=workspace_id, user_id=user_id
-    )
+    workspace_user = await WorkspaceUser.get_by_or_raise(db, workspace_id=workspace_id, user_id=user_id)
 
     await authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 

@@ -37,9 +37,7 @@ async def update_field(
     field_update: FieldUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await Field.get_or_raise(
-        db, field_id, options=[selectinload(Field.dataset)]
-    )
+    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
 
     await authorize(current_user, FieldPolicy.update(field))
 
@@ -53,9 +51,7 @@ async def delete_field(
     field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    field = await Field.get_or_raise(
-        db, field_id, options=[selectinload(Field.dataset)]
-    )
+    field = await Field.get_or_raise(db, field_id, options=[selectinload(Field.dataset)])
 
     await authorize(current_user, FieldPolicy.delete(field))
 

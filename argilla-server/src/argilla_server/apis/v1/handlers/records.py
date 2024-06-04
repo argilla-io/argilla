@@ -28,10 +28,7 @@ from argilla_server.api.schemas.v1.suggestions import Suggestion as SuggestionSc
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
-from argilla_server.errors.future.base_errors import (
-    NotFoundError,
-    UnprocessableEntityError,
-)
+from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
@@ -64,9 +61,7 @@ async def get_record(
     return record
 
 
-@router.patch(
-    "/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema
-)
+@router.patch("/records/{record_id}", status_code=status.HTTP_200_OK, response_model=RecordSchema)
 async def update_record(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -115,9 +110,7 @@ async def create_record_response(
 
     await authorize(current_user, RecordPolicy.create_response(record))
 
-    return await datasets.create_response(
-        db, search_engine, record, current_user, response_create
-    )
+    return await datasets.create_response(db, search_engine, record, current_user, response_create)
 
 
 @router.get(
@@ -193,14 +186,10 @@ async def upsert_suggestion(
 
     # NOTE: If there is already a suggestion for this record and question, we update it instead of creating a new one.
     # So we set the correct status code here.
-    if await Suggestion.get_by(
-        db, record_id=record_id, question_id=suggestion_create.question_id
-    ):
+    if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
         response.status_code = status.HTTP_200_OK
 
-    return await datasets.upsert_suggestion(
-        db, search_engine, record, question, suggestion_create
-    )
+    return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
 
 @router.delete(
@@ -237,9 +226,7 @@ async def delete_record_suggestions(
         raise UnprocessableEntityError("No suggestions IDs provided")
 
     if num_suggestions > DELETE_RECORD_SUGGESTIONS_LIMIT:
-        raise UnprocessableEntityError(
-            f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once"
-        )
+        raise UnprocessableEntityError(f"Cannot delete more than {DELETE_RECORD_SUGGESTIONS_LIMIT} suggestions at once")
 
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
