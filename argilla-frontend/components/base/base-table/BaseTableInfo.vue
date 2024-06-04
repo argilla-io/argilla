@@ -412,9 +412,9 @@ $greyColor: palette(grey, 700);
     }
     .svg-icon {
       margin-right: $base-space;
-      fill: $black-54;
+      fill: $black-37;
       &:hover {
-        fill: $black-87;
+        fill: $black-54;
       }
     }
   }
