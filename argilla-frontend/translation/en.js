@@ -214,7 +214,7 @@ export default {
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
   datasetTable: {
-    name: "Name",
+    name: "Dataset",
     workspace: "Workspace",
     createdAt: "Created",
     lastActivityAt: "Updated",

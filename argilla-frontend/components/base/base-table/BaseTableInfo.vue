@@ -63,7 +63,7 @@
                     <span v-if="column.actions">
                       <div class="table-info__actions">
                         <p
-                          class="table-info__actions-title"
+                          class="table-info__main"
                           v-if="column.type === 'main'"
                         >
                           {{ itemValue(item, column) }}
@@ -321,7 +321,8 @@ $greyColor: palette(grey, 700);
     margin: 0;
   }
   &__header {
-    border: 1px solid $greyColor;
+    border: 1px solid $black-4;
+    border-bottom: 0;
     border-radius: var(--m, 10px) var(--m, 10px) 0px 0px;
     background: $greyColor;
     min-height: 49px;
@@ -386,7 +387,7 @@ $greyColor: palette(grey, 700);
     align-items: center;
     background: palette(white);
     list-style: none;
-    padding-inline: $base-space * 3 $base-space * 8;
+    padding: $base-space * 2 $base-space * 2;
     width: 100%;
     min-height: $base-space * 10;
     text-decoration: none;
@@ -421,7 +422,8 @@ $greyColor: palette(grey, 700);
     margin-top: 5em;
     height: auto;
   }
-  &__actions-title {
+  &__main {
+    margin: 0;
     color: $black-87;
     .table-info__item:hover & {
       color: $primary-color;
