@@ -12,7 +12,20 @@ export const useDatasetQuestions = ({ dataset }: { dataset: Dataset }) => {
   useFetch(async () => {
     try {
       isQuestionsLoading.value = true;
-      questions.value = await getQuestionsUseCase.execute(dataset.id, false);
+
+      const backendQuestions = await getQuestionsUseCase.execute(
+        dataset.id,
+        false
+      );
+
+      questions.value = [];
+
+      for (const question of backendQuestions) {
+        if (questions.value.some((q) => q.type.value === question.type.value))
+          continue;
+
+        questions.value.push(question);
+      }
     } catch {
     } finally {
       isQuestionsLoading.value = false;

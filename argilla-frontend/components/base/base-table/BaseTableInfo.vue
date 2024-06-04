@@ -419,6 +419,7 @@ $greyColor: palette(grey, 700);
 
     &__buttons {
       display: flex;
+      flex-shrink: 0;
 
       &__button {
         position: relative;

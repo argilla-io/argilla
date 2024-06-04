@@ -4,7 +4,7 @@
     <BaseBadge
       v-for="question in questions"
       :key="question.id"
-      :text="question.type"
+      :text="$t(question.type)"
     />
   </div>
 </template>

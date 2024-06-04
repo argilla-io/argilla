@@ -9,7 +9,6 @@
               class="settings__dataset-name --body1"
               v-html="settings.dataset.name"
             />
-            <BaseBadge :text="settings.dataset.task" />
           </div>
           <base-action-tooltip tooltip="$t('copied')">
             <base-button
