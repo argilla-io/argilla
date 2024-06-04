@@ -19,11 +19,11 @@ from fastapi import APIRouter, Depends, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server import telemetry
+from argilla_server.api.policies.v1 import UserPolicy, authorize
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotUniqueError
 from argilla_server.models import User
-from argilla_server.policies import UserPolicyV1, authorize
 from argilla_server.schemas.v1.users import User as UserSchema
 from argilla_server.schemas.v1.users import UserCreate, Users
 from argilla_server.schemas.v1.workspaces import Workspaces
@@ -46,7 +46,7 @@ async def get_user(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, UserPolicyV1.get)
+    await authorize(current_user, UserPolicy.get)
 
     return await User.get_or_raise(db, user_id)
 
@@ -57,7 +57,7 @@ async def list_users(
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, UserPolicyV1.list)
+    await authorize(current_user, UserPolicy.list)
 
     users = await accounts.list_users(db)
 
@@ -71,7 +71,7 @@ async def create_user(
     user_create: UserCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, UserPolicyV1.create)
+    await authorize(current_user, UserPolicy.create)
 
     user = await accounts.create_user(db, user_create.dict())
 
@@ -89,7 +89,7 @@ async def delete_user(
 ):
     user = await User.get_or_raise(db, user_id)
 
-    await authorize(current_user, UserPolicyV1.delete)
+    await authorize(current_user, UserPolicy.delete)
 
     return await accounts.delete_user(db, user)
 
@@ -101,7 +101,7 @@ async def list_user_workspaces(
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, UserPolicyV1.list_workspaces)
+    await authorize(current_user, UserPolicy.list_workspaces)
 
     user = await User.get_or_raise(db, user_id)
 

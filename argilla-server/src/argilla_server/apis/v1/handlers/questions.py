@@ -18,10 +18,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import QuestionPolicy, authorize
 from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Question, User
-from argilla_server.policies import QuestionPolicyV1, authorize
 from argilla_server.schemas.v1.questions import Question as QuestionSchema
 from argilla_server.schemas.v1.questions import QuestionUpdate
 from argilla_server.security import auth
@@ -39,7 +39,7 @@ async def update_question(
 ):
     question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
 
-    await authorize(current_user, QuestionPolicyV1.update(question))
+    await authorize(current_user, QuestionPolicy.update(question))
 
     return await questions.update_question(db, question, question_update)
 
@@ -53,6 +53,6 @@ async def delete_question(
 ):
     question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
 
-    await authorize(current_user, QuestionPolicyV1.delete(question))
+    await authorize(current_user, QuestionPolicy.delete(question))
 
     return await questions.delete_question(db, question)

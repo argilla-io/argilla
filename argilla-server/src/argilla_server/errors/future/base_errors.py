@@ -12,12 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError", "MissingVectorError"]
+__all__ = [
+    "ForbiddenError",
+    "NotFoundError",
+    "NotUniqueError",
+    "UnprocessableEntityError",
+    "AuthenticationError",
+    "MissingVectorError",
+]
 
+FORBIDDEN_ERROR = "forbidden"
 NOT_FOUND_ERROR = "not_found"
 NOT_UNIQUE_ERROR = "not_unique"
 UNPROCESSABLE_ENTITY_ERROR_CODE = "unprocessable_entity"
 MISSING_VECTOR_ERROR_CODE = "missing_vector"
+
+
+class ForbiddenError(Exception):
+    """Custom Argilla forbidden error. Use it for situations where an request is not authorized to perform an action."""
+
+    def __init__(self, message, code=FORBIDDEN_ERROR):
+        self.message = message
+        self.code = code
 
 
 class NotFoundError(Exception):

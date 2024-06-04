@@ -18,10 +18,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import ResponsePolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, Record, Response, User
-from argilla_server.policies import ResponsePolicyV1, authorize
 from argilla_server.schemas.v1.responses import (
     Response as ResponseSchema,
 )
@@ -67,7 +67,7 @@ async def update_response(
         options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
     )
 
-    await authorize(current_user, ResponsePolicyV1.update(response))
+    await authorize(current_user, ResponsePolicy.update(response))
 
     return await datasets.update_response(db, search_engine, response, response_update)
 
@@ -86,6 +86,6 @@ async def delete_response(
         options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
     )
 
-    await authorize(current_user, ResponsePolicyV1.delete(response))
+    await authorize(current_user, ResponsePolicy.delete(response))
 
     return await datasets.delete_response(db, search_engine, response)

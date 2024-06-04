@@ -18,10 +18,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import MetadataPropertyPolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import MetadataProperty, User
-from argilla_server.policies import MetadataPropertyPolicyV1, authorize
 from argilla_server.schemas.v1.metadata_properties import (
     MetadataMetrics,
     MetadataPropertyUpdate,
@@ -49,7 +49,7 @@ async def get_metadata_property_metrics(
         options=[selectinload(MetadataProperty.dataset)],
     )
 
-    await authorize(current_user, MetadataPropertyPolicyV1.get(metadata_property))
+    await authorize(current_user, MetadataPropertyPolicy.get(metadata_property))
 
     return await search_engine.compute_metrics_for(metadata_property)
 
@@ -68,7 +68,7 @@ async def update_metadata_property(
         options=[selectinload(MetadataProperty.dataset)],
     )
 
-    await authorize(current_user, MetadataPropertyPolicyV1.update(metadata_property))
+    await authorize(current_user, MetadataPropertyPolicy.update(metadata_property))
 
     return await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
 
@@ -86,6 +86,6 @@ async def delete_metadata_property(
         options=[selectinload(MetadataProperty.dataset)],
     )
 
-    await authorize(current_user, MetadataPropertyPolicyV1.delete(metadata_property))
+    await authorize(current_user, MetadataPropertyPolicy.delete(metadata_property))
 
     return await datasets.delete_metadata_property(db, metadata_property)

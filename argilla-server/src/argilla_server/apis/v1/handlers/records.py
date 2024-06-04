@@ -20,11 +20,11 @@ from fastapi import Response as HTTPResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import RecordPolicy, authorize
 from argilla_server.contexts import datasets, questions
 from argilla_server.database import get_async_db
 from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
-from argilla_server.policies import RecordPolicyV1, authorize
 from argilla_server.schemas.v1.records import Record as RecordSchema
 from argilla_server.schemas.v1.records import RecordUpdate
 from argilla_server.schemas.v1.responses import Response, ResponseCreate
@@ -56,7 +56,7 @@ async def get_record(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.get(record))
+    await authorize(current_user, RecordPolicy.get(record))
 
     return record
 
@@ -81,7 +81,7 @@ async def update_record(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.update(record))
+    await authorize(current_user, RecordPolicy.update(record))
 
     return await datasets.update_record(db, search_engine, record, record_update)
 
@@ -104,7 +104,7 @@ async def create_record_response(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.create_response(record))
+    await authorize(current_user, RecordPolicy.create_response(record))
 
     return await datasets.create_response(db, search_engine, record, current_user, response_create)
 
@@ -126,7 +126,7 @@ async def get_record_suggestions(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.get_suggestions(record))
+    await authorize(current_user, RecordPolicy.get_suggestions(record))
 
     return Suggestions(items=record.suggestions)
 
@@ -159,7 +159,7 @@ async def upsert_suggestion(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.create_suggestion(record))
+    await authorize(current_user, RecordPolicy.create_suggestion(record))
 
     try:
         question = await Question.get_or_raise(
@@ -200,7 +200,7 @@ async def delete_record_suggestions(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.delete_suggestions(record))
+    await authorize(current_user, RecordPolicy.delete_suggestions(record))
 
     suggestion_ids = parse_uuids(ids)
     num_suggestions = len(suggestion_ids)
@@ -231,6 +231,6 @@ async def delete_record(
         ],
     )
 
-    await authorize(current_user, RecordPolicyV1.delete(record))
+    await authorize(current_user, RecordPolicy.delete(record))
 
     return await datasets.delete_record(db, search_engine, record)
