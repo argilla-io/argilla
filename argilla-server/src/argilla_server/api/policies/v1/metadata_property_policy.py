@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.api.policies.v1.commons import PolicyAction, _exists_workspace_user_by_user_and_workspace_id
+from argilla_server.api.policies.v1.commons import PolicyAction
 from argilla_server.models import MetadataProperty, User
 
 
@@ -22,7 +22,7 @@ class MetadataPropertyPolicy:
         async def is_allowed(actor: User) -> bool:
             return actor.is_owner or (
                 actor.role in metadata_property.allowed_roles
-                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
+                and await actor.is_member(metadata_property.dataset.workspace_id)
             )
 
         return is_allowed
@@ -30,19 +30,13 @@ class MetadataPropertyPolicy:
     @classmethod
     def update(cls, metadata_property: MetadataProperty) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin
-                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(metadata_property.dataset.workspace_id))
 
         return is_allowed
 
     @classmethod
     def delete(cls, metadata_property: MetadataProperty) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin
-                and await _exists_workspace_user_by_user_and_workspace_id(actor, metadata_property.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(metadata_property.dataset.workspace_id))
 
         return is_allowed

@@ -16,8 +16,7 @@ from typing import Awaitable, Callable, Optional
 from uuid import UUID
 
 from argilla_server.errors import ForbiddenOperationError
-from argilla_server.models import User, Workspace, WorkspaceUser
-from sqlalchemy.ext.asyncio import async_object_session
+from argilla_server.models import User
 
 PolicyAction = Callable[[User], Awaitable[bool]]
 
@@ -29,19 +28,3 @@ async def authorize(actor: User, policy_action: PolicyAction) -> None:
 
 async def is_authorized(actor: User, policy_action: PolicyAction) -> bool:
     return await policy_action(actor)
-
-
-async def _exists_workspace_user_by_user_and_workspace_id(user: User, workspace_id: UUID) -> bool:
-    return (
-        await WorkspaceUser.get_by(async_object_session(user), workspace_id=workspace_id, user_id=user.id) is not None
-    )
-
-
-async def _exists_workspace_user_by_user_and_workspace_name(user: User, workspace_name: str) -> bool:
-    db = async_object_session(user)
-
-    workspace = await Workspace.get_by(db, name=workspace_name)
-    if workspace is None:
-        return False
-
-    return await WorkspaceUser.get_by(db, workspace_id=workspace.id, user_id=user.id) is not None

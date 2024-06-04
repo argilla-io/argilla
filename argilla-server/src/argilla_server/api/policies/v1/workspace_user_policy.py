@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from argilla_server.api.policies.v1.commons import PolicyAction, _exists_workspace_user_by_user_and_workspace_id
+from argilla_server.api.policies.v1.commons import PolicyAction
 from argilla_server.models import User, WorkspaceUser
 
 
@@ -22,9 +22,7 @@ class WorkspaceUserPolicy:
     @classmethod
     def list(cls, workspace_id: UUID) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(workspace_id))
 
         return is_allowed
 
@@ -35,9 +33,6 @@ class WorkspaceUserPolicy:
     @classmethod
     def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin
-                and await _exists_workspace_user_by_user_and_workspace_id(actor, workspace_user.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(workspace_user.workspace_id))
 
         return is_allowed

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.api.policies.v1.commons import PolicyAction, _exists_workspace_user_by_user_and_workspace_id
+from argilla_server.api.policies.v1.commons import PolicyAction
 from argilla_server.models import Suggestion, User
 
 
@@ -20,9 +20,6 @@ class SuggestionPolicy:
     @classmethod
     def delete(cls, suggestion: Suggestion) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin
-                and await _exists_workspace_user_by_user_and_workspace_id(actor, suggestion.record.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(suggestion.record.dataset.workspace_id))
 
         return is_allowed

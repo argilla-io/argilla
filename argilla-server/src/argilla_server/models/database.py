@@ -20,6 +20,7 @@ from uuid import UUID
 from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
+from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -460,6 +461,13 @@ class User(DatabaseModel):
     @property
     def is_annotator(self):
         return self.role == UserRole.annotator
+
+    async def is_member(self, workspace_id: UUID) -> bool:
+        # TODO: Change query to use exists may improve performance
+        return (
+            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            is not None
+        )
 
     def __repr__(self):
         return (
