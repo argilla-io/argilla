@@ -210,8 +210,6 @@ export default {
   display: flex;
   justify-content: center;
   padding: 0 calc($sidebarMenuWidth + 4em) 0 4em;
-  max-width: 1500px;
-  margin: 0 auto;
   @include media("<=tablet") {
     padding: 0 $base-space * 2;
   }
@@ -219,6 +217,7 @@ export default {
 .dataset {
   &__table {
     width: 100%;
+    max-width: 1500px;
     display: flex;
     flex-direction: column;
   }
