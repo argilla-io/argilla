@@ -62,7 +62,10 @@
                   <span :class="column.class">
                     <span v-if="column.actions">
                       <div class="table-info__actions">
-                        <p v-if="column.main">
+                        <p
+                          class="table-info__actions-title"
+                          v-if="column.type === 'main'"
+                        >
                           {{ itemValue(item, column) }}
                         </p>
                         <span v-else>{{ itemValue(item, column) }}</span>
@@ -417,6 +420,12 @@ $greyColor: palette(grey, 700);
   .empty {
     margin-top: 5em;
     height: auto;
+  }
+  &__actions-title {
+    color: $black-87;
+    .table-info__item:hover & {
+      color: $primary-color;
+    }
   }
   &__actions {
     display: flex;
