@@ -12,11 +12,15 @@ exports[`BaseTableInfo renders properly 1`] = `
     </div>
     <div class="table-info__body">
       <ul>
-        <li>
-          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span></div>
+        <li id="data1">
+          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span>
+          </div>
         </li>
-        <li>
-          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span></div>
+        <li id="data2">
+          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span>
+          </div>
         </li>
       </ul>
     </div>
