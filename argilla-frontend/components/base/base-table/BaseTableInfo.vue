@@ -421,6 +421,7 @@ $greyColor: palette(grey, 700);
   .empty {
     margin-top: 5em;
     height: auto;
+    min-height: 50vh;
   }
   &__main {
     margin: 0;
