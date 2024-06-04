@@ -19,10 +19,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette import status
 
+from argilla_server.api.policies.v1 import DatasetPolicy, authorize
 from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
-from argilla_server.policies import DatasetPolicyV1, authorize
 from argilla_server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.security import auth
 
@@ -35,7 +35,7 @@ async def list_dataset_questions(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.questions)])
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return Questions(items=dataset.questions)
 
@@ -59,6 +59,6 @@ async def create_dataset_question(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.create_question(dataset))
+    await authorize(current_user, DatasetPolicy.create_question(dataset))
 
     return await questions.create_question(db, dataset, question_create)

@@ -20,11 +20,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server import models
+from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.enums import ResponseStatus
 from argilla_server.models import Dataset, User, Workspace
-from argilla_server.policies import DatasetPolicyV1, MetadataPropertyPolicyV1, authorize, is_authorized
 from argilla_server.schemas.v1.datasets import (
     Dataset as DatasetSchema,
 )
@@ -55,7 +55,7 @@ async def _filter_metadata_properties_by_policy(
 
     for metadata_property in metadata_properties:
         metadata_property_is_authorized = await is_authorized(
-            current_user, MetadataPropertyPolicyV1.get(metadata_property)
+            current_user, MetadataPropertyPolicy.get(metadata_property)
         )
 
         if metadata_property_is_authorized:
@@ -71,7 +71,7 @@ async def list_current_user_datasets(
     workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, DatasetPolicyV1.list(workspace_id))
+    await authorize(current_user, DatasetPolicy.list(workspace_id))
 
     if not workspace_id:
         if current_user.is_owner:
@@ -91,7 +91,7 @@ async def list_dataset_fields(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return Fields(items=dataset.fields)
 
@@ -102,7 +102,7 @@ async def list_dataset_vector_settings(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.vectors_settings)])
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return VectorsSettings(items=dataset.vectors_settings)
 
@@ -113,7 +113,7 @@ async def list_current_user_dataset_metadata_properties(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     filtered_metadata_properties = await _filter_metadata_properties_by_policy(
         current_user, dataset.metadata_properties
@@ -128,7 +128,7 @@ async def get_dataset(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return dataset
 
@@ -142,7 +142,7 @@ async def get_current_user_dataset_metrics(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return {
         "records": {
@@ -172,7 +172,7 @@ async def get_dataset_progress(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     return await datasets.get_dataset_progress(db, dataset_id)
 
@@ -184,7 +184,7 @@ async def create_dataset(
     dataset_create: DatasetCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, DatasetPolicyV1.create(dataset_create.workspace_id))
+    await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
     return await datasets.create_dataset(db, dataset_create)
 
@@ -199,7 +199,7 @@ async def create_dataset_field(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.create_field(dataset))
+    await authorize(current_user, DatasetPolicy.create_field(dataset))
 
     return await datasets.create_field(db, dataset, field_create)
 
@@ -217,7 +217,7 @@ async def create_dataset_metadata_property(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.create_metadata_property(dataset))
+    await authorize(current_user, DatasetPolicy.create_metadata_property(dataset))
 
     return await datasets.create_metadata_property(db, search_engine, dataset, metadata_property_create)
 
@@ -235,7 +235,7 @@ async def create_dataset_vector_settings(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.create_vector_settings(dataset))
+    await authorize(current_user, DatasetPolicy.create_vector_settings(dataset))
 
     return await datasets.create_vector_settings(db, search_engine, dataset, vector_settings_create)
 
@@ -260,7 +260,7 @@ async def publish_dataset(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.publish(dataset))
+    await authorize(current_user, DatasetPolicy.publish(dataset))
 
     dataset = await datasets.publish_dataset(db, search_engine, dataset)
 
@@ -282,7 +282,7 @@ async def delete_dataset(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.delete(dataset))
+    await authorize(current_user, DatasetPolicy.delete(dataset))
 
     return await datasets.delete_dataset(db, search_engine, dataset)
 
@@ -297,6 +297,6 @@ async def update_dataset(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.update(dataset))
+    await authorize(current_user, DatasetPolicy.update(dataset))
 
     return await datasets.update_dataset(db, dataset, dataset_update)

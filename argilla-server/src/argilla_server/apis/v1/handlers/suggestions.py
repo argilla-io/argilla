@@ -18,10 +18,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import SuggestionPolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Record, Suggestion, User
-from argilla_server.policies import SuggestionPolicyV1, authorize
 from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
@@ -46,6 +46,6 @@ async def delete_suggestion(
         ],
     )
 
-    await authorize(current_user, SuggestionPolicyV1.delete(suggestion))
+    await authorize(current_user, SuggestionPolicy.delete(suggestion))
 
     return await datasets.delete_suggestion(db, search_engine, suggestion)

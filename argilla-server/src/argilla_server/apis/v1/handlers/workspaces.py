@@ -17,11 +17,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.policies.v1 import WorkspacePolicy, WorkspaceUserPolicy, authorize
 from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
-from argilla_server.policies import WorkspacePolicyV1, WorkspaceUserPolicyV1, authorize
 from argilla_server.schemas.v1.users import User as UserSchema
 from argilla_server.schemas.v1.users import Users
 from argilla_server.schemas.v1.workspaces import (
@@ -44,7 +44,7 @@ async def get_workspace(
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspacePolicyV1.get(workspace_id))
+    await authorize(current_user, WorkspacePolicy.get(workspace_id))
 
     return await Workspace.get_or_raise(db, workspace_id)
 
@@ -56,7 +56,7 @@ async def create_workspace(
     workspace_create: WorkspaceCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspacePolicyV1.create)
+    await authorize(current_user, WorkspacePolicy.create)
 
     return await accounts.create_workspace(db, workspace_create.dict())
 
@@ -68,7 +68,7 @@ async def delete_workspace(
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspacePolicyV1.delete)
+    await authorize(current_user, WorkspacePolicy.delete)
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
@@ -81,7 +81,7 @@ async def list_workspaces_me(
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
 ) -> Workspaces:
-    await authorize(current_user, WorkspacePolicyV1.list_workspaces_me)
+    await authorize(current_user, WorkspacePolicy.list_workspaces_me)
 
     if current_user.is_owner:
         workspaces = await accounts.list_workspaces(db)
@@ -98,7 +98,7 @@ async def list_workspace_users(
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspaceUserPolicyV1.list(workspace_id))
+    await authorize(current_user, WorkspaceUserPolicy.list(workspace_id))
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
@@ -115,7 +115,7 @@ async def create_workspace_user(
     workspace_user_create: WorkspaceUserCreate,
     current_user: User = Security(auth.get_current_user),
 ):
-    await authorize(current_user, WorkspaceUserPolicyV1.create)
+    await authorize(current_user, WorkspaceUserPolicy.create)
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
@@ -139,7 +139,7 @@ async def delete_workspace_user(
 ):
     workspace_user = await WorkspaceUser.get_by_or_raise(db, workspace_id=workspace_id, user_id=user_id)
 
-    await authorize(current_user, WorkspaceUserPolicyV1.delete(workspace_user))
+    await authorize(current_user, WorkspaceUserPolicy.delete(workspace_user))
 
     await accounts.delete_workspace_user(db, workspace_user)
 

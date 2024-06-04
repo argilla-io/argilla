@@ -22,13 +22,13 @@ from sqlalchemy.orm import selectinload
 from typing_extensions import Annotated
 
 import argilla_server.search_engine as search_engine
+from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
-from argilla_server.policies import DatasetPolicyV1, RecordPolicyV1, authorize, is_authorized
 from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.schemas.v1.records import (
     Filters,
@@ -370,7 +370,7 @@ async def list_current_user_dataset_records(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
 
-    await authorize(current_user, DatasetPolicyV1.get(dataset))
+    await authorize(current_user, DatasetPolicy.get(dataset))
 
     records, total = await _filter_records_using_search_engine(
         db,
@@ -408,7 +408,7 @@ async def list_dataset_records(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.list_records_with_all_responses(dataset))
+    await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
     records, total = await _filter_records_using_search_engine(
         db,
@@ -451,7 +451,7 @@ async def create_dataset_records(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.create_records(dataset))
+    await authorize(current_user, DatasetPolicy.create_records(dataset))
 
     await datasets.create_records(db, search_engine, dataset, records_create)
 
@@ -483,7 +483,7 @@ async def update_dataset_records(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.update_records(dataset))
+    await authorize(current_user, DatasetPolicy.update_records(dataset))
 
     await datasets.update_records(db, search_engine, dataset, records_update)
 
@@ -501,7 +501,7 @@ async def delete_dataset_records(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.delete_records(dataset))
+    await authorize(current_user, DatasetPolicy.delete_records(dataset))
 
     record_ids = parse_uuids(ids)
     num_records = len(record_ids)
@@ -545,7 +545,7 @@ async def search_current_user_dataset_records(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.search_records(dataset))
+    await authorize(current_user, DatasetPolicy.search_records(dataset))
 
     await _validate_search_records_query(db, body, dataset_id)
 
@@ -612,7 +612,7 @@ async def search_dataset_records(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
-    await authorize(current_user, DatasetPolicyV1.search_records_with_all_responses(dataset))
+    await authorize(current_user, DatasetPolicy.search_records_with_all_responses(dataset))
 
     await _validate_search_records_query(db, body, dataset_id)
 
@@ -665,7 +665,7 @@ async def list_dataset_records_search_suggestions_options(
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
-    await authorize(current_user, DatasetPolicyV1.search_records(dataset))
+    await authorize(current_user, DatasetPolicy.search_records(dataset))
 
     suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
 
@@ -686,6 +686,6 @@ async def _filter_record_metadata_for_user(record: Record, user: User) -> Option
 
     metadata = {}
     for metadata_name in list(record.metadata_.keys()):
-        if await is_authorized(user, RecordPolicyV1.get_metadata(record, metadata_name)):
+        if await is_authorized(user, RecordPolicy.get_metadata(record, metadata_name)):
             metadata[metadata_name] = record.metadata_[metadata_name]
     return metadata

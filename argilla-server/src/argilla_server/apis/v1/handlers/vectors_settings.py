@@ -18,10 +18,10 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import VectorSettingsPolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import User, VectorSettings
-from argilla_server.policies import VectorSettingsPolicyV1, authorize
 from argilla_server.schemas.v1.vector_settings import VectorSettings as VectorSettingsSchema
 from argilla_server.schemas.v1.vector_settings import VectorSettingsUpdate
 from argilla_server.security import auth
@@ -43,7 +43,7 @@ async def update_vector_settings(
         options=[selectinload(VectorSettings.dataset)],
     )
 
-    await authorize(current_user, VectorSettingsPolicyV1.update(vector_settings))
+    await authorize(current_user, VectorSettingsPolicy.update(vector_settings))
 
     return await datasets.update_vector_settings(db, vector_settings, vector_settings_update)
 
@@ -61,6 +61,6 @@ async def delete_vector_settings(
         options=[selectinload(VectorSettings.dataset)],
     )
 
-    await authorize(current_user, VectorSettingsPolicyV1.delete(vector_settings))
+    await authorize(current_user, VectorSettingsPolicy.delete(vector_settings))
 
     return await datasets.delete_vector_settings(db, vector_settings)

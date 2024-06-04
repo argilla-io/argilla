@@ -19,10 +19,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette import status
 
+from argilla_server.api.policies.v1 import DatasetPolicy, authorize
 from argilla_server.bulk.records_bulk import CreateRecordsBulk, UpsertRecordsBulk
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
-from argilla_server.policies import DatasetPolicyV1, authorize
 from argilla_server.schemas.v1.records_bulk import RecordsBulk, RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
@@ -84,7 +84,7 @@ async def upsert_dataset_records_bulk(
         ],
     )
 
-    await authorize(current_user, DatasetPolicyV1.upsert_records(dataset))
+    await authorize(current_user, DatasetPolicy.upsert_records(dataset))
 
     records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_create)
 
