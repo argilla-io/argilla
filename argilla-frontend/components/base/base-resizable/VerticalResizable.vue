@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { useResizable } from "./useResizable";
+
 const EVENT = {
   MOUSE_EVENT: "mousemove",
   MOUSE_UP: "mouseup",
@@ -18,6 +20,12 @@ const EVENT = {
 };
 
 export default {
+  props: {
+    id: {
+      type: String,
+      default: "v-rz",
+    },
+  },
   data() {
     return {
       leftSidePrevPosition: {
@@ -38,6 +46,14 @@ export default {
     this.limitElementWidth(this.rightSide);
 
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
+
+    const savedPosition = this.getPosition();
+    if (savedPosition) {
+      this.leftSide.style.width = savedPosition;
+    }
+  },
+  destroyed() {
+    this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
   },
   methods: {
     limitElementWidth(element) {
@@ -64,6 +80,8 @@ export default {
       this.resize(e);
     },
     mouseUpHandler() {
+      this.setPosition(`${this.leftSide.getBoundingClientRect().width}px`);
+
       document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
@@ -74,8 +92,8 @@ export default {
       document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
   },
-  destroyed() {
-    this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
+  setup(props) {
+    return useResizable(props);
   },
 };
 </script>

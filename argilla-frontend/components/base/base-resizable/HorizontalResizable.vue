@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { useResizable } from "./useResizable";
+
 const EVENT = {
   MOUSE_EVENT: "mousemove",
   MOUSE_UP: "mouseup",
@@ -18,6 +20,12 @@ const EVENT = {
 };
 
 export default {
+  props: {
+    id: {
+      type: String,
+      default: "h-rz",
+    },
+  },
   data() {
     return {
       upSidePrevPosition: {
@@ -34,13 +42,21 @@ export default {
     this.upSide = this.resizer.previousElementSibling;
     this.downSide = this.resizer.nextElementSibling;
 
-    this.limitElementWidth(this.upSide);
-    this.limitElementWidth(this.downSide);
+    this.limitElementHeight(this.upSide);
+    this.limitElementHeight(this.downSide);
 
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
+
+    const savedPosition = this.getPosition();
+    if (savedPosition) {
+      this.upSide.style.height = savedPosition;
+    }
+  },
+  destroyed() {
+    this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
   },
   methods: {
-    limitElementWidth(element) {
+    limitElementHeight(element) {
       element.style["max-height"] = "100%";
       element.style["min-height"] = "15%";
     },
@@ -52,19 +68,20 @@ export default {
     },
     resize(e) {
       const dY = e.clientY - this.upSidePrevPosition.clientY;
-      const proportionalWidth = (this.upSidePrevPosition.height + dY) * 100;
-      const parentWidth =
+      const proportionalHeight = (this.upSidePrevPosition.height + dY) * 100;
+      const parentHeight =
         this.resizer.parentNode.getBoundingClientRect().height;
 
-      const newHeight = proportionalWidth / parentWidth;
+      const newHeight = proportionalHeight / parentHeight;
 
       this.upSide.style.height = `${newHeight}%`;
     },
-
     mouseMoveHandler(e) {
       this.resize(e);
     },
     mouseUpHandler() {
+      this.setPosition(`${this.upSide.getBoundingClientRect().height}px`);
+
       document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
@@ -75,8 +92,8 @@ export default {
       document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
     },
   },
-  destroyed() {
-    this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
+  setup(props) {
+    return useResizable(props);
   },
 };
 </script>
