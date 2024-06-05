@@ -218,6 +218,7 @@ export default {
   &__table {
     width: 100%;
     max-width: 1500px;
+    padding: 0 $base-space * 6;
     display: flex;
     flex-direction: column;
   }
