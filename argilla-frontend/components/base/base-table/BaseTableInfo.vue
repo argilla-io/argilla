@@ -281,7 +281,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$greyColor: palette(grey, 700);
+$headerColor: palette(grey, 700);
+$borderColor: palette(grey, 600);
 
 .table-info {
   $this: &;
@@ -297,10 +298,10 @@ $greyColor: palette(grey, 700);
     margin: 0;
   }
   &__header {
-    border: 1px solid $black-4;
+    border: 1px solid $borderColor;
     border-bottom: 0;
     border-radius: var(--m, 10px) var(--m, 10px) 0px 0px;
-    background: $greyColor;
+    background: $headerColor;
     min-height: 49px;
     position: relative;
     margin-top: $base-space * 2;
@@ -368,7 +369,8 @@ $greyColor: palette(grey, 700);
     min-height: $base-space * 10;
     text-decoration: none;
     outline: none;
-    border: 1px solid palette(grey, 700);
+    border: 1px solid $black-4;
+    border-top: 0;
 
     &__col {
       text-align: left;
