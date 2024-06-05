@@ -14,8 +14,8 @@
 
 from fastapi import APIRouter, Depends
 
-from argilla_server.contexts import info
 from argilla_server.api.schemas.v1.info import Status, Version
+from argilla_server.contexts import info
 from argilla_server.search_engine import SearchEngine, get_search_engine
 
 router = APIRouter(tags=["info"])

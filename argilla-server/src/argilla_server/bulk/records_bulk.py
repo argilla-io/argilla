@@ -20,13 +20,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
-from argilla_server.contexts.records import (
-    fetch_records_by_external_ids_as_dict,
-    fetch_records_by_ids_as_dict,
-)
-from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import (
     RecordsBulk,
@@ -36,6 +29,13 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
+from argilla_server.contexts.records import (
+    fetch_records_by_external_ids_as_dict,
+    fetch_records_by_ids_as_dict,
+)
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
 from argilla_server.validators.responses import ResponseCreateValidator

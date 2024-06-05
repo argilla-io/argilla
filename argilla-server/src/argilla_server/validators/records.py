@@ -19,11 +19,11 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
-from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
-from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
 
 
 class RecordValidatorBase(ABC):

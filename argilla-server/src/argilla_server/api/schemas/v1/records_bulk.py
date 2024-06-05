@@ -15,8 +15,8 @@
 from typing import List
 from uuid import UUID
 
-from argilla_server.pydantic_v1 import BaseModel, Field, validator
 from argilla_server.api.schemas.v1.records import Record, RecordCreate, RecordUpsert
+from argilla_server.pydantic_v1 import BaseModel, Field, validator
 
 RECORDS_BULK_CREATE_MIN_ITEMS = 1
 RECORDS_BULK_CREATE_MAX_ITEMS = 500

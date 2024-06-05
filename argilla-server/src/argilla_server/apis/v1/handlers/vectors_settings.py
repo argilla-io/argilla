@@ -19,11 +19,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import VectorSettingsPolicy, authorize
+from argilla_server.api.schemas.v1.vector_settings import VectorSettings as VectorSettingsSchema
+from argilla_server.api.schemas.v1.vector_settings import VectorSettingsUpdate
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import User, VectorSettings
-from argilla_server.api.schemas.v1.vector_settings import VectorSettings as VectorSettingsSchema
-from argilla_server.api.schemas.v1.vector_settings import VectorSettingsUpdate
 from argilla_server.security import auth
 
 router = APIRouter(tags=["vectors-settings"])

@@ -20,13 +20,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server import telemetry
 from argilla_server.api.policies.v1 import UserPolicy, authorize
+from argilla_server.api.schemas.v1.users import User as UserSchema
+from argilla_server.api.schemas.v1.users import UserCreate, Users
+from argilla_server.api.schemas.v1.workspaces import Workspaces
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotUniqueError
 from argilla_server.models import User
-from argilla_server.api.schemas.v1.users import User as UserSchema
-from argilla_server.api.schemas.v1.users import UserCreate, Users
-from argilla_server.api.schemas.v1.workspaces import Workspaces
 from argilla_server.security import auth
 
 router = APIRouter(tags=["users"])

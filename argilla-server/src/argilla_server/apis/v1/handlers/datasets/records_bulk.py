@@ -20,10 +20,10 @@ from sqlalchemy.orm import selectinload
 from starlette import status
 
 from argilla_server.api.policies.v1 import DatasetPolicy, authorize
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulk, RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.bulk.records_bulk import CreateRecordsBulk, UpsertRecordsBulk
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
-from argilla_server.api.schemas.v1.records_bulk import RecordsBulk, RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.telemetry import TelemetryClient, get_telemetry_client

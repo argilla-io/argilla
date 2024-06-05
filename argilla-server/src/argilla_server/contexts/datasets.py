@@ -37,24 +37,6 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla_server.contexts import accounts, questions
-from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
-from argilla_server.errors.future import NotFoundError, NotUniqueError, UnprocessableEntityError
-from argilla_server.models import (
-    Dataset,
-    Field,
-    MetadataProperty,
-    Question,
-    Record,
-    Response,
-    ResponseStatus,
-    Suggestion,
-    User,
-    Vector,
-    VectorSettings,
-    Workspace,
-)
-from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
     DatasetProgress,
@@ -81,6 +63,24 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.contexts import accounts, questions
+from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
+from argilla_server.errors.future import NotFoundError, NotUniqueError, UnprocessableEntityError
+from argilla_server.models import (
+    Dataset,
+    Field,
+    MetadataProperty,
+    Question,
+    Record,
+    Response,
+    ResponseStatus,
+    Suggestion,
+    User,
+    Vector,
+    VectorSettings,
+    Workspace,
+)
+from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.responses import (
     ResponseCreateValidator,

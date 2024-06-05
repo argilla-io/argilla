@@ -16,9 +16,9 @@ import os
 from unittest import mock
 
 import pytest
+from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
 from argilla_server.contexts import settings as settings_context
 from argilla_server.contexts.settings import HUGGINGFACE_SETTINGS
-from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
 from argilla_server.settings import settings as argilla_server_settings
 from httpx import AsyncClient
 

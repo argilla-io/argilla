@@ -14,9 +14,6 @@
 
 from typing import Optional
 
-from argilla_server.enums import QuestionType, ResponseStatus
-from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models import Record
 from argilla_server.api.schemas.v1.questions import (
     LabelSelectionQuestionSettings,
     MultiLabelSelectionQuestionSettings,
@@ -33,6 +30,9 @@ from argilla_server.api.schemas.v1.responses import (
     SpanQuestionResponseValue,
     TextAndLabelSelectionQuestionResponseValue,
 )
+from argilla_server.enums import QuestionType, ResponseStatus
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models import Record
 
 
 class ResponseValueValidator:

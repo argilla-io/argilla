@@ -17,10 +17,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.schemas.v1.oauth2 import Token
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors import UnauthorizedError
-from argilla_server.api.schemas.v1.oauth2 import Token
 
 router = APIRouter(tags=["Authentication"])
 

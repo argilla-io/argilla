@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import pytest
+from argilla_server.api.schemas.v1.datasets import Dataset
 from argilla_server.errors import APIErrorHandler
 from argilla_server.errors.base_errors import (
     EntityAlreadyExistsError,
@@ -20,7 +21,6 @@ from argilla_server.errors.base_errors import (
     GenericServerError,
     ServerError,
 )
-from argilla_server.api.schemas.v1.datasets import Dataset
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})

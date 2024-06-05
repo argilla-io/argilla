@@ -14,9 +14,6 @@
 
 from typing import List
 
-from argilla_server.enums import QuestionType
-from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models.database import Dataset, Question
 from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionSettings,
@@ -24,6 +21,9 @@ from argilla_server.api.schemas.v1.questions import (
     QuestionUpdate,
     SpanQuestionSettings,
 )
+from argilla_server.enums import QuestionType
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models.database import Dataset, Question
 
 
 class QuestionCreateValidator:
