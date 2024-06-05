@@ -9,15 +9,14 @@
           :placeholder="$t('searchDatasets')"
         />
       </div>
-      <base-table-info
+      <BaseTableInfo
         ref="table"
-        search-on="name"
-        :global-actions="false"
         :data="datasets"
+        :columns="tableColumns"
+        :row-link="datasetLink"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
-        :actions="actions"
-        :columns="tableColumns"
+        search-on="name"
         :query-search="querySearch"
         :empty-search-info="emptySearchInfo"
         :active-filters="activeFilters"
@@ -39,18 +38,42 @@ export default {
       required: true,
     },
   },
-  created() {
-    this.setDatasetsLink();
-  },
   data() {
     return {
       querySearch: undefined,
+      datasetLink: (dataset) => this.getDatasetLink(dataset),
       tableColumns: [
         {
           name: this.$t("datasetTable.name"),
           field: "name",
           class: "table-info__title",
-          type: "link",
+          type: "main",
+          component: {
+            name: "DatasetQuestions",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
+          actions: [
+            {
+              name: "copy",
+              icon: "copy",
+              title: "Copy url to clipboard",
+              tooltip: "Copied",
+            },
+            {
+              name: "copy",
+              icon: "link",
+              title: "Copy url to clipboard",
+              tooltip: "Copied",
+            },
+            {
+              name: "go-to-settings",
+              icon: "settings",
+              title: "Go to dataset settings",
+              tooltip: "Dataset settings",
+            },
+          ],
         },
         {
           name: this.$t("datasetTable.workspace"),
@@ -58,12 +81,6 @@ export default {
           class: "text",
           type: "text",
           filtrable: "true",
-        },
-        {
-          name: "Global progress",
-          field: "progress",
-          class: "progress",
-          type: "progress",
         },
         {
           name: this.$t("datasetTable.createdAt"),
@@ -79,19 +96,15 @@ export default {
           type: "date",
           sortable: "true",
         },
-      ],
-      actions: [
         {
-          name: "go-to-settings",
-          icon: "settings",
-          title: "Go to dataset settings",
-          tooltip: "Dataset settings",
-        },
-        {
-          name: "copy",
-          icon: "link",
-          title: "Copy url to clipboard",
-          tooltip: "Copied",
+          name: "Global progress",
+          class: "progress",
+          component: {
+            name: "DatasetProgress",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
         },
       ],
       emptySearchInfo: {
@@ -185,19 +198,6 @@ export default {
     copyName({ name }) {
       this.copy(name);
     },
-    setDatasetsLink() {
-      this.datasets.forEach((dataset) => {
-        dataset.link = this.getDatasetLink(dataset);
-      });
-    },
-  },
-  watch: {
-    datasets: {
-      deep: true,
-      handler() {
-        this.setDatasetsLink();
-      },
-    },
   },
   setup() {
     return useRoutes();
@@ -217,6 +217,7 @@ export default {
 .dataset {
   &__table {
     width: 100%;
+    max-width: 1500px;
     display: flex;
     flex-direction: column;
   }

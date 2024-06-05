@@ -1,7 +1,7 @@
 import { Question } from "../entities/question/Question";
 import { IQuestionRepository } from "../services/IQuestionRepository";
 
-export class GetDatasetQuestionsFilterUseCase {
+export class GetDatasetQuestionsGroupedUseCase {
   constructor(private readonly questionRepository: IQuestionRepository) {}
 
   async execute(datasetId: string): Promise<Question[]> {
@@ -21,14 +21,18 @@ export class GetDatasetQuestionsFilterUseCase {
       );
     });
 
-    return questions.filter(this.visibleTypeOfQuestions);
+    return this.groupQuestionsByType(questions);
   }
 
-  private visibleTypeOfQuestions(question: Question): boolean {
-    return (
-      question.isMultiLabelType ||
-      question.isSingleLabelType ||
-      question.isRatingType
-    );
+  private groupQuestionsByType(questions: Question[]): Question[] {
+    const groupedQuestions: Question[] = [];
+    for (const question of questions) {
+      if (groupedQuestions.some((q) => q.type.value === question.type.value))
+        continue;
+
+      groupedQuestions.push(question);
+    }
+
+    return groupedQuestions;
   }
 }
