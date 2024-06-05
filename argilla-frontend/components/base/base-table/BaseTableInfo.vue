@@ -305,6 +305,9 @@ $borderColor: palette(grey, 600);
     min-height: 49px;
     position: relative;
     margin-top: $base-space * 2;
+    .table-info:has(.empty) & {
+      border-bottom: 1px solid $borderColor;
+    }
     &__checkbox {
       margin: 0 !important;
     }
