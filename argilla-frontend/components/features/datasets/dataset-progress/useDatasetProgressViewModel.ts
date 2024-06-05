@@ -17,8 +17,6 @@ export const useDatasetProgressViewModel = ({
   const t = useTranslate();
 
   useFetch(async () => {
-    if (!dataset.isFeedbackTask) return;
-
     try {
       progress.value = await getProgressUseCase.execute(dataset.id);
 

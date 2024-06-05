@@ -6,8 +6,8 @@ import { RecordCriteria } from "../entities/record/RecordCriteria";
 import { IRecordStorage } from "../services/IRecordStorage";
 import { Records, RecordsWithReference } from "../entities/record/Records";
 import { Record } from "../entities/record/Record";
+import { IQuestionRepository } from "../services/IQuestionRepository";
 import {
-  QuestionRepository,
   FieldRepository,
   RecordRepository,
 } from "~/v1/infrastructure/repositories";
@@ -15,7 +15,7 @@ import {
 export class GetRecordsByCriteriaUseCase {
   constructor(
     private readonly recordRepository: RecordRepository,
-    private readonly questionRepository: QuestionRepository,
+    private readonly questionRepository: IQuestionRepository,
     private readonly fieldRepository: FieldRepository,
     private readonly recordsStorage: IRecordStorage
   ) {}

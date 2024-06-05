@@ -2,6 +2,7 @@ export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
   label_selection: "Label",
+  span: "Span",
   text: "Text",
   rating: "Bewertung",
   minimize: "Minimieren",
@@ -204,7 +205,7 @@ export default {
   youAreOnlineAgain: "Sie sind wieder online",
   youAreOffline: "Sie sind offline",
   datasetTable: {
-    name: "Name",
+    name: "Dataset",
     workspace: "Arbeitsbereich",
     task: "Datensatz",
     tags: "Tags",
