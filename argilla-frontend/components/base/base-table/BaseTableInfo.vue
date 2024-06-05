@@ -369,7 +369,7 @@ $borderColor: palette(grey, 600);
     min-height: $base-space * 10;
     text-decoration: none;
     outline: none;
-    border: 1px solid $black-4;
+    border: 1px solid $borderColor;
     border-top: 0;
 
     &__col {
