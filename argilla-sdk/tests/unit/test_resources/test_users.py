@@ -171,9 +171,9 @@ class TestUsers:
                 {
                     "id": str(uuid.uuid4()),
                     "username": "another-test-user",
-                    "role": "annotator",
                     "first_name": "First",
                     "last_name": "Last",
+                    "role": "annotator",
                     "inserted_at": datetime.utcnow().isoformat(),
                     "updated_at": datetime.utcnow().isoformat(),
                 },
