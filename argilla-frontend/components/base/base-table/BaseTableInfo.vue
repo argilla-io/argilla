@@ -178,6 +178,11 @@ export default {
       hydrate: {},
     };
   },
+  watch: {
+    filteredResults() {
+      this.changeVisibility();
+    },
+  },
   computed: {
     tableIsEmpty() {
       return this.filteredResults && this.filteredResults.length === 0;
@@ -230,9 +235,6 @@ export default {
         this.$set(this.filters, column, values);
       });
   },
-  mounted() {
-    this.changeVisibility();
-  },
   methods: {
     itemValue(item, column) {
       if (column.subfield) {
@@ -273,7 +275,10 @@ export default {
       const observer = new IntersectionObserver(handleIntersection);
 
       this.data.forEach((item) => {
-        observer.observe(document.getElementById(item.id));
+        const element = document.getElementById(item.id);
+        if (!element) return;
+
+        observer.observe(element);
       });
     },
   },
