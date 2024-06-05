@@ -131,7 +131,7 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
 @pytest.fixture(scope="function")
 def client(request, mocker: "MockerFixture") -> Generator[TestClient, None, None]:
     from argilla_server import app
-    from argilla_server.apis.routes import api_v0, api_v1
+    from argilla_server.api.routes import api_v0, api_v1
 
     async def override_get_async_db():
         session = TestSession()
