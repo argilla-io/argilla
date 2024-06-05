@@ -22,10 +22,6 @@ from typing import Any, Dict, List, Optional
 _LOGGER = logging.getLogger("argilla_server")
 
 
-
-
-
-
 def remove_suffix(text: str, suffix: str):
     # TODO Move where is used
     """Give a text, removes suffix substring from it"""
