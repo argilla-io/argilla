@@ -55,6 +55,7 @@ def create_server_app() -> FastAPI:
         description="Argilla API",
         docs_url=None,
         redoc_url=None,
+        redirect_slashes=False,
         version=str(argilla_version),
     )
 
@@ -81,7 +82,7 @@ def create_server_app() -> FastAPI:
     # This if-else clause is needed to simplify the test dependencies setup. Otherwise we cannot override dependencies
     # easily. We can review this once we have separate fastapi application for the api and the webapp.
     if settings.base_url and settings.base_url != "/":
-        _app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+        _app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, redirect_slashes=False)
         _app.mount(settings.base_url, app)
         return _app
     else:
