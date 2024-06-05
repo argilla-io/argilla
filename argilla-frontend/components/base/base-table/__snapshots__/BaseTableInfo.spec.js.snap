@@ -12,11 +12,13 @@ exports[`BaseTableInfo renders properly 1`] = `
     </div>
     <div class="table-info__body">
       <ul>
-        <li>
-          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span></div>
+        <li id="data1">
+          <nuxt-link-stub to="() => {}" class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span></nuxt-link-stub>
         </li>
-        <li>
-          <div class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span></span></span></div>
+        <li id="data2">
+          <nuxt-link-stub to="() => {}" class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span></nuxt-link-stub>
         </li>
       </ul>
     </div>

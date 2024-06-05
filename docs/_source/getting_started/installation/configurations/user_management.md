@@ -182,7 +182,7 @@ import argilla as rg
 
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
-user = rg.User.from_id("new-user")
+user = rg.User.from_id("00000000-0000-0000-0000-000000000000")
 ```
 
 ### Assign a `User` to a `Workspace`

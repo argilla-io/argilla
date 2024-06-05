@@ -50,21 +50,24 @@
       </div>
       <results-empty v-if="tableIsEmpty" :title="emptySearchInfo.title" />
       <template v-else>
-        <div class="table-info__body">
+        <div class="table-info__body" ref="table">
           <ul>
-            <li v-for="item in filteredResults" :key="String(item.id)">
-              <div class="table-info__item">
+            <li v-for="item in filteredResults" :key="item.id" :id="item.id">
+              <nuxt-link :to="rowLink(item)" class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
                   :class="[`table-info__item__col`, column.class]"
                 >
                   <span :class="column.class">
-                    <span v-if="column.type === 'action'">
+                    <span v-if="column.actions">
                       <div class="table-info__actions">
-                        <nuxt-link v-if="item.link" :to="item.link"
-                          >{{ itemValue(item, column) }}
-                        </nuxt-link>
+                        <p
+                          class="table-info__main"
+                          v-if="column.type === 'main'"
+                        >
+                          {{ itemValue(item, column) }}
+                        </p>
                         <span v-else>{{ itemValue(item, column) }}</span>
                         <div class="table-info__actions__buttons">
                           <base-action-tooltip
@@ -75,7 +78,9 @@
                             <base-button
                               :title="action.title"
                               class="table-info__actions__button button-icon"
-                              @click="onActionClicked(action.name, item)"
+                              @click.prevent="
+                                onActionClicked(action.name, item)
+                              "
                             >
                               <svgicon
                                 v-if="action.icon !== undefined"
@@ -88,18 +93,25 @@
                         </div>
                       </div>
                     </span>
-                    <span v-else-if="column.type === 'progress'">
-                      <DatasetProgress :dataset="item" />
-                    </span>
                     <base-date
-                      format="date-relative-now"
                       v-else-if="column.type === 'date'"
+                      format="date-relative-now"
                       :date="itemValue(item, column)"
                     />
+                    <nuxt-link v-else-if="column.link" :to="column.link(item)">
+                      {{ itemValue(item, column) }}
+                    </nuxt-link>
                     <span v-else>{{ itemValue(item, column) }}</span>
+                    <span v-if="column.component">
+                      <component
+                        v-if="hydrate[item.id]"
+                        :is="column.component.name"
+                        v-bind="{ ...column.component.props(item) }"
+                      />
+                    </span>
                   </span>
                 </span>
-              </div>
+              </nuxt-link>
             </li>
           </ul>
         </div>
@@ -151,12 +163,19 @@ export default {
         return [];
       },
     },
+    rowLink: {
+      type: Function,
+      default: () => {
+        return () => {};
+      },
+    },
   },
   data() {
     return {
       sortOrder: this.sortedOrder,
       sortedBy: this.sortedByField,
       filters: {},
+      hydrate: {},
     };
   },
   computed: {
@@ -211,6 +230,9 @@ export default {
         this.$set(this.filters, column, values);
       });
   },
+  mounted() {
+    this.changeVisibility();
+  },
   methods: {
     itemValue(item, column) {
       if (column.subfield) {
@@ -239,6 +261,21 @@ export default {
         values: selectedOptions,
       });
     },
+    changeVisibility() {
+      const handleIntersection = (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            this.$set(this.hydrate, entry.target.id, true);
+          }
+        }
+      };
+
+      const observer = new IntersectionObserver(handleIntersection);
+
+      this.data.forEach((item) => {
+        observer.observe(document.getElementById(item.id));
+      });
+    },
   },
 };
 </script>
@@ -260,7 +297,8 @@ $greyColor: palette(grey, 700);
     margin: 0;
   }
   &__header {
-    border: 1px solid $greyColor;
+    border: 1px solid $black-4;
+    border-bottom: 0;
     border-radius: var(--m, 10px) var(--m, 10px) 0px 0px;
     background: $greyColor;
     min-height: 49px;
@@ -325,7 +363,7 @@ $greyColor: palette(grey, 700);
     align-items: center;
     background: palette(white);
     list-style: none;
-    padding-inline: $base-space * 3 $base-space * 8;
+    padding: $base-space * 2 $base-space * 2;
     width: 100%;
     min-height: $base-space * 10;
     text-decoration: none;
@@ -342,7 +380,7 @@ $greyColor: palette(grey, 700);
       &:first-child {
         width: auto;
         min-width: auto;
-        flex-grow: 1.5;
+        flex-grow: 2.5;
       }
       &.progress {
         min-width: 160px;
@@ -350,15 +388,23 @@ $greyColor: palette(grey, 700);
     }
     .svg-icon {
       margin-right: $base-space;
-      fill: $black-54;
+      fill: $black-37;
       &:hover {
-        fill: $black-87;
+        fill: $black-54;
       }
     }
   }
   .empty {
     margin-top: 5em;
     height: auto;
+    min-height: 50vh;
+  }
+  &__main {
+    margin: 0;
+    color: $black-87;
+    .table-info__item:hover & {
+      color: $primary-color;
+    }
   }
   &__actions {
     display: flex;
@@ -369,6 +415,7 @@ $greyColor: palette(grey, 700);
 
     &__buttons {
       display: flex;
+      flex-shrink: 0;
 
       &__button {
         position: relative;

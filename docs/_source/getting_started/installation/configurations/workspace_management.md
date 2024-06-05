@@ -163,8 +163,8 @@ workspace = rg.Workspace.from_name("new-workspace")
 users = workspace.users
 for user in users:
    ...
-workspace.add_user("<USER_ID>")
-workspace.delete_user("<USER_ID>")
+workspace.add_user(user.id)
+workspace.delete_user(user.id)
 ```
 :::
 

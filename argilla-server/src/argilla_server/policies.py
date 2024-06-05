@@ -36,17 +36,19 @@ PolicyAction = Callable[[User], Awaitable[bool]]
 
 
 async def _exists_workspace_user_by_user_and_workspace_id(user: User, workspace_id: UUID) -> bool:
-    db = async_object_session(user)
-    workspace = await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace_id, user.id)
-    return workspace is not None
+    return (
+        await WorkspaceUser.get_by(async_object_session(user), workspace_id=workspace_id, user_id=user.id) is not None
+    )
 
 
 async def _exists_workspace_user_by_user_and_workspace_name(user: User, workspace_name: str) -> bool:
     db = async_object_session(user)
-    workspace = await accounts.get_workspace_by_name(db, workspace_name)
+
+    workspace = await Workspace.get_by(db, name=workspace_name)
     if workspace is None:
         return False
-    return await accounts.get_workspace_user_by_workspace_id_and_user_id(db, workspace.id, user.id) is not None
+
+    return await WorkspaceUser.get_by(db, workspace_id=workspace.id, user_id=user.id) is not None
 
 
 class WorkspaceUserPolicyV1:
@@ -74,7 +76,6 @@ class WorkspaceUserPolicyV1:
         return is_allowed
 
 
-
 class WorkspacePolicyV1:
     @classmethod
     def get(cls, workspace_id: UUID) -> PolicyAction:
@@ -94,7 +95,6 @@ class WorkspacePolicyV1:
     @classmethod
     async def list_workspaces_me(cls, actor: User) -> bool:
         return True
-
 
 
 class UserPolicyV1:
@@ -117,7 +117,6 @@ class UserPolicyV1:
     @classmethod
     async def list_workspaces(cls, actor: User) -> bool:
         return actor.is_owner
-
 
 
 class DatasetPolicyV1:
@@ -434,6 +433,22 @@ class RecordPolicyV1:
             return actor.is_owner or (
                 actor.is_admin
                 and await _exists_workspace_user_by_user_and_workspace_id(actor, record.dataset.workspace_id)
+            )
+
+        return is_allowed
+
+    @classmethod
+    def get_metadata(cls, record: Record, metadata_name: str):
+        async def is_allowed(actor: User) -> bool:
+            if actor.is_owner:
+                return True
+
+            metadata_property = record.dataset.metadata_property_by_name(metadata_name)
+            if metadata_property:
+                return await is_authorized(actor, MetadataPropertyPolicyV1.get(metadata_property))
+
+            return actor.is_admin and await _exists_workspace_user_by_user_and_workspace_id(
+                actor, record.dataset.workspace_id
             )
 
         return is_allowed

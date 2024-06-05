@@ -377,6 +377,8 @@ class TestSuiteResponses:
     async def test_update_response_with_nonexistent_response_id(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
+        response_id = uuid4()
+
         response = await ResponseFactory.create(
             values={
                 "input_ok": {"value": "no"},
@@ -384,17 +386,22 @@ class TestSuiteResponses:
             },
             status="submitted",
         )
-        response_json = {
-            "values": {
-                "input_ok": {"value": "yes"},
-                "output_ok": {"value": "yes"},
-            },
-            "status": "submitted",
-        }
 
-        resp = await async_client.put(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header, json=response_json)
+        resp = await async_client.put(
+            f"/api/v1/responses/{response_id}",
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "input_ok": {"value": "yes"},
+                    "output_ok": {"value": "yes"},
+                },
+                "status": "submitted",
+            },
+        )
 
         assert resp.status_code == 404
+        assert resp.json() == {"detail": f"Response with id `{response_id}` not found"}
+
         assert (await db.get(Response, response.id)).values == {
             "input_ok": {"value": "no"},
             "output_ok": {"value": "no"},
@@ -473,9 +480,16 @@ class TestSuiteResponses:
     async def test_delete_response_with_nonexistent_response_id(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
+        response_id = uuid4()
+
         await ResponseFactory.create()
 
-        resp = await async_client.delete(f"/api/v1/responses/{uuid4()}", headers=owner_auth_header)
+        resp = await async_client.delete(
+            f"/api/v1/responses/{response_id}",
+            headers=owner_auth_header,
+        )
 
         assert resp.status_code == 404
+        assert resp.json() == {"detail": f"Response with id `{response_id}` not found"}
+
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1

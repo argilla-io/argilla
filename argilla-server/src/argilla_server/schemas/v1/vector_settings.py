@@ -18,6 +18,7 @@ from uuid import UUID
 
 from typing_extensions import Annotated
 
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
 from argilla_server.schemas.base import UpdateSchema
 
@@ -54,7 +55,7 @@ class VectorSettings(BaseModel):
         num_elements = len(value)
 
         if num_elements != self.dimensions:
-            raise ValueError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
+            raise UnprocessableEntityError(f"vector must have {self.dimensions} elements, got {num_elements} elements")
 
 
 class VectorsSettings(BaseModel):

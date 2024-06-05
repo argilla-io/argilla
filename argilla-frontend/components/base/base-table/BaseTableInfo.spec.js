@@ -8,6 +8,7 @@ const mountBaseTableInfo = () =>
       "base-modal",
       "base-button",
       "base-modal",
+      "nuxt-link",
     ],
     propsData: {
       actions: [],

@@ -309,10 +309,10 @@ class TestDatasetRecordsBulkWithResponses:
                                 "user_id": str(user.id),
                                 "values": {"other-question": {"value": "wrong value"}},
                                 "status": "draft",
-                            }
+                            },
                         ],
                     },
-                ]
+                ],
             },
         )
 

@@ -30,7 +30,7 @@ jobs:
           rm -rf dist && python -m build
 
       - name: Upload package artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: python-package
+          name: argilla
           path: argilla/dist

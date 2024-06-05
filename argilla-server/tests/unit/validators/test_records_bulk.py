@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import pytest
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset
 from argilla_server.schemas.v1.records import RecordCreate, RecordUpsert
 from argilla_server.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
@@ -49,7 +50,7 @@ class TestRecordsBulkValidators:
     async def test_records_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
 
-        with pytest.raises(ValueError, match="records cannot be created for a non published dataset"):
+        with pytest.raises(UnprocessableEntityError, match="records cannot be created for a non published dataset"):
             records_create = RecordsBulkCreate(
                 items=[
                     RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
@@ -64,13 +65,18 @@ class TestRecordsBulkValidators:
         records_create = RecordsBulkCreate(
             items=[
                 RecordCreate(
-                    external_id=created_record.external_id, fields={"text": "hello world"}, metadata={"source": "test"}
+                    external_id=created_record.external_id,
+                    fields={"text": "hello world"},
+                    metadata={"source": "test"},
                 ),
-                RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
-            ]
+                RecordCreate(
+                    fields={"text": "hello world"},
+                    metadata={"source": "test"},
+                ),
+            ],
         )
 
-        with pytest.raises(ValueError, match="found records with same external ids: 1"):
+        with pytest.raises(UnprocessableEntityError, match="found records with same external ids: 1"):
             await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
 
     async def test_records_bulk_create_validator_with_record_errors(self, db: AsyncSession):
@@ -83,7 +89,7 @@ class TestRecordsBulkValidators:
         )
 
         with pytest.raises(
-            ValueError,
+            UnprocessableEntityError,
             match="record at position 1 is not valid because",
         ):
             await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
@@ -102,12 +108,15 @@ class TestRecordsBulkValidators:
     async def test_records_bulk_upsert_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
 
-        with pytest.raises(ValueError, match="records cannot be created or updated for a non published dataset"):
+        with pytest.raises(
+            UnprocessableEntityError, match="records cannot be created or updated for a non published dataset"
+        ):
             records_upsert = RecordsBulkUpsert(
                 items=[
                     RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
                 ]
             )
+
             RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
 
     async def test_records_bulk_upsert_validator_with_record_error(self, db: AsyncSession):
@@ -121,7 +130,7 @@ class TestRecordsBulkValidators:
         )
 
         with pytest.raises(
-            ValueError,
+            UnprocessableEntityError,
             match="record at position 2 is not valid because",
         ):
             RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)

@@ -13,6 +13,7 @@
         ref="table"
         :data="datasets"
         :columns="tableColumns"
+        :row-link="datasetLink"
         :sorted-order="sortedOrder"
         :sorted-by-field="sortedByField"
         search-on="name"
@@ -37,18 +38,22 @@ export default {
       required: true,
     },
   },
-  created() {
-    this.setDatasetsLink();
-  },
   data() {
     return {
       querySearch: undefined,
+      datasetLink: (dataset) => this.getDatasetLink(dataset),
       tableColumns: [
         {
           name: this.$t("datasetTable.name"),
           field: "name",
           class: "table-info__title",
-          type: "action",
+          type: "main",
+          component: {
+            name: "DatasetQuestions",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
           actions: [
             {
               name: "copy",
@@ -93,9 +98,13 @@ export default {
         },
         {
           name: "Global progress",
-          field: "progress",
           class: "progress",
-          type: "progress",
+          component: {
+            name: "DatasetProgress",
+            props: (item) => ({
+              dataset: item,
+            }),
+          },
         },
       ],
       emptySearchInfo: {
@@ -189,19 +198,6 @@ export default {
     copyName({ name }) {
       this.copy(name);
     },
-    setDatasetsLink() {
-      this.datasets.forEach((dataset) => {
-        dataset.link = this.getDatasetLink(dataset);
-      });
-    },
-  },
-  watch: {
-    datasets: {
-      deep: true,
-      handler() {
-        this.setDatasetsLink();
-      },
-    },
   },
   setup() {
     return useRoutes();
@@ -221,6 +217,7 @@ export default {
 .dataset {
   &__table {
     width: 100%;
+    max-width: 1500px;
     display: flex;
     flex-direction: column;
   }
