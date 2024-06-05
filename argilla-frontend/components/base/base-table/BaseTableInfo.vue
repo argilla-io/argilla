@@ -282,6 +282,9 @@ export default {
       });
     },
   },
+  mounted() {
+    this.changeVisibility();
+  },
 };
 </script>
 
