@@ -42,18 +42,18 @@ from argilla_server.models import (
     Vector,
     VectorSettings,
 )
-from argilla_server.schemas.v1.datasets import (
+from argilla_server.api.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
 )
-from argilla_server.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
-from argilla_server.schemas.v1.metadata_properties import (
+from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
+from argilla_server.api.schemas.v1.metadata_properties import (
     METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
     TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
 )
-from argilla_server.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
-from argilla_server.schemas.v1.vector_settings import (
+from argilla_server.api.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
+from argilla_server.api.schemas.v1.vector_settings import (
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )

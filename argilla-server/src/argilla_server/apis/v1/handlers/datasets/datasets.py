@@ -25,19 +25,19 @@ from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.enums import ResponseStatus
 from argilla_server.models import Dataset, User, Workspace
-from argilla_server.schemas.v1.datasets import (
+from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
 )
-from argilla_server.schemas.v1.datasets import (
+from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
     DatasetMetrics,
     DatasetProgress,
     Datasets,
     DatasetUpdate,
 )
-from argilla_server.schemas.v1.fields import Field, FieldCreate, Fields
-from argilla_server.schemas.v1.metadata_properties import MetadataProperties, MetadataProperty, MetadataPropertyCreate
-from argilla_server.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
+from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
+from argilla_server.api.schemas.v1.metadata_properties import MetadataProperties, MetadataProperty, MetadataPropertyCreate
+from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla_server.search_engine import (
     SearchEngine,
     get_search_engine,

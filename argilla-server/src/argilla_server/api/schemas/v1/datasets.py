@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla_server.enums import DatasetStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
-from argilla_server.schemas.base import UpdateSchema
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 
 try:
     from typing import Annotated

@@ -22,11 +22,11 @@ from argilla_server.api.policies.v1 import MetadataPropertyPolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import MetadataProperty, User
-from argilla_server.schemas.v1.metadata_properties import (
+from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataMetrics,
     MetadataPropertyUpdate,
 )
-from argilla_server.schemas.v1.metadata_properties import (
+from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataProperty as MetadataPropertySchema,
 )
 from argilla_server.search_engine import SearchEngine, get_search_engine

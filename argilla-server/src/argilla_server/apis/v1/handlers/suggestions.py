@@ -22,7 +22,7 @@ from argilla_server.api.policies.v1 import SuggestionPolicy, authorize
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Record, Suggestion, User
-from argilla_server.schemas.v1.suggestions import Suggestion as SuggestionSchema
+from argilla_server.api.schemas.v1.suggestions import Suggestion as SuggestionSchema
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 

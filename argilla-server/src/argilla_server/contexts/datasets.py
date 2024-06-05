@@ -55,32 +55,32 @@ from argilla_server.models import (
     Workspace,
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
-from argilla_server.schemas.v1.datasets import (
+from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
     DatasetProgress,
 )
-from argilla_server.schemas.v1.fields import FieldCreate
-from argilla_server.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
-from argilla_server.schemas.v1.records import (
+from argilla_server.api.schemas.v1.fields import FieldCreate
+from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
+from argilla_server.api.schemas.v1.records import (
     RecordCreate,
     RecordIncludeParam,
     RecordsCreate,
     RecordsUpdate,
     RecordUpdateWithId,
 )
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     ResponseCreate,
     ResponseUpdate,
     ResponseUpsert,
     UserResponseCreate,
 )
-from argilla_server.schemas.v1.vector_settings import (
+from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettings as VectorSettingsSchema,
 )
-from argilla_server.schemas.v1.vector_settings import (
+from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
-from argilla_server.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
@@ -90,13 +90,13 @@ from argilla_server.validators.responses import (
 from argilla_server.validators.suggestions import SuggestionCreateValidator
 
 if TYPE_CHECKING:
-    from argilla_server.schemas.v1.datasets import (
+    from argilla_server.api.schemas.v1.datasets import (
         DatasetUpdate,
     )
-    from argilla_server.schemas.v1.fields import FieldUpdate
-    from argilla_server.schemas.v1.records import RecordUpdate
-    from argilla_server.schemas.v1.suggestions import SuggestionCreate
-    from argilla_server.schemas.v1.vector_settings import VectorSettingsUpdate
+    from argilla_server.api.schemas.v1.fields import FieldUpdate
+    from argilla_server.api.schemas.v1.records import RecordUpdate
+    from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+    from argilla_server.api.schemas.v1.vector_settings import VectorSettingsUpdate
 
 VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
 NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]

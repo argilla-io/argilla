@@ -15,7 +15,7 @@
 from typing import Optional
 
 import pytest
-from argilla_server.schemas.base import UpdateSchema
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 
 
 def test_update_schema():

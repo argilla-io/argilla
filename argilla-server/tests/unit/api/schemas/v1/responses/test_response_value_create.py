@@ -15,7 +15,7 @@
 from typing import Any
 
 import pytest
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     RankingQuestionResponseValueItem,
     ResponseValueCreate,
     SpanQuestionResponseValueItem,

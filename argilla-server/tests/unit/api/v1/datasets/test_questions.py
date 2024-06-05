@@ -19,7 +19,7 @@ import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import DatasetStatus
 from argilla_server.models import Question
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,

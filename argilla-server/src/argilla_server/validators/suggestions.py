@@ -14,8 +14,8 @@
 
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models.database import Record
-from argilla_server.schemas.v1.questions import QuestionSettings
-from argilla_server.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.api.schemas.v1.questions import QuestionSettings
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 from argilla_server.validators.response_values import ResponseValueValidator
 
 

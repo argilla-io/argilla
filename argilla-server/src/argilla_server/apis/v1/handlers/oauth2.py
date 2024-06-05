@@ -22,7 +22,7 @@ from argilla_server.database import get_async_db
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import AuthenticationError
 from argilla_server.models import User
-from argilla_server.schemas.v1.oauth2 import Provider, Providers, Token
+from argilla_server.api.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo

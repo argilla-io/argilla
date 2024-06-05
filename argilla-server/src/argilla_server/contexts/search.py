@@ -19,14 +19,14 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import MetadataProperty, Question, Suggestion
-from argilla_server.schemas.v1.records import (
+from argilla_server.api.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
     RecordFilterScope,
     SearchRecordsQuery,
 )
-from argilla_server.schemas.v1.responses import ResponseFilterScope
-from argilla_server.schemas.v1.suggestions import SuggestionFilterScope
+from argilla_server.api.schemas.v1.responses import ResponseFilterScope
+from argilla_server.api.schemas.v1.suggestions import SuggestionFilterScope
 
 
 class SearchRecordsQueryValidator:

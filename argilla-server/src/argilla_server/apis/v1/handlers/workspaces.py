@@ -22,12 +22,12 @@ from argilla_server.contexts import accounts, datasets
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
-from argilla_server.schemas.v1.users import User as UserSchema
-from argilla_server.schemas.v1.users import Users
-from argilla_server.schemas.v1.workspaces import (
+from argilla_server.api.schemas.v1.users import User as UserSchema
+from argilla_server.api.schemas.v1.users import Users
+from argilla_server.api.schemas.v1.workspaces import (
     Workspace as WorkspaceSchema,
 )
-from argilla_server.schemas.v1.workspaces import (
+from argilla_server.api.schemas.v1.workspaces import (
     WorkspaceCreate,
     Workspaces,
     WorkspaceUserCreate,

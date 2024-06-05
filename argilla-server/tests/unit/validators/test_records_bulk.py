@@ -15,8 +15,8 @@
 import pytest
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset
-from argilla_server.schemas.v1.records import RecordCreate, RecordUpsert
-from argilla_server.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
 from sqlalchemy.ext.asyncio import AsyncSession
 

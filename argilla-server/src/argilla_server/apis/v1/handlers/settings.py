@@ -15,7 +15,7 @@
 from fastapi import APIRouter
 
 from argilla_server.contexts import settings
-from argilla_server.schemas.v1.settings import Settings
+from argilla_server.api.schemas.v1.settings import Settings
 
 router = APIRouter(tags=["settings"])
 
