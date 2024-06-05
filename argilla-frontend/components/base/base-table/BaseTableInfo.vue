@@ -230,6 +230,9 @@ export default {
         this.$set(this.filters, column, values);
       });
   },
+  mounted() {
+    this.changeVisibility();
+  },
   methods: {
     itemValue(item, column) {
       if (column.subfield) {
@@ -259,47 +262,20 @@ export default {
       });
     },
     changeVisibility() {
-      this.filteredResults.forEach((item) => {
-        if (this.isVisible(item.id)) {
-          this.$set(this.hydrate, item.id, true);
+      const handleIntersection = (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            this.$set(this.hydrate, entry.target.id, true);
+          }
         }
+      };
+
+      const observer = new IntersectionObserver(handleIntersection);
+
+      this.data.forEach((item) => {
+        observer.observe(document.getElementById(item.id));
       });
     },
-    isVisible(id) {
-      const element = document.getElementById(id);
-      if (!element) return false;
-
-      const item = element.getBoundingClientRect();
-      return (
-        item.top >= 0 &&
-        item.left >= 0 &&
-        item.bottom <=
-          (window.innerHeight || document.documentElement.clientHeight) &&
-        item.right <=
-          (window.innerWidth || document.documentElement.clientWidth)
-      );
-    },
-  },
-  watch: {
-    querySearch() {
-      this.changeVisibility();
-    },
-    sortOrder() {
-      this.changeVisibility();
-    },
-    sortedBy() {
-      this.changeVisibility();
-    },
-  },
-  mounted() {
-    this.$refs.table.addEventListener("scroll", this.changeVisibility);
-    window.addEventListener("resize", this.changeVisibility);
-
-    this.changeVisibility();
-  },
-  beforeDestroy() {
-    this.$refs.table.removeEventListener("scroll", this.changeVisibility);
-    window.removeEventListener("resize", this.changeVisibility);
   },
 };
 </script>
