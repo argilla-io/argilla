@@ -19,6 +19,7 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
+from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import (
     DATASET_GUIDELINES_MAX_LENGTH,
     DATASET_NAME_MAX_LENGTH,
@@ -34,7 +35,6 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
     VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
 )
-from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import (
     DatasetStatus,

@@ -16,10 +16,11 @@ from datetime import datetime
 from typing import Annotated, List, Optional
 from uuid import UUID
 
+from typing_extensions import Annotated
+
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
-from typing_extensions import Annotated
 
 VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1

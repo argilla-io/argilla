@@ -24,7 +24,7 @@ from argilla_server.api.schemas.v1.responses import (
     SpanQuestionResponseValue,
     TextAndLabelSelectionQuestionResponseValue,
 )
-from argilla_server.models import SuggestionType
+from argilla_server.enums import SuggestionType
 from argilla_server.pydantic_v1 import BaseModel, Field
 
 AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"

@@ -16,11 +16,12 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from argilla_server.api.schemas.v1.questions import QuestionName
-from argilla_server.models import ResponseStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
 from fastapi import Body
 from typing_extensions import Annotated
+
+from argilla_server.api.schemas.v1.questions import QuestionName
+from argilla_server.enums import ResponseStatus
+from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
 
 try:
     from typing import Annotated
