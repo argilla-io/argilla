@@ -61,7 +61,7 @@ from argilla_server.api.handlers.v1 import (
 from argilla_server.api.handlers.v1 import (
     workspaces as workspaces_v1,
 )
-from argilla_server.apis.errors.v1.exception_handlers import add_exception_handlers as add_exception_handlers_v1
+from argilla_server.api.errors.v1.exception_handlers import add_exception_handlers as add_exception_handlers_v1
 from argilla_server.errors.base_errors import __ALL__
 from argilla_server.errors.error_handler import APIErrorHandler
 
