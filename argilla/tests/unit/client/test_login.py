@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla.client import login
+from argilla_v1.client import login
 
 if TYPE_CHECKING:
     from pytest_mock import MockFixture
@@ -84,7 +84,7 @@ def test_argilla_credentials_load_raises_error():
 
 def test_login(mocker: "MockFixture"):
     mocker.patch("builtins.open", new_callable=mocker.mock_open)
-    init_mock = mocker.patch("argilla.client.login.init")
+    init_mock = mocker.patch("argilla_v1.client.login.init")
 
     login.login(
         api_url="http://unit-test.com:6900",

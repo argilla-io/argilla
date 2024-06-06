@@ -17,11 +17,12 @@ import random
 from typing import TYPE_CHECKING, Generator, List
 
 import pytest
-from argilla import SpanQuestion
-from argilla.client.api import log
-from argilla.client.datasets import read_datasets
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
+from argilla_server.models import User
+from argilla_v1 import SpanQuestion
+from argilla_v1.client.api import log
+from argilla_v1.client.datasets import read_datasets
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
@@ -31,39 +32,38 @@ from argilla.client.feedback.schemas import (
     TextField,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.models import (
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenAttributions,
     TokenClassificationRecord,
 )
-from argilla.client.sdk.datasets.models import TaskType
-from argilla.client.sdk.text2text.models import (
+from argilla_v1.client.sdk.datasets.models import TaskType
+from argilla_v1.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from argilla.client.sdk.text_classification.models import (
+from argilla_v1.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from argilla.client.sdk.token_classification.models import (
+from argilla_v1.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )
-from argilla.client.singleton import init
-from argilla_server.models import User
+from argilla_v1.client.singleton import init
 from datasets import Dataset
 
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import (
+    from argilla_v1.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,

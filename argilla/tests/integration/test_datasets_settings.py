@@ -16,26 +16,26 @@ from typing import TYPE_CHECKING, Optional, Union
 from uuid import uuid4
 
 import pytest
-from argilla import Workspace
-from argilla.client import singleton
-from argilla.client.api import get_workspace
-from argilla.client.client import Argilla
-from argilla.client.sdk.commons.errors import ForbiddenApiError
-from argilla.client.singleton import init
-from argilla.datasets import (
+from argilla_server.contexts import accounts
+from argilla_v1 import Workspace
+from argilla_v1.client import singleton
+from argilla_v1.client.api import get_workspace
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.sdk.commons.errors import ForbiddenApiError
+from argilla_v1.client.singleton import init
+from argilla_v1.datasets import (
     TextClassificationSettings,
     TokenClassificationSettings,
     configure_dataset,
     configure_dataset_settings,
     load_dataset_settings,
 )
-from argilla_server.contexts import accounts
 
 from tests.integration.utils import delete_ignoring_errors
 
 if TYPE_CHECKING:
-    from argilla.client.apis.datasets import LabelsSchemaSettings
     from argilla_server.models import User
+    from argilla_v1.client.apis.datasets import LabelsSchemaSettings
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from .helpers import SecuredClient
@@ -139,7 +139,7 @@ def test_configure_dataset_deprecation_warning(
 
 
 def test_list_dataset(mocked_client: "SecuredClient"):
-    from argilla.client.singleton import active_client
+    from argilla_v1.client.singleton import active_client
 
     client = active_client()
     datasets = client.http_client.get("/api/datasets")

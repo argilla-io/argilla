@@ -17,14 +17,14 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
-from argilla.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
-from argilla.client.feedback.schemas.enums import LabelsOrder
-from argilla.client.feedback.schemas.fields import FieldSchema
-from argilla.client.feedback.schemas.questions import QuestionSchema
+from argilla_v1.client.feedback.config import DatasetConfig, DeprecatedDatasetConfig
+from argilla_v1.client.feedback.schemas.enums import LabelsOrder
+from argilla_v1.client.feedback.schemas.fields import FieldSchema
+from argilla_v1.client.feedback.schemas.questions import QuestionSchema
 from yaml import SafeLoader, load
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import (
+    from argilla_v1.client.feedback.schemas.types import (
         AllowedFieldTypes,
         AllowedMetadataPropertyTypes,
         AllowedQuestionTypes,

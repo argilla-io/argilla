@@ -19,21 +19,21 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from argilla import FeedbackDataset, FeedbackRecord, Workspace
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas import SuggestionSchema
-from argilla.client.feedback.schemas.remote.fields import RemoteTextField
-from argilla.client.feedback.schemas.remote.questions import RemoteTextQuestion
-from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.sdk.users.models import UserModel, UserRole
-from argilla.client.sdk.v1.datasets.models import (
+from argilla_v1 import FeedbackDataset, FeedbackRecord, Workspace
+from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla_v1.client.feedback.schemas import SuggestionSchema
+from argilla_v1.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla_v1.client.feedback.schemas.remote.questions import RemoteTextQuestion
+from argilla_v1.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.sdk.users.models import UserModel, UserRole
+from argilla_v1.client.sdk.v1.datasets.models import (
     FeedbackItemModel,
     FeedbackListVectorSettingsModel,
     FeedbackSuggestionModel,
     FeedbackVectorSettingsModel,
 )
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla_v1.client.sdk.v1.workspaces.models import WorkspaceModel
 from pytest_mock import MockerFixture
 
 

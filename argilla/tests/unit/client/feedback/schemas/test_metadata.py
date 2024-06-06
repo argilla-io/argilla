@@ -15,8 +15,8 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.schemas.enums import MetadataPropertyTypes
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataFilter,
     FloatMetadataProperty,
     IntegerMetadataFilter,

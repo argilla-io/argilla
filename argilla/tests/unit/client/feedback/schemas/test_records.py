@@ -15,7 +15,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Type, Union
 
 import pytest
-from argilla.client.feedback.schemas.records import (
+from argilla_v1.client.feedback.schemas.records import (
     FeedbackRecord,
     RankingValueSchema,
     ResponseSchema,

@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -33,11 +33,11 @@ class TestSuiteDeleteDataset:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         dataset_from_argilla_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
+            "argilla_v1.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
         remote_feedback_dataset_delete_mock = mocker.patch(
-            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete"
+            "argilla_v1.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete"
         )
 
         result = cli_runner.invoke(cli, "datasets --name unit-test --workspace unit-test delete")
@@ -55,11 +55,11 @@ class TestSuiteDeleteDataset:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         dataset_from_argilla_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
+            "argilla_v1.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
         remote_feedback_dataset_delete_mock = mocker.patch(
-            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete", side_effect=RuntimeError
+            "argilla_v1.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.delete", side_effect=RuntimeError
         )
 
         result = cli_runner.invoke(cli, "datasets --name unit-test --workspace unit-test delete")

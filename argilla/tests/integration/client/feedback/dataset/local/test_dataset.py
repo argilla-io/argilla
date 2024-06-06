@@ -15,38 +15,38 @@
 import tempfile
 from typing import TYPE_CHECKING, List, Type, Union
 
-import argilla.client.singleton
+import argilla_v1.client.singleton
 import datasets
 import pytest
-from argilla import ResponseSchema, User, Workspace
-from argilla.client.feedback.config import DatasetConfig
-from argilla.client.feedback.constants import FETCHING_BATCH_SIZE
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1 import ResponseSchema, User, Workspace
+from argilla_v1.client.feedback.config import DatasetConfig
+from argilla_v1.client.feedback.constants import FETCHING_BATCH_SIZE
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import MultiLabelQuestion, SpanLabelOption, SpanQuestion, TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.remote.records import RemoteSuggestionSchema
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.feedback.training.schemas.base import TrainingTask
-from argilla.client.models import Framework
-from argilla.client.sdk.commons.errors import ValidationApiError
-from argilla.feedback import SpanValueSchema
+from argilla_v1.client.feedback.schemas.questions import MultiLabelQuestion, SpanLabelOption, SpanQuestion, TextQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.schemas.remote.records import RemoteSuggestionSchema
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.feedback.training.schemas.base import TrainingTask
+from argilla_v1.client.models import Framework
+from argilla_v1.client.sdk.commons.errors import ValidationApiError
+from argilla_v1.feedback import SpanValueSchema
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from argilla_server.models import User as ServerUser
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from tests.integration.helpers import SecuredClient
 
 
 def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -82,7 +82,7 @@ def test_create_dataset_with_suggestions(argilla_user: "ServerUser") -> None:
 
 
 def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -103,7 +103,7 @@ def test_create_dataset_with_span_questions(argilla_user: "ServerUser") -> None:
 def test_create_dataset_with_span_questions_allow_overlapping(
     argilla_user: "ServerUser", allow_overlapping: bool
 ) -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -124,7 +124,7 @@ def test_create_dataset_with_span_questions_allow_overlapping(
 
 @pytest.mark.asyncio
 async def test_update_dataset_records_with_suggestions(argilla_user: "ServerUser", db: "AsyncSession"):
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     ds = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
 
@@ -295,7 +295,7 @@ def test_add_records(
 def test_add_records_with_wrong_spans_suggestions(
     argilla_user: "ServerUser", spans: list, expected_message_match: str
 ) -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset_cfg = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -317,7 +317,7 @@ def test_add_records_with_wrong_spans_suggestions(
 
 
 def test_add_records_with_overlapped_spans(argilla_user: "ServerUser") -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset_cfg = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -353,7 +353,7 @@ def test_add_records_with_overlapped_spans(argilla_user: "ServerUser") -> None:
 
 
 def test_add_records_with_overlapped_spans_and_disabling_overlapping_span(argilla_user: "ServerUser") -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset_cfg = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -443,7 +443,7 @@ def test_add_records_with_vectors() -> None:
 def test_add_records_validation_error(
     record: FeedbackRecord, exception_cls: Exception, exception_msg: str, argilla_user: "ServerUser"
 ) -> None:
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field", required=True), TextField(name="optional-field", required=False)],
@@ -474,8 +474,8 @@ def test_format_as(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key="argilla.apikey")
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key="argilla.apikey")
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -497,8 +497,8 @@ async def test_push_to_argilla_and_from_argilla(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     db: "AsyncSession",
 ) -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -563,8 +563,8 @@ async def test_push_to_argilla_and_from_argilla(
 
 @pytest.mark.asyncio
 async def test_pull_from_argilla_with_one_more_record_than_chunk_size(argilla_user: "ServerUser") -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     settings = FeedbackDataset(
         fields=[TextField(name="text")],
@@ -591,8 +591,8 @@ async def test_copy_dataset_in_argilla(
     feedback_dataset_records: List[FeedbackRecord],
     db: "AsyncSession",
 ) -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -631,8 +631,8 @@ async def test_update_dataset_records_in_argilla(
     feedback_dataset_records: List[FeedbackRecord],
     db: "AsyncSession",
 ) -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -705,8 +705,8 @@ def test_push_to_huggingface_and_from_huggingface(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records: List[FeedbackRecord],
 ) -> None:
-    argilla.client.singleton.active_api()
-    argilla.client.singleton.init(api_key="argilla.apikey")
+    argilla_v1.client.singleton.active_api()
+    argilla_v1.client.singleton.init(api_key="argilla.apikey")
 
     dataset = FeedbackDataset(
         guidelines=feedback_dataset_guidelines,
@@ -844,7 +844,7 @@ def test_prepare_for_training_text_classification(
     )
     dataset.add_records(feedback_dataset_records)
 
-    argilla.client.singleton.init(api_key=owner.api_key)
+    argilla_v1.client.singleton.init(api_key=owner.api_key)
     ws = Workspace.create(name="test-workspace")
 
     remote = dataset.push_to_argilla(name="test-dataset", workspace=ws)
@@ -857,7 +857,7 @@ def test_prepare_for_training_text_classification(
 
 
 def test_push_to_argilla_with_vector_settings(argilla_user: User):
-    argilla.client.singleton.init(api_key=argilla_user.api_key)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
     dataset = FeedbackDataset(
         fields=[TextField(name="required-field")],

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.apis.datasets import TextClassificationSettings
+from argilla_v1.client.apis.datasets import TextClassificationSettings
 
 
 def test_text_classification_settings_preserve_labels_order() -> None:

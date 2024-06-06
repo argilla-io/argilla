@@ -15,8 +15,8 @@
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
-from argilla.client.feedback.schemas.questions import (
+from argilla_v1.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
+from argilla_v1.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,

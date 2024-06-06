@@ -14,7 +14,7 @@
 
 import warnings
 
-import argilla
+import argilla_v1
 from argilla_server.models import User
 
 
@@ -26,7 +26,7 @@ def test_monitor_with_non_supported_model(argilla_user: User):
     with warnings.catch_warnings(record=True) as warning_list:
         model = MockModel()
 
-        maybe_monitored = argilla.monitor(model, dataset="mock")
+        maybe_monitored = argilla_v1.monitor(model, dataset="mock")
         assert model == maybe_monitored
 
         assert any(
@@ -50,7 +50,7 @@ def test_monitor_non_supported_huggingface_model(argilla_user: User):
         model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
 
         nlp = pipeline("ner", model=model, tokenizer=tokenizer)
-        maybe_monitored = argilla.monitor(nlp, dataset="ds")
+        maybe_monitored = argilla_v1.monitor(nlp, dataset="ds")
         assert nlp == maybe_monitored
         assert any(
             [

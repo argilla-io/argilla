@@ -17,18 +17,18 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
-from argilla.client.feedback.schemas.enums import MetadataPropertyTypes
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.schemas.enums import MetadataPropertyTypes
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.remote.metadata import (
+from argilla_v1.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
+from argilla_v1.client.sdk.v1.datasets.models import FeedbackMetadataPropertyModel
 
 
 @pytest.mark.parametrize(

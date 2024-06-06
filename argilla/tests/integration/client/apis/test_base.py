@@ -13,10 +13,10 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client import singleton
-from argilla.client.apis import AbstractApi, api_compatibility
-from argilla.client.sdk._helpers import handle_response_error
-from argilla.client.sdk.commons.errors import ApiCompatibilityError
+from argilla_v1.client import singleton
+from argilla_v1.client.apis import AbstractApi, api_compatibility
+from argilla_v1.client.sdk._helpers import handle_response_error
+from argilla_v1.client.sdk.commons.errors import ApiCompatibilityError
 
 
 def test_api_compatibility(mocked_client):

@@ -15,22 +15,22 @@
 from typing import TYPE_CHECKING, Any, List
 
 import pytest
-from argilla.client import singleton
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client import singleton
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.remote.records import RemoteFeedbackRecord
-from argilla.client.models import Framework
-from argilla.client.workspaces import Workspace
-from argilla.feedback import TrainingTask
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.schemas.remote.records import RemoteFeedbackRecord
+from argilla_v1.client.models import Framework
+from argilla_v1.client.workspaces import Workspace
+from argilla_v1.feedback import TrainingTask
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-    from argilla.client.sdk.users.models import UserModel as User
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.sdk.users.models import UserModel as User
     from pytest_mock import MockerFixture
 
 
@@ -67,7 +67,7 @@ def ranking_question_payload():
 @pytest.fixture
 def mocked_is_on_huggingface(mocker: "MockerFixture") -> bool:
     mocker.patch(
-        "argilla.client.feedback.integrations.huggingface.model_card.model_card.is_on_huggingface", return_value=True
+        "argilla_v1.client.feedback.integrations.huggingface.model_card.model_card.is_on_huggingface", return_value=True
     )
 
 

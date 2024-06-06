@@ -14,19 +14,19 @@
 
 from typing import TYPE_CHECKING, List, Type, Union
 
-import argilla as rg
-import argilla.client.singleton
+import argilla_v1 as rg
+import argilla_v1.client.singleton
 import pytest
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.remote.metadata import (
+from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla_v1.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
-    from argilla.client.sdk.users.models import UserModel
+    from argilla_v1.client.feedback.schemas.types import AllowedMetadataPropertyTypes
+    from argilla_v1.client.sdk.users.models import UserModel
 
 
 class TestSuiteRemoteMetadataProperties:
@@ -49,7 +49,7 @@ class TestSuiteRemoteMetadataProperties:
     def test_create_and_restore(
         self, owner: "UserModel", metadata_properties: List["AllowedMetadataPropertyTypes"]
     ) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
 
         workspace = rg.Workspace.create(name="my-workspace")
         dataset = rg.FeedbackDataset(

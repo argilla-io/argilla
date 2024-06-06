@@ -15,21 +15,21 @@
 import pandas as pd
 import pytest
 import spacy
-from argilla import (
+from argilla_v1 import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextField,
 )
-from argilla.client.feedback.training.schemas.base import TrainingTask
-from argilla.client.feedback.unification import (
+from argilla_v1.client.feedback.training.schemas.base import TrainingTask
+from argilla_v1.client.feedback.unification import (
     LabelQuestionUnification,
     MultiLabelQuestionUnification,
     RankingQuestionUnification,
     RatingQuestionUnification,
 )
-from argilla.client.models import Framework
+from argilla_v1.client.models import Framework
 from datasets import Dataset, DatasetDict
 from spacy.tokens import DocBin
 

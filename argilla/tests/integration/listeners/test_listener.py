@@ -15,11 +15,11 @@
 import time
 from typing import List
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
-from argilla import RGListenerContext, listener
-from argilla.client.api import delete, log
-from argilla.client.models import Record, TextClassificationRecord
+from argilla_v1 import RGListenerContext, listener
+from argilla_v1.client.api import delete, log
+from argilla_v1.client.models import Record, TextClassificationRecord
 
 
 def condition_check_params(search):

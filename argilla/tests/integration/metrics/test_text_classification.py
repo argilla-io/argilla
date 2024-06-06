@@ -12,11 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import argilla as rg
-from argilla.client import singleton
-from argilla.client.api import log
-from argilla.client.models import TextClassificationRecord
-from argilla.metrics.text_classification import f1, f1_multilabel
+import argilla_v1 as rg
+from argilla_v1.client import singleton
+from argilla_v1.client.api import log
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.metrics.text_classification import f1, f1_multilabel
 
 
 def test_metrics_for_text_classification(mocked_client):

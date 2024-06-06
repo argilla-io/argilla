@@ -12,12 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla.client.singleton as rg
+import argilla_v1.client.singleton as rg
 import pytest
-from argilla import User, ValueSchema, Workspace
-from argilla.client.feedback.schemas.enums import ResponseStatus
-from argilla.client.sdk.users.models import UserRole
-from argilla.feedback import FeedbackDataset, FeedbackRecord, ResponseSchema, TextField, TextQuestion
+from argilla_v1 import User, ValueSchema, Workspace
+from argilla_v1.client.feedback.schemas.enums import ResponseStatus
+from argilla_v1.client.sdk.users.models import UserRole
+from argilla_v1.feedback import FeedbackDataset, FeedbackRecord, ResponseSchema, TextField, TextQuestion
 
 
 class TestListDatasetRecords:

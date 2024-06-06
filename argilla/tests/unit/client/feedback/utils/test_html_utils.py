@@ -17,7 +17,7 @@ import base64
 from unittest import mock
 
 import pytest
-from argilla.client.feedback.utils import (
+from argilla_v1.client.feedback.utils import (
     audio_to_html,
     create_token_highlights,
     get_file_data,
@@ -105,8 +105,8 @@ def test_get_file_data(
         ("document", "path/to/doc.txt", "txt", None, None, False, False, True, b"doc_data", None, ValueError),
     ],
 )
-@mock.patch("argilla.client.feedback.utils.html_utils.get_file_data")
-@mock.patch("argilla.client.feedback.utils.html_utils.is_valid_dimension")
+@mock.patch("argilla_v1.client.feedback.utils.html_utils.get_file_data")
+@mock.patch("argilla_v1.client.feedback.utils.html_utils.is_valid_dimension")
 def test_media_to_html(
     mock_is_valid_dimension,
     mock_get_file_data,

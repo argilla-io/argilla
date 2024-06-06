@@ -13,8 +13,8 @@
 #  limitations under the License.
 
 
-from argilla.client.models import TokenClassificationRecord
-from argilla.training import ArgillaTrainer
+from argilla_v1.client.models import TokenClassificationRecord
+from argilla_v1.training import ArgillaTrainer
 
 from .helpers import train_with_cleanup
 

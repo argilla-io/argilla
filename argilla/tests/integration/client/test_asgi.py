@@ -16,13 +16,13 @@
 import time
 from typing import Any, Dict
 
-import argilla
-from argilla.monitoring.asgi import (
+import argilla_v1
+from argilla_server.models import User
+from argilla_v1.monitoring.asgi import (
     ArgillaLogHTTPMiddleware,
     text_classification_mapper,
     token_classification_mapper,
 )
-from argilla_server.models import User
 from fastapi import FastAPI
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
@@ -73,7 +73,7 @@ def test_argilla_middleware_for_text_classification(argilla_user: User):
     )
 
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 1
 
@@ -82,7 +82,7 @@ def test_argilla_middleware_for_text_classification(argilla_user: User):
         json={"a": "The data input for A", "b": "The data input for B"},
     )
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 2
 
@@ -91,14 +91,14 @@ def test_argilla_middleware_for_text_classification(argilla_user: User):
         params={"a": "The data input for A", "b": "The data input for B"},
     )
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 3
 
     mock.get("/another/predict/route")
 
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 3
 
@@ -154,7 +154,7 @@ def test_argilla_middleware_for_token_classification(argilla_user: User):
         json={"text": "The main text data"},
     )
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 1
 
@@ -163,7 +163,7 @@ def test_argilla_middleware_for_token_classification(argilla_user: User):
         json={"text": "The main text data 3"},
     )
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 2
 
@@ -172,12 +172,12 @@ def test_argilla_middleware_for_token_classification(argilla_user: User):
         params={"text": "The main text data 2"},
     )
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 3
 
     mock.get("/another/predict/route")
     time.sleep(0.5)
-    df = argilla.load(expected_dataset_name)
+    df = argilla_v1.load(expected_dataset_name)
     df = df.to_pandas()
     assert len(df) == 3

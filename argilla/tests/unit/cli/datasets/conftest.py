@@ -18,14 +18,14 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.remote.fields import RemoteTextField
-from argilla.client.feedback.schemas.remote.questions import RemoteTextQuestion
-from argilla.client.sdk.datasets.models import Dataset
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla_v1.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla_v1.client.feedback.schemas.remote.questions import RemoteTextQuestion
+from argilla_v1.client.sdk.datasets.models import Dataset
 
 if TYPE_CHECKING:
-    from argilla.client.workspaces import Workspace
+    from argilla_v1.client.workspaces import Workspace
 
 
 @pytest.fixture

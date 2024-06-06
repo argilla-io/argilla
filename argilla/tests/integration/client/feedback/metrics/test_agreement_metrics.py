@@ -16,19 +16,19 @@ import uuid
 from typing import TYPE_CHECKING, FrozenSet, List, Tuple, Union
 
 import pytest
-from argilla import User, init
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.agreement_metrics import (
+from argilla_v1 import User, init
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.metrics.agreement_metrics import (
     AgreementMetric,
     AgreementMetricResult,
     prepare_dataset_for_annotation_task,
 )
-from argilla.client.feedback.schemas import FeedbackRecord
+from argilla_v1.client.feedback.schemas import FeedbackRecord
 
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 @pytest.mark.parametrize(

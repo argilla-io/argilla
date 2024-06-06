@@ -15,9 +15,9 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._version import version
-from argilla.client import singleton
-from argilla.client.utils import ServerInfo, server_info
+from argilla_v1._version import version
+from argilla_v1.client import singleton
+from argilla_v1.client.utils import ServerInfo, server_info
 
 if TYPE_CHECKING:
     from argilla_server.models import User as ServerUser

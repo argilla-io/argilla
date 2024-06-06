@@ -14,7 +14,7 @@
 from uuid import uuid4
 
 import pytest
-from argilla.feedback import (
+from argilla_v1.feedback import (
     FeedbackDataset,
     ResponseSchema,
     ResponseStatus,

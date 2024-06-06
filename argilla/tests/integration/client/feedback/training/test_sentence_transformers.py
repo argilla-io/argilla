@@ -15,12 +15,12 @@
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import LabelQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas.base import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.questions import LabelQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.training.base import ArgillaTrainer
+from argilla_v1.client.feedback.training.schemas.base import (
     LabelQuestion,
     RatingQuestionUnification,
     TrainingTask,
@@ -40,7 +40,7 @@ from tests.integration.client.feedback.helpers import (
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 __OUTPUT_DIR__ = "tmp"
 __FRAMEWORK__ = "sentence-transformers"

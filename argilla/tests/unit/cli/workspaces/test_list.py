@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from typer import Typer
 
-from argilla.client.workspaces import Workspace
+from argilla_v1.client.workspaces import Workspace
 from rich.table import Table
 
 from tests.factories import WorkspaceSyncFactory
@@ -42,7 +42,7 @@ def test_cli_workspaces_list(cli_runner: "CliRunner", cli: "Typer", mocker: "Moc
             "updated_at": workspace.updated_at,
         }
     )
-    workspace_list_mock = mocker.patch("argilla.client.workspaces.Workspace.list", return_value=[workspace_obj])
+    workspace_list_mock = mocker.patch("argilla_v1.client.workspaces.Workspace.list", return_value=[workspace_obj])
 
     result = cli_runner.invoke(cli, "workspaces list")
 

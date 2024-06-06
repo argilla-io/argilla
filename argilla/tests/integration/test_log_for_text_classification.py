@@ -14,19 +14,19 @@
 
 from typing import TYPE_CHECKING
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
-from argilla.client.api import load, log
-from argilla.client.client import Argilla
-from argilla.client.datasets import read_datasets
-from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
-from argilla.client.sdk.commons.errors import (
+from argilla_server.settings import settings
+from argilla_v1.client.api import load, log
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.datasets import read_datasets
+from argilla_v1.client.models import TextClassificationRecord, TokenClassificationRecord
+from argilla_v1.client.sdk.commons.errors import (
     BadRequestApiError,
     GenericApiError,
     ValidationApiError,
 )
-from argilla.client.singleton import init
-from argilla_server.settings import settings
+from argilla_v1.client.singleton import init
 
 from tests.factories import WorkspaceFactory
 from tests.integration.utils import delete_ignoring_errors

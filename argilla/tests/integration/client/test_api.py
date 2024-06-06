@@ -26,11 +26,17 @@ import datasets
 import httpx
 import pandas as pd
 import pytest
-from argilla._constants import (
+from argilla_server.apis.v0.models.text_classification import (
+    TextClassificationBulkRequest,
+    TextClassificationRecordInputs,
+)
+from argilla_server.commons.models import TaskStatus
+from argilla_server.models import User, UserRole
+from argilla_v1._constants import (
     DEFAULT_API_KEY,
     WORKSPACE_HEADER_NAME,
 )
-from argilla.client.api import (
+from argilla_v1.client.api import (
     delete,
     delete_records,
     get_workspace,
@@ -39,27 +45,27 @@ from argilla.client.api import (
     log,
     set_workspace,
 )
-from argilla.client.apis.status import ApiInfo, Status
-from argilla.client.client import Argilla
-from argilla.client.datasets import (
+from argilla_v1.client.apis.status import ApiInfo, Status
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.datasets import (
     DatasetForText2Text,
     DatasetForTextClassification,
     DatasetForTokenClassification,
 )
-from argilla.client.enums import DatasetType
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.models import (
+from argilla_v1.client.enums import DatasetType
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.questions import TextQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
-from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.api import Response
-from argilla.client.sdk.commons.errors import (
+from argilla_v1.client.sdk.client import AuthenticatedClient
+from argilla_v1.client.sdk.commons.api import Response
+from argilla_v1.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     ForbiddenApiError,
     GenericApiError,
@@ -69,18 +75,12 @@ from argilla.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
-from argilla.client.sdk.datasets.models import Dataset, TaskType
-from argilla.client.sdk.users import api as users_api
-from argilla.client.sdk.users.models import UserModel
-from argilla.client.sdk.v1.workspaces import api as workspaces_api_v1
-from argilla.client.sdk.workspaces.models import WorkspaceModel
-from argilla.client.singleton import active_client, init
-from argilla_server.apis.v0.models.text_classification import (
-    TextClassificationBulkRequest,
-    TextClassificationRecordInputs,
-)
-from argilla_server.commons.models import TaskStatus
-from argilla_server.models import User, UserRole
+from argilla_v1.client.sdk.datasets.models import Dataset, TaskType
+from argilla_v1.client.sdk.users import api as users_api
+from argilla_v1.client.sdk.users.models import UserModel
+from argilla_v1.client.sdk.v1.workspaces import api as workspaces_api_v1
+from argilla_v1.client.sdk.workspaces.models import WorkspaceModel
+from argilla_v1.client.singleton import active_client, init
 from httpx import ConnectError
 
 from tests.factories import UserFactory, WorkspaceFactory
@@ -148,7 +148,7 @@ def mock_init_ok(monkeypatch):
 
     It will return a 200 status code, emulating the correct login.
     """
-    from argilla import __version__ as rg_version
+    from argilla_v1 import __version__ as rg_version
 
     def mock_get_info(*args, **kwargs):
         return ApiInfo(version=rg_version)
@@ -954,7 +954,7 @@ def test_load_sort(api: Argilla):
 
 
 def test_not_aligned_argilla_versions(monkeypatch):
-    from argilla import __version__ as rg_version
+    from argilla_v1 import __version__ as rg_version
 
     def mock_get_info(*args, **kwargs):
         return ApiInfo(version="1.0.0")

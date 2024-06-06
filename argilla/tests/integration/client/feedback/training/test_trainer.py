@@ -19,35 +19,35 @@ from typing import TYPE_CHECKING, Callable, List, Union
 import pytest
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 import re
 import shutil
 import sys
 from pathlib import Path
 
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
 )
-from argilla.client.feedback.schemas.enums import ResponseStatusFilter
-from argilla.client.feedback.schemas.records import SortBy
-from argilla.client.feedback.training import ArgillaTrainer
-from argilla.client.feedback.training.schemas.base import (
+from argilla_v1.client.feedback.schemas.enums import ResponseStatusFilter
+from argilla_v1.client.feedback.schemas.records import SortBy
+from argilla_v1.client.feedback.training import ArgillaTrainer
+from argilla_v1.client.feedback.training.schemas.base import (
     TrainingTask,
     TrainingTaskForTextClassification,
     TrainingTaskMapping,
     TrainingTaskMappingForTextClassification,
     TrainingTaskTypes,
 )
-from argilla.client.feedback.training.schemas.return_types import (
+from argilla_v1.client.feedback.training.schemas.return_types import (
     QuestionAnsweringReturnTypes,
     TextClassificationReturnTypes,
 )
-from argilla.client.feedback.unification import LabelQuestionUnification
-from argilla.client.models import Framework
+from argilla_v1.client.feedback.unification import LabelQuestionUnification
+from argilla_v1.client.models import Framework
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from tests.integration.training.helpers import train_with_cleanup

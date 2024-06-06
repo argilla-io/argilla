@@ -17,7 +17,7 @@ import sys
 from typing import Any, List
 
 import pytest
-from argilla.utils.dependency import is_package_with_extras_installed, require_dependencies, requires_dependencies
+from argilla_v1.utils.dependency import is_package_with_extras_installed, require_dependencies, requires_dependencies
 
 
 class TestDependencyRequirements:

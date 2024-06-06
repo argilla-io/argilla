@@ -16,7 +16,7 @@ import warnings
 from unittest.mock import Mock, patch
 
 import pytest
-from argilla.client.feedback.utils.assignment import (
+from argilla_v1.client.feedback.utils.assignment import (
     assign_records,
     assign_records_to_groups,
     assign_records_to_individuals,
@@ -24,8 +24,8 @@ from argilla.client.feedback.utils.assignment import (
     check_user,
     check_workspace,
 )
-from argilla.client.users import User
-from argilla.client.workspaces import Workspace
+from argilla_v1.client.users import User
+from argilla_v1.client.workspaces import Workspace
 
 
 @pytest.fixture
@@ -79,8 +79,8 @@ def mock_workspace_factory():
     "input, exists, warning, is_user_obj",
     [("existing_user", True, False, False), ("new_user", False, True, False), (mock_user, True, False, True)],
 )
-@patch("argilla.client.users.User.create")
-@patch("argilla.client.users.User.from_name")
+@patch("argilla_v1.client.users.User.create")
+@patch("argilla_v1.client.users.User.from_name")
 def test_check_user(mock_from_name, mock_create, input, exists, warning, is_user_obj, mock_user):
     if is_user_obj:
         user_input = mock_user
@@ -103,8 +103,8 @@ def test_check_user(mock_from_name, mock_create, input, exists, warning, is_user
 
 
 @pytest.mark.parametrize("workspace_name, workspace_exists", [("existing_workspace", True), ("new_workspace", False)])
-@patch("argilla.client.workspaces.Workspace.from_name")
-@patch("argilla.client.workspaces.Workspace.create")
+@patch("argilla_v1.client.workspaces.Workspace.from_name")
+@patch("argilla_v1.client.workspaces.Workspace.create")
 def test_check_workspace(mock_create, mock_from_name, mock_workspace, workspace_name, workspace_exists):
     if workspace_exists:
         mock_from_name.return_value = mock_workspace
@@ -157,12 +157,12 @@ def test_check_workspace(mock_create, mock_from_name, mock_workspace, workspace_
         (-1, False, ValueError, None),
     ],
 )
-@patch("argilla.client.feedback.utils.assignment.random.shuffle")
+@patch("argilla_v1.client.feedback.utils.assignment.random.shuffle")
 def test_assign_records_to_groups(mock_shuffle, overlap, shuffle, expected_error, expected_result, mock_check_user):
     mock_groups = {"group1": ["user1", "user2"], "group2": ["user3", "user4"], "group3": ["user5"]}
     mock_records = ["record1", "record2", "record3", "record4", "record5", "record6"]
 
-    with patch("argilla.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
+    with patch("argilla_v1.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
         if expected_error:
             with pytest.raises(expected_error):
                 assign_records_to_groups(mock_groups, mock_records, overlap, shuffle)
@@ -197,14 +197,14 @@ def test_assign_records_to_groups(mock_shuffle, overlap, shuffle, expected_error
         (-1, False, ValueError, None),
     ],
 )
-@patch("argilla.client.feedback.utils.assignment.random.shuffle")
+@patch("argilla_v1.client.feedback.utils.assignment.random.shuffle")
 def test_assign_records_to_individuals(
     mock_shuffle, overlap, shuffle, expected_error, expected_result, mock_check_user
 ):
     mock_users = [f"user{i}" for i in range(1, 4)]
     mock_records = ["record1", "record2", "record3", "record4", "record5"]
 
-    with patch("argilla.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
+    with patch("argilla_v1.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
         if expected_error:
             with pytest.raises(expected_error):
                 assign_records_to_individuals(mock_users, mock_records, overlap, shuffle)
@@ -254,10 +254,11 @@ def test_assign_records(input, overlap, shuffle, expected_result):
         return expected_result
 
     with patch(
-        "argilla.client.feedback.utils.assignment.assign_records_to_groups", side_effect=mock_assign_records_to_groups
+        "argilla_v1.client.feedback.utils.assignment.assign_records_to_groups",
+        side_effect=mock_assign_records_to_groups,
     ):
         with patch(
-            "argilla.client.feedback.utils.assignment.assign_records_to_individuals",
+            "argilla_v1.client.feedback.utils.assignment.assign_records_to_individuals",
             side_effect=mock_assign_records_to_individuals,
         ):
             result = assign_records(input, mock_records, overlap, shuffle)
@@ -291,11 +292,13 @@ def test_assign_records(input, overlap, shuffle, expected_result):
     ],
 )
 def test_assign_workspaces(mock_check_user, mock_workspace_factory, mock_assignments, assignment_type, expected_result):
-    with patch("argilla.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
+    with patch("argilla_v1.client.feedback.utils.assignment.check_user", side_effect=mock_check_user):
         with patch(
-            "argilla.client.feedback.utils.assignment.User.from_id",
+            "argilla_v1.client.feedback.utils.assignment.User.from_id",
             side_effect=lambda user_id: Mock(username=user_id.split("_")[0]),
         ):
-            with patch("argilla.client.feedback.utils.assignment.check_workspace", side_effect=mock_workspace_factory):
+            with patch(
+                "argilla_v1.client.feedback.utils.assignment.check_workspace", side_effect=mock_workspace_factory
+            ):
                 result = assign_workspaces(mock_assignments, assignment_type)
                 assert result == expected_result

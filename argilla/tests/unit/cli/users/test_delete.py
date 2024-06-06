@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Type
 import pytest
 
 if TYPE_CHECKING:
-    from argilla.client.users import User
+    from argilla_v1.client.users import User
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 @pytest.mark.usefixtures("login_mock")
 class TestSuiteDeleteUserCommand:
     def test_delete_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
-        user_from_name_mock = mocker.patch("argilla.client.users.User.from_name", return_value=user)
-        user_delete_mock = mocker.patch("argilla.client.users.User.delete")
+        user_from_name_mock = mocker.patch("argilla_v1.client.users.User.from_name", return_value=user)
+        user_delete_mock = mocker.patch("argilla_v1.client.users.User.delete")
 
         result = cli_runner.invoke(cli, "users --username unit-test delete")
 
@@ -40,7 +40,7 @@ class TestSuiteDeleteUserCommand:
     def test_delete_user_not_found(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User"
     ) -> None:
-        user_from_name_mock = mocker.patch("argilla.client.users.User.from_name", side_effect=ValueError)
+        user_from_name_mock = mocker.patch("argilla_v1.client.users.User.from_name", side_effect=ValueError)
         result = cli_runner.invoke(cli, "users --username unit-test delete")
 
         assert result.exit_code == 1
@@ -51,7 +51,7 @@ class TestSuiteDeleteUserCommand:
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User"
     ) -> None:
         user_delete_mock = mocker.patch.object(user, "delete", side_effect=RuntimeError)
-        user_from_name_mock = mocker.patch("argilla.client.users.User.from_name", return_value=user)
+        user_from_name_mock = mocker.patch("argilla_v1.client.users.User.from_name", return_value=user)
         result = cli_runner.invoke(cli, "users --username unit-test delete")
 
         assert result.exit_code == 1

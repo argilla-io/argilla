@@ -35,7 +35,7 @@ class ModelNotSupportedError(Exception):
 class DatasetRecordsConsumer(threading.Thread):
     """Consumes the records from the dataset queue."""
 
-    log = logging.getLogger("argilla.monitoring")
+    log = logging.getLogger("argilla_v1.monitoring")
 
     def __init__(
         self,

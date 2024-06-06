@@ -16,25 +16,25 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
-from argilla._constants import DEFAULT_API_KEY
-from argilla.client.models import (
+from argilla_v1._constants import DEFAULT_API_KEY
+from argilla_v1.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenAttributions,
     TokenClassificationRecord,
 )
-from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.text2text.models import (
+from argilla_v1.client.sdk.client import AuthenticatedClient
+from argilla_v1.client.sdk.text2text.models import (
     CreationText2TextRecord,
     Text2TextBulkData,
 )
-from argilla.client.sdk.text_classification.models import (
+from argilla_v1.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from argilla.client.sdk.token_classification.models import (
+from argilla_v1.client.sdk.token_classification.models import (
     CreationTokenClassificationRecord,
     TokenClassificationBulkData,
 )

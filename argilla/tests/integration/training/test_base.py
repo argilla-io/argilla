@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client.datasets import (
+from argilla_v1.client.datasets import (
     DatasetForTextClassification,
     DatasetForTokenClassification,
 )
-from argilla.client.models import TextClassificationRecord, TokenClassificationRecord
-from argilla.training import ArgillaTrainer
+from argilla_v1.client.models import TextClassificationRecord, TokenClassificationRecord
+from argilla_v1.training import ArgillaTrainer
 
 
 def test_wrong_framework(dataset_text_classification):

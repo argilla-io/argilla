@@ -18,12 +18,12 @@ from unittest.mock import ANY
 from uuid import uuid4
 
 import pytest
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla_v1.client.sdk.v1.workspaces.models import WorkspaceModel
 from rich.table import Table
 
 if TYPE_CHECKING:
-    from argilla.client.users import User
-    from argilla.client.workspaces import Workspace
+    from argilla_v1.client.users import User
+    from argilla_v1.client.workspaces import Workspace
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 class TestSuiteListUsersCommand:
     def test_list_users(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
         add_row_spy = mocker.spy(Table, "add_row")
-        user_list_mock = mocker.patch("argilla.client.users.User.list", return_value=[user])
+        user_list_mock = mocker.patch("argilla_v1.client.users.User.list", return_value=[user])
 
         result = cli_runner.invoke(cli, "users list")
 
@@ -55,8 +55,10 @@ class TestSuiteListUsersCommand:
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User", workspace: "Workspace"
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
-        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name", return_value=workspace)
-        mocker.patch("argilla.client.workspaces.Workspace.users", new_callable=lambda: [user])
+        workspace_from_name_mock = mocker.patch(
+            "argilla_v1.client.workspaces.Workspace.from_name", return_value=workspace
+        )
+        mocker.patch("argilla_v1.client.workspaces.Workspace.users", new_callable=lambda: [user])
 
         result = cli_runner.invoke(cli, "users list --workspace unit-test")
 
@@ -78,7 +80,7 @@ class TestSuiteListUsersCommand:
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User"
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
-        user_list_mock = mocker.patch("argilla.client.users.User.list", return_value=[user])
+        user_list_mock = mocker.patch("argilla_v1.client.users.User.list", return_value=[user])
 
         result = cli_runner.invoke(cli, "users list --role annotator")
 

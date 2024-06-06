@@ -18,13 +18,13 @@ from collections import Counter
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List
 
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.training.base import ArgillaTrainer
-from argilla.client.feedback.training.schemas.base import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.training.base import ArgillaTrainer
+from argilla_v1.client.feedback.training.schemas.base import (
     TrainingTask,
 )
-from argilla.client.feedback.training.schemas.return_types import (
+from argilla_v1.client.feedback.training.schemas.return_types import (
     DPOReturnTypes,
     PPOReturnTypes,
     RMReturnTypes,
@@ -44,7 +44,7 @@ from tests.integration.client.feedback.helpers import (
 from tests.integration.training.helpers import train_with_cleanup
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 OUTPUT_DIR = "tmp"
 FRAMEWORK = "trl"

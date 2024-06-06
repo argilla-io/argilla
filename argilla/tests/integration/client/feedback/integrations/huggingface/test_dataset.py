@@ -16,7 +16,7 @@ import os
 import re
 from uuid import uuid4
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
 
 

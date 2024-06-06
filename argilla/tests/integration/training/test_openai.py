@@ -15,7 +15,7 @@
 import os
 
 import pytest
-from argilla.training import ArgillaTrainer
+from argilla_v1.training import ArgillaTrainer
 
 FRAMEWORK = "openai"
 MODEL = "curie"

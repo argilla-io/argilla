@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
-from argilla.training import ArgillaTrainer
+from argilla_v1.training import ArgillaTrainer
 
 from tests.integration.training.helpers import cleanup_spacy_config, train_with_cleanup
 

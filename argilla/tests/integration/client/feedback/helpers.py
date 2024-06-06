@@ -19,8 +19,8 @@ for the trainer that may be reused in different modules.
 from collections import Counter
 from typing import Any, Dict, Iterator
 
-from argilla.client.models import Framework
-from argilla.feedback import TrainingTask
+from argilla_v1.client.models import Framework
+from argilla_v1.feedback import TrainingTask
 
 
 def formatting_func_sft(sample: Dict[str, Any]) -> Iterator[str]:
