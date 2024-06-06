@@ -23,7 +23,7 @@ LOG_LEVEL_MAP = {
     "critical": logging.CRITICAL,
 }
 
-logger = logging.getLogger(name=__name__)
+logger = logging.getLogger(name="argilla.sdk")
 
 
 def log_message(message: str, level: str = "info") -> None:
