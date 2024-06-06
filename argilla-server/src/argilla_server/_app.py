@@ -21,6 +21,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import backoff
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -149,6 +150,7 @@ def configure_app_statics(app: FastAPI):
 
 def ping_search_engine(app: FastAPI):
     @app.on_event("startup")
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
     async def _ping_search_engine():
         async for search_engine in get_search_engine():
             if not await search_engine.ping():
