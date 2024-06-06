@@ -105,7 +105,6 @@ $card-secondary-color: palette(purple, 200);
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 15px;
   height: 100%;
   width: 100%;
 

@@ -105,7 +105,6 @@ $card-secondary-color: palette(purple, 200);
 .resizable {
   display: flex;
   justify-content: space-between;
-  gap: 15px;
   height: 100%;
   width: 100%;
 
