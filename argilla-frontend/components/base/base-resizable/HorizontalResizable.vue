@@ -27,7 +27,9 @@
           />
         </BaseButton>
       </div>
-      <slot v-if="isDownExpanded" name="down" />
+      <div class="resizable__content" v-show="isDownExpanded">
+        <slot name="downContent" />
+      </div>
     </div>
   </div>
 </template>
@@ -149,9 +151,15 @@ $card-secondary-color: palette(purple, 200);
 
   &__header {
     width: 100%;
+    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  &__content {
+    width: 100%;
+    height: 100%;
   }
 
   &__up {

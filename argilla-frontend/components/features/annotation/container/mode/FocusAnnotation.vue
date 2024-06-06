@@ -37,7 +37,7 @@
           <template #downHeader>
             <h2>Guidelines</h2>
           </template>
-          <template #down>
+          <template #downContent>
             <h2>Guidelines Content</h2>
           </template>
         </HorizontalResizable>
@@ -66,7 +66,7 @@
           <template #downHeader>
             <h2>Progress</h2>
           </template>
-          <template #down>
+          <template #downContent>
             <h2>Progress Content</h2>
           </template>
         </HorizontalResizable>
