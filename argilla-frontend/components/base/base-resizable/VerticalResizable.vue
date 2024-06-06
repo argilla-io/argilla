@@ -3,7 +3,7 @@
     <div class="resizable__left"><slot name="left" /></div>
 
     <div class="resizable__bar" ref="resizableBar">
-      <span class="resizable__bar-button">:::</span>
+      <div class="resizable__bar__inner" />
     </div>
 
     <div class="resizable__right"><slot name="right" /></div>
@@ -123,26 +123,24 @@ $card-secondary-color: palette(purple, 200);
   }
 
   &__bar {
-    border-left: thick solid lightgray;
-    border-width: 1px;
-    max-width: 5px;
+    height: 100%;
+    width: $base-space;
+    display: flex;
+    justify-content: center;
+    cursor: ew-resize;
 
-    &-button {
-      user-select: none;
-      cursor: ew-resize;
-      border-radius: $border-radius;
-      align-items: center;
-      background-color: $card-primary-color;
-      color: white;
-      padding: 3px;
-      position: relative;
-      top: 50%;
-      left: -9px;
+    &__inner {
+      height: 100%;
+      border-left: thick solid lightgray;
+      border-width: 1px;
 
       &:hover {
-        background: $card-secondary-color;
-        box-shadow: $shadow-500;
+        border-width: 2px;
       }
+    }
+
+    &:hover {
+      background-color: $card-primary-color;
     }
   }
 }
