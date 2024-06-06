@@ -58,6 +58,7 @@ export default {
   padding: 0.1em 0.5em;
   white-space: nowrap;
   font-family: $primary-font-family !important;
+  z-index: 1;
   &.--left {
     right: 100%;
   }
