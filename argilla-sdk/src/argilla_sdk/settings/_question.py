@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Union, Dict
+from typing import List, Literal, Optional, Union, Dict
 
 from argilla_sdk._models._settings._questions import (
     LabelQuestionModel,
@@ -78,7 +78,7 @@ class LabelQuestion(QuestionPropertyBase):
     def __init__(
         self,
         name: str,
-        labels: List[str],
+        labels: Union[List[str], Dict[str, str]],
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
@@ -90,7 +90,8 @@ class LabelQuestion(QuestionPropertyBase):
         
         Parameters:
             name: str: The name of the question to be used as a reference.
-            labels: List[str]: The list of available labels for the question.
+            labels: Union[List[str], Dict[str, str]]: The list of available labels for the question, 
+                or a dictionary of key-value pairs where the key is the label and the value is the label text in the UI.
             title: Optional[str]: The title of the question to be shown in the UI.
             description: Optional[str]: The description of the question to be shown in the UI.
             required: bool: If the question is required for a record to be valid.
@@ -150,7 +151,7 @@ class MultiLabelQuestion(LabelQuestion):
         name: str,
         labels: List[str],
         visible_labels: Optional[int] = None,
-        labels_order: str = "natural",
+        labels_order: Literal["natural", "suggestion"] = "natural",
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
@@ -162,6 +163,8 @@ class MultiLabelQuestion(LabelQuestion):
         Parameters:
             name: str: The name of the question to be used as a reference.
             labels: List[str]: The list of available labels for the question.
+            labels_order: Literal["natural", "suggestion"]: The order of the labels in the UI. \
+                Can be either "natural" or "suggestion". Default is "natural".
             title: Optional[str]: The title of the question to be shown in the UI.
             description: Optional[str]: The description of the question to be shown in the UI.
             required: bool: If the question is required for a record to be valid.
