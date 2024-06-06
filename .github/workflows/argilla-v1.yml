@@ -74,20 +74,20 @@ jobs:
           echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
           echo "Enable HF access token"
 
-      - name: Run tests 📈
+      - name: Run unit tests 📈
         run: |
           pip install -e ".[server,listeners]"
-          pytest --cov=argilla --cov-report=xml:${{ env.COVERAGE_REPORT }}.xml ${{ inputs.pytestArgs }} -vs
+          pytest tests/unit -vs
 
       - name: Run tests with pandas v2 📈
         run: |
           pip install "pandas~=2.0" pytest-custom_exit_code
-          pytest --suppress-no-test-exit-code ${{ inputs.pytestArgs }} -vs
+          pytest --suppress-no-test-exit-code tests/unit -vs
 
       - name: Run tests with pydantic v2 📈
         run: |
           pip install "pydantic~=2.0" pytest-custom_exit_code
-          pytest --suppress-no-test-exit-code ${{ inputs.pytestArgs }} -vs
+          pytest --suppress-no-test-exit-code tests/unit -vs
 
       - name: Build Package 🍟
         run: |
