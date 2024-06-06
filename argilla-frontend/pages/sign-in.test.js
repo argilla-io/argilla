@@ -7,6 +7,7 @@ const stubs = [
   "geometric-shape-a",
   "base-button",
   "OAuthLogin",
+  "LoginInput",
 ];
 
 const validAuthToken = btoa("USERNAME:PASSWORD");

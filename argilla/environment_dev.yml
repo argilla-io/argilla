@@ -68,5 +68,4 @@ dependencies:
       - nltk < 4.0.0
       - httpx~=0.26.0
       # install Argilla packages in editable mode
-      - -e ../argilla-server[postgresql]
       - -e .[listeners]
