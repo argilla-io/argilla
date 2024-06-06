@@ -23,6 +23,8 @@ LOG_LEVEL_MAP = {
     "critical": logging.CRITICAL,
 }
 
+logger = logging.getLogger(name=__name__)
+
 
 def log_message(message: str, level: str = "info") -> None:
     """Log a message at the specified level.
@@ -31,7 +33,7 @@ def log_message(message: str, level: str = "info") -> None:
         level (str): The log level to use. Defaults to "info".
     """
     level_int = LOG_LEVEL_MAP.get(level, logging.INFO)
-    logging.log(level=level_int, msg=message)
+    logger.log(level=level_int, msg=message)
 
 
 class LoggingMixin:
