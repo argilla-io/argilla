@@ -114,12 +114,12 @@ class TestDependencyRequirements:
 
 
 @pytest.mark.parametrize(
-    "args, expected", [(["argilla", ["server"]], True), (["invented_package", ["invented"]], False)]
+    "args, expected", [(["argilla_v1", ["server"]], True), (["invented_package", ["invented"]], False)]
 )
 def test_is_package_with_extras_installed(args: List[Any], expected: bool) -> None:
     assert is_package_with_extras_installed(*args) == expected
 
 
 def test_is_package_with_extras_installed_raises_key_error() -> None:
-    with pytest.raises(KeyError, match="'argilla' package does not provide 'invented' extra"):
-        is_package_with_extras_installed("argilla", ["invented"])
+    with pytest.raises(KeyError, match="'argilla_v1' package does not provide 'invented' extra"):
+        is_package_with_extras_installed("argilla_v1", ["invented"])
