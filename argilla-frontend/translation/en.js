@@ -2,6 +2,7 @@ export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
   label_selection: "Label",
+  span: "Span",
   text: "Text",
   rating: "Rating",
   minimize: "Minimize",
@@ -214,12 +215,10 @@ export default {
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
   datasetTable: {
-    name: "Name",
+    name: "Dataset",
     workspace: "Workspace",
-    task: "Task",
-    tags: "Tags",
-    createdAt: "Created at",
-    lastActivityAt: "Updated at",
+    createdAt: "Created",
+    lastActivityAt: "Updated",
   },
   metrics: {
     total: "Total",
