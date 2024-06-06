@@ -34,8 +34,11 @@
               </div>
             </section>
           </template>
-          <template #down>
+          <template #downHeader>
             <h2>Guidelines</h2>
+          </template>
+          <template #down>
+            <h2>Guidelines Content</h2>
           </template>
         </HorizontalResizable>
       </template>
@@ -60,8 +63,11 @@
               @on-save-draft="onSaveDraft"
             />
           </template>
-          <template #down>
+          <template #downHeader>
             <h2>Progress</h2>
+          </template>
+          <template #down>
+            <h2>Progress Content</h2>
           </template>
         </HorizontalResizable>
       </template>

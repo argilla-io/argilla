@@ -2,16 +2,41 @@
   <div class="resizable">
     <div class="resizable__up"><slot name="up" /></div>
 
-    <div class="resizable__bar" ref="resizableBar">
+    <div v-if="isDownExpanded" class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
+    <div v-else class="resizable__bar__inner--no-hover" ref="resizableBar" />
 
-    <div class="resizable__down"><slot name="down" /></div>
+    <div class="resizable__down">
+      <div class="resizable__header">
+        <slot name="downHeader" />
+
+        <BaseButton @click="isDownExpanded = !isDownExpanded">
+          <svgicon
+            v-if="isDownExpanded"
+            name="chevron-down"
+            width="20"
+            height="20"
+          />
+
+          <svgicon
+            v-if="!isDownExpanded"
+            name="chevron-right"
+            width="20"
+            height="20"
+          />
+        </BaseButton>
+      </div>
+      <slot v-if="isDownExpanded" name="down" />
+    </div>
   </div>
 </template>
 
 <script>
+import "assets/icons/chevron-right";
+import "assets/icons/chevron-down";
 import { useResizable } from "./useResizable";
+import BaseButton from "../base-button/BaseButton.vue";
 
 const EVENT = {
   MOUSE_EVENT: "mousemove",
@@ -20,6 +45,7 @@ const EVENT = {
 };
 
 export default {
+  components: { BaseButton },
   props: {
     id: {
       type: String,
@@ -28,6 +54,7 @@ export default {
   },
   data() {
     return {
+      isDownExpanded: false,
       upSidePrevPosition: {
         clientY: 0,
         height: 0,
@@ -37,13 +64,25 @@ export default {
       downSide: null,
     };
   },
+  watch: {
+    isDownExpanded() {
+      if (this.isDownExpanded) {
+        this.upSide.style.height = "60%";
+      } else {
+        this.upSide.style.height = "100%";
+      }
+
+      this.$nextTick(() => {
+        this.setPosition(`${this.upSide.getBoundingClientRect().height}px`);
+      });
+    },
+  },
   mounted() {
     this.resizer = this.$refs.resizableBar;
     this.upSide = this.resizer.previousElementSibling;
     this.downSide = this.resizer.nextElementSibling;
 
     this.limitElementHeight(this.upSide);
-    this.limitElementHeight(this.downSide);
 
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
 
@@ -58,7 +97,7 @@ export default {
   methods: {
     limitElementHeight(element) {
       element.style["max-height"] = "100%";
-      element.style["min-height"] = "15%";
+      element.style["min-height"] = "50%";
     },
     savePositionOnStartResizing(e) {
       this.upSidePrevPosition = {
@@ -108,6 +147,13 @@ $card-secondary-color: palette(purple, 200);
   height: 100%;
   width: 100%;
 
+  &__header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   &__up {
     align-items: center;
     display: flex;
@@ -118,6 +164,7 @@ $card-secondary-color: palette(purple, 200);
     flex: 1;
     align-items: center;
     display: flex;
+    flex-direction: column;
     justify-content: center;
   }
 
@@ -136,6 +183,12 @@ $card-secondary-color: palette(purple, 200);
       &:hover {
         border-width: 2px;
       }
+    }
+
+    &__inner--no-hover {
+      width: 100%;
+      border-bottom: thick solid lightgray;
+      border-width: 1px;
     }
 
     &:hover {
