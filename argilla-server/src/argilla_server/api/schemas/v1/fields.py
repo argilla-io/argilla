@@ -20,7 +20,6 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
 from argilla_server.pydantic_v1 import BaseModel, constr
 from argilla_server.pydantic_v1 import Field as PydanticField
-from typing_extensions import Annotated
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1

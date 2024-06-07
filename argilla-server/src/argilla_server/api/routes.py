@@ -21,49 +21,49 @@ set the required security dependencies if api security is enabled
 from fastapi import FastAPI
 
 from argilla_server._version import __version__ as argilla_version
-from argilla_server.apis.errors.v1.exception_handlers import add_exception_handlers as add_exception_handlers_v1
-from argilla_server.apis.v1.handlers import authentication as authentication_v1
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import authentication as authentication_v1
+from argilla_server.api.handlers.v1 import (
     datasets as datasets_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     fields as fields_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     info as info_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     metadata_properties as metadata_properties_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     oauth2 as oauth2_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     questions as questions_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     records as records_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     responses as responses_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     settings as settings_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     suggestions as suggestions_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     users as users_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     vectors_settings as vectors_settings_v1,
 )
-from argilla_server.apis.v1.handlers import (
+from argilla_server.api.handlers.v1 import (
     workspaces as workspaces_v1,
 )
-from argilla_server.errors import APIErrorHandler
+from argilla_server.apis.errors.v1.exception_handlers import add_exception_handlers as add_exception_handlers_v1
 from argilla_server.errors.base_errors import __ALL__
+from argilla_server.errors.error_handler import APIErrorHandler
 
 
 def create_api_v1():

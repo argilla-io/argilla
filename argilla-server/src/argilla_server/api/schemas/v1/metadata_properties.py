@@ -20,7 +20,6 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import MetadataPropertyType
 from argilla_server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
 from argilla_server.pydantic_v1.generics import GenericModel
-from typing_extensions import Annotated
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 

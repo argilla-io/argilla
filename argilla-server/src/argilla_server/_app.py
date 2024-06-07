@@ -29,7 +29,7 @@ from starlette.responses import RedirectResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
-from argilla_server.apis.routes import api_v1
+from argilla_server.api.routes import api_v1
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
