@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Union, Optional, Type
+from typing import Dict, List, Union, Optional, Type, TYPE_CHECKING
 
 from argilla_sdk.records._io._generic import GenericIO
+
+if TYPE_CHECKING:
+    from argilla_sdk.records import Record
 
 
 def _resolve_hf_datasets_type() -> Optional[Type]:
