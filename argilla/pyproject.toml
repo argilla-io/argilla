@@ -45,7 +45,7 @@ dependencies = [
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
 ]
 dynamic = ["version"]
-
+# This line is just to force the build
 [project.optional-dependencies]
 server = [
     # "argilla-server"
