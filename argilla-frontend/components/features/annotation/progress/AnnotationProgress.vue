@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
 import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
 
 export default {
@@ -196,4 +197,3 @@ export default {
   }
 }
 </style>
-
