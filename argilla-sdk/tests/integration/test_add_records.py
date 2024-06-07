@@ -16,7 +16,6 @@ import random
 import uuid
 from datetime import datetime
 
-
 import argilla_sdk as rg
 from argilla_sdk import Argilla
 
@@ -584,8 +583,8 @@ def test_add_records_objects_with_responses(client: Argilla):
             rg.TextField(name="text"),
         ],
         questions=[
-            rg.TextQuestion(name="comment", use_markdown=False),
             rg.LabelQuestion(name="label", labels=["positive", "negative"]),
+            rg.TextQuestion(name="comment", use_markdown=False, required=False),
         ],
     )
     dataset = rg.Dataset(
@@ -605,17 +604,17 @@ def test_add_records_objects_with_responses(client: Argilla):
     records = [
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("label", "negative", user_id=user.id)],
+            responses=[rg.Response("label", "negative", user_id=user.id, status="submitted")],
             id=str(uuid.uuid4()),
         ),
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("label", "positive", user_id=user.id)],
+            responses=[rg.Response("label", "positive", user_id=user.id, status="discarded")],
             id=str(uuid.uuid4()),
         ),
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("comment", "The comment", user_id=user.id)],
+            responses=[rg.Response("comment", "The comment", user_id=user.id, status="draft")],
             id=str(uuid.uuid4()),
         ),
     ]
@@ -627,9 +626,12 @@ def test_add_records_objects_with_responses(client: Argilla):
     assert dataset.name == mock_dataset_name
     assert dataset_records[0].id == records[0].id
     assert dataset_records[0].responses.label[0].value == "negative"
+    assert dataset_records[0].responses.label[0].status == "submitted"
 
     assert dataset_records[1].id == records[1].id
     assert dataset_records[1].responses.label[0].value == "positive"
+    assert dataset_records[1].responses.label[0].status == "discarded"
 
     assert dataset_records[2].id == records[2].id
     assert dataset_records[2].responses.comment[0].value == "The comment"
+    assert dataset_records[2].responses.comment[0].status == "draft"
