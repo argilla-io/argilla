@@ -160,7 +160,6 @@ def ping_search_engine(app: FastAPI):
                     "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
                 )
 
-
 def configure_app_security(app: FastAPI):
     auth.configure_app(app)
 

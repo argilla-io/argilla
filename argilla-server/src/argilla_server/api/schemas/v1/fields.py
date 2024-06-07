@@ -16,8 +16,6 @@ from datetime import datetime
 from typing import Annotated, List, Literal, Optional
 from uuid import UUID
 
-from typing_extensions import Annotated
-
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
 from argilla_server.pydantic_v1 import BaseModel, constr
