@@ -36,6 +36,7 @@ from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
 from argilla_server.pydantic_v1.errors import ConfigError
+from argilla_server.search_engine import get_search_engine
 from argilla_server.security import auth
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
@@ -65,7 +66,7 @@ def create_server_app() -> FastAPI:
     for app_configure in [
         configure_app_logging,
         configure_database,
-        wait_for_search_engine,
+        ping_search_engine,
         configure_telemetry,
         configure_middleware,
         configure_app_security,
@@ -147,10 +148,17 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def wait_for_search_engine(app: FastAPI):
-    # TODO: Ping search engine to check if it is available
-    pass
-
+def ping_search_engine(app: FastAPI):
+    @app.on_event("startup")
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    async def _ping_search_engine():
+        async for search_engine in get_search_engine():
+            if not await search_engine.ping():
+                raise ConnectionError(
+                    f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
+                    "Please make sure your Elasticsearch instance is launched and correctly running and\n"
+                    "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
+                )
 
 def configure_app_security(app: FastAPI):
     auth.configure_app(app)
