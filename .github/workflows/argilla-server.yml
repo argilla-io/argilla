@@ -17,7 +17,9 @@ on:
     branches:
       - main
       - develop
+      - "feat/**"
       - releases/**
+
   pull_request:
     paths:
       - argilla-server/**
