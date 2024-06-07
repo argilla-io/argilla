@@ -21,7 +21,7 @@ import os
 import re
 import warnings
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Literal, Optional, Union
 from urllib.parse import urlparse
 
 from argilla_server.constants import (
@@ -29,6 +29,8 @@ from argilla_server.constants import (
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
     DEFAULT_TELEMETRY_KEY,
+    SEARCH_ENGINE_ELASTICSEARCH,
+    SEARCH_ENGINE_OPENSEARCH,
 )
 from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
@@ -97,7 +99,10 @@ class Settings(BaseSettings):
 
     es_mapping_total_fields_limit: int = 2000
 
-    search_engine: str = "elasticsearch"
+    search_engine: Union[
+        Literal[SEARCH_ENGINE_ELASTICSEARCH],
+        Literal[SEARCH_ENGINE_OPENSEARCH],
+    ] = SEARCH_ENGINE_ELASTICSEARCH
 
     vectors_fields_limit: int = Field(
         default=5,
@@ -216,6 +221,21 @@ class Settings(BaseSettings):
         if ns is None:
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def search_engine_is_elasticsearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_ELASTICSEARCH
+
+    @property
+    def search_engine_is_opensearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_OPENSEARCH
+
+    @property
+    def humanized_search_engine(self) -> str:
+        if self.search_engine_is_elasticsearch:
+            return "Elasticsearch"
+        elif self.search_engine_is_opensearch:
+            return "OpenSearch"
 
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""
