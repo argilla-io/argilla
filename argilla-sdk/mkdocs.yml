@@ -145,6 +145,6 @@ nav:
   - Community:
     - community/index.md
     - How to contribute?: community/contributor.md
-    # - Popular issues: community/popular_issues.md
+    # - Issue dashboard: community/popular_issues.md
   - UI Demo ↗:
     - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==
