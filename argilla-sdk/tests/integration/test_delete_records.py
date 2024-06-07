@@ -17,6 +17,7 @@ import pytest
 
 import argilla_sdk as rg
 
+
 @pytest.fixture
 def dataset(client: rg.Argilla) -> rg.Dataset:
     workspace = client.workspaces[0]

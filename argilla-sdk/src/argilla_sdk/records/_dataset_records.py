@@ -238,7 +238,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         )
 
         return created_or_updated
-    
+
     def delete(
         self,
         records: Union[dict, List[dict], Record, List[Record]],
@@ -255,16 +255,14 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         """
         mapping = None
         user_id = self.__client.me.id
-        
-        record_models = self._ingest_records(
-            records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
-        
+
+        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
+
         for record in record_models:
             if record.responses:
                 warnings.warn(message=f"You're deleting record with id {record.id}, which has responses.")
 
-        self._api.delete_many(
-            dataset_id=self.__dataset.id, records=record_models)
+        self._api.delete_many(dataset_id=self.__dataset.id, records=record_models)
 
         self._log_message(
             message=f"Deleted {len(record_models)} records from dataset {self.__dataset.name}",

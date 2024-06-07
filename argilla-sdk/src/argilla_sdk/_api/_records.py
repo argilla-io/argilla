@@ -157,11 +157,8 @@ class RecordsAPI(ResourceAPI[RecordModel]):
     @api_error_handler
     def delete_many(self, dataset_id: UUID, records: List[RecordModel]) -> None:
         record_ids = [str(record.id) for record in records]
-        record_ids_str = ','.join(record_ids)
-        response = self.http_client.delete(
-            url=f"/api/v1/datasets/{dataset_id}/records",
-            params={"ids": record_ids_str}
-        )
+        record_ids_str = ",".join(record_ids)
+        response = self.http_client.delete(url=f"/api/v1/datasets/{dataset_id}/records", params={"ids": record_ids_str})
         response.raise_for_status()
         self._log_message(message=f"Deleted {len(records)} records in dataset {dataset_id}")
 
