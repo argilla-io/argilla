@@ -238,6 +238,40 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         )
 
         return created_or_updated
+    
+    def delete(
+        self,
+        records: Union[dict, List[dict], Record, List[Record]],
+    ) -> List[Record]:
+        """Delete records in a dataset on the server using the provided records
+            and matching based on the external_id or id.
+
+        Parameters:
+            records: A list of `Record` objects representing the records to be deleted.
+
+        Returns:
+            A list of Record objects representing the deleted records.
+
+        """
+        mapping = None
+        user_id = self.__client.me.id
+        
+        record_models = self._ingest_records(
+            records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
+        
+        for record in record_models:
+            if record.responses:
+                warnings.warn(message=f"You're deleting record with id {record.id}, which has responses.")
+
+        self._api.delete_many(
+            dataset_id=self.__dataset.id, records=record_models)
+
+        self._log_message(
+            message=f"Deleted {len(record_models)} records from dataset {self.__dataset.name}",
+            level="info",
+        )
+
+        return record_models
 
     def to_dict(self, flatten: bool = False, orient: str = "names") -> Dict[str, Any]:
         """
