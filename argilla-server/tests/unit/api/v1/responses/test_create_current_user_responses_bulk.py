@@ -390,7 +390,7 @@ class TestCreateCurrentUserResponsesBulk:
 
     @pytest.mark.skipif(reason="Profiling is not active", condition=not bool(os.getenv("TEST_PROFILING", None)))
     async def test_create_responses_in_bulk_profiling(self, db: "AsyncSession", elasticsearch_config: dict):
-        from argilla_server.schemas.v1.responses import DraftResponseUpsert
+        from argilla_server.api.schemas.v1.responses import DraftResponseUpsert
         from argilla_server.search_engine import ElasticSearchEngine
         from pyinstrument import Profiler
 

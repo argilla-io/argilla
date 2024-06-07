@@ -16,10 +16,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 import pytest
-from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import DatasetStatus
-from argilla_server.models import Question
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
     QUESTION_CREATE_NAME_MAX_LENGTH,
     QUESTION_CREATE_TITLE_MAX_LENGTH,
@@ -30,6 +27,9 @@ from argilla_server.schemas.v1.questions import (
     VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
     VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
 )
+from argilla_server.constants import API_KEY_HEADER_NAME
+from argilla_server.enums import DatasetStatus
+from argilla_server.models import Question
 from argilla_server.settings import settings
 from httpx import AsyncClient
 from sqlalchemy import func, select

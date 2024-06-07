@@ -17,16 +17,15 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 import fastapi
-from typing_extensions import Annotated
-
+from argilla_server.api.schemas.v1.commons import UpdateSchema
+from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
+from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
+from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
-from argilla_server.schemas.base import UpdateSchema
-from argilla_server.schemas.v1.metadata_properties import MetadataPropertyName
-from argilla_server.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
-from argilla_server.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
 from argilla_server.search_engine import TextQuery
+from typing_extensions import Annotated
 
 RECORDS_CREATE_MIN_ITEMS = 1
 RECORDS_CREATE_MAX_ITEMS = 1000

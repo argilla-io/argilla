@@ -20,10 +20,10 @@ from sqlalchemy.orm import selectinload
 from starlette import status
 
 from argilla_server.api.policies.v1 import DatasetPolicy, authorize
+from argilla_server.api.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
-from argilla_server.schemas.v1.questions import Question, QuestionCreate, Questions
 from argilla_server.security import auth
 
 router = APIRouter()

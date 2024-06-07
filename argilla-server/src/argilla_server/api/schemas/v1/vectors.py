@@ -15,7 +15,7 @@
 from typing import List
 from uuid import UUID
 
-from argilla_server.schemas.base import BaseModel
+from argilla_server.pydantic_v1 import BaseModel
 
 
 class Vector(BaseModel):

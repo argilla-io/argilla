@@ -19,11 +19,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import FieldPolicy, authorize
+from argilla_server.api.schemas.v1.fields import Field as FieldSchema
+from argilla_server.api.schemas.v1.fields import FieldUpdate
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Field, User
-from argilla_server.schemas.v1.fields import Field as FieldSchema
-from argilla_server.schemas.v1.fields import FieldUpdate
 from argilla_server.security import auth
 
 router = APIRouter(tags=["fields"])

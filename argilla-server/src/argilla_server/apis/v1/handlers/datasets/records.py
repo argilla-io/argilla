@@ -23,14 +23,8 @@ from typing_extensions import Annotated
 
 import argilla_server.search_engine as search_engine
 from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
-from argilla_server.contexts import datasets, search
-from argilla_server.database import get_async_db
-from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
-from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
-from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
-from argilla_server.schemas.v1.datasets import Dataset as DatasetSchema
-from argilla_server.schemas.v1.records import (
+from argilla_server.api.schemas.v1.datasets import Dataset as DatasetSchema
+from argilla_server.api.schemas.v1.records import (
     Filters,
     FilterScope,
     MetadataFilterScope,
@@ -48,14 +42,20 @@ from argilla_server.schemas.v1.records import (
     SearchRecordsResult,
     TermsFilter,
 )
-from argilla_server.schemas.v1.records import Record as RecordSchema
-from argilla_server.schemas.v1.responses import ResponseFilterScope
-from argilla_server.schemas.v1.suggestions import (
+from argilla_server.api.schemas.v1.records import Record as RecordSchema
+from argilla_server.api.schemas.v1.responses import ResponseFilterScope
+from argilla_server.api.schemas.v1.suggestions import (
     SearchSuggestionOptions,
     SearchSuggestionOptionsQuestion,
     SearchSuggestionsOptions,
     SuggestionFilterScope,
 )
+from argilla_server.contexts import datasets, search
+from argilla_server.database import get_async_db
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
+from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
+from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
     FloatMetadataFilter,

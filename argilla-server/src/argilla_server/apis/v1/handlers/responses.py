@@ -19,17 +19,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import ResponsePolicy, authorize
-from argilla_server.contexts import datasets
-from argilla_server.database import get_async_db
-from argilla_server.models import Dataset, Record, Response, User
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     Response as ResponseSchema,
 )
-from argilla_server.schemas.v1.responses import (
+from argilla_server.api.schemas.v1.responses import (
     ResponsesBulk,
     ResponsesBulkCreate,
     ResponseUpdate,
 )
+from argilla_server.contexts import datasets
+from argilla_server.database import get_async_db
+from argilla_server.models import Dataset, Record, Response, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
 from argilla_server.use_cases.responses.upsert_responses_in_bulk import (
