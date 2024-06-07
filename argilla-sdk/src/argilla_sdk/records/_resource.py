@@ -297,18 +297,6 @@ class RecordResponses(Iterable[Response]):
             response.record = self.record
             self.__responses_by_question_name[response.question_name].append(response)
 
-    def api_models(self) -> List[UserResponseModel]:
-        """Returns a list of ResponseModel objects."""
-
-        responses_by_user_id = defaultdict(list)
-        for response in self.__responses:
-            responses_by_user_id[response.user_id].append(response)
-
-        return [
-            UserResponse(user_id=user_id, answers=responses, _record=self.record).api_model()
-            for user_id, responses in responses_by_user_id.items()
-        ]
-
     def __iter__(self):
         return iter(self.__responses)
 
@@ -317,6 +305,21 @@ class RecordResponses(Iterable[Response]):
 
     def __getattr__(self, name) -> List[Response]:
         return self.__responses_by_question_name[name]
+
+    def __repr__(self) -> str:
+        return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
+
+    def api_models(self) -> List[UserResponseModel]:
+        """Returns a list of ResponseModel objects."""
+
+        responses_by_user_id = defaultdict(list)
+        for response in self.__responses:
+            responses_by_user_id[response.user_id].append(response)
+
+        return [
+            UserResponse(answers=responses, _record=self.record).api_model()
+            for responses in responses_by_user_id.values()
+        ]
 
     def to_dict(self) -> Dict[str, List[Dict]]:
         """Converts the responses to a dictionary.
@@ -327,9 +330,6 @@ class RecordResponses(Iterable[Response]):
         for response in self.__responses:
             response_dict[response.question_name].append({"value": response.value, "user_id": response.user_id})
         return response_dict
-
-    def __repr__(self) -> str:
-        return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
 
 
 class RecordSuggestions(Iterable[Suggestion]):
