@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Union
+
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 import fastapi
-from typing_extensions import Annotated
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
