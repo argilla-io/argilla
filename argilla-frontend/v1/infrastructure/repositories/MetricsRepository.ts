@@ -19,7 +19,10 @@ export class MetricsRepository {
   async getMetrics(datasetId: string): Promise<Metrics> {
     try {
       const { data } = await this.axios.get<BackendMetrics>(
-        `/v1/me/datasets/${datasetId}/metrics`
+        `/v1/me/datasets/${datasetId}/metrics`,
+        {
+          headers: { "cache-control": "max-age=600" },
+        }
       );
 
       return new Metrics(
