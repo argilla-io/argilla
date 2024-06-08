@@ -1,4 +1,5 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { largeCache } from "./AxiosCache";
 import { Metrics } from "~/v1/domain/entities/dataset/Metrics";
 
 interface BackendMetrics {
@@ -20,9 +21,7 @@ export class MetricsRepository {
     try {
       const { data } = await this.axios.get<BackendMetrics>(
         `/v1/me/datasets/${datasetId}/metrics`,
-        {
-          headers: { "cache-control": "max-age=600" },
-        }
+        largeCache()
       );
 
       return new Metrics(
