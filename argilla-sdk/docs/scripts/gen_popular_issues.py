@@ -30,6 +30,7 @@ def fetch_data_from_github(repository, auth_token):
     headers = {"Authorization": f"token {auth_token}", "Accept": "application/vnd.github.v3+json"}
     issues_data = []
 
+    print(f"Fetching issues from {repository}...")
     with requests.Session() as session:
         session.headers.update(headers)
 
