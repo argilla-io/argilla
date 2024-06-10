@@ -215,7 +215,7 @@ export default {
       return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
     spansQuestionsWithSelectedEntities() {
-      return this.recordsOnPage[0].questions
+      return this.record.questions
         .filter((q) => q.isSpanType)
         .filter((s) => s.answer.options.some((e) => e.isSelected));
     },
