@@ -1,7 +1,7 @@
 <template>
   <div>
     <BaseLoading v-if="isLoadingDataset" />
-    <HeaderAndTopAndOneColumn :key="refreshKey">
+    <AnnotationPage>
       <template v-slot:header>
         <HeaderFeedbackTask
           :key="datasetId"
@@ -27,41 +27,31 @@
           />
         </BaseModal>
       </template>
-      <template v-slot:sidebar-right>
-        <SidebarFeedbackTaskContainer
-          :datasetId="datasetId"
-          @refresh="refresh()"
-        />
-      </template>
       <template v-slot:center>
         <PersistentStorageBanner />
         <RecordFeedbackTaskAndQuestionnaire :recordCriteria="recordCriteria" />
       </template>
-    </HeaderAndTopAndOneColumn>
+    </AnnotationPage>
   </div>
 </template>
 
 <script>
-import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import AnnotationPage from "@/layouts/AnnotationPage";
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
 
 export default {
   name: "DatasetPage",
   components: {
-    HeaderAndTopAndOneColumn,
+    AnnotationPage,
   },
   data() {
     return {
       visibleTrainModal: false,
-      refreshKey: 0,
     };
   },
   methods: {
     showTrainModal(value) {
       this.visibleTrainModal = value;
-    },
-    refresh() {
-      this.refreshKey += 1;
     },
   },
   watch: {

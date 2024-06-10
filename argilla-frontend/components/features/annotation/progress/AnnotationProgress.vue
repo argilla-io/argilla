@@ -16,23 +16,23 @@
   -->
 
 <template>
-  <div>
+  <div v-if="datasetMetrics.hasMetrics">
     <p class="metrics__title">Progress</p>
     <div class="metrics__info">
       <p class="metrics__info__name">Total</p>
       <span class="metrics__info__counter">{{
-        metrics.progress | percent
+        datasetMetrics.progress | percent
       }}</span>
     </div>
     <div class="metrics__numbers">
-      <span v-text="metrics.responded" />/{{ metrics.total }}
+      <span v-text="datasetMetrics.responded" />/{{ datasetMetrics.total }}
     </div>
     <BaseProgress
       re-mode="determinate"
       :multiple="true"
-      :progress="metrics.percentage.submitted"
-      :progress-secondary="metrics.percentage.discarded"
-      :progress-tertiary="metrics.percentage.draft"
+      :progress="datasetMetrics.percentage.submitted"
+      :progress-secondary="datasetMetrics.percentage.discarded"
+      :progress-tertiary="datasetMetrics.percentage.draft"
       :progress-bg="pendingColor"
       :color="submittedColor"
       :color-secondary="discardedColor"
@@ -64,11 +64,12 @@
 
 <script>
 import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
+import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
 
 export default {
   props: {
-    metrics: {
-      type: Object,
+    datasetId: {
+      type: String,
       required: true,
     },
   },
@@ -78,22 +79,22 @@ export default {
         {
           name: RecordStatus.pending.name,
           color: this.pendingColor,
-          progress: this.metrics.pending,
+          progress: this.datasetMetrics.pending,
         },
         {
           name: RecordStatus.draft.name,
           color: this.draftColor,
-          progress: this.metrics.draft,
+          progress: this.datasetMetrics.draft,
         },
         {
           name: RecordStatus.submitted.name,
           color: this.submittedColor,
-          progress: this.metrics.submitted,
+          progress: this.datasetMetrics.submitted,
         },
         {
           name: RecordStatus.discarded.name,
           color: this.discardedColor,
-          progress: this.metrics.discarded,
+          progress: this.datasetMetrics.discarded,
         },
       ];
     },
@@ -115,8 +116,12 @@ export default {
       return progress && this.$options.filters.formatNumber(progress);
     },
   },
+  setup(props) {
+    return useFeedbackTaskProgressViewModel(props);
+  },
 };
 </script>
+
 <style lang="scss" scoped>
 .scroll {
   max-height: calc(100vh - 270px);

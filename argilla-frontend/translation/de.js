@@ -18,11 +18,6 @@ export default {
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "Alle",
-  sidebar: {
-    progressTooltip: "Fortschritt",
-    refreshTooltip: "Aktualisieren",
-    shortcutsTooltip: "Tastenkürzel",
-  },
   title: "Titel",
   description: "Beschreibung",
   labels: "Labels",

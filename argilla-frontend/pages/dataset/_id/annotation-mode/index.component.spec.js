@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import AnnotationModePage from "./index";
-import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import AnnotationPage from "@/layouts/AnnotationPage";
 import { setActivePinia, createPinia } from "pinia";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { useResolveMock } from "~/v1/di/__mocks__/useResolveMock";
@@ -52,9 +52,7 @@ describe("AnnotationModePage", () => {
 
     expect(wrapper.is(AnnotationModePage)).toBe(true);
 
-    const headerComponentWrapper = wrapper.findComponent(
-      HeaderAndTopAndOneColumn
-    );
+    const headerComponentWrapper = wrapper.findComponent(AnnotationPage);
 
     expect(headerComponentWrapper.exists()).toBeTruthy();
   });
@@ -85,9 +83,7 @@ describe("AnnotationModePage", () => {
     const wrapper = shallowMount(AnnotationModePage, options);
 
     expect(wrapper.is(AnnotationModePage)).toBe(true);
-    const headerComponentWrapper = wrapper.findComponent(
-      HeaderAndTopAndOneColumn
-    );
+    const headerComponentWrapper = wrapper.findComponent(AnnotationPage);
 
     expect(headerComponentWrapper.exists()).toBeTruthy();
   });
