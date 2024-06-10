@@ -93,7 +93,6 @@ def test_delete_single_record(client: rg.Argilla, dataset: rg.Dataset):
 
     dataset.records.log(records=mock_data)
     records_to_delete = [list(dataset.records)[1]]
-    print(records_to_delete)
     dataset.records.delete(records_to_delete)
     dataset_records = list(dataset.records)
 
