@@ -13,9 +13,7 @@
 # limitations under the License.
 
 import os
-from datetime import datetime
 
-import pandas as pd
 import requests
 import base64
 import mkdocs_gen_files
@@ -29,6 +27,7 @@ DATA_PATH = "community/changelog.md"
 
 GITHUB_ACCESS_TOKEN = os.environ["GITHUB_ACCESS_TOKEN"]
 
+
 def fetch_file_from_github(repository, changelog_path, branch, auth_token):
     headers = {"Authorization": f"Bearer {auth_token}", "Accept": "application/vnd.github.v3+json"}
 
@@ -38,9 +37,10 @@ def fetch_file_from_github(repository, changelog_path, branch, auth_token):
     print(f"Fetching CHANGELOG.md from {changelog_url}...")
     response = requests.get(changelog_url, headers=headers)
 
-    content = base64.b64decode(response.json()['content']).decode('utf-8')
-    
+    content = base64.b64decode(response.json()["content"]).decode("utf-8")
+
     return content
+
 
 with mkdocs_gen_files.open(DATA_PATH, "w") as f:
     content = fetch_file_from_github(REPOSITORY, CHANGELOG_PATH, RETRIEVED_BRANCH, GITHUB_ACCESS_TOKEN)
