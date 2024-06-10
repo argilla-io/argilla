@@ -467,7 +467,7 @@ dataset.records.delete(records=records_to_delete)
 ```
 
 !!! tip "Delete records based on a query"
-    It can be very useful to avoid eliminating records with answers.
+    It can be very useful to avoid eliminating records with responses.
 
     > For more information about the query syntax, check this [how-to guide](query_export.md).
 
