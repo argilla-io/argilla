@@ -18,6 +18,7 @@ from uuid import UUID
 
 from elasticsearch8 import AsyncElasticsearch, helpers
 
+from argilla_server.constants import SEARCH_ENGINE_ELASTICSEARCH
 from argilla_server.models import VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.search_engine.commons import (
@@ -37,7 +38,7 @@ def _compute_num_candidates_from_k(k: int) -> int:
     return 2000
 
 
-@SearchEngine.register(engine_name="elasticsearch")
+@SearchEngine.register(engine_name=SEARCH_ENGINE_ELASTICSEARCH)
 @dataclasses.dataclass
 class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any] = dataclasses.field(default_factory=dict)
