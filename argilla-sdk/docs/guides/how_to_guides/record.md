@@ -73,6 +73,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     dataset.records.log(records)
     ```
+    
     1. This is an illustration of a definition. In a real world scenario, you would iterate over a data structure and create `Record` objects for each iteration. 
 
 === "From a generic data structure"
@@ -99,7 +100,7 @@ You can add records to a dataset in two different ways: either by using a dictio
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-        }, # (2)
+        }, # (1)
     ]
     dataset.records.log(data)
 
@@ -114,7 +115,7 @@ You can add records to a dataset in two different ways: either by using a dictio
             "response": "100 degrees Celsius",
         },
     ]
-    dataset.records.log(data, mapping={"query": "question", "response": "answer"}) # (3)
+    dataset.records.log(data, mapping={"query": "question", "response": "answer"}) # (2)
     ```
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`. 

@@ -202,12 +202,7 @@ $swift-linear-timing-function: linear !default;
 $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;
 
 // topbar
-$topbarHeight: 56px;
-
-// sidebar
-$sidebarPanelWidth: 280px;
-$sidebarMenuWidth: 70px;
-$sidebarWidth: $sidebarPanelWidth + $sidebarMenuWidth;
+$topbarHeight: $base-space * 7;
 
 // record
 $record-reference-border-color: palette(apricot, dark);

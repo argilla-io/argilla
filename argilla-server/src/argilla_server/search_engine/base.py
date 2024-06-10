@@ -265,6 +265,10 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    async def ping(self) -> bool:
+        pass
+
+    @abstractmethod
     async def info(self) -> dict:
         pass
 

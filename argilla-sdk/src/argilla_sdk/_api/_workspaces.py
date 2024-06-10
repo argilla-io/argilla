@@ -35,7 +35,7 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
     @api_error_handler
     def create(self, workspace: WorkspaceModel) -> WorkspaceModel:
         # TODO: Unify API endpoint
-        response = self.http_client.post(url="/api/workspaces", json={"name": workspace.name})
+        response = self.http_client.post(url="/api/v1/workspaces", json={"name": workspace.name})
         response.raise_for_status()
         response_json = response.json()
         workspace = self._model_from_json(json_workspace=response_json)
@@ -103,13 +103,6 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         response = self.http_client.post(f"{self.url_stub}/{workspace_id}/users/{user_id}")
         response.raise_for_status()
         self._log_message(message=f"Added user {user_id} to workspace {workspace_id}")
-
-    @api_error_handler
-    def remove_user(self, workspace_id: UUID, user_id: UUID) -> None:
-        # TODO: This method is already defined in UsersAPI and should be removed from here
-        response = self.http_client.delete(f"{self.url_stub}/{workspace_id}/users/{user_id}")
-        response.raise_for_status()
-        self._log_message(message=f"Removed user {user_id} from workspace {workspace_id}")
 
     ####################
     # Private methods #

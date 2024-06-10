@@ -71,7 +71,7 @@ class TestWorkspaces:
             "updated_at": datetime.utcnow().isoformat(),
         }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/workspaces", status_code=status_code)
+        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/workspaces", status_code=status_code)
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             if expected_exception:
@@ -186,11 +186,11 @@ class TestWorkspacesAPI:
             "updated_at": datetime.utcnow().isoformat(),
         }
         httpx_mock.add_response(
-            url="http://localhost:6900/api/workspaces",
+            url="http://localhost:6900/api/v1/workspaces",
             json=mock_return,
         )
         httpx_mock.add_response(
-            url="http://argilla.production.net/api/workspaces",
+            url="http://argilla.production.net/api/v1/workspaces",
             json=mock_return,
         )
         with httpx.Client():

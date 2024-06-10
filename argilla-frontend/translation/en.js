@@ -18,11 +18,6 @@ export default {
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "All",
-  sidebar: {
-    progressTooltip: "Progress",
-    refreshTooltip: "Refresh",
-    shortcutsTooltip: "Shortcuts",
-  },
   value: "Value",
   title: "Title",
   description: "Description",
