@@ -134,7 +134,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
   watch(
     () => highlighting.value.spans,
     (spans) => {
-      const response = convertSpansToResponse(spans);
+      const nodeSpans = spans.filter((s) => s.node.id === id);
+
+      const response = convertSpansToResponse(nodeSpans);
 
       spanQuestion.response({
         value: response,

@@ -123,14 +123,16 @@ export class SpanSelection {
 
     this.completeOutOfBoundaries(selected);
 
-    const overlaps = this.selections.filter((s) => {
-      return (
-        (selected.from <= s.from && selected.to >= s.to) ||
-        (selected.from >= s.from && selected.to <= s.to) ||
-        (selected.from < s.from && selected.to > s.from) ||
-        (selected.from < s.to && selected.to > s.to)
-      );
-    });
+    const overlaps = this.selections
+      .filter((s) => s.node.id === selected.node.id)
+      .filter((s) => {
+        return (
+          (selected.from <= s.from && selected.to >= s.to) ||
+          (selected.from >= s.from && selected.to <= s.to) ||
+          (selected.from < s.from && selected.to > s.from) ||
+          (selected.from < s.to && selected.to > s.to)
+        );
+      });
 
     const maxLevelInOverlaps =
       overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;

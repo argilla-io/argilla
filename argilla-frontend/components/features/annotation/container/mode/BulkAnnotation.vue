@@ -214,6 +214,11 @@ export default {
     shouldShowModalToConfirm() {
       return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
+    spansQuestionsWithSelectedEntities() {
+      return this.recordsOnPage[0].questions
+        .filter((q) => q.isSpanType)
+        .filter((s) => s.answer.options.some((e) => e.isSelected));
+    },
   },
   methods: {
     onSelectRecord(isSelected, record) {
@@ -313,6 +318,26 @@ export default {
     },
   },
   watch: {
+    spansQuestionsWithSelectedEntities: {
+      deep: true,
+      handler() {
+        const recordsQuestions = this.recordsOnPage
+          .flatMap((r) => r.questions)
+          .filter((q) => q.isSpanType);
+
+        this.spansQuestionsWithSelectedEntities.forEach((q) => {
+          recordsQuestions.forEach((question) => {
+            if (question.id === q.id) {
+              question.answer.options.forEach((option) => {
+                option.isSelected = q.answer.options.some(
+                  (o) => o.isSelected && o.id === option.id
+                );
+              });
+            }
+          });
+        });
+      },
+    },
     "recordCriteria.status"() {
       this.recordCriteria.page.focusMode();
     },

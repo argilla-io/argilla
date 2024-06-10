@@ -165,7 +165,6 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Halten Sie 'Shift' gedrückt, um Zeichenebene auszuwählen",
     notSupported: "Bereichsannotation wird von Ihrem Browser nicht unterstützt",
-    bulkMode: "Bereichsannotation wird in der Massenansicht nicht unterstützt",
   },
   login: {
     title: "Anmelden",

@@ -76,15 +76,17 @@ export class Record {
   }
 
   answerWith(recordReference: Record) {
-    this.questions.forEach((question) => {
-      const questionReference = recordReference.questions.find(
-        (q) => q.id === question.id
-      );
+    this.questions
+      .filter((q) => !q.isSpanType)
+      .forEach((question) => {
+        const questionReference = recordReference.questions.find(
+          (q) => q.id === question.id
+        );
 
-      if (!questionReference) return;
+        if (!questionReference) return;
 
-      question.clone(questionReference);
-    });
+        question.clone(questionReference);
+      });
   }
 
   initialize() {
