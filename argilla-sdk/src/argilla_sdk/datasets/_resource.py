@@ -191,11 +191,13 @@ class Dataset(Resource, DiskImportExportMixin):
         self,
         settings: Optional[Settings] = None,
     ) -> Settings:
-        if settings is None:
+        if self.exists():
+            settings = settings or Settings(_dataset=self)
+            settings.dataset = self
+        elif settings is None:
             settings = Settings(_dataset=self)
             warnings.warn(
-                message="Settings not provided. Using empty settings for the dataset. \
-                    Define the settings before creating the dataset.",
+                message="Settings not provided. Using empty settings for the dataset. Define the settings before creating the dataset.",
                 stacklevel=2,
             )
         else:
