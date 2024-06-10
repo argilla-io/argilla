@@ -104,7 +104,7 @@ plugins:
   - gen-files:
       scripts:
         - docs/scripts/gen_changelog.py
-        - docs/scripts/gen_ref_pages.py
+        # - docs/scripts/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
