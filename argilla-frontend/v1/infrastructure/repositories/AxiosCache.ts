@@ -94,3 +94,15 @@ export const loadCache = (axios) => {
     return response;
   });
 };
+
+export const largeCache = () => {
+  return {
+    headers: { "cache-control": "max-age=600" },
+  };
+};
+
+export const mediumCache = () => {
+  return {
+    headers: { "cache-control": "max-age=120" },
+  };
+};
