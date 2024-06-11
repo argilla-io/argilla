@@ -24,7 +24,7 @@ RETRIEVED_BRANCH = "develop"
 
 DATA_PATH = "community/changelog.md"
 
-GITHUB_ACCESS_TOKEN = os.environ["GH_ACCESS_TOKEN"]  # public_repo and read:org scopes are requiredwha
+GITHUB_ACCESS_TOKEN = os.environ["GH_ACCESS_TOKEN"]  # public_repo and read:org scopes are required
 
 
 def fetch_file_from_github(repository, changelog_path, branch, auth_token):
