@@ -4,29 +4,26 @@
       <slot name="up" />
     </div>
 
-    <div v-if="isDownExpanded" class="resizable__bar" ref="resizableBar">
+    <div v-if="isExpanded" class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
     <div v-else class="resizable__bar__inner--no-hover" ref="resizableBar" />
     <div
       class="resizable__down"
-      :class="isDownExpanded ? '--expanded' : null"
-      :key="isDownExpanded"
+      :class="isExpanded ? '--expanded' : null"
+      :key="isExpanded"
     >
-      <BaseButton
-        class="resizable__header"
-        @click="isDownExpanded = !isDownExpanded"
-      >
+      <BaseButton class="resizable__header" @click="isExpanded = !isExpanded">
         <slot name="downHeader" />
         <svgicon
           class="resizable__header__icon"
-          :name="isDownExpanded ? 'chevron-down' : 'chevron-right'"
+          :name="isExpanded ? 'chevron-down' : 'chevron-right'"
           width="12"
           height="12"
         />
       </BaseButton>
 
-      <div class="resizable__content" v-show="isDownExpanded">
+      <div class="resizable__content" v-show="isExpanded">
         <slot name="downContent" />
       </div>
     </div>
@@ -56,7 +53,7 @@ export default {
   data() {
     return {
       resizing: false,
-      isDownExpanded: false,
+      isExpanded: false,
       upSidePrevPosition: {
         clientY: 0,
         height: 0,
@@ -67,15 +64,22 @@ export default {
     };
   },
   watch: {
-    isDownExpanded() {
-      if (this.isDownExpanded) {
-        this.upSide.style.height = "60%";
+    async isExpanded() {
+      this.debounce.stop();
+      const savedPosition = this.getPosition();
+
+      if (this.isExpanded) {
+        this.upSide.style.height = savedPosition?.position ?? "60%";
       } else {
         this.upSide.style.height = "100%";
       }
 
+      await this.debounce.wait();
       this.$nextTick(() => {
-        this.setPosition(`${this.upSide.getBoundingClientRect().height}px`);
+        this.setPosition({
+          isExpanded: this.isExpanded,
+          position: savedPosition?.position ?? this.upSide.style.height,
+        });
       });
     },
   },
@@ -89,14 +93,16 @@ export default {
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
 
     const savedPosition = this.getPosition();
-    if (savedPosition) {
-      this.upSide.style.height = savedPosition;
-    }
+    this.isExpanded = savedPosition?.isExpanded ?? false;
+    this.upSide.style.height = savedPosition?.isExpanded
+      ? savedPosition?.position
+      : "100%";
   },
   destroyed() {
     this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
   },
   methods: {
+    savePosition() {},
     limitElementHeight(element) {
       element.style["max-height"] = "100%";
       element.style["min-height"] = "50%";
@@ -122,7 +128,12 @@ export default {
       this.resize(e);
     },
     mouseUpHandler() {
-      this.setPosition(`${this.upSide.getBoundingClientRect().height}px`);
+      this.$nextTick(() => {
+        this.setPosition({
+          isExpanded: this.isExpanded,
+          position: `${this.upSide.getBoundingClientRect().height}px`,
+        });
+      });
 
       document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);

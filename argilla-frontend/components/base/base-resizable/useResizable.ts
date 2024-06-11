@@ -26,6 +26,7 @@ export const useResizable = ({ id }: { id: string }) => {
   };
 
   return {
+    debounce,
     getPosition,
     setPosition,
   };
