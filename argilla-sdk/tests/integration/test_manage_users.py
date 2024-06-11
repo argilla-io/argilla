@@ -14,7 +14,7 @@
 
 import pytest
 
-from argilla_sdk import User, Argilla
+from argilla import User, Argilla
 
 
 @pytest.fixture(scope="session", autouse=True)

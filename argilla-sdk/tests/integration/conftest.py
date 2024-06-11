@@ -14,7 +14,7 @@
 
 import pytest
 
-import argilla_sdk as rg
+import argilla as rg
 
 
 @pytest.fixture(scope="session")

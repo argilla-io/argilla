@@ -13,8 +13,8 @@
 # limitations under the License.
 import pytest
 
-import argilla_sdk as rg
-from argilla_sdk._exceptions import SettingsError
+import argilla as rg
+from argilla._exceptions import SettingsError
 
 
 class TestSettings:

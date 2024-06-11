@@ -18,8 +18,8 @@ from datetime import datetime
 import httpx
 from pytest_httpx import HTTPXMock
 
-import argilla_sdk as rg
-from argilla_sdk._models import FieldModel
+import argilla as rg
+from argilla._models import FieldModel
 
 
 class TestFieldsAPI:

@@ -16,8 +16,8 @@ import random
 
 import pytest
 
-import argilla_sdk as rg
-from argilla_sdk._exceptions import NotFoundError
+import argilla as rg
+from argilla._exceptions import NotFoundError
 
 
 @pytest.fixture(autouse=True, scope="session")

@@ -17,8 +17,8 @@ from string import ascii_lowercase
 
 import pytest
 
-import argilla_sdk as rg
-from argilla_sdk import Argilla, Dataset, Settings, TextField, Workspace, LabelQuestion
+import argilla as rg
+from argilla import Argilla, Dataset, Settings, TextField, Workspace, LabelQuestion
 
 
 @pytest.fixture

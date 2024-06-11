@@ -14,7 +14,7 @@
 
 from httpx import Timeout
 
-from argilla_sdk import Argilla
+from argilla import Argilla
 
 
 class TestHTTPClient:

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from argilla_sdk import (
+from argilla import (
     Argilla,
     Settings,
     TextField,

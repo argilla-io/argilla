@@ -18,9 +18,9 @@ from datetime import datetime
 import httpx
 from pytest_httpx import HTTPXMock
 
-import argilla_sdk as rg
-from argilla_sdk._models import TextQuestionModel, LabelQuestionModel
-from argilla_sdk._models._settings._questions import SpanQuestionModel
+import argilla as rg
+from argilla._models import TextQuestionModel, LabelQuestionModel
+from argilla._models._settings._questions import SpanQuestionModel
 
 
 class TestQuestionsAPI:

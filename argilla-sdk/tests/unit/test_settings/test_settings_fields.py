@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pytest
-import argilla_sdk as rg
+import argilla as rg
 
 
 class TestTextField:

@@ -16,10 +16,10 @@ import json
 import uuid
 from datetime import datetime
 
-import argilla_sdk as rg
+import argilla as rg
 import httpx
 import pytest
-from argilla_sdk._exceptions import (
+from argilla._exceptions import (
     BadRequestError,
     ConflictError,
     ForbiddenError,
@@ -27,7 +27,7 @@ from argilla_sdk._exceptions import (
     NotFoundError,
     UnprocessableEntityError,
 )
-from argilla_sdk._models import UserModel
+from argilla._models import UserModel
 from pytest_httpx import HTTPXMock
 
 
