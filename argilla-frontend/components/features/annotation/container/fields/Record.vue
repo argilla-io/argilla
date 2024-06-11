@@ -73,7 +73,7 @@ export default {
     min-width: 0;
     height: 100%;
     min-height: 0;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       height: auto;
     }
   }
