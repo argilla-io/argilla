@@ -64,6 +64,6 @@ for record in dataset.records:
 
 ### `rg.Response`
 
-::: argilla_sdk.responses.Response
+::: argilla.responses.Response
     options:
         heading_level: 3

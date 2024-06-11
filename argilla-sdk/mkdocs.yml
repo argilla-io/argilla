@@ -71,7 +71,7 @@ theme:
         name: Switch to system preference
 
 watch:
-  - src/argilla_sdk
+  - src/argilla
 
 # Extensions
 markdown_extensions:
@@ -140,7 +140,7 @@ nav:
       - Add, update, and delete records: guides/how_to_guides/record.md
       - Query, filter, and export records: guides/how_to_guides/query_export.md
   - API Reference:
-    - Python SDK: reference/argilla_sdk/
+    - Python SDK: reference/argilla/
   - Community:
     - community/index.md
     - How to contribute?: community/contributor.md

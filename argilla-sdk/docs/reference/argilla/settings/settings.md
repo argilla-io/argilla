@@ -15,7 +15,7 @@ cannot be changed.
 To create a new dataset with settings, instantiate the `Settings` class and pass it to the `Dataset` class.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 settings = rg.Settings(
     guidelines="Select the sentiment of the prompt.",
@@ -38,6 +38,6 @@ dataset.create()
 
 ### `rg.Settings`
 
-::: argilla_sdk.settings.Settings
+::: argilla.settings.Settings
     options:
         heading_level: 3

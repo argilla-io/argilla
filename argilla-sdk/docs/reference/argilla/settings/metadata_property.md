@@ -14,9 +14,8 @@ We define metadata properties via type specific classes. The following example d
 
 `TermsMetadataProperty` is used to define a metadata field with a list of options. For example, a color field with options red, blue, and green. `FloatMetadataProperty` and `IntegerMetadataProperty` is used to define a metadata field with a float value. For example, a price field with a minimum value of 0.0 and a maximum value of 100.0.
 
-
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 # Define metadata properties as terms
 metadata_field = rg.TermsMetadataProperty(
@@ -26,7 +25,8 @@ metadata_field = rg.TermsMetadataProperty(
 )
 
 # Define metadata properties as float
-float_ metadata_field = rg.FloatMetadataProperty(
+float_
+metadata_field = rg.FloatMetadataProperty(
     name="price",
     min=0.0,
     max=100.0,
@@ -69,18 +69,18 @@ dataset = rg.Dataset(
 
 ### `rg.FloatMetadataProperty`
 
-::: argilla_sdk.settings.FloatMetadataProperty
+::: argilla.settings.FloatMetadataProperty
     options:
         heading_level: 3
 
 ### `rg.IntegerMetadataProperty`
 
-::: argilla_sdk.settings.IntegerMetadataProperty
+::: argilla.settings.IntegerMetadataProperty
     options:
         heading_level: 3
 
 ### `rg.TermsMetadataProperty`
 
-::: argilla_sdk.settings.TermsMetadataProperty
+::: argilla.settings.TermsMetadataProperty
     options:
         heading_level: 3

@@ -25,7 +25,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             client=client
         )
         ```
-        > Check the [Dataset - Python Reference](../../reference/argilla_sdk/datasets/datasets.md) to see the attributes, arguments, and methods of the `Dataset` class in detail.
+        > Check the [Dataset - Python Reference](../../reference/argilla/datasets/datasets.md) to see the attributes, arguments, and methods of the `Dataset` class in detail.
 
     === "`rg.Settings`"
 
@@ -45,7 +45,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
         )
         ```
 
-        > Check the [Settings - Python Reference](../../reference/argilla_sdk/settings/settings.md) to see the attributes, arguments, and methods of the `Settings` class in detail.
+        > Check the [Settings - Python Reference](../../reference/argilla/settings/settings.md) to see the attributes, arguments, and methods of the `Settings` class in detail.
 
 ## Create a dataset
 
@@ -54,7 +54,7 @@ To create a dataset, you can define it in the `Dataset` class and then call the 
 > The created dataset will be empty, to add the records refer to this [how-to guide](record.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -90,7 +90,7 @@ dataset.create()
 To create multiple datasets with the same settings, define the settings once and pass it to each dataset.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 settings = rg.Settings(
     guidelines="Select the sentiment of the prompt.",
@@ -112,7 +112,7 @@ To create a new dataset with settings from an existing dataset, get the settings
 to the new dataset.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 # Get the settings from an existing dataset
 existing_dataset = client.datasets("sentiment_analysis")
@@ -400,7 +400,7 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 You can list all the datasets available in a workspace using the `datasets` attribute of the `Workspace` class. You can also use `len(workspace.datasets)` to get the number of datasets in a workspace.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -417,7 +417,7 @@ for dataset in datasets:
 You can retrieve a dataset by calling the `datasets` method on the `Argilla` class and passing the name of the dataset as an argument. By default, this method attempts to retrieve the dataset from the first workspace. If the dataset is in a different workspace, you must specify either the workspace name or id as an argument.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -435,7 +435,7 @@ retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
 You can check if a dataset exists by calling the `exists` method on the `Dataset` class. This method returns a boolean value.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -452,7 +452,7 @@ You can update a dataset by calling the `update` method on the `Dataset` class a
     Keep in mind that once your dataset is published, only the guidelines can be updated.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -483,7 +483,7 @@ dataset_updated = dataset_to_update.update()
 You can delete an existing dataset by calling the `delete` method on the `Dataset` class.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 

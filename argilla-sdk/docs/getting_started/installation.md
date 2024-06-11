@@ -39,7 +39,7 @@ Get your `<api_key>` in `My Settings` in the Argilla UI (by default owner.apikey
     Make sure to replace `<api_url>` and `<api_key>` with your actual values. If you are using a private HF Space, you need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(
     api_url="<api_url>",

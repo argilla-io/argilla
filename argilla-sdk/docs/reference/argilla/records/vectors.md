@@ -9,9 +9,8 @@ A vector is a numerical representation of a `Record` field or attribute, usually
 
 To use vectors within a dataset, you must define a vector field in the dataset settings. The vector field is a list of vector fields that can be attached to a record. The following example demonstrates how to add vectors to a dataset and how to access vectors from a record object:
 
-
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 dataset = Dataset(
     name="dataset_with_metadata",
@@ -72,6 +71,6 @@ dataset.records.log(
 
 ### `rg.Vector`
 
-::: argilla_sdk.vectors.Vector
+::: argilla.vectors.Vector
     options:
         heading_level: 3

@@ -31,7 +31,7 @@ Argilla provides a default workspace to help you get started in Python and the U
         client=client
     )
     ```
-    > Check the [Workspace - Python Reference](../../reference/argilla_sdk/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
+    > Check the [Workspace - Python Reference](../../reference/argilla/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
 
 ## Create a new workspace
 
@@ -40,12 +40,12 @@ To create a new workspace in Argilla, you can define it in the `Workspace` class
 > When you create a new workspace, it will be empty. To create and add a new dataset, check these [guides](dataset.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 workspace_to_create = rg.Workspace(
-    name = "my_workspace",
+    name="my_workspace",
     client=client
 )
 
@@ -60,7 +60,7 @@ created_workspace
 You can list all the existing workspaces in Argilla by calling the `workspaces` attribute on the `Argilla` class and iterating over them. You can also use `len(client.workspaces)` to get the number of workspaces.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -77,7 +77,7 @@ for workspace in workspaces:
 You can retrieve a workspace by accessing the `workspaces` method on the `Argilla` class and passing the name of the workspace as an argument.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -89,7 +89,7 @@ retrieved_workspace = client.workspaces("my_workspace")
 You can check if a workspace exists by calling the `exists` method on the `Workspace` class. This method returns a boolean value.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -105,7 +105,7 @@ You can list all the users in a workspace by accessing the `users` attribute on 
 > For further information on how to manage users, check this [how-to guide](user.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -122,7 +122,7 @@ You can also add a user to a workspace by calling the `add_user` method on the `
 > For further information on how to manage users, check this [how-to guide](user.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -138,7 +138,7 @@ You can also remove a user from a workspace by calling the `remove_user` method 
 > For further information on how to manage users, check this [how-to guide](user.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -154,7 +154,7 @@ To delete a workspace, **no dataset can be associated with it**. If the workspac
 > To clear a workspace and delete all their datasets, refer to this [how-to guide](dataset.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 

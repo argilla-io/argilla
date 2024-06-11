@@ -18,7 +18,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             filter=filter
         )
         ```
-        > Check the [Query - Python Reference](../../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
+        > Check the [Query - Python Reference](../../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
 
     === "`rg.Filter`"
 
@@ -29,7 +29,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             ]
         )
         ```
-        > Check the [Filter - Python Reference](../../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
+        > Check the [Filter - Python Reference](../../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
 
 ## Query with search terms
 
@@ -38,7 +38,7 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 === "Single search term"
 
     ```python
-    import argilla_sdk as rg
+    import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -54,7 +54,7 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 === "Multiple search term"
 
     ```python
-    import argilla_sdk as rg
+    import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -81,7 +81,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 === "Single condition"
 
     ```python
-    import argilla_sdk as rg
+    import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -97,7 +97,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 === "Multiple conditions"
 
     ```python
-    import argilla_sdk as rg
+    import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -125,7 +125,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 You can filter records based on their status. The status can be `pending`, `draft`, `submitted`, or `discarded`.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -134,7 +134,7 @@ workspace = client.workspaces("my_workspace")
 dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 status_filter = rg.Query(
-    filter = rg.Filter(("status", "==", "submitted"))
+    filter=rg.Filter(("status", "==", "submitted"))
 )
 
 filtered_records = list(dataset.records(status_filter))
@@ -145,7 +145,7 @@ filtered_records = list(dataset.records(status_filter))
 As mentioned, you can use a query with a search term and a filter or various filters to create complex search queries.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -155,7 +155,7 @@ dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 query_filter = rg.Query(
     query="my_term",
-    filter= rg.Filter(
+    filter=rg.Filter(
         [
             ("label.suggestion", "==", "positive"),
             ("metadata.count", ">=", 10),
@@ -167,7 +167,7 @@ queried_filtered_records = list(dataset.records(
     query=query_filter,
     with_metadata=True,
     with_suggestions=True
-    )
+)
 )
 ```
 
@@ -176,8 +176,9 @@ queried_filtered_records = list(dataset.records(
 Records can be exported from `Dataset.records` as a dictionary. The `to_dict` method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.
 
 === "
+
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -203,7 +204,7 @@ exported_records = dataset.records.to_dict(flatten=True)
 Records can be exported from `Dataset.records` as a list of dictionaries. The `to_list` method can be used to export records as a list of dictionaries. You can decide if to flatten it or not.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 

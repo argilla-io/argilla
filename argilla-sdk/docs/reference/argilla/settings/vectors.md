@@ -32,6 +32,6 @@ settings = rg.Settings(
 
 ### `rg.VectorField`
 
-::: argilla_sdk.settings.VectorField
+::: argilla.settings.VectorField
     options:
         heading_level: 3

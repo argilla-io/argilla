@@ -10,7 +10,7 @@ Metadata in argilla is a dictionary that can be attached to a record. It is used
 To use metadata within a dataset, you must define a metadata property in the dataset settings. The metadata property is a list of metadata properties that can be attached to a record. The following example demonstrates how to add metadata to a dataset and how to access metadata from a record object:
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 dataset = Dataset(
     name="dataset_with_metadata",

@@ -27,6 +27,6 @@ workspace = client.workspaces("my_workspace")
 
 ### `rg.Workspace`
 
-::: argilla_sdk.workspaces.Workspace
+::: argilla.workspaces.Workspace
     options:
         heading_level: 4

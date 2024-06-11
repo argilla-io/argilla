@@ -12,7 +12,7 @@ To interact with the Argilla server from python you can use the `Argilla` class.
 To connect to an Argilla server, instantiate the `Argilla` class and pass the `api_url` of the server and the `api_key` to authenticate.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(
     api_url="https://argilla.example.com",
@@ -48,6 +48,6 @@ for dataset in my_workspace.datasets:
 
 ### `rg.Argilla`
 
-::: argilla_sdk.client.Argilla
+::: argilla.client.Argilla
     options:
         heading_level: 3

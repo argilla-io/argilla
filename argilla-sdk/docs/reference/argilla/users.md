@@ -32,6 +32,6 @@ client.me
 
 ### `rg.User`
 
-::: argilla_sdk.users.User
+::: argilla.users.User
     options:
         heading_level: 3

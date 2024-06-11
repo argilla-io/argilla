@@ -55,6 +55,6 @@ For changes to take effect, the user must call the `update` method on the `Datas
 
 ### `rg.Record`
 
-::: argilla_sdk.records.Record
+::: argilla.records.Record
     options:
         heading_level: 3

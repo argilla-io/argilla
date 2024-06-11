@@ -39,6 +39,6 @@ data = rg.Dataset(
 
 ### `rg.TextField`
 
-::: argilla_sdk.settings.TextField
+::: argilla.settings.TextField
     options:
         heading_level: 3
