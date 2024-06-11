@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-name: Build and publish the `argilla-sdk` python package
+name: Build and publish the `argilla` sdk python package
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,8 +15,8 @@ on:
 
   push:
     paths:
-      - "argilla-sdk/**"
-      - "!argilla-sdk/docs/**"
+      - "argilla/**"
+      - "!argilla/docs/**"
     branches:
       - "develop"
       - "main"
@@ -24,8 +24,8 @@ on:
 
   pull_request:
     paths:
-      - "argilla-sdk/**"
-      - "!argilla-sdk/docs/**"
+      - "argilla/**"
+      - "!argilla/docs/**"
     branches:
       - "develop"
       - "main"
@@ -37,7 +37,7 @@ on:
 
 defaults:
   run:
-    working-directory: argilla-sdk
+    working-directory: argilla
 
 jobs:
   build:
@@ -65,7 +65,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: true
           cache-dependency-path: |
-            argilla-sdk/pyproject.toml
+            argilla/pyproject.toml
       - name: Install dependencies
         run: |
           pdm install
@@ -86,10 +86,10 @@ jobs:
         # Upload the package to be used in the next jobs only once
         if: ${{ matrix.python-version == '3.8' }}
         with:
-          name: argilla-sdk
-          path: argilla-sdk/dist
+          name: argilla
+          path: argilla/dist
 
-  # This job will publish argilla-sdk package into PyPI repository
+  # This job will publish argilla package into PyPI repository
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
@@ -116,8 +116,8 @@ jobs:
       - name: Download python package
         uses: actions/download-artifact@v4
         with:
-          name: argilla-sdk
-          path: argilla-sdk/dist
+          name: argilla
+          path: argilla/dist
 
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
