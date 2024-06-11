@@ -132,7 +132,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   height: 100%;
-  @include media("<=tablet") {
+  @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
   }

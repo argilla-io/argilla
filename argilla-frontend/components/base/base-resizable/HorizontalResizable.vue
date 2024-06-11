@@ -197,6 +197,9 @@ $card-height: 50px;
     justify-content: center;
     min-height: $card-height;
     transition: all 0.2s ease-in;
+    @include media("<desktop") {
+      height: auto !important;
+    }
     .--resizing & {
       transition: none;
     }
@@ -218,7 +221,7 @@ $card-height: 50px;
     align-items: center;
     z-index: 1;
     cursor: ns-resize;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       display: none;
     }
 

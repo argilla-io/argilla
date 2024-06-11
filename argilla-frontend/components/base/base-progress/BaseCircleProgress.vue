@@ -17,7 +17,7 @@ export default {
   computed: {
     pieStyles() {
       let acum = 0;
-      let styles = this.slices.map(
+      const styles = this.slices.map(
         (slice) => `${slice.color} 0 ${(acum += slice.percent)}%`
       );
 

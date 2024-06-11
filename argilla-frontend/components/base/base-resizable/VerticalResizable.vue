@@ -122,8 +122,9 @@ $resizable-bar-width: 8px;
     align-items: center;
     height: 100%;
     margin-right: calc(-#{$resizable-bar-width} / 2);
-    @include media("<=tablet") {
+    @include media("<desktop") {
       min-width: 100% !important;
+      height: auto !important;
     }
   }
 
@@ -134,8 +135,9 @@ $resizable-bar-width: 8px;
     align-items: center;
     height: 100%;
     margin-left: calc(-#{$resizable-bar-width} / 2);
-    @include media("<=tablet") {
+    @include media("<desktop") {
       min-width: 100% !important;
+      height: auto !important;
     }
   }
 
@@ -146,7 +148,7 @@ $resizable-bar-width: 8px;
     justify-content: center;
     z-index: 1;
     cursor: ew-resize;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       display: none;
     }
 
