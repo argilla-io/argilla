@@ -1,5 +1,5 @@
 ---
-description: Argilla-python is the reference argilla python server SDK.
+description: Argilla-python is the reference Argilla Python server SDK.
 hide:
   - footer
 ---
