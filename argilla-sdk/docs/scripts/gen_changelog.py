@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import os
 
-import requests
-import base64
 import mkdocs_gen_files
-
+import requests
 
 REPOSITORY = "argilla-io/argilla"
 CHANGELOG_PATH = "argilla/CHANGELOG.md"
@@ -25,7 +24,7 @@ RETRIEVED_BRANCH = "develop"
 
 DATA_PATH = "community/changelog.md"
 
-GITHUB_ACCESS_TOKEN = os.environ["GITHUB_ACCESS_TOKEN"]
+GITHUB_ACCESS_TOKEN = os.environ["GH_ACCESS_TOKEN"]  # public_repo and read:org scopes are requiredwha
 
 
 def fetch_file_from_github(repository, changelog_path, branch, auth_token):
