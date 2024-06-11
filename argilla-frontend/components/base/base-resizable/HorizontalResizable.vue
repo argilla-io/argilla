@@ -205,11 +205,15 @@ $card-height: 50px;
     width: 100%;
     display: flex;
     align-items: center;
+    z-index: 1;
     cursor: ns-resize;
+    @include media("<=tablet") {
+      display: none;
+    }
 
     &__inner {
       width: 100%;
-      border-bottom: thick solid lightgray;
+      border-bottom: thick solid $black-10;
       border-width: 1px;
 
       &:hover {
@@ -219,7 +223,7 @@ $card-height: 50px;
 
     &__inner--no-hover {
       width: 100%;
-      border-bottom: thick solid lightgray;
+      border-bottom: thick solid $black-10;
       border-width: 1px;
     }
 

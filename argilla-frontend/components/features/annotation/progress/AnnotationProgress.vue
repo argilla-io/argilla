@@ -16,54 +16,16 @@
   -->
 
 <template>
-  <div v-if="datasetMetrics.hasMetrics">
-    <p class="metrics__title">Progress</p>
-    <div class="metrics__info">
-      <p class="metrics__info__name">Total</p>
-      <span class="metrics__info__counter">{{
-        datasetMetrics.progress | percent
-      }}</span>
-    </div>
-    <div class="metrics__numbers">
-      <span v-text="datasetMetrics.responded" />/{{ datasetMetrics.total }}
-    </div>
-    <BaseProgress
-      re-mode="determinate"
-      :multiple="true"
-      :progress="datasetMetrics.percentage.submitted"
-      :progress-secondary="datasetMetrics.percentage.discarded"
-      :progress-tertiary="datasetMetrics.percentage.draft"
-      :progress-bg="pendingColor"
-      :color="submittedColor"
-      :color-secondary="discardedColor"
-      :color-tertiary="draftColor"
-    >
-    </BaseProgress>
-    <div class="scroll">
-      <ul class="metrics__list">
-        <li
-          v-for="(status, index) in progressItems"
-          :key="index"
-          class="metrics__list__item"
-        >
-          <span
-            class="color-bullet"
-            :style="{ backgroundColor: status.color }"
-          ></span>
-          <label class="metrics__list__name" v-text="status.name" />
-          <span
-            class="metrics__list__counter"
-            v-text="getFormattedProgress(status.progress)"
-          />
-        </li>
-      </ul>
-      <slot></slot>
-    </div>
-  </div>
+  <BarProgress
+    v-if="datasetMetrics.hasMetrics"
+    :loading="false"
+    :progress-ranges="progressRanges"
+    :progress-not-pending="progressNotPending"
+    :total="datasetMetrics.total"
+  />
 </template>
 
 <script>
-import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
 import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
 
 export default {
@@ -74,46 +36,24 @@ export default {
     },
   },
   computed: {
-    progressItems() {
+    progressRanges() {
       return [
         {
-          name: RecordStatus.pending.name,
-          color: this.pendingColor,
-          progress: this.datasetMetrics.pending,
+          id: "not-pending",
+          name: "not-pending",
+          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+          value: this.progressNotPending,
         },
         {
-          name: RecordStatus.draft.name,
-          color: this.draftColor,
-          progress: this.datasetMetrics.draft,
-        },
-        {
-          name: RecordStatus.submitted.name,
-          color: this.submittedColor,
-          progress: this.datasetMetrics.submitted,
-        },
-        {
-          name: RecordStatus.discarded.name,
-          color: this.discardedColor,
-          progress: this.datasetMetrics.discarded,
+          id: "pending",
+          name: "progress",
+          color: "linear-gradient(90deg, #EFEFEF 0%, #D3D3D3 100%)",
+          value: this.datasetMetrics.pending,
         },
       ];
     },
-    pendingColor() {
-      return RecordStatus.pending.color;
-    },
-    draftColor() {
-      return RecordStatus.draft.color;
-    },
-    submittedColor() {
-      return RecordStatus.submitted.color;
-    },
-    discardedColor() {
-      return RecordStatus.discarded.color;
-    },
-  },
-  methods: {
-    getFormattedProgress(progress) {
-      return progress && this.$options.filters.formatNumber(progress);
+    progressNotPending() {
+      return this.datasetMetrics.total - this.datasetMetrics.pending;
     },
   },
   setup(props) {
@@ -123,23 +63,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.scroll {
-  max-height: calc(100vh - 270px);
-  padding-right: 1em;
-  margin-right: -1em;
-  overflow: auto;
-  @extend %hide-scrollbar;
-}
 .metrics {
-  &__numbers {
-    margin-bottom: $base-space * 3;
-    margin-top: $base-space * 3;
-    @include font-size(18px);
-    span {
-      @include font-size(40px);
-      font-weight: 700;
-    }
-  }
+  color: $black-54;
 }
 .color-bullet {
   height: $base-space;
@@ -148,30 +73,6 @@ export default {
   display: inline-block;
 }
 :deep() {
-  .metrics__title {
-    margin-top: 0;
-    margin-bottom: $base-space * 4;
-    @include font-size(18px);
-    font-weight: 600;
-  }
-  .metrics__subtitle {
-    @include font-size(15px);
-    font-weight: 600;
-  }
-  .metrics__info {
-    margin-top: 0;
-    margin-bottom: $base-space;
-    display: flex;
-    &__name {
-      margin: 0;
-    }
-    &__counter {
-      margin: 0 0 0 auto;
-    }
-    & + .re-progress__container {
-      margin-top: -$base-space;
-    }
-  }
   .metrics__list {
     list-style: none;
     padding-left: 0;

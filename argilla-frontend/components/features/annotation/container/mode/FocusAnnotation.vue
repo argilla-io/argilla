@@ -1,78 +1,81 @@
 <template>
-  <div class="wrapper">
-    <VerticalResizable>
-      <template #left>
-        <HorizontalResizable id="r-h-rz">
-          <template #up>
-            <section class="wrapper__records">
-              <DatasetFilters :recordCriteria="recordCriteria">
-                <ToggleAnnotationType
-                  v-if="
-                    records.hasRecordsToAnnotate &&
-                    recordCriteria.committed.isPending
-                  "
-                  :recordCriteria="recordCriteria"
-              /></DatasetFilters>
-              <SimilarityRecordReference
-                v-show="recordCriteria.isFilteringBySimilarity"
-                v-if="!!records.reference"
-                :fields="records.reference.fields"
+  <VerticalResizable class="wrapper">
+    <template #left>
+      <HorizontalResizable id="r-h-rz" class="wrapper__left">
+        <template #up>
+          <section class="wrapper__records">
+            <DatasetFilters :recordCriteria="recordCriteria">
+              <ToggleAnnotationType
+                v-if="
+                  records.hasRecordsToAnnotate &&
+                  recordCriteria.committed.isPending
+                "
                 :recordCriteria="recordCriteria"
-                :availableVectors="datasetVectors"
-              />
-              <div class="wrapper__records__header">
-                <PaginationFeedbackTask :recordCriteria="recordCriteria" />
-              </div>
-              <Record
-                v-if="records.hasRecordsToAnnotate"
-                :datasetVectors="datasetVectors"
-                :recordCriteria="recordCriteria"
-                :record="record"
-              />
-              <div v-else class="wrapper--empty">
-                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-              </div>
-            </section>
-          </template>
-          <template #downHeader>
-            <h2>Guidelines</h2>
-          </template>
-          <template #downContent>
-            <h2>Guidelines Content</h2>
-          </template>
-        </HorizontalResizable>
-      </template>
-
-      <template #right>
-        <HorizontalResizable id="q-h-rz">
-          <template #up>
-            <QuestionsForm
-              v-if="!!record"
-              :key="`${record.id}_questions`"
-              class="wrapper__form"
-              :class="statusClass"
-              :datasetId="recordCriteria.datasetId"
-              :record="record"
-              :show-discard-button="!record.isDiscarded"
-              :is-draft-saving="isDraftSaving"
-              :is-submitting="isSubmitting"
-              :is-discarding="isDiscarding"
-              :enableAutoSubmitWithKeyboard="true"
-              @on-submit-responses="onSubmit"
-              @on-discard-responses="onDiscard"
-              @on-save-draft="onSaveDraft"
+            /></DatasetFilters>
+            <SimilarityRecordReference
+              v-show="recordCriteria.isFilteringBySimilarity"
+              v-if="!!records.reference"
+              :fields="records.reference.fields"
+              :recordCriteria="recordCriteria"
+              :availableVectors="datasetVectors"
             />
-          </template>
-          <template #downHeader>
-            <h2>Progress</h2>
-          </template>
-          <template #downContent>
-            <h2>Progress Content</h2>
-          </template>
-        </HorizontalResizable>
-      </template>
-    </VerticalResizable>
-  </div>
+            <div class="wrapper__records__header">
+              <PaginationFeedbackTask :recordCriteria="recordCriteria" />
+            </div>
+            <Record
+              v-if="records.hasRecordsToAnnotate"
+              :datasetVectors="datasetVectors"
+              :recordCriteria="recordCriteria"
+              :record="record"
+            />
+            <div v-else class="wrapper--empty">
+              <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+            </div>
+          </section>
+        </template>
+        <template #downHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #downContent>
+          <AnnotationGuidelines />
+        </template>
+      </HorizontalResizable>
+    </template>
+
+    <template #right>
+      <HorizontalResizable id="q-h-rz" class="wrapper__right">
+        <template #up>
+          <QuestionsForm
+            v-if="!!record"
+            :key="`${record.id}_questions`"
+            class="wrapper__form"
+            :class="statusClass"
+            :datasetId="recordCriteria.datasetId"
+            :record="record"
+            :show-discard-button="!record.isDiscarded"
+            :is-draft-saving="isDraftSaving"
+            :is-submitting="isSubmitting"
+            :is-discarding="isDiscarding"
+            :enableAutoSubmitWithKeyboard="true"
+            @on-submit-responses="onSubmit"
+            @on-discard-responses="onDiscard"
+            @on-save-draft="onSaveDraft"
+          />
+        </template>
+        <template #downHeader>
+          <p v-text="$t('progress')" />
+          <AnnotationProgress
+            class="annotation-progress"
+            :datasetId="recordCriteria.datasetId"
+          />
+        </template>
+        <template #downContent>
+          <AnnotationProgress :datasetId="recordCriteria.datasetId" />
+          <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
+        </template>
+      </HorizontalResizable>
+    </template>
+  </VerticalResizable>
 </template>
 <script>
 import { useFocusAnnotationViewModel } from "./useFocusAnnotationViewModel";
@@ -129,19 +132,20 @@ export default {
   display: flex;
   flex-wrap: wrap;
   height: 100%;
-  gap: $base-space * 2;
-  padding: $base-space * 2;
-  @include media("<desktop") {
+  @include media("<=tablet") {
     flex-flow: column;
     overflow: auto;
   }
-  &__records,
-  &__form {
+  &__left,
+  &__right {
     @include media("<desktop") {
       overflow: visible;
       height: auto !important;
       max-height: none !important;
     }
+  }
+  &__form {
+    padding: $base-space * 2;
   }
   &__records {
     flex: 1;
@@ -150,10 +154,7 @@ export default {
     gap: $base-space;
     height: 100%;
     min-width: 0;
-    @include media("<desktop") {
-      flex: 0;
-      height: auto;
-    }
+    padding: $base-space * 2;
     &__header {
       display: flex;
       justify-content: flex-end;
@@ -170,6 +171,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+.annotation-progress {
+  .--expanded & {
+    display: none;
   }
 }
 </style>

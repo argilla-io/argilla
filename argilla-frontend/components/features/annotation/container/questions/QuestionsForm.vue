@@ -357,7 +357,7 @@ export default {
     border: 1px solid transparent;
     background: palette(white);
     .--pending & {
-      border-color: $black-10;
+      border-color: $black-6;
     }
     .--draft &,
     .--saving-draft & {
