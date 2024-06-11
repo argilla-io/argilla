@@ -54,6 +54,11 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Show GitHUb ref info
+        run:
+          echo "${{ github.ref }}"
+          echo "${{ github.head_ref }}"
+
       - run: pdm run mike deploy dev --push
         if: github.ref == 'refs/heads/feat/v2.0.0'
         # if: github.ref == 'refs/heads/develop'
