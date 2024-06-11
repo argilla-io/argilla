@@ -16,7 +16,7 @@ import os
 import shutil
 from pathlib import Path
 
-from argilla.training import ArgillaTrainer
+from argilla_v1.training import ArgillaTrainer
 
 
 def train_with_cleanup(trainer: ArgillaTrainer, output_dir: str, train: bool = True) -> None:

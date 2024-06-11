@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client.client import Argilla
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.sdk.v1.suggestions.api import delete_suggestion
-from argilla.client.singleton import init
 from argilla_server.models import UserRole
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.questions import TextQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.sdk.v1.suggestions.api import delete_suggestion
+from argilla_v1.client.singleton import init
 
 from tests.factories import UserFactory, WorkspaceFactory
 

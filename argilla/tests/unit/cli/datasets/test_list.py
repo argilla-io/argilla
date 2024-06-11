@@ -16,12 +16,12 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY, call
 
 import pytest
-from argilla.client.enums import DatasetType
+from argilla_v1.client.enums import DatasetType
 from rich.table import Table
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-    from argilla.client.sdk.datasets.models import Dataset
+    from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla_v1.client.sdk.datasets.models import Dataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -39,7 +39,7 @@ class TestSuiteListDatasetsCommand:
     ) -> None:
         add_row_spy = mocker.spy(Table, "add_row")
         list_datasets_mock = mocker.patch(
-            "argilla.client.api.list_datasets", return_value=[remote_feedback_dataset, dataset]
+            "argilla_v1.client.api.list_datasets", return_value=[remote_feedback_dataset, dataset]
         )
 
         result = cli_runner.invoke(cli, "datasets list")
@@ -72,8 +72,8 @@ class TestSuiteListDatasetsCommand:
         )
 
     def test_list_datasets_with_workspace(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
-        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name")
-        list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
+        workspace_from_name_mock = mocker.patch("argilla_v1.client.workspaces.Workspace.from_name")
+        list_datasets_mock = mocker.patch("argilla_v1.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
@@ -84,7 +84,9 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_with_non_existing_workspace(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        workspace_from_name_mock = mocker.patch("argilla.client.workspaces.Workspace.from_name", side_effect=ValueError)
+        workspace_from_name_mock = mocker.patch(
+            "argilla_v1.client.workspaces.Workspace.from_name", side_effect=ValueError
+        )
 
         result = cli_runner.invoke(cli, "datasets list --workspace unit-test")
 
@@ -95,7 +97,7 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_using_type_feedback_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
+        list_datasets_mock = mocker.patch("argilla_v1.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type feedback")
 
@@ -105,7 +107,7 @@ class TestSuiteListDatasetsCommand:
     def test_list_datasets_using_type_other_filter(
         self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"
     ) -> None:
-        list_datasets_mock = mocker.patch("argilla.client.api.list_datasets")
+        list_datasets_mock = mocker.patch("argilla_v1.client.api.list_datasets")
 
         result = cli_runner.invoke(cli, "datasets list --type other")
 

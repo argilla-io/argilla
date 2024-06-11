@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def test_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    login_mock = mocker.patch("argilla.client.login.login")
+    login_mock = mocker.patch("argilla_v1.client.login.login")
 
     result = cli_runner.invoke(
         cli,
@@ -38,7 +38,7 @@ def test_login(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
 
 
 def test_login_fails(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    login_mock = mocker.patch("argilla.client.login.login")
+    login_mock = mocker.patch("argilla_v1.client.login.login")
     login_mock.side_effect = ValueError
 
     result = cli_runner.invoke(

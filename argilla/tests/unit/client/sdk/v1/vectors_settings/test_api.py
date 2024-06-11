@@ -15,7 +15,7 @@
 from uuid import uuid4
 
 import httpx
-from argilla.client.sdk.v1.vectors_settings.api import delete_vector_settings, update_vector_settings
+from argilla_v1.client.sdk.v1.vectors_settings.api import delete_vector_settings, update_vector_settings
 
 
 class TestSuiteVectorsSettingsSDK:

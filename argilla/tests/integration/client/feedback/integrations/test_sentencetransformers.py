@@ -15,12 +15,12 @@
 from typing import List
 
 import pytest
-from argilla import init
-from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1 import init
+from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+from argilla_v1.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.questions import TextQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
 from typing_extensions import TYPE_CHECKING
 
 from tests.factories import WorkspaceFactory
@@ -28,7 +28,7 @@ from tests.factories import WorkspaceFactory
 if TYPE_CHECKING:
     from asyncio import AbstractEventLoop
 
-    from argilla import User
+    from argilla_v1 import User
 
 
 @pytest.fixture(scope="function")

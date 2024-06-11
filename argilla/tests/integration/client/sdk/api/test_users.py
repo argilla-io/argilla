@@ -16,9 +16,9 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from argilla.client.client import Argilla
-from argilla.client.sdk.client import AuthenticatedClient
-from argilla.client.sdk.commons.errors import (
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.sdk.client import AuthenticatedClient
+from argilla_v1.client.sdk.commons.errors import (
     AlreadyExistsApiError,
     BaseClientError,
     ForbiddenApiError,
@@ -26,9 +26,9 @@ from argilla.client.sdk.commons.errors import (
     UnauthorizedApiError,
     ValidationApiError,
 )
-from argilla.client.sdk.users.api import create_user, delete_user, list_users, whoami
-from argilla.client.sdk.users.models import UserModel
-from argilla.client.singleton import ArgillaSingleton
+from argilla_v1.client.sdk.users.api import create_user, delete_user, list_users, whoami
+from argilla_v1.client.sdk.users.models import UserModel
+from argilla_v1.client.singleton import ArgillaSingleton
 
 from tests.factories import WorkspaceFactory
 

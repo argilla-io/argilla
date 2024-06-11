@@ -17,15 +17,15 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
-from argilla.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
-from argilla.client.feedback.schemas.questions import (
+from argilla_v1.client.feedback.schemas.enums import LabelsOrder, QuestionTypes
+from argilla_v1.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.remote.questions import (
+from argilla_v1.client.feedback.schemas.remote.questions import (
     RemoteLabelQuestion,
     RemoteMultiLabelQuestion,
     RemoteRankingQuestion,
@@ -33,7 +33,7 @@ from argilla.client.feedback.schemas.remote.questions import (
     RemoteSpanQuestion,
     RemoteTextQuestion,
 )
-from argilla.client.sdk.v1.datasets.models import FeedbackQuestionModel
+from argilla_v1.client.sdk.v1.datasets.models import FeedbackQuestionModel
 
 
 @pytest.mark.parametrize(

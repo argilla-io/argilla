@@ -15,10 +15,10 @@
 from typing import TYPE_CHECKING, Type
 
 import pytest
-from argilla.client.sdk.users.models import UserRole
+from argilla_v1.client.sdk.users.models import UserRole
 
 if TYPE_CHECKING:
-    from argilla.client.users import User
+    from argilla_v1.client.users import User
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 @pytest.mark.usefixtures("login_mock")
 class TestSuiteCreateUserCommand:
     def test_create_user(self, cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture", user: "User") -> None:
-        user_create_mock = mocker.patch("argilla.client.users.User.create", return_value=user)
+        user_create_mock = mocker.patch("argilla_v1.client.users.User.create", return_value=user)
 
         result = cli_runner.invoke(
             cli,
@@ -66,7 +66,7 @@ class TestSuiteCreateUserCommand:
         ExceptionType: Type[Exception],
         expected_msg: str,
     ) -> None:
-        user_create_mock = mocker.patch("argilla.client.users.User.create", side_effect=ExceptionType)
+        user_create_mock = mocker.patch("argilla_v1.client.users.User.create", side_effect=ExceptionType)
 
         result = cli_runner.invoke(
             cli,

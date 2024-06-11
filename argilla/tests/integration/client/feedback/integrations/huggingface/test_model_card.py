@@ -22,14 +22,14 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Callable, List, Union
 
 import pytest
-from argilla.client.feedback.schemas import (
+from argilla_v1.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
 )
-from argilla.client.feedback.unification import LabelQuestionUnification
-from argilla.client.models import Framework
-from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+from argilla_v1.client.feedback.unification import LabelQuestionUnification
+from argilla_v1.client.models import Framework
+from argilla_v1.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 from tests.integration.client.feedback.helpers import (
     formatting_func_chat_completion,
@@ -42,8 +42,8 @@ from tests.integration.client.feedback.helpers import (
 )
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas import FeedbackRecord
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 DATASET_NAME = "argilla/emotion"

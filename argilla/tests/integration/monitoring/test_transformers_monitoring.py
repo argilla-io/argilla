@@ -14,9 +14,9 @@
 from time import sleep
 from typing import List, Union
 
-import argilla
+import argilla_v1
 import pytest
-from argilla.client.models import TextClassificationRecord
+from argilla_v1.client.models import TextClassificationRecord
 
 from tests.integration.utils import delete_ignoring_errors
 
@@ -32,7 +32,7 @@ def test_classifier_monitoring_with_all_scores(
     classifier_monitor_all_scores(expected_text)
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(classifier_dataset)
+    ds = argilla_v1.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
     record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
@@ -47,7 +47,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     classifier_monitor(expected_text)
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(classifier_dataset)
+    ds = argilla_v1.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
     record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
@@ -59,7 +59,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     classifier_monitor(texts)
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(classifier_dataset)
+    ds = argilla_v1.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 2
     assert set([r["text"] for r in df.inputs.values.tolist()]) == set(texts)
@@ -68,7 +68,7 @@ def test_classifier_monitoring(mocked_client, classifier_monitor, classifier_dat
     classifier_monitor(expected_text, metadata={"some": "metadata"})
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(classifier_dataset)
+    ds = argilla_v1.load(classifier_dataset)
     df = ds.to_pandas()
     assert len(df) == 1
     assert df.metadata.values.tolist()[0] == {"some": "metadata"}
@@ -85,7 +85,7 @@ def classifier_monitor_all_scores(
     classifier_dataset,
     monkeypatch,
 ):
-    monitor = argilla.monitor(
+    monitor = argilla_v1.monitor(
         sentiment_classifier_all_scores,
         dataset=classifier_dataset,
         sample_rate=1.0,
@@ -101,7 +101,7 @@ def classifier_monitor(
     classifier_dataset,
     monkeypatch,
 ):
-    monitor = argilla.monitor(
+    monitor = argilla_v1.monitor(
         sentiment_classifier,
         dataset=classifier_dataset,
         sample_rate=1.0,
@@ -159,7 +159,7 @@ def dataset():
 
 @pytest.fixture
 def mocked_monitor(dataset, monkeypatch, zero_shot_classifier):
-    monitor = argilla.monitor(
+    monitor = argilla_v1.monitor(
         zero_shot_classifier,
         dataset=dataset,
         sample_rate=1.0,
@@ -193,7 +193,7 @@ def check_zero_shot_results(
         pass
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(dataset)
+    ds = argilla_v1.load(dataset)
     df = ds.to_pandas()
     assert len(df) == 1
     record = TextClassificationRecord.parse_obj(df.to_dict(orient="records")[0])
@@ -279,7 +279,7 @@ def test_monitor_zero_shot_with_multilabel(
     )
 
     with pytest.raises(Exception):
-        argilla.load(dataset)
+        argilla_v1.load(dataset)
 
     check_zero_shot_results(
         predictions,
@@ -339,7 +339,7 @@ def test_monitor_zero_shot_passing_metadata(
     )
 
     sleep(1)  # wait for the consumer time
-    ds = argilla.load(dataset)
+    ds = argilla_v1.load(dataset)
     df = ds.to_pandas()
     assert len(df) == 1
 

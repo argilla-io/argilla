@@ -14,23 +14,23 @@
 #  limitations under the License.
 import httpx
 import pytest
-from argilla import User
-from argilla.client.api import copy, delete, load
-from argilla.client.models import TextClassificationRecord
-from argilla.client.sdk.datasets.models import TaskType
-from argilla.client.sdk.text_classification.models import (
+from argilla_server.errors import EntityNotFoundError
+from argilla_v1 import User
+from argilla_v1.client.api import copy, delete, load
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.client.sdk.datasets.models import TaskType
+from argilla_v1.client.sdk.text_classification.models import (
     CreationTextClassificationRecord,
     TextClassificationBulkData,
 )
-from argilla.labeling.text_classification import (
+from argilla_v1.labeling.text_classification import (
     Rule,
     add_rules,
     delete_rules,
     load_rules,
     update_rules,
 )
-from argilla.labeling.text_classification.rule import RuleNotAppliedError
-from argilla_server.errors import EntityNotFoundError
+from argilla_v1.labeling.text_classification.rule import RuleNotAppliedError
 
 from tests.integration.helpers import SecuredClient
 from tests.integration.utils import delete_ignoring_errors

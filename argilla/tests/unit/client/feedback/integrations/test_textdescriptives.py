@@ -16,16 +16,16 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.integrations.textdescriptives import TextDescriptivesExtractor
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import TextQuestion
-from argilla.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.schemas.questions import TextQuestion
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
 
 
 @pytest.fixture

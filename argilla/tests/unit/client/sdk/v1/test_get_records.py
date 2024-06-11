@@ -15,7 +15,7 @@
 import uuid
 
 import httpx
-from argilla.client.sdk.v1.datasets.api import get_records
+from argilla_v1.client.sdk.v1.datasets.api import get_records
 
 
 class TestSuiteGetRecordsSDK:

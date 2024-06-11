@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.feedback.schemas.utils import LabelMappingMixin
+from argilla_v1.client.feedback.schemas.utils import LabelMappingMixin
 
 from tests.pydantic_v1 import BaseModel, Field
 

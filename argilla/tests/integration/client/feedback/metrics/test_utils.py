@@ -15,15 +15,15 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.metrics.utils import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.metrics.utils import (
     get_responses_and_suggestions_per_user,
     get_unified_responses_and_suggestions,
 )
-from argilla.client.feedback.schemas import FeedbackRecord
+from argilla_v1.client.feedback.schemas import FeedbackRecord
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 @pytest.mark.parametrize(

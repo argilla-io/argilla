@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.dataset.local.dataset import FeedbackDataset
-    from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+    from argilla_v1.client.feedback.dataset.local.dataset import FeedbackDataset
+    from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
@@ -35,15 +35,15 @@ class TestSuiteDatasetsPushCommand:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         dataset_from_argilla_mock = mocker.patch(
-            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
+            "argilla_v1.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
         dataset_pull_mock = mocker.patch(
-            "argilla.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.pull",
+            "argilla_v1.client.feedback.dataset.remote.dataset.RemoteFeedbackDataset.pull",
             return_value=feedback_dataset,
         )
         push_to_huggingface_mock = mocker.patch(
-            "argilla.client.feedback.integrations.huggingface.dataset.HuggingFaceDatasetMixin.push_to_huggingface",
+            "argilla_v1.client.feedback.integrations.huggingface.dataset.HuggingFaceDatasetMixin.push_to_huggingface",
             return_value=None,
         )
 
@@ -67,7 +67,7 @@ class TestSuiteDatasetsPushCommand:
         remote_feedback_dataset: "RemoteFeedbackDataset",
     ) -> None:
         mocker.patch(
-            "argilla.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
+            "argilla_v1.client.feedback.dataset.local.dataset.FeedbackDataset.from_argilla",
             return_value=remote_feedback_dataset,
         )
 

@@ -13,10 +13,10 @@
 #  limitations under the License.
 from typing import Any, List, Union
 
-import argilla.client.singleton as rg
+import argilla_v1.client.singleton as rg
 import pytest
-from argilla import User, Workspace
-from argilla.feedback import (
+from argilla_v1 import User, Workspace
+from argilla_v1.feedback import (
     FeedbackDataset,
     FeedbackRecord,
     ResponseSchema,

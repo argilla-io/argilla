@@ -124,12 +124,12 @@ After this, we can connect to our server.
 Once you have deployed Argilla, we will connect to the server.
 
 ```python
-import argilla as rg
+import argilla_v1 as rg
 
 rg.init(
-    api_url="argilla-api-url", # e.g. http://localhost:6900 or https://[your-owner-name]-[your_space_name].hf.space
-    api_key="argilla-api-key" # e.g. "owner.apikey"
-    workspace="argilla-workspace" # e.g. "admin"
+    api_url="argilla-api-url",  # e.g. http://localhost:6900 or https://[your-owner-name]-[your_space_name].hf.space
+    api_key="argilla-api-key"  # e.g. "owner.apikey"
+workspace = "argilla-workspace"  # e.g. "admin"
 )
 ```
 
@@ -163,7 +163,7 @@ for user in users:
 <p>
 
 ```python
-import argilla as rg
+import argilla_v1 as rg
 
 dataset = rg.FeedbackDataset(
     guidelines="Please, read the question carefully and try to answer it as accurately as possible.",
@@ -197,7 +197,7 @@ remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-worksp
 <p>
 
 ```python
-import argilla as rg
+import argilla_v1 as rg
 
 record = rg.FeedbackRecord(
     fields={
@@ -223,7 +223,7 @@ And that's it, you now have your first dataset ready. You can begin annotating i
 <p>
 
 ```python
-import argilla as rg
+import argilla_v1 as rg
 
 filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
@@ -238,17 +238,17 @@ filtered_dataset = dataset.filter_by(response_status="submitted")
 <p>
 
 ```python
-import argilla as rg
+import argilla_v1 as rg
 
 # using text embeddings
-similar_records =  ds.find_similar_records(
+similar_records = ds.find_similar_records(
     vector_name="my_vector",
     value=embedder_model.embeddings("My text is here")
     # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
 )
 
 # using another record
-similar_records =  ds.find_similar_records(
+similar_records = ds.find_similar_records(
     vector_name="my_vector",
     record=ds.records[0],
     max_results=5
@@ -265,7 +265,7 @@ similar_records =  ds.find_similar_records(
 <p>
 
 ```python
-from argilla.labeling.text_classification import add_rules, Rule
+from argilla_v1.labeling.text_classification import add_rules, Rule
 
 rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
@@ -298,7 +298,7 @@ plugin.start()
 <p>
 
 ```python
-from argilla.training import ArgillaTrainer
+from argilla_v1.training import ArgillaTrainer
 
 trainer = ArgillaTrainer(
     name="my_dataset",
@@ -310,7 +310,7 @@ trainer = ArgillaTrainer(
     limit=10,
     query="my-query"
 )
-trainer.update_config() # see usage below
+trainer.update_config()  # see usage below
 trainer.train()
 records = trainer.predict(["my-text"], as_argilla_records=True)
 ```

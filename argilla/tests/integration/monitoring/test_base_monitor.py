@@ -15,10 +15,10 @@
 from time import sleep
 from typing import Any, Dict, List
 
-from argilla.client.api import Api
-from argilla.client.models import TextClassificationRecord
-from argilla.client.singleton import active_api
-from argilla.monitoring.base import BaseMonitor
+from argilla_v1.client.api import Api
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.client.singleton import active_api
+from argilla_v1.monitoring.base import BaseMonitor
 
 
 def test_base_monitor_shutdown(mocked_client):

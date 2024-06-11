@@ -14,7 +14,7 @@
 
 from typing import Any
 
-from argilla.client.api import delete
+from argilla_v1.client.api import delete
 
 
 def delete_ignoring_errors(*args: Any, **kwargs: Any) -> None:

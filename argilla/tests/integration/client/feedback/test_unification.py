@@ -13,14 +13,14 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client.feedback.schemas import (
+from argilla_v1.client.feedback.schemas import (
     FeedbackRecord,
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
 )
-from argilla.client.feedback.unification import (
+from argilla_v1.client.feedback.unification import (
     LabelQuestionStrategy,
     LabelQuestionUnification,
     MultiLabelQuestionStrategy,

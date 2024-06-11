@@ -15,8 +15,8 @@
 
 import sys
 
-from argilla.utils import LazyargillaModule
+from argilla_v1.utils import LazyargillaModule
 
 
 def test_lazy_module():
-    assert isinstance(sys.modules["argilla"], LazyargillaModule)
+    assert isinstance(sys.modules["argilla_v1"], LazyargillaModule)

@@ -14,11 +14,11 @@
 #  limitations under the License.
 
 import httpx
-from argilla.client.sdk.commons.api import bulk
-from argilla.client.sdk.commons.models import (
+from argilla_server.commons.models import TaskType
+from argilla_v1.client.sdk.commons.api import bulk
+from argilla_v1.client.sdk.commons.models import (
     BulkResponse,
 )
-from argilla_server.commons.models import TaskType
 
 
 def test_text2text_bulk(sdk_client, mocked_client, bulk_text2text_data, monkeypatch):

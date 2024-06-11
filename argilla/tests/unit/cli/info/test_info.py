@@ -15,8 +15,8 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla._version import version
-from argilla.client.apis.status import ApiStatus
+from argilla_v1._version import version
+from argilla_v1.client.apis.status import ApiStatus
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 @pytest.mark.usefixtures("login_mock")
 def test_info_command(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture") -> None:
     status_get_status_mock = mocker.patch(
-        "argilla.client.apis.status.Status.get_status",
+        "argilla_v1.client.apis.status.Status.get_status",
         return_value=ApiStatus(
             **{
                 "version": "1.2.3",

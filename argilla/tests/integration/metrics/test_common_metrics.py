@@ -12,13 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import argilla
-import argilla as rg
-import argilla.client.singleton
+import argilla_v1
+import argilla_v1 as rg
+import argilla_v1.client.singleton
 import pytest
-from argilla.client.api import log
-from argilla.client.models import TextClassificationRecord
-from argilla.metrics.commons import keywords, records_status, text_length
+from argilla_v1.client.api import log
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.metrics.commons import keywords, records_status, text_length
 
 from tests.integration.utils import delete_ignoring_errors
 
@@ -35,11 +35,11 @@ def gutenberg_spacy_ner(mocked_client):
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = argilla_v1.read_datasets(dataset_ds, task="TokenClassification")
 
     delete_ignoring_errors(dataset)
 
-    argilla.log(name=dataset, records=dataset_rb)
+    argilla_v1.log(name=dataset, records=dataset_rb)
 
     return dataset
 
@@ -151,12 +151,12 @@ def test_keywords_metrics(mocked_client, gutenberg_spacy_ner):
 
 
 def test_failing_metrics(argilla_user: "User"):
-    argilla.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
+    argilla_v1.client.singleton.init(api_key=argilla_user.api_key, workspace=argilla_user.username)
     dataset_name = "test_failing_metrics"
 
     delete_ignoring_errors(dataset_name)
 
-    argilla.log(argilla.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
+    argilla_v1.log(argilla_v1.TextClassificationRecord(text="This is a text, yeah!"), name=dataset_name)
 
     with pytest.raises(AssertionError, match="Metric missing-metric not found"):
-        argilla.client.singleton.active_client().compute_metric(name=dataset_name, metric="missing-metric")
+        argilla_v1.client.singleton.active_client().compute_metric(name=dataset_name, metric="missing-metric")

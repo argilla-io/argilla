@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "argilla"
+name = "argilla-v1"
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
 readme = "README.md"
 requires-python = ">=3.8,<3.13"
@@ -104,19 +104,19 @@ documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
 [project.scripts]
-argilla = "argilla.cli.app:app"
+argilla = "argilla_v1.cli.app:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.dynamic]
-version = { attr = "argilla.__version__" }
+version = { attr = "argilla_v1.__version__" }
 
 [tool.setuptools.package-data]
-"argilla.client.feedback.integrations.huggingface.card" = [
+"argilla_v1.client.feedback.integrations.huggingface.card" = [
     "argilla_template.md",
 ]
-"argilla.client.feedback.integrations.huggingface.model_card" = [
+"argilla_v1.client.feedback.integrations.huggingface.model_card" = [
     "argilla_model_template.md",
 ]
 

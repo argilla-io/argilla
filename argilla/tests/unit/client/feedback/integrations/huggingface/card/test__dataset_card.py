@@ -18,28 +18,28 @@ from typing import TYPE_CHECKING, List
 from uuid import uuid4
 
 import pytest
-from argilla.client.feedback.integrations.huggingface.card import ArgillaDatasetCard
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.integrations.huggingface.card import ArgillaDatasetCard
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import (
+from argilla_v1.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.feedback.schemas.types import AllowedMetadataPropertyTypes
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
 from huggingface_hub import DatasetCardData
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas import FeedbackRecord
-    from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+    from argilla_v1.client.feedback.schemas import FeedbackRecord
+    from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
 
 
 class TestSuiteArgillaDatasetCard:

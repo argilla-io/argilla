@@ -1,0 +1,664 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+import json
+from dataclasses import dataclass, field, fields
+from inspect import getsource
+from pathlib import Path
+from platform import python_version
+from textwrap import dedent
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+
+from huggingface_hub import CardData, ModelCard, dataset_info, model_info
+from huggingface_hub.utils import yaml_dump
+
+from argilla_v1._version import version
+from argilla_v1.client.feedback.training.schemas.base import TRAINING_TASK_MAPPING, TrainingTaskTypes
+from argilla_v1.client.models import FRAMEWORK_TO_NAME_MAPPING, Framework
+from argilla_v1.training.utils import get_default_args
+
+if TYPE_CHECKING:
+    import spacy
+    from transformers import PreTrainedTokenizer
+
+
+TEMPLATE_ARGILLA_MODEL_CARD_PATH = Path(__file__).parent / "argilla_model_template.md"
+
+
+TEMPLATE_TASK_CALL = "task = TrainingTask.{task_type}({training_task_args})"
+
+
+YAML_FIELDS = ["language", "license", "tags", "dataset_name", "library_name"]
+
+
+class ArgillaModelCard(ModelCard):
+    """`ArgillaModelCard` has been created similarly to `ModelCard` from
+    `huggingface_hub` but with a different template. The template is located at
+    `argilla/client/feedback/integrations/huggingface/model_card/argilla_model_template.md`.
+    """
+
+    default_template_path = TEMPLATE_ARGILLA_MODEL_CARD_PATH
+
+
+@dataclass
+class FrameworkCardData(CardData):
+    """Parent class to generate the variables to add to the ModelCard.
+
+    Each framework will inherit from here and update accordingly.
+    """
+
+    # User provided
+    language: Optional[Union[str, List[str]]] = None
+    license: Optional[str] = None
+    model_name: Optional[str] = None
+    model_id: Optional[str] = None
+    dataset_name: Optional[str] = None
+    dataset_id: Optional[str] = None
+    tags: Optional[List[str]] = field(default_factory=lambda: ["argilla"])
+    model_summary: Optional[str] = None
+    model_description: Optional[str] = None
+    developers: Optional[str] = None
+    shared_by: Optional[str] = None
+    model_type: Optional[str] = None
+    finetuned_from: Optional[str] = None
+    repo: Optional[str] = None
+
+    # Control variables for the templates
+    _is_on_huggingface: bool = field(default=False)
+
+    # Obtained internally from each trainer
+    framework: Optional[Framework] = None
+    train_size: Optional[float] = None
+    seed: Optional[int] = None
+    framework_kwargs: Dict[str, Any] = field(default_factory=dict)
+    task: Optional[TrainingTaskTypes] = None
+    output_dir: Optional[str] = None
+    version: Dict[str, str] = field(
+        default_factory=lambda: {
+            "python": python_version(),
+            "argilla": version,
+        },
+        init=False,
+    )
+    library_name: Optional[str] = None
+    # Used to store the arguments passed through `update_config` method. In the case
+    # of transformers for example, this corresponds to the `trainer_kwargs`.
+    update_config_kwargs: Dict[str, Any] = field(default_factory=lambda: {})
+
+    def __post_init__(self):
+        # To decide whether the dataset is loaded from from_huggingface or from_argilla
+        if self.dataset_name:
+            if is_on_huggingface(self.dataset_name, is_model=False):
+                self._is_on_huggingface = True
+        self.library_name = FRAMEWORK_TO_NAME_MAPPING[self.framework.value]
+        self.task_type = TRAINING_TASK_MAPPING[type(self.task)]
+
+    def _trainer_task__repr__(self) -> str:
+        """Generates the creation of the `TrainingTask*` call.
+
+        Returns:
+            Representation of the training task creation as a str.
+        """
+        pass
+
+    def _predict__repr__(self) -> str:
+        """Generates the call to the `predict` method, for the models that implement it, or
+        the underlying library implementation.
+
+        Returns:
+            A sample call to the predict method according to the type of model.
+        """
+        pass
+
+    def _update_config__repr__(self) -> str:
+        """Generates the call to the `update_config` method, for the models that implement it.
+        The arguments passed by the user to `update_config` are the difference between what
+        the model contains in the `trainer_kwargs`, which are different across frameworks, (not
+        only the internal variables but the the attribute name), and what it's internally
+        generated by the `init_training_args` method.
+
+        Returns:
+            A sample call to the predict method according to the type of model.
+        """
+        pass
+
+    def _to_dict(self) -> Dict[str, str]:
+        """Write this method to insert variables pertaining to a special framework only."""
+        return {}
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Main method to generate the variables that will be written in the model card."""
+        default_kwargs = {field.name: getattr(self, field.name) for field in fields(self)}
+
+        kwargs = {
+            "framework": self.framework.value,
+            "trainer_task_call": self._trainer_task__repr__(),
+            "predict_call": self._predict__repr__(),
+        }
+
+        if self.framework_kwargs:
+            kwargs["framework_kwargs"] = str(self.framework_kwargs)
+
+        if update_config_kwargs := self._update_config__repr__():
+            kwargs["update_config_call"] = update_config_kwargs
+
+        if extra_kwargs := self._to_dict():
+            kwargs.update(**extra_kwargs)
+
+        return {**default_kwargs, **kwargs}
+
+    def to_yaml(self, line_break=None) -> str:
+        return yaml_dump(
+            {key: value for key, value in self.to_dict().items() if key in YAML_FIELDS and value is not None},
+            sort_keys=False,
+            line_break=line_break,
+        ).strip()
+
+
+@dataclass
+class SpacyModelCardDataBase(FrameworkCardData):
+    lang: Optional["spacy.Language"] = None
+    gpu_id: Optional[int] = -1
+    optimize: Literal["efficiency", "accuracy"] = "efficiency"
+    pipeline: List[str] = field(default_factory=lambda: ["ner"])
+
+    def _trainer_task__repr__(self) -> str:
+        task_call = ""
+        if formatting_func := self.task.formatting_func:
+            task_call += getsource(formatting_func) + "\n"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
+        else:
+            text = f'dataset.field_by_name("{self.task.text.name}")'
+            training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
+        return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict__repr__(self) -> str:
+        return 'trainer.predict("This is awesome!")'
+
+    def _to_dict(self) -> Dict[str, str]:
+        return {"gpu_id": self.gpu_id, "lang": self.lang, "optimize": self.optimize}
+
+
+@dataclass
+class SpacyModelCardData(SpacyModelCardDataBase):
+    framework: Framework = Framework("spacy")
+    freeze_tok2vec: bool = False
+
+    def _to_dict(self) -> Dict[str, str]:
+        kwargs = super()._to_dict()
+        # Only add this variable if is different from the default
+        if freeze_tok2vec := self.freeze_tok2vec:
+            kwargs.update({"freeze_tok2vec": freeze_tok2vec})
+        return kwargs
+
+    def _update_config__repr__(self) -> Optional[str]:
+        return
+
+
+@dataclass
+class SpacyTransformersModelCardData(SpacyModelCardDataBase):
+    framework: Framework = Framework("spacy-transformers")
+    update_transformer: bool = True
+
+    def _to_dict(self) -> Dict[str, str]:
+        kwargs = super()._to_dict()
+        if update_transformer := not self.update_transformer:
+            kwargs.update({"update_transformer": update_transformer})
+        return kwargs
+
+    def _update_config__repr__(self) -> str:
+        return
+
+
+@dataclass
+class TransformersModelCardDataBase(FrameworkCardData):
+    tokenizer: "PreTrainedTokenizer" = ""
+
+    def _trainer_task__repr__(self) -> str:
+        task_call = ""
+        if formatting_func := self.task.formatting_func:
+            task_call += getsource(formatting_func) + "\n"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
+        else:
+            text = f'dataset.field_by_name("{self.task.text.name}")'
+            training_task_args = f'text={text}, label=dataset.question_by_name("{self.task.label.question.name}")'
+        return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict__repr__(self) -> str:
+        return 'trainer.predict("This is awesome!")'
+
+    def _to_dict(self) -> Dict[str, str]:
+        return {"tokenizer": self.tokenizer}
+
+
+@dataclass
+class TransformersModelCardData(TransformersModelCardDataBase):
+    framework: Framework = Framework("transformers")
+
+    def _trainer_task__repr__(self) -> str:
+        task_call = ""
+        if formatting_func := self.task.formatting_func:
+            task_call += getsource(formatting_func) + "\n"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
+        else:
+            if self.task_type == "for_text_classification":
+                training_task_args = (
+                    f'text=dataset.field_by_name("{self.task.text.name}"), '
+                    f'label=dataset.question_by_name("{self.task.label.question.name}")'
+                )
+            elif self.task_type == "for_question_answering":
+                training_task_args = (
+                    f'question=dataset.field_by_name("{self.task.question.name}"), '
+                    f'context=dataset.field_by_name("{self.task.context.name}"), '
+                    f'answer=dataset.question_by_name("{self.task.answer.name}")'
+                )
+            else:
+                raise NotImplementedError(f"Transformer doesn't have this `task_type` implemented: `{self.task_type}`")
+
+        return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict__repr__(self) -> str:
+        if self.task_type == "for_text_classification":
+            return super()._predict__repr__()
+        elif self.task_type == "for_question_answering":
+            return dedent(
+                f"""\
+                # This type of model has no `predict` method implemented from argilla, but can be done using the underlying library
+
+                from transformers import pipeline
+
+                qa_model = pipeline("question-answering", model="{self.output_dir}")
+                question = "Where do I live?"
+                context = "My name is Merve and I live in İstanbul."
+                qa_model(question = question, context = context)"""
+            )
+        else:
+            raise NotImplementedError(f"`task_type` not implemented: `{self.task_type}`")
+
+    def _update_config__repr__(self) -> Optional[str]:
+        from transformers import TrainingArguments
+
+        base_kwargs = get_default_args(TrainingArguments.__init__)
+
+        if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
+            return _update_config__repr__(updated_args)
+
+
+@dataclass
+class SetFitModelCardData(TransformersModelCardDataBase):
+    framework: Framework = Framework("setfit")
+    tags: Optional[List[str]] = field(default_factory=lambda: ["text-classification", "setfit", "argilla"])
+
+    def _update_config__repr__(self) -> Optional[str]:
+        from setfit import SetFitModel, SetFitTrainer
+
+        setfit_model_kwargs = get_default_args(SetFitModel._from_pretrained)
+        setfit_model_kwargs.update(get_default_args(SetFitModel.from_pretrained))
+
+        setfit_trainer_kwargs = get_default_args(SetFitTrainer.__init__)
+
+        # The following arguments are set by default internally, don't need to be shown.
+        self.update_config_kwargs.pop("model_id", None)
+        self.update_config_kwargs.pop("revision", None)
+        self.update_config_kwargs.pop("pretrained_model_name_or_path", None)
+        self.update_config_kwargs.pop("multi_target_strategy", None)
+        self.update_config_kwargs.pop("device", None)
+        self.update_config_kwargs.pop("column_mapping", None)
+        self.update_config_kwargs.pop("train_dataset", None)
+        self.update_config_kwargs.pop("eval_dataset", None)
+        self.update_config_kwargs.pop("model", None)
+
+        base_kwargs = {**setfit_model_kwargs, **setfit_trainer_kwargs}
+
+        if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
+            return _update_config__repr__(updated_args)
+
+
+@dataclass
+class SpanMarkerModelCardData(TransformersModelCardDataBase):
+    # Not implemented, once we have the FeedbackDataset ready for this model it should be aligned.
+    framework: Framework = Framework("span_marker")
+    tags: Optional[List[str]] = field(
+        default_factory=lambda: [
+            "span-marker",
+            "token-classification",
+            "ner",
+            "named-entity-recognition",
+        ]
+    )
+
+
+@dataclass
+class PeftModelCardData(TransformersModelCardDataBase):
+    framework: Framework = Framework("peft")
+
+    def _update_config__repr__(self) -> Optional[str]:
+        base_kwargs = {
+            "r": 8,
+            "target_modules": None,
+            "lora_alpha": 16,
+            "lora_dropout": 0.1,
+            "fan_in_fan_out": False,
+            "bias": "none",
+            "inference_mode": False,
+            "modules_to_save": None,
+            "init_lora_weights": True,
+        }
+
+        self.update_config_kwargs.pop("task_type", None)
+
+        if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
+            return _update_config__repr__(updated_args)
+
+
+@dataclass
+class OpenAIModelCardData(FrameworkCardData):
+    framework: Framework = Framework("openai")
+
+    def _trainer_task__repr__(self) -> str:
+        return _formatting_func_call(self.task.formatting_func, self.task_type)
+
+    def _predict__repr__(self) -> str:
+        return dedent(
+            """\
+            # After training we can use the model from the openai framework, you can take a look at their docs in order to use the model
+            import openai
+
+            completion = openai.ChatCompletion.create(
+                model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": "Hello!"}
+                ]
+            )
+            """
+        )
+
+
+@dataclass
+class TRLModelCardData(FrameworkCardData):
+    framework: Framework = Framework("trl")
+
+    def _trainer_task__repr__(self) -> str:
+        return _formatting_func_call(self.task.formatting_func, self.task_type)
+
+    def _predict__repr__(self) -> str:
+        predict_call = "# This type of model has no `predict` method implemented from argilla, but can be done using the underlying library\n"
+        if self.task_type == "for_supervised_fine_tuning":
+            return predict_call + dedent(
+                f"""\
+                from transformers import GenerationConfig, AutoTokenizer, GPT2LMHeadModel
+
+                def generate(model_id: str, instruction: str, context: str = "") -> str:
+                    model = GPT2LMHeadModel.from_pretrained(model_id)
+                    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+                    inputs = template.format(
+                        instruction=instruction,
+                        context=context,
+                        response="",
+                    ).strip()
+
+                    encoding = tokenizer([inputs], return_tensors="pt")
+                    outputs = model.generate(
+                        **encoding,
+                        generation_config=GenerationConfig(
+                            max_new_tokens=32,
+                            min_new_tokens=12,
+                            pad_token_id=tokenizer.pad_token_id,
+                            eos_token_id=tokenizer.eos_token_id,
+                        ),
+                    )
+                    return tokenizer.decode(outputs[0])
+
+                generate("{self.output_dir.replace('"', '')}", "Is a toad a frog?")"""
+            )
+        elif self.task_type == "for_reward_modeling":
+            return predict_call + dedent(
+                f"""\
+                from transformers import AutoTokenizer, AutoModelForSequenceClassification
+                import torch
+
+                model = AutoModelForSequenceClassification.from_pretrained("{self.output_dir.replace('"', "")}")
+                tokenizer = AutoTokenizer.from_pretrained("{self.output_dir.replace('"', "")}")
+
+                def get_score(model, tokenizer, text):
+                    # Tokenize the input sequences
+                    inputs = tokenizer(text, truncation=True, padding="max_length", max_length=512, return_tensors="pt")
+
+                    # Perform forward pass
+                    with torch.no_grad():
+                        outputs = model(**inputs)
+
+                    # Extract the logits
+                    return outputs.logits[0, 0].item()
+
+                # Example usage
+                example = template.format(instruction="your prompt", context="your context", response="response")
+
+                score = get_score(model, tokenizer, example)
+                print(score)"""
+            )
+        elif (self.task_type == "for_proximal_policy_optimization") or (
+            self.task_type == "for_direct_preference_optimization"
+        ):
+            return predict_call + dedent(
+                f"""\
+                from transformers import AutoModelForCausalLM, AutoTokenizer
+
+                model = AutoModelForCausalLM.from_pretrained("{self.output_dir.replace('"', "")}")
+                tokenizer = AutoTokenizer.from_pretrained("{self.output_dir.replace('"', "")}")
+                tokenizer.pad_token = tokenizer.eos_token
+
+                inputs = template.format(
+                    instruction="your prompt",
+                    context="your context",
+                    response=""
+                ).strip()
+                encoding = tokenizer([inputs], return_tensors="pt")
+                outputs = model.generate(**encoding, max_new_tokens=30)
+                output_text = tokenizer.decode(outputs[0])
+                print(output_text)"""
+            )
+        else:
+            raise NotImplementedError(f"Transformer doesn't have this `task_type` implemented: `{self.task_type}`")
+
+    def _update_config__repr__(self) -> Optional[str]:
+        if self.task_type == "for_proximal_policy_optimization":
+            # Similar to what happens with spacy, the current implementation
+            # doesn't render appropriately, for the moment let for the user to be written by hand.
+            return
+
+        else:
+            base_kwargs = {
+                # Let evaluation_strategy as if the eval dataset was passed by default
+                "evaluation_strategy": "epoch",
+                "logging_steps": 1,
+                "num_train_epochs": 1,
+            }
+
+        if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
+            return _update_config__repr__(updated_args)
+
+
+@dataclass
+class SentenceTransformerCardData(FrameworkCardData):
+    framework: Framework = Framework("sentence-transformers")
+    tags: Optional[List[str]] = field(
+        default_factory=lambda: ["sentence-similarity", "sentence-transformers", "argilla"]
+    )
+    cross_encoder: bool = False
+    # Used to gather internally the arguments passed to `update_config`
+    trainer_cls: Optional[Callable] = None
+
+    def _trainer_task__repr__(self) -> str:
+        task_call = ""
+        if formatting_func := self.task.formatting_func:
+            task_call += getsource(formatting_func) + "\n"
+            training_task_args = f"formatting_func={formatting_func.__name__}"
+        else:
+            texts = ", ".join([f'dataset.field_by_name("{text.name}")' for text in self.task.texts])
+            training_task_args = f"texts=[{texts}]{f', label=dataset.question_by_name({self.task.label.question.name})' if self.task.label else ''}"
+        return task_call + TEMPLATE_TASK_CALL.format(task_type=self.task_type, training_task_args=training_task_args)
+
+    def _predict__repr__(self) -> str:
+        return dedent(
+            """\
+            trainer.predict(
+                [
+                    ["Machine learning is so easy.", "Deep learning is so straightforward."],
+                    ["Machine learning is so easy.", "This is so difficult, like rocket science."],
+                    ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
+                ]
+            )"""
+        )
+
+    def _to_dict(self) -> Dict[str, str]:
+        if cross_encoder := self.cross_encoder:
+            return {"cross_encoder": cross_encoder}
+        return {}
+
+    def _update_config__repr__(self) -> Optional[str]:
+        base_kwargs = {
+            # model_kwargs
+            **get_default_args(self.trainer_cls.__init__),
+            # trainer_kwargs
+            **get_default_args(self.trainer_cls.fit),
+            # data_kwargs
+            "batch_size": 32,
+            "dataset_type": None,
+        }
+
+        if updated_args := _updated_arguments(base_kwargs, self.update_config_kwargs):
+            return _update_config__repr__(updated_args)
+
+
+def _formatting_func_call(formatting_func: Callable, task_type: str) -> str:
+    """Helper function to extract the code for the task call.
+
+    Args:
+        formatting_func: Function used to prepare the dataset for training.
+        task_type: Method called to prepare the dataset for training.
+
+    Returns:
+        formatting_func_call
+    """
+    task_call = getsource(formatting_func) + "\n"
+    training_task_args = f"formatting_func={formatting_func.__name__}"
+    return task_call + TEMPLATE_TASK_CALL.format(task_type=task_type, training_task_args=training_task_args)
+
+
+def _updated_arguments(base_kwargs: Dict[str, Any], current_kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    """Helper function to determine the arguments the user has given through the `update_config` method.
+
+    It does so by obtaining the difference between the `current_kwargs` and the `base_kwargs`
+    (the one used by default in the model).
+
+    The arguments can contain nested dicts (which are unhashable). Nested dicts (only one level of depth) are first
+    transformed to tuples of their items to check for differences in the values, and then transformed back.
+    Instantiated classes and type objects (a class not instantiated for example) are transformed to their name.
+
+    Args:
+        base_kwargs: default arguments.
+        current_kwargs: arguments registered in the model after training.
+
+    Returns:
+        user_kwargs: User provided kwargs.
+    """
+
+    base_kwargs_ = _prepare_dict_for_comparison(base_kwargs)
+    current_kwargs_ = _prepare_dict_for_comparison(current_kwargs)
+
+    set1 = set(base_kwargs_.items())
+    set2 = set(current_kwargs_.items())
+    user_kwargs = dict(set2.difference(set1))
+
+    return _prepare_dict_for_return(user_kwargs)
+
+
+def _prepare_dict_for_comparison(d):
+    # Transforms the nested lists/dicts to tuples and prepares
+    # them to be recovered after finding possible differences.
+    # If a "type" is found, it returns its string representation.
+    new_dict = {}
+    for k, v in d.items():
+        if isinstance(v, dict):
+            v = list(v.items())
+            v.append("__dict")  # Placeholder to create it back
+            v = tuple(v)
+        elif isinstance(v, list):
+            v = [v if isinstance(v, (int, float)) else str(v) for v in v]
+            v.append("__list")
+            v = tuple(v)
+        elif isinstance(v, (int, float, bool)):
+            # Left these values as they are
+            pass
+        else:
+            # The remaining cases are either strings (the general case)
+            # an instance of a class (in which case we use the str representation)
+            # or a class (in the best case in the classes' cases there exists a nice __repr__ method as to be
+            # valid for `update_config`, otherwise a better logic must be implemented).
+            if isinstance(v, type):
+                v = v.__name__
+            else:
+                v = str(v)
+
+        new_dict[k] = v
+    return new_dict
+
+
+def _prepare_dict_for_return(d):
+    # Prepares the dict with the original lists/dicts
+    new_dict = {}
+    for k, v in d.items():
+        if isinstance(v, tuple):
+            if "__dict" in v:
+                v = list(v)
+                v.remove("__dict")
+                v = dict(v)
+            elif "__list" in v:
+                v = list(v)
+                v.remove("__list")
+
+        new_dict[k] = v
+    return new_dict
+
+
+def _update_config__repr__(keyword_arguments: Dict[str, Any]) -> str:
+    """Creates the call to `update_config` on the model.
+
+    Args:
+        keyword_arguments: Arguments given by the user.
+
+    Returns:
+        trainer.update_config(...) call.
+    """
+    return f"\ntrainer.update_config({json.dumps(keyword_arguments, sort_keys=True, indent=4)})\n"
+
+
+def is_on_huggingface(repo_id: str, is_model: bool = True) -> bool:
+    # NOTE: kindly copied from https://github.com/tomaarsen/SpanMarkerNER/blob/main/span_marker/model_card.py
+    # Models with more than two 'sections' certainly are not public models
+    if len(repo_id.split("/")) > 2:
+        return False
+
+    try:
+        if is_model:
+            model_info(repo_id)
+        else:
+            dataset_info(repo_id)
+        return True
+    except:
+        # Fetching models can fail for many reasons: Repository not existing, no internet access, HF down, etc.
+        return False

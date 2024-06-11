@@ -20,21 +20,21 @@ from typing import TYPE_CHECKING, AsyncGenerator, Dict, Generator
 import httpx
 import pytest
 import pytest_asyncio
-from argilla._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla.client.api import log
-from argilla.client.apis.datasets import TextClassificationSettings
-from argilla.client.client import Argilla, AuthenticatedClient
-from argilla.client.datasets import read_datasets
-from argilla.client.models import Text2TextRecord, TextClassificationRecord
-from argilla.client.sdk.users import api as users_api
-from argilla.client.singleton import ArgillaSingleton
-from argilla.datasets import configure_dataset
-from argilla.utils import telemetry as client_telemetry
 from argilla_server import telemetry as server_telemetry
 from argilla_server.cli.database.migrate import migrate_db
 from argilla_server.database import get_async_db
 from argilla_server.models import User, UserRole, Workspace
 from argilla_server.settings import settings
+from argilla_v1._constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
+from argilla_v1.client.api import log
+from argilla_v1.client.apis.datasets import TextClassificationSettings
+from argilla_v1.client.client import Argilla, AuthenticatedClient
+from argilla_v1.client.datasets import read_datasets
+from argilla_v1.client.models import Text2TextRecord, TextClassificationRecord
+from argilla_v1.client.sdk.users import api as users_api
+from argilla_v1.client.singleton import ArgillaSingleton
+from argilla_v1.datasets import configure_dataset
+from argilla_v1.utils import telemetry as client_telemetry
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -270,7 +270,7 @@ def mocked_client(
     monkeypatch.setattr(httpx, "delete", client_.delete)
     monkeypatch.setattr(httpx, "put", client_.put)
 
-    from argilla.client.singleton import active_api
+    from argilla_v1.client.singleton import active_api
 
     rb_api = active_api()
     monkeypatch.setattr(rb_api.http_client, "__httpx__", client_)

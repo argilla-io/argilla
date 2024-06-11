@@ -13,16 +13,16 @@
 #  limitations under the License.
 
 import pytest
-from argilla.client.sdk.users.models import UserModel
-from argilla.client.sdk.workspaces.api import (
+from argilla_server.models import User
+from argilla_v1.client.sdk.users.models import UserModel
+from argilla_v1.client.sdk.workspaces.api import (
     create_workspace,
     create_workspace_user,
     delete_workspace_user,
     list_workspace_users,
 )
-from argilla.client.sdk.workspaces.models import WorkspaceModel
-from argilla.client.singleton import ArgillaSingleton
-from argilla_server.models import User
+from argilla_v1.client.sdk.workspaces.models import WorkspaceModel
+from argilla_v1.client.singleton import ArgillaSingleton
 
 from tests.factories import WorkspaceFactory, WorkspaceUserFactory
 

@@ -17,13 +17,13 @@ from typing import Any, Dict
 from uuid import UUID, uuid4
 
 import pytest
-from argilla.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
-from argilla.client.feedback.schemas.remote.records import (
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord, ResponseSchema, SuggestionSchema
+from argilla_v1.client.feedback.schemas.remote.records import (
     RemoteFeedbackRecord,
     RemoteResponseSchema,
     RemoteSuggestionSchema,
 )
-from argilla.client.sdk.v1.datasets.models import (
+from argilla_v1.client.sdk.v1.datasets.models import (
     FeedbackItemModel,
     FeedbackRankingValueModel,
     FeedbackResponseModel,

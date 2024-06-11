@@ -18,15 +18,15 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from argilla.cli.app import app
-from argilla.client.sdk.users.models import UserRole
-from argilla.client.sdk.v1.workspaces.models import WorkspaceModel
-from argilla.client.users import User
-from argilla.client.workspaces import Workspace
+from argilla_v1.cli.app import app
+from argilla_v1.client.sdk.users.models import UserRole
+from argilla_v1.client.sdk.v1.workspaces.models import WorkspaceModel
+from argilla_v1.client.users import User
+from argilla_v1.client.workspaces import Workspace
 from typer.testing import CliRunner
 
 if TYPE_CHECKING:
-    from argilla.cli.typer_ext import ArgillaTyper
+    from argilla_v1.cli.typer_ext import ArgillaTyper
     from pytest_mock import MockerFixture
 
 
@@ -42,13 +42,13 @@ def cli() -> "ArgillaTyper":
 
 @pytest.fixture
 def login_mock(mocker: "MockerFixture") -> None:
-    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=True)
-    mocker.patch("argilla.client.api.ArgillaSingleton.init")
+    mocker.patch("argilla_v1.client.login.ArgillaCredentials.exists", return_value=True)
+    mocker.patch("argilla_v1.client.api.ArgillaSingleton.init")
 
 
 @pytest.fixture
 def not_logged_mock(mocker: "MockerFixture") -> None:
-    mocker.patch("argilla.client.login.ArgillaCredentials.exists", return_value=False)
+    mocker.patch("argilla_v1.client.login.ArgillaCredentials.exists", return_value=False)
 
 
 @pytest.fixture

@@ -11,15 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import argilla
+import argilla_v1
 import pytest
-from argilla import TokenClassificationRecord
-from argilla.client import api
-from argilla.client.client import Argilla
-from argilla.client.sdk.commons.errors import NotFoundApiError
-from argilla.client.singleton import ArgillaSingleton
-from argilla.metrics import __all__ as ALL_METRICS
-from argilla.metrics import entity_consistency
+from argilla_v1 import TokenClassificationRecord
+from argilla_v1.client import api
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.sdk.commons.errors import NotFoundApiError
+from argilla_v1.client.singleton import ArgillaSingleton
+from argilla_v1.metrics import __all__ as ALL_METRICS
+from argilla_v1.metrics import entity_consistency
 
 from tests.integration.utils import delete_ignoring_errors
 
@@ -165,7 +165,7 @@ def test_search_keywords(api: Argilla):
         # This revision does not includes the vectors info, so tests will pass
         revision="fff5f572e4cc3127f196f46ba3f9914c6fd0d763",
     )
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = argilla_v1.read_datasets(dataset_ds, task="TokenClassification")
 
     delete_ignoring_errors(dataset)
     api.log(name=dataset, records=dataset_rb)
@@ -190,7 +190,7 @@ def test_log_data_with_vectors_and_update_ok(api: Argilla):
     delete_ignoring_errors(dataset)
 
     records = [
-        argilla.TokenClassificationRecord(
+        argilla_v1.TokenClassificationRecord(
             id=i,
             text=text,
             tokens=text.split(),
@@ -226,7 +226,7 @@ def test_log_data_with_vectors_and_partial_update_ok(api: Argilla):
     # Logging records with vector info
 
     records = [
-        argilla.TokenClassificationRecord(id=i, text=text, tokens=text.split(), vectors={"test-vector": [i] * 5})
+        argilla_v1.TokenClassificationRecord(id=i, text=text, tokens=text.split(), vectors={"test-vector": [i] * 5})
         for i in range(0, expected_n_records)
     ]
     api.log(records=records, name=dataset)
@@ -268,7 +268,7 @@ def test_logging_data_with_concurrency(api: Argilla):
     dataset = "test_logging_data_with_concurrency"
     dataset_ds = load_dataset("rubrix/gutenberg_spacy-ner", split="train")
 
-    dataset_rb = argilla.read_datasets(dataset_ds, task="TokenClassification")
+    dataset_rb = argilla_v1.read_datasets(dataset_ds, task="TokenClassification")
 
     delete_ignoring_errors(dataset)
     api.log(name=dataset, records=dataset_rb, batch_size=int(len(dataset_ds) / 4), num_threads=4)

@@ -15,16 +15,16 @@
 from typing import Callable
 
 import pytest
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.schemas import (
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.schemas import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.metadata import TermsMetadataProperty
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.feedback.schemas.metadata import TermsMetadataProperty
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
 
 parametrized_task_templates = {
     "for_question_answering": (

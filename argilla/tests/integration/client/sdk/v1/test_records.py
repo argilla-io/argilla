@@ -12,9 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla.client.singleton
+import argilla_v1.client.singleton
 import pytest
-from argilla import (
+from argilla_server.models import User as ServerUser
+from argilla_server.models import UserRole
+from argilla_v1 import (
     FeedbackDataset,
     FeedbackRecord,
     FloatMetadataProperty,
@@ -26,11 +28,9 @@ from argilla import (
     VectorSettings,
     Workspace,
 )
-from argilla.client.client import Argilla
-from argilla.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
-from argilla.client.sdk.v1.records.models import FeedbackItemModel
-from argilla_server.models import User as ServerUser
-from argilla_server.models import UserRole
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.sdk.v1.records.api import delete_record, delete_suggestions, update_record
+from argilla_v1.client.sdk.v1.records.models import FeedbackItemModel
 
 from tests.factories import (
     DatasetFactory,
@@ -60,7 +60,7 @@ def test_dataset():
 class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
 
         workspace = Workspace.create(f"workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
@@ -74,7 +74,7 @@ class TestRecordsSDK:
             ],
         )
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         remote_dataset = feedback_dataset.push_to_argilla(name="dataset", workspace=workspace)
         remote_dataset.add_records([FeedbackRecord(fields={"text": "text"})])
@@ -82,7 +82,7 @@ class TestRecordsSDK:
         record = remote_dataset.records[0]
 
         response = update_record(
-            client=argilla.client.singleton.active_api().client.httpx,
+            client=argilla_v1.client.singleton.active_api().client.httpx,
             id=record.id,
             data={
                 "vectors": {
@@ -102,7 +102,7 @@ class TestRecordsSDK:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: ServerUser, role: UserRole) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(f"workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
@@ -115,7 +115,7 @@ class TestRecordsSDK:
             ],
         )
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         remote_dataset = feedback_dataset.push_to_argilla(name="dataset", workspace=workspace)
         remote_dataset.add_records([FeedbackRecord(fields={"text": "text"})])
@@ -123,7 +123,7 @@ class TestRecordsSDK:
         record = remote_dataset.records[0]
 
         response = update_record(
-            client=argilla.client.singleton.active_api().client.httpx,
+            client=argilla_v1.client.singleton.active_api().client.httpx,
             id=record.id,
             data={
                 "vectors": {
@@ -145,12 +145,12 @@ class TestRecordsSDK:
     async def test_delete_record(self, owner: ServerUser, test_dataset: FeedbackDataset, role: UserRole) -> None:
         user = await UserFactory.create(role=role)
 
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
 
         workspace = Workspace.create("test-workspace")
         workspace.add_user(user.id)
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
         remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace)
         remote.add_records(
             [
@@ -158,7 +158,7 @@ class TestRecordsSDK:
                 FeedbackRecord(fields={"text": "Hello world!"}),
             ]
         )
-        argilla_api = argilla.client.singleton.active_api()
+        argilla_api = argilla_v1.client.singleton.active_api()
 
         for record in remote.records:
             response = delete_record(client=argilla_api.client.httpx, id=record.id)
@@ -171,7 +171,7 @@ class TestRecordsSDK:
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(role=role, workspaces=[workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         dataset = FeedbackDataset(
             fields=[TextField(name="text-field")],
@@ -214,7 +214,7 @@ class TestRecordsSDK:
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(role=role, workspaces=[workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
         dataset = FeedbackDataset(
             fields=[TextField(name="text-field")],

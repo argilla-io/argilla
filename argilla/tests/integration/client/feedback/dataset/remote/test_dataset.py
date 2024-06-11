@@ -16,37 +16,37 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Tuple, Type
 from uuid import UUID
 
-import argilla as rg
-import argilla.client.singleton
+import argilla_v1 as rg
+import argilla_v1.client.singleton
 import pytest
-from argilla import FeedbackRecord, SuggestionSchema
-from argilla.client.feedback.dataset import FeedbackDataset
-from argilla.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.metadata import (
+from argilla_server.models import User as ServerUser
+from argilla_server.settings import settings
+from argilla_v1 import FeedbackRecord, SuggestionSchema
+from argilla_v1.client.feedback.dataset import FeedbackDataset
+from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.questions import (
+from argilla_v1.client.feedback.schemas.questions import (
     LabelQuestion,
     MultiLabelQuestion,
     RankingQuestion,
     RatingQuestion,
     TextQuestion,
 )
-from argilla.client.feedback.schemas.remote.metadata import (
+from argilla_v1.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
-from argilla.client.feedback.schemas.vector_settings import VectorSettings
-from argilla.client.sdk.commons.errors import ValidationApiError
-from argilla.client.sdk.users.models import UserRole
-from argilla.client.workspaces import Workspace
-from argilla_server.models import User as ServerUser
-from argilla_server.settings import settings
+from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes
+from argilla_v1.client.feedback.schemas.vector_settings import VectorSettings
+from argilla_v1.client.sdk.commons.errors import ValidationApiError
+from argilla_v1.client.sdk.users.models import UserRole
+from argilla_v1.client.workspaces import Workspace
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -60,8 +60,11 @@ from tests.factories import (
 )
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
-    from argilla.client.sdk.users.models import UserModel as User
+    from argilla_v1.client.feedback.schemas.types import (
+        AllowedMetadataPropertyTypes,
+        AllowedRemoteMetadataPropertyTypes,
+    )
+    from argilla_v1.client.sdk.users.models import UserModel as User
 
 
 @pytest.fixture()
@@ -115,7 +118,7 @@ class TestRemoteFeedbackDataset:
         ],
     )
     async def test_add_records(self, owner: "User", feedback_dataset: FeedbackDataset, record: FeedbackRecord) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
 
         remote = feedback_dataset.push_to_argilla(name="test_dataset", workspace=ws)
@@ -126,7 +129,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.records) == 1
 
     def test_update_records(self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
         test_dataset_with_metadata_properties.add_records(
@@ -151,7 +154,7 @@ class TestRemoteFeedbackDataset:
     async def test_update_records_with_suggestions(
         self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
         test_dataset_with_metadata_properties.add_records(
@@ -183,7 +186,7 @@ class TestRemoteFeedbackDataset:
     async def test_update_records_with_empty_list_of_suggestions(
         self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
         remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
@@ -219,7 +222,7 @@ class TestRemoteFeedbackDataset:
     async def test_update_records_with_metadata_validation_error(
         self, owner: "User", test_dataset_with_metadata_properties: FeedbackDataset, metadata: Tuple[str, Any]
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = rg.Workspace.create(name="test-workspace")
 
         test_dataset_with_metadata_properties.add_records(FeedbackRecord(fields={"text": "Hello world!"}))
@@ -247,7 +250,7 @@ class TestRemoteFeedbackDataset:
             record.update()
 
     async def test_from_argilla(self, feedback_dataset: FeedbackDataset, owner: "User") -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="unit-test")
 
         remote = feedback_dataset.push_to_argilla(name="unit-test-dataset", workspace="unit-test")
@@ -314,7 +317,7 @@ class TestRemoteFeedbackDataset:
         metadata_property: "AllowedMetadataPropertyTypes",
         RemoteMetadataPropertyCls: Type["AllowedRemoteMetadataPropertyTypes"],
     ) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -363,7 +366,7 @@ class TestRemoteFeedbackDataset:
         metadata_properties: List["AllowedMetadataPropertyTypes"],
         RemoteMetadataPropertiesClasses: List[Type["AllowedRemoteMetadataPropertyTypes"]],
     ) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         dataset = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -381,7 +384,7 @@ class TestRemoteFeedbackDataset:
             assert len(remote_dataset.metadata_properties) == (idx + 1)
 
     async def test_bulk_update_metadata_properties(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -401,7 +404,7 @@ class TestRemoteFeedbackDataset:
             assert metadata_property.visible_for_annotators is False
 
     def test_update_metadata_property_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -419,7 +422,7 @@ class TestRemoteFeedbackDataset:
             assert metadata_property.visible_for_annotators is False
 
     def test_bulk_delete_metadata_properties(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -432,7 +435,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.metadata_properties) == 0
 
     def test_add_vector_settings(self, owner: "User"):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
@@ -457,7 +460,7 @@ class TestRemoteFeedbackDataset:
         assert other_vector_settings.dimensions == remote_vector_settings.dimensions
 
     def test_add_vector_setting_with_the_same_name(self, owner: "User"):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset = FeedbackDataset(fields=[TextField(name="text")], questions=[TextQuestion(name="text")])
@@ -471,7 +474,7 @@ class TestRemoteFeedbackDataset:
             remote_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=10))
 
     def test_update_vectors_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset.add_vector_settings(VectorSettings(name="vector-settings-1", dimensions=4))
@@ -485,7 +488,7 @@ class TestRemoteFeedbackDataset:
         assert vector_settings.title == "New Vector Settings Title"
 
     def test_bulk_update_vectors_settings(self, owner: "User", feedback_dataset: FeedbackDataset):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -499,7 +502,7 @@ class TestRemoteFeedbackDataset:
             assert vector_settings.title == "New Vector Settings Title"
 
     def test_update_vectors_settings_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -513,7 +516,7 @@ class TestRemoteFeedbackDataset:
             assert vector_settings.title == "New Vector Settings Title"
 
     def test_delete_vectors_settings(self, owner: "User"):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset = FeedbackDataset(
@@ -527,7 +530,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.vectors_settings) == 0
 
     def test_bulk_delete_vectors_settings(self, owner: "User"):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset = FeedbackDataset(
@@ -546,7 +549,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.vectors_settings) == 0
 
     def test_delete_vector_settings_one_by_one(self, owner: "User"):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset = FeedbackDataset(
@@ -569,7 +572,7 @@ class TestRemoteFeedbackDataset:
         assert len(remote_dataset.vectors_settings) == 0
 
     def test_add_records_with_vectors(self, owner: "User", feedback_dataset: FeedbackDataset):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset.add_vector_settings(VectorSettings(name="vector", dimensions=4))
@@ -602,7 +605,7 @@ class TestRemoteFeedbackDataset:
     def test_add_records_with_invalid_vectors(
         self, owner: "User", feedback_dataset: FeedbackDataset, invalid_vectors: dict, expected_error: str
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         vector_dimension = 4
@@ -618,7 +621,7 @@ class TestRemoteFeedbackDataset:
             )
 
     def test_delete_metadata_property_one_by_one(self, owner: "User", feedback_dataset: FeedbackDataset) -> None:
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -641,7 +644,7 @@ class TestRemoteFeedbackDataset:
         for status, record in zip(statuses, await RecordFactory.create_batch(size=len(statuses), dataset=dataset)):
             await ResponseFactory.create(record=record, values={text_question.name: {"value": ""}}, status=status)
 
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
         assert remote_dataset.id == dataset.id
         assert all(
@@ -655,11 +658,11 @@ class TestRemoteFeedbackDataset:
     ) -> None:
         user = await UserFactory.create(role=role)
 
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         ws = Workspace.create(name="test-workspace")
         ws.add_user(user.id)
 
-        argilla.client.singleton.init(api_key=user.api_key, workspace=ws.name)
+        argilla_v1.client.singleton.init(api_key=user.api_key, workspace=ws.name)
 
         remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote.add_records(
@@ -684,12 +687,12 @@ class TestRemoteFeedbackDataset:
     ) -> None:
         user = await UserFactory.create(role=role)
 
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
 
         ws = Workspace.create(name="test-workspace")
         ws.add_user(user.id)
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         remote = test_dataset_with_metadata_properties.push_to_argilla(name="test_dataset", workspace=ws)
         remote_dataset = FeedbackDataset.from_argilla(id=remote.id)
         remote_dataset.delete()
@@ -705,7 +708,7 @@ class TestRemoteFeedbackDataset:
         await RecordFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
 
         with pytest.raises(PermissionError, match=f"User with role={role} is not allowed to call `delete`"):
@@ -720,7 +723,7 @@ class TestRemoteFeedbackDataset:
         await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         remote_datasets = FeedbackDataset.list()
         assert len(remote_datasets) == 1
         assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
@@ -735,7 +738,7 @@ class TestRemoteFeedbackDataset:
         await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         remote_datasets = FeedbackDataset.list(workspace=dataset.workspace.name)
         assert len(remote_datasets) == 1
         assert all(isinstance(remote_dataset, RemoteFeedbackDataset) for remote_dataset in remote_datasets)
@@ -750,7 +753,7 @@ class TestRemoteFeedbackDataset:
         await TermsMetadataPropertyFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         remote_dataset = FeedbackDataset.from_argilla(id=dataset.id)
 
         assert isinstance(remote_dataset.id, UUID)
@@ -769,8 +772,8 @@ class TestRemoteFeedbackDataset:
         feedback_dataset_records: List[FeedbackRecord],
         db: AsyncSession,
     ) -> None:
-        argilla.client.singleton.active_api()
-        argilla.client.singleton.init(api_key=argilla_user.api_key)
+        argilla_v1.client.singleton.active_api()
+        argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
         dataset = FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -796,8 +799,8 @@ class TestRemoteFeedbackDataset:
         feedback_dataset_records: List[FeedbackRecord],
         db: AsyncSession,
     ) -> None:
-        argilla.client.singleton.active_api()
-        argilla.client.singleton.init(api_key=argilla_user.api_key)
+        argilla_v1.client.singleton.active_api()
+        argilla_v1.client.singleton.init(api_key=argilla_user.api_key)
 
         dataset = FeedbackDataset(
             guidelines=feedback_dataset_guidelines,
@@ -824,7 +827,7 @@ class TestRemoteFeedbackDataset:
         await RecordFactory.create_batch(dataset=dataset, size=10)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
-        argilla.client.singleton.init(api_key=user.api_key)
+        argilla_v1.client.singleton.init(api_key=user.api_key)
         ds = FeedbackDataset.from_argilla(id=dataset.id)
 
         with pytest.raises(ValueError, match="`FeedbackRecord.fields` does not match the expected schema"):
@@ -844,7 +847,7 @@ class TestRemoteFeedbackDataset:
     async def test_add_records_with_metadata_including_nan_values(
         self, owner: "User", feedback_dataset: FeedbackDataset
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         remote_dataset = feedback_dataset.push_to_argilla(name="test_dataset", workspace=workspace)
@@ -864,7 +867,7 @@ class TestRemoteFeedbackDataset:
     async def test_add_records_with_metadata_including_none_values(
         self, owner: "User", feedback_dataset: FeedbackDataset
     ):
-        argilla.client.singleton.init(api_key=owner.api_key)
+        argilla_v1.client.singleton.init(api_key=owner.api_key)
         workspace = Workspace.create(name="test-workspace")
 
         feedback_dataset.add_records(

@@ -12,12 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla
+import argilla_v1
 import pytest
-from argilla.client.api import load, log
-from argilla.client.models import TokenClassificationRecord
-from argilla.metrics import entity_consistency
-from argilla.metrics.token_classification import (
+from argilla_v1.client.api import load, log
+from argilla_v1.client.models import TokenClassificationRecord
+from argilla_v1.metrics import entity_consistency
+from argilla_v1.metrics.token_classification import (
     Annotations,
     entity_capitalness,
     entity_density,

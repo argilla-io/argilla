@@ -15,9 +15,9 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla.client.client import Argilla
-from argilla.client.sdk.v1.metadata_properties.api import delete_metadata_property, update_metadata_property
 from argilla_server.models import UserRole
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.sdk.v1.metadata_properties.api import delete_metadata_property, update_metadata_property
 
 from tests.factories import (
     DatasetFactory,

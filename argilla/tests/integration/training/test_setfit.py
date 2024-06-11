@@ -12,8 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla.client.models import TextClassificationRecord
-from argilla.training import ArgillaTrainer
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.training import ArgillaTrainer
 
 from .helpers import train_with_cleanup
 

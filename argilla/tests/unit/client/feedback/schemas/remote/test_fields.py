@@ -17,10 +17,10 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
-from argilla.client.feedback.schemas.enums import FieldTypes
-from argilla.client.feedback.schemas.fields import TextField
-from argilla.client.feedback.schemas.remote.fields import RemoteTextField
-from argilla.client.sdk.v1.datasets.models import FeedbackFieldModel
+from argilla_v1.client.feedback.schemas.enums import FieldTypes
+from argilla_v1.client.feedback.schemas.fields import TextField
+from argilla_v1.client.feedback.schemas.remote.fields import RemoteTextField
+from argilla_v1.client.sdk.v1.datasets.models import FeedbackFieldModel
 
 
 @pytest.mark.parametrize(

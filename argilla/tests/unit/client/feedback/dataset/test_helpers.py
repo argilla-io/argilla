@@ -15,13 +15,13 @@
 from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 import pytest
-from argilla.client.feedback.dataset.helpers import generate_pydantic_schema_for_metadata
-from argilla.client.feedback.schemas.metadata import (
+from argilla_v1.client.feedback.dataset.helpers import generate_pydantic_schema_for_metadata
+from argilla_v1.client.feedback.schemas.metadata import (
     FloatMetadataProperty,
     IntegerMetadataProperty,
     TermsMetadataProperty,
 )
-from argilla.client.feedback.schemas.remote.metadata import (
+from argilla_v1.client.feedback.schemas.remote.metadata import (
     RemoteFloatMetadataProperty,
     RemoteIntegerMetadataProperty,
     RemoteTermsMetadataProperty,
@@ -30,7 +30,10 @@ from argilla.client.feedback.schemas.remote.metadata import (
 from tests.pydantic_v1 import ValidationError
 
 if TYPE_CHECKING:
-    from argilla.client.feedback.schemas.types import AllowedMetadataPropertyTypes, AllowedRemoteMetadataPropertyTypes
+    from argilla_v1.client.feedback.schemas.types import (
+        AllowedMetadataPropertyTypes,
+        AllowedRemoteMetadataPropertyTypes,
+    )
 
 
 @pytest.mark.parametrize(

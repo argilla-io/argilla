@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from argilla.utils.span_utils import SpanUtils
+from argilla_v1.utils.span_utils import SpanUtils
 
 
 def test_init():

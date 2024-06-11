@@ -16,14 +16,14 @@ import sys
 
 import numpy as np
 import pytest
-from argilla.client.models import TextClassificationRecord
-from argilla.labeling.text_classification import (
+from argilla_v1.client.models import TextClassificationRecord
+from argilla_v1.labeling.text_classification import (
     FlyingSquid,
     Snorkel,
     WeakLabels,
     WeakMultiLabels,
 )
-from argilla.labeling.text_classification.label_models import (
+from argilla_v1.labeling.text_classification.label_models import (
     LabelModel,
     MajorityVoter,
     MissingAnnotationError,
@@ -43,7 +43,7 @@ def weak_labels(monkeypatch):
             TextClassificationRecord(text="test", annotation="neutral"),
         ]
 
-    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
+    monkeypatch.setattr("argilla_v1.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array(
@@ -67,7 +67,7 @@ def weak_labels_from_guide(monkeypatch, resources):
     def mock_load(*args, **kwargs):
         return [TextClassificationRecord(text="mock", id=i) for i in range(len(matrix))]
 
-    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
+    monkeypatch.setattr("argilla_v1.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         return matrix, annotation, {None: -1, "SPAM": 0, "HAM": 1}
@@ -87,7 +87,7 @@ def weak_multi_labels(monkeypatch):
             TextClassificationRecord(text="test", multi_label=True),
         ]
 
-    monkeypatch.setattr("argilla.labeling.text_classification.weak_labels.load", mock_load)
+    monkeypatch.setattr("argilla_v1.labeling.text_classification.weak_labels.load", mock_load)
 
     def mock_apply(self, *args, **kwargs):
         weak_label_matrix = np.array(

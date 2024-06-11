@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import argilla.client.singleton
+import argilla_v1.client.singleton
 import pytest
-from argilla import (
+from argilla_server.models import DatasetStatus, User, UserRole
+from argilla_v1 import (
     FeedbackDataset,
     FloatMetadataProperty,
     IntegerMetadataProperty,
@@ -23,9 +24,9 @@ from argilla import (
     TextQuestion,
     Workspace,
 )
-from argilla.client.client import Argilla
-from argilla.client.feedback.schemas.records import FeedbackRecord
-from argilla.client.sdk.v1.datasets.api import (
+from argilla_v1.client.client import Argilla
+from argilla_v1.client.feedback.schemas.records import FeedbackRecord
+from argilla_v1.client.sdk.v1.datasets.api import (
     add_field,
     add_metadata_property,
     add_question,
@@ -43,7 +44,7 @@ from argilla.client.sdk.v1.datasets.api import (
     search_records,
     update_records,
 )
-from argilla.client.sdk.v1.datasets.models import (
+from argilla_v1.client.sdk.v1.datasets.models import (
     FeedbackDatasetModel,
     FeedbackFieldModel,
     FeedbackItemModel,
@@ -56,8 +57,7 @@ from argilla.client.sdk.v1.datasets.models import (
     FeedbackRecordsSearchVectorQuery,
     FeedbackSuggestionModel,
 )
-from argilla.client.sdk.v1.records.api import set_suggestion
-from argilla_server.models import DatasetStatus, User, UserRole
+from argilla_v1.client.sdk.v1.records.api import set_suggestion
 
 from tests.factories import (
     DatasetFactory,
@@ -314,13 +314,13 @@ async def test_get_metadata_properties(role: UserRole) -> None:
 async def test_add_records(owner: User, test_dataset: FeedbackDataset, role: UserRole) -> None:
     user = await UserFactory.create(role=role)
 
-    argilla.client.singleton.init(api_key=owner.api_key)
+    argilla_v1.client.singleton.init(api_key=owner.api_key)
     workspace = Workspace.create(name="test-workspace")
     workspace.add_user(user.id)
 
-    argilla.client.singleton.init(api_key=user.api_key)
+    argilla_v1.client.singleton.init(api_key=user.api_key)
     remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace)
-    argilla_api = argilla.client.singleton.active_api()
+    argilla_api = argilla_v1.client.singleton.active_api()
 
     response = add_records(client=argilla_api.client.httpx, id=remote.id, records=[{"fields": {"text": "test_value"}}])
 
@@ -353,7 +353,7 @@ async def test_update_records(test_dataset: FeedbackDataset, role: UserRole) -> 
         ]
     )
 
-    argilla.client.singleton.init(api_key=user.api_key)
+    argilla_v1.client.singleton.init(api_key=user.api_key)
     remote = test_dataset.push_to_argilla(name="test-dataset", workspace=workspace.name)
 
     records_to_update = []
@@ -366,7 +366,7 @@ async def test_update_records(test_dataset: FeedbackDataset, role: UserRole) -> 
             }
         )
 
-    argilla_api = argilla.client.singleton.active_api()
+    argilla_api = argilla_v1.client.singleton.active_api()
     response = update_records(client=argilla_api.client.httpx, id=remote.id, records=records_to_update)
 
     assert response.status_code == 204
@@ -404,7 +404,7 @@ async def test_add_suggestion(role: UserRole) -> None:
     workspace = await WorkspaceFactory.create()
     user = await UserFactory.create(role=role, workspaces=[workspace])
 
-    argilla.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
+    argilla_v1.client.singleton.init(api_key=user.api_key, workspace=workspace.name)
 
     dataset = FeedbackDataset(fields=[TextField(name="text-field")], questions=[TextQuestion(name="text-question")])
 

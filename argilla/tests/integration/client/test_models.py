@@ -20,7 +20,7 @@ from typing import Any, Optional
 import numpy
 import pandas as pd
 import pytest
-from argilla.client.models import (
+from argilla_v1.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,

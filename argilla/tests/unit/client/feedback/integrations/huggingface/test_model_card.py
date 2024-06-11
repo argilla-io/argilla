@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 import pytest
-from argilla.client.feedback.integrations.huggingface.model_card.model_card import (
+from argilla_v1.client.feedback.integrations.huggingface.model_card.model_card import (
     _prepare_dict_for_comparison,
     _updated_arguments,
 )
-from argilla.training.utils import get_default_args
+from argilla_v1.training.utils import get_default_args
 from transformers import TrainingArguments
 
 default_transformer_args = get_default_args(TrainingArguments.__init__)

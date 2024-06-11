@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import papermill
-from argilla._constants import DEFAULT_API_KEY
+from argilla_v1._constants import DEFAULT_API_KEY
 
 ARGILLA_DOCS_PATH = Path(__file__).parent.parent.parent / "docs"
 

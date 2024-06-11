@@ -14,10 +14,10 @@
 
 import re
 
-import argilla as rg
+import argilla_v1 as rg
 import pytest
-from argilla.client.feedback.training.schemas.return_types import ChatCompletionReturnTypes
-from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
+from argilla_v1.client.feedback.training.schemas.return_types import ChatCompletionReturnTypes
+from argilla_v1.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 from tests.integration.client.feedback.helpers import formatting_func_chat_completion
 

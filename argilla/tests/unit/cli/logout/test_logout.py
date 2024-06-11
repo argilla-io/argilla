@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 
 def test_logout(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    init_callback_mock = mocker.patch("argilla.cli.callback.init_callback")
-    argilla_credentials_remove_mock = mocker.patch("argilla.client.login.ArgillaCredentials.remove")
+    init_callback_mock = mocker.patch("argilla_v1.cli.callback.init_callback")
+    argilla_credentials_remove_mock = mocker.patch("argilla_v1.client.login.ArgillaCredentials.remove")
 
     result = cli_runner.invoke(
         cli,
@@ -35,7 +35,7 @@ def test_logout(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
 
 
 def test_logout_fails(cli_runner: "CliRunner", cli: "Typer", mocker: "MockerFixture"):
-    init_callback_mock = mocker.patch("argilla.cli.callback.init_callback")
+    init_callback_mock = mocker.patch("argilla_v1.cli.callback.init_callback")
     init_callback_mock.side_effect = ValueError("Error")
 
     result = cli_runner.invoke(

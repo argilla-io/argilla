@@ -21,7 +21,7 @@ import datasets
 import pandas as pd
 import pytest
 import spacy
-from argilla.client.datasets import (
+from argilla_v1.client.datasets import (
     DatasetBase,
     DatasetForText2Text,
     DatasetForTextClassification,
@@ -30,12 +30,12 @@ from argilla.client.datasets import (
     read_datasets,
     read_pandas,
 )
-from argilla.client.models import (
+from argilla_v1.client.models import (
     Text2TextRecord,
     TextClassificationRecord,
     TokenClassificationRecord,
 )
-from argilla.datasets import TextClassificationSettings
+from argilla_v1.datasets import TextClassificationSettings
 
 _HF_HUB_ACCESS_TOKEN = os.getenv("HF_HUB_ACCESS_TOKEN")
 
@@ -58,7 +58,7 @@ class TestDatasetBase:
             DatasetBase()
 
     def test_init(self, monkeypatch, singlelabel_textclassification_records):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
 
         ds = DatasetBase(
             records=singlelabel_textclassification_records,
@@ -94,7 +94,7 @@ class TestDatasetBase:
             ds._from_pandas("mock")
 
     def test_to_dataframe(self, monkeypatch, singlelabel_textclassification_records):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
 
         df = DatasetBase(singlelabel_textclassification_records).to_pandas()
 
@@ -103,7 +103,7 @@ class TestDatasetBase:
         assert list(df.columns) == list(TextClassificationRecord.__fields__)
 
     def test_prepare_dataset_and_column_mapping(self, monkeypatch):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
 
         ds = datasets.Dataset.from_dict(
             {"unsupported_column": [None], "ID": [1], "inputs_a": ["a"], "inputs_b": ["b"], "metadata": ["mock"]}
@@ -126,8 +126,8 @@ class TestDatasetBase:
             assert col_to_be_joined == {"inputs": ["inputs_a", "inputs_b"], "metadata": ["metadata"]}
 
     def test_from_pandas(self, monkeypatch):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._from_pandas", lambda x: x)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._from_pandas", lambda x: x)
 
         df = pd.DataFrame({"unsupported_column": [None]})
 
@@ -140,9 +140,9 @@ class TestDatasetBase:
             assert len(empty_df.columns) == 0
 
     def test_to_datasets(self, monkeypatch):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", "mock")
         monkeypatch.setattr(
-            "argilla.client.datasets.DatasetBase._to_datasets_dict",
+            "argilla_v1.client.datasets.DatasetBase._to_datasets_dict",
             lambda x: {"metadata": [{"int_or_str": 1}, {"int_or_str": "str"}]},
         )
 
@@ -153,13 +153,13 @@ class TestDatasetBase:
             assert len(datasets_ds) == 0
 
     def test_datasets_not_installed(self, monkeypatch):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", "mock")
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", "mock")
         monkeypatch.setattr(sys, "meta_path", [], raising=False)
         with pytest.raises(ModuleNotFoundError, match="pip install datasets>1.17.0"):
             DatasetBase().to_datasets()
 
     def test_iter_len_getitem(self, monkeypatch, singlelabel_textclassification_records):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         dataset = DatasetBase(singlelabel_textclassification_records)
 
         for record, expected in zip(dataset, singlelabel_textclassification_records):
@@ -169,7 +169,7 @@ class TestDatasetBase:
         assert dataset[1] is singlelabel_textclassification_records[1]
 
     def test_setitem_delitem(self, monkeypatch, singlelabel_textclassification_records):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         dataset = DatasetBase(
             [rec.copy(deep=True) for rec in singlelabel_textclassification_records],
         )
@@ -193,7 +193,7 @@ class TestDatasetBase:
             dataset[0] = Text2TextRecord(text="mock")
 
     def test_prepare_for_training_train_test_splits(self, monkeypatch, singlelabel_textclassification_records):
-        monkeypatch.setattr("argilla.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
+        monkeypatch.setattr("argilla_v1.client.datasets.DatasetBase._RECORD_TYPE", TextClassificationRecord)
         temp_records = copy.deepcopy(singlelabel_textclassification_records)
         settings = TextClassificationSettings(["a", "b", "c"])
         ds = DatasetBase(temp_records)
@@ -993,7 +993,7 @@ def test_read_pandas(monkeypatch, task, dataset_class):
     def mock_from_pandas(mock):
         return mock
 
-    monkeypatch.setattr(f"argilla.client.datasets.{dataset_class}.from_pandas", mock_from_pandas)
+    monkeypatch.setattr(f"argilla_v1.client.datasets.{dataset_class}.from_pandas", mock_from_pandas)
 
     assert read_pandas("mock", task) == "mock"
 
@@ -1010,6 +1010,6 @@ def test_read_datasets(monkeypatch, task, dataset_class):
     def mock_from_datasets(mock):
         return mock
 
-    monkeypatch.setattr(f"argilla.client.datasets.{dataset_class}.from_datasets", mock_from_datasets)
+    monkeypatch.setattr(f"argilla_v1.client.datasets.{dataset_class}.from_datasets", mock_from_datasets)
 
     assert read_datasets("mock", task) == "mock"
