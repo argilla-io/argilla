@@ -1,5 +1,5 @@
 <template>
-  <div class="resizable">
+  <div class="resizable" :class="resizing ? '--resizing' : ''">
     <div class="resizable__left"><slot name="left" /></div>
 
     <div class="resizable__bar" ref="resizableBar">
@@ -35,6 +35,7 @@ export default {
       resizer: null,
       leftSide: null,
       rightSide: null,
+      resizing: false,
     };
   },
   mounted() {
@@ -57,8 +58,8 @@ export default {
   },
   methods: {
     limitElementWidth(element) {
-      element.style["max-width"] = "100%";
-      element.style["min-width"] = "30%";
+      element.style["max-width"] = "65%";
+      element.style["min-width"] = "35%";
     },
     savePositionOnStartResizing(e) {
       this.leftSidePrevPosition = {
@@ -67,6 +68,7 @@ export default {
       };
     },
     resize(e) {
+      e.preventDefault();
       const dX = e.clientX - this.leftSidePrevPosition.clientX;
       const proportionalWidth = (this.leftSidePrevPosition.width + dX) * 100;
       const parentWidth = this.resizer.parentNode.getBoundingClientRect().width;
@@ -84,12 +86,14 @@ export default {
 
       document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
+      this.resizing = false;
     },
     mouseDownHandler(e) {
       this.savePositionOnStartResizing(e);
 
       document.addEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
+      this.resizing = true;
     },
   },
   setup(props) {
@@ -101,29 +105,37 @@ export default {
 <style lang="scss" scoped>
 $card-primary-color: #e0e0ff;
 $card-secondary-color: palette(purple, 200);
+$resizable-bar-width: 8px;
 
 .resizable {
   display: flex;
   justify-content: space-between;
   height: 100%;
   width: 100%;
+  &.--resizing {
+    user-select: none;
+  }
 
   &__left {
-    align-items: center;
     display: flex;
     justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-right: calc(-#{$resizable-bar-width} / 2);
   }
 
   &__right {
-    flex: 1;
-    align-items: center;
     display: flex;
+    flex: 1;
     justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-left: calc(-#{$resizable-bar-width} / 2);
   }
 
   &__bar {
     height: 100%;
-    width: $base-space;
+    width: $resizable-bar-width;
     display: flex;
     justify-content: center;
     cursor: ew-resize;

@@ -1,32 +1,31 @@
 <template>
-  <div class="resizable">
-    <div class="resizable__up"><slot name="up" /></div>
+  <div class="resizable" :class="resizing ? '--resizing' : null">
+    <div class="resizable__up">
+      <slot name="up" />
+    </div>
 
     <div v-if="isDownExpanded" class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
     <div v-else class="resizable__bar__inner--no-hover" ref="resizableBar" />
-
-    <div class="resizable__down">
-      <div class="resizable__header">
+    <div
+      class="resizable__down"
+      :class="isDownExpanded ? '--expanded' : null"
+      :key="isDownExpanded"
+    >
+      <BaseButton
+        class="resizable__header"
+        @click="isDownExpanded = !isDownExpanded"
+      >
         <slot name="downHeader" />
+        <svgicon
+          class="resizable__header__icon"
+          :name="isDownExpanded ? 'chevron-down' : 'chevron-right'"
+          width="12"
+          height="12"
+        />
+      </BaseButton>
 
-        <BaseButton @click="isDownExpanded = !isDownExpanded">
-          <svgicon
-            v-if="isDownExpanded"
-            name="chevron-down"
-            width="20"
-            height="20"
-          />
-
-          <svgicon
-            v-if="!isDownExpanded"
-            name="chevron-right"
-            width="20"
-            height="20"
-          />
-        </BaseButton>
-      </div>
       <div class="resizable__content" v-show="isDownExpanded">
         <slot name="downContent" />
       </div>
@@ -56,6 +55,7 @@ export default {
   },
   data() {
     return {
+      resizing: false,
       isDownExpanded: false,
       upSidePrevPosition: {
         clientY: 0,
@@ -108,6 +108,7 @@ export default {
       };
     },
     resize(e) {
+      e.preventDefault();
       const dY = e.clientY - this.upSidePrevPosition.clientY;
       const proportionalHeight = (this.upSidePrevPosition.height + dY) * 100;
       const parentHeight =
@@ -125,12 +126,14 @@ export default {
 
       document.removeEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.removeEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
+      this.resizing = false;
     },
     mouseDownHandler(e) {
       this.savePositionOnStartResizing(e);
 
       document.addEventListener(EVENT.MOUSE_EVENT, this.mouseMoveHandler);
       document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
+      this.resizing = true;
     },
   },
   setup(props) {
@@ -141,31 +144,51 @@ export default {
 <style lang="scss" scoped>
 $card-primary-color: #e0e0ff;
 $card-secondary-color: palette(purple, 200);
-
+$card-height: 50px;
 .resizable {
   display: flex;
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
   width: 100%;
+  &.--resizing {
+    user-select: none;
+  }
 
   &__header {
     width: 100%;
-    height: 50px;
+    height: $card-height;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: $base-space $base-space * 2;
+    @include font-size(13px);
+    :deep(p) {
+      text-transform: uppercase;
+    }
+    &__icon {
+      padding: 0;
+      flex-shrink: 0;
+    }
   }
 
   &__content {
     width: 100%;
     height: 100%;
+    padding: $base-space $base-space * 2;
+    overflow: scroll;
+    @include font-size(13px);
   }
 
   &__up {
     align-items: center;
     display: flex;
     justify-content: center;
+    min-height: $card-height;
+    transition: all 0.2s ease-in;
+    .--resizing & {
+      transition: none;
+    }
   }
 
   &__down {
@@ -174,6 +197,7 @@ $card-secondary-color: palette(purple, 200);
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-height: $card-height;
   }
 
   &__bar {
@@ -203,5 +227,14 @@ $card-secondary-color: palette(purple, 200);
       background-color: $card-primary-color;
     }
   }
+}
+
+.transition-enter-active,
+.transition-leave-active {
+  transition: all 2s ease-in-out;
+}
+.transition-enter-from,
+.transition-leave-to {
+  min-height: 0;
 }
 </style>
