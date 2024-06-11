@@ -167,6 +167,18 @@ export class SpanSelection {
   }
 
   removeSpan(span: Span) {
+    this.remove(span);
+
+    const nodeSpans = this.spans.filter((s) => s.node.id === span.node.id);
+
+    nodeSpans.forEach((span) => {
+      this.remove(span);
+    });
+
+    this.loadSpans(nodeSpans);
+  }
+
+  private remove(span: Span) {
     this.selections = this.selections.filter(
       (s) => this.createId(s) !== this.createId(span)
     );
