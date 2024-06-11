@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..600&display=swap');
+
+:root {
+    --md-text-font:                      "Inter";
+}
+
+[data-md-color-scheme="default"] {
+    --md-typeset-a-code-color:           var(--md-default-fg-color--light);
+    --md-accent-typeset-a-code-color:    var(--md-default-fg-color--lighter);
+    --md-typeset-a-color:                #5859c0;
+    --md-accent-fg-color:                #6366fa;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-primary-fg-color:               hsla(var(--md-hue), 15%, 9%, 1);
+    --md-primary-fg-color--dark:         hsla(var(--md-hue), 15%, 9%, 1);
+    --md-typeset-a-code-color:           var(--md-accent-bg-color);
+    --md-accent-typeset-a-code-color:    var(--md-default-fg-color);
+    --md-typeset-a-color:                #8384cc;
+    --md-accent-fg-color:                #7f81f3;
+}
+
+.md-typeset a code {
+    color: var(--md-typeset-a-code-color);
+}
+
+.md-typeset a:hover code {
+    color: var(--md-accent-typeset-a-code-color);
+}
