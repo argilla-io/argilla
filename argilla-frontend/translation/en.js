@@ -33,6 +33,7 @@ export default {
   dimension: "Dimension",
   visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
+  guidelines: "Guidelines",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
     home: "Home",
