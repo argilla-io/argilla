@@ -166,7 +166,7 @@ def configure_search_engine(app: FastAPI):
         logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
 
     @app.on_event("startup")
-    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=settings.search_engine_ping_timeout)
     async def ping_search_engine():
         async for search_engine in get_search_engine():
             if not await search_engine.ping():
