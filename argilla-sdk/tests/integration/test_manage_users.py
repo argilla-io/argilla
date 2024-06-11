@@ -45,3 +45,16 @@ class TestManageUsers:
         client.users.add(user)
         user.delete()
         assert not user.exists()
+
+    def test_add_user_to_workspace(self, client: Argilla):
+        user = User(username="test_user", password="test_password")
+        client.users.add(user)
+
+        workspace = client.workspaces(name="test_workspace")
+        workspace.create()
+
+        user = client.users(username="test_user")
+        assert user.password is None
+
+        user.add_to_workspace(workspace)
+        assert user in workspace.users
