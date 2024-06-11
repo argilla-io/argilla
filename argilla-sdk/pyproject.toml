@@ -1,5 +1,5 @@
 [project]
-name = "argilla-sdk"
+name = "argilla"
 description = "The Argilla python server SDK"
 authors = [
     {name = "Argilla", email = "contact@argilla.io"},
@@ -36,7 +36,7 @@ distribution = true
 
 [tool.pdm.version]
 source = "file"
-path = "src/argilla_sdk/__init__.py"
+path = "src/argilla/__init__.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
