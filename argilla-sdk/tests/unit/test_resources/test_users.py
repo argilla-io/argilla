@@ -41,6 +41,7 @@ class TestUserSerialization:
         )
 
         assert user.serialize()["username"] == "test-user"
+        assert user.serialize()["password"] == None
 
     def test_json_serialize(self):
         mock_uuid = uuid.uuid4()
@@ -283,6 +284,7 @@ class TestUsersAPI:
             "first_name": "Test",
             "last_name": "User",
             "role": "admin",
+            "password": "test-password",
             "inserted_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat(),
         }
@@ -295,4 +297,4 @@ class TestUsersAPI:
             user = client.api.users.create(user_create)
             assert user.id == user_id
             assert user.username == "test-user"
-            assert user.password is None
+            assert user.password == "test-password"
