@@ -15,8 +15,8 @@ import uuid
 
 import pytest
 
-from argilla_sdk import Response, User, Dataset, Settings, TextQuestion, TextField, Workspace
-from argilla_sdk.records._resource import RecordResponses, Record
+from argilla import Response, User, Dataset, Settings, TextQuestion, TextField, Workspace
+from argilla.records._resource import RecordResponses, Record
 
 
 @pytest.fixture

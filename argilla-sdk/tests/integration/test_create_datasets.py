@@ -15,7 +15,7 @@ import uuid
 
 import pytest
 
-from argilla_sdk import Argilla, Dataset, Settings, TextField, RatingQuestion
+from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -69,14 +69,14 @@ Argilla provides a default user with the `owner` role to help you get started in
         client=client
     )
     ```
-    > Check the [User - Python Reference](../../reference/argilla_sdk/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
+    > Check the [User - Python Reference](../../reference/argilla/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
 
 ## Get current user
 
 To ensure you're using the correct credentials for managing users, you can get the current user in Argilla using the `me` attribute of the `Argilla` class.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -91,7 +91,7 @@ To create a new user in Argilla, you can define it in the `User` class and then 
     If you don't provide a password, a random one will be generated for you. Ensure you store this password securely by accessing it through `user.password` immediately after user creation. For security reasons, the password will not be retrievable later.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -111,7 +111,7 @@ created_user = user_to_create.create()
 You can list all the existing users in Argilla by accessing the `users` attribute on the `Argilla` class and iterating over them. You can also use `len(client.users)` to get the number of users.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -128,7 +128,7 @@ for user in users:
 You can retrieve an existing user from Argilla by accessing the `users` attribute on the `Argilla` class and passing the `username` as an argument.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -142,7 +142,7 @@ You can list all the users in a workspace by accessing the `users` attribute on 
 > For further information on how to manage workspaces, check this [how-to guide](workspace.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -159,7 +159,7 @@ You can add an existing user to a workspace in Argilla by calling the `add_to_wo
 > For further information on how to manage workspaces, check this [how-to guide](workspace.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -176,7 +176,7 @@ You can remove an existing user from a workspace in Argilla by calling the `remo
 > For further information on how to manage workspaces, check this [how-to guide](workspace.md).
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -191,7 +191,7 @@ removed_user = user.remove_from_workspace(workspace)
 You can delete an existing user from Argilla by calling the `delete` method on the `User` class.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 

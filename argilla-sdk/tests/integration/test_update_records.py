@@ -18,9 +18,9 @@ from string import ascii_lowercase
 
 import pytest
 
-import argilla_sdk as rg
-from argilla_sdk import Record
-from argilla_sdk._models import RecordModel
+import argilla as rg
+from argilla import Record
+from argilla._models import RecordModel
 
 
 @pytest.fixture

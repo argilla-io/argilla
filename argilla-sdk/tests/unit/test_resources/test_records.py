@@ -14,8 +14,8 @@
 
 import uuid
 
-from argilla_sdk import Record, Suggestion, Response
-from argilla_sdk._models import MetadataModel
+from argilla import Record, Suggestion, Response
+from argilla._models import MetadataModel
 
 
 class TestRecords:

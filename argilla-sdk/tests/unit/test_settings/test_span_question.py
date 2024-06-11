@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argilla_sdk as rg
+import argilla as rg
 
 
 class TestSpanQuestions:

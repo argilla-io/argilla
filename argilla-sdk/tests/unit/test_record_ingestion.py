@@ -16,7 +16,7 @@ from uuid import uuid4
 
 import pytest
 
-import argilla_sdk as rg
+import argilla as rg
 
 
 @pytest.fixture

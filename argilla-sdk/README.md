@@ -9,6 +9,7 @@ The argilla-sdk is an experimental project to rebuild Argilla's python client in
 
 Since this package is not yet published on PyPi, you can install it directly from the repository:
 
+# TODO: Changed this to use the testpypi releases.
 ```console
 pip install git+https://github.com/argilla-io/argilla-python.git
 ```
@@ -18,7 +19,7 @@ pip install git+https://github.com/argilla-io/argilla-python.git
 To use the client, you need to import the `Argilla` class and instantiate it with the API URL and API key. You can use this SDK with any stable release of argilla server >= 1.27.
 
 ```python
-import argilla_sdk as rg
+import argilla as rg
 
 client = rg.Argilla(api_url="http://localhost:6900", api_key="argilla.apikey")
 ```

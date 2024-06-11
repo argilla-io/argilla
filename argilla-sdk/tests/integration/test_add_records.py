@@ -17,8 +17,8 @@ import uuid
 from datetime import datetime
 
 
-import argilla_sdk as rg
-from argilla_sdk import Argilla
+import argilla as rg
+from argilla import Argilla
 
 
 def test_create_dataset(client):

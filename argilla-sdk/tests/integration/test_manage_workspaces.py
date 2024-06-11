@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla_sdk import Argilla, Workspace
+from argilla import Argilla, Workspace
 
 
 class TestWorkspacesManagement:

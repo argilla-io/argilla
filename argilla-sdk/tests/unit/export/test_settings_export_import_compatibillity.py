@@ -20,7 +20,7 @@ from tempfile import TemporaryDirectory
 import httpx
 from pytest_httpx import HTTPXMock
 
-import argilla_sdk as rg
+import argilla as rg
 
 
 @pytest.fixture

@@ -14,8 +14,8 @@
 
 import uuid
 
-import argilla_sdk as rg
-from argilla_sdk._models import MetadataFieldModel, TermsMetadataPropertySettings
+import argilla as rg
+from argilla._models import MetadataFieldModel, TermsMetadataPropertySettings
 
 
 class TestTermsMetadata:

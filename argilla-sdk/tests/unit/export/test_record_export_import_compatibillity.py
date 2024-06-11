@@ -17,8 +17,8 @@ import uuid
 
 import pytest
 
-import argilla_sdk as rg
-from argilla_sdk.records._resource import Record
+import argilla as rg
+from argilla.records._resource import Record
 
 
 @pytest.fixture

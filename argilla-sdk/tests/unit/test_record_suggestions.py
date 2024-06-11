@@ -14,8 +14,8 @@
 
 import pytest
 
-from argilla_sdk import Record, Suggestion
-from argilla_sdk.records._resource import RecordSuggestions
+from argilla import Record, Suggestion
+from argilla.records._resource import RecordSuggestions
 
 
 @pytest.fixture

@@ -22,8 +22,8 @@ from tempfile import TemporaryDirectory
 import pytest
 from datasets import Dataset as HFDataset
 
-import argilla_sdk as rg
-from argilla_sdk import Argilla
+import argilla as rg
+from argilla import Argilla
 
 
 @pytest.fixture
