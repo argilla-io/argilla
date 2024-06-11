@@ -194,9 +194,7 @@ class UserResponse(Resource):
         return ResponseStatusModel.draft
 
     def _compute_user_id_from_answers(self, answers: List[Response]) -> UUID:
-        user_ids = set([answer.user_id for answer in answers if answer.user_id is not None])
-        if len(user_ids) == 0:
-            raise ValueError("No user_id found in user answers.")
+        user_ids = set([answer.user_id for answer in answers])
         if len(user_ids) > 1:
             raise ValueError("Multiple user_ids found in user answers.")
         return next(iter(user_ids))
