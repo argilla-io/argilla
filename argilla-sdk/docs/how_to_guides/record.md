@@ -33,7 +33,7 @@ A **record** in Argilla is a data item that requires annotation, consisting of o
         ],
     )
     ```
-    > Check the [Record - Python Reference](../../reference/argilla_sdk/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
+    > Check the [Record - Python Reference](../reference/argilla_sdk/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
 
 ## Add records
 
@@ -73,18 +73,18 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     dataset.records.log(records)
     ```
-    
-    1. This is an illustration of a definition. In a real world scenario, you would iterate over a data structure and create `Record` objects for each iteration. 
+
+    1. This is an illustration of a definition. In a real world scenario, you would iterate over a data structure and create `Record` objects for each iteration.
 
 === "From a generic data structure"
 
-    You can add the data directly as a dictionary like structure, where the keys correspond to the names of fields, questions, metadata or vectors in the dataset and the values are the data to be added. 
-    
+    You can add the data directly as a dictionary like structure, where the keys correspond to the names of fields, questions, metadata or vectors in the dataset and the values are the data to be added.
+
     If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
 
-    ```python	
+    ```python
     import argilla_sdk as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -118,7 +118,7 @@ You can add records to a dataset in two different ways: either by using a dictio
     dataset.records.log(data, mapping={"query": "question", "response": "answer"}) # (2)
     ```
 
-    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`. 
+    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
     2. The data structure has keys `query` and `response` and the Argilla dataset has `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
 
 
@@ -126,8 +126,8 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     You can also add records to a dataset using a Hugging Face dataset. This is useful when you want to use a dataset from the Hugging Face Hub and add it to your Argilla dataset.
 
-    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset. 
-    
+    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset.
+
     If the dataset's schema does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which columns in the dataset correspond to the Argilla dataset fields.
 
     ```python
@@ -142,14 +142,14 @@ You can add records to a dataset in two different ways: either by using a dictio
     hf_dataset = load_dataset("imdb", split="train[:100]") # (2)
 
     dataset.records.log(records=hf_dataset)
-    ```	
+    ```
 
     1. In this case, we are using the `my_dataset` dataset from the Argilla workspace. The dataset has a `text` field and a `label` question.
 
     2. In this example, the Hugging Face dataset matches the Argilla dataset schema. If that is not the case, you could use the `.map` of the `datasets` library to prepare the data before adding it to the Argilla dataset.
 
     Here we use the `mapping` parameter to specify the relationship between the Hugging Face dataset and the Argilla dataset.
-    
+
     ```python
     dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"}) # (1)
     ```
@@ -166,7 +166,7 @@ Record metadata can include any information about the record that is not part of
 
 === "As `Record` objects"
 
-    You can add metadata to a record in an initialized `Record` object. 
+    You can add metadata to a record in an initialized `Record` object.
 
     ```python
     # Add records to the dataset with the metadata 'category'
@@ -222,7 +222,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
     You can also add vectors to a record in an initialized `Record` object.
 
-    > Check the [Vector - Python Reference](../../reference/argilla_sdk/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
+    > Check the [Vector - Python Reference](../reference/argilla_sdk/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -277,7 +277,7 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 === "As `Record objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Suggestions - Python Reference](../../reference/argilla_sdk/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Suggestions - Python Reference](../reference/argilla_sdk/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -348,7 +348,7 @@ If your dataset includes some annotations, you can add those to the records as y
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Responses - Python Reference](../../reference/argilla_sdk/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Responses - Python Reference](../reference/argilla_sdk/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -443,12 +443,12 @@ dataset.records.log(records=updated_data)
 
     ```python
     updated_records = []
-    
+
     for record in dataset.records():
 
         record.metadata["my_metadata"] = "new_value"
         record.metadata["my_new_metadata"] = "new_value"
-        
+
         updated_records.append(record)
 
     dataset.records.log(records=updated_records)
