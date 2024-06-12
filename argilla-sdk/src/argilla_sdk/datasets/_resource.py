@@ -75,7 +75,7 @@ class Dataset(Resource, DiskImportExportMixin):
         self.workspace_id = (
             _model.workspace_id
             if _model and _model.workspace_id
-            else self.__workspace_id_from_name(workspace=workspace)
+            else self._workspace_id_from_name(workspace=workspace)
         )
         self._model = _model or DatasetModel(
             name=name,
@@ -102,7 +102,7 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @property
     def settings(self) -> Settings:
-        if self.__is_published() and self._settings.is_outdated:
+        if self._is_published() and self._settings.is_outdated:
             self._settings.get()
         return self._settings
 
@@ -161,7 +161,7 @@ class Dataset(Resource, DiskImportExportMixin):
             return self._publish()
         except Exception as e:
             self._log_message(message=f"Error creating dataset: {e}", level="error")
-            self.__rollback_dataset_creation()
+            self._rollback_dataset_creation()
             raise SettingsError from e
 
     def update(self) -> "Dataset":
@@ -187,7 +187,7 @@ class Dataset(Resource, DiskImportExportMixin):
 
         return self.get()  # type: ignore
 
-    def __workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
+    def _workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
         if workspace is None:
             available_workspaces = self._client.workspaces
             ws = available_workspaces[0]  # type: ignore
@@ -206,9 +206,9 @@ class Dataset(Resource, DiskImportExportMixin):
             ws = workspace
         return ws.id
 
-    def __rollback_dataset_creation(self):
-        if self.exists() and not self.__is_published():
+    def _rollback_dataset_creation(self):
+        if self.exists() and not self._is_published():
             self.delete()
 
-    def __is_published(self) -> bool:
+    def _is_published(self) -> bool:
         return self.exists() and self._model.status == "ready"
