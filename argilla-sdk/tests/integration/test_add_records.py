@@ -617,6 +617,11 @@ def test_add_records_objects_with_responses(client: Argilla):
             responses=[rg.Response("comment", "The comment", user_id=user.id, status="draft")],
             id=str(uuid.uuid4()),
         ),
+        rg.Record(
+            fields={"text": "Hello World, how are you?"},
+            responses=[rg.Response("comment", "The comment", user_id=user.id)],
+            id=str(uuid.uuid4()),
+        ),
     ]
 
     dataset.records.log(records)
@@ -635,3 +640,7 @@ def test_add_records_objects_with_responses(client: Argilla):
     assert dataset_records[2].id == records[2].id
     assert dataset_records[2].responses.comment[0].value == "The comment"
     assert dataset_records[2].responses.comment[0].status == "draft"
+
+    assert dataset_records[3].id == records[3].id
+    assert dataset_records[3].responses.comment[0].value == "The comment"
+    assert dataset_records[3].responses.comment[0].status == "draft"
