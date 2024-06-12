@@ -34,19 +34,6 @@
           :datasets="datasets.datasets"
         />
       </div>
-      <sidebar-menu
-        class="home__sidebar"
-        @refresh="$fetch"
-        :sidebar-items="[
-          {
-            id: 'refresh',
-            tooltip: $t('sidebar.refreshTooltip'),
-            icon: 'refresh',
-            group: $t('refresh'),
-            action: 'refresh',
-          },
-        ]"
-      />
     </div>
   </div>
 </template>
@@ -79,17 +66,10 @@ export default {
       max-height: 100svh;
     }
   }
-  &__sidebar.sidebar {
-    position: fixed;
-    top: 56px;
-    right: 0;
-    border-left: 1px solid palette(grey, 600);
-  }
   &__header {
     min-height: $topbarHeight;
   }
   &__banner {
-    margin-right: $sidebarMenuWidth;
     width: auto;
   }
   &__table {

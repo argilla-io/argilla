@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Response } from "../types";
+import { mediumCache } from "./AxiosCache";
 
 interface BackendWorkspace {
   id: string;
@@ -16,7 +17,7 @@ export class WorkspaceRepository {
     try {
       const { data } = await this.axios.get<Response<BackendWorkspace[]>>(
         "/v1/me/workspaces",
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;

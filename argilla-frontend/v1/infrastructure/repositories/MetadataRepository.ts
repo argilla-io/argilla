@@ -1,7 +1,7 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendMetadata, Response } from "../types";
 import { MetadataMetricsRepository } from "./MetadataMetricsRepository";
-import { revalidateCache } from "./AxiosCache";
+import { mediumCache, revalidateCache } from "./AxiosCache";
 import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
 
 const METADATA_API_ERRORS = {
@@ -32,7 +32,7 @@ export class MetadataRepository {
       // TODO: Review this endpoint, for admin should be /v1/datasets/${datasetId}/metadata-properties without ME.
       const { data } = await this.axios.get<Response<BackendMetadata[]>>(
         `/v1/me/datasets/${datasetId}/metadata-properties`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;

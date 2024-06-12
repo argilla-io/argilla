@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import pytest
-
-from argilla_sdk import User, Argilla
+from argilla_sdk import Argilla, User
+from argilla_sdk._exceptions import UnprocessableEntityError
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -35,8 +35,26 @@ class TestManageUsers:
         assert user.id is not None
         assert client.users(username=user.username).id == user.id
 
+    def test_create_user_without_password(self, client: Argilla):
+        user = User(username="test_user")
+        with pytest.raises(expected_exception=UnprocessableEntityError):
+            client.users.add(user)
+
     def test_delete_user(self, client: Argilla):
         user = User(username="test_delete_user", password="test_password")
         client.users.add(user)
         user.delete()
         assert not user.exists()
+
+    def test_add_user_to_workspace(self, client: Argilla):
+        user = User(username="test_user", password="test_password")
+        client.users.add(user)
+
+        workspace = client.workspaces(name="test_workspace")
+        workspace.create()
+
+        user = client.users(username="test_user")
+        assert user.password is None
+
+        user.add_to_workspace(workspace)
+        assert user in workspace.users
