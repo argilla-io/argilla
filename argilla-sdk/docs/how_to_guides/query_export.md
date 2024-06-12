@@ -18,7 +18,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             filter=filter
         )
         ```
-        > Check the [Query - Python Reference](../../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
+        > Check the [Query - Python Reference](../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
 
     === "`rg.Filter`"
 
@@ -29,7 +29,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             ]
         )
         ```
-        > Check the [Filter - Python Reference](../../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
+        > Check the [Filter - Python Reference](../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
 
 ## Query with search terms
 

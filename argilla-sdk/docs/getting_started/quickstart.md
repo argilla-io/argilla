@@ -108,12 +108,12 @@ Now you can add the data to your dataset. Use a `mapping` to indicate which keys
 
 ```python
 dataset.records.log(records=data, mapping={"text": "review"})
-```	
+```
 
 🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
 
 ## More references
 
 * [Installation guide](installation.md)
-* [How-to guides](../guides/how_to_guides/index.md)
+* [How-to guides](../how_to_guides/index.md)
 * [API reference](../reference//argilla_sdk/client.md)

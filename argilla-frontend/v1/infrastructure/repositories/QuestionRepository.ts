@@ -1,6 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Response, BackendQuestion } from "../types";
-import { revalidateCache } from "./AxiosCache";
+import { mediumCache, revalidateCache } from "./AxiosCache";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { IQuestionRepository } from "~/v1/domain/services/IQuestionRepository";
 
@@ -16,7 +16,7 @@ export class QuestionRepository implements IQuestionRepository {
     try {
       const { data } = await this.axios.get<Response<BackendQuestion[]>>(
         `/v1/datasets/${datasetId}/questions`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;

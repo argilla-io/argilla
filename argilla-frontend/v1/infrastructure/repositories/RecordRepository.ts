@@ -160,6 +160,7 @@ export class RecordRepository {
       );
 
       revalidateCache(`/v1/datasets/${record.datasetId}/progress`);
+      revalidateCache(`/v1/me/datasets/${record.datasetId}/metrics`);
 
       return new RecordAnswer(
         data.id,
