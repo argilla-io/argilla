@@ -244,7 +244,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         records: List[Record],
     ) -> List[Record]:
         """Delete records in a dataset on the server using the provided records
-            and matching based on the external_id or id.
+            and matching based on the id.
 
         Parameters:
             records: A list of `Record` objects representing the records to be deleted.
