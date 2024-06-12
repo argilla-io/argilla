@@ -81,7 +81,7 @@ class Dataset(Resource, DiskImportExportMixin):
             name=name,
             workspace_id=UUIDUtilities.convert_optional_uuid(uuid=self.workspace_id),
         )
-        self._settings = self.__configure_settings_for_dataset(settings=settings)
+        self._settings = settings or Settings(_dataset=self)
         self.__records = DatasetRecords(client=self._client, dataset=self)
 
     #####################
@@ -108,7 +108,7 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @settings.setter
     def settings(self, value: Settings) -> None:
-        self._settings = self.__configure_settings_for_dataset(settings=value)
+        self._settings = Settings(_dataset=self)
 
     @property
     def fields(self) -> list:
@@ -186,23 +186,6 @@ class Dataset(Resource, DiskImportExportMixin):
         self._api.publish(dataset_id=self._model.id)
 
         return self.get()  # type: ignore
-
-    def __configure_settings_for_dataset(
-        self,
-        settings: Optional[Settings] = None,
-    ) -> Settings:
-        if self.exists():
-            settings = settings or Settings(_dataset=self)
-            settings.dataset = self
-        elif settings is None:
-            settings = Settings(_dataset=self)
-            warnings.warn(
-                message="Settings not provided. Using empty settings for the dataset. Define the settings before creating the dataset.",
-                stacklevel=2,
-            )
-        else:
-            settings.dataset = self
-        return settings
 
     def __workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
         if workspace is None:
