@@ -223,7 +223,10 @@ export default {
   methods: {
     onSelectRecord(isSelected, record) {
       if (isSelected) {
-        return this.selectedRecords.push(record);
+        if (!this.selectedRecords.some((r) => r.id === record.id))
+          return this.selectedRecords.push(record);
+
+        return;
       }
 
       this.selectedRecords = this.selectedRecords.filter(
@@ -318,18 +321,6 @@ export default {
     },
   },
   watch: {
-    recordsOnPage: {
-      deep: true,
-      handler() {
-        for (const record of this.recordsOnPage) {
-          if (record.questions.some((q) => q.isSpanType && q.isModified)) {
-            if (!this.selectedRecords.some((r) => r.id === record.id)) {
-              this.selectedRecords.push(record);
-            }
-          }
-        }
-      },
-    },
     spansQuestionsWithSelectedEntities: {
       deep: true,
       handler() {

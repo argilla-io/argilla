@@ -45,6 +45,30 @@ export default {
       this.$emit("on-select-record", isSelected, this.record);
     },
   },
+  computed: {
+    spanQuestionsAnswers() {
+      return this.record.questions
+        .filter((q) => q.isSpanType)
+        .map((q) => ({
+          id: q.id,
+          answer: q.answer.values,
+        }));
+    },
+  },
+  watch: {
+    spanQuestionsAnswers: {
+      deep: true,
+      handler() {
+        if (
+          this.record.questions
+            .filter((q) => q.isSpanType)
+            .some((q) => q.isModified)
+        ) {
+          this.onSelectedRecord(true);
+        }
+      },
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
