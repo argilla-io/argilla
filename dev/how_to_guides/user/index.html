@@ -1835,10 +1835,6 @@
 </span></code></pre></div>
 <h2 id="create-a-user">Create a user<a class="headerlink" href="#create-a-user" title="Permanent link">&para;</a></h2>
 <p>To create a new user in Argilla, you can define it in the <code>User</code> class and then call the <code>create</code> method. This method is inherited from the <code>Resource</code> base class and operates without modifications.</p>
-<div class="admonition info password generation">
-<p class="admonition-title">Info</p>
-<p>If you don't provide a password, a random one will be generated for you. Ensure you store this password securely by accessing it through <code>user.password</code> immediately after user creation. For security reasons, the password will not be retrievable later.</p>
-</div>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla_sdk</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
