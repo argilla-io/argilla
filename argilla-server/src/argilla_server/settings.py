@@ -222,6 +222,7 @@ class Settings(BaseSettings):
         parsed = urlparse(self.elasticsearch)
         if parsed.password:
             return self.elasticsearch.replace(parsed.password, "XXXX")
+
         return self.elasticsearch
 
     class Config:

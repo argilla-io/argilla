@@ -12,7 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError", "MissingVectorError"]
+__all__ = [
+    "NotFoundError",
+    "NotUniqueError",
+    "UnprocessableEntityError",
+    "AuthenticationError",
+    "MissingVectorError",
+]
 
 NOT_FOUND_ERROR = "not_found"
 NOT_UNIQUE_ERROR = "not_unique"

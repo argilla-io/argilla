@@ -56,6 +56,9 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     async def close(self):
         await self.client.close()
 
+    async def ping(self) -> bool:
+        return await self.client.ping()
+
     async def info(self) -> dict:
         return await self.client.info()
 

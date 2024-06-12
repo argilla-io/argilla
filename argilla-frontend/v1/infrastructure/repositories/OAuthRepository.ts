@@ -2,6 +2,7 @@ import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
 import { useRunningEnvironment } from "../services/useRunningEnvironment";
+import { largeCache } from "./AxiosCache";
 import {
   OAuthParams,
   OAuthProvider,
@@ -37,7 +38,7 @@ export class OAuthRepository implements IOAuthRepository {
 
       const { data } = await this.axios.get<Response<BackendOAuthProvider[]>>(
         url,
-        { headers: { "cache-control": "max-age=240" } }
+        largeCache()
       );
 
       return data.items.map((i) => new OAuthProvider(i.name));

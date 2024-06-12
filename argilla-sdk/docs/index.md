@@ -23,7 +23,7 @@ Argilla is a **collaboration platform for AI engineers and domain experts** that
 
     Get familiar with basic and complex workflows for Argilla. From managing `Users`, `Workspaces`. `Datasets` and `Records` to fine-tuning a model.
 
-    [:octicons-arrow-right-24: Learn more](guides/how_to_guides/index.md)
+    [:octicons-arrow-right-24: Learn more](how_to_guides/index.md)
 
 </div>
 
