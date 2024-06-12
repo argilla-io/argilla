@@ -78,6 +78,19 @@ $header-button-color: #262a2e;
     position: relative;
   }
 }
+
+.button-settings {
+  margin-right: $base-space;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+    &:before,
+    &:after {
+      margin-top: calc($base-space/2);
+    }
+  }
+}
 .header__button {
   background: $header-button-color;
   color: palette(white);
