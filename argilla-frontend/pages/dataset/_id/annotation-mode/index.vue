@@ -7,25 +7,9 @@
           :key="datasetId"
           :datasetId="datasetId"
           :breadcrumbs="breadcrumbs"
-          :showTrainButton="true"
           :showSettingButton="true"
           :showCopyButton="true"
-          @on-click-train="showTrainModal(true)"
         />
-        <BaseModal
-          :modal-custom="true"
-          :prevent-body-scroll="true"
-          modal-class="modal-auto"
-          modal-position="modal-top-center"
-          :modal-visible="visibleTrainModal"
-          allow-close
-          @close-modal="showTrainModal(false)"
-        >
-          <DatasetTrain
-            :datasetName="dataset.name"
-            :workspaceName="dataset.workspace"
-          />
-        </BaseModal>
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />
@@ -43,16 +27,6 @@ export default {
   name: "DatasetPage",
   components: {
     AnnotationPage,
-  },
-  data() {
-    return {
-      visibleTrainModal: false,
-    };
-  },
-  methods: {
-    showTrainModal(value) {
-      this.visibleTrainModal = value;
-    },
   },
   watch: {
     "recordCriteria.committed"() {
