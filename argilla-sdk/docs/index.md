@@ -7,6 +7,15 @@ hide: navigation
 
 Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
+!!! SUCCESS "Welcome to Argilla 2.x!"
+    To skip the introductions and go directly to installing and creating your first dataset, see [Quickstart](getting_started/quickstart/).
+
+!!! DANGER "Looking for Argilla 1.x?"
+    Looking for documentation for Argilla 1.x? Visit the latest release [here](https://docs.argilla.io/en/latest/).
+
+!!! NOTE "Migrate to Argilla 2.x"
+    Want to learn how to migrate from Argilla 1.x to 2.x? Take a look at our dedicated [Migration Guide](how_to_guides/migrate_from_legacy_datasets.md).
+
 <div class="grid cards" markdown>
 
 -  __Get started in 5 minutes!__
