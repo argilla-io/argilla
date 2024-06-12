@@ -1,5 +1,5 @@
 <template>
-  <div class="resizable" :class="resizing ? '--resizing' : null">
+  <div class="resizable" :class="resizing ? '--h-resizing' : null">
     <div class="resizable__up">
       <slot name="up" />
     </div>
@@ -153,16 +153,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$card-primary-color: #e0e0ff;
-$card-secondary-color: palette(purple, 200);
+$card-primary-color: #6794fe;
 $card-height: 50px;
+$resizable-bar-width: $base-space;
 .resizable {
+  $this: &;
   display: flex;
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  &.--resizing {
+  &.--h-resizing {
     user-select: none;
   }
 
@@ -200,7 +201,7 @@ $card-height: 50px;
     @include media("<desktop") {
       height: auto !important;
     }
-    .--resizing & {
+    .--h-resizing & {
       transition: none;
     }
   }
@@ -215,12 +216,12 @@ $card-height: 50px;
   }
 
   &__bar {
-    height: $base-space;
+    height: $resizable-bar-width;
     width: 100%;
     display: flex;
     align-items: center;
     z-index: 1;
-    cursor: ns-resize;
+    cursor: row-resize;
     @include media("<desktop") {
       display: none;
     }
@@ -229,20 +230,20 @@ $card-height: 50px;
       width: 100%;
       border-bottom: thick solid $black-10;
       border-width: 1px;
-
-      &:hover {
-        border-width: 2px;
-      }
+      transition: all 0.1s ease-in;
     }
 
     &__inner--no-hover {
       width: 100%;
-      border-bottom: thick solid $black-10;
-      border-width: 1px;
+      border-bottom: 1px solid $black-10;
     }
 
-    &:hover {
-      background-color: $card-primary-color;
+    &:hover,
+    .--h-resizing & {
+      #{$this}__bar__inner {
+        transition: all 0.1s ease-in;
+        border: 2px solid $card-primary-color;
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="resizable" :class="resizing ? '--resizing' : ''">
+  <div class="resizable" :class="resizing ? '--v-resizing' : ''">
     <div class="resizable__left"><slot name="left" /></div>
 
     <div class="resizable__bar" ref="resizableBar">
@@ -103,16 +103,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-primary-color: #e0e0ff;
-$card-secondary-color: palette(purple, 200);
-$resizable-bar-width: 8px;
+$card-primary-color: #6794fe;
+$resizable-bar-width: $base-space;
 
 .resizable {
+  $this: &;
   display: flex;
   justify-content: space-between;
   height: 100%;
   width: 100%;
-  &.--resizing {
+  &.--v-resizing {
     user-select: none;
   }
 
@@ -147,23 +147,23 @@ $resizable-bar-width: 8px;
     display: flex;
     justify-content: center;
     z-index: 1;
-    cursor: ew-resize;
+    cursor: col-resize;
     @include media("<desktop") {
       display: none;
     }
 
     &__inner {
       height: 100%;
-      border-left: thick solid $black-10;
-      border-width: 1px;
-
-      &:hover {
-        border-width: 2px;
-      }
+      border-left: 1px solid $black-10;
+      transition: all 0.1s ease-in;
     }
 
-    &:hover {
-      background-color: $card-primary-color;
+    &:hover,
+    .--v-resizing & {
+      #{$this}__bar__inner {
+        transition: all 0.1s ease-in;
+        border: 2px solid $card-primary-color;
+      }
     }
   }
 }
