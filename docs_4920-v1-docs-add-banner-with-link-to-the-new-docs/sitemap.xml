@@ -51,6 +51,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_4920-v1-docs-add-banner-with-link-to-the-new-docs/how_to_guides/migrate_from_legacy_datasets/</loc>
+         <lastmod>2024-06-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla-python/docs_4920-v1-docs-add-banner-with-link-to-the-new-docs/how_to_guides/query_export/</loc>
          <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
