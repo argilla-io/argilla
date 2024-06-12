@@ -221,6 +221,9 @@ export default {
     padding: 0 $base-space * 6;
     display: flex;
     flex-direction: column;
+    @include media("<=tablet") {
+      padding: 0;
+    }
   }
 }
 .interactions {
