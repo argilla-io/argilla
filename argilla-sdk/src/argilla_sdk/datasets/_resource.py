@@ -73,9 +73,7 @@ class Dataset(Resource, DiskImportExportMixin):
             self._log_message(f"Settings dataset name to unique UUID: {name}")
 
         self.workspace_id = (
-            _model.workspace_id
-            if _model and _model.workspace_id
-            else self._workspace_id_from_name(workspace=workspace)
+            _model.workspace_id if _model and _model.workspace_id else self._workspace_id_from_name(workspace=workspace)
         )
         self._model = _model or DatasetModel(
             name=name,
