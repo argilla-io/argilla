@@ -182,6 +182,12 @@ $resizable-bar-width: $base-space;
       padding: 0;
       flex-shrink: 0;
     }
+    &:hover {
+      :deep(p),
+      :deep(svg) {
+        color: darken(palette(grey, 300), 10%);
+      }
+    }
   }
 
   &__content {
