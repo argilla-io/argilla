@@ -454,14 +454,9 @@ dataset.records.log(records=updated_data)
 
 ## Delete records
 
-You can delete records in a dataset calling the `delete` method on the `Dataset` object. To delete a record, you need to retrieve them from the server and get a list with those that you want to delete.
+You can delete records in a dataset calling the `delete` method on the `Dataset` object. To delete records, you need to retrieve them from the server and get a list with those that you want to delete.
 
 ```python
-# Delete a single record
-record_to_delete = [list(dataset.records)[0]]
-dataset.records.delete(records=record_to_delete)
-
-# Delete multiple records
 records_to_delete = list(dataset.records)[:5]
 dataset.records.delete(records=records_to_delete)
 ```
