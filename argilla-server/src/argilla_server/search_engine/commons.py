@@ -258,10 +258,10 @@ def is_response_status_scope(scope: FilterScope) -> bool:
 
 def is_response_value_scope_without_user(scope: FilterScope) -> bool:
     return (
-            isinstance(scope, ResponseFilterScope)
-            and scope.user is None
-            and scope.question is not None
-            and (scope.property is None or scope.property == "value")
+        isinstance(scope, ResponseFilterScope)
+        and scope.user is None
+        and scope.question is not None
+        and (scope.property is None or scope.property == "value")
     )
 
 
@@ -531,10 +531,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         """
         question_response_fields = _get_response_value_fields_for_question(index_mapping, filter.scope.question)
 
-        all_user_filters = [
-            self._map_filter_to_es_filter(filter, field)
-            for field in question_response_fields
-        ]
+        all_user_filters = [self._map_filter_to_es_filter(filter, field) for field in question_response_fields]
 
         if all_user_filters:
             return es_bool_query(should=all_user_filters, minimum_should_match=1)
