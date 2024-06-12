@@ -27,7 +27,6 @@ const options = {
       },
     ],
     datasetId: "65931567-0b51-4e74-9aff-834c32a3d898",
-    showTrainButton: true,
   },
 };
 
@@ -40,53 +39,5 @@ describe("HeaderFeedbackTask", () => {
     const wrapper = shallowMount(HeaderFeedbackTask, options);
 
     expect(wrapper.is(HeaderFeedbackTask)).toBeTruthy();
-  });
-
-  describe("Train button", () => {
-    describe("show when", () => {
-      test("render Train button if user role is admin or owner", () => {
-        jest.spyOn(useRole, "useRole").mockReturnValue({
-          isAdminOrOwnerRole: true,
-        });
-
-        const wrapper = shallowMount(HeaderFeedbackTask, options);
-
-        expect(
-          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
-        ).toBeTruthy();
-      });
-    });
-
-    describe("hide when", () => {
-      test("no render Train button if user role is not admin or owner", () => {
-        jest.spyOn(useRole, "useRole").mockReturnValue({
-          isAdminOrOwnerRole: false,
-        });
-
-        const wrapper = shallowMount(HeaderFeedbackTask, options);
-
-        expect(
-          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
-        ).toBeFalsy();
-      });
-
-      test("no render Train button if showTrainButton is false", () => {
-        jest.spyOn(useRole, "useRole").mockReturnValue({
-          isAdminOrOwnerRole: true,
-        });
-
-        const wrapper = shallowMount(HeaderFeedbackTask, {
-          ...options,
-          propsData: {
-            ...options.propsData,
-            showTrainButton: false,
-          },
-        });
-
-        expect(
-          wrapper.findComponent({ ref: "trainButtonRef" }).exists()
-        ).toBeFalsy();
-      });
-    });
   });
 });
