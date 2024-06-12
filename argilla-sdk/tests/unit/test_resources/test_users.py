@@ -41,7 +41,7 @@ class TestUserSerialization:
         )
 
         assert user.serialize()["username"] == "test-user"
-        assert user.serialize()["password"] == None
+        assert user.serialize()["password"] is None
 
     def test_json_serialize(self):
         mock_uuid = uuid.uuid4()
