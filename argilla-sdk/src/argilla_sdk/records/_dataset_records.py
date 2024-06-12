@@ -241,7 +241,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             level="info",
         )
 
-        return self
+        return created_or_updated   
 
     def to_dict(self, flatten: bool = False, orient: str = "names") -> Dict[str, Any]:
         """
