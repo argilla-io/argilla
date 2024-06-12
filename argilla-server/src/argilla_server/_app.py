@@ -66,7 +66,7 @@ def create_server_app() -> FastAPI:
     for app_configure in [
         configure_app_logging,
         configure_database,
-        ping_search_engine,
+        configure_search_engine,
         configure_telemetry,
         configure_middleware,
         configure_app_security,
@@ -148,17 +148,34 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def ping_search_engine(app: FastAPI):
+def configure_search_engine(app: FastAPI):
+    @app.on_event("startup")
+    async def configure_elasticsearch():
+        if not settings.search_engine_is_elasticsearch:
+            return
+
+        logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+        logging.getLogger("elastic_transport").setLevel(logging.ERROR)
+
+    @app.on_event("startup")
+    async def configure_opensearch():
+        if not settings.search_engine_is_opensearch:
+            return
+
+        logging.getLogger("opensearch").setLevel(logging.ERROR)
+        logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
+
     @app.on_event("startup")
     @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
-    async def _ping_search_engine():
+    async def ping_search_engine():
         async for search_engine in get_search_engine():
             if not await search_engine.ping():
                 raise ConnectionError(
-                    f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
-                    "Please make sure your Elasticsearch instance is launched and correctly running and\n"
+                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
+                    f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
                     "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
                 )
+
 
 def configure_app_security(app: FastAPI):
     auth.configure_app(app)

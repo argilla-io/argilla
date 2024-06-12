@@ -18,6 +18,7 @@ from uuid import UUID
 
 from opensearchpy import AsyncOpenSearch, helpers
 
+from argilla_server.constants import SEARCH_ENGINE_OPENSEARCH
 from argilla_server.models import VectorSettings
 from argilla_server.search_engine.base import SearchEngine
 from argilla_server.search_engine.commons import (
@@ -29,7 +30,7 @@ from argilla_server.search_engine.commons import (
 from argilla_server.settings import settings
 
 
-@SearchEngine.register(engine_name="opensearch")
+@SearchEngine.register(engine_name=SEARCH_ENGINE_OPENSEARCH)
 @dataclasses.dataclass
 class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
     config: Dict[str, Any] = dataclasses.field(default_factory=dict)

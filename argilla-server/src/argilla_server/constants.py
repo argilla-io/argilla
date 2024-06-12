@@ -15,6 +15,9 @@
 API_KEY_HEADER_NAME = "X-Argilla-Api-Key"
 WORKSPACE_HEADER_NAME = "X-Argilla-Workspace"
 
+SEARCH_ENGINE_ELASTICSEARCH = "elasticsearch"
+SEARCH_ENGINE_OPENSEARCH = "opensearch"
+
 DEFAULT_USERNAME = "argilla"
 DEFAULT_PASSWORD = "1234"
 DEFAULT_API_KEY = "argilla.apikey"
