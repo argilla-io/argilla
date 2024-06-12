@@ -5,6 +5,11 @@
     "aliases": []
   },
   {
+    "version": "docs_4989-docs-update-gh_access_token-for-20-sdk-docs-build",
+    "title": "docs_4989-docs-update-gh_access_token-for-20-sdk-docs-build",
+    "aliases": []
+  },
+  {
     "version": "docs_scripts-pipeline-access-token",
     "title": "docs_scripts-pipeline-access-token",
     "aliases": []
