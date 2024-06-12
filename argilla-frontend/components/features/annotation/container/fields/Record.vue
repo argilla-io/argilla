@@ -40,11 +40,6 @@ export default {
       type: Array,
     },
   },
-  computed: {
-    searchValue() {
-      return this.$route.query?._search ?? "";
-    },
-  },
   methods: {
     onSelectedRecord(isSelected) {
       this.$emit("on-select-record", isSelected, this.record);

@@ -318,15 +318,27 @@ export default {
     },
   },
   watch: {
+    recordsOnPage: {
+      deep: true,
+      handler() {
+        for (const record of this.recordsOnPage) {
+          if (record.questions.some((q) => q.isSpanType && q.isModified)) {
+            if (!this.selectedRecords.some((r) => r.id === record.id)) {
+              this.selectedRecords.push(record);
+            }
+          }
+        }
+      },
+    },
     spansQuestionsWithSelectedEntities: {
       deep: true,
       handler() {
-        const recordsQuestions = this.recordsOnPage
+        const spanQuestions = this.recordsOnPage
           .flatMap((r) => r.questions)
           .filter((q) => q.isSpanType);
 
         this.spansQuestionsWithSelectedEntities.forEach((q) => {
-          recordsQuestions.forEach((question) => {
+          spanQuestions.forEach((question) => {
             if (question.id === q.id) {
               question.answer.options.forEach((option) => {
                 option.isSelected = q.answer.options.some(
