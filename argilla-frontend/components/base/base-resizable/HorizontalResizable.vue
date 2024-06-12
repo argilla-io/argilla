@@ -4,35 +4,24 @@
       <slot name="up" />
     </div>
 
-    <div v-if="isExpanded" class="resizable__bar" ref="resizableBar">
+    <div v-show="isExpanded" class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
-    <div v-else class="resizable__bar__inner--no-hover" ref="resizableBar" />
-    <div
+
+    <BaseCollapsablePanel
       class="resizable__down"
       :class="isExpanded ? '--expanded' : null"
       :key="isExpanded"
+      :is-expanded="isExpanded"
+      @toggle-expand="toggleExpand"
     >
-      <BaseButton class="resizable__header" @click="isExpanded = !isExpanded">
-        <slot name="downHeader" />
-        <svgicon
-          class="resizable__header__icon"
-          :name="isExpanded ? 'chevron-down' : 'chevron-right'"
-          width="12"
-          height="12"
-        />
-      </BaseButton>
-
-      <div class="resizable__content" v-show="isExpanded">
-        <slot name="downContent" />
-      </div>
-    </div>
+      <slot name="downHeader" slot="panelHeader" />
+      <slot name="downContent" slot="panelContent" />
+    </BaseCollapsablePanel>
   </div>
 </template>
 
 <script>
-import "assets/icons/chevron-right";
-import "assets/icons/chevron-down";
 import { useResizable } from "./useResizable";
 import BaseButton from "../base-button/BaseButton.vue";
 
@@ -146,6 +135,9 @@ export default {
       document.addEventListener(EVENT.MOUSE_UP, this.mouseUpHandler);
       this.resizing = true;
     },
+    toggleExpand() {
+      this.isExpanded = !this.isExpanded;
+    },
   },
   setup(props) {
     return useResizable(props);
@@ -165,37 +157,6 @@ $resizable-bar-width: $base-space;
   width: 100%;
   &.--h-resizing {
     user-select: none;
-  }
-
-  &__header {
-    width: 100%;
-    height: $card-height;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $base-space $base-space * 2;
-    @include font-size(13px);
-    :deep(p) {
-      text-transform: uppercase;
-    }
-    &__icon {
-      padding: 0;
-      flex-shrink: 0;
-    }
-    &:hover {
-      :deep(p),
-      :deep(svg) {
-        color: darken(palette(grey, 300), 10%);
-      }
-    }
-  }
-
-  &__content {
-    width: 100%;
-    height: 100%;
-    padding: $base-space $base-space * 2;
-    overflow: scroll;
-    @include font-size(13px);
   }
 
   &__up {
@@ -219,6 +180,9 @@ $resizable-bar-width: $base-space;
     flex-direction: column;
     justify-content: center;
     min-height: $card-height;
+    &.--expanded {
+      border: none;
+    }
   }
 
   &__bar {
@@ -237,11 +201,6 @@ $resizable-bar-width: $base-space;
       border-bottom: thick solid $black-10;
       border-width: 1px;
       transition: all 0.1s ease-in;
-    }
-
-    &__inner--no-hover {
-      width: 100%;
-      border-bottom: 1px solid $black-10;
     }
 
     &:hover,
