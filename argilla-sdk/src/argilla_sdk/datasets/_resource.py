@@ -80,6 +80,7 @@ class Dataset(Resource, DiskImportExportMixin):
             workspace_id=UUIDUtilities.convert_optional_uuid(uuid=self.workspace_id),
         )
         self._settings = settings or Settings(_dataset=self)
+        self._settings.dataset = self
         self.__records = DatasetRecords(client=self._client, dataset=self)
 
     #####################
@@ -106,7 +107,8 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @settings.setter
     def settings(self, value: Settings) -> None:
-        self._settings = Settings(_dataset=self)
+        value.dataset = self
+        self._settings = value
 
     @property
     def fields(self) -> list:
