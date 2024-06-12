@@ -2,6 +2,12 @@
 
 [Argilla](https://argilla.io) is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
 
+```{danger} Argilla 2.x
+We are announcing that Argilla 1.29 is the final minor release for Argilla 1.x. Although we will continue to release bug fixes for this version, we will neither be adding nor removing any functionalities. Instead, we will focus our efforts on Argilla 2.x. Argilla 1.29 will reach its end-of-life on June 20, 2025.
+
+Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/dev/)!
+```
+
 <div class="social social--sidebar" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
     <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"
         class="button--primary" target="_blank">Join <span aria-label="slack" class="slack-icon"></span></a>
