@@ -165,6 +165,7 @@ $resizable-bar-width: $base-space;
     justify-content: center;
     min-height: $card-height;
     transition: all 0.2s ease-in;
+    margin-bottom: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       height: auto !important;
     }
