@@ -87,9 +87,6 @@ current_user = client.me
 
 To create a new user in Argilla, you can define it in the `User` class and then call the `create` method. This method is inherited from the `Resource` base class and operates without modifications.
 
-!!! info Password generation
-    If you don't provide a password, a random one will be generated for you. Ensure you store this password securely by accessing it through `user.password` immediately after user creation. For security reasons, the password will not be retrievable later.
-
 ```python
 import argilla_sdk as rg
 

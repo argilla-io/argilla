@@ -17,7 +17,7 @@ from uuid import UUID
 
 from argilla_sdk import Workspace
 from argilla_sdk._api import UsersAPI
-from argilla_sdk._models import UserModel, Role
+from argilla_sdk._models import Role, UserModel
 from argilla_sdk._resource import Resource
 from argilla_sdk.client import Argilla
 
@@ -25,7 +25,7 @@ from argilla_sdk.client import Argilla
 class User(Resource):
     """Class for interacting with Argilla users in the Argilla server. User profiles \
         are used to manage access to the Argilla server and track responses to records.
-        
+
     Attributes:
         username (str): The username of the user.
         first_name (str): The first name of the user.
@@ -56,7 +56,7 @@ class User(Resource):
             first_name (str): The first name of the user
             last_name (str): The last name of the user
             role (str): The role of the user, either 'annotator', admin, or 'owner'
-            password (str): The password of the user. If not provided, a random password will be generated
+            password (str): The password of the user
             client (Argilla): The client used to interact with Argilla
 
         Returns:
@@ -69,7 +69,7 @@ class User(Resource):
         if _model is None:
             _model = UserModel(
                 username=username,
-                password=password or self._generate_random_password(),
+                password=password,
                 first_name=first_name or username,
                 last_name=last_name,
                 role=role or Role.annotator,
@@ -176,15 +176,3 @@ class User(Resource):
     @role.setter
     def role(self, value: Role) -> None:
         self._model.role = value
-
-    ############################
-    # Private methods
-    ############################
-
-    @staticmethod
-    def _generate_random_password(n: int = 12) -> str:
-        """Generates a random password for the user"""
-        import random
-        import string
-
-        return "".join(random.choices(string.ascii_letters + string.digits, k=n))
