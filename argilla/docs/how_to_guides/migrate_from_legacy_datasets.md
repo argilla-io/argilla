@@ -119,27 +119,24 @@ Here are a set of example functions to convert the records for single-label and 
         """ This function maps a text classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-        vectors = []
-        if data.get("prediction"):
-            # From data["prediction"]
-            label, score = data["prediction"][0].values()
-            agent = data.get("prediction_agent")
+    
+        if prediction := data.get("prediction"):
+            label, score = prediction[0].values()
+            agent = data["prediction_agent"]
             suggestions.append(rg.Suggestion(question_name="label", value=label, score=score, agent=agent))
-        if data.get("annotation"):
-            # From data[annotation] and data[annotation_agent]
+    
+        if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=data["annotation"], user_id=user_id))
-        if data.get("vectors"):
-            # From data["vectors"]
-            vectors = [rg.Vector(name=name, values=value) for name, value in data["vectors"].items()]
-
+            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+    
+        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
             fields=data["inputs"],
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=vectors,
+            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
             suggestions=suggestions,
             responses=responses,
         )
@@ -148,74 +145,92 @@ Here are a set of example functions to convert the records for single-label and 
 === "For multi-label classification"
 
     ```python
-    def map_to_record_for_multi_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+def map_to_record_for_multi_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+    """ This function maps a text classification record dictionary to the new Argilla record."""
+    suggestions = []
+    responses = []
+    
+    if prediction := data.get("prediction"):
+        labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
+        agent = data["prediction_agent"]
+        suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
+
+    if annotation := data.get("annotation"):
+        user_id = users_by_name.get(data["annotation_agent"], current_user).id
+        responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+
+    vectors = data.get("vectors") or {}
+    return rg.Record(
+        id=data["id"],
+        fields=data["inputs"],
+        # The inputs field should be a dictionary with the same keys as the `fields` in the settings
+        metadata=data["metadata"],
+        # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
+        vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+        suggestions=suggestions,
+        responses=responses,
+    )
+    ```
+    
+=== "For token classification"
+
+    ```python
+    def map_to_record_for_span(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+        """ This function maps a token classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-        vectors = []
-        if data.get("prediction"):
-            # From data["prediction"]
-            labels = [label["label"] for label in data["prediction"]]
-            scores = [label["score"] for label in data["prediction"]]
-            agent = data.get("prediction_agent")
-            suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
-        if data.get("annotation"):
-            # From data[annotation] and data[annotation_agent]
+    
+        if prediction := data.get("prediction"):
+            scores = [span["score"] for span in prediction]
+            agent = data["prediction_agent"]
+            suggestions.append(rg.Suggestion(question_name="labels", value=prediction, score=scores, agent=agent))
+    
+        if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=data["annotation"], user_id=user_id))
-
-        if data.get("vectors"):
-            # From data["vectors"]
-            vectors = [rg.Vector(name=name, values=value) for name, value in data["vectors"].items()]
-
+            responses.append(rg.Response(question_name="spans", value=annotation, user_id=user_id))
+    
+        vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
-            fields=data["inputs"],
+            fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=vectors,
+            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,
         )
     ```
-=== "For token classification"
+    
+=== "For Text generation"
 
     ```python
-
-    def map_to_record_for_span(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+    def map_to_record_for_text_generation(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+        """ This function maps a text2text record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-
-        if data.get("prediction"):
-            # Prediction for token classification will be a list of tuple (label, start, end)
-            spans = [
-                {"start": start, "end": end, "label": label}
-                for label, start, end in data["prediction"]
-            ]
-            agent = data.get("prediction_agent")
-            suggestions.append(rg.Suggestion(question_name="labels", value=spans, agent=agent))
-
-        if data.get("annotation"):
-            # From data[annotation] and data[annotation_agent]
-            spans = [
-                {"start": start, "end": end, "label": label}
-                for label, start, end in data["annotation"]
-            ]
+    
+        if prediction := data.get("prediction"):
+            first = prediction[0]
+            agent = data["prediction_agent"]
+            suggestions.append(
+                rg.Suggestion(question_name="text_generation", value=first["text"], score=first["score"], agent=agent)
+            )
+    
+        if annotation := data.get("annotation"):
+            # From data[annotation]
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=spans, user_id=user_id))
-
-        if data.get("vectors"):
-            # From data["vectors"]
-            vectors = [rg.Vector(name=name, values=value) for name, value in data["vectors"].items()]
-
+            responses.append(rg.Response(question_name="text_generation", value=annotation, user_id=user_id))
+    
+        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
-            fields=data["inputs"],
+            fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=vectors,
+            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,
