@@ -41,7 +41,37 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/dataset/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/migrate_from_legacy_datasets/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/query_export/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/record/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/user/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_migration-guide-in-docs-format/how_to_guides/workspace/</loc>
          <lastmod>2024-06-13</lastmod>
          <changefreq>daily</changefreq>
     </url>

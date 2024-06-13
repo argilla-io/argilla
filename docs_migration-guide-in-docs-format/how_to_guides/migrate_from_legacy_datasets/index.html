@@ -305,17 +305,16 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
     
-    
-      <li class="md-tabs__item">
-        <a href="../index.md" class="md-tabs__link">
-          
   
   How-to guides
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -577,16 +576,24 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-            
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
   
   <span class="md-ellipsis">
     How-to guides
   </span>
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
@@ -602,28 +609,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../index.md" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    None
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user.md" class="md-nav__link">
+      <a href="../user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -644,7 +630,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workspace.md" class="md-nav__link">
+      <a href="../workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -665,7 +651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dataset.md" class="md-nav__link">
+      <a href="../dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -686,7 +672,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../record.md" class="md-nav__link">
+      <a href="../record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -707,7 +693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../query_export.md" class="md-nav__link">
+      <a href="../query_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1764,7 +1750,7 @@
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Upload the records to the new dataset</span>
 </span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
 </span></code></pre></div>
-You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the <a href="index.md">How to guides</a>.</p>
+You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the <a href="../">How to guides</a>.</p>
 <h2 id="migrating-feedback-datasets-on-your-argilla-1-server">Migrating Feedback Datasets on your Argilla 1.* server<a class="headerlink" href="#migrating-feedback-datasets-on-your-argilla-1-server" title="Permanent link">&para;</a></h2>
 <p>As mentioned above, <code>FeedbackDataset</code>'s are compatible with Argilla V2 and do not need to be reformatted. However, you may want to migrate your feedback datasets to the new server so that you can deprecate your Argilla 1.* server. Here is a guide on how to migrate your feedback datasets:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span> <span class="nn">argilla.v1</span> <span class="k">as</span> <span class="nn">rg_v1</span>
