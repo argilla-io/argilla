@@ -396,8 +396,6 @@ If your dataset includes some annotations, you can add those to the records as y
     dataset.records.log(data, user_id=user.id)
     ```
 
-
-
 ## List records
 
 To list records in a dataset, you can use the `records` method on the `Dataset` object. This method returns a list of `Record` objects that can be iterated over to access the record properties.
@@ -422,7 +420,7 @@ for record in dataset.records(
 
 ## Update records
 
-You can update records in a dataset calling the `update` method on the `Dataset` object. To update a record, you need to provide the record `id` and the new data to be updated.
+You can update records in a dataset calling the `log` method on the `Dataset` object. To update a record, you need to provide the record `id` and the new data to be updated.
 
 ```python
 data = dataset.records.to_list(flatten=True)
@@ -436,8 +434,8 @@ updated_data = [
     for sample in data
 ]
 dataset.records.log(records=updated_data)
-
 ```
+
 !!! note "Update the metadata"
     The `metadata` of `Record` object is a python dictionary. So to update the metadata of a record, you can iterate over the records and update the metadata by key or using `metadata.update`. After that, you should update the records in the dataset.
 
@@ -452,4 +450,27 @@ dataset.records.log(records=updated_data)
         updated_records.append(record)
 
     dataset.records.log(records=updated_records)
+    ```
+
+## Delete records
+
+You can delete records in a dataset calling the `delete` method on the `Dataset` object. To delete records, you need to retrieve them from the server and get a list with those that you want to delete.
+
+```python
+records_to_delete = list(dataset.records)[:5]
+dataset.records.delete(records=records_to_delete)
+```
+
+!!! tip "Delete records based on a query"
+    It can be very useful to avoid eliminating records with responses.
+
+    > For more information about the query syntax, check this [how-to guide](query_export.md).
+
+    ```python
+    status_filter = rg.Query(
+        filter = rg.Filter(("status", "==", "pending"))
+    )
+    records_to_delete = list(dataset.records(status_filter))
+
+    dataset.records.delete(records_to_delete)
     ```
