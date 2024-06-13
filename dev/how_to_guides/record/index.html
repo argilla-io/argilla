@@ -797,6 +797,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete records
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1651,6 +1660,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete records
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2071,7 +2089,7 @@
 </span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">question_name</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="update-records">Update records<a class="headerlink" href="#update-records" title="Permanent link">&para;</a></h2>
-<p>You can update records in a dataset calling the <code>update</code> method on the <code>Dataset</code> object. To update a record, you need to provide the record <code>id</code> and the new data to be updated.</p>
+<p>You can update records in a dataset calling the <code>log</code> method on the <code>Dataset</code> object. To update a record, you need to provide the record <code>id</code> and the new data to be updated.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
@@ -2097,6 +2115,25 @@
 </span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>    <span class="n">updated_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
 </span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
 </span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_records</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<h2 id="delete-records">Delete records<a class="headerlink" href="#delete-records" title="Permanent link">&para;</a></h2>
+<p>You can delete records in a dataset calling the <code>delete</code> method on the <code>Dataset</code> object. To delete records, you need to retrieve them from the server and get a list with those that you want to delete.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">records_to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">records_to_delete</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Delete records based on a query</p>
+<p>It can be very useful to avoid eliminating records with responses.</p>
+<blockquote>
+<p>For more information about the query syntax, check this <a href="../query_export/">how-to guide</a>.</p>
+</blockquote>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">status_filter</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="nb">filter</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Filter</span><span class="p">((</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">))</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">)</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">records_to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">status_filter</span><span class="p">))</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">records_to_delete</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
 
