@@ -46,6 +46,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla-python/docs_how-to-use-ui-features/how_to_guides/annotate/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla-python/docs_how-to-use-ui-features/how_to_guides/dataset/</loc>
          <lastmod>2024-06-13</lastmod>
          <changefreq>daily</changefreq>

@@ -724,6 +724,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../how_to_guides/annotate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Annotate records
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
         
   
@@ -1551,7 +1572,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.settings.Settings" class="md-nav__link">
+  <a href="#src.argilla.settings._resource.Settings" class="md-nav__link">
     <span class="md-ellipsis">
       Settings
     </span>
@@ -1560,7 +1581,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.settings.Settings.__init__" class="md-nav__link">
+  <a href="#src.argilla.settings._resource.Settings.__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__
     </span>
@@ -1569,7 +1590,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.settings.Settings.from_json" class="md-nav__link">
+  <a href="#src.argilla.settings._resource.Settings.from_json" class="md-nav__link">
     <span class="md-ellipsis">
       from_json
     </span>
@@ -1578,7 +1599,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.settings.Settings.to_json" class="md-nav__link">
+  <a href="#src.argilla.settings._resource.Settings.to_json" class="md-nav__link">
     <span class="md-ellipsis">
       to_json
     </span>
@@ -1647,7 +1668,7 @@ cannot be changed.</p>
 
 
 
-<a id="argilla.settings.Settings"></a>
+<a id="src.argilla.settings._resource.Settings"></a>
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
               Bases: <code><span title="argilla._resource.Resource">Resource</span></code></p>
@@ -2343,10 +2364,10 @@ cannot be changed.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.settings.Settings.__init__" class="doc doc-heading">
+<h3 id="src.argilla.settings._resource.Settings.__init__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">questions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">guidelines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_extra_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-<a href="#argilla.settings.Settings.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.settings._resource.Settings.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2367,7 +2388,7 @@ cannot be changed.</p>
           <tr class="doc-section-item">
             <td><code>fields</code></td>
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="argilla.settings._field.TextField" href="../fields/#argilla.settings.TextField">TextField</a>]</code>
+                  <code><span title="typing.List">List</span>[<span title="argilla.settings._field.TextField">TextField</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2381,7 +2402,7 @@ cannot be changed.</p>
           <tr class="doc-section-item">
             <td><code>questions</code></td>
             <td>
-                  <code><span title="typing.List">List</span>[<span title="typing.Union">Union</span>[<a class="autorefs autorefs-internal" title="argilla.settings._question.LabelQuestion" href="../questions/#argilla.settings.LabelQuestion">LabelQuestion</a>, <a class="autorefs autorefs-internal" title="argilla.settings._question.MultiLabelQuestion" href="../questions/#argilla.settings.MultiLabelQuestion">MultiLabelQuestion</a>, <a class="autorefs autorefs-internal" title="argilla.settings._question.RankingQuestion" href="../questions/#argilla.settings.RankingQuestion">RankingQuestion</a>, <a class="autorefs autorefs-internal" title="argilla.settings._question.TextQuestion" href="../questions/#argilla.settings.TextQuestion">TextQuestion</a>, <a class="autorefs autorefs-internal" title="argilla.settings._question.RatingQuestion" href="../questions/#argilla.settings.RatingQuestion">RatingQuestion</a>]]</code>
+                  <code><span title="typing.List">List</span>[<span title="typing.Union">Union</span>[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2395,7 +2416,7 @@ cannot be changed.</p>
           <tr class="doc-section-item">
             <td><code>vectors</code></td>
             <td>
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="argilla.settings._vector.VectorField" href="../vectors/#argilla.settings.VectorField">VectorField</a>]</code>
+                  <code><span title="typing.List">List</span>[<span title="argilla.settings._vector.VectorField">VectorField</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2521,14 +2542,14 @@ cannot be changed.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.settings.Settings.from_json" class="doc doc-heading">
+<h3 id="src.argilla.settings._resource.Settings.from_json" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">from_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-<a href="#argilla.settings.Settings.from_json" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.settings._resource.Settings.from_json" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2597,10 +2618,10 @@ cannot be changed.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.settings.Settings.to_json" class="doc doc-heading">
+<h3 id="src.argilla.settings._resource.Settings.to_json" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
 
-<a href="#argilla.settings.Settings.to_json" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.settings._resource.Settings.to_json" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">

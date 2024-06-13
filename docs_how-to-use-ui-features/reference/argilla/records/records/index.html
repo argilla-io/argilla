@@ -724,6 +724,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../../how_to_guides/annotate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Annotate records
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
         
   
@@ -1560,7 +1581,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record" class="md-nav__link">
     <span class="md-ellipsis">
       Record
     </span>
@@ -1569,7 +1590,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record.__init__" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record.__init__" class="md-nav__link">
     <span class="md-ellipsis">
       __init__
     </span>
@@ -1578,7 +1599,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record.from_dict" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record.from_dict" class="md-nav__link">
     <span class="md-ellipsis">
       from_dict
     </span>
@@ -1587,7 +1608,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record.from_model" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record.from_model" class="md-nav__link">
     <span class="md-ellipsis">
       from_model
     </span>
@@ -1596,7 +1617,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record.serialize" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record.serialize" class="md-nav__link">
     <span class="md-ellipsis">
       serialize
     </span>
@@ -1605,7 +1626,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla.records.Record.to_dict" class="md-nav__link">
+  <a href="#src.argilla.records._resource.Record.to_dict" class="md-nav__link">
     <span class="md-ellipsis">
       to_dict
     </span>
@@ -1684,7 +1705,7 @@
 
 
 
-<a id="argilla.records.Record"></a>
+<a id="src.argilla.records._resource.Record"></a>
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
               Bases: <code><span title="argilla._resource.Resource">Resource</span></code></p>
@@ -1706,7 +1727,7 @@ Records contain fields, metadata, and vectors.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.id">id</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.id">id</span></code></td>
             <td>
                   <code><span title="typing.Union">Union</span>[str, <span title="uuid.UUID">UUID</span>]</code>
             </td>
@@ -1717,9 +1738,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.fields">fields</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.fields">fields</span></code></td>
             <td>
-                  <code><span title="argilla.records._resource.RecordFields">RecordFields</span></code>
+                  <code><span title="src.argilla.records._resource.RecordFields">RecordFields</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1728,9 +1749,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.metadata">metadata</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.metadata">metadata</span></code></td>
             <td>
-                  <code><span title="argilla.records._resource.RecordMetadata">RecordMetadata</span></code>
+                  <code><span title="src.argilla.records._resource.RecordMetadata">RecordMetadata</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1739,9 +1760,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.vectors">vectors</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.vectors">vectors</span></code></td>
             <td>
-                  <code><span title="argilla.records._resource.RecordVectors">RecordVectors</span></code>
+                  <code><span title="src.argilla.records._resource.RecordVectors">RecordVectors</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1750,9 +1771,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.responses">responses</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.responses">responses</span></code></td>
             <td>
-                  <code><span title="argilla.records._resource.RecordResponses">RecordResponses</span></code>
+                  <code><span title="src.argilla.records._resource.RecordResponses">RecordResponses</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1761,9 +1782,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.suggestions">suggestions</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.suggestions">suggestions</span></code></td>
             <td>
-                  <code><span title="argilla.records._resource.RecordSuggestions">RecordSuggestions</span></code>
+                  <code><span title="src.argilla.records._resource.RecordSuggestions">RecordSuggestions</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1772,9 +1793,9 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record.dataset">dataset</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record.dataset">dataset</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="argilla.datasets.Dataset" href="../../datasets/datasets/#argilla.datasets.Dataset">Dataset</a></code>
+                  <code><span title="argilla.datasets.Dataset">Dataset</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1783,7 +1804,7 @@ Records contain fields, metadata, and vectors.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="argilla.records.Record._server_id">_server_id</span></code></td>
+            <td><code><span title="src.argilla.records._resource.Record._server_id">_server_id</span></code></td>
             <td>
                   <code><span title="uuid.UUID">UUID</span></code>
             </td>
@@ -2261,10 +2282,10 @@ Records contain fields, metadata, and vectors.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.records.Record.__init__" class="doc doc-heading">
+<h3 id="src.argilla.records._resource.Record.__init__" class="doc doc-heading">
             <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_server_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-<a href="#argilla.records.Record.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.records._resource.Record.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2330,7 +2351,7 @@ and passed to Dataset.DatasetRecords.add() as a list of dictionaries.</p>
           <tr class="doc-section-item">
             <td><code>vectors</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="argilla.vectors.Vector" href="../vectors/#argilla.vectors.Vector">Vector</a>]]</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="argilla.vectors.Vector">Vector</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2344,7 +2365,7 @@ and passed to Dataset.DatasetRecords.add() as a list of dictionaries.</p>
           <tr class="doc-section-item">
             <td><code>responses</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="argilla.responses.Response" href="../responses/#argilla.responses.Response">Response</a>]]</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="argilla.responses.Response">Response</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2358,7 +2379,7 @@ and passed to Dataset.DatasetRecords.add() as a list of dictionaries.</p>
           <tr class="doc-section-item">
             <td><code>suggestions</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="argilla.suggestions.Suggestion" href="../suggestions/#argilla.suggestions.Suggestion">Suggestion</a>]]</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[<span title="argilla.suggestions.Suggestion">Suggestion</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2386,7 +2407,7 @@ and passed to Dataset.DatasetRecords.add() as a list of dictionaries.</p>
           <tr class="doc-section-item">
             <td><code>_dataset</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="argilla.datasets.Dataset" href="../../datasets/datasets/#argilla.datasets.Dataset">Dataset</a>]</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="argilla.datasets.Dataset">Dataset</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2504,14 +2525,14 @@ and passed to Dataset.DatasetRecords.add() as a list of dictionaries.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.records.Record.from_dict" class="doc doc-heading">
+<h3 id="src.argilla.records._resource.Record.from_dict" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-<a href="#argilla.records.Record.from_dict" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.records._resource.Record.from_dict" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2603,14 +2624,14 @@ Returns:
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.records.Record.from_model" class="doc doc-heading">
+<h3 id="src.argilla.records._resource.Record.from_model" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">from_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-<a href="#argilla.records.Record.from_model" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.records._resource.Record.from_model" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2680,10 +2701,10 @@ Returns:
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.records.Record.serialize" class="doc doc-heading">
+<h3 id="src.argilla.records._resource.Record.serialize" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">serialize</span><span class="p">()</span></code>
 
-<a href="#argilla.records.Record.serialize" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.records._resource.Record.serialize" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -2716,10 +2737,10 @@ Returns:
 <div class="doc doc-object doc-function">
 
 
-<h3 id="argilla.records.Record.to_dict" class="doc doc-heading">
+<h3 id="src.argilla.records._resource.Record.to_dict" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">to_dict</span><span class="p">()</span></code>
 
-<a href="#argilla.records.Record.to_dict" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.records._resource.Record.to_dict" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
