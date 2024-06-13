@@ -1,7 +1,10 @@
 <template>
   <VerticalResizable class="wrapper">
     <template #left>
-      <HorizontalResizable id="r-h-rz" class="wrapper__left">
+      <HorizontalResizable
+        :id="`${recordCriteria.datasetId}-r-h-rz`"
+        class="wrapper__left"
+      >
         <template #up>
           <section class="wrapper__records">
             <DatasetFilters :recordCriteria="recordCriteria">
@@ -43,7 +46,10 @@
     </template>
 
     <template #right>
-      <HorizontalResizable id="q-h-rz" class="wrapper__right">
+      <HorizontalResizable
+        :id="`${recordCriteria.datasetId}-q-h-rz}`"
+        class="wrapper__right"
+      >
         <template #up>
           <QuestionsForm
             v-if="!!record"

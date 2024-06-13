@@ -182,6 +182,7 @@ $resizable-bar-width: $base-space;
     flex-direction: column;
     justify-content: center;
     min-height: $card-height;
+    margin-top: calc($resizable-bar-width / 2);
     &.--expanded {
       border: none;
     }
