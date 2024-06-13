@@ -79,6 +79,7 @@ from argilla_server.models import (
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
+from argilla_server.validators.datasets import DatasetCreateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -120,22 +121,17 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
 
 
 async def create_dataset(db: AsyncSession, dataset_attrs: dict):
-    if await Workspace.get(db, dataset_attrs["workspace_id"]) is None:
-        raise UnprocessableEntityError(f"Workspace with id `{dataset_attrs['workspace_id']}` not found")
-
-    if await Dataset.get_by(db, name=dataset_attrs["name"], workspace_id=dataset_attrs["workspace_id"]):
-        raise NotUniqueError(
-            f"Dataset with name `{dataset_attrs['name']}` already exists for workspace with id `{dataset_attrs['workspace_id']}`"
-        )
-
-    return await Dataset.create(
-        db,
+    dataset = Dataset(
         name=dataset_attrs["name"],
         guidelines=dataset_attrs["guidelines"],
         allow_extra_metadata=dataset_attrs["allow_extra_metadata"],
         distribution=dataset_attrs["distribution"],
         workspace_id=dataset_attrs["workspace_id"],
     )
+
+    await DatasetCreateValidator.validate(db, dataset)
+
+    return await dataset.save(db)
 
 
 async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
