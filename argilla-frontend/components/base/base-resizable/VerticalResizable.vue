@@ -103,7 +103,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-primary-color: #6794fe;
+$resizabla-bar-color: #6794fe;
 $resizable-bar-width: $base-space;
 
 .resizable {
@@ -162,7 +162,7 @@ $resizable-bar-width: $base-space;
     .--v-resizing & {
       #{$this}__bar__inner {
         transition: all 0.1s ease-in;
-        border: 2px solid $card-primary-color;
+        border: 2px solid $resizabla-bar-color;
       }
     }
   }

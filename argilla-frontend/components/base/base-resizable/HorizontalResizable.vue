@@ -4,7 +4,7 @@
       <slot name="up" />
     </div>
 
-    <div v-show="isExpanded" class="resizable__bar" ref="resizableBar">
+    <div class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
 
@@ -50,6 +50,7 @@ export default {
       resizer: null,
       upSide: null,
       downSide: null,
+      collapsedPanelHeight: 50,
     };
   },
   watch: {
@@ -110,8 +111,13 @@ export default {
         this.resizer.parentNode.getBoundingClientRect().height;
 
       const newHeight = proportionalHeight / parentHeight;
-
+      const collapsedHeight = (this.collapsedPanelHeight * 100) / parentHeight;
       this.upSide.style.height = `${newHeight}%`;
+      if (newHeight >= 100 - collapsedHeight) {
+        this.isExpanded = false;
+      } else {
+        this.isExpanded = true;
+      }
     },
     mouseMoveHandler(e) {
       this.resize(e);
@@ -146,8 +152,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-primary-color: #6794fe;
-$card-height: 50px;
+$resizabla-bar-color: #6794fe;
+$collapsed-panel-height: 50px;
 $resizable-bar-width: $base-space;
 .resizable {
   $this: &;
@@ -164,7 +170,7 @@ $resizable-bar-width: $base-space;
     align-items: center;
     display: flex;
     justify-content: center;
-    min-height: $card-height;
+    min-height: $collapsed-panel-height;
     transition: all 0.2s ease-in;
     margin-bottom: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
@@ -181,11 +187,9 @@ $resizable-bar-width: $base-space;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: $card-height;
+    min-height: $collapsed-panel-height;
     margin-top: calc($resizable-bar-width / 2);
-    &.--expanded {
-      border: none;
-    }
+    border: none;
   }
 
   &__bar {
@@ -210,7 +214,7 @@ $resizable-bar-width: $base-space;
     .--h-resizing & {
       #{$this}__bar__inner {
         transition: all 0.1s ease-in;
-        border: 2px solid $card-primary-color;
+        border: 2px solid $resizabla-bar-color;
       }
     }
   }
