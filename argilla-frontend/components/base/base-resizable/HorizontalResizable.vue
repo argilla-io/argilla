@@ -189,7 +189,9 @@ $resizable-bar-width: $base-space;
     justify-content: center;
     min-height: $collapsed-panel-height;
     margin-top: calc($resizable-bar-width / 2);
-    border: none;
+    &.panel {
+      border: none;
+    }
   }
 
   &__bar {
