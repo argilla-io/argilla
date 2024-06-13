@@ -12,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
+from argilla_v1 import *  # noqa
 
-#     return mock_client
+
+def deprecation(message: str):
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+
+deprecation(
+    "The module `argilla_sdk.v1` has been include for migration purposes. "
+    "It's deprecated and will be removed in the future"
+)

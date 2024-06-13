@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from argilla.client import *  # noqa
+from argilla.datasets import *  # noqa
+from argilla.workspaces._resource import *  # noqa
+from argilla.users._resource import *  # noqa
+from argilla.settings import *  # noqa
+from argilla.suggestions import *  # noqa
+from argilla.responses import *  # noqa
+from argilla.records import *  # noqa
+from argilla.vectors import *  # noqa
 
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
 
-#     return mock_client
+__version__ = "2.0.0a0.dev0"

@@ -12,10 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
 
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
+from pydantic import Field
 
-#     return mock_client
+from argilla._models._settings._questions._label_selection import LabelQuestionSettings, LabelQuestionModel
+
+
+class OptionsOrder(str, Enum):
+    natural = "natural"
+    suggestion = "suggestion"
+
+
+class MultiLabelQuestionSettings(LabelQuestionSettings):
+    type: str = "multi_label_selection"
+    options_order: OptionsOrder = Field(OptionsOrder.natural, description="The order of the labels in the UI.")
+
+
+class MultiLabelQuestionModel(LabelQuestionModel):
+    settings: MultiLabelQuestionSettings

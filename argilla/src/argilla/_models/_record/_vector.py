@@ -11,11 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
+from argilla._models import ResourceModel
+
+import re
+from pydantic import field_validator
+
+__all__ = ["VectorModel"]
 
 
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
+class VectorModel(ResourceModel):
+    name: str
+    vector_values: List[float]
 
-#     return mock_client
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        """Validate the name of the vector is url safe"""
+        if not re.match(r"^[a-zA-Z0-9_-]+$", value):
+            raise ValueError("Vector name must be url safe")
+        return value

@@ -12,10 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from argilla._models import ResourceModel
 
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
+import re
+from pydantic import field_validator
 
-#     return mock_client
+__all__ = ["WorkspaceModel"]
+
+
+class WorkspaceModel(ResourceModel):
+    name: str
+
+    class Config:
+        validate_assignment = True
+        str_strip_whitespace = True
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        """Validate the name of the workspace is url safe"""
+        if not re.match(r"^[a-zA-Z0-9_-]+$", value):
+            raise ValueError("Workspace name must be url safe")
+        return value

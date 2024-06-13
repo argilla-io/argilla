@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
-
-#     return mock_client
+from argilla._api._datasets import *  # noqa 403
+from argilla._api._http import *  # noqa 403
+from argilla._api._workspaces import *  # noqa 403
+from argilla._api._users import *  # noqa 403
+from argilla._api._client import *  # noqa 403
+from argilla._api._fields import *  # noqa 403
+from argilla._api._records import *  # noqa 403
+from argilla._api._questions import *  # noqa 403
