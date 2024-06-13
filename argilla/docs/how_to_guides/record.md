@@ -33,11 +33,7 @@ A **record** in Argilla is a data item that requires annotation, consisting of o
         ],
     )
     ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/record.md
     > Check the [Record - Python Reference](../../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
-========
-    > Check the [Record - Python Reference](../reference/argilla_sdk/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/record.md
 
 ## Add records
 
@@ -88,13 +84,8 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
 
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/record.md
     ```python	
     import argilla as rg
-========
-    ```python
-    import argilla_sdk as rg
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/record.md
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
@@ -231,11 +222,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
     You can also add vectors to a record in an initialized `Record` object.
 
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/record.md
     > Check the [Vector - Python Reference](../../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
-========
-    > Check the [Vector - Python Reference](../reference/argilla_sdk/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/record.md
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -290,11 +277,7 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 === "As `Record objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/record.md
     > Check the [Suggestions - Python Reference](../../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
-========
-    > Check the [Suggestions - Python Reference](../reference/argilla_sdk/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/record.md
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -365,11 +348,7 @@ If your dataset includes some annotations, you can add those to the records as y
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/record.md
     > Check the [Responses - Python Reference](../../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
-========
-    > Check the [Responses - Python Reference](../reference/argilla_sdk/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/record.md
 
     ```python
     # Add records to the dataset with the label 'my_label'

@@ -31,11 +31,7 @@ Argilla provides a default workspace to help you get started in Python and the U
         client=client
     )
     ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/workspace.md
     > Check the [Workspace - Python Reference](../../reference/argilla/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
-========
-    > Check the [Workspace - Python Reference](../reference/argilla_sdk/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/workspace.md
 
 ## Create a new workspace
 

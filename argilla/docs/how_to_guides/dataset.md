@@ -25,11 +25,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             client=client
         )
         ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/dataset.md
         > Check the [Dataset - Python Reference](../../reference/argilla/datasets/datasets.md) to see the attributes, arguments, and methods of the `Dataset` class in detail.
-========
-        > Check the [Dataset - Python Reference](../reference/argilla_sdk/datasets/datasets.md) to see the attributes, arguments, and methods of the `Dataset` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/dataset.md
 
     === "`rg.Settings`"
 
@@ -49,11 +45,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
         )
         ```
 
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/dataset.md
         > Check the [Settings - Python Reference](../../reference/argilla/settings/settings.md) to see the attributes, arguments, and methods of the `Settings` class in detail.
-========
-        > Check the [Settings - Python Reference](../reference/argilla_sdk/settings/settings.md) to see the attributes, arguments, and methods of the `Settings` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/dataset.md
 
 ## Create a dataset
 
