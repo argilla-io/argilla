@@ -224,6 +224,7 @@ $resizable-bar-width: $base-space;
 .transition-leave-active {
   transition: all 2s ease-in-out;
 }
+
 .transition-enter-from,
 .transition-leave-to {
   min-height: 0;
