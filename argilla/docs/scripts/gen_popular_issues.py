@@ -22,10 +22,27 @@ import requests
 REPOSITORY = "argilla-io/argilla"
 DATA_PATH = "community/popular_issues.md"
 
-GITHUB_ACCESS_TOKEN = os.environ["GH_ACCESS_TOKEN"]  # public_repo and read:org scopes are required
+GITHUB_ACCESS_TOKEN = os.getenv("GH_ACCESS_TOKEN")  # public_repo and read:org scopes are required
 
 
 def fetch_data_from_github(repository, auth_token):
+    if auth_token is None:
+        return pd.DataFrame(
+            {
+                "Issue": [],
+                "State": [],
+                "Created at": [],
+                "Closed at": [],
+                "Last update": [],
+                "Labels": [],
+                "Milestone": [],
+                "Reactions": [],
+                "Comments": [],
+                "URL": [],
+                "Repository": [],
+                "Author": [],
+            }
+        )
     headers = {"Authorization": f"token {auth_token}", "Accept": "application/vnd.github.v3+json"}
     issues_data = []
 
