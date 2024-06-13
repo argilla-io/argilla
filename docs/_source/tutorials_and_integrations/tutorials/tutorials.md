@@ -139,7 +139,7 @@ Learn how to monitor data and model drift in a real-world scenario using differe
 
 Learn how to train an ABSA model and evaluate with Argilla.
 ```
-```{grid-item-card} # 🙌 Analyzing Annotation Metrics with FastFit Model Predictions
+```{grid-item-card} 🙌 Analyzing Annotation Metrics with FastFit Model Predictions
 :link: feedback/training-fastfit-agreement.html
 Learn how to train a FastFit model and calculate well-know annotation metrics.
 ```
