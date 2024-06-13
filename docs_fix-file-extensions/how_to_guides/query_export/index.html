@@ -1649,7 +1649,7 @@
 <p>You can search for records in your dataset by <strong>querying</strong> or <strong>filtering</strong>. The query focuses on the content of the text field, while the filter is used to filter the records based on conditions. You can use them independently or combine multiple filters to create complex search queries. You can also export records from a dataset either as a single dictionary or a list of dictionaries.</p>
 <div class="admonition info">
 <p class="admonition-title">Main Classes</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1"><code>rg.query</code></label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1"><code>rg.query</code></label><label for="__tabbed_1_2"><code>rg.Filter</code></label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span>
@@ -1657,62 +1657,24 @@
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
 </span></code></pre></div>
+<blockquote>
+<p>Check the <a href="../../reference/argilla/search.md">Query - Python Reference</a> to see the attributes, arguments, and methods of the <code>Query</code> class in detail.</p>
+</blockquote>
+</div>
+<div class="tabbed-block">
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">Filter</span><span class="p">(</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="p">[</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>        <span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="p">]</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<blockquote>
+<p>Check the <a href="../../reference/argilla/search.md">Filter - Python Reference</a> to see the attributes, arguments, and methods of the <code>Filter</code> class in detail.</p>
+</blockquote>
 </div>
 </div>
 </div>
 </div>
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:argilla/docs/guides/how_to_guides/query_export.md
-        &gt; Check the <a href="../../reference/argilla/search.md">Query - Python Reference</a> to see the attributes, arguments, and methods of the <code>Query</code> class in detail.
-========
-        &gt; Check the <a href="../reference/argilla_sdk/search.md">Query - Python Reference</a> to see the attributes, arguments, and methods of the <code>Query</code> class in detail.</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/query_export.md</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-<div class="language-text highlight"><pre><span></span><code>=== &quot;`rg.Filter`&quot;
-
-    ```python
-    rg.Filter(
-        [
-            (&quot;field&quot;, &quot;==&quot;, &quot;value&quot;),
-        ]
-    )
-    ```
-</code></pre></div>
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD:argilla/docs/guides/how_to_guides/query_export.md
-        &gt; Check the <a href="../../reference/argilla/search.md">Filter - Python Reference</a> to see the attributes, arguments, and methods of the <code>Filter</code> class in detail.
-========
-        &gt; Check the <a href="../reference/argilla_sdk/search.md">Filter - Python Reference</a> to see the attributes, arguments, and methods of the <code>Filter</code> class in detail.</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/query_export.md</p>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
-</blockquote>
 <h2 id="query-with-search-terms">Query with search terms<a class="headerlink" href="#query-with-search-terms" title="Permanent link">&para;</a></h2>
 <p>To search for records with terms, you can use the <code>Dataset.records</code> attribute with a query string. The search terms are used to search for records that contain the terms in the text field. You can search a single term or various terms, in the latter, all of them should appear in the record to be retrieved.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Single search term</label><label for="__tabbed_2_2">Multiple search term</label></div>
