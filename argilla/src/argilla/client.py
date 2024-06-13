@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from argilla import Dataset
     from argilla import User
 
-    from IPython.display import HTML
 
 __all__ = ["Argilla"]
 
@@ -170,7 +169,7 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
     # Private methods
     ############################
 
-    def _repr_html_(self) -> "HTML":
+    def _repr_html_(self) -> str:
         return self._represent_as_html(resources=self.list())
 
     def _from_model(self, model: UserModel) -> "User":
@@ -249,7 +248,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     # Private methods
     ############################
 
-    def _repr_html_(self) -> "HTML":
+    def _repr_html_(self) -> str:
         return self._represent_as_html(resources=self.list())
 
     def _from_model(self, model: WorkspaceModel) -> "Workspace":
@@ -324,7 +323,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
     # Private methods
     ############################
 
-    def _repr_html_(self) -> "HTML":
+    def _repr_html_(self) -> str:
         return self._represent_as_html(resources=self.list())
 
     def _from_model(self, model: DatasetModel) -> "Dataset":

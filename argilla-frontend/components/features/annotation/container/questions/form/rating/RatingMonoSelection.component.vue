@@ -116,11 +116,6 @@ export default {
     display: inline-flex;
     gap: $base-space;
     border-radius: $border-radius-rounded;
-    border: 1px solid #cdcdff;
-    background: #e0e0ff;
-    &:hover {
-      border-color: darken(palette(purple, 800), 12%);
-    }
   }
 }
 .label-text {
@@ -133,7 +128,7 @@ export default {
   min-width: $base-space * 4;
   padding-inline: $base-space;
   outline: none;
-  background: palette(purple, 800);
+  background: palette(grey, 700);
   color: palette(purple, 200);
   font-weight: 500;
   overflow: hidden;
@@ -157,7 +152,7 @@ export default {
   }
 
   &:not(.label-active):hover {
-    background: darken(palette(purple, 800), 5%);
+    background: darken(palette(grey, 700), 5%);
     transition: all 0.2s ease-in-out;
   }
 }

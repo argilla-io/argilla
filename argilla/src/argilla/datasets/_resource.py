@@ -73,15 +73,14 @@ class Dataset(Resource, DiskImportExportMixin):
             self._log_message(f"Settings dataset name to unique UUID: {name}")
 
         self.workspace_id = (
-            _model.workspace_id
-            if _model and _model.workspace_id
-            else self.__workspace_id_from_name(workspace=workspace)
+            _model.workspace_id if _model and _model.workspace_id else self._workspace_id_from_name(workspace=workspace)
         )
         self._model = _model or DatasetModel(
             name=name,
             workspace_id=UUIDUtilities.convert_optional_uuid(uuid=self.workspace_id),
         )
-        self._settings = self.__configure_settings_for_dataset(settings=settings)
+        self._settings = settings or Settings(_dataset=self)
+        self._settings.dataset = self
         self.__records = DatasetRecords(client=self._client, dataset=self)
 
     #####################
@@ -102,13 +101,14 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @property
     def settings(self) -> Settings:
-        if self.__is_published() and self._settings.is_outdated:
+        if self._is_published() and self._settings.is_outdated:
             self._settings.get()
         return self._settings
 
     @settings.setter
     def settings(self, value: Settings) -> None:
-        self._settings = self.__configure_settings_for_dataset(settings=value)
+        value.dataset = self
+        self._settings = value
 
     @property
     def fields(self) -> list:
@@ -161,7 +161,7 @@ class Dataset(Resource, DiskImportExportMixin):
             return self._publish()
         except Exception as e:
             self._log_message(message=f"Error creating dataset: {e}", level="error")
-            self.__rollback_dataset_creation()
+            self._rollback_dataset_creation()
             raise SettingsError from e
 
     def update(self) -> "Dataset":
@@ -187,22 +187,7 @@ class Dataset(Resource, DiskImportExportMixin):
 
         return self.get()  # type: ignore
 
-    def __configure_settings_for_dataset(
-        self,
-        settings: Optional[Settings] = None,
-    ) -> Settings:
-        if settings is None:
-            settings = Settings(_dataset=self)
-            warnings.warn(
-                message="Settings not provided. Using empty settings for the dataset. \
-                    Define the settings before creating the dataset.",
-                stacklevel=2,
-            )
-        else:
-            settings.dataset = self
-        return settings
-
-    def __workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
+    def _workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
         if workspace is None:
             available_workspaces = self._client.workspaces
             ws = available_workspaces[0]  # type: ignore
@@ -221,9 +206,9 @@ class Dataset(Resource, DiskImportExportMixin):
             ws = workspace
         return ws.id
 
-    def __rollback_dataset_creation(self):
-        if self.exists() and not self.__is_published():
+    def _rollback_dataset_creation(self):
+        if self.exists() and not self._is_published():
             self.delete()
 
-    def __is_published(self) -> bool:
+    def _is_published(self) -> bool:
         return self.exists() and self._model.status == "ready"

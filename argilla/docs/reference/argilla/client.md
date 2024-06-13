@@ -3,7 +3,7 @@ hide: footer
 ---
 # `rg.Argilla`
 
-To interact with the Argilla server from python you can use the `Argilla` class. The `Argilla` client is used to create, get, update, and delete all Argilla resources, such as workspaces, users, datasets, and records.
+To interact with the Argilla server from Python you can use the `Argilla` class. The `Argilla` client is used to create, get, update, and delete all Argilla resources, such as workspaces, users, datasets, and records.
 
 ## Usage Examples
 

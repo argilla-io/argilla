@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
 
+from tqdm import tqdm
+
 from argilla._api import RecordsAPI
 from argilla._helpers import LoggingMixin
 from argilla._models import RecordModel, MetadataValue
@@ -224,7 +226,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         created_or_updated = []
         records_updated = 0
-        for batch in range(0, len(records), batch_size):
+        for batch in tqdm(
+            iterable=range(0, len(records), batch_size), desc="Adding and updating records", unit="batch"
+        ):
             self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
             batch_records = record_models[batch : batch + batch_size]
             models, updated = self._api.bulk_upsert(dataset_id=self.__dataset.id, records=batch_records)
@@ -238,6 +242,34 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         )
 
         return created_or_updated
+
+    def delete(
+        self,
+        records: List[Record],
+    ) -> List[Record]:
+        """Delete records in a dataset on the server using the provided records
+            and matching based on the id.
+
+        Parameters:
+            records: A list of `Record` objects representing the records to be deleted.
+
+        Returns:
+            A list of Record objects representing the deleted records.
+
+        """
+        mapping = None
+        user_id = self.__client.me.id
+
+        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id)
+
+        self._api.delete_many(dataset_id=self.__dataset.id, records=record_models)
+
+        self._log_message(
+            message=f"Deleted {len(record_models)} records from dataset {self.__dataset.name}",
+            level="info",
+        )
+
+        return record_models
 
     def to_dict(self, flatten: bool = False, orient: str = "names") -> Dict[str, Any]:
         """
