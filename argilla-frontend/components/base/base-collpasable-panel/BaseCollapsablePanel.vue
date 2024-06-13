@@ -68,7 +68,7 @@ export default {
     width: 100%;
     height: 100%;
     padding: $base-space $base-space * 2;
-    overflow: scroll;
+    overflow-y: auto;
     @include font-size(13px);
   }
 }
