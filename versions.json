@@ -30,6 +30,11 @@
     "aliases": []
   },
   {
+    "version": "docs_fix-file-extensions",
+    "title": "docs_fix-file-extensions",
+    "aliases": []
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
