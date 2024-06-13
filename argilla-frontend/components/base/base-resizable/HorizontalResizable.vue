@@ -144,6 +144,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 $card-primary-color: #6794fe;
 $card-height: 50px;
