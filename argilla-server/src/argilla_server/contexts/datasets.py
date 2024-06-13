@@ -37,10 +37,7 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla_server.api.schemas.v1.datasets import (
-    DatasetCreate,
-    DatasetProgress,
-)
+from argilla_server.api.schemas.v1.datasets import DatasetProgress
 from argilla_server.api.schemas.v1.fields import FieldCreate
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
 from argilla_server.api.schemas.v1.records import (
@@ -122,22 +119,22 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
     return result.scalars().all()
 
 
-async def create_dataset(db: AsyncSession, dataset_create: DatasetCreate):
-    if await Workspace.get(db, dataset_create.workspace_id) is None:
-        raise UnprocessableEntityError(f"Workspace with id `{dataset_create.workspace_id}` not found")
+async def create_dataset(db: AsyncSession, dataset_attrs: dict):
+    if await Workspace.get(db, dataset_attrs["workspace_id"]) is None:
+        raise UnprocessableEntityError(f"Workspace with id `{dataset_attrs['workspace_id']}` not found")
 
-    if await Dataset.get_by(db, name=dataset_create.name, workspace_id=dataset_create.workspace_id):
+    if await Dataset.get_by(db, name=dataset_attrs["name"], workspace_id=dataset_attrs["workspace_id"]):
         raise NotUniqueError(
-            f"Dataset with name `{dataset_create.name}` already exists for workspace with id `{dataset_create.workspace_id}`"
+            f"Dataset with name `{dataset_attrs['name']}` already exists for workspace with id `{dataset_attrs['workspace_id']}`"
         )
 
     return await Dataset.create(
         db,
-        name=dataset_create.name,
-        guidelines=dataset_create.guidelines,
-        allow_extra_metadata=dataset_create.allow_extra_metadata,
-        distribution=dataset_create.distribution.dict(),
-        workspace_id=dataset_create.workspace_id,
+        name=dataset_attrs["name"],
+        guidelines=dataset_attrs["guidelines"],
+        allow_extra_metadata=dataset_attrs["allow_extra_metadata"],
+        distribution=dataset_attrs["distribution"],
+        workspace_id=dataset_attrs["workspace_id"],
     )
 
 

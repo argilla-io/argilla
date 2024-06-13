@@ -190,7 +190,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    return await datasets.create_dataset(db, dataset_create)
+    return await datasets.create_dataset(db, dataset_create.dict())
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
