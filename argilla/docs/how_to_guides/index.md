@@ -1,11 +1,11 @@
 ---
-description: These are the how-to guides for the the Argilla Python SDK SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+description: These are the how-to guides for the Argilla Python SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
 hide: toc
 ---
 
 # How-to guides
 
-These are the how-to guides for the *the Argilla Python SDK SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+These are the how-to guides for *the Argilla Python SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
 
 <div class="grid cards" markdown>
 
@@ -49,28 +49,12 @@ These are the how-to guides for the *the Argilla Python SDK SDK*. They provide s
 
     [:octicons-arrow-right-24: How-to guide](query_export.md)
 
-<!-- -   :material-scale-balance:{ .lg .middle } __Distribute annotation work__
+-   __Migrate to Argilla V2__
 
     ---
 
-    Learn how to distribute [`Records`](#) to [`Users`](#) and [`Workspaces`](#) for managing annotation efforts the way you require.
+    Learn how to migrate your legacy datasets from Argilla 1.x to 2.x.
 
-    [:octicons-arrow-right-24: License](#)
-
--   :material-scale-balance:{ .lg .middle } __Evaluate annotators and models with metrics and KPIs__
-
-    ---
-
-    Learn how to evaluate [`Users`](#) and Models with [`Metrics`](#) and [`KPIs`](#) to ensure the quality of your data, models and annotations.
-
-    [:octicons-arrow-right-24: License](#)
-
--   :material-scale-balance:{ .lg .middle } __Fine-tune a model__
-
-    ---
-
-    Learn how to fine-tune your own model with [`transformers`](#) and take ownership of your data and models.
-
-    [:octicons-arrow-right-24: License](#) -->
+    [:octicons-arrow-right-24: How-to guide](migrate_from_legacy_datasets.md)
 
 </div>
