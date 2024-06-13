@@ -24,10 +24,12 @@ RETRIEVED_BRANCH = "develop"
 
 DATA_PATH = "community/changelog.md"
 
-GITHUB_ACCESS_TOKEN = os.environ["GH_ACCESS_TOKEN"]  # public_repo and read:org scopes are required
+GITHUB_ACCESS_TOKEN = os.getenv("GH_ACCESS_TOKEN")  # public_repo and read:org scopes are required
 
 
 def fetch_file_from_github(repository, changelog_path, branch, auth_token):
+    if auth_token is None:
+        return ""
     headers = {"Authorization": f"Bearer {auth_token}", "Accept": "application/vnd.github.v3+json"}
 
     owner, repo_name = repository.split("/")
