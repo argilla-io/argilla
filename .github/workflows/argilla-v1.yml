@@ -9,16 +9,19 @@ on:
   workflow_call:
 
   push:
+    paths:
+      - argilla-v1/**
     tags:
       - "*"
     branches:
       - main
       - develop
+      - feat/**
       - releases/**
 
   pull_request:
     paths:
-      - "argilla-v1/**"
+      - argilla-v1/**
 
   release:
     types:

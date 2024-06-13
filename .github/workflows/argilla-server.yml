@@ -12,23 +12,20 @@ defaults:
 on:
   workflow_dispatch:
   push:
+    paths:
+      - argilla-server/**
     tags:
       - "*"
     branches:
       - main
       - develop
-      - "feat/**"
+      - feat/**
       - releases/**
 
   pull_request:
     paths:
       - argilla-server/**
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - ready_for_review
+
   release:
     types:
       - published

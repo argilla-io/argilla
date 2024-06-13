@@ -15,21 +15,18 @@ on:
 
   push:
     paths:
-      - "argilla/**"
+      - argilla/**
       - "!argilla/docs/**"
     branches:
-      - "develop"
-      - "main"
-      - "feat/**"
+      - main
+      - develop
+      - feat/**
+      - releases/**
 
   pull_request:
     paths:
-      - "argilla/**"
+      - argilla/**
       - "!argilla/docs/**"
-    branches:
-      - "develop"
-      - "main"
-      - "feat/**"
 
   release:
     types:
