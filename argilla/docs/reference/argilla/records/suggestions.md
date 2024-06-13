@@ -73,6 +73,6 @@ for record in dataset.records(with_suggestions=True):
 
 ### `rg.Suggestion`
 
-::: argilla.suggestions.Suggestion
+::: src.argilla.suggestions.Suggestion
     options:
         heading_level: 3
