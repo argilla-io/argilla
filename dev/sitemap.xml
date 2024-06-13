@@ -41,6 +41,36 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/dataset/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/query_export/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/record/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/user/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla-python/dev/how_to_guides/workspace/</loc>
+         <lastmod>2024-06-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla-python/dev/reference/argilla/SUMMARY/</loc>
          <lastmod>2024-06-13</lastmod>
          <changefreq>daily</changefreq>
