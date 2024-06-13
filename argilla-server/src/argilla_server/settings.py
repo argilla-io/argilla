@@ -29,6 +29,8 @@ from argilla_server.constants import (
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
     DEFAULT_TELEMETRY_KEY,
+    SEARCH_ENGINE_ELASTICSEARCH,
+    SEARCH_ENGINE_OPENSEARCH,
 )
 from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
@@ -97,7 +99,7 @@ class Settings(BaseSettings):
 
     es_mapping_total_fields_limit: int = 2000
 
-    search_engine: str = "elasticsearch"
+    search_engine: str = SEARCH_ENGINE_ELASTICSEARCH
 
     vectors_fields_limit: int = Field(
         default=5,
@@ -217,11 +219,20 @@ class Settings(BaseSettings):
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
 
+    @property
+    def search_engine_is_elasticsearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_ELASTICSEARCH
+
+    @property
+    def search_engine_is_opensearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_OPENSEARCH
+
     def obfuscated_elasticsearch(self) -> str:
         """Returns configured elasticsearch url obfuscating the provided password, if any"""
         parsed = urlparse(self.elasticsearch)
         if parsed.password:
             return self.elasticsearch.replace(parsed.password, "XXXX")
+
         return self.elasticsearch
 
     class Config:

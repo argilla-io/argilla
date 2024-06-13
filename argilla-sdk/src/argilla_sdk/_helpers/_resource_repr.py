@@ -14,9 +14,6 @@
 
 from typing import Any, Dict
 
-from IPython.display import HTML
-
-
 RESOURCE_REPR_CONFIG = {
     "Dataset": {
         "columns": ["name", "id", "workspace_id", "updated_at"],
@@ -53,7 +50,7 @@ class ResourceHTMLReprMixin:
         resource_name = resource.__class__.__name__
         return RESOURCE_REPR_CONFIG[resource_name]["table_name"]
 
-    def _represent_as_html(self, resources) -> HTML:
+    def _represent_as_html(self, resources) -> str:
         table_name = self._resource_to_table_name(resources[0])
         table_rows = [self._resource_to_table_row(resource) for resource in resources]
 
@@ -69,4 +66,4 @@ class ResourceHTMLReprMixin:
             html_table += "</tr>"
 
         html_table += "</table>"
-        return HTML(html_table)._repr_html_()
+        return html_table

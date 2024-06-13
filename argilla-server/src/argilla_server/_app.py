@@ -29,13 +29,14 @@ from starlette.responses import RedirectResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
-from argilla_server.apis.routes import api_v1
+from argilla_server.api.routes import api_v1
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
 from argilla_server.pydantic_v1.errors import ConfigError
+from argilla_server.search_engine import get_search_engine
 from argilla_server.security import auth
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
@@ -65,7 +66,7 @@ def create_server_app() -> FastAPI:
     for app_configure in [
         configure_app_logging,
         configure_database,
-        wait_for_search_engine,
+        configure_search_engine,
         configure_telemetry,
         configure_middleware,
         configure_app_security,
@@ -147,10 +148,33 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def wait_for_search_engine(app: FastAPI):
-    # TODO: Ping search engine to check if it is available
-    pass
+def configure_search_engine(app: FastAPI):
+    @app.on_event("startup")
+    async def configure_elasticsearch():
+        if not settings.search_engine_is_elasticsearch:
+            return
 
+        logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+        logging.getLogger("elastic_transport").setLevel(logging.ERROR)
+
+    @app.on_event("startup")
+    async def configure_opensearch():
+        if not settings.search_engine_is_opensearch:
+            return
+
+        logging.getLogger("opensearch").setLevel(logging.ERROR)
+        logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
+
+    @app.on_event("startup")
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    async def ping_search_engine():
+        async for search_engine in get_search_engine():
+            if not await search_engine.ping():
+                raise ConnectionError(
+                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
+                    f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
+                    "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
+                )
 
 
 def configure_app_security(app: FastAPI):

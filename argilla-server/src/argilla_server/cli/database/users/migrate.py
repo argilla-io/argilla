@@ -18,11 +18,11 @@ from typing import TYPE_CHECKING, List, Optional
 import typer
 import yaml
 
+from argilla_server.api.schemas.v1.users import USER_USERNAME_REGEX
+from argilla_server.api.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
-from argilla_server.schemas.v1.users import USER_USERNAME_REGEX
-from argilla_server.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 
 from .utils import get_or_new_workspace
 

@@ -7,14 +7,6 @@
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId">
-      <BaseButton
-        ref="trainButtonRef"
-        class="header__button small"
-        @on-click="onClickTrain"
-        v-if="isAdminOrOwnerRole && showTrainButton"
-      >
-        <svgicon name="code" width="20" height="20" />Train
-      </BaseButton>
       <NuxtLink
         v-if="showSettingButton"
         :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
@@ -39,10 +31,6 @@ export default {
       type: Array,
       default: () => [],
     },
-    showTrainButton: {
-      type: Boolean,
-      default: false,
-    },
     showSettingButton: {
       type: Boolean,
       default: false,
@@ -52,35 +40,8 @@ export default {
       default: false,
     },
   },
-  methods: {
-    onClickTrain() {
-      this.$emit("on-click-train");
-    },
-  },
   setup() {
     return useRole();
   },
 };
 </script>
-
-<style lang="scss" scoped>
-$header-button-color: #262a2e;
-.header__button {
-  background: $header-button-color;
-  color: palette(white);
-  margin-right: $base-space;
-  padding: 10px 12px 10px 10px;
-  font-weight: 600;
-  @include font-size(14px);
-  box-shadow: $shadow-200;
-  @include media("<=tablet") {
-    display: none;
-  }
-  &:hover {
-    background: lighten($header-button-color, 3%);
-  }
-  svg {
-    fill: palette(white);
-  }
-}
-</style>

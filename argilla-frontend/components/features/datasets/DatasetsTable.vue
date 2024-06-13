@@ -209,7 +209,7 @@ export default {
 .container {
   display: flex;
   justify-content: center;
-  padding: 0 calc($sidebarMenuWidth + 4em) 0 4em;
+  padding: 0 4em;
   @include media("<=tablet") {
     padding: 0 $base-space * 2;
   }
@@ -221,6 +221,9 @@ export default {
     padding: 0 $base-space * 6;
     display: flex;
     flex-direction: column;
+    @include media("<=tablet") {
+      padding: 0;
+    }
   }
 }
 .interactions {

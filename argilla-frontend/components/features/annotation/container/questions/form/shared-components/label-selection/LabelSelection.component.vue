@@ -351,7 +351,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$label-color: palette(purple, 800);
+$label-color: palette(grey, 700);
 $label-dark-color: palette(purple, 200);
 .container {
   display: flex;

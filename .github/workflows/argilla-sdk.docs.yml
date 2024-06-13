@@ -54,12 +54,21 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Print GitHub ref info
+        run:
+          echo "${{ github.ref }}"
+          echo "${{ github.head_ref }}"
+
       - run: pdm run mike deploy dev --push
         if: github.ref == 'refs/heads/feat/v2.0.0'
         # if: github.ref == 'refs/heads/develop'
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - run: pdm run mike deploy ${{ github.ref_name }} latest --update-aliases --push
         if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Extract branch name
         shell: bash
@@ -67,4 +76,6 @@ jobs:
         id: extract_branch_name
 
       - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --push
-        if: startsWith(github.head_ref, 'docs/')
+        if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}

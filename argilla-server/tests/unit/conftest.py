@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Dict, Generator
 import pytest
 import pytest_asyncio
 from argilla_server import telemetry
-from argilla_server.apis.routes import api_v1
+from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
 from argilla_server.models import User, UserRole, Workspace

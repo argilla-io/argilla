@@ -5,7 +5,7 @@
 groups = ["default", "test", "postgresql"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:592d83634749c72985d653064a9ec2c4e103025d8f03d843cb6118a76b85c8dd"
+content_hash = "sha256:495a399675d75cf0686a39118a520e835a978ab18916ab467c349f4703629122"
 
 [[package]]
 name = "aiofiles"
