@@ -140,6 +140,7 @@ nav:
     - Manage and create datasets: how_to_guides/dataset.md
     - Add, update, and delete records: how_to_guides/record.md
     - Query, filter, and export records: how_to_guides/query_export.md
+    - Annotate records: how_to_guides/annotate.md
     - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - API Reference:
     - Python SDK: reference/argilla/
