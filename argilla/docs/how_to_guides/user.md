@@ -69,11 +69,7 @@ Argilla provides a default user with the `owner` role to help you get started in
         client=client
     )
     ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/user.md
     > Check the [User - Python Reference](../../reference/argilla/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
-========
-    > Check the [User - Python Reference](../reference/argilla_sdk/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/user.md
 
 ## Get current user
 
