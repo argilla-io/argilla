@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
 
+from tqdm import tqdm
+
 from argilla_sdk._api import RecordsAPI
 from argilla_sdk._helpers import LoggingMixin
 from argilla_sdk._models import RecordModel, MetadataValue
@@ -224,7 +226,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         created_or_updated = []
         records_updated = 0
-        for batch in range(0, len(records), batch_size):
+        for batch in tqdm(
+            iterable=range(0, len(records), batch_size), desc="Adding and updating records", unit="batch"
+        ):
             self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
             batch_records = record_models[batch : batch + batch_size]
             models, updated = self._api.bulk_upsert(dataset_id=self.__dataset.id, records=batch_records)
