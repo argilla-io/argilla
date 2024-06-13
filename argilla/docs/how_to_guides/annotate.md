@@ -17,12 +17,12 @@ To improve clarity, we will reference three main areas in the UI: the *preferenc
 
 !!! info "Main use cases"
     * You are handling one or a few questions.
-    * You are conducting exploratory work of the records.
+    * You are conducting exploratory work on the records.
     * You are getting familiar with the data.
 
 ### Focus view
 
-As you open a dataset in the UI, you will see a *single-record view* by default, i.e a **focus view**.
+As you open a dataset in the UI, you will see a *single-record view* by default, i.e. a **focus view**.
 
 In the record view, on the left, you can find the record to annotate. Each field of the record is headed with a title and displayed in a separate box. On the top right, the status of the record is indicated, i.e. `Pending`, `Draft`, `Submitted` or `Discarded`. The pending records will be the first to be displayed by default.
 
@@ -39,11 +39,11 @@ Some questions may include a suggested response marked with ✨. You will see it
     * **Span**: Select pieces of text in the field linked to the span question and apply a label.
     * **Text**: Provide a text response inside the text area.
 
-At the botton of the annotation view, you can find the `Discard`, `Save as draft` and `Submit` buttons. The `Discard` button will discard the record if you decide not to provide any response. `Save as draft` will allow you to save your responses for review before submission. Finally, the `Submit` button will submit your responses for the given record, but it will be disabled until you provide responses for all required questions.
+At the bottom of the annotation view, you can find the `Discard`, `Save as draft` and `Submit` buttons. The `Discard` button will discard the record if you decide not to provide any response. `Save as draft` will allow you to save your responses for review before submission. Finally, the `Submit` button will submit your responses for the given record, but it will be disabled until you provide responses for all required questions.
 
 ### Navigation buttons
 
-To navigate through the records, you can use the `Prev`, shown as `<`, and `Next`, `>` buttons in the botton right corner of the preferences view.
+To navigate through the records, you can use the `Prev`, shown as `<`, and `Next`, `>` buttons in the bottom right corner of the preferences view.
 
 ### Shortcuts use
 
@@ -76,13 +76,13 @@ If you are looking to speed up your annotation process, you can use keyboard sho
 !!! note
     The *bulk view* is not available for **span questions**. You will need to switch to the *focus view* for their annotation. In that case, we recommend you to annotate the rest of the questions in bulk, save them as drafts and answer the span questions in the *focus view* of the *Draft* queue.
 
-As you open a dataset in the UI, you will see a *focus view* by default. To swich to the **bulk view**, you will need to click the `Bulk view` button on the top right of the preferences view. It is only available for the `Pending` queue.
+As you open a dataset in the UI, you will see a *focus view* by default. To switch to the **bulk view**, you will need to click the `Bulk view` button on the top right of the preferences view. It is only available for the `Pending` queue.
 
-Now, in the record view, on the left, you can find a list of multiple records to annotate. Each record is displayed in a different white box with their corresponding fields, headed with a title, and the status on the top right.
+Now, in the record view, on the left, you can find a list of multiple records to annotate. Each record is displayed in a different white box with its corresponding fields, headed with a title, and the status on the top right.
 
-In the annotation view, on the right, you can find the questions to annotate. The annotation view in the bulk view is similar to the focus view. Each question has a title and the description (`i` icon), if available, and you will need to answer all the required questions marked with <span style="color:red; font-weight:bold;">*</span> to be able to submit the responses. However, suggestions are not available in the bulk view, so you will have to swich to the focus view if you need them.
+In the annotation view, on the right, you can find the questions to annotate. The annotation view in the bulk view is similar to the focus view. Each question has a title and the description (`i` icon), if available, and you will need to answer all the required questions marked with <span style="color:red; font-weight:bold;">*</span> to be able to submit the responses. However, suggestions are not available in the bulk view, so you will have to switch to the focus view if you need them.
 
-At the botton of the annotation view, you can find the `Discard`, `Save as draft` and `Submit` buttons that will be enable when at least one record is selected and, in the case of `Submit`, when all the required questions are annotated. To select specific records, you can click on the checkbox on the top left of each record. To select all records, you can click the checkbox in the botton left of the preferences view. When discarded/saved as draft/submitted, **all the selected records** will change their status, so you can continue annotating the rest of the records.
+At the bottom of the annotation view, you can find the `Discard`, `Save as draft` and `Submit` buttons that will be enabled when at least one record is selected and, in the case of `Submit`, when all the required questions are annotated. To select specific records, you can click on the checkbox on the top left of each record. To select all records, you can click the checkbox in the bottom left of the preferences view. When discarded/saved as draft/submitted, **all the selected records** will change their status, so you can continue annotating the rest of the records.
 
 !!! Tip
     Some specific situations in which you may want to use the bulk view are:
@@ -93,15 +93,15 @@ At the botton of the annotation view, you can find the `Discard`, `Save as draft
 
 ### Custom record view
 
-The bulk view also allow you to customize the record view, which can be particularly useful when your records are long.
+The bulk view also allows you to customize the record view, which can be particularly useful when your records are long.
 
 === "Collapse records"
 
-    You can collapse the records to focus on the fields you are annotating. To do so, you can click on the `Record size` button at the botton right of the preferences view. A dropdown will appear with the options `Expand records` and `Collapse records`.
+    You can collapse the records to focus on the fields you are annotating. To do so, you can click on the `Record size` button at the bottom right of the preferences view. A dropdown will appear with the options `Expand records` and `Collapse records`.
 
 === "Manage the number of records by page"
 
-    You can manage the number of records displayed by page. To do so, you can click on the `Page size` button at the botton right of the preferences view. A dropdown will appear with the options `10`, `25`, `50` and `100`.
+    You can manage the number of records displayed by page. To do so, you can click on the `Page size` button at the bottom right of the preferences view. A dropdown will appear with the options `10`, `25`, `50` and `100`.
 
 ## Understand patterns in your data
 
@@ -115,7 +115,7 @@ The UI provides different features to help you understand patterns in your data 
 
 ### Search and highlight
 
-You can search for records with specific words in their fields content. For this, you should click on the magnifying glass icon in the top right of the preferences view. A search bar will appear where you can type the word or words you are looking for. If your records have multiple fields, you will be able to select a specific field for the search or select `All` to search on all the fields. Pressing `Enter` will show the records that contain these words, highlighted in <span style="color:#ff675f">coral</span>, in the selected fields.
+You can search for records with specific words in their field content. For this, you should click on the magnifying glass icon in the top right of the preferences view. A search bar will appear where you can type the word or words you are looking for. If your records have multiple fields, you will be able to select a specific field for the search or select `All` to search on all the fields. Pressing `Enter` will show the records that contain these words, highlighted in <span style="color:#ff675f">coral</span>, in the selected fields.
 
 ### Order by similar record
 
@@ -123,7 +123,7 @@ You can search for records with specific words in their fields content. For this
 
 You can retrieve records based on their similarity with another record if vectors have been added to the dataset, which is quite useful for the *bulk view*. If available, go to the record you would like to use for the semantic search and click on the `Find similar` button at the top right of the record view. If there is more than one vector, you will be asked to select which vector to use or whether you want the most or least similar records.
 
-Once you have selected the vector, you will see the records ordered by similarity. The similarity score will be displayed next to the `Find similar` button. In addition, a new bar above will allow you to update the selected vector or similarity order, and choose the number of results you would like to see. On the righ of the bar, you will find a button to expand or collapse the record that was used for the search as a reference.
+Once you have selected the vector, you will see the records ordered by similarity. The similarity score will be displayed next to the `Find similar` button. In addition, a new bar above will allow you to update the selected vector or similarity order, and choose the number of results you would like to see. On the right of the bar, you will find a button to expand or collapse the record that was used for the search as a reference.
 
 To undo the search, you can click on the cross next to the reference record.
 
@@ -161,18 +161,18 @@ You can sort your records according to one or several attributes. To do so, you 
 ## Annotate in team
 
 !!! info "Main use cases"
-    Multiple users on the same dataset who need to be specially aligned on the task.
+    Multiple users on the same dataset need to be specially aligned on the task.
 
 !!! note
     The 2.1 version of argilla will come with task distribution, which will allow you to assign records to specific users easily.
 
 ### Access the annotation guidelines
 
-Before starting the annotation, we highly recommend you consulting the annotation guidelines when available. If they have been specified, you can find them by clicking the `Annotation guidelines` button on the top right of the annotation view.
+Before starting the annotation, we highly recommend consulting the annotation guidelines when available. If they have been specified, you can find them by clicking the `Annotation guidelines` button on the top right of the annotation view.
 
 ### Edit guidelines in the settings
 
-You can edit the guidelines if you are `owner` or `admin` of the dataset. For that, you can click on the `Dataset settings` button on the thte right of the top black bar. You will just need to write them or update them and save the changes.
+You can edit the guidelines if you are `owner` or `admin` of the dataset. For that, you can click on the `Dataset settings` button on the the right of the top black bar. You will just need to write them or update them and save the changes.
 
 !!! tip
     If you want further guidance on good practices for guidelines during the project development, check our [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
@@ -184,7 +184,7 @@ You can edit the guidelines if you are `owner` or `admin` of the dataset. For th
 
 ### General progress view
 
-In the main page, before accessing the dataset, you can see the general progress of the annotation task. This is indicated in the `Global progress` column that shows the number of remaining records to be annotted and a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e. those with overlap), discarded and pending by hovering your mouse over it.
+On the main page, before accessing the dataset, you can see the general progress of the annotation task. This is indicated in the `Global progress` column that shows the number of remaining records to be annotated and a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e. those with overlap), discarded and pending by hovering your mouse over it.
 
 ### Individual progress view
 
