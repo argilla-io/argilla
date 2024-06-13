@@ -136,6 +136,7 @@ async def create_dataset(db: AsyncSession, dataset_create: DatasetCreate):
         name=dataset_create.name,
         guidelines=dataset_create.guidelines,
         allow_extra_metadata=dataset_create.allow_extra_metadata,
+        distribution=dataset_create.distribution.dict(),
         workspace_id=dataset_create.workspace_id,
     )
 

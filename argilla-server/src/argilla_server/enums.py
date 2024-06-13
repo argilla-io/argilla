@@ -43,6 +43,10 @@ class DatasetStatus(str, Enum):
     ready = "ready"
 
 
+class DatasetDistributionStrategy(str, Enum):
+    overlap = "overlap"
+
+
 class UserRole(str, Enum):
     owner = "owner"
     admin = "admin"

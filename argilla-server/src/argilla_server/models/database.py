@@ -304,6 +304,7 @@ class Dataset(DatabaseModel):
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
     allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
+    distribution: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON))
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)

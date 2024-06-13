@@ -13,11 +13,11 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional, Union
 from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
-from argilla_server.enums import DatasetStatus
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
 try:
@@ -42,6 +42,25 @@ DatasetGuidelines = Annotated[
     constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
     Field(..., description="Dataset guidelines"),
 ]
+
+
+class DatasetOverlapDistribution(BaseModel):
+    strategy: Literal[DatasetDistributionStrategy.overlap]
+    min_submitted: int
+
+
+DatasetDistribution = DatasetOverlapDistribution
+
+
+class DatasetOverlapDistributionCreate(BaseModel):
+    strategy: Literal[DatasetDistributionStrategy.overlap]
+    min_submitted: int = Field(
+        ge=1,
+        description="Minimum number of submitted responses to consider a record as completed",
+    )
+
+
+DatasetDistributionCreate = DatasetOverlapDistributionCreate
 
 
 class RecordMetrics(BaseModel):
@@ -74,6 +93,7 @@ class Dataset(BaseModel):
     guidelines: Optional[str]
     allow_extra_metadata: bool
     status: DatasetStatus
+    distribution: DatasetDistribution
     workspace_id: UUID
     last_activity_at: datetime
     inserted_at: datetime
@@ -91,6 +111,10 @@ class DatasetCreate(BaseModel):
     name: DatasetName
     guidelines: Optional[DatasetGuidelines]
     allow_extra_metadata: bool = True
+    distribution: DatasetDistributionCreate = DatasetOverlapDistributionCreate(
+        strategy=DatasetDistributionStrategy.overlap,
+        min_submitted=1,
+    )
     workspace_id: UUID
 
 
