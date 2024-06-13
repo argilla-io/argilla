@@ -10,8 +10,10 @@ This guide will help you migrate task specific datasets to Argilla V2. These do 
 To follow this guide, you will need to have the following prerequisites:
 
 - An argilla 1.* server instance running with legacy datasets.
-- An argilla 2.* server instance running. If you don't have one, you can create one by following the [Argilla installation guide](../../getting_started/installation.md).
+- An argilla >=1.29 server instance running. If you don't have one, you can create one by following the [Argilla installation guide](../../getting_started/installation.md).
 - The `argilla` sdk package installed in your environment.
+
+If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.  
 
 ## Steps
 
@@ -42,7 +44,7 @@ dataset_name = "news-programmatic-labeling"
 workspace = "demo"
 
 settings_v1 = rg_v1.load_dataset_settings(dataset_name, workspace)
-records_v1 = rg_v1.load(dataset_name, workspace, limit=100, query="_exists_:annotated_by")
+records_v1 = rg_v1.load(dataset_name, workspace)
 hf_dataset = records_v1.to_datasets()
 ```
 
@@ -177,6 +179,48 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
+=== "For token classification"
+
+    ```python
+
+    def map_to_record_for_span(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+        suggestions = []
+        responses = []
+
+        if data.get("prediction"):
+            # Prediction for token classification will be a list of tuple (label, start, end)
+            spans = [
+                {"start": start, "end": end, "label": label}
+                for label, start, end in data["prediction"]
+            ]
+            agent = data.get("prediction_agent")
+            suggestions.append(rg.Suggestion(question_name="labels", value=spans, agent=agent))
+
+        if data.get("annotation"):
+            # From data[annotation] and data[annotation_agent]
+            spans = [
+                {"start": start, "end": end, "label": label}
+                for label, start, end in data["annotation"]
+            ]
+            user_id = users_by_name.get(data["annotation_agent"], current_user).id
+            responses.append(rg.Response(question_name="label", value=spans, user_id=user_id))
+
+        if data.get("vectors"):
+            # From data["vectors"]
+            vectors = [rg.Vector(name=name, values=value) for name, value in data["vectors"].items()]
+
+        return rg.Record(
+            id=data["id"],
+            fields=data["inputs"],
+            # The inputs field should be a dictionary with the same keys as the `fields` in the settings
+            metadata=data["metadata"],
+            # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
+            vectors=vectors,
+            # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
+            suggestions=suggestions,
+            responses=responses,
+        )
+    ```
 
 The functions above depend on the `users_by_name` dictionary and the `current_user` object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:
 
@@ -198,3 +242,31 @@ for data in hf_records:
 dataset.records.log(records)
 ```
 You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).
+
+## Migrating Feedback Datasets on your Argilla 1.* server
+
+As mentioned above, `FeedbackDataset`'s are compatible with Argilla V2 and do not need to be reformatted. However, you may want to migrate your feedback datasets to the new server so that you can deprecate your Argilla 1.* server. Here is a guide on how to migrate your feedback datasets:
+
+```python
+import argilla.v1 as rg_v1
+
+# Initialize the API with an Argilla server less than 2.0
+old_client = rg.Argilla(old_server_api_url, old_server_api_key)
+new_client = rg.Argilla(new_server_api_url, new_server_api_key) 
+
+dataset_name = "feedback-dataset"
+old_dataset = old_client.datasets(name=dataset_name)
+new_dataset = new_client.datasets.add(dataset)
+
+# Load the records from the old server
+new_dataset.records.log(
+    old_dataset.records(
+        with_responses=True, # (1)
+        with_suggestions=True,
+        with_vectors=True,
+        with_metadata=True,
+    )
+)
+```
+
+1. The `with_responses`, `with_suggestions`, `with_vectors`, and `with_metadata` flags are used to load the records with the responses, suggestions, vectors, and metadata respectively.
