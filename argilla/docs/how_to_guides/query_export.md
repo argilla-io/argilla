@@ -18,11 +18,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             filter=filter
         )
         ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/query_export.md
         > Check the [Query - Python Reference](../../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
-========
-        > Check the [Query - Python Reference](../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/query_export.md
 
     === "`rg.Filter`"
 
@@ -33,11 +29,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
             ]
         )
         ```
-<<<<<<<< HEAD:argilla/docs/guides/how_to_guides/query_export.md
         > Check the [Filter - Python Reference](../../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
-========
-        > Check the [Filter - Python Reference](../reference/argilla_sdk/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
->>>>>>>> feat/rename-argilla-2-argilla-v1:argilla-sdk/docs/how_to_guides/query_export.md
 
 ## Query with search terms
 
