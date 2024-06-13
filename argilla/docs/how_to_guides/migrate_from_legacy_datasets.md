@@ -145,31 +145,31 @@ Here are a set of example functions to convert the records for single-label and 
 === "For multi-label classification"
 
     ```python
-def map_to_record_for_multi_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
-    """ This function maps a text classification record dictionary to the new Argilla record."""
-    suggestions = []
-    responses = []
+    def map_to_record_for_multi_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
+        """ This function maps a text classification record dictionary to the new Argilla record."""
+        suggestions = []
+        responses = []
+        
+        if prediction := data.get("prediction"):
+            labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
+            agent = data["prediction_agent"]
+            suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
     
-    if prediction := data.get("prediction"):
-        labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
-        agent = data["prediction_agent"]
-        suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
-
-    if annotation := data.get("annotation"):
-        user_id = users_by_name.get(data["annotation_agent"], current_user).id
-        responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
-
-    vectors = data.get("vectors") or {}
-    return rg.Record(
-        id=data["id"],
-        fields=data["inputs"],
-        # The inputs field should be a dictionary with the same keys as the `fields` in the settings
-        metadata=data["metadata"],
-        # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-        vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
-        suggestions=suggestions,
-        responses=responses,
-    )
+        if annotation := data.get("annotation"):
+            user_id = users_by_name.get(data["annotation_agent"], current_user).id
+            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+    
+        vectors = data.get("vectors") or {}
+        return rg.Record(
+            id=data["id"],
+            fields=data["inputs"],
+            # The inputs field should be a dictionary with the same keys as the `fields` in the settings
+            metadata=data["metadata"],
+            # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
+            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            suggestions=suggestions,
+            responses=responses,
+        )
     ```
     
 === "For token classification"
