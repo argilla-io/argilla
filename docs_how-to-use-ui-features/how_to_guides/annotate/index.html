@@ -799,9 +799,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#shortcuts-use" class="md-nav__link">
+  <a href="#shortcut-usage" class="md-nav__link">
     <span class="md-ellipsis">
-      Shortcuts use
+      Shortcut usage
     </span>
   </a>
   
@@ -837,13 +837,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#understand-patterns-in-your-data" class="md-nav__link">
+  <a href="#explore-find-and-understand-patterns-in-your-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Understand patterns in your data
+      Explore, find and understand patterns in your data
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Understand patterns in your data">
+    <nav class="md-nav" aria-label="Explore, find and understand patterns in your data">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -856,9 +856,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#order-by-similar-record" class="md-nav__link">
+  <a href="#order-by-textual-record-similarity" class="md-nav__link">
     <span class="md-ellipsis">
-      Order by similar record
+      Order by textual record similarity
     </span>
   </a>
   
@@ -1776,9 +1776,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#shortcuts-use" class="md-nav__link">
+  <a href="#shortcut-usage" class="md-nav__link">
     <span class="md-ellipsis">
-      Shortcuts use
+      Shortcut usage
     </span>
   </a>
   
@@ -1814,13 +1814,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#understand-patterns-in-your-data" class="md-nav__link">
+  <a href="#explore-find-and-understand-patterns-in-your-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Understand patterns in your data
+      Explore, find and understand patterns in your data
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Understand patterns in your data">
+    <nav class="md-nav" aria-label="Explore, find and understand patterns in your data">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1833,9 +1833,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#order-by-similar-record" class="md-nav__link">
+  <a href="#order-by-textual-record-similarity" class="md-nav__link">
     <span class="md-ellipsis">
-      Order by similar record
+      Order by textual record similarity
     </span>
   </a>
   
@@ -1998,7 +1998,7 @@
 <p>At the bottom of the annotation view, you can find the <code>Discard</code>, <code>Save as draft</code> and <code>Submit</code> buttons. The <code>Discard</code> button will discard the record if you decide not to provide any response. <code>Save as draft</code> will allow you to save your responses for review before submission. Finally, the <code>Submit</code> button will submit your responses for the given record, but it will be disabled until you provide responses for all required questions.</p>
 <h3 id="navigation-buttons">Navigation buttons<a class="headerlink" href="#navigation-buttons" title="Permanent link">&para;</a></h3>
 <p>To navigate through the records, you can use the <code>Prev</code>, shown as <code>&lt;</code>, and <code>Next</code>, <code>&gt;</code> buttons in the bottom right corner of the preferences view.</p>
-<h3 id="shortcuts-use">Shortcuts use<a class="headerlink" href="#shortcuts-use" title="Permanent link">&para;</a></h3>
+<h3 id="shortcut-usage">Shortcut usage<a class="headerlink" href="#shortcut-usage" title="Permanent link">&para;</a></h3>
 <p>If you are looking to speed up your annotation process, you can use keyboard shortcuts. They will help you to move between questions, select labels, and navigate through the annotation view. It can be particularly useful when you have a long list of labels or a single question form.</p>
 <details class="info">
 <summary>Consult the available shortcuts</summary>
@@ -2073,14 +2073,6 @@
 <li>You are doing basic text classification.</li>
 </ul>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <em>bulk view</em> is not available for <strong>span questions</strong>. You will need to switch to the <em>focus view</em> for their annotation. In that case, we recommend you to annotate the rest of the questions in bulk, save them as drafts and answer the span questions in the <em>focus view</em> of the <em>Draft</em> queue.</p>
-</div>
-<p>As you open a dataset in the UI, you will see a <em>focus view</em> by default. To switch to the <strong>bulk view</strong>, you will need to click the <code>Bulk view</code> button on the top right of the preferences view. It is only available for the <code>Pending</code> queue.</p>
-<p>Now, in the record view, on the left, you can find a list of multiple records to annotate. Each record is displayed in a different white box with its corresponding fields, headed with a title, and the status on the top right.</p>
-<p>In the annotation view, on the right, you can find the questions to annotate. The annotation view in the bulk view is similar to the focus view. Each question has a title and the description (<code>i</code> icon), if available, and you will need to answer all the required questions marked with <span style="color:red; font-weight:bold;">*</span> to be able to submit the responses. However, suggestions are not available in the bulk view, so you will have to switch to the focus view if you need them.</p>
-<p>At the bottom of the annotation view, you can find the <code>Discard</code>, <code>Save as draft</code> and <code>Submit</code> buttons that will be enabled when at least one record is selected and, in the case of <code>Submit</code>, when all the required questions are annotated. To select specific records, you can click on the checkbox on the top left of each record. To select all records, you can click the checkbox in the bottom left of the preferences view. When discarded/saved as draft/submitted, <strong>all the selected records</strong> will change their status, so you can continue annotating the rest of the records.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Some specific situations in which you may want to use the bulk view are:</p>
@@ -2090,6 +2082,14 @@
 <li>Saving/submitting records with a suggestion score over a safe threshold.</li>
 </ul>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Bulk is not available for SpanQuestions</p>
+<p>The <em>bulk view</em> is not available for <strong>span questions</strong>. You will need to switch to the <em>focus view</em> for their annotation. In that case, we recommend annotating the rest of the questions in bulk, save them as drafts and answer the span questions in the <em>focus view</em> of the <em>Draft</em> queue.</p>
+</div>
+<p>As you open a dataset in the UI, you will see a <em>focus view</em> by default. To switch to the <strong>bulk view</strong>, you will need to click the <code>Bulk view</code> button on the top right of the preferences view. It is only available for the <code>Pending</code> queue.</p>
+<p>Now, in the record view, on the left, you can find a list of multiple records to annotate. Each record is displayed in a different white box with its corresponding fields, headed with a title, and the status on the top right.</p>
+<p>In the annotation view, on the right, you can find the questions to annotate. The annotation view in the bulk view is similar to the focus view. Each question has a title and the description (<code>i</code> icon), if available, and you will need to answer all the required questions marked with <span style="color:red; font-weight:bold;">*</span> to be able to submit the responses. However, suggestions are not available in the bulk view, so you will have to switch to the focus view if you need them.</p>
+<p>At the bottom of the annotation view, you can find the <code>Discard</code>, <code>Save as draft</code> and <code>Submit</code> buttons that will be enabled when at least one record is selected and, in the case of <code>Submit</code>, when all the required questions are annotated. To select specific records, you can click on the checkbox on the top left of each record. To select all records, you can click the checkbox in the bottom left of the preferences view. When discarded/saved as draft/submitted, <strong>all the selected records</strong> will change their status, so you can continue annotating the rest of the records.</p>
 <h3 id="custom-record-view">Custom record view<a class="headerlink" href="#custom-record-view" title="Permanent link">&para;</a></h3>
 <p>The bulk view also allows you to customize the record view, which can be particularly useful when your records are long.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Collapse records</label><label for="__tabbed_1_2">Manage the number of records by page</label></div>
@@ -2102,7 +2102,7 @@
 </div>
 </div>
 </div>
-<h2 id="understand-patterns-in-your-data">Understand patterns in your data<a class="headerlink" href="#understand-patterns-in-your-data" title="Permanent link">&para;</a></h2>
+<h2 id="explore-find-and-understand-patterns-in-your-data">Explore, find and understand patterns in your data<a class="headerlink" href="#explore-find-and-understand-patterns-in-your-data" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Main use cases</p>
 <ul>
@@ -2115,7 +2115,7 @@
 <p>The UI provides different features to help you understand patterns in your data and manage the annotation task more efficiently.</p>
 <h3 id="search-and-highlight">Search and highlight<a class="headerlink" href="#search-and-highlight" title="Permanent link">&para;</a></h3>
 <p>You can search for records with specific words in their field content. For this, you should click on the magnifying glass icon in the top right of the preferences view. A search bar will appear where you can type the word or words you are looking for. If your records have multiple fields, you will be able to select a specific field for the search or select <code>All</code> to search on all the fields. Pressing <code>Enter</code> will show the records that contain these words, highlighted in <span style="color:#ff675f">coral</span>, in the selected fields.</p>
-<h3 id="order-by-similar-record">Order by similar record<a class="headerlink" href="#order-by-similar-record" title="Permanent link">&para;</a></h3>
+<h3 id="order-by-textual-record-similarity">Order by textual record similarity<a class="headerlink" href="#order-by-textual-record-similarity" title="Permanent link">&para;</a></h3>
 <blockquote>
 <p>Consult these guides, to know how to add vectors to your <a href="../dataset/">dataset</a> and <a href="../record/">records</a>.</p>
 </blockquote>
