@@ -24,6 +24,7 @@ from argilla._models import (
     VectorModel,
     MetadataValue,
     FieldValue,
+    VectorValue,
 )
 from argilla._resource import Resource
 from argilla.responses import Response, UserResponse
@@ -55,9 +56,9 @@ class Record(Resource):
     def __init__(
         self,
         id: Optional[Union[UUID, str]] = None,
-        fields: Optional[Dict[str, Union[str, None]]] = None,
+        fields: Optional[Dict[str, FieldValue]] = None,
         metadata: Optional[Dict[str, MetadataValue]] = None,
-        vectors: Optional[List[Vector]] = None,
+        vectors: Optional[Dict[str, VectorValue]] = None,
         responses: Optional[List[Response]] = None,
         suggestions: Optional[List[Suggestion]] = None,
         _server_id: Optional[UUID] = None,
@@ -94,7 +95,7 @@ class Record(Resource):
         # Initialize the fields
         self.__fields = RecordFields(fields=self._model.fields)
         # Initialize the vectors
-        self.__vectors = RecordVectors(vectors=vectors, record=self)
+        self.__vectors = RecordVectors(vectors=vectors)
         # Initialize the metadata
         self.__metadata = RecordMetadata(metadata=metadata)
         self.__responses = RecordResponses(responses=responses, record=self)
@@ -160,7 +161,7 @@ class Record(Resource):
             external_id=self._model.external_id,
             fields=self.fields.to_dict(),
             metadata=self.metadata.api_models(),
-            vectors=self.vectors.models,
+            vectors=self.vectors.api_models(),
             responses=self.responses.api_models(),
             suggestions=self.suggestions.api_models(),
         )
@@ -221,7 +222,6 @@ class Record(Resource):
             for question_name, _responses in responses.items()
             for value in _responses
         ]
-        vectors = [Vector(name=vector_name, values=values) for vector_name, values in vectors.items()]
 
         return cls(
             id=record_id,
@@ -247,7 +247,7 @@ class Record(Resource):
             id=model.external_id,
             fields=model.fields,
             metadata={meta.name: meta.value for meta in model.metadata},
-            vectors=[Vector.from_model(model=vector) for vector in model.vectors],
+            vectors={vector.name: vector.vector_values for vector in model.vectors},
             # Responses and their models are not aligned 1-1.
             responses=[
                 response
@@ -295,6 +295,27 @@ class RecordMetadata(dict):
 
     def api_models(self) -> List[MetadataModel]:
         return [MetadataModel(name=key, value=value) for key, value in self.items()]
+
+
+class RecordVectors(dict):
+    """This is a container class for the vectors of a Record.
+    It allows for accessing suggestions by attribute and key name.
+    """
+
+    def __init__(self, vectors: Dict[str, VectorValue]) -> None:
+        super().__init__(vectors or {})
+
+    def __getattr__(self, item: str):
+        return self[item]
+
+    def __setattr__(self, key: str, value: VectorValue):
+        self[key] = value
+
+    def api_models(self) -> List[VectorModel]:
+        return [Vector(name=name, values=value).api_model() for name, value in self.items()]
+
+    def to_dict(self) -> Dict[str, List[float]]:
+        return {key: value for key, value in self.items()}
 
 
 class RecordResponses(Iterable[Response]):
@@ -386,29 +407,3 @@ class RecordSuggestions(Iterable[Suggestion]):
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
-
-
-class RecordVectors:
-    """This is a container class for the vectors of a Record.
-    It allows for accessing suggestions by attribute and iterating over them.
-    """
-
-    def __init__(self, vectors: List[Vector], record: Record) -> None:
-        self.__vectors = vectors or []
-        self.record = record
-        for vector in self.__vectors:
-            setattr(self, vector.name, vector.values)
-
-    def __repr__(self) -> str:
-        return {vector.name: f"{len(vector.values)}" for vector in self.__vectors}.__repr__()
-
-    @property
-    def models(self) -> List[VectorModel]:
-        return [vector.api_model() for vector in self.__vectors]
-
-    def to_dict(self) -> Dict[str, List[float]]:
-        """Converts the vectors to a dictionary.
-        Returns:
-            A dictionary of vectors.
-        """
-        return {vector.name: list(map(float, vector.values)) for vector in self.__vectors}
