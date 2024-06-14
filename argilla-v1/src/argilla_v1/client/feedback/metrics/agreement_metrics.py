@@ -12,7 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""This module contains metrics to gather information related to inter-Annotator agreement. """
+"""This module contains metrics to gather information related to inter-Annotator agreement."""
+
 import warnings
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 

@@ -155,7 +155,7 @@ async def _reindex(feedback_dataset_id: Optional[UUID] = None) -> None:
 
 
 def reindex(
-    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed")
+    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed"),
 ) -> None:
     asyncio.run(_reindex(feedback_dataset_id))
 
