@@ -158,7 +158,7 @@ class Record(Resource):
             id=self._model.id,
             external_id=self._model.external_id,
             fields=self.fields.to_dict(),
-            metadata=self.metadata.models,
+            metadata=self.metadata.api_models(),
             vectors=self.vectors.models,
             responses=self.responses.api_models(),
             suggestions=self.suggestions.api_models(),
@@ -280,6 +280,21 @@ class RecordFields:
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
 
+class RecordMetadata(dict):
+    """This is a container class for the metadata of a Record."""
+
+    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
+        super().__init__(metadata or {})
+
+    def __getattr__(self, item: str):
+        return self[item]
+
+    def __setattr__(self, key: str, value: MetadataValue):
+        self[key] = value
+
+    def api_models(self) -> List[MetadataModel]:
+        return [MetadataModel(name=key, value=value) for key, value in self.items()]
+
 
 class RecordResponses(Iterable[Response]):
     """This is a container class for the responses of a Record.
@@ -397,19 +412,3 @@ class RecordVectors:
         """
         return {vector.name: list(map(float, vector.values)) for vector in self.__vectors}
 
-
-class RecordMetadata(dict):
-    """This is a container class for the metadata of a Record."""
-
-    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
-        super().__init__(metadata or {})
-
-    def __getattr__(self, item: str):
-        return self[item]
-
-    def __setattr__(self, key: str, value: MetadataValue):
-        self[key] = value
-
-    @property
-    def models(self) -> List[MetadataModel]:
-        return [MetadataModel(name=key, value=value) for key, value in self.items()]

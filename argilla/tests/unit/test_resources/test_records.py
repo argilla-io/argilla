@@ -44,7 +44,7 @@ class TestRecords:
         record.metadata["new-key"] = "new_value"
 
         assert record.metadata == {"key": "new_value", "new-key": "new_value"}
-        assert record.metadata.models == [
+        assert record.metadata.api_models() == [
             MetadataModel(name="key", value="new_value"),
             MetadataModel(name="new-key", value="new_value"),
         ]
@@ -56,7 +56,7 @@ class TestRecords:
         record.metadata.new_key = "new_value"
 
         assert record.metadata == {"key": "new_value", "new_key": "new_value"}
-        assert record.metadata.models == [
+        assert record.metadata.api_models() == [
             MetadataModel(name="key", value="new_value"),
             MetadataModel(name="new_key", value="new_value"),
         ]
