@@ -33,10 +33,6 @@ from argilla_v1.client.sdk.v1.records.api import delete_record, delete_suggestio
 from argilla_v1.client.sdk.v1.records.models import FeedbackItemModel
 
 from tests.factories import (
-    DatasetFactory,
-    RatingQuestionFactory,
-    RecordFactory,
-    SuggestionFactory,
     UserFactory,
     WorkspaceFactory,
 )
@@ -62,7 +58,7 @@ class TestRecordsSDK:
     def test_update_record_with_vectors(self, owner: User, role: UserRole) -> None:
         argilla_v1.client.singleton.init(api_key=owner.api_key)
 
-        workspace = Workspace.create(f"workspace")
+        workspace = Workspace.create("workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
         feedback_dataset = FeedbackDataset(
@@ -103,7 +99,7 @@ class TestRecordsSDK:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     def test_update_record_with_vectors(self, owner: ServerUser, role: UserRole) -> None:
         argilla_v1.client.singleton.init(api_key=owner.api_key)
-        workspace = Workspace.create(f"workspace")
+        workspace = Workspace.create("workspace")
         user = User.create(username="user", role=role, password="password", workspaces=[workspace.name])
 
         feedback_dataset = FeedbackDataset(

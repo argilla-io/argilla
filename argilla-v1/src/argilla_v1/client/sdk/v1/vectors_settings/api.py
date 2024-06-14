@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from argilla_v1.client.sdk.commons.errors_handler import handle_response_error
 from argilla_v1.client.sdk.commons.models import Response

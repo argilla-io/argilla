@@ -11,10 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Union
 
-from argilla_v1.client.feedback.schemas.enums import FieldTypes, MetadataPropertyTypes
-from argilla_v1.pydantic_v1 import StrictFloat, StrictInt, StrictStr
+from argilla_v1.client.feedback.schemas.enums import FieldTypes
 
 FETCHING_BATCH_SIZE = 250
 PUSHING_BATCH_SIZE = 32

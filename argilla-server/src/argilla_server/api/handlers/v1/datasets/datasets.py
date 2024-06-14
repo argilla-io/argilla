@@ -19,7 +19,6 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server import models
 from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
@@ -38,10 +37,10 @@ from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataPropertyCreate,
 )
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
-from argilla_server.contexts import accounts, datasets
+from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.enums import ResponseStatus
-from argilla_server.models import Dataset, User, Workspace
+from argilla_server.models import Dataset, User
 from argilla_server.search_engine import (
     SearchEngine,
     get_search_engine,

@@ -78,13 +78,13 @@ class Filter:
 
     def __init__(self, conditions: Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None] = None):
         """ Create a filter object for use in Argilla search requests.
-        
+
         Parameters:
             conditions (Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None], optional): \
                 The conditions that will be used to filter the search results. \
                 The conditions should be a list of tuples where each tuple contains \
                 the field, operator, and value. For example `("label", "in", ["positive","happy"])`.\
-        
+
         """
 
         if isinstance(conditions, tuple):

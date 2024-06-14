@@ -87,10 +87,10 @@ class LabelQuestion(QuestionPropertyBase):
         """ Define a new label question for `Settings` of a `Dataset`. A label \
             question is a question where the user can select one label from \
             a list of available labels.
-        
+
         Parameters:
             name: str: The name of the question to be used as a reference.
-            labels: Union[List[str], Dict[str, str]]: The list of available labels for the question, 
+            labels: Union[List[str], Dict[str, str]]: The list of available labels for the question,
                 or a dictionary of key-value pairs where the key is the label and the value is the label text in the UI.
             title: Optional[str]: The title of the question to be shown in the UI.
             description: Optional[str]: The description of the question to be shown in the UI.
@@ -159,7 +159,7 @@ class MultiLabelQuestion(LabelQuestion):
         """Create a new multilabel question for `Settings` of a `Dataset`. A \
             multilabel question is a question where the user can select multiple \
             labels from a list of available labels.
-            
+
         Parameters:
             name: str: The name of the question to be used as a reference.
             labels: List[str]: The list of available labels for the question.
@@ -169,7 +169,7 @@ class MultiLabelQuestion(LabelQuestion):
             description: Optional[str]: The description of the question to be shown in the UI.
             required: bool: If the question is required for a record to be valid.
             visible_labels: Optional[int]: The number of visible labels for the question.
-            labels_order: str: The order of the labels in the UI. Can be either "natural" or "suggestion". Default is "natural". 
+            labels_order: str: The order of the labels in the UI. Can be either "natural" or "suggestion". Default is "natural".
         """
         self._model = MultiLabelQuestionModel(
             name=name,
@@ -213,7 +213,7 @@ class TextQuestion(QuestionPropertyBase):
     ) -> None:
         """Create a new text question for `Settings` of a `Dataset`. A text question \
             is a question where the user can input text.
-            
+
         Parameters:
             name: str: The name of the question to be used as a reference.
             title: Optional[str]: The title of the question to be shown in the UI.
@@ -263,7 +263,7 @@ class RatingQuestion(QuestionPropertyBase):
     ) -> None:
         """Create a new rating question for `Settings` of a `Dataset`. A rating question \
             is a question where the user can select a value from a sequential list of options.
-            
+
         Parameters:
             name: str: The name of the question to be used as a reference.
             values: List[int]: The list of available values for the question.
@@ -314,7 +314,7 @@ class RankingQuestion(QuestionPropertyBase):
     ) -> None:
         """Create a new ranking question for `Settings` of a `Dataset`. A ranking question \
             is a question where the user can rank a list of options.
-        
+
         Parameters:
             name: str: The name of the question to be used as a reference.
             values: List[str]: The list of available values for the question.
@@ -368,7 +368,7 @@ class SpanQuestion(QuestionPropertyBase):
         """ Create a new span question for `Settings` of a `Dataset`. A span question \
             is a question where the user can select a section of text within a text field \
             and assign it a label.
-            
+
             Parameters:
                 name: str: The name of the question to be used as a reference.
                 field: str: The name of the text field to apply the span question to.
