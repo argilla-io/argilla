@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added support to specify `distribution` attribute when creating a dataset. ([#5013](https://github.com/argilla-io/argilla/pull/5013))
+
 ### Removed
 
 - Removed all API v0 endpoints. ([#4852](https://github.com/argilla-io/argilla/pull/4852))
