@@ -15,7 +15,7 @@
 from argilla._models import ResourceModel
 
 import re
-from pydantic import field_validator
+from pydantic import field_validator, ConfigDict
 
 __all__ = ["WorkspaceModel"]
 
@@ -23,9 +23,10 @@ __all__ = ["WorkspaceModel"]
 class WorkspaceModel(ResourceModel):
     name: str
 
-    class Config:
-        validate_assignment = True
-        str_strip_whitespace = True
+    model_config = ConfigDict(
+        validate_assignment = True,
+        str_strip_whitespace = True,
+    )
 
     @field_validator("name")
     @classmethod
