@@ -170,6 +170,10 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
     return dataset
 
 
+async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> Dataset:
+    return await dataset.update(db, **dataset_attrs)
+
+
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     async with db.begin_nested():
         dataset = await dataset.delete(db, autocommit=False)
@@ -178,11 +182,6 @@ async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset:
     await db.commit()
 
     return dataset
-
-
-async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
-    params = dataset_update.dict(exclude_unset=True)
-    return await dataset.update(db, **params)
 
 
 async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCreate) -> Field:

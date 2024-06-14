@@ -303,4 +303,4 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    return await datasets.update_dataset(db, dataset, dataset_update)
+    return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
