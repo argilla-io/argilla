@@ -16,11 +16,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import Field, field_serializer, field_validator
 
-from argilla._models._resource import ResourceModel
 from argilla._models._record._metadata import MetadataModel, MetadataValue
 from argilla._models._record._response import UserResponseModel
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
+from argilla._models._resource import ResourceModel
+
+__all__ = ["RecordModel", "FieldValue"]
 
 FieldValue = Union[str, None]
 
