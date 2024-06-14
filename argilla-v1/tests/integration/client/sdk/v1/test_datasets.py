@@ -41,7 +41,6 @@ from argilla_v1.client.sdk.v1.datasets.api import (
     get_records,
     list_datasets,
     publish_dataset,
-    search_records,
     update_records,
 )
 from argilla_v1.client.sdk.v1.datasets.models import (
@@ -51,10 +50,7 @@ from argilla_v1.client.sdk.v1.datasets.models import (
     FeedbackMetadataPropertyModel,
     FeedbackMetricsModel,
     FeedbackQuestionModel,
-    FeedbackRecordSearchModel,
     FeedbackRecordsModel,
-    FeedbackRecordsSearchModel,
-    FeedbackRecordsSearchVectorQuery,
     FeedbackSuggestionModel,
 )
 from argilla_v1.client.sdk.v1.records.api import set_suggestion

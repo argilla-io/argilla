@@ -23,7 +23,6 @@ from argilla_v1.client.singleton import active_api
     argvalues=(set(), {"text"}, {"tokens"}),
 )
 def test_scan_records(gutenberg_spacy_ner, fields):
-    import argilla_v1 as rg
     import pandas as pd
 
     data = active_api().datasets.scan(

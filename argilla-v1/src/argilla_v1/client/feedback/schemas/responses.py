@@ -20,12 +20,11 @@ from argilla_v1.client.feedback.schemas.enums import ResponseStatus
 from argilla_v1.client.feedback.schemas.response_values import (
     ResponseValue,
     normalize_response_value,
-    parse_value_response_for_question,
 )
 from argilla_v1.pydantic_v1 import BaseModel, Extra, validator
 
 if TYPE_CHECKING:
-    from argilla_v1.client.feedback.schemas.questions import QuestionSchema
+    pass
 
 
 class ValueSchema(BaseModel):

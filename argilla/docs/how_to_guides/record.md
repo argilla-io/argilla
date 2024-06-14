@@ -84,7 +84,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
 
-    ```python	
+    ```python
     import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")

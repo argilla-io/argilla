@@ -39,7 +39,7 @@ from tests.factories import (
 @pytest.mark.asyncio
 class TestCreateCurrentUserResponsesBulk:
     def url(self) -> str:
-        return f"/api/v1/me/responses/bulk"
+        return "/api/v1/me/responses/bulk"
 
     def bulk_max_items(self) -> int:
         return 100

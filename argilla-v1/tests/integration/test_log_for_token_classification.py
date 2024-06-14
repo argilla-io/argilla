@@ -14,7 +14,6 @@
 import argilla_v1
 import pytest
 from argilla_v1 import TokenClassificationRecord
-from argilla_v1.client import api
 from argilla_v1.client.client import Argilla
 from argilla_v1.client.sdk.commons.errors import NotFoundApiError
 from argilla_v1.client.singleton import ArgillaSingleton

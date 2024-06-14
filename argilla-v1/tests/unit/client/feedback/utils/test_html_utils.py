@@ -22,10 +22,8 @@ from argilla_v1.client.feedback.utils import (
     create_token_highlights,
     get_file_data,
     image_to_html,
-    is_valid_dimension,
     media_to_html,
     pdf_to_html,
-    validate_media_type,
     video_to_html,
 )
 

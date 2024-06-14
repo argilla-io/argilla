@@ -14,7 +14,6 @@
 
 from datetime import datetime
 from typing import Dict
-from unittest import mock
 from uuid import uuid4
 
 import httpx

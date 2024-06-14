@@ -832,7 +832,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def __stats_aggregation(self, index_name: str, field_name: str, query: dict) -> dict:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html
-        aggregation_name = f"numeric_stats"
+        aggregation_name = "numeric_stats"
 
         stats_agg = {aggregation_name: {"stats": {"field": field_name}}}
 
