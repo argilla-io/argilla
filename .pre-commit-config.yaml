@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
-        exclude_types: [ text, jupyter ]
+        exclude_types: [text, jupyter]
       - id: trailing-whitespace
 
   ##############################################################################
@@ -17,8 +17,7 @@ repos:
         args:
           - --fix
       - id: ruff-format
-        files: 'argila/.*\.py$'
-        exclude: 'argilla/tests/.*\.py$'
+        files: 'argilla/src/.*\.py$'
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.4
     hooks:
@@ -55,8 +54,8 @@ repos:
         args:
           - --fix
       - id: ruff-format
-        files: 'argila-server/.*\.py$'
-        exclude: 'argilla-server/tests/.*\.py$'
+        files: 'argila-server/src/.*\.py$'
+
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
