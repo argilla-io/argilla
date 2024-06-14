@@ -94,13 +94,6 @@ jobs:
           pip install -U build
           rm -rf dist && python -m build
 
-      - name: Read package info
-        run: |
-          PACKAGE_VERSION=$(python -c 'import argilla_v1; print(argilla_v1.__version__)')
-          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
-          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
-
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
@@ -139,6 +132,13 @@ jobs:
         with:
           name: argilla-v1
           path: dist
+      - name: Read package info
+        run: |
+          pip install --no-deps dist/*.whl
+          PACKAGE_VERSION=$(python -c 'from importlib.metadata import version; print(version("argilla-v1"))')
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
         continue-on-error: true
