@@ -7,6 +7,11 @@ repos:
         exclude_types: [text, jupyter]
       - id: trailing-whitespace
 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.1.4
+    hooks:
+      - id: ruff-format
+
   ##############################################################################
   # argilla specific hooks
   ##############################################################################
@@ -14,10 +19,9 @@ repos:
     rev: v0.1.4
     hooks:
       - id: ruff
+        files: 'argilla/src/.*\.py$'
         args:
           - --fix
-      - id: ruff-format
-        files: 'argilla/src/.*\.py$'
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.4
     hooks:
@@ -51,10 +55,9 @@ repos:
     rev: v0.1.4
     hooks:
       - id: ruff
+        files: 'argila-server/src/.*\.py$'
         args:
           - --fix
-      - id: ruff-format
-        files: 'argila-server/src/.*\.py$'
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
