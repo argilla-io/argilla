@@ -183,10 +183,11 @@ class Record(Resource):
             `{"fields": {"prompt": "...", "response": "..."}, "responses": {"rating": "..."},
         """
         fields = self.fields.to_dict()
-        metadata = dict(self.metadata)
+        metadata = self.metadata.to_dict()
         suggestions = self.suggestions.to_dict()
         responses = self.responses.to_dict()
         vectors = self.vectors.to_dict()
+
         return {
             "id": self.id,
             "fields": fields,
@@ -288,6 +289,9 @@ class RecordMetadata(dict):
 
     def __setattr__(self, key: str, value: MetadataValue):
         self[key] = value
+
+    def to_dict(self) -> dict:
+        return {key: value for key, value in self.items()}
 
     def api_models(self) -> List[MetadataModel]:
         return [MetadataModel(name=key, value=value) for key, value in self.items()]
