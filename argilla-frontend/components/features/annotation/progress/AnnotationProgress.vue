@@ -20,7 +20,7 @@
     v-if="datasetMetrics.hasMetrics"
     :loading="false"
     :progress-ranges="progressRanges"
-    :progress-not-pending="progressNotPending"
+    :progress-completed="progressCompleted"
     :total="datasetMetrics.total"
   />
 </template>
@@ -39,10 +39,10 @@ export default {
     progressRanges() {
       return [
         {
-          id: "not-pending",
-          name: "not-pending",
+          id: "completed",
+          name: "completed",
           color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.progressNotPending,
+          value: this.progressCompleted,
         },
         {
           id: "pending",
@@ -52,8 +52,8 @@ export default {
         },
       ];
     },
-    progressNotPending() {
-      return this.datasetMetrics.total - this.datasetMetrics.pending;
+    progressCompleted() {
+      return this.datasetMetrics.submitted + this.datasetMetrics.discarded;
     },
   },
   setup(props) {

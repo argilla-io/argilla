@@ -6,10 +6,10 @@
       :progress-max="total"
     />
     <span class="dataset-progress__data"
-      >{{ progressNotPending }} of {{ total }}</span
+      >{{ progressCompleted }} of {{ total }}</span
     >
     <span class="dataset-progress__percent">{{
-      progressNotPendingPercent
+      progressCompletedPercent
     }}</span>
   </div>
 </template>
@@ -21,7 +21,7 @@ export default {
       type: Number,
       required: true,
     },
-    progressNotPending: {
+    progressCompleted: {
       type: Number,
       required: true,
     },
@@ -35,8 +35,8 @@ export default {
     },
   },
   computed: {
-    progressNotPendingPercent() {
-      return `${((this.progressNotPending / this.total) * 100).toFixed(2)}%`;
+    progressCompletedPercent() {
+      return `${((this.progressCompleted / this.total) * 100).toFixed(2)}%`;
     },
   },
 };
