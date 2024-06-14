@@ -71,12 +71,12 @@ class Response:
     def serialize(self) -> dict[str, Any]:
         """Serializes the Response to a dictionary. This is principally used for sending the response to the API, \
             but can be used for data wrangling or manual export.
-        
+
         Returns:
             dict[str, Any]: The serialized response as a dictionary with keys `question_name`, `value`, and `user_id`.
-            
+
         Examples:
-        
+
         ```python
         response = rg.Response("label", "negative", user_id=user.id)
         response.serialize()
