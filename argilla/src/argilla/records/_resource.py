@@ -183,6 +183,8 @@ class Record(Resource):
             represented as a key-value pair in the dictionary of the respective key. i.e.
             `{"fields": {"prompt": "...", "response": "..."}, "responses": {"rating": "..."},
         """
+        id = str(self.id) if self.id else None
+        server_id = str(self._model.id) if self._model.id else None
         fields = self.fields.to_dict()
         metadata = self.metadata.to_dict()
         suggestions = self.suggestions.to_dict()
@@ -190,13 +192,13 @@ class Record(Resource):
         vectors = self.vectors.to_dict()
 
         return {
-            "id": self.id,
+            "id": id,
             "fields": fields,
             "metadata": metadata,
             "suggestions": suggestions,
             "responses": responses,
             "vectors": vectors,
-            "_server_id": str(self._model.id) if self._model.id else None,
+            "_server_id": server_id,
         }
 
     @classmethod
@@ -365,7 +367,7 @@ class RecordResponses(Iterable[Response]):
         """
         response_dict = defaultdict(list)
         for response in self.__responses:
-            response_dict[response.question_name].append({"value": response.value, "user_id": response.user_id})
+            response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
         return response_dict
 
 
