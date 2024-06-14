@@ -45,7 +45,7 @@ At the bottom of the annotation view, you can find the `Discard`, `Save as draft
 
 To navigate through the records, you can use the `Prev`, shown as `<`, and `Next`, `>` buttons in the bottom right corner of the preferences view.
 
-### Shortcuts use
+### Shortcut usage
 
 If you are looking to speed up your annotation process, you can use keyboard shortcuts. They will help you to move between questions, select labels, and navigate through the annotation view. It can be particularly useful when you have a long list of labels or a single question form.
 
@@ -73,8 +73,15 @@ If you are looking to speed up your annotation process, you can use keyboard sho
     * You have a good understanding of your data and a clear idea of the patterns to expect.
     * You are doing basic text classification.
 
-!!! note
-    The *bulk view* is not available for **span questions**. You will need to switch to the *focus view* for their annotation. In that case, we recommend you to annotate the rest of the questions in bulk, save them as drafts and answer the span questions in the *focus view* of the *Draft* queue.
+!!! Tip
+    Some specific situations in which you may want to use the bulk view are:
+
+    * Applying the same label to the results of a similarity search.
+    * Discarding all records in a specific language or that do not match a certain pattern or guidelines.
+    * Saving/submitting records with a suggestion score over a safe threshold.
+
+!!! note "Bulk is not available for SpanQuestions"
+    The *bulk view* is not available for **span questions**. You will need to switch to the *focus view* for their annotation. In that case, we recommend annotating the rest of the questions in bulk, save them as drafts and answer the span questions in the *focus view* of the *Draft* queue.
 
 As you open a dataset in the UI, you will see a *focus view* by default. To switch to the **bulk view**, you will need to click the `Bulk view` button on the top right of the preferences view. It is only available for the `Pending` queue.
 
@@ -83,13 +90,6 @@ Now, in the record view, on the left, you can find a list of multiple records to
 In the annotation view, on the right, you can find the questions to annotate. The annotation view in the bulk view is similar to the focus view. Each question has a title and the description (`i` icon), if available, and you will need to answer all the required questions marked with <span style="color:red; font-weight:bold;">*</span> to be able to submit the responses. However, suggestions are not available in the bulk view, so you will have to switch to the focus view if you need them.
 
 At the bottom of the annotation view, you can find the `Discard`, `Save as draft` and `Submit` buttons that will be enabled when at least one record is selected and, in the case of `Submit`, when all the required questions are annotated. To select specific records, you can click on the checkbox on the top left of each record. To select all records, you can click the checkbox in the bottom left of the preferences view. When discarded/saved as draft/submitted, **all the selected records** will change their status, so you can continue annotating the rest of the records.
-
-!!! Tip
-    Some specific situations in which you may want to use the bulk view are:
-
-    * Applying the same label to the results of a similarity search.
-    * Discarding all records in a specific language or that do not match a certain pattern or guidelines.
-    * Saving/submitting records with a suggestion score over a safe threshold.
 
 ### Custom record view
 
@@ -103,7 +103,7 @@ The bulk view also allows you to customize the record view, which can be particu
 
     You can manage the number of records displayed by page. To do so, you can click on the `Page size` button at the bottom right of the preferences view. A dropdown will appear with the options `10`, `25`, `50` and `100`.
 
-## Understand patterns in your data
+## Explore, find and understand patterns in your data
 
 !!! info "Main use cases"
     * You have a large volume of data to annotate.
@@ -117,7 +117,7 @@ The UI provides different features to help you understand patterns in your data 
 
 You can search for records with specific words in their field content. For this, you should click on the magnifying glass icon in the top right of the preferences view. A search bar will appear where you can type the word or words you are looking for. If your records have multiple fields, you will be able to select a specific field for the search or select `All` to search on all the fields. Pressing `Enter` will show the records that contain these words, highlighted in <span style="color:#ff675f">coral</span>, in the selected fields.
 
-### Order by similar record
+### Order by textual record similarity
 
 > Consult these guides, to know how to add vectors to your [dataset](dataset.md) and [records](record.md).
 
