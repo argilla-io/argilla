@@ -77,3 +77,15 @@ class TestRecords:
         record.fields.new_field = "value"
 
         assert record.fields == {"name": "Jane", "age": "30", "new_field": "value"}
+
+    def test_update_record_vectors(self):
+        record = Record(fields={"name": "John"}, vectors={"vector": [1.0, 2.0, 3.0]})
+
+        record.vectors["new-vector"] = [1.0, 2.0, 3.0]
+        assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+
+    def test_update_record_vectors_by_attribute(self):
+        record = Record(fields={"name": "John"})
+
+        record.vectors.vector = [1.0, 2.0, 3.0]
+        assert record.vectors == {"vector": [1.0, 2.0, 3.0]}
