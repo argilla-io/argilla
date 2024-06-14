@@ -22,11 +22,12 @@ from argilla._models._record._response import UserResponseModel
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
 
+FieldValue = Union[str, None]
 
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
-    fields: Optional[Dict[str, Union[str, None]]] = None
+    fields: Optional[Dict[str, FieldValue]] = None
     metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
