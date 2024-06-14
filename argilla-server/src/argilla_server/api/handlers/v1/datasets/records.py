@@ -23,7 +23,6 @@ from typing_extensions import Annotated
 
 import argilla_server.search_engine as search_engine
 from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
-from argilla_server.api.schemas.v1.datasets import Dataset as DatasetSchema
 from argilla_server.api.schemas.v1.records import (
     Filters,
     FilterScope,
