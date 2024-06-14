@@ -145,7 +145,7 @@ jobs:
 
       - name: Test Installing 🍿
         continue-on-error: true
-        run: pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
+        run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@release/v1
