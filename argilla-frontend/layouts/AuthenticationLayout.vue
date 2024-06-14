@@ -46,13 +46,13 @@ export default {
       position: relative;
       font-family: $secondary-font-family;
       max-width: min(80%, 580px);
-      color: palette(white);
+      color: $black-87;
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
         @include font-size(40px);
         padding-right: $base-space * 8;
-        padding-top: $base-space * 4;
+        padding-bottom: $base-space * 12;
       }
       &--mobile {
         position: relative;
