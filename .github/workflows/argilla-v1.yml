@@ -97,6 +97,13 @@ jobs:
           pip install -U build
           rm -rf dist && python -m build
 
+      - name: Read package info
+        run: |
+          PACKAGE_VERSION=$(python -c 'import argilla_v1; print(argilla_v1.__version__)')
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
@@ -109,7 +116,6 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
 
     needs:
       - build
@@ -136,10 +142,10 @@ jobs:
           repository_url: https://test.pypi.org/legacy/
       - name: Test Installing 🍿
         continue-on-error: true
-        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
-
+        run: pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@release/v1
+        if: ${{ github.event_name == 'release' }}
         with:
           user: __token__
           password: ${{ secrets.AR_PYPI_API_TOKEN }}
