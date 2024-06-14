@@ -30,11 +30,11 @@ class TestRecords:
             responses=[Response(question_name="question", value="answer", user_id=user_id)],
         )
         assert (
-            record.__repr__() == f"Record(id={record_id},"
-            "fields={'name': 'John', 'age': '30'},"
-            "metadata={'key': 'value'},"
-            "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
-            f"responses={{'question': [{{'value': 'answer'}}]}})"
+                record.__repr__() == f"Record(id={record_id},"
+                                     "fields={'name': 'John', 'age': '30'},"
+                                     "metadata={'key': 'value'},"
+                                     "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
+                                     f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
 
     def test_update_record_metadata_by_key(self):
@@ -60,3 +60,20 @@ class TestRecords:
             MetadataModel(name="key", value="new_value"),
             MetadataModel(name="new_key", value="new_value"),
         ]
+
+    def test_update_record_fields(self):
+        record = Record(fields={"name": "John"})
+
+        record.fields.update({"name": "Jane", "age": "30"})
+        record.fields["new_field"] = "value"
+
+        assert record.fields == {"name": "Jane", "age": "30", "new_field": "value"}
+
+    def test_update_record_fields_by_attribute(self):
+        record = Record(fields={"name": "John"})
+
+        record.fields.name = "Jane"
+        record.fields.age = "30"
+        record.fields.new_field = "value"
+
+        assert record.fields == {"name": "Jane", "age": "30", "new_field": "value"}
