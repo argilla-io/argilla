@@ -23,6 +23,7 @@ from argilla._models import (
     SuggestionModel,
     VectorModel,
     MetadataValue,
+    FieldValue,
 )
 from argilla._resource import Resource
 from argilla.responses import Response, UserResponse
@@ -258,27 +259,23 @@ class Record(Resource):
         )
 
 
-class RecordFields:
+class RecordFields(dict):
     """This is a container class for the fields of a Record.
-    It allows for accessing fields by attribute and iterating over them.
+    It allows for accessing fields by attribute and key name.
     """
 
-    def __init__(self, fields: Dict[str, Union[str, None]]) -> None:
-        self.__fields = fields or {}
-        for key, value in self.__fields.items():
-            setattr(self, key, value)
+    def __init__(self, fields: Optional[Dict[str, FieldValue]] = None) -> None:
+        super().__init__(fields or {})
 
-    def __getitem__(self, key: str) -> Optional[str]:
-        return self.__fields.get(key)
+    def __getattr__(self, item: str):
+        return self[item]
 
-    def __iter__(self):
-        return iter(self.__fields)
+    def __setattr__(self, key: str, value: MetadataValue):
+        self[key] = value
 
-    def to_dict(self) -> Dict[str, Union[str, None]]:
-        return self.__fields
+    def to_dict(self) -> dict:
+        return {key: value for key, value in self.items()}
 
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
 
 class RecordMetadata(dict):
     """This is a container class for the metadata of a Record."""
@@ -411,4 +408,3 @@ class RecordVectors:
             A dictionary of vectors.
         """
         return {vector.name: list(map(float, vector.values)) for vector in self.__vectors}
-
