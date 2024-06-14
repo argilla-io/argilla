@@ -98,17 +98,17 @@ def test_import_dataset_from_disk(dataset: rg.Dataset, client):
         {
             "text": "1: Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "2: Hello World, how are you?",
             "label": "negative",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "3: Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
     ]
     dataset.records.log(records=mock_data)

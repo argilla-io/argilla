@@ -190,17 +190,17 @@ def test_export_records_to_json(dataset: rg.Dataset):
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "label": "negative",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
     ]
     dataset.records.log(records=mock_data)
