@@ -119,19 +119,16 @@ jobs:
     needs:
       - build
 
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: argilla-v1
-
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
+
       - name: Download python package
         uses: actions/download-artifact@v4
         with:
           name: argilla-v1
           path: dist
+
       - name: Read package info
         run: |
           pip install --no-deps dist/*.whl
@@ -139,14 +136,17 @@ jobs:
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
         continue-on-error: true
         with:
           repository-url: https://test.pypi.org/legacy/
+
       - name: Test Installing 🍿
         continue-on-error: true
         run: pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
+
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@release/v1
         if: ${{ github.event_name == 'release' }}
