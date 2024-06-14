@@ -36,6 +36,7 @@
             </div>
           </section>
         </template>
+
         <template #downHeader>
           <p v-text="$t('guidelines')" />
         </template>
@@ -69,7 +70,7 @@
           />
         </template>
         <template #downHeader>
-          <p v-text="$t('progress')" />
+          <p v-text="$t('metrics.progress')" />
           <AnnotationProgress
             class="annotation-progress"
             :datasetId="recordCriteria.datasetId"
@@ -81,6 +82,18 @@
         </template>
       </HorizontalResizable>
     </template>
+    <BaseCollapsablePanel
+      class="--mobile"
+      :is-expanded="expandedGuidelines"
+      @toggle-expand="expandedGuidelines = !expandedGuidelines"
+    >
+      <template #panelHeader>
+        <p v-text="$t('guidelines')" />
+      </template>
+      <template #panelContent>
+        <AnnotationGuidelines />
+      </template>
+    </BaseCollapsablePanel>
   </VerticalResizable>
 </template>
 <script>
@@ -111,6 +124,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      expandedGuidelines: false,
+    };
+  },
   methods: {
     async onSubmit() {
       await this.submit(this.record);
@@ -138,6 +156,9 @@ export default {
   display: flex;
   flex-wrap: wrap;
   height: 100%;
+  &__inner {
+    display: flex;
+  }
   @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
@@ -148,6 +169,13 @@ export default {
       overflow: visible;
       height: auto !important;
       max-height: none !important;
+    }
+  }
+  &__left {
+    @include media("<desktop") {
+      :deep(.resizable__down) {
+        display: none;
+      }
     }
   }
   &__form {
@@ -181,6 +209,11 @@ export default {
 }
 .annotation-progress {
   .--expanded & {
+    display: none;
+  }
+}
+.--mobile {
+  @include media(">=desktop") {
     display: none;
   }
 }

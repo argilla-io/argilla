@@ -7,6 +7,7 @@
     </div>
 
     <div class="resizable__right"><slot name="right" /></div>
+    <slot></slot>
   </div>
 </template>
 
@@ -138,6 +139,7 @@ $resizable-bar-width: $base-space;
     @include media("<desktop") {
       min-width: 100% !important;
       height: auto !important;
+      margin-left: 0;
     }
   }
 

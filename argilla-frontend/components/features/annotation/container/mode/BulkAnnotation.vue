@@ -147,7 +147,7 @@
             />
           </template>
           <template #downHeader>
-            <p v-text="$t('progress')" />
+            <p v-text="$t('metrics.progress')" />
             <AnnotationProgress
               class="annotation-progress"
               :datasetId="recordCriteria.datasetId"
@@ -159,6 +159,18 @@
           </template>
         </HorizontalResizable>
       </template>
+      <BaseCollapsablePanel
+        class="--mobile"
+        :is-expanded="expandedGuidelines"
+        @toggle-expand="expandedGuidelines = !expandedGuidelines"
+      >
+        <template #panelHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #panelContent>
+          <AnnotationGuidelines />
+        </template>
+      </BaseCollapsablePanel>
     </VerticalResizable>
     <BaseModal
       class="conformation-modal"
@@ -219,6 +231,7 @@ export default {
       recordHeight: "defaultHeight",
       visibleConfirmationModal: false,
       allowedAction: null,
+      expandedGuidelines: false,
     };
   },
   computed: {
@@ -403,6 +416,13 @@ export default {
       max-height: none !important;
     }
   }
+  &__left {
+    @include media("<desktop") {
+      :deep(.resizable__down) {
+        display: none;
+      }
+    }
+  }
   &__form {
     padding: $base-space * 2;
   }
@@ -490,5 +510,10 @@ export default {
 }
 [data-title] {
   @include tooltip-mini("right", 12px);
+}
+.--mobile {
+  @include media(">=desktop") {
+    display: none;
+  }
 }
 </style>
