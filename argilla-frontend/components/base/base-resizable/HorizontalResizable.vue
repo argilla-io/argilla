@@ -50,16 +50,26 @@ export default {
       resizer: null,
       upSide: null,
       downSide: null,
+      expandedPanelMinHeight: 60,
       collapsedPanelHeight: 50,
     };
+  },
+  computed: {
+    parentHeight() {
+      return this.resizer.parentNode.getBoundingClientRect().height;
+    },
   },
   watch: {
     async isExpanded() {
       this.debounce.stop();
       const savedPosition = this.getPosition();
-
       if (this.isExpanded) {
-        this.upSide.style.height = savedPosition?.position ?? "60%";
+        const useSavedPosition =
+          this.parentHeight - parseInt(savedPosition?.position) >
+          this.expandedPanelMinHeight;
+        this.upSide.style.height = useSavedPosition
+          ? savedPosition?.position
+          : "50%";
       } else {
         this.upSide.style.height = "100%";
       }
@@ -107,11 +117,9 @@ export default {
       e.preventDefault();
       const dY = e.clientY - this.upSidePrevPosition.clientY;
       const proportionalHeight = (this.upSidePrevPosition.height + dY) * 100;
-      const parentHeight =
-        this.resizer.parentNode.getBoundingClientRect().height;
-
-      const newHeight = proportionalHeight / parentHeight;
-      const collapsedHeight = (this.collapsedPanelHeight * 100) / parentHeight;
+      const newHeight = proportionalHeight / this.parentHeight;
+      const collapsedHeight =
+        (this.collapsedPanelHeight * 100) / this.parentHeight;
       this.upSide.style.height = `${newHeight}%`;
       if (newHeight >= 100 - collapsedHeight) {
         this.isExpanded = false;
@@ -188,8 +196,7 @@ $resizable-bar-width: $base-space;
     flex-direction: column;
     justify-content: center;
     min-height: $collapsed-panel-height;
-    margin-top: calc($resizable-bar-width / 2);
-    &.panel {
+    @include media(">=desktop") {
       border: none;
     }
   }
@@ -220,15 +227,5 @@ $resizable-bar-width: $base-space;
       }
     }
   }
-}
-
-.transition-enter-active,
-.transition-leave-active {
-  transition: all 2s ease-in-out;
-}
-
-.transition-enter-from,
-.transition-leave-to {
-  min-height: 0;
 }
 </style>
