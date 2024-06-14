@@ -16,7 +16,7 @@ import httpx
 import pytest
 from argilla_server.errors import EntityNotFoundError
 from argilla_v1 import User
-from argilla_v1.client.api import copy, delete, load
+from argilla_v1.client.api import copy, load
 from argilla_v1.client.models import TextClassificationRecord
 from argilla_v1.client.sdk.datasets.models import TaskType
 from argilla_v1.client.sdk.text_classification.models import (

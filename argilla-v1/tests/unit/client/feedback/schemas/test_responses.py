@@ -11,16 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from uuid import uuid4
 
 import pytest
 from argilla_v1.feedback import (
-    FeedbackDataset,
     ResponseSchema,
     ResponseStatus,
     SpanValueSchema,
     TextQuestion,
-    ValueSchema,
 )
 
 

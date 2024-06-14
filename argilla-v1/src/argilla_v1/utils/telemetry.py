@@ -16,7 +16,7 @@ import dataclasses
 import logging
 import platform
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Dict, Optional
 
 from argilla_v1.pydantic_v1 import BaseSettings
 
@@ -115,11 +115,11 @@ def get_current_filename() -> Optional[str]:
         try:
             # Should work if we are running from python
             return Path(__file__).stem
-        except NameError as e:
+        except NameError:
             # This should work if we are running a notebook from vscode
             globals_ = globals()
             return Path(globals_["__vsc_ipynb_file__"]).stem
-    except KeyError as e:
+    except KeyError:
         # This should work for notebooks running locally or using google colab
         import urllib.parse
 

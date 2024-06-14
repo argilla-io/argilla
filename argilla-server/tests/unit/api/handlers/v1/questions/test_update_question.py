@@ -16,9 +16,7 @@ from uuid import UUID
 
 import pytest
 from argilla_server.enums import OptionsOrder, QuestionType
-from argilla_server.models import Question
 from httpx import AsyncClient
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import LabelSelectionQuestionFactory, QuestionFactory, SpanQuestionFactory, TextQuestionFactory

@@ -26,7 +26,6 @@ def add_user(
 ) -> None:
     from argilla_v1.cli.rich import echo_in_panel
     from argilla_v1.cli.workspaces.utils import get_user
-    from argilla_v1.client.users import User
 
     workspace: "Workspace" = ctx.obj
 

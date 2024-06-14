@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Any, List, Union
+from typing import List, Union
 
 import argilla_v1.client.singleton as rg
 import pytest

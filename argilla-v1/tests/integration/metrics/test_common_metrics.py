@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import argilla_v1
-import argilla_v1 as rg
 import argilla_v1.client.singleton
 import pytest
 from argilla_v1.client.api import log

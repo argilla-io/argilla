@@ -21,7 +21,7 @@ import argilla_v1.client.singleton
 import pytest
 from argilla_server.models import User as ServerUser
 from argilla_server.settings import settings
-from argilla_v1 import FeedbackRecord, SuggestionSchema
+from argilla_v1 import FeedbackRecord
 from argilla_v1.client.feedback.dataset import FeedbackDataset
 from argilla_v1.client.feedback.dataset.remote.dataset import RemoteFeedbackDataset
 from argilla_v1.client.feedback.schemas.fields import TextField

@@ -44,7 +44,6 @@ def train(
     import json
 
     from argilla_v1.cli.callback import init_callback
-    from argilla_v1.client.singleton import init
     from argilla_v1.training import ArgillaTrainer
 
     init_callback()

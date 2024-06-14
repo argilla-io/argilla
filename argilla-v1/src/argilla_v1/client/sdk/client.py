@@ -15,7 +15,6 @@
 import dataclasses
 import datetime
 import functools
-import inspect
 import json
 import uuid
 from json import JSONEncoder
