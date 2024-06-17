@@ -169,7 +169,7 @@ jobs:
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
 
       - name: Publish Package to PyPI test environment 🥪
-        continue-on-error: false
+        continue-on-error: true
         run: |
           pdm publish --no-build --repository testpypi
 
