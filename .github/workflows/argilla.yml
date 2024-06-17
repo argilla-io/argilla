@@ -54,7 +54,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: true
           cache-dependency-path: |
-            argilla/pyproject.toml
+            argilla/pdm.lock
       - name: Install dependencies
         run: |
           pdm install
@@ -112,8 +112,9 @@ jobs:
         uses: pdm-project/setup-pdm@v4
         with:
           cache: true
+          python-version-file: argilla/pyproject.toml
           cache-dependency-path: |
-            argilla/pyproject.toml
+            argilla/pdm.lock
 
       - name: Read package info
         run: |
