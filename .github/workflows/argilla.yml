@@ -112,6 +112,8 @@ jobs:
         uses: pdm-project/setup-pdm@v4
         with:
           cache: true
+          cache-dependency-path: |
+            argilla/pyproject.toml
 
       - name: Read package info
         run: |
