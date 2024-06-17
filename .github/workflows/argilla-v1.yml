@@ -15,7 +15,6 @@ on:
       - develop
       - feat/**
       - releases/**
-      - releases/stable # This is for tests purposes
 
   pull_request:
     paths:
@@ -102,7 +101,7 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/releases/stable' || ${{ github.event_name }} == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' || ${{ github.event_name }} == 'workflow_dispatch'
 
     permissions:
       # This permission is needed for private repositories.
@@ -145,13 +144,5 @@ jobs:
         run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
-        if: github.ref == 'refs/heads/releases/stable'
+        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
-
-      - name: Create tag
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          TAG=${{ env.PACKAGE_NAME }}_${{ env.PACKAGE_VERSION }}
-          git tag -f -a $TAG -m "Release ${{ env.PACKAGE_NAME }} v${{ env.PACKAGE_VERSION }}"
-          git push -f origin $TAG
