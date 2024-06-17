@@ -15,7 +15,7 @@ on:
       - develop
       - feat/**
       - releases/**
-      - stable # This is for tests purposes
+      - releases/stable # This is for tests purposes
 
   pull_request:
     paths:
@@ -102,7 +102,7 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/stable' || ${{ github.event_name }} == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/releases/stable' || ${{ github.event_name }} == 'workflow_dispatch'
 
     permissions:
       # This permission is needed for private repositories.
@@ -145,7 +145,7 @@ jobs:
         run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
-        if: github.ref == 'refs/heads/stable'
+        if: github.ref == 'refs/heads/releases/stable'
         uses: pypa/gh-action-pypi-publish@release/v1
 
       - name: Create tag
