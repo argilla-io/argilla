@@ -140,8 +140,8 @@ jobs:
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: ${{ inputs.image-name }}
-          readme-filepath: ${{ inputs.readme }}
+          repository: argilla/argilla-server
+          readme-filepath: argilla-server/README.md
 
       - name: Docker Hub Description for `argilla-quickstart`
         uses: peter-evans/dockerhub-description@v4
@@ -149,5 +149,5 @@ jobs:
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: ${{ inputs.image-name }}
-          readme-filepath: ${{ inputs.readme }}
+          repository: argilla/argilla-quickstart
+          readme-filepath: argilla-server/docker/quickstart/README.md
