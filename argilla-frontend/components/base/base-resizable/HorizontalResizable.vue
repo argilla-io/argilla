@@ -63,12 +63,9 @@ export default {
       this.debounce.stop();
       const savedPosition = this.getPosition();
       if (this.isExpanded) {
-        const useSavedPosition =
-          this.parentHeight - parseInt(savedPosition?.position) >
-          this.expandedPanelMinHeight;
-        this.upSide.style.height = useSavedPosition
-          ? savedPosition?.position
-          : "50%";
+        if (this.resizing) {
+          this.upSide.style.height = savedPosition?.position;
+        }
       } else {
         this.upSide.style.height = "100%";
       }
@@ -150,6 +147,15 @@ export default {
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded;
+      if (this.isExpanded) {
+        const savedPosition = this.getPosition();
+        const useSavedPosition =
+          this.parentHeight - parseInt(savedPosition?.position) >
+          this.expandedPanelMinHeight;
+        this.upSide.style.height = useSavedPosition
+          ? savedPosition?.position
+          : "50%";
+      }
     },
   },
   setup(props) {
