@@ -1,4 +1,4 @@
-name: Build Argilla server docker image
+name: Build Argilla server docker images
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build Docker image
+    name: Build Argilla server docker images
     runs-on: ubuntu-latest
 
     env:
@@ -94,8 +94,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: true
 
-      - name: Push latest `argilla-quickstart` image
-        if: ${{ inputs.is_release }}
+      - name: Build and push `argilla-quickstart` image
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/quickstart
