@@ -277,7 +277,7 @@ class RecordFields(dict):
         self[key] = value
 
     def to_dict(self) -> dict:
-        return {key: value for key, value in self.items()}
+        return dict(self.items())
 
 
 class RecordMetadata(dict):
@@ -293,7 +293,7 @@ class RecordMetadata(dict):
         self[key] = value
 
     def to_dict(self) -> dict:
-        return {key: value for key, value in self.items()}
+        return dict(self.items())
 
     def api_models(self) -> List[MetadataModel]:
         return [MetadataModel(name=key, value=value) for key, value in self.items()]
@@ -313,11 +313,11 @@ class RecordVectors(dict):
     def __setattr__(self, key: str, value: VectorValue):
         self[key] = value
 
+    def to_dict(self) -> Dict[str, List[float]]:
+        return dict(self.items())
+
     def api_models(self) -> List[VectorModel]:
         return [Vector(name=name, values=value).api_model() for name, value in self.items()]
-
-    def to_dict(self) -> Dict[str, List[float]]:
-        return {key: value for key, value in self.items()}
 
 
 class RecordResponses(Iterable[Response]):
@@ -348,6 +348,16 @@ class RecordResponses(Iterable[Response]):
     def __repr__(self) -> str:
         return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
 
+    def to_dict(self) -> Dict[str, List[Dict]]:
+        """Converts the responses to a dictionary.
+        Returns:
+            A dictionary of responses.
+        """
+        response_dict = defaultdict(list)
+        for response in self.__responses:
+            response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
+        return response_dict
+
     def api_models(self) -> List[UserResponseModel]:
         """Returns a list of ResponseModel objects."""
 
@@ -360,15 +370,6 @@ class RecordResponses(Iterable[Response]):
             for responses in responses_by_user_id.values()
         ]
 
-    def to_dict(self) -> Dict[str, List[Dict]]:
-        """Converts the responses to a dictionary.
-        Returns:
-            A dictionary of responses.
-        """
-        response_dict = defaultdict(list)
-        for response in self.__responses:
-            response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
-        return response_dict
 
 
 class RecordSuggestions(Iterable[Suggestion]):
@@ -384,14 +385,14 @@ class RecordSuggestions(Iterable[Suggestion]):
             suggestion.record = self.record
             setattr(self, suggestion.question_name, suggestion)
 
-    def api_models(self) -> List[SuggestionModel]:
-        return [suggestion.api_model() for suggestion in self.__suggestions]
-
     def __iter__(self):
         return iter(self.__suggestions)
 
     def __getitem__(self, index: int):
         return self.__suggestions[index]
+
+    def __repr__(self) -> str:
+        return self.to_dict().__repr__()
 
     def to_dict(self) -> Dict[str, List[str]]:
         """Converts the suggestions to a dictionary.
@@ -407,5 +408,6 @@ class RecordSuggestions(Iterable[Suggestion]):
             }
         return suggestion_dict
 
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
+    def api_models(self) -> List[SuggestionModel]:
+        return [suggestion.api_model() for suggestion in self.__suggestions]
+
