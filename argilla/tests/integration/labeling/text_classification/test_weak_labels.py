@@ -53,12 +53,14 @@ def log_dataset(mocked_client: SecuredClient) -> str:
         CreationTextClassificationRecord.parse_obj(
             {
                 "inputs": {"text": text},
-                "annotation": {
-                    "labels": [{"class": label, "score": 1}],
-                    "agent": "test",
-                }
-                if label is not None
-                else None,
+                "annotation": (
+                    {
+                        "labels": [{"class": label, "score": 1}],
+                        "agent": "test",
+                    }
+                    if label is not None
+                    else None
+                ),
                 "id": idx,
             }
         )
@@ -114,12 +116,14 @@ def log_multilabel_dataset(mocked_client: SecuredClient) -> str:
         CreationTextClassificationRecord.parse_obj(
             {
                 "inputs": {"text": text},
-                "annotation": {
-                    "labels": [{"class": label, "score": 1} for label in labels],
-                    "agent": "test",
-                }
-                if labels is not None
-                else None,
+                "annotation": (
+                    {
+                        "labels": [{"class": label, "score": 1} for label in labels],
+                        "agent": "test",
+                    }
+                    if labels is not None
+                    else None
+                ),
                 "multi_label": True,
                 "id": idx,
             }

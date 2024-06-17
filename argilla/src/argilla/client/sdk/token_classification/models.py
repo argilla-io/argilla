@@ -58,9 +58,11 @@ class CreationTokenClassificationRecord(BaseRecord[TokenClassificationAnnotation
         if record.prediction is not None:
             prediction = TokenClassificationAnnotation(
                 entities=[
-                    EntitySpan(label=ent[0], start=ent[1], end=ent[2])
-                    if len(ent) == 3
-                    else EntitySpan(label=ent[0], start=ent[1], end=ent[2], score=ent[3])
+                    (
+                        EntitySpan(label=ent[0], start=ent[1], end=ent[2])
+                        if len(ent) == 3
+                        else EntitySpan(label=ent[0], start=ent[1], end=ent[2], score=ent[3])
+                    )
                     for ent in record.prediction
                 ],
                 agent=record.prediction_agent or MACHINE_NAME,
@@ -94,13 +96,15 @@ class TokenClassificationRecord(CreationTokenClassificationRecord):
         return ClientTokenClassificationRecord(
             text=self.text,
             tokens=self.tokens,
-            prediction=[(ent.label, ent.start, ent.end, ent.score) for ent in self.prediction.entities]
-            if self.prediction
-            else None,
+            prediction=(
+                [(ent.label, ent.start, ent.end, ent.score) for ent in self.prediction.entities]
+                if self.prediction
+                else None
+            ),
             prediction_agent=self.prediction.agent if self.prediction else None,
-            annotation=[(ent.label, ent.start, ent.end) for ent in self.annotation.entities]
-            if self.annotation
-            else None,
+            annotation=(
+                [(ent.label, ent.start, ent.end) for ent in self.annotation.entities] if self.annotation else None
+            ),
             annotation_agent=self.annotation.agent if self.annotation else None,
             vectors=self._to_client_vectors(self.vectors),
             id=self.id,
