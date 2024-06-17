@@ -51,6 +51,7 @@ export default {
   width: 100%;
   color: $black-54;
   @include font-size(12px);
+  border-radius: $border-radius-m;
   &__bar {
     width: 100%;
     max-width: 160px;

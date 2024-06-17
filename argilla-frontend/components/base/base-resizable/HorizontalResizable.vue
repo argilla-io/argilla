@@ -201,8 +201,10 @@ $resizable-bar-width: $base-space;
     flex-direction: column;
     justify-content: center;
     min-height: $collapsed-panel-height;
-    @include media(">=desktop") {
-      border: none;
+    &.panel {
+      @include media(">=desktop") {
+        border: none;
+      }
     }
   }
 
