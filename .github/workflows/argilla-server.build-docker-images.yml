@@ -8,13 +8,15 @@ on:
         required: true
         type: boolean
 
+      publish_latest:
+        description: "True if the image is a release"
+        required: true
+        type: boolean
+
 jobs:
   build:
     name: Build Argilla server docker images
     runs-on: ubuntu-latest
-
-    env:
-      PLATFORMS: "linux/amd64"
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +31,14 @@ jobs:
       - name: Setup ARM platforms
         if: ${{ inputs.is_release }}
         run: |
-          echo "PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_ENV
+          echo $IS_RELEASE
+          if [[ $IS_RELEASE == true ]]; then
+            echo "PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_ENV
+          else
+            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
+          fi
+        env:
+          IS_RELEASE: ${{ inputs.is_release }}
 
       - name: Set up QEMU
         if: ${{ inputs.is_release }}
@@ -48,30 +57,36 @@ jobs:
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
 
-      - name: Download python package
-        uses: actions/download-artifact@v4
-        with:
-          name: argilla-server
-          path: argilla-server/docker/server/dist
-
       - name: Get Docker image tag from GITHUB_REF
+        if: ${{ !inputs.is_release }}
         id: docker-image-tag-from-ref
         uses: ./.github/actions/docker-image-tag-from-ref
 
-      - name: Set image tag from GITHUB_REF
+      - name: Set image tag
+        if: ${{ !inputs.is_release }}
         run: |
-          echo "IMAGE_TAG=${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}" >> $GITHUB_ENV
-
-      - name: Set image tag from package version
-        if: ${{ inputs.is_release }}
-        run: |
-          echo "IMAGE_TAG=${{ steps.package-info.outputs.PACKAGE_VERSION }}" >> $GITHUB_ENV
+          echo $IS_RELEASE
+          if [[ $IS_RELEASE == true ]]; then
+            echo "IMAGE_TAG=$PACKAGE_VERSION" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
+          fi
+        env:
+          IS_RELEASE: ${{ inputs.is_release }}
+          PACKAGE_VERSION: ${{ steps.package-info.outputs.PACKAGE_VERSION }}
+          DOCKER_IMAGE_TAG: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
+
+      - name: Download python package
+        uses: actions/download-artifact@v4
+        with:
+          name: argilla-server
+          path: argilla-server/docker/server/dist
 
       - name: Build and push `argilla-server` image
         uses: docker/build-push-action@v5
@@ -84,7 +99,7 @@ jobs:
           push: true
 
       - name: Push latest `argilla-server` image
-        if: ${{ inputs.is_release }}
+        if: ${{ inputs.is_release && inputs.publish_latest }}
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
@@ -107,7 +122,7 @@ jobs:
           push: true
 
       - name: Push latest `argilla-quickstart` image
-        if: ${{ inputs.is_release }}
+        if: ${{ inputs.is_release && inputs.publish_latest }}
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/quickstart
@@ -121,7 +136,7 @@ jobs:
 
       - name: Docker Hub Description for `argilla-server`
         uses: peter-evans/dockerhub-description@v4
-        if: ${{ inputs.is_release }}
+        if: ${{ inputs.is_release && inputs.publish_latest }}
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
@@ -130,7 +145,7 @@ jobs:
 
       - name: Docker Hub Description for `argilla-quickstart`
         uses: peter-evans/dockerhub-description@v4
-        if: ${{ inputs.is_release }}
+        if: ${{ inputs.is_release && inputs.publish_latest }}
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}

@@ -113,12 +113,13 @@ jobs:
           path: argilla-server/dist
 
   build_docker_images:
-    name: Build Argilla server docker image
+    name: Build docker images
     uses: ./.github/workflows/argilla-server.build-docker-images.yml
     needs:
       - build
     with:
       is_release: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+      publish_latest: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit
 
   # This job will publish argilla-server python package into PyPI repository
