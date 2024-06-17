@@ -152,10 +152,8 @@ class TestDatasetRecordsBulk:
             self.url(dataset.id),
             headers=owner_auth_header,
             json={
-                "items": [{
-                    "id": str(record.id),
-                    "external_id": str(uuid.uuid4()),
-                    "metadata": new_metadata}
+                "items": [
+                    {"id": str(record.id), "external_id": str(uuid.uuid4()), "metadata": new_metadata}
                     for record in records
                 ],
             },
