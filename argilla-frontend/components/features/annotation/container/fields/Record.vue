@@ -59,7 +59,7 @@ export default {
   flex-direction: column;
   min-height: 0;
   background: palette(white);
-  border: 1px solid palette(grey, 600);
+  border: 1px solid $black-6;
   border-radius: $border-radius-m;
   &:has(.dropdown__content),
   &:has(.checkbox.checked) {
@@ -73,7 +73,7 @@ export default {
     min-width: 0;
     height: 100%;
     min-height: 0;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       height: auto;
     }
   }

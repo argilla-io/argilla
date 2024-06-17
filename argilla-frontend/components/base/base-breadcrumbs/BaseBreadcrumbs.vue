@@ -33,19 +33,6 @@
         >
       </li>
     </ul>
-    <base-action-tooltip :tooltip="$t('copied')">
-      <a
-        v-if="copyButton"
-        class="breadcrumbs__copy"
-        @click.prevent="
-          $copyToClipboard(
-            filteredBreadcrumbs[filteredBreadcrumbs.length - 1].name
-          )
-        "
-      >
-        <svgicon name="copy" width="16" height="16" />
-      </a>
-    </base-action-tooltip>
   </div>
 </template>
 
@@ -76,7 +63,6 @@ export default {
 
 <style lang="scss" scoped>
 .breadcrumbs {
-  margin-right: auto;
   margin-left: 1em;
   display: flex;
   align-items: center;
@@ -107,21 +93,6 @@ export default {
         cursor: default;
         pointer-events: none;
       }
-    }
-  }
-  &__copy {
-    user-select: none;
-    cursor: pointer;
-    @include media("<=tablet") {
-      display: none;
-    }
-    &:hover {
-      .svg-icon {
-        fill: darken(palette(white), 10%);
-      }
-    }
-    .svg-icon {
-      fill: palette(white);
     }
   }
   &__item {

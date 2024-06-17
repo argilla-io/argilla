@@ -7,20 +7,6 @@
     @click="focusOnFirstQuestionFromOutside"
   >
     <div class="questions-form__content">
-      <div class="questions-form__header">
-        <p class="questions-form__guidelines-link">
-          <NuxtLink
-            :to="{
-              name: 'dataset-id-settings',
-              params: { id: datasetId },
-            }"
-            target="_blank"
-            >{{ $t("annotationGuidelines") }}
-            <svgicon name="external-link" width="12" />
-          </NuxtLink>
-        </p>
-      </div>
-
       <QuestionsComponent
         :questions="record.questions"
         :autofocusPosition="autofocusPosition"
@@ -320,30 +306,11 @@ export default {
   flex-basis: clamp(33%, 520px, 40%);
   gap: $base-space;
   max-height: 100%;
-  min-width: 0;
+  min-width: 100%;
   justify-content: space-between;
   margin-bottom: auto;
   @include media("<desktop") {
     justify-content: flex-start;
-  }
-  &__header {
-    display: flex;
-    justify-content: right;
-  }
-  &__guidelines-link {
-    margin: 0;
-    @include font-size(14px);
-    color: $black-37;
-    a {
-      color: $black-37;
-      outline: 0;
-      text-decoration: none;
-      &:hover,
-      &:focus {
-        color: $black-54;
-        transition: color 0.2s ease-in-out;
-      }
-    }
   }
   &__content {
     position: relative;
@@ -357,7 +324,7 @@ export default {
     border: 1px solid transparent;
     background: palette(white);
     .--pending & {
-      border-color: $black-10;
+      border-color: $black-6;
     }
     .--draft &,
     .--saving-draft & {

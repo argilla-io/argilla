@@ -116,6 +116,7 @@ $buttonSize: 34px;
 
 .user {
   position: relative;
+  margin-left: auto;
   z-index: 3;
   &__button {
     user-select: none;

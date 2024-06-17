@@ -102,16 +102,6 @@ const config: NuxtConfig = {
     "@nuxtjs/auth-next",
     "nuxt-highlightjs",
     "@nuxtjs/i18n",
-    [
-      "nuxt-mq",
-      {
-        breakpoints: {
-          sm: 450,
-          md: 1901,
-          lg: Infinity,
-        },
-      },
-    ],
   ],
 
   i18n: {
