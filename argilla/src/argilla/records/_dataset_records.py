@@ -412,7 +412,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         metadata: Dict[str, MetadataValue] = {}
 
         responses: List[Response] = []
-        suggestion_values = defaultdict(dict)
+        suggestion_values: Dict[str, dict] = defaultdict(dict)
 
         schema = self.__dataset.schema
 
