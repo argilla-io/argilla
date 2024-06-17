@@ -13,6 +13,7 @@ on:
       - develop
       - feat/**
       - releases/**
+      - stable # This is for tests purposes
 
   pull_request:
     paths:
@@ -99,7 +100,6 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name == 'release' }}
 
     permissions:
       # This permission is needed for private repositories.
@@ -130,6 +130,14 @@ jobs:
           echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
 
+      - name: Create tag
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          TAG=${{ env.PACKAGE_NAME }}.v${{ env.PACKAGE_VERSION }}
+          git tag -f -a $TAG -m "Release ${{ env.PACKAGE_NAME }} v${{ env.PACKAGE_VERSION }}"
+          git push -f origin $TAG
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
         continue-on-error: true
@@ -142,4 +150,4 @@ jobs:
 
       - name: Publish Package to PyPI 🥩
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: ${{ github.event_name == 'release' }}
+        if: github.ref == 'refs/heads/stable'
