@@ -304,7 +304,7 @@ export class Highlighting {
   ) {
     const highlights: Dictionary<Range[]> = {};
 
-    for (const span of this.nodeSpans) {
+    for (const span of this.spans) {
       const className = getClassName(span);
 
       if (!highlights[className]) highlights[className] = [];
