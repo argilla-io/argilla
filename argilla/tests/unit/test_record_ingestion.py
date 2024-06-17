@@ -36,30 +36,34 @@ def dataset():
 
 
 def test_ingest_record_from_dict(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "What is the capital of France?",
-            "label": "positive",
-        },
+    record = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "What is the capital of France?",
+                "label": "positive",
+            }
+        ],
     )
 
-    assert record.fields.prompt == "What is the capital of France?"
-    assert record.suggestions.label.value == "positive"
+    assert record[0].fields["prompt"] == "What is the capital of France?"
+    assert record[0].suggestions[0]["label"]["value"] == "positive"
 
 
 def test_ingest_record_from_dict_with_mapping(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "my_prompt": "What is the capital of France?",
-            "label": "positive",
-        },
+    record = dataset.records._ingest_records(
+        records=[
+            {
+                "my_prompt": "What is the capital of France?",
+                "label": "positive",
+            }
+        ],
         mapping={
-            "my_prompt": "prompt",
+            "prompt": "my_prompt",
         },
     )
 
-    assert record.fields.prompt == "What is the capital of France?"
-    assert record.suggestions.label.value == "positive"
+    assert record[0].fields["prompt"] == "What is the capital of France?"
+    assert record[0].suggestions[0]["label"]["value"] == "positive"
 
 
 def test_ingest_record_from_dict_with_suggestions(dataset):
