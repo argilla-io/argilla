@@ -8,7 +8,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.4
+    rev: v0.4.8
     hooks:
       - id: ruff-format
 
@@ -16,14 +16,14 @@ repos:
   # argilla specific hooks
   ##############################################################################
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.4
+    rev: v0.4.8
     hooks:
       - id: ruff
         files: 'argilla/src/.*\.py$'
         args:
           - --fix
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
@@ -52,7 +52,7 @@ repos:
   # argilla-server specific hooks
   ##############################################################################
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.4
+    rev: v0.4.8
     hooks:
       - id: ruff
         files: 'argila-server/src/.*\.py$'

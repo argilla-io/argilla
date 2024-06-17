@@ -8,8 +8,6 @@ on:
   push:
     paths:
       - argilla-v1/**
-    tags:
-      - "*"
     branches:
       - main
       - develop
@@ -19,11 +17,6 @@ on:
   pull_request:
     paths:
       - argilla-v1/**
-
-  release:
-    types:
-      - "published"
-      - "released"
 
 jobs:
   build:

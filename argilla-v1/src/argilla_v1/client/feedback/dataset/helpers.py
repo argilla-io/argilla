@@ -88,7 +88,7 @@ def validate_questions(questions: typing.Union[AllowedQuestionTypes, typing.List
 
 
 def validate_metadata_properties(
-    metadata_properties: typing.Union[typing.List[AllowedMetadataPropertyTypes], None]
+    metadata_properties: typing.Union[typing.List[AllowedMetadataPropertyTypes], None],
 ) -> None:
     """Validates that the metadata properties used in the filters are valid."""
 
@@ -142,7 +142,7 @@ def validate_vector_names(dataset: "FeedbackDatasetBase", names: typing.List[str
 
 
 def normalize_records(
-    records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]]
+    records: Union[FeedbackRecord, Dict[str, Any], List[Union[FeedbackRecord, Dict[str, Any]]]],
 ) -> List[FeedbackRecord]:
     """Parses the records into a list of `FeedbackRecord` objects.
 

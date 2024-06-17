@@ -16,6 +16,7 @@
 """
 Common helper functions
 """
+
 import logging
 
 _LOGGER = logging.getLogger("argilla_server")

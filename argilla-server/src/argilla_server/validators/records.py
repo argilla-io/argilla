@@ -150,8 +150,9 @@ class RecordsBulkUpsertValidator:
         for idx, record_upsert in enumerate(records_upsert):
             try:
                 record = self._existing_records_by_external_id_or_record_id.get(
-                    record_upsert.external_id or record_upsert.id
-                )
+                    record_upsert.id
+                ) or self._existing_records_by_external_id_or_record_id.get(record_upsert.external_id)
+
                 if record:
                     RecordUpdateValidator(RecordUpdate.parse_obj(record_upsert)).validate_for(dataset)
                 else:

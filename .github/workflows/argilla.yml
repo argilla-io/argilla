@@ -28,10 +28,6 @@ on:
       - argilla/**
       - "!argilla/docs/**"
 
-  release:
-    types:
-      - "published"
-
 defaults:
   run:
     working-directory: argilla
