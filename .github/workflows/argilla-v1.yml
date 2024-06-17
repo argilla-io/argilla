@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  workflow_dispatch:
+
   push:
     paths:
       - argilla-v1/**
@@ -100,6 +102,7 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/stable' || ${{ github.event_name }} == 'workflow_dispatch'
 
     permissions:
       # This permission is needed for private repositories.
@@ -126,17 +129,10 @@ jobs:
         run: |
           pip install --no-deps dist/*.whl
           PACKAGE_VERSION=$(python -c 'from importlib.metadata import version; print(version("argilla-v1"))')
+          PACKAGE_NAME=argilla-v1
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          echo "PACKAGE_NAME=argilla-v1" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
-
-      - name: Create tag
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          TAG=${{ env.PACKAGE_NAME }}.v${{ env.PACKAGE_VERSION }}
-          git tag -f -a $TAG -m "Release ${{ env.PACKAGE_NAME }} v${{ env.PACKAGE_VERSION }}"
-          git push -f origin $TAG
 
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -149,5 +145,13 @@ jobs:
         run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
-        uses: pypa/gh-action-pypi-publish@release/v1
         if: github.ref == 'refs/heads/stable'
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Create tag
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          TAG=${{ env.PACKAGE_NAME }}_${{ env.PACKAGE_VERSION }}
+          git tag -f -a $TAG -m "Release ${{ env.PACKAGE_NAME }} v${{ env.PACKAGE_VERSION }}"
+          git push -f origin $TAG
