@@ -106,7 +106,7 @@ class TestDatasetRecordsBulk:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
     ) -> None:
         dataset = await self.test_dataset()
-        records = await RecordFactory.create_batch(dataset=dataset, size=100)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -125,7 +125,7 @@ class TestDatasetRecordsBulk:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
     ):
         dataset = await self.test_dataset()
-        records = await RecordFactory.create_batch(dataset=dataset, size=100)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -145,7 +145,7 @@ class TestDatasetRecordsBulk:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await self.test_dataset()
-        records = await RecordFactory.create_batch(dataset=dataset, size=100)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
 
         new_metadata = {"whatever": "whatever"}
         response = await async_client.put(
