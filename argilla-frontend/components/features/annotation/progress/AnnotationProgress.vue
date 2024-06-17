@@ -51,7 +51,7 @@ export default {
         {
           id: "pending",
           name: "progress",
-          color: "linear-gradient(90deg, #EFEFEF 0%, #D3D3D3 100%)",
+          color: "linear-gradient(white)",
           value: this.datasetMetrics.pending + this.datasetMetrics.draft,
         },
       ];
@@ -62,40 +62,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.metrics {
-  color: $black-54;
-}
-.color-bullet {
-  height: $base-space;
-  width: $base-space;
-  border-radius: $border-radius-rounded;
-  display: inline-block;
-}
-:deep() {
-  .metrics__list {
-    list-style: none;
-    padding-left: 0;
-    margin-bottom: $base-space * 3;
-    &__item {
-      display: flex;
-      align-items: center;
-      gap: $base-space;
-      margin-bottom: $base-space;
-      @include font-size(13px);
-    }
-    &__name {
-      text-transform: capitalize;
-      display: block;
-      width: calc(100% - 40px);
-      hyphens: auto;
-      word-break: break-word;
-    }
-    &__counter {
-      margin-right: 0;
-      margin-left: auto;
-    }
-  }
-}
-</style>

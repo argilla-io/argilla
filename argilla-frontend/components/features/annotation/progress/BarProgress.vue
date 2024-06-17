@@ -54,6 +54,7 @@ export default {
   &__bar {
     width: 100%;
     max-width: 160px;
+    box-shadow: 0 0 0 1px $black-10;
   }
   &__data {
     font-weight: 500;
