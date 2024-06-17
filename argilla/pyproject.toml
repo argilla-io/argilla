@@ -13,7 +13,8 @@ dynamic = ["version"]
 dependencies = [
     "httpx>=0.26.0",
     "pydantic>=2.6.0, <3.0.0",
-    "argilla-v1[listeners] @ file:///${PROJECT_ROOT}/../argilla-v1",
+    # Comment previous line and uncomment next line for the release
+    "argilla-v1[listeners]"
 ]
 
 [project.optional-dependencies]
@@ -60,6 +61,7 @@ dev = [
     "CairoSVG >= 2.7.1",
     "mknotebooks >= 0.8.0",
     "datasets>=2.19.1",
+    "argilla-v1[listeners] @ file:///${PROJECT_ROOT}/../argilla-v1",
 ]
 
 [tool.pdm.scripts]
