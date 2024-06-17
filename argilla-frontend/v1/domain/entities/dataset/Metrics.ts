@@ -1,5 +1,6 @@
 export class Metrics {
   public readonly percentage: {
+    pending: number;
     draft: number;
     submitted: number;
     discarded: number;
@@ -13,6 +14,7 @@ export class Metrics {
     public readonly draft: number
   ) {
     this.percentage = {
+      pending: (this.pending * 100) / this.total,
       draft: (this.draft * 100) / this.total,
       submitted: (this.submitted * 100) / this.total,
       discarded: (this.discarded * 100) / this.total,

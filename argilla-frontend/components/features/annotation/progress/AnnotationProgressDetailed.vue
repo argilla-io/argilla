@@ -48,74 +48,44 @@ export default {
       type: String,
       required: true,
     },
+    enableFetch: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
-    progressRanges() {
-      return [
-        {
-          id: "discarded",
-          name: "progress",
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.progressNotPending,
-        },
-        {
-          id: "pending",
-          name: "progress",
-          color: "linear-gradient(90deg, #EFEFEF 0%, #D3D3D3 100%)",
-          value: this.datasetMetrics.pending,
-        },
-      ];
-    },
-    progressNotPending() {
-      return this.datasetMetrics.total - this.datasetMetrics.pending;
-    },
     progressItems() {
       return [
         {
           name: RecordStatus.submitted.name,
-          color: this.submittedColor,
+          color: RecordStatus.submitted.color,
           value: this.datasetMetrics.submitted,
-          percent: this.getPercent(this.datasetMetrics.submitted),
+          percent: this.datasetMetrics.percentage.submitted,
         },
         {
           name: RecordStatus.draft.name,
-          color: this.draftColor,
+          color: RecordStatus.draft.color,
           value: this.datasetMetrics.draft,
-          percent: this.getPercent(this.datasetMetrics.draft),
+          percent: this.datasetMetrics.percentage.draft,
         },
         {
           name: RecordStatus.discarded.name,
-          color: this.discardedColor,
+          color: RecordStatus.discarded.color,
           value: this.datasetMetrics.discarded,
-          percent: this.getPercent(this.datasetMetrics.discarded),
+          percent: this.datasetMetrics.percentage.discarded,
         },
         {
           name: RecordStatus.pending.name,
-          color: this.pendingColor,
+          color: RecordStatus.pending.color,
           value: this.datasetMetrics.pending,
-          percent: this.getPercent(this.datasetMetrics.pending),
+          percent: this.datasetMetrics.percentage.pending,
         },
       ];
-    },
-    pendingColor() {
-      return RecordStatus.pending.color;
-    },
-    draftColor() {
-      return RecordStatus.draft.color;
-    },
-    submittedColor() {
-      return RecordStatus.submitted.color;
-    },
-    discardedColor() {
-      return RecordStatus.discarded.color;
     },
   },
   methods: {
     getFormattedProgress(progress) {
       return progress && this.$options.filters.formatNumber(progress);
-    },
-    getPercent(progress) {
-      return (progress / this.datasetMetrics.total) * 100;
     },
   },
   setup(props) {

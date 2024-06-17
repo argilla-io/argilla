@@ -11,7 +11,6 @@
     <BaseCollapsablePanel
       class="resizable__down"
       :class="isExpanded ? '--expanded' : null"
-      :key="isExpanded"
       :is-expanded="isExpanded"
       @toggle-expand="toggleExpand"
     >

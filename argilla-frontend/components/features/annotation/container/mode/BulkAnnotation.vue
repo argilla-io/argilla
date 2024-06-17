@@ -151,6 +151,7 @@
             <AnnotationProgress
               class="annotation-progress"
               :datasetId="recordCriteria.datasetId"
+              enableFetch
             />
           </template>
           <template #downContent>

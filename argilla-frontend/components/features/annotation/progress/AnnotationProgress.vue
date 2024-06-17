@@ -20,7 +20,7 @@
     v-if="datasetMetrics.hasMetrics"
     :loading="false"
     :progress-ranges="progressRanges"
-    :progress-completed="progressCompleted"
+    :progress-completed="datasetMetrics.submitted + datasetMetrics.discarded"
     :total="datasetMetrics.total"
   />
 </template>
@@ -34,6 +34,10 @@ export default {
       type: String,
       required: true,
     },
+    enableFetch: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     progressRanges() {
@@ -42,18 +46,15 @@ export default {
           id: "completed",
           name: "completed",
           color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.progressCompleted,
+          value: this.datasetMetrics.submitted + this.datasetMetrics.discarded,
         },
         {
           id: "pending",
           name: "progress",
           color: "linear-gradient(90deg, #EFEFEF 0%, #D3D3D3 100%)",
-          value: this.datasetMetrics.pending,
+          value: this.datasetMetrics.pending + this.datasetMetrics.draft,
         },
       ];
-    },
-    progressCompleted() {
-      return this.datasetMetrics.submitted + this.datasetMetrics.discarded;
     },
   },
   setup(props) {

@@ -10,7 +10,7 @@
       />
     </BaseButton>
 
-    <div class="panel__content" v-show="isExpanded">
+    <div class="panel__content" v-if="isExpanded">
       <slot name="panelContent" />
     </div>
   </div>
