@@ -118,8 +118,10 @@ jobs:
     needs:
       - build
     with:
-      is_release: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
-      publish_latest: ${{ github.ref == 'refs/heads/main' }}
+      #is_release: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+      #publish_latest: ${{ github.ref == 'refs/heads/main' }}
+      is_release: true
+      publish_latest: false
     secrets: inherit
 
   # This job will publish argilla-server python package into PyPI repository
