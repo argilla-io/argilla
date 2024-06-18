@@ -270,12 +270,6 @@ class RecordFields(dict):
     def __init__(self, fields: Optional[Dict[str, FieldValue]] = None) -> None:
         super().__init__(fields or {})
 
-    def __getattr__(self, item: str):
-        return self[item]
-
-    def __setattr__(self, key: str, value: MetadataValue):
-        self[key] = value
-
     def to_dict(self) -> dict:
         return dict(self.items())
 
@@ -285,12 +279,6 @@ class RecordMetadata(dict):
 
     def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
         super().__init__(metadata or {})
-
-    def __getattr__(self, item: str):
-        return self[item]
-
-    def __setattr__(self, key: str, value: MetadataValue):
-        self[key] = value
 
     def to_dict(self) -> dict:
         return dict(self.items())
@@ -306,12 +294,6 @@ class RecordVectors(dict):
 
     def __init__(self, vectors: Dict[str, VectorValue]) -> None:
         super().__init__(vectors or {})
-
-    def __getattr__(self, item: str):
-        return self[item]
-
-    def __setattr__(self, key: str, value: VectorValue):
-        self[key] = value
 
     def to_dict(self) -> Dict[str, List[float]]:
         return dict(self.items())
@@ -371,7 +353,6 @@ class RecordResponses(Iterable[Response]):
         ]
 
 
-
 class RecordSuggestions(Iterable[Suggestion]):
     """This is a container class for the suggestions of a Record.
     It allows for accessing suggestions by attribute and iterating over them.
@@ -410,4 +391,3 @@ class RecordSuggestions(Iterable[Suggestion]):
 
     def api_models(self) -> List[SuggestionModel]:
         return [suggestion.api_model() for suggestion in self.__suggestions]
-

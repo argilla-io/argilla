@@ -241,7 +241,7 @@ def test_export_records_from_json(dataset: rg.Dataset):
         dataset.records.from_json(path=temp_file)
 
     for i, record in enumerate(dataset.records(with_suggestions=True)):
-        assert record.fields.text == mock_data[i]["text"]
+        assert record.fields["text"] == mock_data[i]["text"]
         assert record.suggestions.label.value == mock_data[i]["label"]
         assert record.id == str(mock_data[i]["id"])
 
@@ -297,6 +297,6 @@ def test_import_records_from_hf_dataset(dataset: rg.Dataset) -> None:
     dataset.records.log(records=mock_hf_dataset)
 
     for i, record in enumerate(dataset.records(with_suggestions=True)):
-        assert record.fields.text == mock_data[i]["text"]
+        assert record.fields["text"] == mock_data[i]["text"]
         assert record.suggestions.label.value == mock_data[i]["label"]
         assert record.id == str(mock_data[i]["id"])
