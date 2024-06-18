@@ -47,8 +47,8 @@ class DatasetRecordsIterator:
         query: Optional[Query] = None,
         start_offset: int = 0,
         batch_size: Optional[int] = None,
-        with_suggestions: bool = True,
-        with_responses: bool = True,
+        with_suggestions: bool = False,
+        with_responses: bool = False,
         with_vectors: Optional[Union[str, List[str], bool]] = None,
     ):
         self.__dataset = dataset
@@ -155,7 +155,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         self._api = self.__client.api.records
 
     def __iter__(self):
-        return DatasetRecordsIterator(self.__dataset, self.__client)
+        return DatasetRecordsIterator(self.__dataset, self.__client, with_suggestions=True, with_responses=True)
 
     def __call__(
         self,
