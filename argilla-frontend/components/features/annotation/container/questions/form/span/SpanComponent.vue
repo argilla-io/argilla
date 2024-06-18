@@ -6,7 +6,7 @@
       <span v-text="warningMessage" />
     </div>
     <EntityLabelSelectionComponent
-      v-if="!isBulkMode && supportedSpanAnnotation"
+      v-if="supportedSpanAnnotation"
       v-model="question.answer.options"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
@@ -51,8 +51,6 @@ export default {
     warningMessage() {
       if (!this.supportedSpanAnnotation) {
         return this.$t("spanAnnotation.notSupported");
-      } else if (this.isBulkMode) {
-        return this.$t("spanAnnotation.bulkMode");
       }
     },
   },

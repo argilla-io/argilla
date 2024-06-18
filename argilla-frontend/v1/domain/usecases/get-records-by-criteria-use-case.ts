@@ -72,22 +72,25 @@ export class GetRecordsByCriteriaUseCase {
             )
           : null;
 
-        const suggestions = !criteria.page.isBulkMode
-          ? record.suggestions.map((suggestion) => {
-              const question = questions.find(
-                (q) => q.id === suggestion.question_id
-              );
+        const suggestions = record.suggestions
+          .map((suggestion) => {
+            const question = questions.find(
+              (q) => q.id === suggestion.question_id
+            );
 
-              return new Suggestion(
-                suggestion.id,
-                suggestion.question_id,
-                question.type,
-                suggestion.value,
-                suggestion.score,
-                suggestion.agent
-              );
-            })
-          : [];
+            if (criteria.page.isBulkMode && !question.isSpanType)
+              return undefined;
+
+            return new Suggestion(
+              suggestion.id,
+              suggestion.question_id,
+              question.type,
+              suggestion.value,
+              suggestion.score,
+              suggestion.agent
+            );
+          })
+          .filter(Boolean);
 
         return new Record(
           record.id,

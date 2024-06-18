@@ -270,11 +270,19 @@ export default {
     shouldShowModalToConfirm() {
       return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
+    spansQuestionsWithSelectedEntities() {
+      return this.record.questions
+        .filter((q) => q.isSpanType)
+        .filter((s) => s.answer.options.some((e) => e.isSelected));
+    },
   },
   methods: {
     onSelectRecord(isSelected, record) {
       if (isSelected) {
-        return this.selectedRecords.push(record);
+        if (!this.selectedRecords.some((r) => r.id === record.id))
+          return this.selectedRecords.push(record);
+
+        return;
       }
 
       this.selectedRecords = this.selectedRecords.filter(
@@ -369,6 +377,26 @@ export default {
     },
   },
   watch: {
+    spansQuestionsWithSelectedEntities: {
+      deep: true,
+      handler() {
+        const spanQuestions = this.recordsOnPage
+          .flatMap((r) => r.questions)
+          .filter((q) => q.isSpanType);
+
+        this.spansQuestionsWithSelectedEntities.forEach((q) => {
+          spanQuestions.forEach((question) => {
+            if (question.id === q.id) {
+              question.answer.options.forEach((option) => {
+                option.isSelected = q.answer.options.some(
+                  (o) => o.isSelected && o.id === option.id
+                );
+              });
+            }
+          });
+        });
+      },
+    },
     "recordCriteria.status"() {
       this.recordCriteria.page.focusMode();
     },
