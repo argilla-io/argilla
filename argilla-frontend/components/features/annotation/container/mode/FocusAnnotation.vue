@@ -1,5 +1,5 @@
 <template>
-  <VerticalResizable class="wrapper">
+  <VerticalResizable class="wrapper" :id="`${recordCriteria.datasetId}-r-v-rz`">
     <template #left>
       <HorizontalResizable
         :id="`${recordCriteria.datasetId}-r-h-rz`"

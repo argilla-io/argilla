@@ -122,6 +122,7 @@ $resizable-bar-width: $base-space;
     justify-content: center;
     align-items: center;
     height: 100%;
+    width: 100%;
     margin-right: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       min-width: 100% !important;

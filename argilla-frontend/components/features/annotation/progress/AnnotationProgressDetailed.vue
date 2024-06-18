@@ -123,9 +123,8 @@ $bullet-size: 10px;
     display: flex;
     align-items: center;
     gap: $base-space;
-    flex: 1;
-    min-width: 40%;
     @include font-size(13px);
+    min-width: 140px;
   }
   &__name {
     text-transform: capitalize;

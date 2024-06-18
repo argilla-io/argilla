@@ -49,7 +49,7 @@ export default {
       resizer: null,
       upSide: null,
       downSide: null,
-      expandedPanelMinHeight: 60,
+      expandedPanelMinHeight: 80,
       collapsedPanelHeight: 50,
     };
   },
