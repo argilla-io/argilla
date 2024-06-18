@@ -4,12 +4,12 @@ on:
   workflow_call:
     inputs:
       is_release:
-        description: "True if the image is a release"
+        description: "True if the images should be built for release"
         required: true
         type: boolean
 
       publish_latest:
-        description: "True if the image is a release"
+        description: "True if the images should be published as latest"
         required: true
         type: boolean
 
@@ -63,7 +63,6 @@ jobs:
         uses: ./.github/actions/docker-image-tag-from-ref
 
       - name: Set image tag
-        if: ${{ !inputs.is_release }}
         run: |
           echo $IS_RELEASE
           if [[ $IS_RELEASE == true ]]; then
