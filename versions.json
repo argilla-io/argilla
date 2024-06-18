@@ -20,6 +20,11 @@
     "aliases": []
   },
   {
+    "version": "docs_update-vectors-howto",
+    "title": "docs_update-vectors-howto",
+    "aliases": []
+  },
+  {
     "version": "docs_scripts-pipeline-access-token",
     "title": "docs_scripts-pipeline-access-token",
     "aliases": []
