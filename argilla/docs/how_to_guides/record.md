@@ -452,6 +452,22 @@ dataset.records.log(records=updated_data)
     dataset.records.log(records=updated_records)
     ```
 
+!!! note "Update vectors"
+    When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata. 
+
+    ```python
+    updated_records = []
+
+    for record in dataset.records():
+
+        record.vectors["new_vector"] = [...]
+        record.vector["v"] = [...]
+
+        updated_records.append(record)
+
+    dataset.records.log(records=updated_records)
+    ```
+
 ## Delete records
 
 You can delete records in a dataset calling the `delete` method on the `Dataset` object. To delete records, you need to retrieve them from the server and get a list with those that you want to delete.
