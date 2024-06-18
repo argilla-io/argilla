@@ -85,7 +85,7 @@ def get_org_members(auth_token):
     members_list = []
 
     members_url = "https://api.github.com/orgs/argilla-io/members"
-    
+
     if auth_token is None:
         return []
 
