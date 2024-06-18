@@ -15,7 +15,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import field_validator
+from pydantic import field_validator, ConfigDict
 
 from argilla._models import ResourceModel
 
@@ -36,9 +36,10 @@ class UserModel(ResourceModel):
     last_name: Optional[str] = None
     password: Optional[str] = None
 
-    class Config:
-        validate_assignment = True
-        str_strip_whitespace = True
+    model_config = ConfigDict(
+        validate_assignment = True,
+        str_strip_whitespace = True,
+    )
 
     @field_validator("first_name")
     @classmethod
