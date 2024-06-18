@@ -46,7 +46,7 @@ def test_export_record_to_from_dict(record):
     assert record.suggestions[0].value == imported_record.suggestions[0].value
     for key, value in record.metadata.items():
         assert imported_record.metadata[key] == value
-    assert record.fields.text == imported_record.fields.text
+    assert record.fields["text"] == imported_record.fields["text"]
     # This is a consequence of how UUIDs are treated in python and could be
     #  problematic for users.
     assert str(record.id) == imported_record.id
@@ -62,5 +62,5 @@ def test_export_generic_io_via_json(record):
     assert record.suggestions[0].value == imported_record.suggestions[0].value
     for key, value in record.metadata.items():
         assert imported_record.metadata[key] == value
-    assert record.fields.text == imported_record.fields.text
-    assert record.vectors.text == imported_record.vectors.text
+    assert record.fields["text"] == imported_record.fields["text"]
+    assert record.vectors["text"] == imported_record.vectors["text"]
