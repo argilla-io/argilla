@@ -47,8 +47,8 @@ class DatasetRecordsIterator:
         query: Optional[Query] = None,
         start_offset: int = 0,
         batch_size: Optional[int] = None,
-        with_suggestions: bool = False,
-        with_responses: bool = False,
+        with_suggestions: bool = True,
+        with_responses: bool = True,
         with_vectors: Optional[Union[str, List[str], bool]] = None,
     ):
         self.__dataset = dataset
@@ -115,6 +115,19 @@ class DatasetRecordsIterator:
 
     def _is_search_query(self) -> bool:
         return bool(self.__query and (self.__query.query or self.__query.filter))
+
+    def to_list(self, flatten: bool) -> List[Dict[str, Any]]:
+        return GenericIO.to_list(records=list(self), flatten=flatten)
+
+    def to_dict(self, flatten: bool, orient: str) -> Dict[str, Any]:
+        data = GenericIO.to_dict(records=list(self), flatten=flatten, orient=orient)
+        return data
+
+    def to_json(self, path: Union[Path, str]) -> Path:
+        return JsonIO.to_json(records=list(self), path=path)
+
+    def to_datasets(self) -> "HFDataset":
+        return HFDatasetsIO.to_datasets(records=list(self))
 
 
 class DatasetRecords(Iterable[Record], LoggingMixin):
@@ -286,9 +299,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             A dictionary of records.
 
         """
-        records = list(self(with_suggestions=True, with_responses=True))
-        data = GenericIO.to_dict(records=records, flatten=flatten, orient=orient)
-        return data
+        return self().to_dict(flatten=flatten, orient=orient)
 
     def to_list(self, flatten: bool = False) -> List[Dict[str, Any]]:
         """
@@ -300,8 +311,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Returns:
             A list of dictionaries of records.
         """
-        records = list(self(with_suggestions=True, with_responses=True))
-        data = GenericIO.to_list(records=records, flatten=flatten)
+        data = self().to_list(flatten=flatten)
         return data
 
     def to_json(self, path: Union[Path, str]) -> Path:
@@ -315,8 +325,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             The path to the file where the records were saved.
 
         """
-        records = list(self(with_suggestions=True, with_responses=True))
-        return JsonIO.to_json(records=records, path=path)
+        return self().to_json(path=path)
 
     def from_json(self, path: Union[Path, str]) -> List[Record]:
         """Creates a DatasetRecords object from a disk path to a JSON file.
@@ -340,8 +349,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             The dataset containing the records.
 
         """
-        records = list(self(with_suggestions=True, with_responses=True))
-        return HFDatasetsIO.to_datasets(records=records)
+
+        return self().to_datasets()
 
     ############################
     # Private methods
