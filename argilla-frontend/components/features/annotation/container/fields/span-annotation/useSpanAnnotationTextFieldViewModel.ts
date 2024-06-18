@@ -139,6 +139,9 @@ export const useSpanAnnotationTextFieldViewModel = ({
       const response = convertSpansToResponse(nodeSpans);
 
       spanQuestion.answer.response({ value: response });
+    },
+    {
+      deep: true,
     }
   );
 
