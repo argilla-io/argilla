@@ -37,7 +37,10 @@
   {
     "version": "docs_fix-file-extensions",
     "title": "docs_fix-file-extensions",
-    "aliases": []
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
   },
   {
     "version": "dev",
