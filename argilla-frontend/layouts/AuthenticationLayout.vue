@@ -51,7 +51,7 @@ export default {
       line-height: 1.2em;
       @include media(">desktop") {
         @include font-size(44px);
-        padding-left: $base-space * 8;
+        padding-left: min($base-space * 12, 12%);
         padding-top: $base-space * 12;
         text-wrap: balance;
       }
