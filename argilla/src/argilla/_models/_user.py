@@ -37,8 +37,8 @@ class UserModel(ResourceModel):
     password: Optional[str] = None
 
     model_config = ConfigDict(
-        validate_assignment = True,
-        str_strip_whitespace = True,
+        validate_assignment=True,
+        str_strip_whitespace=True,
     )
 
     @field_validator("first_name")

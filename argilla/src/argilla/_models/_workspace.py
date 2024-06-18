@@ -24,8 +24,8 @@ class WorkspaceModel(ResourceModel):
     name: str
 
     model_config = ConfigDict(
-        validate_assignment = True,
-        str_strip_whitespace = True,
+        validate_assignment=True,
+        str_strip_whitespace=True,
     )
 
     @field_validator("name")
