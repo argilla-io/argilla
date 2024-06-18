@@ -179,10 +179,10 @@ You can get a user by id using the `from_id` classmethod in the `User` class.
 
 ```python
 import argilla as rg
-
+from uuid import UUID
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
-user = rg.User.from_id("00000000-0000-0000-0000-000000000000")
+user = rg.User.from_id(UUID("00000000-0000-0000-0000-000000000000")) 
 ```
 
 ### Assign a `User` to a `Workspace`
