@@ -23,6 +23,8 @@ from argilla._models import (
     SuggestionModel,
     VectorModel,
     MetadataValue,
+    FieldValue,
+    VectorValue,
 )
 from argilla._resource import Resource
 from argilla.responses import Response, UserResponse
@@ -54,9 +56,9 @@ class Record(Resource):
     def __init__(
         self,
         id: Optional[Union[UUID, str]] = None,
-        fields: Optional[Dict[str, Union[str, None]]] = None,
+        fields: Optional[Dict[str, FieldValue]] = None,
         metadata: Optional[Dict[str, MetadataValue]] = None,
-        vectors: Optional[List[Vector]] = None,
+        vectors: Optional[Dict[str, VectorValue]] = None,
         responses: Optional[List[Response]] = None,
         suggestions: Optional[List[Suggestion]] = None,
         _server_id: Optional[UUID] = None,
@@ -93,7 +95,7 @@ class Record(Resource):
         # Initialize the fields
         self.__fields = RecordFields(fields=self._model.fields)
         # Initialize the vectors
-        self.__vectors = RecordVectors(vectors=vectors, record=self)
+        self.__vectors = RecordVectors(vectors=vectors)
         # Initialize the metadata
         self.__metadata = RecordMetadata(metadata=metadata)
         self.__responses = RecordResponses(responses=responses, record=self)
@@ -158,8 +160,8 @@ class Record(Resource):
             id=self._model.id,
             external_id=self._model.external_id,
             fields=self.fields.to_dict(),
-            metadata=self.metadata.models,
-            vectors=self.vectors.models,
+            metadata=self.metadata.api_models(),
+            vectors=self.vectors.api_models(),
             responses=self.responses.api_models(),
             suggestions=self.suggestions.api_models(),
         )
@@ -181,19 +183,22 @@ class Record(Resource):
             represented as a key-value pair in the dictionary of the respective key. i.e.
             `{"fields": {"prompt": "...", "response": "..."}, "responses": {"rating": "..."},
         """
+        id = str(self.id) if self.id else None
+        server_id = str(self._model.id) if self._model.id else None
         fields = self.fields.to_dict()
-        metadata = dict(self.metadata)
+        metadata = self.metadata.to_dict()
         suggestions = self.suggestions.to_dict()
         responses = self.responses.to_dict()
         vectors = self.vectors.to_dict()
+
         return {
-            "id": self.id,
+            "id": id,
             "fields": fields,
             "metadata": metadata,
             "suggestions": suggestions,
             "responses": responses,
             "vectors": vectors,
-            "_server_id": str(self._model.id) if self._model.id else None,
+            "_server_id": server_id,
         }
 
     @classmethod
@@ -219,7 +224,6 @@ class Record(Resource):
             for question_name, _responses in responses.items()
             for value in _responses
         ]
-        vectors = [Vector(name=vector_name, values=values) for vector_name, values in vectors.items()]
 
         return cls(
             id=record_id,
@@ -245,7 +249,7 @@ class Record(Resource):
             id=model.external_id,
             fields=model.fields,
             metadata={meta.name: meta.value for meta in model.metadata},
-            vectors=[Vector.from_model(model=vector) for vector in model.vectors],
+            vectors={vector.name: vector.vector_values for vector in model.vectors},
             # Responses and their models are not aligned 1-1.
             responses=[
                 response
@@ -258,27 +262,62 @@ class Record(Resource):
         )
 
 
-class RecordFields:
+class RecordFields(dict):
     """This is a container class for the fields of a Record.
-    It allows for accessing fields by attribute and iterating over them.
+    It allows for accessing fields by attribute and key name.
     """
 
-    def __init__(self, fields: Dict[str, Union[str, None]]) -> None:
-        self.__fields = fields or {}
-        for key, value in self.__fields.items():
-            setattr(self, key, value)
+    def __init__(self, fields: Optional[Dict[str, FieldValue]] = None) -> None:
+        super().__init__(fields or {})
 
-    def __getitem__(self, key: str) -> Optional[str]:
-        return self.__fields.get(key)
+    def __getattr__(self, item: str):
+        return self[item]
 
-    def __iter__(self):
-        return iter(self.__fields)
+    def __setattr__(self, key: str, value: MetadataValue):
+        self[key] = value
 
-    def to_dict(self) -> Dict[str, Union[str, None]]:
-        return self.__fields
+    def to_dict(self) -> dict:
+        return dict(self.items())
 
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
+
+class RecordMetadata(dict):
+    """This is a container class for the metadata of a Record."""
+
+    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
+        super().__init__(metadata or {})
+
+    def __getattr__(self, item: str):
+        return self[item]
+
+    def __setattr__(self, key: str, value: MetadataValue):
+        self[key] = value
+
+    def to_dict(self) -> dict:
+        return dict(self.items())
+
+    def api_models(self) -> List[MetadataModel]:
+        return [MetadataModel(name=key, value=value) for key, value in self.items()]
+
+
+class RecordVectors(dict):
+    """This is a container class for the vectors of a Record.
+    It allows for accessing suggestions by attribute and key name.
+    """
+
+    def __init__(self, vectors: Dict[str, VectorValue]) -> None:
+        super().__init__(vectors or {})
+
+    def __getattr__(self, item: str):
+        return self[item]
+
+    def __setattr__(self, key: str, value: VectorValue):
+        self[key] = value
+
+    def to_dict(self) -> Dict[str, List[float]]:
+        return dict(self.items())
+
+    def api_models(self) -> List[VectorModel]:
+        return [Vector(name=name, values=value).api_model() for name, value in self.items()]
 
 
 class RecordResponses(Iterable[Response]):
@@ -309,6 +348,16 @@ class RecordResponses(Iterable[Response]):
     def __repr__(self) -> str:
         return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
 
+    def to_dict(self) -> Dict[str, List[Dict]]:
+        """Converts the responses to a dictionary.
+        Returns:
+            A dictionary of responses.
+        """
+        response_dict = defaultdict(list)
+        for response in self.__responses:
+            response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
+        return response_dict
+
     def api_models(self) -> List[UserResponseModel]:
         """Returns a list of ResponseModel objects."""
 
@@ -321,15 +370,6 @@ class RecordResponses(Iterable[Response]):
             for responses in responses_by_user_id.values()
         ]
 
-    def to_dict(self) -> Dict[str, List[Dict]]:
-        """Converts the responses to a dictionary.
-        Returns:
-            A dictionary of responses.
-        """
-        response_dict = defaultdict(list)
-        for response in self.__responses:
-            response_dict[response.question_name].append({"value": response.value, "user_id": response.user_id})
-        return response_dict
 
 
 class RecordSuggestions(Iterable[Suggestion]):
@@ -345,14 +385,14 @@ class RecordSuggestions(Iterable[Suggestion]):
             suggestion.record = self.record
             setattr(self, suggestion.question_name, suggestion)
 
-    def api_models(self) -> List[SuggestionModel]:
-        return [suggestion.api_model() for suggestion in self.__suggestions]
-
     def __iter__(self):
         return iter(self.__suggestions)
 
     def __getitem__(self, index: int):
         return self.__suggestions[index]
+
+    def __repr__(self) -> str:
+        return self.to_dict().__repr__()
 
     def to_dict(self) -> Dict[str, List[str]]:
         """Converts the suggestions to a dictionary.
@@ -368,48 +408,6 @@ class RecordSuggestions(Iterable[Suggestion]):
             }
         return suggestion_dict
 
-    def __repr__(self) -> str:
-        return self.to_dict().__repr__()
+    def api_models(self) -> List[SuggestionModel]:
+        return [suggestion.api_model() for suggestion in self.__suggestions]
 
-
-class RecordVectors:
-    """This is a container class for the vectors of a Record.
-    It allows for accessing suggestions by attribute and iterating over them.
-    """
-
-    def __init__(self, vectors: List[Vector], record: Record) -> None:
-        self.__vectors = vectors or []
-        self.record = record
-        for vector in self.__vectors:
-            setattr(self, vector.name, vector.values)
-
-    def __repr__(self) -> str:
-        return {vector.name: f"{len(vector.values)}" for vector in self.__vectors}.__repr__()
-
-    @property
-    def models(self) -> List[VectorModel]:
-        return [vector.api_model() for vector in self.__vectors]
-
-    def to_dict(self) -> Dict[str, List[float]]:
-        """Converts the vectors to a dictionary.
-        Returns:
-            A dictionary of vectors.
-        """
-        return {vector.name: list(map(float, vector.values)) for vector in self.__vectors}
-
-
-class RecordMetadata(dict):
-    """This is a container class for the metadata of a Record."""
-
-    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
-        super().__init__(metadata or {})
-
-    def __getattr__(self, item: str):
-        return self[item]
-
-    def __setattr__(self, key: str, value: MetadataValue):
-        self[key] = value
-
-    @property
-    def models(self) -> List[MetadataModel]:
-        return [MetadataModel(name=key, value=value) for key, value in self.items()]
