@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:21d1388229fea007d4f9ba997b02c37cb792ec71e7efb00d02b4c1864560ba38"
+content_hash = "sha256:10269e0bb9a8b44cdcb92d40bc63899c1ace59fd69d17d263a9d5a68067b7970"
 
 [[package]]
 name = "aiohttp"
@@ -1623,6 +1623,7 @@ groups = ["default", "dev"]
 dependencies = [
     "numpy>=1.22.4; python_version < \"3.11\"",
     "numpy>=1.23.2; python_version == \"3.11\"",
+    "numpy>=1.26.0; python_version >= \"3.12\"",
     "python-dateutil>=2.8.2",
     "pytz>=2020.1",
     "tzdata>=2022.7",
