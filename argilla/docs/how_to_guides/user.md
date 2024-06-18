@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to manage users and their credentials.
 ---
 
-# User Management
+# User management
 
 This guide provides an overview of user roles and credentials, explaining how to set up and manage users in Argilla.
 

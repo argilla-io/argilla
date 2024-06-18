@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to manage workspaces.
 ---
 
-# Workspace Management
+# Workspace management
 
 This guide provides an overview of workspaces, explaining how to set up and manage workspaces in Argilla.
 

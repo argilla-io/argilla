@@ -274,7 +274,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
-=== "As `Record objects"
+=== "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
     > Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
