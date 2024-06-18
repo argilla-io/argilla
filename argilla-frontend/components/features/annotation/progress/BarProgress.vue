@@ -51,11 +51,11 @@ export default {
   width: 100%;
   color: $black-54;
   @include font-size(12px);
-  border-radius: $border-radius-m;
   &__bar {
     width: 100%;
     max-width: 160px;
     box-shadow: 0 0 0 1px $black-10;
+    border-radius: $border-radius-m;
   }
   &__data {
     font-weight: 500;
