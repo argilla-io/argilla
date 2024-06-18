@@ -13,7 +13,7 @@ import hljs from "highlight.js";
 import * as DOMPurify from "dompurify";
 
 const preprocess = (html) => {
-  return html.replace(/[^\S\r\n]+$/gm, "");
+  return html?.replace(/[^\S\r\n]+$/gm, "");
 };
 const postprocess = (html) => {
   return DOMPurify.sanitize(html, {
