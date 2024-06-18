@@ -103,7 +103,7 @@
   &--bottom {
     bottom: 0;
     right: 0;
-    width: max(600px, 50%);
+    width: clamp(560px, 70%, 800px);
     @extend %deco;
   }
 }

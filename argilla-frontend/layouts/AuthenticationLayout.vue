@@ -45,13 +45,12 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      max-width: min(80%, 680px);
       color: $black-87;
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
-        @include font-size(44px);
-        padding-left: min($base-space * 12, 12%);
+        font-size: clamp(40px, 3vw, 60px);
+        padding-left: 12%;
         padding-top: $base-space * 12;
         text-wrap: balance;
       }
