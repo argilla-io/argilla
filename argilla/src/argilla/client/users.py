@@ -104,7 +104,7 @@ class User:
             " advance in Argilla, unless you are creating a new one."
         )
         if id is not None:
-            error_msg += f" As the `id` argument is not None, you should use `User.from_id('{id}')` instead."
+            error_msg += f" As the `id` argument is not None, you should use `User.from_id(UUID('{id}'))` instead."
         if name is not None:
             error_msg += f" As the `name` argument is not None, you should use `User.from_name('{name}')` instead."
         raise Exception(error_msg)
@@ -285,7 +285,8 @@ class User:
 
         Examples:
             >>> from argilla import rg
-            >>> user = rg.User.from_id("my-user")
+            >>> from uuid import UUID
+            >>> user = rg.User.from_id(UUID("my-user"))
         """
         client = cls.__active_client()
         try:
