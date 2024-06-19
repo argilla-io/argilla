@@ -19,7 +19,7 @@ import argilla as rg
 
 @pytest.fixture(scope="session")
 def client() -> rg.Argilla:
-    client = rg.Argilla()
+    client = rg.Argilla(api_key="owner.apikey")
     yield client
 
 
