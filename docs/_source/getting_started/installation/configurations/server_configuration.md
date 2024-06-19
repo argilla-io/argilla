@@ -73,6 +73,8 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_SEARCH_ENGINE`: (Only for Feedback datasets) Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").
 
+- `ARGILLA_SEARCH_ENGINE_PING_TIMEOUT`: The maximum time in seconds that Argilla will wait for the search engine to be up and running (Default: `60`).
+
 - `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connecting to the Elasticsearch backend.
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)

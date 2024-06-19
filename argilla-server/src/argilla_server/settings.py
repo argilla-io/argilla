@@ -28,6 +28,7 @@ from urllib.parse import urlparse
 from argilla_server.constants import (
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     DEFAULT_MAX_KEYWORD_LENGTH,
+    DEFAULT_SEARCH_ENGINE_PING_TIMEOUT,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
     DEFAULT_TELEMETRY_KEY,
     SEARCH_ENGINE_ELASTICSEARCH,
@@ -101,6 +102,10 @@ class Settings(BaseSettings):
     es_mapping_total_fields_limit: int = 2000
 
     search_engine: str = SEARCH_ENGINE_ELASTICSEARCH
+    search_engine_ping_timeout: int = Field(
+        default=DEFAULT_SEARCH_ENGINE_PING_TIMEOUT,
+        description="Maximum time in seconds that Argilla will wait for the search engine to respond when starting",
+    )
 
     vectors_fields_limit: int = Field(
         default=5,

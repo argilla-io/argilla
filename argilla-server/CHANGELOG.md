@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `ARGILLA_SEARCH_ENGINE_PING_TIMEOUT` new environment variable to specify a number of seconds that Argilla will wait for the search engine to be ready.
+
 ### Removed
 
 - Removed all API v0 endpoints. ([#4852](https://github.com/argilla-io/argilla/pull/4852))
