@@ -8,8 +8,6 @@ on:
   workflow_dispatch:
 
   push:
-    paths:
-      - argilla-v1/**
     branches:
       - main
       - develop
