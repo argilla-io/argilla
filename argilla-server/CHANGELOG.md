@@ -25,6 +25,11 @@ These are the section headers that we use:
 
 - Removed all API v0 endpoints. ([#4852](https://github.com/argilla-io/argilla/pull/4852))
 
+### Fixed
+
+- Fixed error when updating records in bulk with wrong `external_id` but correct record `id`. ([#5014](https://github.com/argilla-io/argilla/pull/5014))
+- Fixed error when searching all record response values. ([#5003](https://github.com/argilla-io/argilla/pull/5003))
+
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 
 ### Added

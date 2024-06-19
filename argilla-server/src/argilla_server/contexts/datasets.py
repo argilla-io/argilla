@@ -60,9 +60,9 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
-from argilla_server.contexts import accounts, questions
+from argilla_server.contexts import accounts
 from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
-from argilla_server.errors.future import NotFoundError, NotUniqueError, UnprocessableEntityError
+from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
     Dataset,
     Field,

@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Awaitable, Callable, Optional
-from uuid import UUID
+from typing import Awaitable, Callable
 
 from argilla_server.errors import ForbiddenOperationError
 from argilla_server.models import User

@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
