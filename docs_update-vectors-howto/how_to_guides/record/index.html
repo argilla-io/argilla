@@ -2123,8 +2123,9 @@
 </span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="p">]</span>
 </span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
 </span></code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Update the metadata</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Update the metadata</label><label for="__tabbed_6_2">Update vectors</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p>The <code>metadata</code> of <code>Record</code> object is a python dictionary. So to update the metadata of a record, you can iterate over the records and update the metadata by key or using <code>metadata.update</code>. After that, you should update the records in the dataset.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">updated_records</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
@@ -2138,8 +2139,7 @@
 </span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_records</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Update vectors</p>
+<div class="tabbed-block">
 <p>When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata. </p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">updated_records</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
@@ -2152,6 +2152,8 @@
 </span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
 </span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_records</span><span class="p">)</span>
 </span></code></pre></div>
+</div>
+</div>
 </div>
 <h2 id="delete-records">Delete records<a class="headerlink" href="#delete-records" title="Permanent link">&para;</a></h2>
 <p>You can delete records in a dataset calling the <code>delete</code> method on the <code>Dataset</code> object. To delete records, you need to retrieve them from the server and get a list with those that you want to delete.</p>
