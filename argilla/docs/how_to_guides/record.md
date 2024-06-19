@@ -415,7 +415,7 @@ for record in dataset.records(
 
     # Access the responses of the record
     for response in record.responses:
-        print(record.question_name.value)
+        print(record.["<question_name>"].value)
 ```
 
 ## Update records
