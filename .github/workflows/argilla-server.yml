@@ -15,8 +15,6 @@ on:
       - releases/**
 
   pull_request:
-    paths:
-      - argilla-server/**
 
 jobs:
   build:
