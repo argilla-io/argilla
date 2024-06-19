@@ -142,7 +142,7 @@ nav:
       - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
-      - Text classification with SetFit: tutorials/text_classification_setfit.ipynb
+      - Text classification task: tutorials/text_classification.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
   - Community:

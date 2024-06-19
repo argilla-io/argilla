@@ -10,11 +10,11 @@ These are the tutorials for *the Argilla Python SDK*. They provide step-by-step 
 
 <div class="grid cards" markdown>
 
--   __Text classification with SetFit__
+-   __Text classification task__
 
     ---
 
-    Learn about a common workflow end-to-end for a text classification task with SetFit.
-    [:octicons-arrow-right-24: How-to guide](text_classification_setfit.ipynb)
+    Learn about a standard workflow to improve data quality for a text classification task.
+    [:octicons-arrow-right-24: How-to guide](text_classification.ipynb)
 
 </div>
