@@ -436,7 +436,7 @@ updated_data = [
 dataset.records.log(records=updated_data)
 ```
 
-!!! note "Update the metadata"
+=== "Update the metadata"
     The `metadata` of `Record` object is a python dictionary. So to update the metadata of a record, you can iterate over the records and update the metadata by key or using `metadata.update`. After that, you should update the records in the dataset.
 
     ```python
@@ -452,7 +452,7 @@ dataset.records.log(records=updated_data)
     dataset.records.log(records=updated_records)
     ```
 
-!!! note "Update vectors"
+=== "Update vectors"
     When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata. 
 
     ```python
