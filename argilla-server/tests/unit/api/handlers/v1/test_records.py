@@ -21,7 +21,7 @@ import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import ResponseStatus
 from argilla_server.models import Dataset, Record, Response, Suggestion, User, UserRole
-from argilla_server.search_engine import SearchEngine, SearchResponseItem, SearchResponses
+from argilla_server.search_engine import SearchEngine
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 

@@ -101,6 +101,16 @@ export class RecordRepository {
         request
       );
 
+      const datasetId =
+        Array.isArray(records) && records.length > 0
+          ? records[0].datasetId
+          : null;
+
+      if (datasetId) {
+        revalidateCache(`/v1/datasets/${datasetId}/progress`);
+        revalidateCache(`/v1/me/datasets/${datasetId}/metrics`);
+      }
+
       return data.items.map(({ item, error }) => {
         if (item) {
           return {

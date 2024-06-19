@@ -28,7 +28,7 @@ from argilla_server.api.schemas.v1.workspaces import (
     Workspaces,
     WorkspaceUserCreate,
 )
-from argilla_server.contexts import accounts, datasets
+from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser

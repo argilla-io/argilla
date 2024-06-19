@@ -16,7 +16,7 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import QuestionType, ResponseStatusFilter
+from argilla_server.enums import ResponseStatusFilter
 from argilla_server.models import Response, User
 from httpx import AsyncClient
 from sqlalchemy import func, select

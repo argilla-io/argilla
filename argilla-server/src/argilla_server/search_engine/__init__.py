@@ -15,7 +15,8 @@
 from typing import AsyncGenerator
 
 from ..settings import settings
-from .base import *
+from .base import *  # noqa
+from .base import SearchEngine
 from .elasticsearch import ElasticSearchEngine
 from .opensearch import OpenSearchEngine
 

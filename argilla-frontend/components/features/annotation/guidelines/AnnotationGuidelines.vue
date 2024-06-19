@@ -1,18 +1,15 @@
 <template>
   <RenderMarkdownBaseComponent
-    class="--body1 description__text"
-    :markdown="guidelines"
+    class="--body3"
+    :markdown="guidelines || $t('noAnnotationGuidelines')"
   />
 </template>
 
 <script>
+import { useAnnotationGuidelinesViewModel } from "./useAnnotationGuidelinesViewModel";
 export default {
-  name: "SettingsInfo",
-  props: {
-    guidelines: {
-      type: String,
-      required: true,
-    },
+  setup() {
+    return useAnnotationGuidelinesViewModel();
   },
 };
 </script>

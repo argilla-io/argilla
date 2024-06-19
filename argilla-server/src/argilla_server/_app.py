@@ -35,7 +35,6 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
-from argilla_server.pydantic_v1.errors import ConfigError
 from argilla_server.search_engine import get_search_engine
 from argilla_server.security import auth
 from argilla_server.settings import settings

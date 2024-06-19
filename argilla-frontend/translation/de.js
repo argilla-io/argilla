@@ -29,6 +29,7 @@ export default {
   dimension: "Dimension",
   visibleLabels: "Sichtbare labels",
   annotationGuidelines: "Annotationsrichtlinien",
+  guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
   breadcrumbs: {
     home: "start",
@@ -160,7 +161,6 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Halten Sie 'Shift' gedrückt, um Zeichenebene auszuwählen",
     notSupported: "Bereichsannotation wird von Ihrem Browser nicht unterstützt",
-    bulkMode: "Bereichsannotation wird in der Massenansicht nicht unterstützt",
   },
   login: {
     title: "Anmelden",

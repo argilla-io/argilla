@@ -123,14 +123,16 @@ export class SpanSelection {
 
     this.completeOutOfBoundaries(selected);
 
-    const overlaps = this.selections.filter((s) => {
-      return (
-        (selected.from <= s.from && selected.to >= s.to) ||
-        (selected.from >= s.from && selected.to <= s.to) ||
-        (selected.from < s.from && selected.to > s.from) ||
-        (selected.from < s.to && selected.to > s.to)
-      );
-    });
+    const overlaps = this.selections
+      .filter((s) => s.node.id === selected.node.id)
+      .filter((s) => {
+        return (
+          (selected.from <= s.from && selected.to >= s.to) ||
+          (selected.from >= s.from && selected.to <= s.to) ||
+          (selected.from < s.from && selected.to > s.from) ||
+          (selected.from < s.to && selected.to > s.to)
+        );
+      });
 
     const maxLevelInOverlaps =
       overlaps.reduce((acc, curr) => Math.max(acc, curr.overlap.level), 0) + 1;
@@ -165,6 +167,18 @@ export class SpanSelection {
   }
 
   removeSpan(span: Span) {
+    this.remove(span);
+
+    const nodeSpans = this.spans.filter((s) => s.node.id === span.node.id);
+
+    nodeSpans.forEach((span) => {
+      this.remove(span);
+    });
+
+    this.loadSpans(nodeSpans);
+  }
+
+  private remove(span: Span) {
     this.selections = this.selections.filter(
       (s) => this.createId(s) !== this.createId(span)
     );

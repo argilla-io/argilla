@@ -18,7 +18,7 @@ from uuid import UUID
 from passlib.context import CryptContext
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets
 from argilla_server.enums import UserRole

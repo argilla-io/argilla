@@ -277,7 +277,7 @@ def _expected_value_for_question(question: Question) -> Dict[str, Any]:
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(
-    not server_settings.search_engine in ["elasticsearch", "opensearch"],
+    server_settings.search_engine not in ["elasticsearch", "opensearch"],
     reason="Running on elasticsearch/opensearch engine",
 )
 class TestBaseElasticAndOpenSearchEngine:

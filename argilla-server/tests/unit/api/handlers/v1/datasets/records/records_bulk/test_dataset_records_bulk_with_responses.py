@@ -34,7 +34,6 @@ from tests.factories import (
 
 @pytest.mark.asyncio
 class TestDatasetRecordsBulkWithResponses:
-
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
@@ -318,7 +317,7 @@ class TestDatasetRecordsBulkWithResponses:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid responses because "
+            "detail": "Record at position 0 does not have valid responses because "
             "found response value for non configured question with name='other-question'"
         }
 
@@ -349,7 +348,7 @@ class TestDatasetRecordsBulkWithResponses:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid responses because 'wrong-label' "
+            "detail": "Record at position 0 does not have valid responses because 'wrong-label' "
             "is not a valid label for label selection question.\n"
             "Valid labels are: ['label-a', 'label-b']"
         }
@@ -361,7 +360,6 @@ class TestDatasetRecordsBulkWithResponses:
         await dataset.awaitable_attrs.fields
 
     async def _configure_dataset_questions(self, dataset: Dataset):
-
         await LabelSelectionQuestionFactory.create(
             dataset=dataset,
             name="label",
