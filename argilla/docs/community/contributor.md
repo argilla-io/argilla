@@ -1,5 +1,5 @@
 ---
-description: A gu.
+description: This is a step-by-step guide to help you contribute to the Argilla project. We are excited to have you on board! 🚀
 hide:
   - footer
 ---
