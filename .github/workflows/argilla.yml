@@ -8,10 +8,6 @@ concurrency:
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: "If true, the workflow will publish the package to PyPI. Default is false."
-        default: false
 
   push:
     paths:
@@ -28,10 +24,6 @@ on:
       - argilla/**
       - "!argilla/docs/**"
 
-defaults:
-  run:
-    working-directory: argilla
-
 jobs:
   build:
     services:
@@ -46,6 +38,9 @@ jobs:
           ADMIN_USERNAME: admin
           ADMIN_API_KEY: admin.apikey
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: argilla
     strategy:
       fail-fast: false
       matrix:
@@ -58,7 +53,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: true
           cache-dependency-path: |
-            argilla/pyproject.toml
+            argilla/pdm.lock
       - name: Install dependencies
         run: |
           pdm install
@@ -86,7 +81,7 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' || ${{ github.event_name }} == 'workflow_dispatch'
     needs:
       - build
 
@@ -101,6 +96,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+        working-directory: argilla
 
     steps:
       - name: Checkout Code 🛎
@@ -116,6 +112,9 @@ jobs:
         uses: pdm-project/setup-pdm@v4
         with:
           cache: true
+          python-version-file: argilla/pyproject.toml
+          cache-dependency-path: |
+            argilla/pdm.lock
 
       - name: Read package info
         run: |
@@ -124,13 +123,6 @@ jobs:
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
           echo "$PACKAGE_NAME==$PACKAGE_VERSION"
-
-      - name: Create tag
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git tag -f -a v${{ env.PACKAGE_VERSION }} -m "Release v${{ env.PACKAGE_VERSION }}"
-          git push -f origin v${{ env.PACKAGE_VERSION }}
 
       - name: Publish Package to PyPI test environment 🥪
         run: pdm publish --no-build --repository testpypi
@@ -141,5 +133,5 @@ jobs:
           pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
-        if: ${{ inputs.release == 'true' }}
+        if: github.ref == 'refs/heads/main'
         run: pdm publish --no-build
