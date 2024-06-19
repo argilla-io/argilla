@@ -15,7 +15,6 @@ on:
     branches:
       - "main"
       - "develop"
-      - "feat/v2.0.0" # Fixing this branch until we merge everything into develop
 
 defaults:
   run:
@@ -63,8 +62,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
 
       - run: pdm run mike deploy dev --push
-        if: github.ref == 'refs/heads/feat/v2.0.0'
-        # if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/develop'
 
       - run: pdm run mike deploy ${{ github.ref_name }}
         if: startsWith(github.ref, 'refs/tags/')
