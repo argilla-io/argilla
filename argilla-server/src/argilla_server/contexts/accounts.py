@@ -18,14 +18,12 @@ from uuid import UUID
 from passlib.context import CryptContext
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
 from argilla_server.contexts import datasets
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
-from argilla_server.schemas.v0.users import UserCreate
-from argilla_server.schemas.v0.workspaces import WorkspaceCreate
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
 
@@ -86,17 +84,9 @@ async def user_exists(db: AsyncSession, user_id: UUID) -> bool:
     return await db.scalar(select(exists().where(User.id == user_id)))
 
 
-def get_user_by_username_sync(db: Session, username: str) -> Union[User, None]:
-    return db.query(User).filter_by(username=username).first()
-
-
 async def get_user_by_username(db: AsyncSession, username: str) -> Union[User, None]:
     result = await db.execute(select(User).filter_by(username=username).options(selectinload(User.workspaces)))
     return result.scalar_one_or_none()
-
-
-def get_user_by_api_key_sync(db: Session, api_key: str) -> Union[User, None]:
-    return db.query(User).filter_by(api_key=api_key).first()
 
 
 async def get_user_by_api_key(db: AsyncSession, api_key: str) -> Union[User, None]:

@@ -41,6 +41,32 @@ look at our [main repository](https://github.com/argilla-io/argilla) or our [doc
 Are you a contributor or do you want to understand what is going on under the hood, please keep reading the
 documentation below.
 
+## Source code folder structure
+
+The following is a high-level overview of relevant folders and files in the argilla-server source code:
+
+```
+/argilla_server
+  /api # Including all the API endpoints and related code
+    /errors # Custom exceptions and error handlers
+      /v1
+    /handlers # Request FastAPI handlers
+      /v1
+    /policies # Authorization policies for resources
+      /v1
+    /schemas # Pydantic schemas for request and response bodies
+      /v1
+  /contexts # Domain contexts for the application including business logic
+    accounts.py
+    datasets.py
+    search.py
+    ...
+  /models # SQLAlchemy ORM models for the database
+    database.py
+```
+
+Folders inside `/api` are organized by API version, having right now only v1 implemented. This is in contrast to `/contexts` and `/models` folders that are not versioned. This is because the business logic and canonical database models are not exposed directly to the API, and therefore are not subject to versioning.
+
 ## Development environment
 
 By default all commands executed with `pdm run` will get environment variables from `.env.dev` except command `pdm test`

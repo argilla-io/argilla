@@ -21,6 +21,7 @@ from argilla_server.models import Dataset, Question, Record, User, VectorSetting
 from argilla_server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
+    ResponseFilterScope,
     SortBy,
     SuggestionFilterScope,
     TermsFilter,
@@ -92,8 +93,8 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
 async def test_banking_sentiment_dataset_non_indexed():
-    text_question = await TextQuestionFactory()
-    rating_question = await RatingQuestionFactory()
+    text_question = await TextQuestionFactory(name="text")
+    rating_question = await RatingQuestionFactory(name="rating")
 
     dataset = await DatasetFactory.create(
         fields=[
@@ -276,7 +277,7 @@ def _expected_value_for_question(question: Question) -> Dict[str, Any]:
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(
-    not server_settings.search_engine in ["elasticsearch", "opensearch"],
+    server_settings.search_engine not in ["elasticsearch", "opensearch"],
     reason="Running on elasticsearch/opensearch engine",
 )
 class TestBaseElasticAndOpenSearchEngine:
@@ -594,6 +595,50 @@ class TestBaseElasticAndOpenSearchEngine:
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
+    async def test_search_with_response_value_without_user(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        user = await UserFactory.create()
+        await self._configure_record_responses(
+            opensearch,
+            test_banking_sentiment_dataset,
+            [ResponseStatusFilter.draft],
+            number_of_answered_records=2,
+            user=user,
+            rating_value=2,
+        )
+
+        another_user = await UserFactory.create()
+        await self._configure_record_responses(
+            opensearch,
+            test_banking_sentiment_dataset,
+            [ResponseStatusFilter.draft],
+            number_of_answered_records=3,
+            user=another_user,
+            rating_value=4,
+        )
+
+        results_for_user = await search_engine.search(
+            test_banking_sentiment_dataset,
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2"]),
+        )
+        assert results_for_user.total == 2
+
+        results_for_another_user = await search_engine.search(
+            test_banking_sentiment_dataset,
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["4"]),
+        )
+        assert results_for_another_user.total == 3
+
+        combined_results = await search_engine.search(
+            test_banking_sentiment_dataset,
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2", "4"]),
+        )
+        assert combined_results.total == 3
+
     @pytest.mark.parametrize(
         "statuses, expected_items",
         [
@@ -707,7 +752,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
     @pytest.mark.parametrize(
         "property, filter_match_value, filter_unmatch_value",
-        [("value", "A", "C"), ("score", 0.5, 0), ("agent", "peter", "john"), ("type", "human", "model")],
+        [("value", "A", "C"), ("score", "0.5", "0"), ("agent", "peter", "john"), ("type", "human", "model")],
     )
     async def test_search_with_suggestion_filter(
         self,
@@ -1377,6 +1422,7 @@ class TestBaseElasticAndOpenSearchEngine:
         response_status: List[ResponseStatusFilter],
         number_of_answered_records: int,
         user: Optional[User] = None,
+        rating_value: Optional[int] = None,
     ):
         index_name = es_index_name_for_dataset(dataset)
 
@@ -1392,7 +1438,9 @@ class TestBaseElasticAndOpenSearchEngine:
         # Create two responses with the same status (one in each record)
         for i, status in enumerate(response_status):
             if status != ResponseStatusFilter.missing:
-                await self._update_records_responses(opensearch, index_name, selected_records, status, user)
+                await self._update_records_responses(
+                    opensearch, index_name, selected_records, status, user, rating_value
+                )
 
         for status in all_statuses:
             if status not in response_status and status != ResponseStatusFilter.missing:
@@ -1407,11 +1455,20 @@ class TestBaseElasticAndOpenSearchEngine:
         records: List[Record],
         status: ResponseStatusFilter,
         user: Optional[User] = None,
+        rating_value: Optional[int] = None,
     ):
         another_user = await UserFactory.create()
 
         for record in records:
-            users_responses = {f"{another_user.id}.status": status.value}
+            users_responses = {
+                f"{another_user.id}.status": status.value,
+                f"{another_user.id}.values.rating": -1,
+            }
             if user:
-                users_responses.update({f"{user.id}.status": status.value})
+                users_responses.update(
+                    {
+                        f"{user.id}.status": status.value,
+                        f"{user.id}.values.rating": rating_value or -1,
+                    }
+                )
             opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})

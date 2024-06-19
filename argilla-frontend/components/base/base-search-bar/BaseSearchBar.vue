@@ -40,6 +40,10 @@ import "assets/icons/close";
 
 export default {
   props: {
+    querySearch: {
+      type: String,
+      default: "",
+    },
     placeholder: {
       type: String,
       default: "Search",
@@ -51,6 +55,9 @@ export default {
     };
   },
   watch: {
+    querySearch(val) {
+      this.filter = val;
+    },
     filter(val) {
       this.$emit("input", val);
     },
@@ -58,26 +65,26 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$searchBarSize: $base-space * 4;
 .search-area {
   display: flex;
   min-width: 300px;
+  max-height: $searchBarSize;
+  max-width: $searchBarSize;
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: $border-radius-l;
   background: palette(white);
-  box-shadow: $shadow-300;
   transition: all 0.2s ease;
   &:hover {
     border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: $shadow-500;
     transition: all 0.2s ease;
   }
   &.active,
   &.re-input-focused {
     border: 1px solid $primary-color;
-    box-shadow: $shadow-300;
   }
   &__icon {
     display: flex;

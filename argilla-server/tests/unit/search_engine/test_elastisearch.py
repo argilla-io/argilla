@@ -14,10 +14,9 @@
 
 import pytest
 from argilla_server.search_engine import ElasticSearchEngine
-from argilla_server.search_engine.commons import ALL_RESPONSES_STATUSES_FIELD, es_index_name_for_dataset
+from argilla_server.search_engine.commons import es_index_name_for_dataset
 from argilla_server.settings import settings
 from opensearchpy import OpenSearch
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import DatasetFactory, VectorSettingsFactory
 from tests.unit.search_engine.test_commons import refresh_dataset

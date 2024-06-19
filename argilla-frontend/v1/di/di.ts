@@ -14,6 +14,7 @@ import {
   AgentRepository,
   OAuthRepository,
   EnvironmentRepository,
+  WorkspaceRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -42,19 +43,20 @@ import { UpdateDatasetSettingUseCase } from "@/v1/domain/usecases/dataset-settin
 import { GetMetadataUseCase } from "@/v1/domain/usecases/get-metadata-use-case";
 import { GetDatasetVectorsUseCase } from "@/v1/domain/usecases/get-dataset-vectors-use-case";
 import { UpdateVectorSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-vector-setting-use-case";
-import { GetDatasetQuestionsFilterUseCase } from "~/v1/domain/usecases/get-dataset-questions-filter-use-case";
+import { GetDatasetQuestionsFilterUseCase } from "@/v1/domain/usecases/get-dataset-questions-filter-use-case";
 import { GetDatasetSuggestionsAgentsUseCase } from "@/v1/domain/usecases/get-dataset-suggestions-agents-use-case";
 import { UpdateMetadataSettingUseCase } from "@/v1/domain/usecases/dataset-setting/update-metadata-setting-use-case";
 import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
+import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
+import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
-  const useStore = () => context.store;
   const useAuth = () => context.$auth;
 
   const dependencies = [
-    register(DatasetRepository).withDependencies(useAxios, useStore).build(),
+    register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
     register(FieldRepository).withDependency(useAxios).build(),
@@ -66,8 +68,11 @@ export const loadDependencyContainer = (context: Context) => {
     register(OAuthRepository)
       .withDependencies(useAxios, useRoutes, useAuth)
       .build(),
+    register(WorkspaceRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
+
+    register(GetWorkspacesUseCase).withDependency(WorkspaceRepository).build(),
 
     register(GetDatasetsUseCase)
       .withDependencies(DatasetRepository, useDatasets)
@@ -156,6 +161,10 @@ export const loadDependencyContainer = (context: Context) => {
     register(GetDatasetVectorsUseCase).withDependency(VectorRepository).build(),
 
     register(GetDatasetQuestionsFilterUseCase)
+      .withDependency(QuestionRepository)
+      .build(),
+
+    register(GetDatasetQuestionsGroupedUseCase)
       .withDependency(QuestionRepository)
       .build(),
 

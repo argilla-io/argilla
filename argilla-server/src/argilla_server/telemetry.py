@@ -21,13 +21,11 @@ from typing import Any, Dict, Optional
 
 from fastapi import Request
 
-from argilla_server.commons.models import TaskType
 from argilla_server.constants import DEFAULT_USERNAME
 from argilla_server.models import User
 from argilla_server.settings import settings
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
-    is_running_on_huggingface_space,
     server_deployment_type,
 )
 
@@ -102,10 +100,6 @@ _CLIENT = TelemetryClient()
 
 def _process_request_info(request: Request):
     return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
-
-
-async def track_bulk(task: TaskType, records: int):
-    _CLIENT.track_data(action="LogRecordsRequested", data={"task": task, "records": records})
 
 
 async def track_login(request: Request, user: User):

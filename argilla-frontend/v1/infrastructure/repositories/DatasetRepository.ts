@@ -1,11 +1,10 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Store } from "vuex";
 import {
   BackendDatasetFeedbackTaskResponse,
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
-import { revalidateCache } from "./AxiosCache";
+import { largeCache, revalidateCache } from "./AxiosCache";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
@@ -21,10 +20,7 @@ export const DATASET_API_ERRORS = {
 };
 
 export class DatasetRepository implements IDatasetRepository {
-  constructor(
-    private readonly axios: NuxtAxiosInstance,
-    private readonly store: Store<unknown>
-  ) {}
+  constructor(private readonly axios: NuxtAxiosInstance) {}
 
   async getById(id: string): Promise<Dataset> {
     const dataset = await this.getDatasetById(id);
@@ -33,12 +29,10 @@ export class DatasetRepository implements IDatasetRepository {
     return new Dataset(
       dataset.id,
       dataset.name,
-      "FeedbackTask",
       dataset.guidelines,
       dataset.status,
       dataset.workspace_id,
       workspace,
-      {},
       dataset.inserted_at,
       dataset.updated_at,
       dataset.last_activity_at,
@@ -49,34 +43,15 @@ export class DatasetRepository implements IDatasetRepository {
   async getAll(): Promise<Dataset[]> {
     const response = await this.getDatasets();
 
-    const otherDatasets = response.oldDatasets.map((dataset) => {
-      return new Dataset(
-        dataset.id,
-        dataset.name,
-        dataset.task,
-        "",
-        "",
-        "",
-        dataset.workspace,
-        dataset.tags,
-        dataset.created_at,
-        dataset.last_updated,
-        dataset.last_updated,
-        false
-      );
-    });
-
     const feedbackDatasets = response.feedbackDatasetsWithWorkspaces.map(
       (datasetFromBackend) => {
         return new Dataset(
           datasetFromBackend.id,
           datasetFromBackend.name,
-          "FeedbackTask",
           datasetFromBackend.guidelines,
           datasetFromBackend.status,
           datasetFromBackend.workspace_id,
           datasetFromBackend.workspace_name,
-          {},
           datasetFromBackend.inserted_at,
           datasetFromBackend.updated_at,
           datasetFromBackend.last_activity_at,
@@ -85,7 +60,7 @@ export class DatasetRepository implements IDatasetRepository {
       }
     );
 
-    return [...otherDatasets, ...feedbackDatasets];
+    return [...feedbackDatasets];
   }
 
   async update({ id, allowExtraMetadata, guidelines }: Dataset) {
@@ -129,9 +104,7 @@ export class DatasetRepository implements IDatasetRepository {
     try {
       const { data } = await this.axios.get<BackendProgress>(
         `/v1/datasets/${datasetId}/progress`,
-        {
-          headers: { "cache-control": "max-age=600" },
-        }
+        largeCache()
       );
 
       return new Progress(
@@ -150,9 +123,10 @@ export class DatasetRepository implements IDatasetRepository {
 
   private async getDatasetById(datasetId: string) {
     try {
-      const { data } = await this.axios.get(`/v1/datasets/${datasetId}`, {
-        headers: { "cache-control": "max-age=600" },
-      });
+      const { data } = await this.axios.get(
+        `/v1/datasets/${datasetId}`,
+        largeCache()
+      );
 
       return data;
     } catch (err) {
@@ -166,7 +140,7 @@ export class DatasetRepository implements IDatasetRepository {
     try {
       const { data: responseWorkspace } = await this.axios.get(
         `/v1/workspaces/${workspaceId}`,
-        { headers: { "cache-control": "max-age=600" } }
+        largeCache()
       );
 
       const { name } = responseWorkspace || { name: null };
@@ -220,8 +194,7 @@ export class DatasetRepository implements IDatasetRepository {
   };
 
   private getDatasets = async () => {
-    const [oldDatasets, newDatasets, workspaces] = await Promise.all([
-      this.store.dispatch("entities/datasets/fetchAll"),
+    const [newDatasets, workspaces] = await Promise.all([
       this.fetchFeedbackDatasets(this.axios),
       this.fetchWorkspaces(this.axios),
     ]);
@@ -234,6 +207,6 @@ export class DatasetRepository implements IDatasetRepository {
         workspaces
       );
 
-    return { oldDatasets, feedbackDatasetsWithWorkspaces };
+    return { feedbackDatasetsWithWorkspaces };
   };
 }

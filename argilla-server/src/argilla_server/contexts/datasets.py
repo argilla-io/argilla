@@ -37,9 +37,35 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla_server.contexts import accounts, questions
+from argilla_server.api.schemas.v1.datasets import (
+    DatasetCreate,
+    DatasetProgress,
+)
+from argilla_server.api.schemas.v1.fields import FieldCreate
+from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
+from argilla_server.api.schemas.v1.records import (
+    RecordCreate,
+    RecordIncludeParam,
+    RecordsCreate,
+    RecordsUpdate,
+    RecordUpdateWithId,
+)
+from argilla_server.api.schemas.v1.responses import (
+    ResponseCreate,
+    ResponseUpdate,
+    ResponseUpsert,
+    UserResponseCreate,
+)
+from argilla_server.api.schemas.v1.vector_settings import (
+    VectorSettings as VectorSettingsSchema,
+)
+from argilla_server.api.schemas.v1.vector_settings import (
+    VectorSettingsCreate,
+)
+from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.contexts import accounts
 from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
-from argilla_server.errors.future import NotFoundError, NotUniqueError, UnprocessableEntityError
+from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
     Dataset,
     Field,
@@ -49,38 +75,12 @@ from argilla_server.models import (
     Response,
     ResponseStatus,
     Suggestion,
+    User,
     Vector,
     VectorSettings,
     Workspace,
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
-from argilla_server.schemas.v0.users import User
-from argilla_server.schemas.v1.datasets import (
-    DatasetCreate,
-    DatasetProgress,
-)
-from argilla_server.schemas.v1.fields import FieldCreate
-from argilla_server.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
-from argilla_server.schemas.v1.records import (
-    RecordCreate,
-    RecordIncludeParam,
-    RecordsCreate,
-    RecordsUpdate,
-    RecordUpdateWithId,
-)
-from argilla_server.schemas.v1.responses import (
-    ResponseCreate,
-    ResponseUpdate,
-    ResponseUpsert,
-    UserResponseCreate,
-)
-from argilla_server.schemas.v1.vector_settings import (
-    VectorSettings as VectorSettingsSchema,
-)
-from argilla_server.schemas.v1.vector_settings import (
-    VectorSettingsCreate,
-)
-from argilla_server.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
@@ -90,15 +90,13 @@ from argilla_server.validators.responses import (
 from argilla_server.validators.suggestions import SuggestionCreateValidator
 
 if TYPE_CHECKING:
-    from argilla_server.schemas.v1.datasets import (
+    from argilla_server.api.schemas.v1.datasets import (
         DatasetUpdate,
     )
-    from argilla_server.schemas.v1.fields import FieldUpdate
-    from argilla_server.schemas.v1.records import RecordUpdate
-    from argilla_server.schemas.v1.suggestions import SuggestionCreate
-    from argilla_server.schemas.v1.vector_settings import VectorSettingsUpdate
-
-LIST_RECORDS_LIMIT = 20
+    from argilla_server.api.schemas.v1.fields import FieldUpdate
+    from argilla_server.api.schemas.v1.records import RecordUpdate
+    from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+    from argilla_server.api.schemas.v1.vector_settings import VectorSettingsUpdate
 
 VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
 NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
@@ -357,8 +355,8 @@ async def get_records_by_ids(
 
 
 async def _configure_query_relationships(
-    query: "Select", dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
-) -> "Select":
+    query: Select, dataset_id: UUID, include_params: Optional["RecordIncludeParam"] = None
+) -> Select:
     if not include_params:
         return query
 
@@ -570,11 +568,6 @@ async def _load_users_from_responses(responses: Union[Response, Iterable[Respons
     # something similar to what we are already doing in _preload_suggestion_relationships_before_index.
     for response in responses:
         await response.awaitable_attrs.user
-
-
-async def _load_users_from_record_responses(records: Iterable[Record]) -> None:
-    for record in records:
-        await _load_users_from_responses(record.responses)
 
 
 async def _validate_record_metadata(

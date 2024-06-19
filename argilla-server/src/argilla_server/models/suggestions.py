@@ -14,7 +14,7 @@
 
 from uuid import UUID
 
-from argilla_server.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 
 
 class SuggestionCreateWithRecordId(SuggestionCreate):

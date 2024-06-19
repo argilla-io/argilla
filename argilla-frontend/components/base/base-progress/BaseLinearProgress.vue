@@ -17,10 +17,7 @@
           @mouseenter="hoveredRange = range"
           @mouseleave="hoveredRange = null"
         >
-          <div
-            class="progress__bar"
-            :style="{ backgroundColor: range.color }"
-          ></div>
+          <div class="progress__bar" :style="{ background: range.color }"></div>
         </div>
       </div>
       <template v-if="showTooltip && !!hoveredRange">

@@ -1,6 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
-import { revalidateCache } from "./AxiosCache";
+import { mediumCache, revalidateCache } from "./AxiosCache";
 import { Field } from "~/v1/domain/entities/field/Field";
 
 export const enum FIELD_API_ERRORS {
@@ -15,7 +15,7 @@ export class FieldRepository {
     try {
       const { data } = await this.axios.get<Response<BackendField[]>>(
         `/v1/datasets/${datasetId}/fields`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;
