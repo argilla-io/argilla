@@ -101,7 +101,7 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || ${{ github.event_name }} == 'workflow_dispatch'
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
 
     permissions:
       # This permission is needed for private repositories.
