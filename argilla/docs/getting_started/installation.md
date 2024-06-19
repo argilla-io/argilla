@@ -1,5 +1,5 @@
 ---
-description: Installation of the Argilla Python SDK.
+description: Installation of the Argilla SDK.
 ---
 
 # Installation

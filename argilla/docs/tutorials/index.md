@@ -1,12 +1,12 @@
 ---
-description: These are the tutorials for the Argilla Python SDK. They provide step-by-step instructions for common tasks.
+description: These are the tutorials for the Argilla SDK. They provide step-by-step instructions for common tasks.
 hide: toc
 ---
 
 
 # Tutorials
 
-These are the tutorials for *the Argilla Python SDK*. They provide step-by-step instructions for common tasks.
+These are the tutorials for *the Argilla SDK*. They provide step-by-step instructions for common tasks.
 
 <div class="grid cards" markdown>
 
