@@ -83,6 +83,6 @@ def test_list_records_with_responses(client: Argilla, dataset: Dataset):
 
     assert records[0].responses["comment"][0].value == "The comment"
     assert records[0].responses["sentiment"][0].value == "positive"
-    
+
     assert records[1].responses["comment"][0].value == "The comment"
     assert records[1].responses["sentiment"][0].value == "negative"

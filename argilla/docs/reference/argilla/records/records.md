@@ -48,7 +48,7 @@ for record in dataset.records(with_metadata=True):
 ```
 
 For changes to take effect, the user must call the `update` method on the `Dataset` object, or pass the updated records to `Dataset.records.log`. All core record atttributes can be updated in this way. Check their respective documentation for more information: [Suggestions](suggestions.md), [Responses](responses.md), [Metadata](metadata.md), [Vectors](vectors/md).
- 
+
 
 ---
 
