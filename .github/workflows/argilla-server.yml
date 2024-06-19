@@ -15,8 +15,6 @@ on:
       - releases/**
 
   pull_request:
-    paths:
-      - argilla-server/**
 
 jobs:
   build:
@@ -113,6 +111,11 @@ jobs:
   build_docker_images:
     name: Build docker images
     uses: ./.github/workflows/argilla-server.build-docker-images.yml
+    if: |
+      github.ref == 'refs/heads/main'
+      || github.ref == 'refs/heads/develop'
+      || github.event_name == 'workflow_dispatch'
+      || github.event_name == 'pull_request'
     needs:
       - build
     with:
