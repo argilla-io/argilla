@@ -33,7 +33,7 @@ A **record** in Argilla is a data item that requires annotation, consisting of o
         ],
     )
     ```
-    > Check the [Record - Python Reference](../../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
+    > Check the [Record - Python Reference](../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
 
 ## Add records
 
@@ -222,7 +222,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
     You can also add vectors to a record in an initialized `Record` object.
 
-    > Check the [Vector - Python Reference](../../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
+    > Check the [Vector - Python Reference](../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -274,10 +274,10 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
-=== "As `Record objects"
+=== "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Suggestions - Python Reference](../../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -348,7 +348,7 @@ If your dataset includes some annotations, you can add those to the records as y
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Responses - Python Reference](../../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Responses - Python Reference](../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'

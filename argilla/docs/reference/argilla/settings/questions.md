@@ -57,36 +57,36 @@ dataset = rg.Dataset(
 
 ### `rg.LabelQuestion`
 
-::: argilla.settings.LabelQuestion
+::: src.argilla.settings._question.LabelQuestion
     options:
         heading_level: 3
 
 ### `rg.MultiLabelQuestion`
 
-::: argilla.settings.MultiLabelQuestion
+::: src.argilla.settings._question.MultiLabelQuestion
     options:
         heading_level: 3
 
 ### `rg.RankingQuestion`
 
-::: argilla.settings.RankingQuestion
+::: src.argilla.settings._question.RankingQuestion
     options:
         heading_level: 3
 
 ### `rg.TextQuestion`
 
-::: argilla.settings.TextQuestion
+::: src.argilla.settings._question.TextQuestion
     options:
         heading_level: 3
 
 ### `rg.RatingQuestion`
 
-::: argilla.settings.RatingQuestion
+::: src.argilla.settings._question.RatingQuestion
     options:
         heading_level: 3
 
 ### `rg.SpanQuestion`
 
-::: argilla.settings.SpanQuestion
+::: src.argilla.settings._question.SpanQuestion
     options:
         heading_level: 3
