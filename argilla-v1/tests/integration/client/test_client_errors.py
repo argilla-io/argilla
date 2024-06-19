@@ -19,6 +19,4 @@ from argilla_v1.client.singleton import init
 
 def test_unauthorized_response_error(mocked_client):
     with pytest.raises(UnauthorizedApiError, match="Could not validate credentials"):
-        import argilla_v1 as rg
-
         init(api_key="wrong-api-key")

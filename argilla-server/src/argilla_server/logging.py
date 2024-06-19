@@ -19,7 +19,6 @@ This module centralizes all configuration and logging management
 
 # TODO: Remove this and provide a file to configure logging
 
-
 import logging
 from logging import Logger, StreamHandler
 from typing import Type

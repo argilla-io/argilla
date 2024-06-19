@@ -14,7 +14,6 @@
 #  limitations under the License.
 from typing import Dict, List, Optional, Union
 
-import argilla_v1 as rg
 from argilla_v1.client import singleton
 from argilla_v1.client.api import load
 from argilla_v1.client.models import TextClassificationRecord

@@ -21,7 +21,7 @@ def create_workspace(
     name: str = typer.Argument(
         ...,
         help="The name of the workspace to be created",
-    )
+    ),
 ) -> None:
     """Creates a workspace for the logged user in Argilla"""
     from argilla_v1.cli.rich import echo_in_panel

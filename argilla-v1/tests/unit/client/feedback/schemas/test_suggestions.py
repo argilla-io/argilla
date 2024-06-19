@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import pytest
-from argilla_v1.feedback import SuggestionSchema, TextQuestion
+from argilla_v1.feedback import TextQuestion
 
 
 def test_create_suggestion():

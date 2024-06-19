@@ -358,7 +358,6 @@ class RecordResponses(Iterable[Response]):
         self.__responses.append(response)
         self.__responses_by_question_name[response.question_name].append(response)
 
-
 class RecordSuggestions(Iterable[Suggestion]):
     """This is a container class for the suggestions of a Record.
     It allows for accessing suggestions by attribute and iterating over them.
@@ -371,7 +370,7 @@ class RecordSuggestions(Iterable[Suggestion]):
         for suggestion in suggestions:
             suggestion.record = self.record
             self._suggestion_by_question_name[suggestion.question_name] = suggestion
-
+            
     def __iter__(self):
         return iter(self._suggestion_by_question_name.values())
 

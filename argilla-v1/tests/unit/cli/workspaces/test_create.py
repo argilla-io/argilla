@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING
-from unittest.mock import ANY
 
 import pytest
 
@@ -21,8 +20,6 @@ if TYPE_CHECKING:
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
     from typer import Typer
-
-from argilla_v1.client.workspaces import Workspace
 
 
 @pytest.mark.usefixtures("login_mock")

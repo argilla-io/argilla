@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, List
 
 import pytest
 from argilla_v1.client import singleton
@@ -23,10 +23,7 @@ from argilla_v1.client.feedback.schemas.metadata import (
     TermsMetadataProperty,
 )
 from argilla_v1.client.feedback.schemas.records import FeedbackRecord
-from argilla_v1.client.feedback.schemas.remote.records import RemoteFeedbackRecord
-from argilla_v1.client.models import Framework
 from argilla_v1.client.workspaces import Workspace
-from argilla_v1.feedback import TrainingTask
 
 if TYPE_CHECKING:
     from argilla_v1.client.feedback.schemas.types import AllowedFieldTypes, AllowedQuestionTypes

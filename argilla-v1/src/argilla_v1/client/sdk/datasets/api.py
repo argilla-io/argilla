@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 from functools import lru_cache
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import httpx
 

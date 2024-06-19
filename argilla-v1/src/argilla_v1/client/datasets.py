@@ -1250,7 +1250,7 @@ class DatasetForTokenClassification(DatasetBase):
 
         # create a dict first, where we make the necessary transformations
         def entities_to_dict(
-            entities: Optional[List[Union[Tuple[str, int, int, float], Tuple[str, int, int]]]]
+            entities: Optional[List[Union[Tuple[str, int, int, float], Tuple[str, int, int]]]],
         ) -> Optional[List[Dict[str, Union[str, int, float]]]]:
             if entities is None:
                 return None
