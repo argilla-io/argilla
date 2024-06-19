@@ -291,7 +291,7 @@ class User:
         client = cls.__active_client()
 
         try:
-            if not isinstance(id,UUID):
+            if not isinstance(id, UUID):
                 id = UUID(id)
         except BaseClientError as e:
             raise RuntimeError(f"Error while converting id=`{id}` to UUID. Is it a valid UUID?") from e
