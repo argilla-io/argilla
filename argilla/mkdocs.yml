@@ -6,8 +6,8 @@ site_description: The Argilla python server SDK
 copyright: Copyright &copy; 2017 - 2024 Argilla
 
 # Repository
-repo_name: argilla-io/argilla-python
-repo_url: https://github.com/argilla-io/argilla-python
+repo_name: argilla-io/argilla
+repo_url: https://github.com/argilla-io/argilla
 edit_uri: edit/main/docs/
 
 extra:
