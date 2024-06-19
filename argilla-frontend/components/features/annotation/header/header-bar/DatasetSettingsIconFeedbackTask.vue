@@ -6,6 +6,7 @@
     badge-vertical-position="top"
     badge-horizontal-position="right"
     badge-border-color="#212121"
+    badge-size="20"
     icon="settings"
   />
 </template>
@@ -24,15 +25,10 @@ export default {
 
 <style lang="scss" scoped>
 .button-settings {
-  margin-right: $base-space;
+  padding: $base-space;
+  overflow: visible;
   &[data-title] {
-    position: relative;
-    overflow: visible;
-    @extend %has-tooltip--bottom;
-    &:before,
-    &:after {
-      margin-top: calc($base-space/2);
-    }
+    @include tooltip-mini("bottom");
   }
 }
 </style>

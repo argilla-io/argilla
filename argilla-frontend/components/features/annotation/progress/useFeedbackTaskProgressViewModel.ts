@@ -9,6 +9,7 @@ import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 
 interface FeedbackTaskProgressProps {
   datasetId: string;
+  enableFetch?: boolean;
 }
 
 export const useFeedbackTaskProgressViewModel = (
@@ -22,6 +23,8 @@ export const useFeedbackTaskProgressViewModel = (
   };
 
   onBeforeMount(() => {
+    if (!props.enableFetch) return;
+
     useEvents(() => {
       new UpdateMetricsEventHandler();
     });

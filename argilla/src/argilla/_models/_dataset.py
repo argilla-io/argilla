@@ -17,7 +17,7 @@ from datetime import datetime
 from uuid import UUID
 from typing import Literal
 
-from pydantic import field_serializer
+from pydantic import field_serializer, ConfigDict
 
 from argilla._models import ResourceModel
 
@@ -35,9 +35,10 @@ class DatasetModel(ResourceModel):
     last_activity_at: Optional[datetime] = None
     url: Optional[str] = None
 
-    class Config:
-        validate_assignment = True
-        str_strip_whitespace = True
+    model_config = ConfigDict(
+        validate_assignment=True,
+        str_strip_whitespace=True,
+    )
 
     @field_serializer("last_activity_at", when_used="unless-none")
     def serialize_last_activity_at(self, value: datetime) -> str:

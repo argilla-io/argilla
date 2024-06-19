@@ -14,8 +14,6 @@ on:
   push:
     paths:
       - argilla-server/**
-    tags:
-      - "*"
     branches:
       - main
       - develop
@@ -25,10 +23,6 @@ on:
   pull_request:
     paths:
       - argilla-server/**
-
-  release:
-    types:
-      - published
 
 jobs:
   build:

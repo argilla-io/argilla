@@ -188,7 +188,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         records = []
         async with self._db.begin_nested():
             for record_upsert in bulk_upsert.items:
-                record = found_records.get(record_upsert.external_id or record_upsert.id)
+                record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
                 if not record:
                     record = Record(
                         fields=record_upsert.fields,

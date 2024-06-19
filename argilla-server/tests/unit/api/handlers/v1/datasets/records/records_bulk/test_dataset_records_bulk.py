@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import uuid
 from uuid import UUID
 
 import pytest
@@ -105,7 +105,7 @@ class TestDatasetRecordsBulk:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
     ) -> None:
         dataset = await self.test_dataset()
-        records = await RecordFactory.create_batch(dataset=dataset, size=100)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -124,7 +124,7 @@ class TestDatasetRecordsBulk:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
     ):
         dataset = await self.test_dataset()
-        records = await RecordFactory.create_batch(dataset=dataset, size=100)
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -139,6 +139,30 @@ class TestDatasetRecordsBulk:
         updated_records = (await db.execute(select(Record))).scalars().all()
         for record in updated_records:
             assert record.metadata_ == metadata
+
+    async def test_update_record_metadata_with_invalid_external_id_but_correct_id(
+        self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
+    ):
+        dataset = await self.test_dataset()
+        records = await RecordFactory.create_batch(dataset=dataset, size=10)
+
+        new_metadata = {"whatever": "whatever"}
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {"id": str(record.id), "external_id": str(uuid.uuid4()), "metadata": new_metadata}
+                    for record in records
+                ],
+            },
+        )
+
+        assert response.status_code == 200, response.json()
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(records)
+        updated_records = (await db.execute(select(Record))).scalars().all()
+        for record in updated_records:
+            assert record.metadata_ == new_metadata
 
     async def test_update_record_for_other_dataset(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
