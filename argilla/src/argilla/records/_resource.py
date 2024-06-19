@@ -321,10 +321,7 @@ class RecordResponses(Iterable[Response]):
     def __iter__(self):
         return iter(self.__responses)
 
-    def __getitem__(self, index: int):
-        return self.__responses[index]
-
-    def __getattr__(self, name) -> List[Response]:
+    def __getitem__(self, name: str):
         return self.__responses_by_question_name[name]
 
     def __repr__(self) -> str:
@@ -352,6 +349,15 @@ class RecordResponses(Iterable[Response]):
             for responses in responses_by_user_id.values()
         ]
 
+    def add(self, response: Response) -> None:
+        """Adds a response to the record and updates the record. Records can have multiple responses per question.
+        Args:
+            response: The response to add.
+        """
+        response.record = self.record
+        self.__responses.append(response)
+        self.__responses_by_question_name[response.question_name].append(response)
+
 
 class RecordSuggestions(Iterable[Suggestion]):
     """This is a container class for the suggestions of a Record.
@@ -360,17 +366,17 @@ class RecordSuggestions(Iterable[Suggestion]):
 
     def __init__(self, suggestions: List[Suggestion], record: Record) -> None:
         self.record = record
-
-        self.__suggestions = suggestions or []
-        for suggestion in self.__suggestions:
+        self._suggestion_by_question_name: Dict[str, Suggestion] = {}
+        suggestions = suggestions or []
+        for suggestion in suggestions:
             suggestion.record = self.record
-            setattr(self, suggestion.question_name, suggestion)
+            self._suggestion_by_question_name[suggestion.question_name] = suggestion
 
     def __iter__(self):
-        return iter(self.__suggestions)
+        return iter(self._suggestion_by_question_name.values())
 
-    def __getitem__(self, index: int):
-        return self.__suggestions[index]
+    def __getitem__(self, question_name: str):
+        return self._suggestion_by_question_name[question_name]
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
@@ -380,9 +386,9 @@ class RecordSuggestions(Iterable[Suggestion]):
         Returns:
             A dictionary of suggestions.
         """
-        suggestion_dict: dict = {}
-        for suggestion in self.__suggestions:
-            suggestion_dict[suggestion.question_name] = {
+        suggestion_dict = {}
+        for question_name, suggestion in self._suggestion_by_question_name.items():
+            suggestion_dict[question_name] = {
                 "value": suggestion.value,
                 "score": suggestion.score,
                 "agent": suggestion.agent,
@@ -390,4 +396,14 @@ class RecordSuggestions(Iterable[Suggestion]):
         return suggestion_dict
 
     def api_models(self) -> List[SuggestionModel]:
-        return [suggestion.api_model() for suggestion in self.__suggestions]
+        suggestions = self._suggestion_by_question_name.values()
+        return [suggestion.api_model() for suggestion in suggestions]
+
+    def add(self, suggestion: Suggestion) -> None:
+        """Adds a suggestion to the record and updates the record. Records can have only one suggestion per question, so
+        adding a new suggestion will overwrite the previous suggestion.
+        Args:
+            suggestion: The suggestion to add.
+        """
+        suggestion.record = self.record
+        self._suggestion_by_question_name[suggestion.question_name] = suggestion
