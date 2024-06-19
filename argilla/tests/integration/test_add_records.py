@@ -84,9 +84,9 @@ def test_add_records(client):
     assert dataset_records[0].id == str(mock_data[0]["id"])
     assert dataset_records[1].id == str(mock_data[1]["id"])
     assert dataset_records[2].id == str(mock_data[2]["id"])
-    assert dataset_records[0].fields.text == mock_data[0]["text"]
-    assert dataset_records[1].fields.text == mock_data[1]["text"]
-    assert dataset_records[2].fields.text == mock_data[2]["text"]
+    assert dataset_records[0].fields["text"] == mock_data[0]["text"]
+    assert dataset_records[1].fields["text"] == mock_data[1]["text"]
+    assert dataset_records[2].fields["text"] == mock_data[2]["text"]
 
 
 def test_add_dict_records(client: Argilla):
@@ -124,7 +124,7 @@ def test_add_dict_records(client: Argilla):
 
     for record, data in zip(ds.records, mock_data):
         assert record.id == data["id"]
-        assert record.fields.text == data["text"]
+        assert record.fields["text"] == data["text"]
         assert "label" not in record.__dict__
 
     for record, data in zip(ds.records(batch_size=1, with_suggestions=True), mock_data):
@@ -193,7 +193,7 @@ def test_add_records_with_suggestions(client) -> None:
     assert dataset_records[0].suggestions.topics.value == ["topic1", "topic2"]
     assert dataset_records[0].suggestions.topics.score == [0.9, 0.8]
 
-    assert dataset_records[1].fields.text == mock_data[1]["text"]
+    assert dataset_records[1].fields["text"] == mock_data[1]["text"]
     assert dataset_records[1].suggestions.comment.value == "I'm doing great, thank you!"
     assert dataset_records[1].suggestions.comment.score is None
     assert dataset_records[1].suggestions.topics.value == ["topic3"]
@@ -258,7 +258,7 @@ def test_add_records_with_responses(client) -> None:
 
     for record, mock_record in zip(dataset_records, mock_data):
         assert record.id == str(mock_record["id"])
-        assert record.fields.text == mock_record["text"]
+        assert record.fields["text"] == mock_record["text"]
         assert record.responses.label[0].value == mock_record["my_label"]
         assert record.responses.label[0].user_id == user.id
 
@@ -319,7 +319,7 @@ def test_add_records_with_responses_and_suggestions(client) -> None:
     dataset_records = list(dataset.records(with_suggestions=True))
 
     assert dataset_records[0].id == str(mock_data[0]["id"])
-    assert dataset_records[1].fields.text == mock_data[1]["text"]
+    assert dataset_records[1].fields["text"] == mock_data[1]["text"]
     assert dataset_records[2].suggestions.label.value == "positive"
     assert dataset_records[2].responses.label[0].value == "negative"
     assert dataset_records[2].responses.label[0].user_id == user.id
@@ -386,7 +386,7 @@ def test_add_records_with_fields_mapped(client) -> None:
     dataset_records = list(dataset.records(with_suggestions=True))
 
     assert dataset_records[0].id == str(mock_data[0]["id"])
-    assert dataset_records[1].fields.text == mock_data[1]["x"]
+    assert dataset_records[1].fields["text"] == mock_data[1]["x"]
     assert dataset_records[2].suggestions.label.value == "positive"
     assert dataset_records[2].suggestions.label.score == 0.5
     assert dataset_records[2].responses.label[0].value == "negative"
@@ -447,7 +447,7 @@ def test_add_records_with_id_mapped(client) -> None:
     dataset_records = list(dataset.records(with_suggestions=True))
 
     assert dataset_records[0].id == str(mock_data[0]["uuid"])
-    assert dataset_records[1].fields.text == mock_data[1]["x"]
+    assert dataset_records[1].fields["text"] == mock_data[1]["x"]
     assert dataset_records[2].suggestions.label.value == "positive"
     assert dataset_records[2].responses.label[0].value == "negative"
     assert dataset_records[2].responses.label[0].user_id == user.id
@@ -571,7 +571,7 @@ def test_add_records_with_responses_and_same_schema_name(client: Argilla):
 
     dataset_records = list(dataset.records(with_responses=True))
 
-    assert dataset_records[0].fields.text == mock_data[1]["text"]
+    assert dataset_records[0].fields["text"] == mock_data[1]["text"]
     assert dataset_records[1].responses.label[0].value == "negative"
     assert dataset_records[1].responses.label[0].user_id == user.id
 

@@ -98,17 +98,17 @@ def test_import_dataset_from_disk(dataset: rg.Dataset, client):
         {
             "text": "1: Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "2: Hello World, how are you?",
             "label": "negative",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
         {
             "text": "3: Hello World, how are you?",
             "label": "positive",
-            "external_id": uuid.uuid4(),
+            "id": uuid.uuid4(),
         },
     ]
     dataset.records.log(records=mock_data)
@@ -118,7 +118,7 @@ def test_import_dataset_from_disk(dataset: rg.Dataset, client):
         new_dataset = rg.Dataset.from_disk(output_dir, client=client)
 
     for i, record in enumerate(new_dataset.records(with_suggestions=True)):
-        assert record.fields.text == mock_data[i]["text"]
+        assert record.fields["text"] == mock_data[i]["text"]
         assert record.suggestions.label.value == mock_data[i]["label"]
 
     assert new_dataset.settings.fields[0].name == "text"

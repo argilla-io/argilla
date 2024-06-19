@@ -16,17 +16,20 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import Field, field_serializer, field_validator
 
-from argilla._models._resource import ResourceModel
 from argilla._models._record._metadata import MetadataModel, MetadataValue
 from argilla._models._record._response import UserResponseModel
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
+from argilla._models._resource import ResourceModel
 
+__all__ = ["RecordModel", "FieldValue"]
+
+FieldValue = Union[str, None]
 
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
-    fields: Optional[Dict[str, Union[str, None]]] = None
+    fields: Optional[Dict[str, FieldValue]] = None
     metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
@@ -49,7 +52,7 @@ class RecordModel(ResourceModel):
         return {metadata.name: metadata.value for metadata in value}
 
     @field_serializer("fields", when_used="always")
-    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Dict[str, Union[str, None]]:
+    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Optional[Dict[str, Union[str, None]]]:
         """Serialize empty fields to None."""
         if isinstance(value, dict) and len(value) == 0:
             return None
