@@ -189,7 +189,9 @@ class Record(DatabaseModel):
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
     metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
-    status: Mapped[RecordStatus] = mapped_column(RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True)
+    status: Mapped[RecordStatus] = mapped_column(
+        RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True
+    )
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
