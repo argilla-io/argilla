@@ -94,7 +94,7 @@ export const useDatasetSettingViewModel = () => {
     ];
   });
 
-  const onGoToDataset = () => {
+  const goToDataset = () => {
     if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
 
     routes.goToFeedbackTaskAnnotationPage(datasetId);
@@ -112,7 +112,7 @@ export const useDatasetSettingViewModel = () => {
     if (datasetSetting.isVectorsModified) return goToTab("vector");
   };
 
-  const goToDataset = () => {
+  const goToOutside = (next) => {
     if (datasetSetting.isModified) {
       return notification.notify({
         message: t("changes_no_submit"),
@@ -120,7 +120,7 @@ export const useDatasetSettingViewModel = () => {
         permanent: true,
         type: "warning",
         onClick() {
-          onGoToDataset();
+          next();
         },
         onClose() {
           goToTabWithModification();
@@ -128,7 +128,7 @@ export const useDatasetSettingViewModel = () => {
       });
     }
 
-    onGoToDataset();
+    next();
   };
 
   onBeforeMount(() => {
@@ -155,6 +155,7 @@ export const useDatasetSettingViewModel = () => {
     isAdminOrOwnerRole,
     datasetId,
     datasetSetting,
+    goToOutside,
     goToDataset,
   };
 };

@@ -74,7 +74,6 @@ class CreateRecordsBulk:
         return RecordsBulk(items=records)
 
     async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
-
         records_and_suggestions = list(zip(records, [r.suggestions for r in records_create]))
         records_and_responses = list(zip(records, [r.responses for r in records_create]))
         records_and_vectors = list(zip(records, [r.vectors for r in records_create]))
@@ -88,7 +87,6 @@ class CreateRecordsBulk:
     async def _upsert_records_suggestions(
         self, records_and_suggestions: List[Tuple[Record, List[SuggestionCreate]]]
     ) -> List[Suggestion]:
-
         upsert_many_suggestions = []
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             try:
@@ -121,7 +119,6 @@ class CreateRecordsBulk:
     async def _upsert_records_responses(
         self, records_and_responses: List[Tuple[Record, List[UserResponseCreate]]]
     ) -> List[Response]:
-
         user_ids = [response.user_id for _, responses in records_and_responses for response in responses or []]
         users_by_id = await fetch_users_by_ids_as_dict(self._db, user_ids)
 
@@ -152,7 +149,6 @@ class CreateRecordsBulk:
     async def _upsert_records_vectors(
         self, records_and_vectors: List[Tuple[Record, Dict[str, List[float]]]]
     ) -> List[Vector]:
-
         upsert_many_vectors = []
         for idx, (record, vectors) in enumerate(records_and_vectors):
             try:
@@ -192,7 +188,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         records = []
         async with self._db.begin_nested():
             for record_upsert in bulk_upsert.items:
-                record = found_records.get(record_upsert.external_id or record_upsert.id)
+                record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
                 if not record:
                     record = Record(
                         fields=record_upsert.fields,
@@ -225,7 +221,6 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         dataset: Dataset,
         records_upsert: List[RecordUpsert],
     ) -> Dict[Union[str, UUID], Record]:
-
         records_by_external_id = await fetch_records_by_external_ids_as_dict(
             self._db, dataset, [r.external_id for r in records_upsert]
         )

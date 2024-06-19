@@ -42,6 +42,9 @@ export default {
   components: {
     InternalPage,
   },
+  beforeRouteLeave(to, from, next) {
+    this.goToOutside(next);
+  },
   setup() {
     return useDatasetSettingViewModel();
   },

@@ -33,6 +33,7 @@ export default {
   dimension: "Dimension",
   visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
+  guidelines: "Guidelines",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
     home: "Home",
@@ -170,7 +171,6 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
-    bulkMode: "Span annotation is not supported in Bulk view",
   },
   login: {
     title: "Sign in",

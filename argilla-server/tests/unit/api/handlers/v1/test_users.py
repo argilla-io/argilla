@@ -22,7 +22,7 @@ from argilla_server.models import UserRole
 from tests.factories import UserFactory, WorkspaceFactory
 
 if TYPE_CHECKING:
-    from fastapi.testclient import TestClient
+    pass
 
 
 @pytest.mark.asyncio

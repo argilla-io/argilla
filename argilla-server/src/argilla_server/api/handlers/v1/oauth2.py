@@ -92,7 +92,7 @@ def _check_oauth_enabled_or_raise() -> None:
 
 
 def _get_provider_by_name_or_raise(provider_name: str) -> OAuth2ClientProvider:
-    if not provider_name in settings.oauth.providers:
+    if provider_name not in settings.oauth.providers:
         raise HTTPException(status_code=404, detail=f"Provider '{provider_name}' not found")
     return settings.oauth.providers[provider_name]
 

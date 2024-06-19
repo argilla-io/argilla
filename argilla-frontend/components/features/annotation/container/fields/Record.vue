@@ -40,14 +40,33 @@ export default {
       type: Array,
     },
   },
-  computed: {
-    searchValue() {
-      return this.$route.query?._search ?? "";
-    },
-  },
   methods: {
     onSelectedRecord(isSelected) {
       this.$emit("on-select-record", isSelected, this.record);
+    },
+  },
+  computed: {
+    spanQuestionsAnswers() {
+      return this.record.questions
+        .filter((q) => q.isSpanType)
+        .map((q) => ({
+          id: q.id,
+          answer: q.answer.values,
+        }));
+    },
+  },
+  watch: {
+    spanQuestionsAnswers: {
+      deep: true,
+      handler() {
+        if (
+          this.record.questions
+            .filter((q) => q.isSpanType)
+            .some((q) => q.isModified)
+        ) {
+          this.onSelectedRecord(true);
+        }
+      },
     },
   },
 };
@@ -59,7 +78,7 @@ export default {
   flex-direction: column;
   min-height: 0;
   background: palette(white);
-  border: 1px solid palette(grey, 600);
+  border: 1px solid $black-6;
   border-radius: $border-radius-m;
   &:has(.dropdown__content),
   &:has(.checkbox.checked) {
@@ -73,7 +92,7 @@ export default {
     min-width: 0;
     height: 100%;
     min-height: 0;
-    @include media("<=tablet") {
+    @include media("<desktop") {
       height: auto;
     }
   }

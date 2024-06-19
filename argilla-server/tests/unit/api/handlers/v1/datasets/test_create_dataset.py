@@ -118,7 +118,9 @@ class TestCreateDataset:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar_one() == 0
 
-    async def test_create_dataset_with_invalid_distribution_strategy(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_create_dataset_with_invalid_distribution_strategy(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         workspace = await WorkspaceFactory.create()
 
         response = await async_client.post(

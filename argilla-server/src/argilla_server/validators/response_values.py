@@ -260,7 +260,7 @@ class SpanQuestionResponseValueValidator:
         available_labels = [option.value for option in span_question_settings.options]
 
         for value_item in self._response_value:
-            if not value_item.label in available_labels:
+            if value_item.label not in available_labels:
                 raise UnprocessableEntityError(
                     f"undefined label '{value_item.label}' for span question.\nValid labels are: {available_labels!r}"
                 )

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 from uuid import UUID
 
 from argilla_server.api.schemas.v1.questions import QuestionName
