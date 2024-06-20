@@ -92,7 +92,7 @@ This is the default view to annotate your dataset linearly, displaying one recor
 
 **You should use this when:** getting acquainted with a dataset or when the annotation team is very diverse, the topic is generic.
 
-Once you submit your first annotation, the next record will appear automatically. To see again your submitted record, just click on prev.
+Once you submit your first response, the next record will appear automatically. To see again your submitted record, just click on prev.
 
 **Navigating through the records**
 
