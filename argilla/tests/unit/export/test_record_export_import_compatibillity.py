@@ -23,7 +23,6 @@ from argilla.records._resource import Record
 
 @pytest.fixture
 def record():
-
     return rg.Record(
         id=uuid.uuid4(),
         fields={"text": "Hello World, how are you?"},
@@ -34,7 +33,6 @@ def record():
         responses=[rg.Response("label", "positive", user_id=uuid.uuid4())],
         metadata={"source": "twitter", "language": "en"},
         vectors={"text": [0, 0, 0]},
-
     )
 
 
