@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, List
+from typing import List
 from uuid import UUID, uuid4
 
 import pytest

@@ -16,6 +16,7 @@
 """
 This module contains the data models for the interface
 """
+
 import datetime
 import logging
 import uuid

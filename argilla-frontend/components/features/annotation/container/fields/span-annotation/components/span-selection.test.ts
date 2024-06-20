@@ -415,6 +415,38 @@ describe("Span Selection", () => {
 
         expect(spanSelection.spans).toHaveLength(0);
       });
+
+      test("should remove span and re calculate the overlapping", () => {
+        const spanSelection = new SpanSelection();
+        spanSelection.config.allowOverlap = true;
+
+        const textSelection1 = createTextSelection({
+          from: 10,
+          to: 17,
+          text: "rem Ips",
+          entity: "TOKEN",
+        });
+
+        const textSelection2 = createTextSelection({
+          from: 8,
+          to: 19,
+          text: "Lorem Ipsum",
+          entity: "TOKEN-2",
+        });
+
+        spanSelection.addSpan(textSelection1);
+        spanSelection.addSpan(textSelection2);
+
+        expect(spanSelection.spans[0].overlap.level).toBe(1);
+        expect(spanSelection.spans[1].overlap.level).toBe(2);
+
+        spanSelection.removeSpan(spanSelection.spans[0]);
+
+        expect(spanSelection.spans).toHaveLength(1);
+        expect(spanSelection.spans[0].from).toBe(textSelection2.from);
+        expect(spanSelection.spans[0].to).toBe(textSelection2.to);
+        expect(spanSelection.spans[0].overlap.level).toBe(1);
+      });
     });
 
     describe("should replace the entity for the span", () => {

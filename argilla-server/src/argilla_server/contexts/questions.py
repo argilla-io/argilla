@@ -12,19 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
-from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 import argilla_server.errors.future as errors
 from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionUpdate,
 )
-from argilla_server.models import Dataset, Question, User
+from argilla_server.models import Dataset, Question
 from argilla_server.validators.questions import (
     QuestionCreateValidator,
     QuestionDeleteValidator,

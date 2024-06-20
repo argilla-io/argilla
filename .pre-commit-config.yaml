@@ -1,32 +1,44 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+        exclude: argilla/mkdocs.yml
+      - id: end-of-file-fixer
+        exclude_types: [text, jupyter]
+      - id: trailing-whitespace
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff-format
+
   ##############################################################################
   # argilla specific hooks
   ##############################################################################
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff
+        files: 'argilla/src/.*\.py$'
+        args:
+          - --fix
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
-        files: '^argilla-sdk/.*\.py$'
-        exclude: ^argilla-sdk/docs/snippets/
+        files: '^argilla/.*\.py$'
+        exclude: ^argilla/docs/snippets/
         args:
           - --license-filepath
-          - argilla-sdk/LICENSE_HEADER
+          - argilla/LICENSE_HEADER
           - --fuzzy-match-generates-todo
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.4
-    hooks:
-      - id: ruff
-        files: '^argilla-sdk/.*\.py$'
-        args:
-          - --fix
-      - id: ruff-format
-        files: '^argilla-sdk/.*\.py$'
   - repo: https://github.com/kynan/nbstripout
     rev: 0.7.1
     hooks:
       - id: nbstripout
-        files: '^argilla-sdk/.*\.ipynb$'
+        files: '^argilla/.*\.ipynb$'
         args:
           - --keep-count
           - --keep-output
@@ -37,6 +49,27 @@ repos:
           # - --keep-execution-count
           # - --keep-metadata
           # - --keep-version
+  ##############################################################################
+  # argilla-server specific hooks
+  ##############################################################################
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff
+        files: 'argila-server/src/.*\.py$'
+        args:
+          - --fix
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: "Insert license header in Python source files"
+        files: '^argilla-server/.*\.py$'
+        args:
+          - --license-filepath
+          - argilla-server/LICENSE_HEADER
+          - --fuzzy-match-generates-todo
 
 ci:
   autofix_commit_msg: |

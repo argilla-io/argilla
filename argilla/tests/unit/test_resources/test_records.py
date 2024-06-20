@@ -30,11 +30,11 @@ class TestRecords:
             responses=[Response(question_name="question", value="answer", user_id=user_id)],
         )
         assert (
-                record.__repr__() == f"Record(id={record_id},"
-                                     "fields={'name': 'John', 'age': '30'},"
-                                     "metadata={'key': 'value'},"
-                                     "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
-                                     f"responses={{'question': [{{'value': 'answer'}}]}})"
+            record.__repr__() == f"Record(id={record_id},"
+            "fields={'name': 'John', 'age': '30'},"
+            "metadata={'key': 'value'},"
+            "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
+            f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
 
     def test_update_record_metadata_by_key(self):
@@ -62,4 +62,3 @@ class TestRecords:
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
         assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
-

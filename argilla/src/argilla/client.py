@@ -121,13 +121,11 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: int) -> "User":
-        ...
+    def __getitem__(self, index: int) -> "User": ...
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: slice) -> Sequence["User"]:
-        ...
+    def __getitem__(self, index: slice) -> Sequence["User"]: ...
 
     def __getitem__(self, index):
         model = self._api.list()[index]
@@ -149,12 +147,10 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         return user.create()
 
     @overload
-    def list(self) -> List["User"]:
-        ...
+    def list(self) -> List["User"]: ...
 
     @overload
-    def list(self, workspace: "Workspace") -> List["User"]:
-        ...
+    def list(self, workspace: "Workspace") -> List["User"]: ...
 
     def list(self, workspace: Optional["Workspace"] = None) -> List["User"]:
         """List all users."""
@@ -206,13 +202,11 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: int) -> "Workspace":
-        ...
+    def __getitem__(self, index: int) -> "Workspace": ...
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: slice) -> Sequence["Workspace"]:
-        ...
+    def __getitem__(self, index: slice) -> Sequence["Workspace"]: ...
 
     def __getitem__(self, index) -> "Workspace":
         model = self._api.list()[index]
@@ -286,13 +280,11 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: int) -> "Dataset":
-        ...
+    def __getitem__(self, index: int) -> "Dataset": ...
 
     @overload
     @abstractmethod
-    def __getitem__(self, index: slice) -> Sequence["Dataset"]:
-        ...
+    def __getitem__(self, index: slice) -> Sequence["Dataset"]: ...
 
     def __getitem__(self, index) -> "Dataset":
         model = self._api.list()[index]

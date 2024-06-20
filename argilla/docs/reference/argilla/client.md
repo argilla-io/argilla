@@ -48,6 +48,6 @@ for dataset in my_workspace.datasets:
 
 ### `rg.Argilla`
 
-::: argilla.client.Argilla
+::: src.argilla.client.Argilla
     options:
         heading_level: 3

@@ -12,7 +12,7 @@ dataset.records
 ```
 
 !!! note "For user familiar with legacy approaches"
-    1. `Dataset.records` object is used to interact with the records in a dataset. It interactively fetches records from the server in batches without using a local copy of the records. 
+    1. `Dataset.records` object is used to interact with the records in a dataset. It interactively fetches records from the server in batches without using a local copy of the records.
     2. The `log` method of `Dataset.records` is used to both add and update records in a dataset. If the record includes a known `id` field, the record will be updated. If the record does not include a known `id` field, the record will be added.
 
 
@@ -24,7 +24,7 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
 
     You can also add records to a dataset by initializing a `Record` object directly.
 
-    ```python	
+    ```python
 
     records = [
         rg.Record(
@@ -44,11 +44,11 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     dataset.records.log(records)
     ```
 
-    1. This is an illustration of a definition. In a real world scenario, you would iterate over a data structure and create `Record` objects for each iteration. 
+    1. This is an illustration of a definition. In a real world scenario, you would iterate over a data structure and create `Record` objects for each iteration.
 
 === "From a data structure"
 
-    ```python	
+    ```python
 
     data = [
         {
@@ -64,7 +64,7 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     dataset.records.log(data)
     ```
 
-    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`. 
+    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
 
 === "From a data structure with a mapping"
 
@@ -80,21 +80,21 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
         },
     ] # (1)
     dataset.records.log(
-        records=data, 
+        records=data,
         mapping={"query": "question", "response": "answer"} # (2)
     )
 
     ```
 
-    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`. 
+    1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
     2. The data structure has keys `query` and `response` and the Argilla dataset has `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
 
 === "From a Hugging Face dataset"
 
     You can also add records to a dataset using a Hugging Face dataset. This is useful when you want to use a dataset from the Hugging Face Hub and add it to your Argilla dataset.
 
-    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset. 
-    
+    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset.
+
     If the dataset's schema does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which columns in the dataset correspond to the Argilla dataset fields.
 
     ```python
@@ -103,18 +103,18 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     hf_dataset = load_dataset("imdb", split="train[:100]") # (1)
 
     dataset.records.log(records=hf_dataset)
-    ```	
+    ```
 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema. If that is not the case, you could use the `.map` of the `datasets` library to prepare the data before adding it to the Argilla dataset.
 
     Here we use the `mapping` parameter to specify the relationship between the Hugging Face dataset and the Argilla dataset.
-    
+
     ```python
     dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"}) # (1)
     ```
 
     1. In this case, the `txt` key in the Hugging Face dataset corresponds to the `text` field in the Argilla dataset, and the `y` key in the Hugging Face dataset corresponds to the `label` field in the Argilla dataset.
-    
+
 
 ### Updating records in a dataset
 
@@ -124,7 +124,7 @@ Records can also be updated using the `log` method with records that contain an 
 
     You can update records in a dataset by initializing a `Record` object directly and providing the `id` field.
 
-    ```python	
+    ```python
 
     records = [
         rg.Record(
@@ -142,7 +142,7 @@ Records can also be updated using the `log` method with records that contain an 
 
     You can also update records in a dataset by providing the `id` field in the data structure.
 
-    ```python	
+    ```python
 
     data = [
         {
@@ -170,7 +170,7 @@ Records can also be updated using the `log` method with records that contain an 
     ]
 
     dataset.records.log(
-        records=data, 
+        records=data,
         mapping={"my_id": "id"} # (2)
     )
 
@@ -188,7 +188,7 @@ Records can also be updated using the `log` method with records that contain an 
     hf_dataset = load_dataset("imdb", split="train[:100]") # (1)
 
     dataset.records.log(records=hf_dataset, mapping={"uuid": "id"}) # (2)
-    ```	
+    ```
 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema.
     2. The `uuid` key in the Hugging Face dataset corresponds to the `id` field in the Argilla dataset.
@@ -219,6 +219,6 @@ Check out the [`rg.Record`](../records/records.md) class reference for more info
 
 ### `rg.Dataset.records`
 
-::: argilla.records.DatasetRecords
+::: src.argilla.records._dataset_records.DatasetRecords
     options:
         heading_level: 3

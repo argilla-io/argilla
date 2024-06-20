@@ -16,7 +16,7 @@ import uuid
 
 import httpx
 import pytest
-from argilla_v1.client.sdk.commons.errors import ArApiResponseError, BadRequestApiError
+from argilla_v1.client.sdk.commons.errors import ArApiResponseError
 from argilla_v1.client.sdk.v1.datasets.api import search_records
 from argilla_v1.client.sdk.v1.datasets.models import FeedbackRecordsSearchVectorQuery
 

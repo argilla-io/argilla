@@ -91,6 +91,10 @@ export class Highlighting {
     return [...this.spanSelection.spans];
   }
 
+  get nodeSpans() {
+    return this.spans.filter((s) => s.node.id === this.nodeId);
+  }
+
   private get entitySpanContainer() {
     const { spanContainerId } = this.styles;
 
@@ -165,7 +169,7 @@ export class Highlighting {
   }
 
   private updateLineHeight() {
-    const maxOverlappedLevels = this.spans.reduce(
+    const maxOverlappedLevels = this.nodeSpans.reduce(
       (max, span) => Math.max(max, span.overlap.level),
       0
     );
@@ -335,11 +339,7 @@ export class Highlighting {
 
     this.updateLineHeight();
 
-    for (const span of this.spans) {
-      const { node } = span;
-
-      if (node.id !== this.nodeId) continue;
-
+    for (const span of this.nodeSpans) {
       const entityPosition = this.createPosition(span);
 
       const entityElement = this.EntityComponentConstructor(
@@ -414,11 +414,7 @@ export class Highlighting {
   private removeSpan(span: Span) {
     this.spanSelection.removeSpan(span);
 
-    const spans = this.spans;
-
-    this.removeAllHighlights();
-
-    this.loadHighlights(spans);
+    this.applyStyles();
   }
 
   public createRange({ from, to, node }: Span) {

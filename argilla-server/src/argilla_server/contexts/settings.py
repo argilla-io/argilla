@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Union
 
 from argilla_server.api.schemas.v1.settings import ArgillaSettings, HuggingfaceSettings, Settings
 from argilla_server.settings import settings

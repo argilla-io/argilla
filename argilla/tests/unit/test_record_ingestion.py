@@ -160,6 +160,7 @@ def test_ingest_record_from_dict_with_id_and_mapping(dataset):
     )
 
     assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.fields["prompt"] == "Hello World, how are you?"
     assert record.id == record_id
 
 

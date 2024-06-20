@@ -12,13 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
-from uuid import uuid4
 
 import pytest
-from argilla_v1.client.sdk.v1.workspaces.models import WorkspaceModel
 from rich.table import Table
 
 if TYPE_CHECKING:

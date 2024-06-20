@@ -105,6 +105,37 @@ def test_export_records_list_flattened(client: Argilla, dataset: rg.Dataset):
     assert exported_records[0]["label.suggestion.score"] is None
 
 
+def test_export_record_list_with_filtered_records(client: Argilla, dataset: rg.Dataset):
+    mock_data = [
+        {
+            "text": "Hello World, how are you?",
+            "label": "positive",
+            "id": uuid.uuid4(),
+        },
+        {
+            "text": "Hello World, how are you?",
+            "label": "negative",
+            "id": uuid.uuid4(),
+        },
+        {
+            "text": "Hello World, how are you?",
+            "label": "positive",
+            "id": uuid.uuid4(),
+        },
+    ]
+    dataset.records.log(records=mock_data)
+    exported_records = dataset.records(query=rg.Query(query="hello")).to_list(flatten=True)
+    assert len(exported_records) == len(mock_data)
+    assert isinstance(exported_records, list)
+    assert isinstance(exported_records[0], dict)
+    assert isinstance(exported_records[0]["id"], str)
+    assert isinstance(exported_records[0]["text"], str)
+    assert isinstance(exported_records[0]["label.suggestion"], str)
+    assert exported_records[0]["text"] == "Hello World, how are you?"
+    assert exported_records[0]["label.suggestion"] == "positive"
+    assert exported_records[0]["label.suggestion.score"] is None
+
+
 def test_export_records_list_nested(client: Argilla, dataset: rg.Dataset):
     mock_data = [
         {

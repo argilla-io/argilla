@@ -33,7 +33,7 @@ A **record** in Argilla is a data item that requires annotation, consisting of o
         ],
     )
     ```
-    > Check the [Record - Python Reference](../../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
+    > Check the [Record - Python Reference](../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
 
 ## Add records
 
@@ -84,7 +84,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
 
-    ```python	
+    ```python
     import argilla as rg
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -222,7 +222,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
     You can also add vectors to a record in an initialized `Record` object.
 
-    > Check the [Vector - Python Reference](../../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
+    > Check the [Vector - Python Reference](../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -274,10 +274,10 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
-=== "As `Record objects"
+=== "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Suggestions - Python Reference](../../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -348,7 +348,7 @@ If your dataset includes some annotations, you can add those to the records as y
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
 
-    > Check the [Responses - Python Reference](../../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+    > Check the [Responses - Python Reference](../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -436,7 +436,7 @@ updated_data = [
 dataset.records.log(records=updated_data)
 ```
 
-!!! note "Update the metadata"
+=== "Update the metadata"
     The `metadata` of `Record` object is a python dictionary. So to update the metadata of a record, you can iterate over the records and update the metadata by key or using `metadata.update`. After that, you should update the records in the dataset.
 
     ```python
@@ -446,6 +446,22 @@ dataset.records.log(records=updated_data)
 
         record.metadata["my_metadata"] = "new_value"
         record.metadata["my_new_metadata"] = "new_value"
+
+        updated_records.append(record)
+
+    dataset.records.log(records=updated_records)
+    ```
+
+=== "Update vectors"
+    When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata.
+
+    ```python
+    updated_records = []
+
+    for record in dataset.records():
+
+        record.vectors["new_vector"] = [...]
+        record.vector["v"] = [...]
 
         updated_records.append(record)
 

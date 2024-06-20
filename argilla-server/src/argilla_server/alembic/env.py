@@ -17,7 +17,7 @@ from logging.config import fileConfig
 from alembic import context
 from argilla_server.database import database_url_sync
 from argilla_server.models.base import DatabaseModel
-from argilla_server.models.database import *  # noqa: I001
+from argilla_server.models.database import *  # noqa
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides

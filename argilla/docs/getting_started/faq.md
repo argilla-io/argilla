@@ -1,5 +1,5 @@
 ---
-description: the Argilla Python SDK is the reference Argilla Python server.
+description: These are the Frequently Asked Questions regarding Argilla.
 hide: toc
 ---
 

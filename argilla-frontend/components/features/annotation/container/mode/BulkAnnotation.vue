@@ -1,123 +1,181 @@
 <template>
   <span>
     <LoadLine v-if="isSubmitting || isDraftSaving || isDiscarding" />
-    <div class="wrapper">
-      <section class="wrapper__records">
-        <DatasetFilters :recordCriteria="recordCriteria">
-          <ToggleAnnotationType
-            v-if="
-              records.hasRecordsToAnnotate && recordCriteria.committed.isPending
-            "
-            :recordCriteria="recordCriteria"
-        /></DatasetFilters>
-        <SimilarityRecordReference
-          v-show="recordCriteria.isFilteringBySimilarity"
-          v-if="!!records.reference"
-          :fields="records.reference.fields"
-          :recordCriteria="recordCriteria"
-          :availableVectors="datasetVectors"
-        />
-        <div class="wrapper__records__header">
-          <div class="wrapper__records__header--left">
-            <BaseCheckbox
-              :data-title="
-                !selectedRecords.length
-                  ? $t('bulkAnnotation.select_to_annotate')
-                  : null
-              "
-              v-if="records.hasRecordsToAnnotate"
-              :decoration-circle="true"
-              class="wrapper__records__header__checkbox"
-              :value="isSelectedAll"
-              @input="toggleAllRecords"
-            />
-            <span
-              class="wrapper__records__header__selection-text"
-              v-if="selectedRecords.length && !affectAllRecords"
-              v-text="
-                $tc('bulkAnnotation.recordsSelected', selectedRecords.length)
-              "
-            />
-
-            <div v-if="isAffectAllRecordsAllowed" class="bulk-by-criteria">
-              <BaseButton
-                v-if="!affectAllRecords"
-                class="bulk-by-criteria__button primary text small"
-                @on-click="affectAllRecords = true"
-                >{{
-                  $t("bulkAnnotation.selectAllResults", {
-                    total: records.total,
-                  })
-                }}</BaseButton
-              >
-              <template v-else>
-                <span class="wrapper__records__header__selection-text">{{
-                  $t("bulkAnnotation.haveSelectedRecords", {
-                    total: records.total,
-                  })
-                }}</span>
-                <BaseButton
-                  class="bulk-by-criteria__button primary text small"
-                  @on-click="resetAffectAllRecords"
-                  >{{ $t("button.cancel") }}</BaseButton
-                >
-              </template>
-            </div>
-          </div>
-          <RecordsViewConfig
-            v-if="records.hasRecordsToAnnotate"
-            v-model="recordHeight"
-          />
-          <PaginationFeedbackTask :recordCriteria="recordCriteria" />
-        </div>
-        <div
-          ref="bulkScrollableArea"
-          class="bulk__records snap"
-          v-if="records.hasRecordsToAnnotate"
+    <VerticalResizable
+      class="wrapper"
+      :id="`${recordCriteria.datasetId}-r-v-rz`"
+    >
+      <template #left>
+        <HorizontalResizable
+          :id="`${recordCriteria.datasetId}-r-h-rz`"
+          class="wrapper__left"
         >
-          <Record
-            class="snap-child"
-            :class="{
-              'record__wrapper--fixed-height': recordHeight === 'fixedHeight',
-            }"
-            v-for="(record, i) in recordsOnPage"
-            :key="`${recordCriteria.committed.page.client.page}_${record.id}_${i}`"
-            :datasetVectors="datasetVectors"
-            :recordCriteria="recordCriteria"
-            :record="record"
-            :selectedRecords="selectedRecords"
-            @on-select-record="onSelectRecord"
-          />
-        </div>
-        <div v-else class="wrapper--empty">
-          <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-        </div>
-      </section>
+          <template #up>
+            <section class="wrapper__records">
+              <DatasetFilters :recordCriteria="recordCriteria">
+                <ToggleAnnotationType
+                  v-if="
+                    records.hasRecordsToAnnotate &&
+                    recordCriteria.committed.isPending
+                  "
+                  :recordCriteria="recordCriteria"
+              /></DatasetFilters>
+              <SimilarityRecordReference
+                v-show="recordCriteria.isFilteringBySimilarity"
+                v-if="!!records.reference"
+                :fields="records.reference.fields"
+                :recordCriteria="recordCriteria"
+                :availableVectors="datasetVectors"
+              />
+              <div class="wrapper__records__header">
+                <div class="wrapper__records__header--left">
+                  <BaseCheckbox
+                    :data-title="
+                      !selectedRecords.length
+                        ? $t('bulkAnnotation.select_to_annotate')
+                        : null
+                    "
+                    v-if="records.hasRecordsToAnnotate"
+                    :decoration-circle="true"
+                    class="wrapper__records__header__checkbox"
+                    :value="isSelectedAll"
+                    @input="toggleAllRecords"
+                  />
+                  <span
+                    class="wrapper__records__header__selection-text"
+                    v-if="selectedRecords.length && !affectAllRecords"
+                    v-text="
+                      $tc(
+                        'bulkAnnotation.recordsSelected',
+                        selectedRecords.length
+                      )
+                    "
+                  />
 
-      <QuestionsForm
-        v-if="!!record"
-        :key="`${recordCriteria.committed.page.client.page}_${record.id}_questions`"
-        class="wrapper__form"
-        :class="statusClass"
-        :datasetId="recordCriteria.datasetId"
-        :record="record"
-        :is-bulk-mode="true"
-        :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
-        :is-submitting="isSubmitting"
-        :is-discarding="isDiscarding"
-        :is-draft-saving="isDraftSaving"
-        :is-submit-disabled="!hasSelectedAtLeastOneRecord"
-        :is-discard-disabled="!hasSelectedAtLeastOneRecord"
-        :is-draft-save-disabled="!hasSelectedAtLeastOneRecord"
-        :submit-tooltip="bulkActionsTooltip"
-        :discard-tooltip="bulkActionsTooltip"
-        :draft-saving-tooltip="bulkActionsTooltip"
-        :progress="progress"
-        @on-submit-responses="onClickSubmit"
-        @on-discard-responses="onClickDiscard"
-        @on-save-draft="onClickSaveDraft"
-      />
-    </div>
+                  <div
+                    v-if="isAffectAllRecordsAllowed"
+                    class="bulk-by-criteria"
+                  >
+                    <BaseButton
+                      v-if="!affectAllRecords"
+                      class="bulk-by-criteria__button primary text small"
+                      @on-click="affectAllRecords = true"
+                      >{{
+                        $t("bulkAnnotation.selectAllResults", {
+                          total: records.total,
+                        })
+                      }}</BaseButton
+                    >
+                    <template v-else>
+                      <span class="wrapper__records__header__selection-text">{{
+                        $t("bulkAnnotation.haveSelectedRecords", {
+                          total: records.total,
+                        })
+                      }}</span>
+                      <BaseButton
+                        class="bulk-by-criteria__button primary text small"
+                        @on-click="resetAffectAllRecords"
+                        >{{ $t("button.cancel") }}</BaseButton
+                      >
+                    </template>
+                  </div>
+                </div>
+                <RecordsViewConfig
+                  v-if="records.hasRecordsToAnnotate"
+                  v-model="recordHeight"
+                />
+                <PaginationFeedbackTask :recordCriteria="recordCriteria" />
+              </div>
+              <div
+                ref="bulkScrollableArea"
+                class="bulk__records snap"
+                v-if="records.hasRecordsToAnnotate"
+              >
+                <Record
+                  class="snap-child"
+                  :class="{
+                    'record__wrapper--fixed-height':
+                      recordHeight === 'fixedHeight',
+                  }"
+                  v-for="(record, i) in recordsOnPage"
+                  :key="`${recordCriteria.committed.page.client.page}_${record.id}_${i}`"
+                  :datasetVectors="datasetVectors"
+                  :recordCriteria="recordCriteria"
+                  :record="record"
+                  :selectedRecords="selectedRecords"
+                  @on-select-record="onSelectRecord"
+                />
+              </div>
+              <div v-else class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+              </div>
+            </section>
+          </template>
+          <template #downHeader>
+            <p v-text="$t('guidelines')" />
+          </template>
+          <template #downContent>
+            <AnnotationGuidelines />
+          </template>
+        </HorizontalResizable>
+      </template>
+      <template #right>
+        <HorizontalResizable
+          :id="`${recordCriteria.datasetId}-q-h-rz}`"
+          class="wrapper__right"
+        >
+          <template #up>
+            <QuestionsForm
+              v-if="!!record"
+              :key="`${recordCriteria.committed.page.client.page}_${record.id}_questions`"
+              class="wrapper__form"
+              :class="statusClass"
+              :datasetId="recordCriteria.datasetId"
+              :record="record"
+              :is-bulk-mode="true"
+              :show-discard-button="recordsOnPage.some((r) => !r.isDiscarded)"
+              :is-submitting="isSubmitting"
+              :is-discarding="isDiscarding"
+              :is-draft-saving="isDraftSaving"
+              :is-submit-disabled="!hasSelectedAtLeastOneRecord"
+              :is-discard-disabled="!hasSelectedAtLeastOneRecord"
+              :is-draft-save-disabled="!hasSelectedAtLeastOneRecord"
+              :submit-tooltip="bulkActionsTooltip"
+              :discard-tooltip="bulkActionsTooltip"
+              :draft-saving-tooltip="bulkActionsTooltip"
+              :progress="progress"
+              @on-submit-responses="onClickSubmit"
+              @on-discard-responses="onClickDiscard"
+              @on-save-draft="onClickSaveDraft"
+            />
+          </template>
+          <template #downHeader>
+            <p v-text="$t('metrics.progress')" />
+            <AnnotationProgress
+              class="annotation-progress"
+              :datasetId="recordCriteria.datasetId"
+              enableFetch
+            />
+          </template>
+          <template #downContent>
+            <AnnotationProgress :datasetId="recordCriteria.datasetId" />
+            <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
+          </template>
+        </HorizontalResizable>
+      </template>
+      <BaseCollapsablePanel
+        class="--mobile"
+        :is-expanded="expandedGuidelines"
+        @toggle-expand="expandedGuidelines = !expandedGuidelines"
+      >
+        <template #panelHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #panelContent>
+          <AnnotationGuidelines />
+        </template>
+      </BaseCollapsablePanel>
+    </VerticalResizable>
     <BaseModal
       class="conformation-modal"
       :modal-custom="true"
@@ -177,6 +235,7 @@ export default {
       recordHeight: "defaultHeight",
       visibleConfirmationModal: false,
       allowedAction: null,
+      expandedGuidelines: false,
     };
   },
   computed: {
@@ -214,11 +273,19 @@ export default {
     shouldShowModalToConfirm() {
       return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
+    spansQuestionsWithSelectedEntities() {
+      return this.record.questions
+        .filter((q) => q.isSpanType)
+        .filter((s) => s.answer.options.some((e) => e.isSelected));
+    },
   },
   methods: {
     onSelectRecord(isSelected, record) {
       if (isSelected) {
-        return this.selectedRecords.push(record);
+        if (!this.selectedRecords.some((r) => r.id === record.id))
+          return this.selectedRecords.push(record);
+
+        return;
       }
 
       this.selectedRecords = this.selectedRecords.filter(
@@ -313,6 +380,26 @@ export default {
     },
   },
   watch: {
+    spansQuestionsWithSelectedEntities: {
+      deep: true,
+      handler() {
+        const spanQuestions = this.recordsOnPage
+          .flatMap((r) => r.questions)
+          .filter((q) => q.isSpanType);
+
+        this.spansQuestionsWithSelectedEntities.forEach((q) => {
+          spanQuestions.forEach((question) => {
+            if (question.id === q.id) {
+              question.answer.options.forEach((option) => {
+                option.isSelected = q.answer.options.some(
+                  (o) => o.isSelected && o.id === option.id
+                );
+              });
+            }
+          });
+        });
+      },
+    },
     "recordCriteria.status"() {
       this.recordCriteria.page.focusMode();
     },
@@ -349,27 +436,36 @@ export default {
   display: flex;
   flex-wrap: wrap;
   height: 100%;
-  gap: $base-space * 2;
-  padding: $base-space * 2 $base-space * 2 0 $base-space * 2;
   @include media("<desktop") {
     flex-flow: column;
     overflow: auto;
   }
-  &__records,
-  &__form {
+  &__left,
+  &__right {
     @include media("<desktop") {
       overflow: visible;
       height: auto !important;
       max-height: none !important;
     }
   }
+  &__left {
+    @include media("<desktop") {
+      :deep(.resizable__down) {
+        display: none;
+      }
+    }
+  }
+  &__form {
+    padding: $base-space * 2;
+  }
   &__records {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $base-space * 2;
+    gap: $base-space;
     height: 100%;
     min-width: 0;
+    padding: $base-space * 2 $base-space * 2 0 $base-space * 2;
     &__header {
       display: flex;
       justify-content: flex-end;
@@ -439,8 +535,17 @@ export default {
     }
   }
 }
-
+.annotation-progress {
+  .--expanded & {
+    display: none;
+  }
+}
 [data-title] {
   @include tooltip-mini("right", 12px);
+}
+.--mobile {
+  @include media(">=desktop") {
+    display: none;
+  }
 }
 </style>
