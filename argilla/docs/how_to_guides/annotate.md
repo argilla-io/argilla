@@ -82,7 +82,7 @@ If your dataset includes model predictions, you will see them represented by a s
 If the suggestion is incorrect, you can modify it and submit your response.
 
 The score per suggested label/value is displayed for MultiLabelQuestion and RankingQuestion.
-You can also order your labels in the preference settings in order to show suggestions first, on top of the label list.
+For label questions, admins can also choose the ordering of labels in the datasets settings. Additionally, admins can choose to always show suggested labels at the beginning of the list.
 
 ### Focus view
 
