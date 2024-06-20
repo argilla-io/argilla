@@ -263,7 +263,7 @@ You have now successfully migrated your legacy dataset to Argilla V2. For more g
 As mentioned above, `FeedbackDataset`'s are compatible with Argilla V2 and do not need to be reformatted. However, you may want to migrate your feedback datasets to the new server so that you can deprecate your Argilla 1.* server. Here is a guide on how to migrate your feedback datasets:
 
 ```python
-import argilla.v1 as rg_v1
+import argilla as rg
 
 # Initialize the API with an Argilla server less than 2.0
 old_client = rg.Argilla(old_server_api_url, old_server_api_key)
