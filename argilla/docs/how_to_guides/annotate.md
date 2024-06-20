@@ -41,7 +41,7 @@ Argilla UI offers many functions to help you manage your annotation workflow, ai
 
 Argilla UI includes a range of shortcuts. For the main actions submit, discard, save as draft and the labels the keys are showed in the button.
 
-To move from a question to another, or between records using the keyboard you may have a look to the table just below.
+To move from one question to another or between records using the keyboard take a look at the table below.
 
 !!! tip
     Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.
