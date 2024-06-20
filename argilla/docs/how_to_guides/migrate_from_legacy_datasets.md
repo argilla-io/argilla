@@ -1,6 +1,6 @@
 # Migrate your legacy datasets to Argilla V2
 
-This guide will help you migrate task specific datasets to Argilla V2. These do not include the `FeedbackDataset` which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the [SDK migration blog post](https://argilla.io/blog/introducing-argilla-new-sdk/). 
+This guide will help you migrate task specific datasets to Argilla V2. These do not include the `FeedbackDataset` which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the [SDK migration blog post](https://argilla.io/blog/introducing-argilla-new-sdk/).
 
 !!! note
     Legacy Datasets include: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
@@ -13,11 +13,11 @@ To follow this guide, you will need to have the following prerequisites:
 - An argilla >=1.29 server instance running. If you don't have one, you can create one by following the [Argilla installation guide](../../getting_started/installation.md).
 - The `argilla` sdk package installed in your environment.
 
-If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.  
+If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.
 
 ## Steps
 
-The guide will take you through three steps: 
+The guide will take you through three steps:
 
 1. **Retrieve the legacy dataset** from the Argilla V1 server using the new `argilla` package.
 2. **Define the new dataset** in the Argilla V2 format.
@@ -101,7 +101,7 @@ dataset.create()
 
     ```python
     dataset = client.datasets(name=dataset_name)
-    
+
     if dataset.exists():
         dataset.delete()
     ```
@@ -119,16 +119,16 @@ Here are a set of example functions to convert the records for single-label and 
         """ This function maps a text classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-    
+
         if prediction := data.get("prediction"):
             label, score = prediction[0].values()
             agent = data["prediction_agent"]
             suggestions.append(rg.Suggestion(question_name="label", value=label, score=score, agent=agent))
-    
+
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
-    
+
         vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
@@ -149,16 +149,16 @@ Here are a set of example functions to convert the records for single-label and 
         """ This function maps a text classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-        
+
         if prediction := data.get("prediction"):
             labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
             agent = data["prediction_agent"]
             suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
-    
+
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
-    
+
         vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
@@ -171,7 +171,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
-    
+
 === "For token classification"
 
     ```python
@@ -179,16 +179,16 @@ Here are a set of example functions to convert the records for single-label and 
         """ This function maps a token classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-    
+
         if prediction := data.get("prediction"):
             scores = [span["score"] for span in prediction]
             agent = data["prediction_agent"]
             suggestions.append(rg.Suggestion(question_name="spans", value=prediction, score=scores, agent=agent))
-    
+
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="spans", value=annotation, user_id=user_id))
-    
+
         vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
@@ -202,7 +202,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
-    
+
 === "For Text generation"
 
     ```python
@@ -210,19 +210,19 @@ Here are a set of example functions to convert the records for single-label and 
         """ This function maps a text2text record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
-    
+
         if prediction := data.get("prediction"):
             first = prediction[0]
             agent = data["prediction_agent"]
             suggestions.append(
                 rg.Suggestion(question_name="text_generation", value=first["text"], score=first["score"], agent=agent)
             )
-    
+
         if annotation := data.get("annotation"):
             # From data[annotation]
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="text_generation", value=annotation, user_id=user_id))
-    
+
         vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
@@ -240,7 +240,7 @@ Here are a set of example functions to convert the records for single-label and 
 The functions above depend on the `users_by_name` dictionary and the `current_user` object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:
 
 ```python
-# For 
+# For
 users_by_name = {user.username: user for user in client.users}
 current_user = client.me
 ```
