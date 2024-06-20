@@ -9,9 +9,8 @@ The argilla-sdk is an experimental project to rebuild Argilla's python client in
 
 Since this package is not yet published on PyPi, you can install it directly from the repository:
 
-# TODO: Changed this to use the testpypi releases.
 ```console
-pip install git+https://github.com/argilla-io/argilla-python.git
+pip install argilla --pre
 ```
 
 ### Usage
