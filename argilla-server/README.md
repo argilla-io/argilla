@@ -1,19 +1,18 @@
 <h1 align="center">
   <a href=""><img src="https://github.com/dvsrepo/imgs/raw/main/rg.svg" alt="Argilla" width="150"></a>
   <br>
-  Argilla-Server
+  Argilla
   <br>
 </h1>
-<h3 align="center">The repository for the Python native FastAPI server for Argilla backend.</h2>
-
+<h3 align="center">Work on data together, make your model outputs better!</h2>
 
 <p align="center">
-<a  href="https://pypi.org/project/argilla-server/">
+<a  href="https://pypi.org/project/argilla/">
 <img alt="CI" src="https://img.shields.io/pypi/v/argilla.svg?style=flat-round&logo=pypi&logoColor=white">
 </a>
-<img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla-server/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
-<a href="https://pepy.tech/project/argilla-server">
-<img alt="CI" src="https://static.pepy.tech/personalized-badge/argilla-server?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
+<img alt="Codecov" src="https://codecov.io/gh/argilla-io/argilla/branch/main/graph/badge.svg?token=VDVR29VOMG"/>
+<a href="https://pepy.tech/project/argilla">
+<img alt="CI" src="https://static.pepy.tech/personalized-badge/argilla?period=month&units=international_system&left_color=grey&right_color=blue&left_text=pypi%20downloads/month">
 </a>
 <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg"/>
@@ -32,11 +31,10 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full
-data ownership, and overall efficiency**.
+Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
 This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
-look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/).
+look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
 
 Are you a contributor or do you want to understand what is going on under the hood, please keep reading the
 documentation below.
@@ -108,3 +106,17 @@ the [argilla-frontend](/argilla-frontend/README.md) project
 ```sh
 pdm server
 ```
+
+## 🫱🏾‍🫲🏼 Contribute
+
+To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+
+<a  href="https://github.com/argilla-io/argilla/graphs/contributors">
+
+<img  src="https://contrib.rocks/image?repo=argilla-io/argilla" />
+
+</a>
+
+## 🗺️ Roadmap
+
+We continuously work on updating [our plans and our roadmap](https://github.com/orgs/argilla-io/projects/10/views/1) and we love to discuss those with our community. Feel encouraged to participate.
