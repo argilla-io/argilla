@@ -183,7 +183,7 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             scores = [span["score"] for span in prediction]
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="labels", value=prediction, score=scores, agent=agent))
+            suggestions.append(rg.Suggestion(question_name="spans", value=prediction, score=scores, agent=agent))
     
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
@@ -271,7 +271,7 @@ new_client = rg.Argilla(new_server_api_url, new_server_api_key)
 
 dataset_name = "feedback-dataset"
 old_dataset = old_client.datasets(name=dataset_name)
-new_dataset = new_client.datasets.add(dataset)
+new_dataset = new_client.datasets.add(old_dataset)
 
 # Load the records from the old server
 new_dataset.records.log(
