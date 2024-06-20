@@ -16,7 +16,10 @@ import uuid
 
 import pytest
 
-from argilla import UserResponse, Response
+from argilla import Response, Dataset, Settings, TextQuestion, Workspace
+from argilla._models import UserResponseModel
+from argilla.responses import ResponseStatus, UserResponse
+from argilla.users import DELETED_USER
 
 
 class TestResponses:
@@ -85,3 +88,13 @@ class TestResponses:
                     Response(question_name="other-question", value="answer", user_id=other_user_id),
                 ],
             )
+
+    def test_create_user_response_from_model_without_user_id(self):
+        mock_workspace = Workspace(id=uuid.uuid4(), name="workspace")
+        dataset = Dataset(settings=Settings(questions=[TextQuestion(name="question")]), workspace=mock_workspace)
+        response = UserResponse.from_model(
+            UserResponseModel(values={"question": {"value": "answer"}}, user_id=None, status=ResponseStatus.draft),
+            dataset=dataset,
+        )
+
+        assert response.user_id == DELETED_USER.id
