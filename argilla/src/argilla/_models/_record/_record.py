@@ -26,6 +26,7 @@ __all__ = ["RecordModel", "FieldValue"]
 
 FieldValue = Union[str, None]
 
+
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
