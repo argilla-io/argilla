@@ -20,13 +20,13 @@ export default {
   },
   async fetch() {
     const folderContent = require.context(
-      `../../../../../docs/_source/_common/snippets`,
+      `./content`,
       false,
-      /.start_page.md/,
+      /.quickstart.md/,
       "lazy"
     );
 
-    const startPage = await folderContent("./start_page.md");
+    const startPage = await folderContent("./quickstart.md");
 
     this.content.tabs.push({
       id: "start-page",
