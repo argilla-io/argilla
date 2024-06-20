@@ -1,60 +1,7 @@
 [
   {
-    "version": "feat_add-new-sdk-project",
-    "title": "feat_add-new-sdk-project",
-    "aliases": []
-  },
-  {
-    "version": "docs_4989-docs-update-gh_access_token-for-20-sdk-docs-build",
-    "title": "docs_4989-docs-update-gh_access_token-for-20-sdk-docs-build",
-    "aliases": []
-  },
-  {
-    "version": "docs_4920-v1-docs-add-banner-with-link-to-the-new-docs-post-refactor",
-    "title": "docs_4920-v1-docs-add-banner-with-link-to-the-new-docs-post-refactor",
-    "aliases": []
-  },
-  {
-    "version": "docs_4920-v1-docs-add-banner-with-link-to-the-new-docs",
-    "title": "docs_4920-v1-docs-add-banner-with-link-to-the-new-docs",
-    "aliases": []
-  },
-  {
-    "version": "docs_update-vectors-howto",
-    "title": "docs_update-vectors-howto",
-    "aliases": []
-  },
-  {
-    "version": "docs_scripts-pipeline-access-token",
-    "title": "docs_scripts-pipeline-access-token",
-    "aliases": []
-  },
-  {
-    "version": "docs_migration-guide-in-docs-format",
-    "title": "docs_migration-guide-in-docs-format",
-    "aliases": []
-  },
-  {
-    "version": "docs_how-to-use-ui-features",
-    "title": "docs_how-to-use-ui-features",
-    "aliases": []
-  },
-  {
-    "version": "docs_fix-file-extensions",
-    "title": "docs_fix-file-extensions",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
-    "version": "docs_docs-textcat-tutorial",
-    "title": "docs_docs-textcat-tutorial",
-    "aliases": []
-  },
-  {
     "version": "dev",
     "title": "dev",
-    "aliases": []
+    "aliases": ["latest"]
   }
 ]
