@@ -11,7 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from uuid import UUID
 
 from argilla.users._resource import User
 
-__all__ = ["User"]
+__all__ = ["User", "DELETED_USER"]
+
+# This is the user id for the deleted user. Used when records contains responses from a user that has been deleted.
+DELETED_USER = User(id=UUID("00000000-0000-0000-0000-000000000000"), username="deleted")
