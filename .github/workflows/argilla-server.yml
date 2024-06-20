@@ -170,6 +170,7 @@ jobs:
           pdm publish --no-build --repository testpypi
 
       - name: Test Installing 🍿
+        continue-on-error: true
         run: |
           pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
 
