@@ -6,19 +6,19 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="The Argilla python server SDK">
+        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI.">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/community/popular_issues/">
+        <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/how_to_guides/annotate/">
       
       
-        <link rel="prev" href="../contributor/">
+        <link rel="prev" href="../query_export/">
       
       
-        <link rel="next" href="../changelog/">
+        <link rel="next" href="../migrate_from_legacy_datasets/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Issue dashboard - Argilla Docs</title>
+        <title>Annotate a dataset - Argilla Docs</title>
       
     
     
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Issue dashboard - Argilla Docs" >
+        <meta  property="og:title"  content="Annotate a dataset - Argilla Docs" >
       
-        <meta  property="og:description"  content="The Argilla python server SDK" >
+        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI." >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/community/popular_issues.png" >
+        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/annotate.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/dev/community/popular_issues/" >
+        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/dev/how_to_guides/annotate/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Issue dashboard - Argilla Docs" >
+        <meta  name="twitter:title"  content="Annotate a dataset - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="The Argilla python server SDK" >
+        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI." >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/community/popular_issues.png" >
+        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/annotate.png" >
       
     
     
@@ -112,6 +112,11 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
+      
+        
+        <a href="#annotate-your-dataset" class="md-skip">
+          Skip to content
+        </a>
       
     </div>
     <div data-md-component="announce">
@@ -146,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue dashboard
+              Annotate a dataset
             
           </span>
         </div>
@@ -303,9 +308,11 @@
         
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../../how_to_guides/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="../" class="md-tabs__link">
         
   
     
@@ -364,11 +371,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="../" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../community/" class="md-tabs__link">
         
   
     
@@ -576,27 +581,32 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../how_to_guides/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -607,13 +617,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             How-to guides
@@ -627,7 +637,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/user/" class="md-nav__link">
+      <a href="../user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -648,7 +658,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/workspace/" class="md-nav__link">
+      <a href="../workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -669,7 +679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/dataset/" class="md-nav__link">
+      <a href="../dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -690,7 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/record/" class="md-nav__link">
+      <a href="../record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -711,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/query_export/" class="md-nav__link">
+      <a href="../query_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -729,10 +739,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../how_to_guides/annotate/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Annotate a dataset
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -741,6 +771,170 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#annotation-interface-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotation interface overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotation interface overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flexible-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flexible layout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shortcuts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-by-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      View by status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suggestions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Suggestions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#focus-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      Focus view
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk view
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotation-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotation progress
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discover-patterns-and-speed-up-your-annotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discover patterns and speed up your annotation.
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Discover patterns and speed up your annotation.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-and-highlight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search and highlight
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-by-record-semantic-similarity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order by record semantic similarity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-and-sort-by-metadata-responses-and-suggestions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter and sort by metadata, responses, and suggestions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#annotate-in-teams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotate in teams
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotate in teams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edit-guidelines-in-the-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Edit guidelines in the settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -753,7 +947,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1390,32 +1584,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1426,13 +1615,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Community
@@ -1446,7 +1635,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../contributor/" class="md-nav__link">
+      <a href="../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1464,17 +1653,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../community/popular_issues/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1483,7 +1665,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1496,7 +1677,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
+      <a href="../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1602,6 +1783,160 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#annotation-interface-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotation interface overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotation interface overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flexible-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flexible layout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shortcuts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-by-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      View by status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suggestions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Suggestions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#focus-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      Focus view
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk view
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotation-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotation progress
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discover-patterns-and-speed-up-your-annotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discover patterns and speed up your annotation.
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Discover patterns and speed up your annotation.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-and-highlight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search and highlight
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-by-record-semantic-similarity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order by record semantic similarity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-and-sort-by-metadata-responses-and-suggestions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter and sort by metadata, responses, and suggestions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#annotate-in-teams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Annotate in teams
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotate in teams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edit-guidelines-in-the-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Edit guidelines in the settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1615,214 +1950,230 @@
                 
                   
 
+  
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/annotate.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
+    </a>
+  
+  
 
-  <h1>Issue dashboard</h1>
 
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Most engaging open issues</label><label for="__tabbed_1_2">Latest issues open by the community</label><label for="__tabbed_1_3">Planned issues for upcoming releases</label></div>
+<h1 id="annotate-your-dataset">Annotate your dataset<a class="headerlink" href="#annotate-your-dataset" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To experience the UI features firsthand, you can take a look to the <a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==">Demo ↗</a>.</p>
+</div>
+<p>Argilla UI offers many functions to help you manage your annotation workflow, aiming to provide the most flexible approach to fit the wide variety of use cases handled by the community.</p>
+<h2 id="annotation-interface-overview">Annotation interface overview<a class="headerlink" href="#annotation-interface-overview" title="Permanent link">&para;</a></h2>
+<h3 id="flexible-layout">Flexible layout<a class="headerlink" href="#flexible-layout" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">The header</label><label for="__tabbed_1_2">The left pane</label><label for="__tabbed_1_3">The right pane</label><label for="__tabbed_1_4">The left bottom panel</label><label for="__tabbed_1_5">The right bottom panel</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Reactions</th>
-<th style="text-align: center;">Comments</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4637">4637 - [FEATURE] Label breakdown in Feedback dataset stats</a></td>
-<td style="text-align: center;">👍 4</td>
-<td style="text-align: center;">💬 3</td>
-</tr>
-<tr>
-<td>2</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4658">4658 - Active listeners for Feedback Dataset</a></td>
-<td style="text-align: center;">👍 4</td>
-<td style="text-align: center;">💬 2</td>
-</tr>
-<tr>
-<td>3</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1607">1607 - Support for hierarchical multilabel text classification (taxonomy)</a></td>
-<td style="text-align: center;">👍 3</td>
-<td style="text-align: center;">💬 15</td>
-</tr>
-<tr>
-<td>4</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4867">4867 - [FEATURE] Add dependencies to support dev mode on HF Spaces</a></td>
-<td style="text-align: center;">👍 3</td>
-<td style="text-align: center;">💬 4</td>
-</tr>
-<tr>
-<td>5</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4964">4964 - [DOCS] Improvements to docker-compose getting started installation guide</a></td>
-<td style="text-align: center;">👍 3</td>
-<td style="text-align: center;">💬 3</td>
-</tr>
-<tr>
-<td>6</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/3338">3338 - [FEATURE] Add conversation support to Feedback</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 9</td>
-</tr>
-<tr>
-<td>7</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4512">4512 - [BUG-python/deployment] ValueError: The sum of train_size and test_size should be smaller than the number of samples</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 6</td>
-</tr>
-<tr>
-<td>8</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1800">1800 - Add comments/notes to annotation datasets to share with teammates. </a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 6</td>
-</tr>
-<tr>
-<td>9</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1837">1837 - Custom Record UI Templates</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 4</td>
-</tr>
-<tr>
-<td>10</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1630">1630 - Accepting several predictions/annotations for the same record</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 2</td>
-</tr>
-</tbody>
-</table>
+<p>At the right side of the navigation breadcrumb, you can customize the dataset settings and edit your profile.</p>
 </div>
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Author</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5073">5073 - [FEATURE]</a></td>
-<td style="text-align: center;">by <strong>Harry-gill</strong></td>
-</tr>
-<tr>
-<td>2</td>
-<td>🟣 <a href="https://github.com/argilla-io/argilla/pull/5067">5067 - docs: how to use UI features</a></td>
-<td style="text-align: center;">by <strong>sdiazlor</strong></td>
-</tr>
-<tr>
-<td>3</td>
-<td>🟣 <a href="https://github.com/argilla-io/argilla/pull/5066">5066 - docs: comment changelog generator</a></td>
-<td style="text-align: center;">by <strong>sdiazlor</strong></td>
-</tr>
-<tr>
-<td>4</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/pull/5062">5062 - [FEAT] improve notebook logging of log function</a></td>
-<td style="text-align: center;">by <strong>burtenshaw</strong></td>
-</tr>
-<tr>
-<td>5</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/pull/5056">5056 - [FEAT] Make adding and accessing suggestion and response from a record consistent</a></td>
-<td style="text-align: center;">by <strong>burtenshaw</strong></td>
-</tr>
-<tr>
-<td>6</td>
-<td>🟣 <a href="https://github.com/argilla-io/argilla/pull/5055">5055 - docs: textcat tutorial and small doc fixes</a></td>
-<td style="text-align: center;">by <strong>sdiazlor</strong></td>
-</tr>
-<tr>
-<td>7</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5049">5049 - [BUG][SDK] [v2] StopIteration error when retrieving records with existing responses.</a></td>
-<td style="text-align: center;">by <strong>burtenshaw</strong></td>
-</tr>
-<tr>
-<td>8</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/pull/5044">5044 - docs: retrieve user by ID</a></td>
-<td style="text-align: center;">by <strong>datapumpernickel</strong></td>
-</tr>
-<tr>
-<td>9</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5043">5043 - [ENHANCEMENT] Make mapping function in DatasetRecords.log compatible with multiple attributes</a></td>
-<td style="text-align: center;">by <strong>burtenshaw</strong></td>
-</tr>
-<tr>
-<td>10</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5042">5042 - [BUG] SDK: <code>to_list</code> with <code>flatten=True</code> does not add responses</a></td>
-<td style="text-align: center;">by <strong>sdiazlor</strong></td>
-</tr>
-</tbody>
-</table>
+<p>This area is displayed on top of <strong>the control panel</strong> for performing searches, applying filters and sorting results. The record card(s) are displayed one by one or in a vertical list depending on the active view: <strong>Focus view</strong> or <strong>Bulk view.</strong> A card includes one or many fields and an ellipsis menu to mainly access the record extra info like the metadata.</p>
 </div>
 <div class="tabbed-block">
+<p>This is where you annotate your dataset. Simply fill it out as a form, then choose to Submit, Save as Draft, or Discard your response to send the records to their corresponding queues.</p>
+</div>
+<div class="tabbed-block">
+<p>This expandable area displays the annotation guidelines.</p>
+</div>
+<div class="tabbed-block">
+<p>This expandable area displays your annotation progress.</p>
+</div>
+</div>
+</div>
+<p><img alt="UI overview" src="../../assets/images/how_to_guides/annotate/ui_overview.png" /></p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The app is responsive which enable you to adapt your workspace from two to one column. You can even use your mobile to provides simple feedback on your datasets.</p>
+</div>
+<h3 id="shortcuts">Shortcuts<a class="headerlink" href="#shortcuts" title="Permanent link">&para;</a></h3>
+<p>Argilla UI includes a range of shortcuts. For the main actions submit, discard, save as draft and the labels the keys are showed in the button.</p>
+<p>To move from one question to another or between records using the keyboard take a look at the table below.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.</p>
+</div>
+<details>
+<summary>Available shortcuts</summary>
 <table>
 <thead>
 <tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Milestone</th>
+<th>Action</th>
+<th>Keys</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4935">4935 - [CONFIG] Resolve python requirements for python version and dependencies with server.</a></td>
-<td style="text-align: center;"><strong>v2.2.0</strong></td>
+<td>Activate form</td>
+<td>⇥ Tab</td>
 </tr>
 <tr>
-<td>2</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4950">4950 - [DOCS] Add integrations to new documentation</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Move between questions</td>
+<td>↓ Down arrow or ↑ Up arrow</td>
 </tr>
 <tr>
-<td>3</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5043">5043 - [ENHANCEMENT] Make mapping function in DatasetRecords.log compatible with multiple attributes</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Select and unselect label</td>
+<td>1, 2, 3</td>
 </tr>
 <tr>
-<td>4</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4880">4880 - [FEATURE] Upgrade distilabel to use Argilla 2.0</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Move between labels or ranking options</td>
+<td>⇥ Tab or ⇧ Shift ⇥ Tab</td>
 </tr>
 <tr>
-<td>5</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4949">4949 - [FEAT][SDK] Implement external integrations </a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Select rating and rank</td>
+<td>1, 2, 3</td>
 </tr>
 <tr>
-<td>6</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4931">4931 - [REFACTOR] Improve handling of question models and dicts</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Fit span to character selection</td>
+<td>Hold ⇧ Shift</td>
 </tr>
 <tr>
-<td>7</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4932">4932 - [FEATURE] Simplify user response assignation</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Activate text area</td>
+<td>⇧ Shift ↵ Enter</td>
 </tr>
 <tr>
-<td>8</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4948">4948 - [FEATURE][SDK] minimal pandas integration</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Exit text area</td>
+<td>Esc</td>
 </tr>
 <tr>
-<td>9</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4944">4944 - [REFACTOR] Simplify naming of serialize, to_dict, and to_json methods</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Discard</td>
+<td>⌫ Backspace</td>
 </tr>
 <tr>
-<td>10</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4934">4934 - [FEAT] Querying records using vectors</a></td>
-<td style="text-align: center;"><strong>v2.1.0</strong></td>
+<td>Save draft (Mac os)</td>
+<td>⌘ Cmd S</td>
+</tr>
+<tr>
+<td>Save draft (Other)</td>
+<td>Ctrl S</td>
+</tr>
+<tr>
+<td>Submit</td>
+<td>↵ Enter</td>
+</tr>
+<tr>
+<td>Move between pages</td>
+<td>→ Right arrow or ← Left arrow</td>
 </tr>
 </tbody>
 </table>
+</details>
+<h3 id="view-by-status">View by status<a class="headerlink" href="#view-by-status" title="Permanent link">&para;</a></h3>
+<p>The view selector is set by default on Pending.</p>
+<p>If you are starting an annotation effort, all the records are initially kept in the Pending view. Once you start annotating, the records will move to the other queues: Draft, Submitted, Discarded.</p>
+<ul>
+<li><strong>Pending</strong>: The records without a response.</li>
+<li><strong>Draft</strong>: The records with partial responses. They can be submitted or discarded later. You can’t move them back to the pending queue.</li>
+<li><strong>Discarded</strong>: The records may or may not have responses. They can be edited but you can’t move them back to the pending queue.</li>
+<li><strong>Submitted</strong>: The records have been fully annotated and have already been submitted.</li>
+</ul>
+<h3 id="suggestions">Suggestions<a class="headerlink" href="#suggestions" title="Permanent link">&para;</a></h3>
+<p>If your dataset includes model predictions, you will see them represented by a sparkle icon <code>✨</code> in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If you agree with the suggestion, you just need to click on the Submit button, and they will be considered as your response.</p>
+<p>If the suggestion is incorrect, you can modify it and submit your response.</p>
+<p>The score per suggested label/value is displayed for MultiLabelQuestion and RankingQuestion.
+For label questions, admins can also choose the ordering of labels in the datasets settings. Additionally, admins can choose to always show suggested labels at the beginning of the list.</p>
+<h3 id="focus-view">Focus view<a class="headerlink" href="#focus-view" title="Permanent link">&para;</a></h3>
+<p><img alt="Focus view" src="../../assets/images/how_to_guides/annotate/focus_view.png" /></p>
+<p>This is the default view to annotate your dataset linearly, displaying one record after another.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You should use this when getting acquainted with a dataset or when the annotation team is very diverse, the topic is generic.</p>
+</div>
+<p>Once you submit your first response, the next record will appear automatically. To see again your submitted record, just click on prev.</p>
+<p><strong>Navigating through the records</strong></p>
+<p>To navigate through the records, you can use the <code>Prev</code>, shown as <code>&lt;</code>, and <code>Next</code>, <code>&gt;</code> buttons on top of the record card.</p>
+<p>Each time the page is fully refreshed, the records with modified statuses (Pending to Discarded, Pending to Save as Draft, Pending to Submitted) are sent to the corresponding queue. The <strong>control panel</strong> displays the <strong>status selector</strong>, which is set to Pending by default.</p>
+<h3 id="bulk-view">Bulk view<a class="headerlink" href="#bulk-view" title="Permanent link">&para;</a></h3>
+<p><img alt="Bulk view" src="../../assets/images/how_to_guides/annotate/bulk_view.png" /></p>
+<p>The bulk view is designed to speed up the annotation and get a quick overview of the whole dataset.</p>
+<p>It displays the records in a vertical list. Once the view is active, some functions from the <strong>control panel</strong> will be available to optimize the records reading. You define the number of records to display by page between <code>10</code>, <code>25</code>, <code>50</code> , <code>100</code> and the option to fix the card height by selecting <code>Expand records</code> or <code>Collapse records</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You should use this when you have a good understanding of your data and want to apply your knowledge based on things like similarity search, filter patterns, and suggestion score thresholds.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You should consider that bulk view does not show suggestions in bulk view (except for Spans) and will always convert questions to Draft queue when working with multiple question types.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per records from the draft queue.</p>
+</div>
+<h3 id="annotation-progress">Annotation progress<a class="headerlink" href="#annotation-progress" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">General progress view</label><label for="__tabbed_2_2">Your own progress view</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>On the dataset list, the global progress of the annotation task from all users is displayed. This is indicated in the <code>Global progress</code> column, which shows the number of left records to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with overlap), discarded, and pending by hovering your mouse over it.</p>
+</div>
+<div class="tabbed-block">
+<p>You can track your annotation progress in real-time. That means once you are annotating, the progress bar is incrementing in real time each time you submit or discard a record. Expanding the panel, the distribution of <code>Pending</code>, <code>Draft</code>, <code>Submitted</code> and <code>Discarded</code> responses is displayed in a donut chart.</p>
 </div>
 </div>
 </div>
-<p>Last update: 2024-06-20</p>
+<h2 id="discover-patterns-and-speed-up-your-annotation">Discover patterns and speed up your annotation.<a class="headerlink" href="#discover-patterns-and-speed-up-your-annotation" title="Permanent link">&para;</a></h2>
+<p>The UI offers various features designed to enhance your understanding of data patterns and streamline annotation tasks. Combining filters with bulk annotations can save you and your team hours of time.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.</p>
+</div>
+<h3 id="search-and-highlight">Search and highlight<a class="headerlink" href="#search-and-highlight" title="Permanent link">&para;</a></h3>
+<p>From the <strong>control panel</strong> at the top of the left pane, you can search across the entire dataset or by fields (if you have more than one in your record) and visualize matched results highlighted in color.</p>
+<h3 id="order-by-record-semantic-similarity">Order by record semantic similarity<a class="headerlink" href="#order-by-record-semantic-similarity" title="Permanent link">&para;</a></h3>
+<p>You can retrieve records based on their similarity to another record if vectors have been added to the dataset.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Consult these guides to know how to add vectors to your <a href="../dataset/">dataset</a> and <a href="../record/">records</a>.</p>
+</div>
+<p>To initiate a semantic search, click on <code>Find similar</code> within the record you wish to use as a reference. If multiple vectors are available, select the desired vector or choose whether to retrieve the most or least similar records.</p>
+<p>The retrieved records are then ordered by similarity, with the similarity score displayed on each record card.</p>
+<p>While the semantic search is active, you can update the selected vector or adjust the order of similarity, and specify the number of desired results.</p>
+<p>To cancel the search, click on the cross icon next to the reference record.</p>
+<h3 id="filter-and-sort-by-metadata-responses-and-suggestions">Filter and sort by metadata, responses, and suggestions<a class="headerlink" href="#filter-and-sort-by-metadata-responses-and-suggestions" title="Permanent link">&para;</a></h3>
+<h4>Filter</h4>
+
+<p>If the dataset contains metadata, responses and suggestions, click on <strong>Filter</strong> in the <strong>control panel</strong> to display the available filters. You can select multiple filters and combine them.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Record info including metadata is visible from the ellipsis menu in the record card.</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">By metadata properties</label><label for="__tabbed_3_2">By responses from the current user</label><label for="__tabbed_3_3">By suggestions</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>From the <code>Metadata</code> dropdown, type and select the property. You can set a range for integer and float properties, and select specific values for term metadata.</p>
+</div>
+<div class="tabbed-block">
+<p>From the <code>Responses</code> dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+</div>
+<p>The text and ranking questions are not available for filtering.</p>
+</div>
+<div class="tabbed-block">
+<p>From the Suggestions dropdown, Filter the suggestions by <code>Suggestion values</code>, <code>Score</code> , or <code>Agent</code> </p>
+</div>
+</div>
+</div>
+<h4>Sort</h4>
+
+<p>You can sort your records according to one or several attributes.</p>
+<p>The insertion time and last update are general to all records.</p>
+<p>The suggestion scores, response, and suggestion values for rating questions and metadata properties are available only when they were provided.</p>
+<h2 id="annotate-in-teams">Annotate in teams<a class="headerlink" href="#annotate-in-teams" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Argilla 2.1 will come with automatic task distribution, which will allow you to distribute the work across several users more efficiently.</p>
+</div>
+<h3 id="edit-guidelines-in-the-settings">Edit guidelines in the settings<a class="headerlink" href="#edit-guidelines-in-the-settings" title="Permanent link">&para;</a></h3>
+<p>As an <code>owner</code> or <code>admin</code>, you can edit the guidelines as much as you need from the icon settings on the header. Markdown format is enabled.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you want further guidance on good practices for guidelines during the project development, check our <a href="https://argilla.io/blog/annotation-guidelines-practices/">blog post</a>.</p>
+</div>
 
 
 
@@ -1861,7 +2212,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../contributor/" class="md-footer__link md-footer__link--prev" aria-label="Previous: How to contribute?">
+          <a href="../query_export/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Query, filter, and export records">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1871,20 +2222,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                How to contribute?
+                Query, filter, and export records
               </div>
             </div>
           </a>
         
         
           
-          <a href="../changelog/" class="md-footer__link md-footer__link--next" aria-label="Next: Changelog">
+          <a href="../migrate_from_legacy_datasets/" class="md-footer__link md-footer__link--next" aria-label="Next: Migrate your legacy datasets to Argilla V2">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Changelog
+                Migrate your legacy datasets to Argilla V2
               </div>
             </div>
             <div class="md-footer__button md-icon">
