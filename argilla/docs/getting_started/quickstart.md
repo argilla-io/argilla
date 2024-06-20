@@ -27,7 +27,7 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 * Locally using Docker.
 
 ```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1
 ```
 
 ### Connect to the Argilla server
