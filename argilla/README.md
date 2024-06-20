@@ -91,6 +91,8 @@ pip install argilla --pre
 
 After that, you will need to deploy Argilla Server. The easiest way to do this is through our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 
+> As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
+
 To use the client, you need to import the `Argilla` class and instantiate it with the API URL and API key.
 
 ```python
