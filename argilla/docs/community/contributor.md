@@ -13,7 +13,7 @@ Thank you for investing your time in contributing to the project! Any contributi
     * **Git**: This is a very useful tool to keep track of the changes in your files. Using the command-line interface (CLI), you can make your contributions easily. For that, you need to have it [installed and updated](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your computer.
     * **GitHub**: It is a platform and cloud-based service that uses git and allows developers to collaborate on projects. To contribute to Argilla, you'll need to create an account. Check the [Contributor Workflow with Git and Github](#contributor-workflow-with-git-and-github) for more info.
     * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [developer documentation](../getting_started/installation.md) to know how to do it.
-    * **Schedule a meeting with our developer advocate**: If you have more questions, do not hesitate to contact our developer advocate and [schedule a meeting](https://calendly.com/argilla-office-hours/30min).
+    * **Schedule a meeting with our developer advocate**: If you have more questions, do not hesitate to contact our developer advocate and [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min).
 
 ## First Contact in Slack
 
