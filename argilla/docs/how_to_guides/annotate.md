@@ -77,7 +77,7 @@ If you are starting an annotation effort, all the records are initially kept in 
 
 ### Suggestions
 
-If your dataset includes model prediction, you will see them represented by a sparkle icon `✨` in the label or value button. We call them “Suggestions”, and they appear in the form as pre-filled responses. If the suggestions convince you, you just need to click on the Submit button, and they will be considered as another annotation.
+If your dataset includes model predictions, you will see them represented by a sparkle icon `✨` in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If you agree with the suggestion, you just need to click on the Submit button, and they will be considered as your response.
 
 If the suggestion is incorrect, you can modify it and submit it.
 
