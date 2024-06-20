@@ -453,7 +453,7 @@ dataset.records.log(records=updated_data)
     ```
 
 === "Update vectors"
-    When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata. 
+    When a new vector field is added to the dataset settings, or some value for the existing record vectors must updated, you can iterate over the records and update the vectors in the same way as the metadata.
 
     ```python
     updated_records = []
