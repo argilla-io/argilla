@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
+
 ### Removed
 
 - Removed all API v0 endpoints. ([#4852](https://github.com/argilla-io/argilla/pull/4852))
