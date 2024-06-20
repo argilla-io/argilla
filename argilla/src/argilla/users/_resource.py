@@ -15,7 +15,7 @@
 from typing import Optional
 from uuid import UUID
 
-from argilla import Workspace
+from argilla.workspaces import Workspace
 from argilla._api import UsersAPI
 from argilla._models import UserModel, Role
 from argilla._resource import Resource
