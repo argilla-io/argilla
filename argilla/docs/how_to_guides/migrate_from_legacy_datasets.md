@@ -279,7 +279,6 @@ new_dataset.records.log(
         with_responses=True, # (1)
         with_suggestions=True,
         with_vectors=True,
-        with_metadata=True,
     )
 )
 ```
