@@ -16,7 +16,7 @@ To work with Argilla datasets, you need to use the Argilla SDK. You can install 
     The package is not yet available on PyPi. You'll need to install it directly from the GitHub repository.
 
 ```console
-pip install git+https://github.com/argilla-io/argilla-python.git
+pip install argilla --pre
 ```
 
 ### Run the Argilla server

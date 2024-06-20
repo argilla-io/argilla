@@ -14,10 +14,10 @@ Closes #<issue_number>
 - Documentation update
 
 **How Has This Been Tested**
-<!--  Please delete options that are not relevant. Remember to title the PR according to the type of change  -->
+<!--  Please add some reference about how your feature has been tested.  -->
 
 **Checklist**
-<!--  Please go over the checklist and make sure you've taken everything into account -->
+<!--  Please go over the list and make sure you've taken everything into account -->
 
 - I added relevant documentation
 - follows the style guidelines of this project
