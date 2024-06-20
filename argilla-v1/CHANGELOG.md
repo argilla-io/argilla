@@ -17,7 +17,7 @@ These are the section headers that we use:
 ## [Unreleased]()
 
 > [!NOTE]
-> As per the release of our 2.0 SDK, this changelog is deprecated and will only contain potential bug fix fixed for the 1.x SDK, but it will not contain any new features. For the latest features and changes, please refer to the [2.0 SDK changelog](../argilla/CHANGELOG.md).
+> As per the release of our 2.0 SDK, this changelog is deprecated and will only contain potential bug fixes for the 1.x SDK, but it will not contain any new features. For the latest features and changes, please refer to the [2.0 SDK changelog](../argilla/CHANGELOG.md).
 
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 
