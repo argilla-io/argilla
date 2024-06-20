@@ -44,6 +44,7 @@ class UpsertResponsesInBulkUseCase:
                     raise errors.NotFoundError(f"Record with id `{item.record_id}` not found")
 
                 await authorize(user, RecordPolicy.create_response(record))
+
                 response = await datasets.upsert_response(self.db, self.search_engine, record, user, item)
             except Exception as err:
                 responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))

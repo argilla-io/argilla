@@ -33,6 +33,7 @@ from argilla_server.enums import (
     ResponseStatus,
     SuggestionType,
     UserRole,
+    DatasetDistributionStrategy,
 )
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
@@ -360,6 +361,10 @@ class Dataset(DatabaseModel):
     @property
     def is_ready(self):
         return self.status == DatasetStatus.ready
+
+    @property
+    def distribution_strategy(self) -> DatasetDistributionStrategy:
+        return DatasetDistributionStrategy(self.distribution["strategy"])
 
     def metadata_property_by_name(self, name: str) -> Union["MetadataProperty", None]:
         for metadata_property in self.metadata_properties:

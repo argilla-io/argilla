@@ -60,7 +60,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
-from argilla_server.contexts import accounts
+from argilla_server.contexts import accounts, distribution
 from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
@@ -936,6 +936,7 @@ async def create_response(
         )
 
         await db.flush([response])
+        await distribution.refresh_record_status(db, record, autocommit=False)
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
 
@@ -959,6 +960,7 @@ async def update_response(
         )
 
         await _load_users_from_responses(response)
+        await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
@@ -988,6 +990,7 @@ async def upsert_response(
         )
 
         await _load_users_from_responses(response)
+        await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
@@ -1000,6 +1003,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
         await _load_users_from_responses(response)
+        await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
 
