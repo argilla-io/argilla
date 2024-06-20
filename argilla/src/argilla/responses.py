@@ -19,6 +19,7 @@ from uuid import UUID
 from argilla._models import UserResponseModel, ResponseStatus as ResponseStatusModel
 from argilla._resource import Resource
 from argilla.settings import RankingQuestion
+from argilla.users import DELETED_USER
 
 if TYPE_CHECKING:
     from argilla import Argilla, Dataset, Record
@@ -143,7 +144,7 @@ class UserResponse(Resource):
         self._model.status = status
 
     @property
-    def user_id(self) -> UUID:
+    def user_id(self) -> Optional[UUID]:
         """Returns the user_id of the UserResponse"""
         return self._model.user_id
 
@@ -160,6 +161,10 @@ class UserResponse(Resource):
     @classmethod
     def from_model(cls, model: UserResponseModel, dataset: "Dataset") -> "UserResponse":
         """Creates a UserResponse from a ResponseModel"""
+
+        if model.user_id is None:
+            model.user_id = DELETED_USER.id
+
         answers = cls.__model_as_response_list(model)
         for answer in answers:
             question = dataset.settings.question_by_name(answer.question_name)
