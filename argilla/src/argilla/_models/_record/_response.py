@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import warnings
 from enum import Enum
 from typing import Dict, Optional, Union, Any
 from uuid import UUID
 
-from pydantic import BaseModel, field_serializer, field_validator, Field
+from pydantic import BaseModel, field_serializer, Field, ConfigDict
 
 
 class ResponseStatus(str, Enum):
@@ -33,20 +32,10 @@ class UserResponseModel(BaseModel):
     status: ResponseStatus
     user_id: Optional[UUID] = Field(None, validate_default=True)
 
-    class Config:
-        validate_assignment = True
-
-    @field_validator("user_id")
-    @classmethod
-    def user_id_must_have_value(cls, user_id: Optional[UUID]):
-        if not user_id:
-            warnings.warn(
-                "`user_id` not provided, so it will be set to `None`. Which is not an"
-                " issue, unless you're planning to log the response in Argilla, as"
-                " it will be automatically set to the active `user_id`.",
-            )
-        return user_id
+    model_config = ConfigDict(
+        validate_assignment=True,
+    )
 
     @field_serializer("user_id", when_used="always")
-    def serialize_user_id(value: UUID) -> str:
+    def serialize_user_id(self, value: UUID) -> str:
         return str(value)
