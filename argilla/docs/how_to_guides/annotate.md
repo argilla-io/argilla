@@ -90,7 +90,8 @@ For label questions, admins can also choose the ordering of labels in the datase
 
 This is the default view to annotate your dataset linearly, displaying one record after another.
 
-**You should use this when:** getting acquainted with a dataset or when the annotation team is very diverse, the topic is generic.
+!!! tip
+    You should use this when getting acquainted with a dataset or when the annotation team is very diverse, the topic is generic.
 
 Once you submit your first response, the next record will appear automatically. To see again your submitted record, just click on prev.
 
@@ -108,9 +109,11 @@ The bulk view is designed to speed up the annotation and get a quick overview of
 
 It displays the records in a vertical list. Once the view is active, some functions from the **control panel** will be available to optimize the records reading. You define the number of records to display by page between `10`, `25`, `50` , `100` and the option to fix the card height by selecting `Expand records` or `Collapse records`.
 
-**You should use this when:** you have a good understanding of your data and want to apply your knowledge based on things like similarity search, filter patterns, and suggestion score thresholds.
+!!! tip
+    You should use this when you have a good understanding of your data and want to apply your knowledge based on things like similarity search, filter patterns, and suggestion score thresholds.
 
-**You should consider that:** bulk view does not show suggestions in bulk view (except for Spans) and will always convert questions to Draft queue when working with multiple question types.
+!!! note
+    You should consider that bulk view does not show suggestions in bulk view (except for Spans) and will always convert questions to Draft queue when working with multiple question types.
 
 !!! tip
     With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per records from the draft queue.
@@ -129,7 +132,8 @@ It displays the records in a vertical list. Once the view is active, some functi
 
 The UI offers various features designed to enhance your understanding of data patterns and streamline annotation tasks. Combining filters with bulk annotations can save you and your team hours of time.
 
-**You should use this when:** you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.
+!!! tip
+    You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.
 
 ### Search and highlight
 
