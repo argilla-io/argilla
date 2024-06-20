@@ -31,7 +31,6 @@ from argilla.settings import TextField, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionPropertyBase
 from argilla.suggestions import Suggestion
-from argilla.vectors import Vector
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
