@@ -119,7 +119,7 @@ def test_import_dataset_from_disk(dataset: rg.Dataset, client):
 
     for i, record in enumerate(new_dataset.records(with_suggestions=True)):
         assert record.fields["text"] == mock_data[i]["text"]
-        assert record.suggestions.label.value == mock_data[i]["label"]
+        assert record.suggestions["label"].value == mock_data[i]["label"]
 
     assert new_dataset.settings.fields[0].name == "text"
     assert new_dataset.settings.questions[0].name == "label"

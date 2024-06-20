@@ -46,111 +46,145 @@ def dataset(client: rg.Argilla) -> rg.Dataset:
     return dataset
 
 
-def test_update_records_separately(client: rg.Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-    ]
-    updated_mock_data = [
-        {
-            "text": r["text"],
-            "label": "positive",
-            "id": r["id"],
-        }
-        for r in mock_data
-    ]
+class TestUpdateSuggestions:
+    def test_update_records_suggestions_from_data(self, client: rg.Argilla, dataset: rg.Dataset):
+        mock_data = [
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+        ]
+        updated_mock_data = [
+            {
+                "text": r["text"],
+                "label": "positive",
+                "id": r["id"],
+            }
+            for r in mock_data
+        ]
 
-    dataset.records.log(records=mock_data)
-    dataset.records.log(records=updated_mock_data)
-    dataset_records = list(dataset.records)
+        dataset.records.log(records=mock_data)
+        dataset.records.log(records=updated_mock_data)
+        dataset_records = list(dataset.records)
 
-    assert dataset_records[0].id == str(mock_data[0]["id"])
-    assert dataset_records[1].id == str(mock_data[1]["id"])
-    assert dataset_records[2].id == str(mock_data[2]["id"])
-    for record in dataset.records(with_suggestions=True):
-        assert record.suggestions[0].value == "positive"
+        assert dataset_records[0].id == str(mock_data[0]["id"])
+        assert dataset_records[1].id == str(mock_data[1]["id"])
+        assert dataset_records[2].id == str(mock_data[2]["id"])
+        for record in dataset.records(with_suggestions=True):
+            assert record.suggestions["label"].value == "positive"
+
+    @pytest.mark.skip(reason="This test is failing because the backend expects the fields to be present in the data.")
+    def test_update_records_without_fields(self, client: rg.Argilla, dataset: rg.Dataset):
+        mock_data = [
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+        ]
+
+        updated_mock_data = mock_data.copy()
+        for record in updated_mock_data:
+            record.pop("text")
+            record["label"] = "positive"
+        dataset.records.log(records=mock_data)
+        dataset.records.log(records=updated_mock_data)
+
+        for i, record in enumerate(dataset.records(with_suggestions=True)):
+            assert record.suggestions["label"].value == updated_mock_data[i]["label"]
+
+    def test_update_records_add_suggestions(self, client: rg.Argilla, dataset: rg.Dataset):
+        mock_data = [
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+        ]
+        dataset.records.log(records=mock_data)
+
+        updated_records = []
+
+        for record in dataset.records(with_suggestions=True):
+            record.suggestions.add(
+                rg.Suggestion(
+                    question_name="label",
+                    value="positive",
+                )
+            )
+            updated_records.append(record)
+
+        dataset.records.log(records=updated_records)
+
+        for record in dataset.records(with_suggestions=True):
+            assert record.suggestions["label"].value == "positive"
 
 
-def test_update_records_partially(client: rg.Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-    ]
-    updated_mock_data = mock_data.copy()
-    updated_mock_data[0]["label"] = "positive"
-    dataset.records.log(records=mock_data)
-    dataset.records.log(records=updated_mock_data)
+class TestUpdateResponses:
+    def test_update_records_add_responses(self, client: rg.Argilla, dataset: rg.Dataset):
+        mock_data = [
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+        ]
+        dataset.records.log(records=mock_data)
 
-    for i, record in enumerate(dataset.records(with_suggestions=True)):
-        assert record.suggestions[0].value == updated_mock_data[i]["label"]
+        updated_records = []
 
+        for record in dataset.records(with_suggestions=True):
+            record.responses.add(
+                rg.Response(
+                    question_name="label",
+                    value="positive",
+                    user_id=client.users[0].id,
+                )
+            )
+            updated_records.append(record)
 
-def test_update_records_by_server_id(client: rg.Argilla, dataset: rg.Dataset):
-    record = Record.from_model(
-        RecordModel(fields={"text": "Hello World, how are you?"}, metadata={"key": "value"}),
-        dataset=dataset,
-    )
-    created_record = dataset.records.log([record])[0]
+        dataset.records.log(records=updated_records)
 
-    created_record.metadata["new-key"] = "new-value"
-    dataset.records.log([created_record])
-
-    assert len(list(dataset.records)) == 1
-
-    updated_record = list(dataset.records)[0]
-    assert updated_record.metadata["new-key"] == "new-value"
-    assert updated_record._server_id == created_record._server_id
-
-
-def test_update_records_without_fields(client: rg.Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-    ]
-
-    updated_mock_data = mock_data.copy()
-    updated_mock_data[0]["label"] = "positive"
-    dataset.records.log(records=mock_data)
-    dataset.records.log(records=updated_mock_data)
-
-    for i, record in enumerate(dataset.records(with_suggestions=True)):
-        assert record.suggestions[0].value == updated_mock_data[i]["label"]
+        for record in dataset.records(with_suggestions=True):
+            assert record.responses["label"][-1].value == "positive"

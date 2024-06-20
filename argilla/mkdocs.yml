@@ -1,13 +1,13 @@
 # Project information
 site_name: Argilla Docs
-site_url: https://argilla-io.github.io/argilla-python
+site_url: https://argilla-io.github.io/argilla/
 site_author: Argilla, Inc.
 site_description: The Argilla python server SDK
 copyright: Copyright &copy; 2017 - 2024 Argilla
 
 # Repository
 repo_name: argilla-io/argilla
-repo_url: https://github.com/argilla-io/argilla
+repo_url: https://github.com/argilla-io/argilla/
 edit_uri: edit/main/argilla/docs/
 
 extra:
@@ -139,6 +139,7 @@ nav:
       - Manage and create datasets: how_to_guides/dataset.md
       - Add, update, and delete records: how_to_guides/record.md
       - Query, filter, and export records: how_to_guides/query_export.md
+      - Annotate a dataset: how_to_guides/annotate.md
       - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md

@@ -14,10 +14,10 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [Unreleased]()
+## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc)
 
 > [!NOTE]
-> As per the release of our 2.0 SDK, this changelog is deprecated and will only contain potential bug fixes for the 1.x SDK, but it will not contain any new features. For the latest features and changes, please refer to the [2.0 SDK changelog](../argilla/CHANGELOG.md).
+> This releas for 2.0.0rc1 does not contain any changelog entries because it is the first release candidate for the 2.0.0 version. The following versions will contain the changelog entries again. For a general overview of the changes in the 2.0.0 version, please refer to [our blog](https://argilla.io/blog/) or [our new documentation](https://argilla-io.github.io/argilla/latest).
 
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 

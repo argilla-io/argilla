@@ -31,7 +31,6 @@ from argilla.settings import TextField, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionPropertyBase
 from argilla.suggestions import Suggestion
-from argilla.vectors import Vector
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -212,7 +211,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, str]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> List[Record]:
+    ) -> "DatasetRecords":
         """Add or update records in a dataset on the server using the provided records.
         If the record includes a known `id` field, the record will be updated.
         If the record does not include a known `id` field, the record will be added as a new record.
@@ -254,7 +253,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             level="info",
         )
 
-        return created_or_updated
+        return self
 
     def delete(
         self,
