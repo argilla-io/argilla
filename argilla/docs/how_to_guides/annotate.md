@@ -46,7 +46,7 @@ To move from a question to another, or between records using the keyboard you ma
 !!! tip
     Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.
 
-??? "Consult the available shortcuts"
+??? "Available shortcuts"
 
     | Action | Keys |
     | --- | --- |
