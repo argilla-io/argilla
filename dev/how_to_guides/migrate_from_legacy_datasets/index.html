@@ -1756,7 +1756,7 @@
 
 
 <h1 id="migrate-your-legacy-datasets-to-argilla-v2">Migrate your legacy datasets to Argilla V2<a class="headerlink" href="#migrate-your-legacy-datasets-to-argilla-v2" title="Permanent link">&para;</a></h1>
-<p>This guide will help you migrate task specific datasets to Argilla V2. These do not include the <code>FeedbackDataset</code> which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the <a href="https://argilla.io/blog/introducing-argilla-new-sdk/">SDK migration blog post</a>. </p>
+<p>This guide will help you migrate task specific datasets to Argilla V2. These do not include the <code>FeedbackDataset</code> which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the <a href="https://argilla.io/blog/introducing-argilla-new-sdk/">SDK migration blog post</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Legacy Datasets include: <code>DatasetForTextClassification</code>, <code>DatasetForTokenClassification</code>, and <code>DatasetForText2Text</code>.</p>
@@ -1768,9 +1768,9 @@
 <li>An argilla &gt;=1.29 server instance running. If you don't have one, you can create one by following the <a href="../../getting_started/installation.md">Argilla installation guide</a>.</li>
 <li>The <code>argilla</code> sdk package installed in your environment.</li>
 </ul>
-<p>If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.  </p>
+<p>If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.</p>
 <h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
-<p>The guide will take you through three steps: </p>
+<p>The guide will take you through three steps:</p>
 <ol>
 <li><strong>Retrieve the legacy dataset</strong> from the Argilla V1 server using the new <code>argilla</code> package.</li>
 <li><strong>Define the new dataset</strong> in the Argilla V2 format.</li>
@@ -1969,7 +1969,7 @@
 </div>
 </div>
 <p>The functions above depend on the <code>users_by_name</code> dictionary and the <code>current_user</code> object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># For </span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># For</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">users_by_name</span> <span class="o">=</span> <span class="p">{</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">:</span> <span class="n">user</span> <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="p">}</span>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">current_user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">me</span>
 </span></code></pre></div>
