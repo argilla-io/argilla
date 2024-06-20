@@ -488,3 +488,44 @@ class User(DatabaseModel):
             f"username={self.username!r}, role={self.role.value!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
+
+
+from sqlalchemy import event
+from sqlalchemy.orm import Session
+
+
+def refresh_record_status(db: Session, record: Record) -> None:
+    if record.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
+        return _refresh_record_status_with_overlap_strategy(db, record)
+
+    raise NotImplementedError(f"unsupported distribution strategy `{record.dataset.distribution_strategy}`")
+
+
+def _refresh_record_status_with_overlap_strategy(db: Session, record: Record) -> None:
+    count_record_submitted_responses = (
+        db.query(Response).filter_by(status=ResponseStatus.submitted, record_id=record.id).count()
+    )
+
+    if count_record_submitted_responses >= record.dataset.distribution["min_submitted"]:
+        record.status = RecordStatus.completed
+    else:
+        record.status = RecordStatus.pending
+
+    db.add(record)
+
+
+@event.listens_for(Response, "after_insert")
+@event.listens_for(Response, "after_update")
+@event.listens_for(Response, "after_delete")
+def refresh_record_status_listener(mapper, connection, response: Response):
+    from sqlalchemy.orm import Session
+
+    session = Session.object_session(response)
+    if session is None:
+        return
+
+    record = session.query(Record).get(response.record_id)
+    if record is None:
+        return
+
+    refresh_record_status(session, record)
