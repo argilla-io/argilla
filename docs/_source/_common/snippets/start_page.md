@@ -2,7 +2,7 @@
 
 # Welcome to
 
-## Argilla is a platform to build high-quality AI datasets
+## Argilla is a platform for building high-quality AI datasets
 
 If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
 
@@ -12,19 +12,15 @@ If you need support join the [Argilla Slack community](https://join.slack.com/t/
 
 Get started by publishing your first dataset.
 
-### 1. Open an IDE, Jupyter or Collab
-
-If you're a Collab user, you can directly use our [introductory tutorial](https://colab.research.google.com/github/argilla-io/argilla/blob/develop/docs/_source/getting_started/quickstart_workflow_feedback.ipynb).
-
-### 2. Install the SDK with pip
+### 1. Install the SDK with pip
 
 To work with Argilla datasets, you need to use the Argilla SDK. You can install the SDK with pip as follows:
 
 ```sh
-pip install argilla -U
+pip install argilla -U --pre
 ```
 
-### 3. Connect to your Argilla server
+### 2. Connect to your Argilla server
 
 Get your `ARGILLA_API_URL`:
 
@@ -38,51 +34,66 @@ Make sure to replace `ARGILLA_API_URL` and `ARGILLA_API_KEY` in the code below. 
 ```python
 import argilla as rg
 
-rg.init(
-    api_url="ARGILLA_API_URL",
-    api_key="ARGILLA_API_KEY",
-    # extra_headers={"Authorization": f"Bearer {"HF_TOKEN"}"}
+client = rg.Argilla(
+    api_url="<api_url>",
+    api_key="<api_key>"
+    # extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
-### 4. Create your first dataset
+### 3. Create your first dataset
 
-Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user-settings). To create a new workspace, check the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html).
+Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user-settings). To create a new workspace, check the [docs](https://argilla-io.github.io/argilla/latest/how_to_guides/workspace/).
 
-Create a Dataset with two labels ("sadness" and "joy"). Don't forget to replace "<your-workspace>". Here, we are using a task template, check the docs to [create a fully custom dataset](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html).
+Create a Dataset with two labels ("positive" and "negative"). Don't forget to replace "<your-workspace>". Here, we are using a task template, check the docs to [create a fully custom dataset](https://argilla-io.github.io/argilla/latest/how_to_guides/dataset/).
 
 ```python
-dataset = rg.FeedbackDataset.for_text_classification(
-    labels=["sadness", "joy"],
-    multi_label=False,
-    use_markdown=True,
-    guidelines=None,
-    metadata_properties=None,
-    vectors_settings=None,
+settings = rg.Settings(
+    guidelines="Classify the reviews as positive or negative.",
+    fields=[
+        rg.TextField(
+            name="review",
+            title="Text from the review",
+            use_markdown=False,
+        ),
+    ],
+    questions=[
+        rg.LabelQuestion(
+            name="my_label",
+            title="In which category does this article fit?",
+            labels=["positive", "negative"],
+        )
+    ],
 )
-dataset.push_to_argilla(name="my-first-dataset", workspace="<your-workspace>")
+dataset = rg.Dataset(
+    name=f"my_first_dataset",
+    workspace="<your-workspace>",
+    settings=settings,
+    client=client,
+)
+dataset.create()
 ```
 
-### 5. Add records
+### 4. Add records
 
-Create a list with the records you want to add. Ensure that you match the fields with the ones specified in the previous step.
+You canCreate a list with the records you want to add. Ensure that you match the fields with the ones specified in the previous step.
 
-You can also use `pandas` or `load_dataset` to [read an existing dataset and create records from it](https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/records.html#add-records).
+You can also use `pandas` or `datasets.load_dataset` to [read an existing dataset and create records from it](https://argilla-io.github.io/argilla/latest/how_to_guides/record/).
 
 ```python
 records = [
-    rg.FeedbackRecord(
+    rg.Record(
         fields={
-            "text": "I am so happy today",
+            "review": "This is a great product.",
         },
     ),
-    rg.FeedbackRecord(
+    rg.Record(
         fields={
-            "text": "I feel sad today",
+            "review": "This is a bad product.",
         },
-    )
+    ),
 ]
-dataset.add_records(records)
+dataset.records.log(records)
 ```
 
 </div>
