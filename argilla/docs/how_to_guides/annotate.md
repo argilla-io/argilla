@@ -172,7 +172,7 @@ If the dataset contains metadata, responses and suggestions, click on **Filter*
     From the `Responses` dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.
 
     !!! note
-    The text and ranking questions are not available for filtering.
+        The text and ranking questions are not available for filtering.
 
 === "By suggestions"
 
