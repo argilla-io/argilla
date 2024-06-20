@@ -45,7 +45,7 @@ client = rg.Argilla(
 
 Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user-settings). To create a new workspace, check the [docs](https://argilla-io.github.io/argilla/latest/how_to_guides/workspace/).
 
-Create a Dataset with two labels ("positive" and "negative"). Don't forget to replace "<your-workspace>". Here, we are using a task template, check the docs to [create a fully custom dataset](https://argilla-io.github.io/argilla/latest/how_to_guides/dataset/).
+Here, we are defining a creating a dataset with a text field and a label question ("positive" and "negative"), check the docs to [create a fully custom dataset](https://argilla-io.github.io/argilla/latest/how_to_guides/dataset/). Don't forget to replace "<your-workspace>". 
 
 ```python
 settings = rg.Settings(
@@ -76,7 +76,7 @@ dataset.create()
 
 ### 4. Add records
 
-You canCreate a list with the records you want to add. Ensure that you match the fields with the ones specified in the previous step.
+You can create a list with records that you want to add. Ensure that you match the fields with those specified in the question settings.
 
 You can also use `pandas` or `datasets.load_dataset` to [read an existing dataset and create records from it](https://argilla-io.github.io/argilla/latest/how_to_guides/record/).
 
