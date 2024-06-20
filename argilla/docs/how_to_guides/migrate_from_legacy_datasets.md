@@ -258,29 +258,3 @@ dataset.records.log(records)
 ```
 You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).
 
-## Migrating Feedback Datasets on your Argilla 1.* server
-
-As mentioned above, `FeedbackDataset`'s are compatible with Argilla V2 and do not need to be reformatted. However, you may want to migrate your feedback datasets to the new server so that you can deprecate your Argilla 1.* server. Here is a guide on how to migrate your feedback datasets:
-
-```python
-import argilla as rg
-
-# Initialize the API with an Argilla server less than 2.0
-old_client = rg.Argilla(old_server_api_url, old_server_api_key)
-new_client = rg.Argilla(new_server_api_url, new_server_api_key) 
-
-dataset_name = "feedback-dataset"
-old_dataset = old_client.datasets(name=dataset_name)
-new_dataset = new_client.datasets.add(old_dataset)
-
-# Load the records from the old server
-new_dataset.records.log(
-    old_dataset.records(
-        with_responses=True, # (1)
-        with_suggestions=True,
-        with_vectors=True,
-    )
-)
-```
-
-1. The `with_responses`, `with_suggestions`, `with_vectors`, and `with_metadata` flags are used to load the records with the responses, suggestions, vectors, and metadata respectively.
