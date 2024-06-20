@@ -205,9 +205,6 @@ Once your PR is merged, your contributions will be publicly visible on the [Argi
 
 Additionally, we will include your changes in the next release based on our [development branch](https://github.com/argilla-io/argilla/tree/develop).
 
-We will probably contact you, but if you would like to send your personal information (LinkedIn, profile picture, GitHub) to [David](mailto:david@argilla.io), he can set everything up for receiving your JustDiggit bunds and a LinkedIn shoutout.
-
-
 ## Additional resources
 
 Here are some helpful resources for your reference.
