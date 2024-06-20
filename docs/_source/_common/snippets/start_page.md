@@ -45,7 +45,7 @@ client = rg.Argilla(
 
 Specify a workspace where the dataset will be created. Check your workspaces in ["My settings"](/user-settings). To create a new workspace, check the [docs](https://argilla-io.github.io/argilla/latest/how_to_guides/workspace/).
 
-Here, we are defining a creating a dataset with a text field and a label question ("positive" and "negative"), check the docs to [create a fully custom dataset](https://argilla-io.github.io/argilla/latest/how_to_guides/dataset/). Don't forget to replace "<your-workspace>". 
+Here, we are defining a creating a dataset with a text field and a label question ("positive" and "negative"), check the docs to [create a fully custom dataset](https://argilla-io.github.io/argilla/latest/how_to_guides/dataset/). Don't forget to replace "<your-workspace>".
 
 ```python
 settings = rg.Settings(
