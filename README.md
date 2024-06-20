@@ -81,6 +81,10 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 
 ## 👨‍💻 Getting started
 
+> [!NOTE]
+> This readme represent the release candidate for the 2.0.0 SDK version. The readme for the last stable version of the 1x SDK can be found [1.x](./argilla-v1/README.md)
+
+
 ### Installation
 
 First things first! You can install the SDK with pip as follows:
