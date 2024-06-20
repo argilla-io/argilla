@@ -2221,7 +2221,7 @@
 </span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>
 </span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="c1"># Access the responses of the record</span>
 </span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">responses</span><span class="p">:</span>
-</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">question_name</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="p">[</span><span class="s2">&quot;&lt;question_name&gt;&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="update-records">Update records<a class="headerlink" href="#update-records" title="Permanent link">&para;</a></h2>
 <p>You can update records in a dataset calling the <code>log</code> method on the <code>Dataset</code> object. To update a record, you need to provide the record <code>id</code> and the new data to be updated.</p>
