@@ -19,8 +19,7 @@ from string import ascii_lowercase
 import pytest
 
 import argilla as rg
-from argilla import Record
-from argilla._models import RecordModel
+from argilla.users import DELETED_USER
 
 
 @pytest.fixture
@@ -188,3 +187,32 @@ class TestUpdateResponses:
 
         for record in dataset.records(with_suggestions=True):
             assert record.responses["label"][-1].value == "positive"
+
+    def test_update_record_with_responses_for_deleted_users(self, client: rg.Argilla, dataset: rg.Dataset):
+        new_user = rg.User(username=f"test_user_{uuid.uuid4()}", password="test_password").create()
+        workspace = rg.Workspace(id=dataset.workspace_id).get()
+
+        workspace.users.add(new_user)
+
+        record = rg.Record(
+            id=uuid.uuid4(),
+            fields={"text": "Hello World, how are you?"},
+            responses=[rg.Response(question_name="label", user_id=new_user.id, value="positive")],
+        )
+        dataset.records.log([record])
+
+        new_user.delete()
+        records = list(dataset.records)
+        assert len(records) == 1
+        record = records[0]
+        assert record.responses["label"][0].user_id == DELETED_USER.id
+
+        record.responses.add(rg.Response(question_name="label", user_id=client.me.id, value="negative"))
+        dataset.records.log([record])
+
+        records = list(dataset.records)
+        assert len(records) == 1
+        record = records[0]
+
+        assert record.responses["label"][0].user_id == DELETED_USER.id
+        assert record.responses["label"][1].user_id == client.me.id
