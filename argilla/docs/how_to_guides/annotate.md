@@ -128,7 +128,7 @@ The UI offers various features designed for data exploration and understanding. 
 
 ### Search and highlight
 
-From the **control panel** at the top of the left pane, you can search keywords across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
+From the **control panel** at the top of the left pane, you can search by keyword across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
 
 ### Order by record semantic similarity
 
