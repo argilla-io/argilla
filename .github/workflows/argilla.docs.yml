@@ -62,11 +62,11 @@ jobs:
       - run: pdm run mike deploy dev --push
         if: github.ref == 'refs/heads/develop'
 
-      - name: pdm run mike deploy $version
+      - name: pdm run mike deploy $version --push
         run: |
           version=$(echo $TAG_VERSION | awk -F \. {'print $1"."$2'})
           echo "Deploying version ${version}"
-          pdm run mike deploy $version
+          pdm run mike deploy $version --push
         if: startsWith(github.ref, 'refs/tags/')
         env:
           TAG_VERSION: ${{ github.ref_name }}
