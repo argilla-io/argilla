@@ -31,7 +31,7 @@ The UI is responsive with two columns for larger devices and one column for smal
 
 === "Left bottom panel"
 
-    This expandable area displays the annotation guidelines.
+    This expandable area displays the annotation guidelines. The annotation guidelines can be edited by owner and admin roles in the dataset settings.
 
 === "Right bottom panel"
 
