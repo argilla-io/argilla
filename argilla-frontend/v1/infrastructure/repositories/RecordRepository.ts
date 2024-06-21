@@ -101,6 +101,16 @@ export class RecordRepository {
         request
       );
 
+      const datasetId =
+        Array.isArray(records) && records.length > 0
+          ? records[0].datasetId
+          : null;
+
+      if (datasetId) {
+        revalidateCache(`/v1/datasets/${datasetId}/progress`);
+        revalidateCache(`/v1/me/datasets/${datasetId}/metrics`);
+      }
+
       return data.items.map(({ item, error }) => {
         if (item) {
           return {
@@ -139,6 +149,9 @@ export class RecordRepository {
         request
       );
 
+      revalidateCache(`/v1/datasets/${record.datasetId}/progress`);
+      revalidateCache(`/v1/me/datasets/${record.datasetId}/metrics`);
+
       return new RecordAnswer(data.id, status, data.values, data.updated_at);
     } catch (error) {
       throw {
@@ -160,6 +173,7 @@ export class RecordRepository {
       );
 
       revalidateCache(`/v1/datasets/${record.datasetId}/progress`);
+      revalidateCache(`/v1/me/datasets/${record.datasetId}/metrics`);
 
       return new RecordAnswer(
         data.id,

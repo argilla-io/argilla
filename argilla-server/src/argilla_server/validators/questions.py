@@ -14,19 +14,16 @@
 
 from typing import List
 
-from argilla_server.enums import QuestionType
-from argilla_server.models.database import Dataset, Question
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionSettings,
     QuestionSettingsUpdate,
     QuestionUpdate,
     SpanQuestionSettings,
 )
-
-
-class InvalidQuestionSettings(Exception):
-    pass
+from argilla_server.enums import QuestionType
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models.database import Dataset, Question
 
 
 class QuestionCreateValidator:
@@ -39,7 +36,7 @@ class QuestionCreateValidator:
 
     def _validate_dataset_is_not_ready(self, dataset):
         if dataset.is_ready:
-            raise ValueError("questions cannot be created for a published dataset")
+            raise UnprocessableEntityError("questions cannot be created for a published dataset")
 
     def _validate_span_question_settings(self, dataset: Dataset):
         if self._question_create.settings.type != QuestionType.span:
@@ -49,11 +46,13 @@ class QuestionCreateValidator:
         field_names = [field.name for field in dataset.fields]
 
         if field not in field_names:
-            raise ValueError(f"'{field}' is not a valid field name.\nValid field names are {field_names!r}")
+            raise UnprocessableEntityError(
+                f"'{field}' is not a valid field name.\nValid field names are {field_names!r}"
+            )
 
         for question in dataset.questions:
             if question.type == QuestionType.span and field == question.parsed_settings.field:
-                raise ValueError(f"'{field}' is already used by span question with id '{question.id}'")
+                raise UnprocessableEntityError(f"'{field}' is already used by span question with id '{question.id}'")
 
 
 class QuestionUpdateValidator:
@@ -88,7 +87,7 @@ class QuestionUpdateValidator:
         self, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
     ):
         if question_settings.type != question_settings_update.type:
-            raise InvalidQuestionSettings(
+            raise UnprocessableEntityError(
                 f"question type cannot be changed. expected '{question_settings.type}' but got '{question_settings_update.type}'"
             )
 
@@ -102,7 +101,7 @@ class QuestionUpdateValidator:
             return
 
         if len(question_settings.options) != len(question_settings_update.options):
-            raise InvalidQuestionSettings(
+            raise UnprocessableEntityError(
                 f"the number of options cannot be modified. expected {len(question_settings.options)} but got {len(question_settings_update.options)}"
             )
 
@@ -115,7 +114,7 @@ class QuestionUpdateValidator:
                 unexpected_options.append(update_option.value)
 
         if unexpected_options:
-            raise InvalidQuestionSettings(
+            raise UnprocessableEntityError(
                 f"the option values cannot be modified. found unexpected option values: {unexpected_options!r}"
             )
 
@@ -130,7 +129,7 @@ class QuestionUpdateValidator:
 
         number_of_options = len(question_settings.options)
         if question_settings_update.visible_options > number_of_options:
-            raise InvalidQuestionSettings(
+            raise UnprocessableEntityError(
                 f"the value for 'visible_options' must be less or equal to the number of items in 'options' ({number_of_options})"
             )
 
@@ -141,7 +140,7 @@ class QuestionUpdateValidator:
             return
 
         if question_settings.allow_overlapping and not question_settings_update.allow_overlapping:
-            raise InvalidQuestionSettings(
+            raise UnprocessableEntityError(
                 "'allow_overlapping' can't be disabled because responses may become inconsistent"
             )
 
@@ -152,4 +151,4 @@ class QuestionDeleteValidator:
 
     def _validate_dataset_is_not_ready(self, dataset):
         if dataset.is_ready:
-            raise ValueError("questions cannot be deleted for a published dataset")
+            raise UnprocessableEntityError("questions cannot be deleted for a published dataset")

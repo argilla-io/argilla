@@ -2,6 +2,7 @@ export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
   label_selection: "Label",
+  span: "Span",
   text: "Text",
   rating: "Rating",
   minimize: "Minimize",
@@ -17,11 +18,6 @@ export default {
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "All",
-  sidebar: {
-    progressTooltip: "Progress",
-    refreshTooltip: "Refresh",
-    shortcutsTooltip: "Shortcuts",
-  },
   value: "Value",
   title: "Title",
   description: "Description",
@@ -37,6 +33,7 @@ export default {
   dimension: "Dimension",
   visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
+  guidelines: "Guidelines",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
     home: "Home",
@@ -174,17 +171,16 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
-    bulkMode: "Span annotation is not supported in Bulk view",
   },
   login: {
     title: "Sign in",
     username: "Username",
     usernameDescription: "Enter your username",
     password: "Password",
+    show: "Show",
+    hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
-    support:
-      "To get support from the community, join us on <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
@@ -214,12 +210,10 @@ export default {
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
   datasetTable: {
-    name: "Name",
+    name: "Dataset",
     workspace: "Workspace",
-    task: "Task",
-    tags: "Tags",
-    createdAt: "Created at",
-    lastActivityAt: "Updated at",
+    createdAt: "Created",
+    lastActivityAt: "Updated",
   },
   metrics: {
     total: "Total",

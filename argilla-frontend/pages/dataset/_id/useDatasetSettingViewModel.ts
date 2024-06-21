@@ -10,7 +10,7 @@ import {
   useTranslate,
 } from "@/v1/infrastructure/services";
 import { DatasetSetting } from "~/v1/domain/entities/dataset/DatasetSetting";
-import { Notification } from "~/models/Notifications";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 interface Tab {
   id: "info" | "fields" | "questions" | "metadata" | "vector" | "danger-zone";
@@ -19,6 +19,7 @@ interface Tab {
 }
 
 export const useDatasetSettingViewModel = () => {
+  const notification = useNotifications();
   const routes = useRoutes();
   const beforeUnload = useBeforeUnload();
   const t = useTranslate();
@@ -93,7 +94,7 @@ export const useDatasetSettingViewModel = () => {
     ];
   });
 
-  const onGoToDataset = () => {
+  const goToDataset = () => {
     if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
 
     routes.goToFeedbackTaskAnnotationPage(datasetId);
@@ -111,15 +112,15 @@ export const useDatasetSettingViewModel = () => {
     if (datasetSetting.isVectorsModified) return goToTab("vector");
   };
 
-  const goToDataset = () => {
+  const goToOutside = (next) => {
     if (datasetSetting.isModified) {
-      return Notification.dispatch("notify", {
+      return notification.notify({
         message: t("changes_no_submit"),
         buttonText: t("button.ignore_and_continue"),
         permanent: true,
         type: "warning",
         onClick() {
-          onGoToDataset();
+          next();
         },
         onClose() {
           goToTabWithModification();
@@ -127,7 +128,7 @@ export const useDatasetSettingViewModel = () => {
       });
     }
 
-    onGoToDataset();
+    next();
   };
 
   onBeforeMount(() => {
@@ -154,6 +155,7 @@ export const useDatasetSettingViewModel = () => {
     isAdminOrOwnerRole,
     datasetId,
     datasetSetting,
+    goToOutside,
     goToDataset,
   };
 };

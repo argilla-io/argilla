@@ -20,21 +20,22 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
-from argilla_server.contexts.records import (
-    fetch_records_by_external_ids_as_dict,
-    fetch_records_by_ids_as_dict,
-)
-from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
-from argilla_server.schemas.v1.records import RecordCreate, RecordUpsert
-from argilla_server.schemas.v1.records_bulk import (
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
+from argilla_server.api.schemas.v1.records_bulk import (
     RecordsBulk,
     RecordsBulkCreate,
     RecordsBulkUpsert,
     RecordsBulkWithUpdateInfo,
 )
-from argilla_server.schemas.v1.responses import UserResponseCreate
-from argilla_server.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.api.schemas.v1.responses import UserResponseCreate
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
+from argilla_server.contexts.records import (
+    fetch_records_by_external_ids_as_dict,
+    fetch_records_by_ids_as_dict,
+)
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
 from argilla_server.validators.responses import ResponseCreateValidator
@@ -43,7 +44,6 @@ from argilla_server.validators.vectors import VectorValidator
 
 
 class CreateRecordsBulk:
-
     def __init__(self, db: AsyncSession, search_engine: SearchEngine):
         self._db = db
         self._search_engine = search_engine
@@ -70,10 +70,10 @@ class CreateRecordsBulk:
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
+
         return RecordsBulk(items=records)
 
     async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
-
         records_and_suggestions = list(zip(records, [r.suggestions for r in records_create]))
         records_and_responses = list(zip(records, [r.responses for r in records_create]))
         records_and_vectors = list(zip(records, [r.vectors for r in records_create]))
@@ -87,7 +87,6 @@ class CreateRecordsBulk:
     async def _upsert_records_suggestions(
         self, records_and_suggestions: List[Tuple[Record, List[SuggestionCreate]]]
     ) -> List[Suggestion]:
-
         upsert_many_suggestions = []
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             try:
@@ -99,11 +98,13 @@ class CreateRecordsBulk:
                     try:
                         SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
                         upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
-                    except ValueError as ex:
+                    except (UnprocessableEntityError, ValueError) as ex:
                         raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
 
-            except ValueError as ex:
-                raise ValueError(f"Record at position {idx} does not have valid suggestions because {ex}") from ex
+            except (UnprocessableEntityError, ValueError) as ex:
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid suggestions because {ex}"
+                ) from ex
 
         if not upsert_many_suggestions:
             return []
@@ -118,7 +119,6 @@ class CreateRecordsBulk:
     async def _upsert_records_responses(
         self, records_and_responses: List[Tuple[Record, List[UserResponseCreate]]]
     ) -> List[Response]:
-
         user_ids = [response.user_id for _, responses in records_and_responses for response in responses or []]
         users_by_id = await fetch_users_by_ids_as_dict(self._db, user_ids)
 
@@ -131,8 +131,10 @@ class CreateRecordsBulk:
 
                     ResponseCreateValidator(response_create).validate_for(record)
                     upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
-            except ValueError as ex:
-                raise ValueError(f"Record at position {idx} does not have valid responses because {ex}") from ex
+            except (UnprocessableEntityError, ValueError) as ex:
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid responses because {ex}"
+                ) from ex
 
         if not upsert_many_responses:
             return []
@@ -147,7 +149,6 @@ class CreateRecordsBulk:
     async def _upsert_records_vectors(
         self, records_and_vectors: List[Tuple[Record, Dict[str, List[float]]]]
     ) -> List[Vector]:
-
         upsert_many_vectors = []
         for idx, (record, vectors) in enumerate(records_and_vectors):
             try:
@@ -158,8 +159,10 @@ class CreateRecordsBulk:
 
                     VectorValidator(value).validate_for(settings)
                     upsert_many_vectors.append(dict(value=value, record_id=record.id, vector_settings_id=settings.id))
-            except ValueError as ex:
-                raise ValueError(f"Record at position {idx} does not have valid vectors because {ex}") from ex
+            except (UnprocessableEntityError, ValueError) as ex:
+                raise UnprocessableEntityError(
+                    f"Record at position {idx} does not have valid vectors because {ex}"
+                ) from ex
 
         if not upsert_many_vectors:
             return []
@@ -176,9 +179,7 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-
     async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
-
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
@@ -187,7 +188,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         records = []
         async with self._db.begin_nested():
             for record_upsert in bulk_upsert.items:
-                record = found_records.get(record_upsert.external_id or record_upsert.id)
+                record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
                 if not record:
                     record = Record(
                         fields=record_upsert.fields,
@@ -220,7 +221,6 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         dataset: Dataset,
         records_upsert: List[RecordUpsert],
     ) -> Dict[Union[str, UUID], Record]:
-
         records_by_external_id = await fetch_records_by_external_ids_as_dict(
             self._db, dataset, [r.external_id for r in records_upsert]
         )

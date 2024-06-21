@@ -12,20 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, Iterable, Sequence
+from typing import Dict, Sequence
 from uuid import UUID
 
-from sqlalchemy import select, sql
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server.models import Dataset, Record, Suggestion
+from argilla_server.models import Dataset, Record
 
 
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-
     query = select(Record).filter(Record.id.in_(record_ids), Record.dataset_id == dataset_id)
     return (await db.execute(query)).unique().scalars().all()
 
@@ -33,17 +32,12 @@ async def list_dataset_records_by_ids(
 async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
-
     query = (
         select(Record)
         .filter(Record.external_id.in_(external_ids), Record.dataset_id == dataset_id)
         .options(selectinload(Record.dataset))
     )
     return (await db.execute(query)).unique().scalars().all()
-
-
-async def delete_suggestions_by_record_ids(db: AsyncSession, record_ids: Iterable[UUID]) -> None:
-    await db.execute(sql.delete(Suggestion).filter(Suggestion.record_id.in_(record_ids)))
 
 
 async def fetch_records_by_ids_as_dict(

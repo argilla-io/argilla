@@ -1,0 +1,155 @@
+# Project information
+site_name: Argilla Docs
+site_url: https://argilla-io.github.io/argilla/
+site_author: Argilla, Inc.
+site_description: The Argilla python server SDK
+copyright: Copyright &copy; 2017 - 2024 Argilla
+
+# Repository
+repo_name: argilla-io/argilla
+repo_url: https://github.com/argilla-io/argilla/
+edit_uri: edit/main/argilla/docs/
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/argilla-io
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/argilla_io
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/rubrixworkspace/shared_invite/zt-20wllqq29-Z11~kp2SeFYjJ0qevJRiPg
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - navigation.path
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+    - search.share
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme)"
+      primary: white
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+watch:
+  - src/argilla
+
+# Extensions
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  # activating permalink: true makes the anchor link works in the notebooks
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - open-in-new-tab
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_changelog.py
+        - docs/scripts/gen_popular_issues.py
+        # - docs/scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            inherited_members: true # Allow looking up inherited methods
+          rendering:
+            show_root_heading: true # actually display anything at all...
+            # show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
+            show_if_no_docstring: true
+            show_signature_annotations: true
+            show_source: false # don't include source code
+            members_order: source # order methods according to their order of definition in the source code, not alphabetical order
+            heading_level: 4
+            # hide private members
+            private: true
+  - social
+  - mknotebooks
+
+nav:
+  - Argilla: index.md
+  - Getting started:
+      - Quickstart: getting_started/quickstart.md
+      - Installation: getting_started/installation.md
+      - FAQ: getting_started/faq.md
+  - How-to guides:
+      - how_to_guides/index.md
+      - Manage users and credentials: how_to_guides/user.md
+      - Manage workspaces: how_to_guides/workspace.md
+      - Manage and create datasets: how_to_guides/dataset.md
+      - Add, update, and delete records: how_to_guides/record.md
+      - Query, filter, and export records: how_to_guides/query_export.md
+      - Annotate a dataset: how_to_guides/annotate.md
+      - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+  - Tutorials:
+      - tutorials/index.md
+      - Text classification task: tutorials/text_classification.ipynb
+  - API Reference:
+      - Python SDK: reference/argilla/
+  - Community:
+      - community/index.md
+      - How to contribute?: community/contributor.md
+      - Issue dashboard: community/popular_issues.md
+      - Changelog: community/changelog.md
+  - UI Demo ↗:
+      - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==

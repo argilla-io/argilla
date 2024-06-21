@@ -2,6 +2,7 @@ export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
   label_selection: "Label",
+  span: "Span",
   text: "Text",
   rating: "Bewertung",
   minimize: "Minimieren",
@@ -17,11 +18,6 @@ export default {
   refresh: "Refresh",
   typeYourText: "Type your text",
   all: "Alle",
-  sidebar: {
-    progressTooltip: "Fortschritt",
-    refreshTooltip: "Aktualisieren",
-    shortcutsTooltip: "Tastenkürzel",
-  },
   title: "Titel",
   description: "Beschreibung",
   labels: "Labels",
@@ -33,6 +29,7 @@ export default {
   dimension: "Dimension",
   visibleLabels: "Sichtbare labels",
   annotationGuidelines: "Annotationsrichtlinien",
+  guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
   breadcrumbs: {
     home: "start",
@@ -164,17 +161,16 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Halten Sie 'Shift' gedrückt, um Zeichenebene auszuwählen",
     notSupported: "Bereichsannotation wird von Ihrem Browser nicht unterstützt",
-    bulkMode: "Bereichsannotation wird in der Massenansicht nicht unterstützt",
   },
   login: {
     title: "Anmelden",
     username: "Benutzername",
     usernameDescription: "Gebe Sie ihren Benutzernamen ein",
     password: "Passwort",
+    show: "Anzeigen",
+    hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
-    support:
-      "Um Unterstützung von der Community zu erhalten, folgen Sie uns auf <a href='{link}' target='_blank'>Slack</a>",
     quickstart:
       "Sie verwenden die Quickstart-Version von Argilla. Überprüfen Sie <a href='{link}' target='_blank'>diesen Leitfaden</a> um mehr über Nutzung und Konfigurationsoptionen zu erfahren.",
     hf: {
@@ -204,7 +200,7 @@ export default {
   youAreOnlineAgain: "Sie sind wieder online",
   youAreOffline: "Sie sind offline",
   datasetTable: {
-    name: "Name",
+    name: "Dataset",
     workspace: "Arbeitsbereich",
     task: "Datensatz",
     tags: "Tags",

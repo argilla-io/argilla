@@ -12,8 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError"]
+__all__ = [
+    "NotFoundError",
+    "NotUniqueError",
+    "UnprocessableEntityError",
+    "AuthenticationError",
+    "MissingVectorError",
+]
 
+NOT_FOUND_ERROR = "not_found"
+NOT_UNIQUE_ERROR = "not_unique"
 UNPROCESSABLE_ENTITY_ERROR_CODE = "unprocessable_entity"
 MISSING_VECTOR_ERROR_CODE = "missing_vector"
 
@@ -21,13 +29,17 @@ MISSING_VECTOR_ERROR_CODE = "missing_vector"
 class NotFoundError(Exception):
     """Custom Argilla not found error. Use it for situations where an Argilla domain entity has not be found on the system."""
 
-    pass
+    def __init__(self, message, code=NOT_FOUND_ERROR):
+        self.message = message
+        self.code = code
 
 
 class NotUniqueError(Exception):
     """Custom Argilla not unique error. Use it for situations where an Argilla domain entity already exists violating a constraint."""
 
-    pass
+    def __init__(self, message, code=NOT_UNIQUE_ERROR):
+        self.message = message
+        self.code = code
 
 
 class UnprocessableEntityError(Exception):
@@ -36,6 +48,11 @@ class UnprocessableEntityError(Exception):
     def __init__(self, message, code=UNPROCESSABLE_ENTITY_ERROR_CODE):
         self.message = message
         self.code = code
+
+
+# TODO: Once we move to v2.0 we can remove this error and use UnprocessableEntityError
+class MissingVectorError(UnprocessableEntityError):
+    pass
 
 
 class AuthenticationError(Exception):
