@@ -34,7 +34,7 @@ class TestUpdateDatasetSettings:
     def test_update_settings(self, client: Argilla, dataset: Dataset):
         settings = dataset.settings
 
-        settings.fields.text.use_markdown = True
+        settings.fields["text"].use_markdown = True
         dataset.settings.vectors.add(VectorField(name="vector", dimensions=10))
         dataset.settings.metadata.add(FloatMetadataProperty(name="metadata"))
         dataset.settings.update()
