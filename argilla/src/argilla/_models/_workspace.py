@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 from argilla._models import ResourceModel
 
@@ -21,7 +22,7 @@ __all__ = ["WorkspaceModel"]
 
 
 class WorkspaceModel(ResourceModel):
-    name: str
+    name: Optional[str]
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -30,8 +31,8 @@ class WorkspaceModel(ResourceModel):
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, value):
+    def validate_name(cls, value: Optional[str]) -> Optional[str]:
         """Validate the name of the workspace is url safe"""
-        if not re.match(r"^[a-zA-Z0-9_-]+$", value):
+        if value and not re.match(r"^[a-zA-Z0-9_-]+$", value):
             raise ValueError("Workspace name must be url safe")
         return value
