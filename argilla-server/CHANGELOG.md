@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed error when indexing responses without user_id. ([#5093](https://github.com/argilla-io/argilla/pull/5093))
+
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
 ### Removed
