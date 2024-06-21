@@ -121,7 +121,7 @@ You can track your annotation progress in real time from the righ-bottom panel i
 
 ## Discover patterns and speed up your annotation
 
-The UI offers various features designed to enhance your understanding of data patterns and streamline annotation tasks. Combining filters with bulk annotations can save you and your team hours of time.
+The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.
 
 !!! tip
     You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.
