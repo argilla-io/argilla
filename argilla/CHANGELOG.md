@@ -14,139 +14,126 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [Unreleased]()
+## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc)
 
-## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
-
-### Removed
-
-- Removed all API v0 endpoints. ([#4852](https://github.com/argilla-io/argilla/pull/4852))
-
-### Fixed
-
-- Fixed error when updating records in bulk with wrong `external_id` but correct record `id`. ([#5014](https://github.com/argilla-io/argilla/pull/5014))
-- Fixed error when searching all record response values. ([#5003](https://github.com/argilla-io/argilla/pull/5003))
+> [!NOTE]
+> This release for 2.0.0rc1 does not contain any changelog entries because it is the first release candidate for the 2.0.0 version. The following versions will contain the changelog entries again. For a general overview of the changes in the 2.0.0 version, please refer to [our blog](https://argilla.io/blog/) or [our new documentation](https://argilla-io.github.io/argilla/latest).
 
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 
 ### Added
 
-- Added support for rating questions to include `0` as a valid value. ([#4858](https://github.com/argilla-io/argilla/pull/4858))
-- Added `POST /api/v1/token` endpoint to generate a new API token for a user. ([#138](https://github.com/argilla-io/argilla-server/pull/138))
-- Added `GET /api/v1/me` endpoint to get the current user information. ([#140](https://github.com/argilla-io/argilla-server/pull/140))
-- Added `GET /api/v1/users` endpoint to get a list of all users. ([#142](https://github.com/argilla-io/argilla-server/pull/142))
-- Added `GET /api/v1/users/:user_id` endpoint to get a specific user. ([#166](https://github.com/argilla-io/argilla-server/pull/166))
-- Added `POST /api/v1/users` endpoint to create a new user. ([#146](https://github.com/argilla-io/argilla-server/pull/146))
-- Added `DELETE /api/v1/users` endpoint to delete a user. ([#148](https://github.com/argilla-io/argilla-server/pull/148))
-- Added `POST /api/v1/workspaces` endpoint to create a new workspace. ([#150](https://github.com/argilla-io/argilla-server/pull/150))
-- Added `GET /api/v1/workspaces/:workspace_id/users` endpoint to get the users of a workspace. ([#153](https://github.com/argilla-io/argilla-server/pull/153))
-- Added `POST /api/v1/workspaces/:workspace_id/users` endpoind to add a user to a workspace. ([#156](https://github.com/argilla-io/argilla-server/pull/156))
-- Added `DELETE /api/v1/workspaces/:workspace_id/users/:user_id` endpoint to remove a user from a workspace. ([#158](https://github.com/argilla-io/argilla-server/pull/158))
-- Added `GET /api/v1/version` endpoint to get the current Argilla version. ([#162](https://github.com/argilla-io/argilla-server/pull/162))
-- Added `GET /api/v1/status` endpoint to get Argilla service status. ([#165](https://github.com/argilla-io/argilla-server/pull/165))
+- Added support for rating questions to include `0` as a valid value. ([#4860](https://github.com/argilla-io/argilla/pull/4860))
+- Added support for Python 3.12. ([#4837](https://github.com/argilla-io/argilla/pull/4837))
+- Added search by field in the `FeedbackDataset` UI search. ([#4746](https://github.com/argilla-io/argilla/issues/4746))
+- Added record metadata info in the `FeedbackDataset` UI. ([#4851](https://github.com/argilla-io/argilla/pull/4851))
+- Added highlight on search results in the `FeedbackDataset` UI. ([#4747](https://github.com/argilla-io/argilla/issues/4747))
 
-## Fixed
+### Fixed
 
-- Fixed error when fetching record with metadata values with visibility restrictions. ([#4906](https://github.com/argilla-io/argilla/pull/4906))
+- Fix wildcard import for the whole argilla module. ([#4874](https://github.com/argilla-io/argilla/pull/4874))
+- Fix issue when record does not have vectors related. ([#4856](https://github.com/argilla-io/argilla/pull/4856))
+- Fix issue on character level. ([#4836](https://github.com/argilla-io/argilla/pull/4836))
 
-## [1.28.0](https://github.com/argilla-io/argilla-server/compare/v1.27.0...v1.28.0)
+## [1.28.0](https://github.com/argilla-io/argilla/compare/v1.27.0...v1.28.0)
 
 ### Added
 
-- Added support to specify a list of score values for suggestions `score` attribute. ([#98](https://github.com/argilla-io/argilla-server/pull/98))
-- Added `GET /api/v1/settings` new endpoint exposing Argilla and Hugging Face settings when available. ([#127](https://github.com/argilla-io/argilla-server/pull/127))
-- Added `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` new environment variable to disable warning message when Hugging Face Spaces persistent storage is disabled. ([#124](https://github.com/argilla-io/argilla-server/pull/124))
-- Added `options_order` new settings attribute to support specify an order for options in multi label selection questions. ([#133](https://github.com/argilla-io/argilla-server/pull/133))
-- Added `POST /api/v1/datasets/:dataset_id/records/bulk` endpoint. ([#106](https://github.com/argilla-io/argilla-server/pull/106))
-- Added `PUT /api/v1/datasets/:dataset_id/records/bulk` endpoint. ([#106](https://github.com/argilla-io/argilla-server/pull/106))
-
-### Deprecated
-
-- Deprecated `POST /api/v1/datasets/:dataset_id/records` in favour of `POST /api/v1/datasets/:dataset_id/records/bulk`. ([#130](https://github.com/argilla-io/argilla-server/pull/130))
-- Deprecated `PATCH /api/v1/dataset/:dataset_id/records` in favour of `PUT /api/v1/datasets/:dataset_id/records/bulk`. ([#130](https://github.com/argilla-io/argilla-server/pull/130))
-
-### Removed
-
-- Removed support for specifying `score` attributes for individual value items when creating suggestions associated with span questions. ([#101](https://github.com/argilla-io/argilla-server/pull/101))
-
-## [1.27.0](https://github.com/argilla-io/argilla-server/compare/v1.26.1...v1.27.0)
-
-### Added
-
-- Added `allow_overlapping` field for creation and update of span question settings. ([#89](https://github.com/argilla-io/argilla-server/pull/89))
-- Added `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS` environment variable to set the number of maximum items to be used by label and multi label questions. By default this value is set to `500`. ([#85](https://github.com/argilla-io/argilla-server/pull/85))
-- Added `ARGILLA_SPAN_OPTIONS_MAX_ITEMS` environment variable to set the number of maximum items to be used by span questions. By default this value is set to `500`. ([#85](https://github.com/argilla-io/argilla-server/pull/85))
-- Added `GET /api/v1/datasets/:dataset_id/progress` endpoint to return progress metrics related with one specific dataset. ([#90](https://github.com/argilla-io/argilla-server/pull/90))
+- Added suggestion multi score attribute. ([#4730](https://github.com/argilla-io/argilla/pull/4730))
+- Added order by suggestion first. ([#4731](https://github.com/argilla-io/argilla/pull/4731))
+- Added multi selection entity dropdown for span annotation overlap. ([#4735](https://github.com/argilla-io/argilla/pull/4735))
+- Added pre selection highlight for span annotation. ([#4726](https://github.com/argilla-io/argilla/pull/4726))
+- Added banner when persistent storage is not enabled. ([#4744](https://github.com/argilla-io/argilla/pull/4744))
+- Added support on Python SDK for new multi-label questions `labels_order` attribute. ([#4757](https://github.com/argilla-io/argilla/pull/4757))
 
 ### Changed
 
-- Changed ElasticSearch JVM heap size from `512m` to `1g` for quickstart Dockerfile. ([#109](https://github.com/argilla-io/argilla-server/pull/109))
-
-## [1.26.1](https://github.com/argilla-io/argilla-server/compare/v1.26.0...v1.26.1)
-
-> [!NOTE]
-> This patch version only includes changes in the argilla frontend to support RTL languages.
-> No changes where made on `argilla-server` repository for this patch version.
-
-### Added
-
-- Added latests changes from argilla to support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
-
-## [1.26.0](https://github.com/argilla-io/argilla-server/compare/v1.25.0...v1.26.0)
-
-### Added
-
-- Add support for new `span` questions. ([#54](https://github.com/argilla-io/argilla-server/pull/54))
-- Add `inserted_at` and `updated_at` missing fields to API v1 `Suggestion` schema. ([#52](https://github.com/argilla-io/argilla-server/pull/52))
-- Add validation for `visible_options` attribute when updating a a question. ([#76](https://github.com/argilla-io/argilla-server/pull/76))
-
-### Removed
-
-- Removed unused `GET /api/workspaces` endpoint. ([#83](https://github.com/argilla-io/argilla-server/pull/83))
+- Changed the way how Hugging Face space and user is showed in sign in. ([#4748](https://github.com/argilla-io/argilla/pull/4748))
 
 ### Fixed
 
-- Fixed error when returning responses from deleted users (which contains user_id=None). ([#57](https://github.com/argilla-io/argilla-server/pull/57))
+- Fixed Korean character reversed. ([#4753](https://github.com/argilla-io/argilla/pull/4753))
 
-## [1.25.0](https://github.com/argilla-io/argilla-server/compare/v1.24.0...v1.25.0)
+### Fixed
 
-> [!IMPORTANT]
-> This version include changes related to the search index. So, a reindex is needed.
-> Visit the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets) for more info.
+- Fixed requirements for version of wrapt library conflicting with Python 3.11 ([#4693](https://github.com/argilla-io/argilla/pull/4693))
+
+## [1.27.0](https://github.com/argilla-io/argilla/compare/v1.26.1...v1.27.0)
 
 ### Added
 
-- Added `ARGILLA_ES_MAPPING_TOTAL_FIELDS_LIMIT` to work with large dataset annotation flows. ([#31](https://github.com/argilla-io/argilla-server/pull/31))
-- Added support for update options for label and multi-label selection questions. ([#34](https://github.com/argilla-io/argilla-server/pull/34))
-- Added `REINDEX_DATASETS` quickstart environment variable to reindex datasets and records into the search engine. ([#39](https://github.com/argilla-io/argilla-server/pull/39))
-- Added pseudo-random shuffling of records based on the user's `id`. ([#23](https://github.com/argilla-io/argilla-server/pull/23))
+- Added Allow overlap spans in the `FeedbackDataset`. ([#4668](https://github.com/argilla-io/argilla/pull/4668))
+- Added `allow_overlapping` parameter for span questions. ([#4697](https://github.com/argilla-io/argilla/pull/4697))
+- Added overall progress bar on `Datasets` table. ([#4696](https://github.com/argilla-io/argilla/pull/4696))
+- Added German language translation. ([#4688](https://github.com/argilla-io/argilla/pull/4688))
 
 ### Changed
 
-- Changed indexing responses for search to use user `id` instead of `username`. **[Reindex needed](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#26](https://github.com/argilla-io/argilla-server/pull/26))
-- Changed search index mappings definition to optimize the number of fields. **[Reindex needed](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#31](https://github.com/argilla-io/argilla-server/pull/31))
+- New UI design for suggestions. ([#4682](https://github.com/argilla-io/argilla/pull/4682))
+
+### Fixed
+
+- Improve performance for more than 250 labels. ([#4702](https://github.com/argilla-io/argilla/pull/4702))
+
+## [1.26.1](https://github.com/argilla-io/argilla/compare/v1.26.0...v1.26.1)
+
+### Added
+
+- Added support for automatic detection of RTL languages. ([#4686](https://github.com/argilla-io/argilla/pull/4686))
+
+## [1.26.0](https://github.com/argilla-io/argilla/compare/v1.25.0...v1.26.0)
+
+### Added
+
+- If you expand the labels of a `single or multi` label Question, the state is maintained during the entire annotation process. ([#4630](https://github.com/argilla-io/argilla/pull/4630))
+- Added support for span questions in the Python SDK. ([#4617](https://github.com/argilla-io/argilla/pull/4617))
+- Added support for span values in suggestions and responses. ([#4623](https://github.com/argilla-io/argilla/pull/4623))
+- Added `span` questions for `FeedbackDataset`. ([#4622](https://github.com/argilla-io/argilla/pull/4622))
+- Added `ARGILLA_CACHE_DIR` environment variable to configure the client cache directory. ([#4509](https://github.com/argilla-io/argilla/pull/4509))
+
+### Fixed
+
+- Fixed contextualized workspaces. ([#4665](https://github.com/argilla-io/argilla/pull/4665))
+- Fixed prepare for training when passing `RankingValueSchema` instances to suggestions. ([#4628](https://github.com/argilla-io/argilla/pull/4628))
+- Fixed parsing ranking values in suggestions from HF datasets. ([#4629](https://github.com/argilla-io/argilla/pull/4629))
+- Fixed reading description from API response payload. ([#4632](https://github.com/argilla-io/argilla/pull/4632))
+- Fixed pulling (n\*chunk_size)+1 records when using `ds.pull` or iterating over the dataset. ([#4662](https://github.com/argilla-io/argilla/pull/4662))
+- Fixed client's resolution of enum values when calling the Search and Metrics api, to support Python >=3.11 enum handling. ([#4672](https://github.com/argilla-io/argilla/pull/4672))
+
+## [1.25.0](https://github.com/argilla-io/argilla/compare/v1.24.0...v1.25.0)
+
+> [!NOTE]
+> For changes in the argilla-server module, visit the argilla-server [release notes](https://github.com/argilla-io/argilla-server/releases/tag/v1.25.0)
+
+### Added
+
+- Reorder labels in `dataset settings page` for single/multi label questions ([#4598](https://github.com/argilla-io/argilla/pull/4598))
+- Added pandas v2 support using the python SDK. ([#4600](https://github.com/argilla-io/argilla/pull/4600))
 
 ### Removed
 
-- Removed `ARGILLA_LOCAL_AUTH_TOKEN_EXPIRATION_IN_MINUTES` environment variable. ([#38](https://github.com/argilla-io/argilla-server/pull/38))
-- Removed `ARGILLA_LOCAL_AUTH_ALGORITHM` environment variable. ([#38](https://github.com/argilla-io/argilla-server/pull/38))
-- Removed `ARGILLA_LOCAL_AUTH_SECRET_KEY` environment variable. ([#38](https://github.com/argilla-io/argilla-server/pull/38))
-- Removed data loading for docker quickstart image. ([#108](https://github.com/argilla-io/argilla-server/pull/108))
+- Removed `missing` response for status filter. Use `pending` instead. ([#4533](https://github.com/argilla-io/argilla/issues/4533))
 
 ### Fixed
 
-- Max size parameter for getting the metadata property metrics is currently set as 2^14(=12) instead of 2 \*\* 14 ([#30](https://github.com/argilla-io/argilla-server/pull/30)) ([v1.24-fix](https://github.com/bharath97-git/argilla-server/releases/tag/v1.24-fix))
-- Fixed error when combining similarity search with text search. ([#32](https://github.com/argilla-io/argilla-server/pull/32))
+- Fixed FloatMetadataProperty: value is not a valid float ([#4570](https://github.com/argilla-io/argilla/pull/4605))
+- Fixed redirect to `user-settings` instead of 404 `user_settings` ([#4609](https://github.com/argilla-io/argilla/pull/4609))
 
-## [1.24.0](https://github.com/argilla-io/argilla-server/releases/tag/v1.24.0)
+## [1.24.0](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.24.0)
 
 > [!NOTE]
-> This version is the first release of the Argilla Server. Before this release, the Argilla Server was part of the [Argilla SDK](https://github.com/argilla-io/argilla).
-> Now, the Argilla Server is a separate package that can be installed and used independently of the [Argilla SDK](https://github.com/argilla-io/argilla).
+> This release does not contain any new features, but it includes a major change in the `argilla-server` dependency.
+> The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
+### Changed
+
+- The package is using the `argilla-server` dependency defined [here](https://github.com/argilla-io/argilla-server). ([#4537](https://github.com/argilla-io/argilla/pull/4537))
+
+## [1.23.1](https://github.com/argilla-io/argilla/compare/v1.23.0...v1.23.1)
 
 ### Fixed
 
-- Fixed problems using `ARGILLA_BASE_URL` environment variable. ([#14](https://github.com/argilla-io/argilla-server/pull/14))
+- Fixed Responsive view for Feedback Datasets. ([#4579](https://github.com/argilla-io/argilla/pull/4579))
 
 ## [1.23.0](https://github.com/argilla-io/argilla/compare/v1.22.0...v1.23.0)
 
@@ -201,6 +188,7 @@ These are the section headers that we use:
 - The constant definition `ES_INDEX_REGEX_PATTERN` in module `argilla._constants` is now private. ([#4472](https://github.com/argilla-io/argilla/pull/4474))
 - `nan` values in metadata properties will raise a 422 error when creating/updating records. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
 - `None` values are now allowed in metadata properties. ([#4300](https://github.com/argilla-io/argilla/issues/4300))
+- Refactor and add `width`, `height`, `autoplay` and `loop` attributes as optional args in `to_html` functions. ([#4481](https://github.com/argilla-io/argilla/issues/4481#issuecomment-1903695755))
 
 ### Fixed
 

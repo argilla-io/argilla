@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to manage workspaces.
 ---
 
-# Workspace Management
+# Workspace management
 
 This guide provides an overview of workspaces, explaining how to set up and manage workspaces in Argilla.
 
@@ -31,7 +31,7 @@ Argilla provides a default workspace to help you get started in Python and the U
         client=client
     )
     ```
-    > Check the [Workspace - Python Reference](../../reference/argilla/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
+    > Check the [Workspace - Python Reference](../reference/argilla/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
 
 ## Create a new workspace
 

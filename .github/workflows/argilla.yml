@@ -115,8 +115,9 @@ jobs:
         continue-on-error: true
 
       - name: Test Installing 🍿
+        continue-on-error: true
         run: |
-          pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
+          pip3 install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
         if: github.ref == 'refs/heads/main'

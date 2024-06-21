@@ -13,7 +13,9 @@ dynamic = ["version"]
 dependencies = [
     "httpx>=0.26.0",
     "pydantic>=2.6.0, <3.0.0",
-    "argilla-v1[listeners]"
+    "argilla-v1[listeners]",
+    "tqdm>=4.60.0",
+    "rich>=10.0.0",
 ]
 
 [project.optional-dependencies]

@@ -1,5 +1,5 @@
 ---
-description: the Argilla Python SDK is the reference Argilla Python server.
+description: These are the tools and resources to be up-to-date with the Argilla development and contribute to the project.
 hide:
     - toc
     - footer

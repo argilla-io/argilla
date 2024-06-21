@@ -44,19 +44,26 @@ Responses can be accessed from a `Record` via their question name as an attribut
 # iterate over the records and responses
 
 for record in dataset.records:
-    for response in record.responses.label:
+    for response in record.responses["label"]: # (1)
         print(response.value)
         print(response.user_id)
 
 # validate that the record has a response
 
 for record in dataset.records:
-    if record.responses.label:
-        for response in record.responses.label:
+    if record.responses["label"]:
+        for response in record.responses["label"]:
             print(response.value)
             print(response.user_id)
+    else:
+        record.responses.add(
+            rg.Response("label", "positive", user_id=user.id)
+        ) # (2)
 
 ```
+    1. Access the responses for the question named `label` for each record like a dictionary containing a list of `Response` objects.
+    2. Add a response to the record if it does not already have one.
+
 
 ---
 
@@ -64,6 +71,6 @@ for record in dataset.records:
 
 ### `rg.Response`
 
-::: argilla.responses.Response
+::: src.argilla.responses.Response
     options:
         heading_level: 3

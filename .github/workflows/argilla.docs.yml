@@ -56,7 +56,7 @@ jobs:
 
       - run: |
           pdm run mike deploy latest --push
-          pdm run mike set-default latest
+          pdm run mike set-default --push latest
         if: github.ref == 'refs/heads/main'
 
       - run: pdm run mike deploy dev --push

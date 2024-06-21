@@ -12,11 +12,8 @@ This guide provides a quick overview of the Argilla SDK and how to create your f
 
 To work with Argilla datasets, you need to use the Argilla SDK. You can install the SDK with pip as follows:
 
-!!! note
-    The package is not yet available on PyPi. You'll need to install it directly from the GitHub repository.
-
 ```console
-pip install git+https://github.com/argilla-io/argilla-python.git
+pip install argilla --pre
 ```
 
 ### Run the Argilla server
@@ -24,10 +21,14 @@ pip install git+https://github.com/argilla-io/argilla-python.git
 If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:
 
 * Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
+
+!!! note
+    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
+
 * Locally using Docker.
 
 ```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1
 ```
 
 ### Connect to the Argilla server
