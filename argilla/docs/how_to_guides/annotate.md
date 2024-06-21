@@ -87,8 +87,8 @@ If you agree with the suggestions, you just need to click on the Submit button, 
 This is the default view to annotate your dataset linearly, displaying one record after another.
 
 !!! tip
-    You should use this when getting acquainted with a dataset or when the annotation team is very diverse, the topic is generic.
-
+    You should use this view if you have a large number of required questions or need a strong focus on the record content to be labelled. This is also the recommended view for annotating a dataset sample to avoid potential biases introduced by using filters, search, sorting and bulk labelling.
+    
 Once you submit your first response, the next record will appear automatically. To see again your submitted response, just click on `Prev`.
 
 **Navigating through the records**
@@ -106,12 +106,12 @@ The bulk view is designed to speed up the annotation and get a quick overview of
 The bulk view displays the records in a vertical list. Once this view is active, some functions from the control panel will activate to optimize the view. You can define the number of records to display by page between `10`, `25`, `50`, `100` and whether records are shown with a fixed (`Collapse records`) or their natural height (`Expand records`).
 
 !!! tip
-    You should use this when you have a good understanding of your data and want to apply your knowledge based on things like similarity search, filter patterns, and suggestion score thresholds.
+    You should use this to quickly explore a dataset. This view is also recommended if you have a good understanding of the domain and want to apply your knowledge based on things like similarity and keyword search, filters, and suggestion score thresholds. For a datasets with a large number of required questions or very long fields, the focus view would be more suitable.
 
     With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per record from the draft queue.
 
 !!! note
-    You should consider that suggestions are not shown in bulk view (except for Spans) and that you will need to save as a draft when you are not providing responses to all required questions.
+    Please note that suggestions are not shown in bulk view (except for Spans) and that you will need to save as a draft when you are not providing responses to all required questions.
 
 ### Annotation progress
 
@@ -119,14 +119,14 @@ The global progress of the annotation task from all users is displayed in the da
 
 You can track your annotation progress in real time from the righ-bottom panel inside the dataset page. This means that, while you are annotating, the progress bar updates as you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
 
-## Discover patterns and speed up your annotation
+## Use search, filters, and sort
 
 The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.
 
 !!! tip
     You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.
 
-### Search and highlight
+### Search
 
 From the **control panel** at the top of the left pane, you can search by keyword across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
 
