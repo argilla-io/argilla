@@ -164,6 +164,7 @@ From the `Responses` dropdown, type and select the question. You can set a range
 !!! note
     The text and ranking questions are not available for filtering.
 
+
 From the Suggestions dropdown, filter the suggestions by `Suggestion values`, `Score` , or `Agent`. 
 
 #### Sort
