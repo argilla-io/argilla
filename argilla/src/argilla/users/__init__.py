@@ -15,7 +15,16 @@ from uuid import UUID
 
 from argilla.users._resource import User
 
-__all__ = ["User", "DELETED_USER"]
+__all__ = ["User", "DELETED_USER", "is_deleted_user_id"]
 
 # This is the user id for the deleted user. Used when records contains responses from a user that has been deleted.
 DELETED_USER = User(id=UUID("00000000-0000-0000-0000-000000000000"), username="deleted")
+
+
+def is_deleted_user_id(user_id: UUID) -> bool:
+    """Check if a specific user id is the delete user id
+
+    Returns:
+        True: If the provided user id is the DELETE_USER.id. False, otherwise
+    """
+    return DELETED_USER.id == user_id

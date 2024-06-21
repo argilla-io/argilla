@@ -16,6 +16,8 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
 from uuid import UUID, uuid4
 
+from argilla import users
+
 from argilla._models import (
     MetadataModel,
     RecordModel,
@@ -342,7 +344,8 @@ class RecordResponses(Iterable[Response]):
 
         responses_by_user_id = defaultdict(list)
         for response in self.__responses:
-            responses_by_user_id[response.user_id].append(response)
+            if not users.is_deleted_user_id(response.user_id):
+                responses_by_user_id[response.user_id].append(response)
 
         return [
             UserResponse(answers=responses, _record=self.record).api_model()
