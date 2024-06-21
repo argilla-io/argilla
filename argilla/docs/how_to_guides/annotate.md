@@ -23,7 +23,7 @@ The UI is responsive with two columns for larger devices and one column for smal
 === "Left pane"
     This area displays the **control panel** on the top. The control panel is used for performing keyword-based search, applying filters, and sorting the results.
 
-    Below the control panel, the record card(s) are displayed one by one (Focus view) or in a vertical list (Bulk view). 
+    Below the control panel, the record card(s) are displayed one by one (Focus view) or in a vertical list (Bulk view).
 
 === "Right pane"
 
@@ -43,7 +43,7 @@ The Argilla UI includes a range of shortcuts. For the main actions (submit, disc
 
 To learn how to move from one question to another or between records using the keyboard, take a look at the table below.
 
-Shortcuts provide a smoother annotation experience, especially with datasets using a single question (Label, MultiLabel, Rating, or Ranking). 
+Shortcuts provide a smoother annotation experience, especially with datasets using a single question (Label, MultiLabel, Rating, or Ranking).
 
 ??? "Available shortcuts"
 
@@ -88,7 +88,7 @@ This is the default view to annotate your dataset linearly, displaying one recor
 
 !!! tip
     You should use this view if you have a large number of required questions or need a strong focus on the record content to be labelled. This is also the recommended view for annotating a dataset sample to avoid potential biases introduced by using filters, search, sorting and bulk labelling.
-    
+
 Once you submit your first response, the next record will appear automatically. To see again your submitted response, just click on `Prev`.
 
 **Navigating through the records**
