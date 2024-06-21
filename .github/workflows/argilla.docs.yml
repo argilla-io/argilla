@@ -13,6 +13,7 @@ on:
     branches:
       - "main"
       - "develop"
+      - "docs/**"
 
 defaults:
   run:
@@ -64,3 +65,11 @@ jobs:
 
       - run: pdm run mike deploy ${{ github.ref_name }}
         if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Extract branch name
+        id: extract_branch_name
+        shell: bash
+        run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
+
+      - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --prop-set hidden=true --push
+        if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
