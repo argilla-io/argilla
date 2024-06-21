@@ -76,7 +76,7 @@ If you are starting an annotation effort, all the records are initially kept in 
 
 ### Suggestions
 
-If your dataset includes model predictions, you will see them represented by a sparkle icon `✨` in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If confidence scores are provided, they will be shown with the label or value as well. Additionally, admins can choose to always show suggested labels at the beginning of the list. This can be configured from the dataset settings.
+If your dataset includes model predictions, you will see them represented by a sparkle icon `✨` in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If confidence scores have been included by the dataset admin, they will be shown alongside with the label. Additionally, admins can choose to always show suggested labels at the beginning of the list. This can be configured from the dataset settings.
 
 If you agree with the suggestions, you just need to click on the Submit button, and they will be considered as your response. If the suggestion is incorrect, you can modify it and submit your final response.
 
