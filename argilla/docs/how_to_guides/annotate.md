@@ -135,7 +135,7 @@ From the **control panel** at the top of the left pane, you can search by keywor
 You can retrieve records based on their similarity to another record if vectors have been added to the dataset.
 
 !!! note
-    Consult these guides to know how to add vectors to your [dataset](dataset.md) and [records](record.md).
+    Check these guides to know how to add vectors to your [dataset](dataset.md) and [records](record.md).
 
 To initiate a semantic search, click on `Find similar` within the record you wish to use as a reference. If multiple vectors are available, select the desired vector. You can also choose whether to retrieve the most or least similar records.
 
