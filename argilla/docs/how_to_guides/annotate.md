@@ -3,7 +3,7 @@ description: In this section, we will provide a step-by-step guide to show how t
 ---
 # Annotate your dataset
 
-!!! note
+!!! note ""
     To experience the UI features firsthand, you can take a look to the [Demo ↗](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==).
 
 Argilla UI offers many functions to help you manage your annotation workflow, aiming to provide the most flexible approach to fit the wide variety of use cases handled by the community.
@@ -12,39 +12,37 @@ Argilla UI offers many functions to help you manage your annotation workflow, ai
 
 ### Flexible layout
 
-=== "The header"
+![UI overview](../assets/images/how_to_guides/annotate/ui_overview.png)
+
+The app is responsive, which enables you to adapt your workspace from two to one column. You can even use your mobile to provide simple feedback on your datasets.
+
+=== "Header"
 
     At the right side of the navigation breadcrumb, you can customize the dataset settings and edit your profile.
 
-=== "The left pane"
+=== "Left pane"
 
     This area is displayed on top of **the control panel** for performing searches, applying filters and sorting results. The record card(s) are displayed one by one or in a vertical list depending on the active view: **Focus view** or **Bulk view.** A card includes one or many fields and an ellipsis menu to mainly access the record extra info like the metadata.
 
-=== "The right pane"
+=== "Right pane"
 
     This is where you annotate your dataset. Simply fill it out as a form, then choose to Submit, Save as Draft, or Discard your response to send the records to their corresponding queues.
 
-=== "The left bottom panel"
+=== "Left bottom panel"
 
     This expandable area displays the annotation guidelines.
 
-=== "The right bottom panel"
+=== "Right bottom panel"
 
     This expandable area displays your annotation progress.
 
-![UI overview](../assets/images/how_to_guides/annotate/ui_overview.png)
-
-!!! tip
-    The app is responsive, which enables you to adapt your workspace from two to one column. You can even use your mobile to provide simple feedback on your datasets.
-
 ### Shortcuts
 
-Argilla UI includes a range of shortcuts. For the main actions submit, discard, save as draft and the labels the keys are showed in the button.
+The Argilla UI includes a range of shortcuts. For the main actions (submit, discard, save as draft and selecting labels) the keys are showed in the corresponding button.
 
-To move from one question to another or between records using the keyboard take a look at the table below.
+To learn how to move from one question to another or between records using the keyboard, take a look at the table below.
 
-!!! tip
-    Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.
+Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.
 
 ??? "Available shortcuts"
 
@@ -86,7 +84,7 @@ For label questions, admins can also choose the ordering of labels in the datase
 
 ### Focus view
 
-![Focus view](../assets/images/how_to_guides/annotate/focus_view.png)
+![Focus view](../assets/images/how_to_guides/annotate/focus_view.png){ width=10% height=10% }
 
 This is the default view to annotate your dataset linearly, displaying one record after another.
 
@@ -103,7 +101,7 @@ Each time the page is fully refreshed, the records with modified statuses (Pendi
 
 ### Bulk view
 
-![Bulk view](../assets/images/how_to_guides/annotate/bulk_view.png)
+![Bulk view](../assets/images/how_to_guides/annotate/bulk_view.png){ width=10% height=10% }
 
 The bulk view is designed to speed up the annotation and get a quick overview of the whole dataset.
 
@@ -112,21 +110,17 @@ It displays the records in a vertical list. Once the view is active, some functi
 !!! tip
     You should use this when you have a good understanding of your data and want to apply your knowledge based on things like similarity search, filter patterns, and suggestion score thresholds.
 
+    With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per records from the draft queue.
+
 !!! note
     You should consider that bulk view does not show suggestions in bulk view (except for Spans) and will always convert questions to Draft queue when working with multiple question types.
 
-!!! tip
-    With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per records from the draft queue.
 
 ### Annotation progress
 
-=== "General progress view"
+On the dataset list, the global progress of the annotation task from all users is displayed. This is indicated in the `Global progress` column, which shows the number of left records to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with overlap), discarded, and pending by hovering your mouse over it.
 
-    On the dataset list, the global progress of the annotation task from all users is displayed. This is indicated in the `Global progress` column, which shows the number of left records to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with overlap), discarded, and pending by hovering your mouse over it.
-
-=== "Your own progress view"
-
-    You can track your annotation progress in real-time. That means once you are annotating, the progress bar is incrementing in real time each time you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
+You can track your annotation progress in real-time. That means once you are annotating, the progress bar is incrementing in real time each time you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
 
 ## Discover patterns and speed up your annotation.
 
@@ -156,29 +150,23 @@ To cancel the search, click on the cross icon next to the reference record.
 
 ### Filter and sort by metadata, responses, and suggestions
 
-<h4>Filter</h4>
+#### Filter
 
 If the dataset contains metadata, responses and suggestions, click on **Filter** in the **control panel** to display the available filters. You can select multiple filters and combine them.
 
 !!! note
     Record info including metadata is visible from the ellipsis menu in the record card.
 
-=== "By metadata properties"
+From the `Metadata` dropdown, type and select the property. You can set a range for integer and float properties, and select specific values for term metadata.
 
-    From the `Metadata` dropdown, type and select the property. You can set a range for integer and float properties, and select specific values for term metadata.
+From the `Responses` dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.
 
-=== "By responses from the current user"
-
-    From the `Responses` dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.
-
-    !!! note
+!!! note
     The text and ranking questions are not available for filtering.
 
-=== "By suggestions"
+From the Suggestions dropdown, filter the suggestions by `Suggestion values`, `Score` , or `Agent`. 
 
-    From the Suggestions dropdown, Filter the suggestions by `Suggestion values`, `Score` , or `Agent` 
-
-<h4>Sort</h4>
+#### Sort
 
 You can sort your records according to one or several attributes.
 
