@@ -43,7 +43,7 @@ The Argilla UI includes a range of shortcuts. For the main actions (submit, disc
 
 To learn how to move from one question to another or between records using the keyboard, take a look at the table below.
 
-Shortcuts provide a smoother experience, especially with a long list of labels or single-question forms.
+Shortcuts provide a smoother annotation experience, especially with datasets using a single question (Label, MultiLabel, Rating, or Ranking). 
 
 ??? "Available shortcuts"
 
