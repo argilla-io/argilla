@@ -27,7 +27,7 @@ The UI is responsive with two columns for larger devices and one column for smal
 
 === "Right pane"
 
-    This is where you annotate your dataset. Simply fill it out as a form, then choose to Submit, Save as Draft, or Discard to send the records to their corresponding queues.
+    This is where you annotate your dataset. Simply fill it out as a form, then choose to `Submit`, `Save as Draft`, or `Discard` to send the records to their corresponding queues.
 
 === "Left bottom panel"
 
