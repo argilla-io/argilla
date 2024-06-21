@@ -113,16 +113,15 @@ It displays the records in a vertical list. Once the view is active, some functi
     With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per records from the draft queue.
 
 !!! note
-    You should consider that bulk view does not show suggestions in bulk view (except for Spans) and will always convert questions to Draft queue when working with multiple question types.
-
+    You should consider that suggestions are not shown in bulk view (except for Spans) and that you will need to save as a draft when you are not providing responses to all required questions.
 
 ### Annotation progress
 
-On the dataset list, the global progress of the annotation task from all users is displayed. This is indicated in the `Global progress` column, which shows the number of left records to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with overlap), discarded, and pending by hovering your mouse over it.
+On the dataset list, the global progress of the annotation task from all users is displayed. This is indicated in the `Global progress` column, which shows the number of records still to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e.,  those with both submitted and discarded responses), discarded, and pending by hovering your mouse over it.
 
-You can track your annotation progress in real-time. That means once you are annotating, the progress bar is incrementing in real time each time you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
+You can track your annotation progress in real time from the righ-bottom panel inside the dataset page. This means that, while you are annotating, the progress bar updates as you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
 
-## Discover patterns and speed up your annotation.
+## Discover patterns and speed up your annotation
 
 The UI offers various features designed to enhance your understanding of data patterns and streamline annotation tasks. Combining filters with bulk annotations can save you and your team hours of time.
 
@@ -131,7 +130,7 @@ The UI offers various features designed to enhance your understanding of data pa
 
 ### Search and highlight
 
-From the **control panel** at the top of the left pane, you can search across the entire dataset or by fields (if you have more than one in your record) and visualize matched results highlighted in color.
+From the **control panel** at the top of the left pane, you can search keywords across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
 
 ### Order by record semantic similarity
 
@@ -158,6 +157,9 @@ If the dataset contains metadata, responses and suggestions, click on **Filter*
     Record info including metadata is visible from the ellipsis menu in the record card.
 
 From the `Metadata` dropdown, type and select the property. You can set a range for integer and float properties, and select specific values for term metadata.
+
+!!! note
+    Note that if a metadata property was set to `visible_for_annotators=False` this metadata property will only appear in the metadata filter for users with the `admin` or `owner` role.
 
 From the `Responses` dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.
 
