@@ -14,7 +14,7 @@ Argilla UI offers many functions to help you manage your annotation workflow, ai
 
 ![UI overview](../assets/images/how_to_guides/annotate/ui_overview.png)
 
-The app is responsive, which enables you to adapt your workspace from two to one column. You can even use your mobile to provide simple feedback on your datasets.
+The UI is responsive with two columns for larger devices and one column for smaller devices. This enables you to annotate data using your mobile phone for simple datasets (i.e., not very long text and 1-2 questions) or resize your screen to get a more compact UI.
 
 === "Header"
 
