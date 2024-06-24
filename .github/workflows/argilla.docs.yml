@@ -61,17 +61,11 @@ jobs:
           pdm run mike deploy latest --push
         if: github.ref == 'refs/heads/main'
 
-      - name: Get list of published doc versions
-        id: get_versions
+      - name: Delete Argilla docs (versions 'docs_*')
+        id: delete_deployment
         run: |
           versions=$(pdm run mike list)
           formatted_versions=$(echo "$versions" | tr ',' '\n' | tr -d '[]')
-          echo "versions=$formatted_versions" >> $GITHUB_ENV
-
-
-      - name: Delete Argilla docs (versions 'docs_*')
-        run: |
-          versions="${{ steps.get_versions.outputs.versions }}"
           for version in $versions; do
             if [[ $version == docs_* ]]; then
               echo "Deleting version: $version"
