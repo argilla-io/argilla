@@ -64,9 +64,10 @@ jobs:
       - name: Get list of published doc versions
         id: get_versions
         run: |
-          versions=$(mike list)
+          versions=$(pdm run mike list)
           formatted_versions=$(echo "$versions" | tr ',' '\n' | tr -d '[]')
-          echo "versions=$(pdm run mike list)" | sed 's/\//_/g' >> $GITHUB_OUTPUT
+          echo "versions=$formatted_versions" >> $GITHUB_ENV
+
 
       - name: Delete Argilla docs (versions 'docs_*')
         run: |
