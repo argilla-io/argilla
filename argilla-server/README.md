@@ -26,7 +26,7 @@
 <a href="https://www.linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin"/>
 </a>
-<a href="https://discord.gg/hugging-face-879548962464493619">
+<a href="http://hf.co/join/discord">
 <img src="https://img.shields.io/badge/Discord-7289DA?&logo=discord&logoColor=white"/>
 </a>
 </p>
