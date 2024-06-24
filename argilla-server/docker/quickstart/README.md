@@ -36,8 +36,8 @@
 
 
 <p align="center">
-<a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-<img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
+<a  href="http://hf.co/join/discord">
+<img src="https://img.shields.io/badge/JOIN US ON DISCORD-7289DA?style=for-the-badge&logo=discord&logoColor=white" />
 </a>
 <a href="https://linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
@@ -46,7 +46,6 @@
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
 </a>
 </p>
-
 <br>
 
 <h3>
