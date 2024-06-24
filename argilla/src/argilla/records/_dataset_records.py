@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from cProfile import label
 import warnings
 from collections import defaultdict
 from pathlib import Path
@@ -393,11 +394,10 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 raise ValueError(f"Vector field {vector_name} not found in dataset schema.")
 
     def _reverse_parse_mapping(self, keys: List[str], mapping: Optional[Dict[str, str]] = None) -> Dict[str, str]:
-        if mapping is None:
-            return {key: key for key in keys}
         schema = self.__dataset.schema
 
         reverse_mapping = {}
+        mapping = mapping or {}
 
         unknown_src_keys = [key for key in keys if key not in mapping.values() or key not in schema]
 
@@ -423,7 +423,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             if attribute_type == "suggestion" and sub_attribute is None:
                 raise ValueError(
                     f"Record attribute {attribute_name} is a suggestion so sub_attribute is required. \
-                        To assign the value to the suggestion value, use the format '<question_name>.suggestion.value' or <question_name>."
+                        To assign the value to the suggestion value, use the format '<question_name>.suggestion.value' or <question_name>"
                 )
 
             # Assign the value to question, field, or response based on schema item
@@ -445,14 +445,30 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             else:
                 # warnings.warn(message=f"Record attribute {attribute} is not in the schema or mapping so skipping.")
                 continue
-            
-            reverse_mapping[src_key] = (attribute_name, attribute_type, sub_attribute, schema_attribute.id)
 
+            reverse_mapping[src_key] = (attribute_name, attribute_type, sub_attribute, schema_attribute.id)
+            
             self._log_message(
                 message=f"Reverse mapping: {src_key} -> {attribute_name} ({attribute_type})",
                 level="debug",
             )
-        
+
+        for key in keys:
+            if key in reverse_mapping:
+                continue
+            schema_item = schema.get(key)
+            if not schema_item:
+                continue
+            if isinstance(schema_item, TextField):
+                attribute_type = "field"
+            elif isinstance(schema_item, QuestionPropertyBase):
+                attribute_type = "suggestion"
+            elif isinstance(schema_item, VectorField):
+                attribute_type = "vector"
+            elif isinstance(schema_item, MetadataPropertyBase):
+                attribute_type = "metadata"
+            reverse_mapping[key] = (key, attribute_type, None, schema_item.id)
+
         return reverse_mapping
 
     def _infer_record_from_mapping(
@@ -477,10 +493,10 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         vectors: List[Vector] = []
         metadata: Dict[str, MetadataValue] = {}
 
-        
-
         for src_key, value in data.items():
-            attribute_name, attribute_type, sub_attribute, schema_item_id = mapping.get(src_key, (None, None, None, None))
+            attribute_name, attribute_type, sub_attribute, schema_item_id = mapping.get(
+                src_key, (None, None, None, None)
+            )
 
             if attribute_name == "id":
                 record_id = value
@@ -488,6 +504,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
             # Add suggestion values to the suggestions
             if attribute_type == "suggestion":
+                sub_attribute = sub_attribute or "value"
                 suggestion_values[attribute_name][sub_attribute] = value
                 suggestion_values[attribute_name]["question_id"] = schema_item_id
 

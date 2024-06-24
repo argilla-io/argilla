@@ -36,7 +36,7 @@ def dataset():
 
 
 def test_ingest_record_from_dict(dataset):
-    record = dataset.records._ingest_records(
+    records = dataset.records._ingest_records(
         records=[
             {
                 "prompt": "What is the capital of France?",
@@ -45,12 +45,13 @@ def test_ingest_record_from_dict(dataset):
         ],
     )
 
+    record = records[0]
     assert record[0].fields["prompt"] == "What is the capital of France?"
-    assert record[0].suggestions[0]["label"]["value"] == "positive"
+    assert record[0].suggestions[0].value == "positive"
 
 
 def test_ingest_record_from_dict_with_mapping(dataset):
-    record = dataset.records._ingest_records(
+    records = dataset.records._ingest_records(
         records=[
             {
                 "my_prompt": "What is the capital of France?",
@@ -62,20 +63,23 @@ def test_ingest_record_from_dict_with_mapping(dataset):
         },
     )
 
+    record = records[0]
     assert record[0].fields["prompt"] == "What is the capital of France?"
-    assert record[0].suggestions[0]["label"]["value"] == "positive"
+    assert record[0].suggestions[0].value == "positive"
 
 
 def test_ingest_record_from_dict_with_suggestions(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-        },
+    records = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "Hello World, how are you?",
+                "label": "negative",
+            }
+        ],
     )
-
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
+    record = records[0]
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
 
 
 def test_ingest_record_from_dict_with_suggestions_scores(dataset):
@@ -99,7 +103,7 @@ def test_ingest_record_from_dict_with_suggestions_scores(dataset):
 
 
 def test_ingest_record_from_dict_with_suggestions_scores_and_agent(dataset):
-    record = dataset.records._infer_record_from_mapping(
+    records = dataset.records._infer_record_from_mapping(
         data={
             "prompt": "Hello World, how are you?",
             "label": "negative",
@@ -112,6 +116,7 @@ def test_ingest_record_from_dict_with_suggestions_scores_and_agent(dataset):
         },
     )
 
+    record = records[0]
     assert record.fields.prompt == "Hello World, how are you?"
     assert record.suggestions.label.value == "negative"
     assert record.suggestions.label.score == 0.9
