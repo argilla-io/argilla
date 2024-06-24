@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_build-hidden-docs-version",
+    "title": "docs_build-hidden-docs-version",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
