@@ -49,7 +49,7 @@ import argilla as rg
 client = rg.Argilla(
     api_url="<api_url>",
     api_key="<api_key>"
-    # extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
+    # headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
