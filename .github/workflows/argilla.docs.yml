@@ -83,3 +83,17 @@ jobs:
         with:
           message: |
             Docs for this PR have been deployed in private here: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
+
+      - name: Get list of versions
+        id: get-versions
+        run: echo "::set-output name=versions::$(mike list)"
+
+      - name: Delete versions starting with 'docs_'
+        run: |
+          versions="${{ steps.get-versions.outputs.versions }}"
+          for version in $versions; do
+            if [[ $version == docs_* ]]; then
+              echo "Deleting version: $version"
+              mike delete "$version"
+            fi
+          done
