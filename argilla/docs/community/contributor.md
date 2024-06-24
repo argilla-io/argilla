@@ -103,6 +103,7 @@ git checkout [branch-name]
 ### Use CHANGELOG.md
 
 If you are working on a new feature, it is a good practice to make note of it for others to keep up with the changes. For that, we utilize the `CHANGELOG.md` file in the root directory. This file is used to list changes made in each version of the project and there are headers that we use to denote each type of change.
+
 - **Added:** for new features.
 - **Changed:** for changes in existing functionality.
 - **Deprecated:** for soon-to-be removed features.
