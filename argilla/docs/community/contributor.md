@@ -162,19 +162,11 @@ First, click on `compare across forks` and select the right repositories and bra
 
 ![compare-across-forks](../assets/images/community/contributing/compare-across-forks.PNG)
 
-Then, fill in the pull request template. In the title, add the feat, bug or docs prefix depending on the type of modification. A general template will be shown, please click on `Preview` and choose the corresponding pull request template. In addition, on the right side, you can select a reviewer (for instance, if you discussed the issue with a member of the Argilla team) and assign the pull request to yourself.
+Then, fill in the pull request template. You should add a prefix to the PR name as we did with the branch above. If you are working on a new feature, you can name your PR as `feat: TITLE`. If your PR consists of a solution for a bug, you can name your PR as `bug: TITLE` And, if your work is for improving the documentation, you can name your PR as `docs: TITLE`.
 
-It is highly advisable to add labels to PR as well. You can do this again by the labels section right to the screen. For instance, if you are addressing a bug, add the `bug` label or if the PR is related to the documentation, add the `documentation` label. This way, PRs can be easily filtered.
+In addition, on the right side, you can select a reviewer (for instance, if you discussed the issue with a member of the Argilla team) and assign the pull request to yourself. It is highly advisable to add labels to PR as well. You can do this again by the labels section right to the screen. For instance, if you are addressing a bug, add the `bug` label or if the PR is related to the documentation, add the `documentation` label. This way, PRs can be easily filtered.
 
-Additionally, you should add a prefix to the PR name as we did with the branch above. If you are working on a new feature, you can name your PR as `feat: TITLE`. If your PR consists of a solution for a bug, you can name your PR as `bug: TITLE` And, if your work is for improving the documentation, you can name your PR as `docs: TITLE`.
-
-Finally, click on `Create pull request`.
-
-![pr](../assets/images/community/contributing/pull-request.PNG)
-
-Below, we chose the feature template. Now, fill in it carefully and follow the guidelines. Remember to link the original issue. Finally, enable the checkbox to allow maintainer edits so the branch can be updated for a merge and click on `Create pull request`.
-
-![pr-feature-template](../assets/images/community/contributing/pull-request-feature.PNG)
+Finally, fill in the template carefully and follow the guidelines. Remember to link the original issue and enable the checkbox to allow maintainer edits so the branch can be updated for a merge. Then, click on `Create pull request`.
 
 
 ### Review your pull request
