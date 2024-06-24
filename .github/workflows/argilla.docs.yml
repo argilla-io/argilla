@@ -61,6 +61,14 @@ jobs:
           pdm run mike deploy latest --push
         if: github.ref == 'refs/heads/main'
 
+      - name: Deploy Argilla docs (branch /develop)
+        run: pdm run mike deploy dev --push
+        if: github.ref == 'refs/heads/develop'
+
+      - name: Deploy Argilla docs (release vX.Y.Z)
+        run: pdm run mike deploy ${{ github.ref_name }}
+        if: startsWith(github.ref, 'refs/tags/')
+
       - name: Delete Argilla docs (versions 'docs_*')
         id: delete_deployment
         run: |
@@ -72,13 +80,6 @@ jobs:
               pdm run mike delete "$version"
             fi
           done
-
-      - name: Deploy Argilla docs (branch /develop)
-        run: pdm run mike deploy dev --push
-        if: github.ref == 'refs/heads/develop'
-
-      - name: Deploy Argilla docs (release vX.Y.Z)
-        run: pdm run mike deploy ${{ github.ref_name }}
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Extract branch name
