@@ -21,14 +21,14 @@ If you're a new contributor, read the [README](https://github.com/argilla-io/arg
 
 ## First Contact in Discord
 
-Discord is a very useful tool for more casual conversations and to answer day-to-day questions. As part of Hugging Face, we have set some Argilla channels on their serer. Click [here](http://hf.co/join/discord) to join the Hugging Face Discord community effortlessly.
+Discord is a handy tool for more casual conversations and to answer day-to-day questions. As part of Hugging Face, we have set up some Argilla channels on the server. Click [here](http://hf.co/join/discord) to join the Hugging Face Discord community effortlessly.
 
-When part of the Hugging Face Discord, you can select “Channels & roles” and select “Argilla” along with any of the other groups that are interesting to you. “Argilla” will cover anything about argilla and distilabel. You can join the following channels:
+When part of the Hugging Face Discord, you can select "Channels & roles" and select "Argilla" along with any of the other groups that are interesting to you. "Argilla" will cover anything about argilla and distilabel. You can join the following channels:
 
 * **#argilla-general**: 📣 Stay up-to-date and general discussions.
-* **#argilla-help**: 🙋‍♀️ Need assistance? We’re always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
+* **#argilla-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
 
-So now there is only one thing left to do, introduce yourself and talk to the community. You'll be always welcome! 🤗👋
+So now there is only one thing left to do: introduce yourself and talk to the community. You'll always be welcome! 🤗👋
 
 
 ## Contributor Workflow with Git and GitHub
