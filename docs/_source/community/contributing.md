@@ -12,31 +12,21 @@ If you're a new contributor, we recommend you start reading the [New Contributor
 
 If you're a new contributor, read the [README](https://github.com/argilla-io/argilla/blob/develop/README.md) to get an overview of the project. In addition, here are some resources to help you get started with open-source contributions:
 
-* **Slack**: You are welcome to join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-slack), you can find more information on how to get started in Slack.
+* **Discord**: You are welcome to join the [Argilla Discord community](http://hf.co/join/discord), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-discord), you can find more information on how to get started in Discord.
 * **Git**: This is a very useful tool to keep track of the changes in your files. Using the command-line interface (CLI), you can make your contributions easily. For that, you need to have it [installed and updated](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your computer.
 * **GitHub**: It is a platform and cloud-based service that uses git and allows developers to collaborate on projects. To contribute to Argilla, you'll need to create an account. Check the [Contributor Workflow with Git and Github](#contributor-workflow-with-git-and-github) for more info.
 * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [developer documentation](/community/developer_docs.md) to know how to do it.
 * **Schedule a meeting with our developer advocate**: If you have more questions, do not hesitate to contact to our developer advocate and [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min).
 
 
-## First Contact in Slack
+## First Contact in Discord
 
-Slack is a very useful tool for more casual conversations and to answer day-to-day questions. Click [here](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) to join our Slack community effortlessly.
+Discord is a very useful tool for more casual conversations and to answer day-to-day questions. As part of Hugging Face, we have set some Argilla channels on their serer. Click [here](http://hf.co/join/discord) to join the Hugging Face Discord community effortlessly.
 
-The following screens will be displayed, choose how you wish to join and enter the code sent to you via email.
+When part of the Hugging Face Discord, you can select “Channels & roles” and select “Argilla” along with any of the other groups that are interesting to you. “Argilla” will cover anything about argilla and distilabel. You can join the following channels:
 
-![argilla-slack](../_static/images/community/contributing/argilla-slack.png)
-
-Once you have joined the community, you'll be added to some channels by default, but below we show you all the community channels you can join:
-
-* **00-announcements**: 📣 Stay up-to-date on official Argilla
-* **01-introductions**:  👋 Say hi! to the community Fun facts are appreciated.
-* **02-support-and-questions**: 🙋‍♀️ Need help with Argilla or NLP? We are always here.
-* **03-discoveries-and-news**: 📚 Looking for resources and news related to everything NLP?
-* **04-contributors**: 🏗️ A channel for contributions and contributors.
-* **05-beta-testing**: 🚧 For access to the latest features and help us with testing the newest features.
-* **06-general**: 🐒 This channel is for... well, everything else.
-* **07-events-and-job-offers**: 👔 Would you like to share info about events, job offers or meetups?
+* **#argilla-general**: 📣 Stay up-to-date and general discussions.
+* **#argilla-help**: 🙋‍♀️ Need assistance? We’re always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
 
 So now there is only one thing left to do, introduce yourself and talk to the community. You'll be always welcome! 🤗👋
 
@@ -223,7 +213,7 @@ Additionally, we will include your changes in the next release based on our [dev
 
 Here are some helpful resources for your reference.
 
-* [Configuring Slack](https://slack.com/help/articles/218080037-Getting-started-for-new-Slack-users), a guide to learn how to configure Slack.
+* [Configuring Discord](https://support.discord.com/hc/en-us/categories/115000217151), a guide to learn how to get started with Discord.
 * [Pro Git](https://git-scm.com/book/en/v2), a book to learn Git.
 * [Git in VSCode](https://code.visualstudio.com/docs/sourcecontrol/overview), a guide to learn how to easily use Git in VSCode.
 * [GitHub Skills](https://skills.github.com/), an interactive course to learn GitHub.
