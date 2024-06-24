@@ -10,7 +10,7 @@ Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla
 
 <div class="social social--sidebar" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
     <a href="http://hf.co/join/discord"
-        class="button--primary" target="_blank">Join <span aria-label="discord" class="discord-icon"></span></a>
+        class="button--primary" target="_blank">Join <span aria-label="slack" class="slack-icon"></span></a>
     <a href="https://linkedin.com/company/argilla-io"
         class="button--primary" target="_blank">Follow on LinkedIn</a>
     <a href="https://linkedin.com/company/argilla-io"
