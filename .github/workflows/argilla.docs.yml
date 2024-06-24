@@ -55,15 +55,18 @@ jobs:
         run: echo "${{ github.ref }}"
           echo "${{ github.head_ref }}"
 
-      - run: |
+      - name: Deploy Argilla docs (branch /main)
+        run: |
           pdm run mike set-default --push latest
           pdm run mike deploy latest --push
         if: github.ref == 'refs/heads/main'
 
-      - run: pdm run mike deploy dev --push
+      - name: Deploy Argilla docs (branch /develop)
+        run: pdm run mike deploy dev --push
         if: github.ref == 'refs/heads/develop'
 
-      - run: pdm run mike deploy ${{ github.ref_name }}
+      - name: Deploy Argilla docs (release vX.Y.Z)
+        run: pdm run mike deploy ${{ github.ref_name }}
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Extract branch name
@@ -71,5 +74,12 @@ jobs:
         shell: bash
         run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
 
-      - run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --prop-set hidden=true --push
+      - name: Deploy Argilla docs (branch /docs/*)
+        run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --prop-set hidden=true --push
         if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
+
+      - uses: mshick/add-pr-comment@v2
+        if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
+        with:
+          message: |
+            Docs have been deployed her: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
