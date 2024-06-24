@@ -61,7 +61,7 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 - [Community Meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB): listen in or present during one of our bi-weekly events.
 
-- [Discord](http://hf.co/join/discord): get direct support from the community.
+- [Discord](http://hf.co/join/discord): get direct support from the community in #argilla-general and #argilla-help.
 
 - [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
 

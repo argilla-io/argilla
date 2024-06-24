@@ -11,7 +11,7 @@
   tabindex="0"
 ></iframe>
 
-🙋‍♀️ Join the Argilla community on [Discord](http://hf.co/join/discord) and get direct support from the community.
+🙋‍♀️ Join the Argilla community on [Discord](http://hf.co/join/discord) and get direct support from the community in #argilla-general and #argilla-help.
 
 ⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
 
