@@ -218,16 +218,16 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
+
     def __repr__(self):
         return (
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
-
-    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
-        for vector in self.vectors:
-            if vector.vector_settings_id == vector_settings.id:
-                return vector.value
 
 
 class Question(DatabaseModel):

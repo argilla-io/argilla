@@ -12,11 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, select
 
 from argilla_server.models import Record, Response
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus, ResponseStatus
+
+
+async def refresh_records_status(db: AsyncSession, records: List[Record], autocommit: bool) -> None:
+    # TODO: Improve this to avoid doing too many queries
+    for record in records:
+        await refresh_record_status(db, record, autocommit)
 
 
 async def refresh_record_status(db: AsyncSession, record: Record, autocommit: bool) -> Record:
@@ -26,6 +34,7 @@ async def refresh_record_status(db: AsyncSession, record: Record, autocommit: bo
     raise NotImplementedError(f"unsupported distribution strategy `{record.dataset.distribution_strategy}`")
 
 
+# TODO: A possible improvement could be to do the count and update in a single SQL query.
 async def _refresh_record_status_with_overlap_strategy(db: AsyncSession, record: Record, autocommit: bool) -> Record:
     count_record_submitted_responses = (
         await db.execute(
