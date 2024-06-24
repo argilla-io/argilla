@@ -61,9 +61,9 @@ jobs:
           pdm run mike deploy latest --push
         if: github.ref == 'refs/heads/main'
 
-      - name: Get list of versions
+      - name: Get list of published doc versions
         id: get_versions
-        run: echo "versions=$(mike list)" >> $GITHUB_OUTPUT
+        run: echo "versions=$(pdm run mike list)" >> $GITHUB_OUTPUT
 
       - name: Delete Argilla docs (versions 'docs_*')
         run: |
