@@ -82,4 +82,4 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
         with:
           message: |
-            Docs have been deployed her: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
+            Docs for this PR have been deployed in private here: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
