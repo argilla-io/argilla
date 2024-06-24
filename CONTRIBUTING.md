@@ -13,7 +13,7 @@ However you choose to contribute, please be mindful and respect our
 
 ## Need some help?
 
-We understand that getting started might be scary and difficult, therefore, we provide a guided contributor mentorship program. Feel free to schedule a meeting [here](https://calendly.com/david-berenstein-huggingface/30min) to get you started. Alternatively, you can start with [joining our Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and reaching out in our [contributor channel](https://rubrixworkspace.slack.com/archives/C05BCGM277B).
+We understand that getting started might be scary and difficult, therefore, you can join our discord channel [#argilla-general](https://discord.gg/hugging-face-879548962464493619) by selecting *Argilla* in *Channels and Roles*.
 
 ## Want to work on your own?
 
