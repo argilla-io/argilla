@@ -367,6 +367,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
         if all(map(lambda r: isinstance(r, dict), records)):
             # Records as flat dicts of values to be matched to questions as suggestion or response
+            mapping = self._render_record_mapping(records=records, mapping=mapping)
             records = [self._infer_record_from_mapping(data=r, mapping=mapping, user_id=user_id) for r in records]  # type: ignore
         elif all(map(lambda r: isinstance(r, Record), records)):
             for record in records:
@@ -398,6 +399,43 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             if vector_name not in self.__dataset.schema:
                 raise ValueError(f"Vector field {vector_name} not found in dataset schema.")
 
+    def _render_record_mapping(
+        self,
+        records: List[Dict[str, Any]],
+        mapping: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, List[str]]:
+        schema = self.__dataset.schema
+        mapping = mapping or {}
+        singular_mapping = {}
+
+        # update the mapping with unmapped columns
+        for key, value in records[0].items():
+            if key not in schema and key not in mapping:
+                warnings.warn(
+                    message=f"Record attribute {key} is not in the schema so skipping.",
+                )
+            if key not in mapping:
+                mapping[key] = key
+
+        # create a singular mapping with destinations from the schema
+        for source_key, value in mapping.items():
+            destinations = []
+            _destinations = [value] if isinstance(value, str) else list(value)
+
+            for attribute_mapping in _destinations:
+                attribute_mapping = attribute_mapping.split(".")
+                
+                attribute_name = attribute_mapping[0]
+                schema_item = schema.get(attribute_name)
+                attribute_type = attribute_mapping[1] if len(attribute_mapping) > 1 else None
+                sub_attribute = attribute_mapping[2] if len(attribute_mapping) > 2 else None
+
+                destinations.append((attribute_name, attribute_type, sub_attribute, schema_item))
+
+            singular_mapping[source_key] = destinations
+
+        return singular_mapping
+
     def _infer_record_from_mapping(
         self,
         data: dict,
@@ -412,76 +450,56 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             user_id: The user id to associate with the record responses.
         Returns:
             A Record object.
+
         """
+
         record_id: Optional[str] = None
 
         fields: Dict[str, FieldValue] = {}
         vectors: Dict[str, VectorValue] = {}
         metadata: Dict[str, MetadataValue] = {}
-
         responses: List[Response] = []
         suggestion_values: Dict[str, dict] = defaultdict(dict)
 
-        schema = self.__dataset.schema
+        for source_key, destinations in mapping.items():
+            value = data.get(source_key)
+            for attribute_name, attribute_type, sub_attribute, schema_item in destinations:
+                if attribute_name == "id":
+                    record_id = value
+                    continue
+                # Add suggestion values to the suggestions
+                if attribute_type == "suggestion":
+                    if sub_attribute in ["score", "agent"]:
+                        suggestion_values[attribute_name][sub_attribute] = value
 
-        for attribute, value in data.items():
-            schema_item = schema.get(attribute)
-            attribute_type = None
-            sub_attribute = None
+                    elif sub_attribute is None:
+                        suggestion_values[attribute_name].update(
+                            {"value": value, "question_name": attribute_name, "question_id": schema_item.id}
+                        )
+                    else:
+                        warnings.warn(
+                            message=f"Record attribute {sub_attribute} is not a valid suggestion sub_attribute so skipping."
+                        )
+                    continue
 
-            # Map source data keys using the mapping
-            if mapping and attribute in mapping:
-                attribute_mapping = mapping.get(attribute)
-                attribute_mapping = attribute_mapping.split(".")
-                attribute = attribute_mapping[0]
-                schema_item = schema.get(attribute)
-                if len(attribute_mapping) > 1:
-                    attribute_type = attribute_mapping[1]
-                if len(attribute_mapping) > 2:
-                    sub_attribute = attribute_mapping[2]
-            elif schema_item is mapping is None and attribute != "id":
-                warnings.warn(
-                    message=f"""Record attribute {attribute} is not in the schema so skipping.
-                        Define a mapping to map source data fields to Argilla Fields, Questions, and ids
-                        """
-                )
-                continue
-
-            if attribute == "id":
-                record_id = value
-                continue
-
-            # Add suggestion values to the suggestions
-            if attribute_type == "suggestion":
-                if sub_attribute in ["score", "agent"]:
-                    suggestion_values[attribute][sub_attribute] = value
-
-                elif sub_attribute is None:
-                    suggestion_values[attribute].update(
-                        {"value": value, "question_name": attribute, "question_id": schema_item.id}
+                # Assign the value to question, field, or response based on schema item
+                if isinstance(schema_item, TextField):
+                    fields[attribute_name] = value
+                elif isinstance(schema_item, QuestionPropertyBase) and attribute_type == "response":
+                    responses.append(Response(question_name=attribute_name, value=value, user_id=user_id))
+                elif isinstance(schema_item, QuestionPropertyBase) and attribute_type is None:
+                    suggestion_values[attribute_name].update(
+                        {"value": value, "question_name": attribute_name, "question_id": schema_item.id}
                     )
+                elif isinstance(schema_item, VectorField):
+                    vectors[attribute_name] = value
+                elif isinstance(schema_item, MetadataPropertyBase):
+                    metadata[attribute_name] = value
                 else:
                     warnings.warn(
-                        message=f"Record attribute {sub_attribute} is not a valid suggestion sub_attribute so skipping."
+                        message=f"Record attribute {attribute_name} is not in the schema or mapping so skipping."
                     )
-                continue
-
-            # Assign the value to question, field, or response based on schema item
-            if isinstance(schema_item, TextField):
-                fields[attribute] = value
-            elif isinstance(schema_item, QuestionPropertyBase) and attribute_type == "response":
-                responses.append(Response(question_name=attribute, value=value, user_id=user_id))
-            elif isinstance(schema_item, QuestionPropertyBase) and attribute_type is None:
-                suggestion_values[attribute].update(
-                    {"value": value, "question_name": attribute, "question_id": schema_item.id}
-                )
-            elif isinstance(schema_item, VectorField):
-                vectors[attribute] = value
-            elif isinstance(schema_item, MetadataPropertyBase):
-                metadata[attribute] = value
-            else:
-                warnings.warn(message=f"Record attribute {attribute} is not in the schema or mapping so skipping.")
-                continue
+                    continue
 
         suggestions = [Suggestion(**suggestion_dict) for suggestion_dict in suggestion_values.values()]
 
