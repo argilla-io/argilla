@@ -91,9 +91,10 @@ jobs:
         run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --prop-set hidden=true --push
         if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
 
-      - uses: mshick/add-pr-comment@v2
+      - name: Add deployment message in PR
+        uses: mshick/add-pr-comment@v2
         if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
         with:
           message: |
-            Docs for this PR have been deployed in private here: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
+            Docs for this PR have been deployed hidden from versioning: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
 
