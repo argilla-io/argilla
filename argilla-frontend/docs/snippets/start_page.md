@@ -31,7 +31,7 @@ client = rg.Argilla(
     [local_]api_url="[LOCAL_HOST]",
     [hf_]api_url="https://[HF_OWNER]-[HF_SPACE_NAME].hf.space",
     api_key="[USER_API_KEY]"
-    [hf_]extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
+    [hf_]headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
