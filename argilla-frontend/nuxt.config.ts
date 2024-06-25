@@ -14,8 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { NuxtConfig } from "@nuxt/types";
+import { defineNuxtConfig } from "@nuxt/bridge";
 import Mode from "frontmatter-markdown-loader/mode";
 import pkg from "./package.json";
 
@@ -23,7 +22,9 @@ const LOCAL_ENVIRONMENT = "http://localhost:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
-const config: NuxtConfig = {
+export default defineNuxtConfig({
+  bridge: false,
+
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
   telemetry: false,
@@ -83,7 +84,6 @@ const config: NuxtConfig = {
       path: "~/components",
       pattern: "**/*.vue",
       pathPrefix: false,
-      level: 1,
     },
   ],
 
@@ -136,10 +136,10 @@ const config: NuxtConfig = {
       target: BASE_URL,
     },
   },
-
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
     cssSourceMap: false,
+    // @ts-ignore: Unreachable code error
     extend(config) {
       config.resolve.alias.vue = "vue/dist/vue.common";
       config.module.rules.push({
@@ -217,5 +217,4 @@ const config: NuxtConfig = {
     documentationPersistentStorage:
       "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
   },
-};
-export default config;
+});
