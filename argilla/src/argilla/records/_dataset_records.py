@@ -361,6 +361,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, str]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
+        """ Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
         if HFDatasetsIO._is_hf_dataset(dataset=records):
@@ -404,6 +405,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         records: List[Dict[str, Any]],
         mapping: Optional[Dict[str, str]] = None,
     ) -> Dict[str, List[str]]:
+        """ Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
         schema = self.__dataset.schema
         mapping = mapping or {}
         singular_mapping = {}
@@ -467,6 +469,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 if attribute_name == "id":
                     record_id = value
                     continue
+                
                 # Add suggestion values to the suggestions
                 if attribute_type == "suggestion":
                     if sub_attribute in ["score", "agent"]:
