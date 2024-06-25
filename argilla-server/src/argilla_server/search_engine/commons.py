@@ -575,6 +575,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 "status": response.status,
             }
             for response in responses
+            if response.user is not None
         }
 
     @staticmethod

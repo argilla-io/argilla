@@ -1100,6 +1100,26 @@ class TestBaseElasticAndOpenSearchEngine:
             },
         }
 
+    async def test_update_record_response_without_user_id(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+        question = test_banking_sentiment_dataset.questions[0]
+
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}}, user=None)
+        record = await response.awaitable_attrs.record
+        await record.awaitable_attrs.dataset
+        await search_engine.update_record_response(response)
+
+        index_name = es_index_name_for_dataset(test_banking_sentiment_dataset)
+
+        results = opensearch.get(index=index_name, id=record.id)
+
+        assert results["_source"]["responses"] == {}
+
     @pytest.mark.parametrize("annotators_size", [20, 200, 400])
     async def test_annotators_limits(
         self,
