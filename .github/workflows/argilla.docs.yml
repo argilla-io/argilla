@@ -58,7 +58,7 @@ jobs:
       - name: Deploy Argilla docs (branch /main)
         run: |
           pdm run mike set-default --push latest
-          pdm run mike deploy latest --push
+          pdm run mike set-default --push latest
         if: github.ref == 'refs/heads/main'
 
       - name: Deploy Argilla docs (branch /develop)
