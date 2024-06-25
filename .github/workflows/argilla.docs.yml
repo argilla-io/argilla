@@ -77,7 +77,7 @@ jobs:
           for version in $versions; do
             if [[ $version == docs_* ]]; then
               echo "Deleting version: $version"
-              pdm run mike delete "$version"
+              pdm run mike delete "$version" --push
             fi
           done
         if: startsWith(github.ref, 'refs/tags/')
