@@ -22,7 +22,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory
+from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory, TextQuestionFactory
 
 
 @pytest.mark.asyncio
@@ -560,3 +560,102 @@ class TestUpdateResponse:
         }
 
         assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+
+    @pytest.mark.parametrize("previous_response_status", [ResponseStatus.draft, ResponseStatus.discarded])
+    async def test_update_response_as_submitted_increases_record_count_submitted_responses(
+        self, async_client: AsyncClient, owner_auth_header: dict, owner: User, previous_response_status: ResponseStatus
+    ):
+        dataset = await DatasetFactory.create()
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await ResponseFactory.create(
+            status=previous_response_status,
+            values={
+                "text-question": {
+                    "value": "text question response",
+                },
+            },
+            user=owner,
+            record=record,
+        )
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={
+                "status": ResponseStatus.submitted,
+                "values": {
+                    "text-question": {
+                        "value": "text question response",
+                    },
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        assert record.count_submitted_responses == 1
+
+    @pytest.mark.parametrize("new_response_status", [ResponseStatus.draft, ResponseStatus.discarded])
+    async def test_update_response_as_not_submitted_from_submitted_descreases_record_count_submitted_responses(
+        self, async_client: AsyncClient, owner_auth_header: dict, owner: User, new_response_status: ResponseStatus
+    ):
+        dataset = await DatasetFactory.create()
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(dataset=dataset, count_submitted_responses=1)
+
+        response = await ResponseFactory.create(
+            status=ResponseStatus.submitted,
+            values={
+                "text-question": {
+                    "value": "text question response",
+                },
+            },
+            user=owner,
+            record=record,
+        )
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={"status": new_response_status},
+        )
+
+        assert resp.status_code == 200
+        assert record.count_submitted_responses == 0
+
+    @pytest.mark.parametrize(
+        "previous_response_status,new_response_status",
+        [
+            (ResponseStatus.draft, ResponseStatus.discarded),
+            (ResponseStatus.discarded, ResponseStatus.draft),
+        ],
+    )
+    async def test_update_response_as_not_submitted_from_not_submitted_does_not_modify_count_submitted_responses(
+        self,
+        async_client: AsyncClient,
+        owner_auth_header: dict,
+        owner: User,
+        previous_response_status: ResponseStatus,
+        new_response_status: ResponseStatus,
+    ):
+        dataset = await DatasetFactory.create()
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(dataset=dataset, count_submitted_responses=0)
+
+        response = await ResponseFactory.create(status=previous_response_status, user=owner, record=record)
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={"status": new_response_status},
+        )
+
+        assert resp.status_code == 200
+        assert record.count_submitted_responses == 0

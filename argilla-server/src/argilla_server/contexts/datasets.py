@@ -936,6 +936,15 @@ async def create_response(
         )
 
         await db.flush([response])
+
+        if response_create.status == ResponseStatus.submitted:
+            await db.execute(
+                sqlalchemy.update(Record)
+                .where(Record.id == record.id)
+                .values(count_submitted_responses=Record.count_submitted_responses + 1)
+            )
+        # TODO: refresh record at search engine
+
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
 
@@ -950,6 +959,8 @@ async def update_response(
     ResponseUpdateValidator(response_update).validate_for(response.record)
 
     async with db.begin_nested():
+        previous_response_status = response.status
+
         response = await response.update(
             db,
             values=jsonable_encoder(response_update.values),
@@ -959,6 +970,21 @@ async def update_response(
         )
 
         await _load_users_from_responses(response)
+
+        if response_update.status == ResponseStatus.submitted and previous_response_status != ResponseStatus.submitted:
+            await db.execute(
+                sqlalchemy.update(Record)
+                .where(Record.id == response.record_id)
+                .values(count_submitted_responses=Record.count_submitted_responses + 1)
+            )
+        if response_update.status != ResponseStatus.submitted and previous_response_status == ResponseStatus.submitted:
+            await db.execute(
+                sqlalchemy.update(Record)
+                .where(Record.id == response.record_id)
+                .values(count_submitted_responses=Record.count_submitted_responses - 1)
+            )
+        # TODO: refresh record at search engine
+
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
@@ -1000,6 +1026,15 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
         await _load_users_from_responses(response)
+
+        if response.status == ResponseStatus.submitted:
+            await db.execute(
+                sqlalchemy.update(Record)
+                .where(Record.id == response.record_id)
+                .values(count_submitted_responses=Record.count_submitted_responses - 1)
+            )
+        # TODO: refresh record at search engine
+
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
 

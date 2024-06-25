@@ -188,6 +188,8 @@ class Record(DatabaseModel):
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
+    count_submitted_responses: Mapped[int] = mapped_column(default=0, server_default="0")
+
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(
         back_populates="record",
