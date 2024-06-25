@@ -17,6 +17,7 @@ Argilla UI offers many functions to help you manage your annotation workflow, ai
 The UI is responsive with two columns for larger devices and one column for smaller devices. This enables you to annotate data using your mobile phone for simple datasets (i.e., not very long text and 1-2 questions) or resize your screen to get a more compact UI.
 
 === "Header"
+
     At the right side of the navigation breadcrumb, you can customize the dataset settings and edit your profile.
 
 === "Left pane"
@@ -25,9 +26,11 @@ The UI is responsive with two columns for larger devices and one column for smal
     Below the control panel, the record card(s) are displayed one by one (Focus view) or in a vertical list (Bulk view).
 
 === "Right pane"
+
     This is where you annotate your dataset. Simply fill it out as a form, then choose to `Submit`, `Save as Draft`, or `Discard`.
 
 === "Left bottom panel"
+
     This expandable area displays the annotation guidelines. The annotation guidelines can be edited by owner and admin roles in the dataset settings.
 
 === "Right bottom panel"
@@ -160,6 +163,7 @@ From the `Responses` dropdown, type and select the question. You can set a range
 
 !!! note
     The text and ranking questions are not available for filtering.
+
 
 From the Suggestions dropdown, filter the suggestions by `Suggestion values`, `Score` , or `Agent`. 
 
