@@ -14,7 +14,7 @@
 import warnings
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
 from tqdm import tqdm
@@ -208,7 +208,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def log(
         self,
         records: Union[List[dict], List[Record], HFDataset],
-        mapping: Optional[Dict[str, str]] = None,
+        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> "DatasetRecords":
@@ -222,6 +222,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                      If records are defined as a dictionaries or a dataset, the keys/ column names should correspond to the
                      fields in the Argilla dataset's fields and questions. `id` should be provided to identify the records when updating.
             mapping: A dictionary that maps the keys/ column names in the records to the fields or questions in the Argilla dataset.
+                     To assign an incoming key or column to multiple fields or questions, provide a list or tuple of field or question names.
             user_id: The user id to be associated with the records' response. If not provided, the current user id is used.
             batch_size: The number of records to send in each batch. The default is 256.
 
@@ -358,18 +359,20 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def _ingest_records(
         self,
         records: Union[List[Dict[str, Any]], Dict[str, Any], List[Record], Record, HFDataset],
-        mapping: Optional[Dict[str, str]] = None,
+        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
-        """ Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
+        """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
         if HFDatasetsIO._is_hf_dataset(dataset=records):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
         if all(map(lambda r: isinstance(r, dict), records)):
             # Records as flat dicts of values to be matched to questions as suggestion or response
-            mapping = self._render_record_mapping(records=records, mapping=mapping)
-            records = [self._infer_record_from_mapping(data=r, mapping=mapping, user_id=user_id) for r in records]  # type: ignore
+            rendered_mapping = self._render_record_mapping(records=records, mapping=mapping)
+            records = [
+                self._infer_record_from_mapping(data=r, mapping=rendered_mapping, user_id=user_id) for r in records
+            ]  # type: ignore
         elif all(map(lambda r: isinstance(r, Record), records)):
             for record in records:
                 record.dataset = self.__dataset
@@ -403,9 +406,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def _render_record_mapping(
         self,
         records: List[Dict[str, Any]],
-        mapping: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, List[str]]:
-        """ Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
+        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
+    ) -> Dict[str, Tuple[Optional[str]]]:
+        """Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
         schema = self.__dataset.schema
         mapping = mapping or {}
         singular_mapping = {}
@@ -426,7 +429,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
             for attribute_mapping in _destinations:
                 attribute_mapping = attribute_mapping.split(".")
-                
+
                 attribute_name = attribute_mapping[0]
                 schema_item = schema.get(attribute_name)
                 attribute_type = attribute_mapping[1] if len(attribute_mapping) > 1 else None
@@ -440,8 +443,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
     def _infer_record_from_mapping(
         self,
-        data: dict,
-        mapping: Optional[Dict[str, str]] = None,
+        data: Dict[str, Any],
+        mapping: Dict[str, Tuple[Optional[str]]],
         user_id: Optional[UUID] = None,
     ) -> "Record":
         """Converts a mapped record dictionary to a Record object for use by the add or update methods.
@@ -469,7 +472,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 if attribute_name == "id":
                     record_id = value
                     continue
-                
+
                 # Add suggestion values to the suggestions
                 if attribute_type == "suggestion":
                     if sub_attribute in ["score", "agent"]:
