@@ -164,8 +164,8 @@
         </HorizontalResizable>
       </template>
       <BaseCollapsablePanel
-        class="--mobile"
-        :is-expanded="expandedGuidelines"
+        hideOnDesktop
+        :isExpanded="expandedGuidelines"
         @toggle-expand="expandedGuidelines = !expandedGuidelines"
       >
         <template #panelHeader>
@@ -542,10 +542,5 @@ export default {
 }
 [data-title] {
   @include tooltip-mini("right", 12px);
-}
-.--mobile {
-  @include media(">=desktop") {
-    display: none;
-  }
 }
 </style>
