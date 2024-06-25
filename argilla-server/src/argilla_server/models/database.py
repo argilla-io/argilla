@@ -15,14 +15,14 @@
 import secrets
 from datetime import datetime
 from typing import Any, List, Optional, Union
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
+from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql, select, func
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
@@ -183,10 +183,26 @@ class VectorSettings(DatabaseModel):
 class Record(DatabaseModel):
     __tablename__ = "records"
 
+    # NOTE: `count_submitted_responses` was failing for not finding `id`,
+    # redefining the id here is fixing the problem.
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+
     fields: Mapped[dict] = mapped_column(JSON, default={})
     metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+
+    count_submitted_responses = column_property(
+        select(func.count(Response.id))
+        .where(
+            and_(
+                Response.record_id == id,
+                Response.status == ResponseStatus.submitted,
+            )
+        )
+        .correlate_except(Response)
+        .scalar_subquery()
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(
