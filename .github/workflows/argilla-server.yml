@@ -8,8 +8,14 @@ on:
   workflow_dispatch:
 
   push:
+    branches:
+      - main
+      - develop
+      - releases/**
 
   pull_request:
+    paths:
+      - "argilla-server/**"
 
 jobs:
   build:
@@ -109,6 +115,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main'
       || github.ref == 'refs/heads/develop'
+      || contains(github.ref, "releases/")
       || github.event_name == 'workflow_dispatch'
       || github.event_name == 'pull_request'
     needs:

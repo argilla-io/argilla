@@ -84,8 +84,8 @@
       </HorizontalResizable>
     </template>
     <BaseCollapsablePanel
-      class="--mobile"
-      :is-expanded="expandedGuidelines"
+      hideOnDesktop
+      :isExpanded="expandedGuidelines"
       @toggle-expand="expandedGuidelines = !expandedGuidelines"
     >
       <template #panelHeader>
@@ -210,11 +210,6 @@ export default {
 }
 .annotation-progress {
   .--expanded & {
-    display: none;
-  }
-}
-.--mobile {
-  @include media(">=desktop") {
     display: none;
   }
 }
