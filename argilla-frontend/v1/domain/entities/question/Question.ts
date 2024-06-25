@@ -140,6 +140,16 @@ export class Question {
     this.answer.clear();
   }
 
+  reloadAnswerFromOptions() {
+    const valuesAnswered = this.answer.valuesAnswered;
+
+    this.initializeAnswers();
+
+    if (valuesAnswered) {
+      this.answer.response({ value: valuesAnswered });
+    }
+  }
+
   restore() {
     this.title = this.original.title;
     this.description = this.original.description;
