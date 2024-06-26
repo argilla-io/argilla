@@ -364,10 +364,10 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
         """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
-        
+
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
-        
+
         if HFDatasetsIO._is_hf_dataset(dataset=records):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
 
