@@ -358,7 +358,6 @@ async def _configure_query_relationships(
 
     if include_params.with_all_vectors:
         query = query.options(joinedload(Record.vectors).joinedload(Vector.vector_settings))
-
     elif include_params.with_some_vector:
         vector_settings_ids_subquery = select(VectorSettings.id).filter(
             and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(include_params.vectors))
@@ -885,6 +884,8 @@ async def update_record(
             await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
+
+    await db.refresh(record, attribute_names=["count_submitted_responses"])
 
     return record
 

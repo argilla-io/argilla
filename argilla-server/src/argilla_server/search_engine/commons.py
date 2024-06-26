@@ -552,6 +552,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         document = {
             "id": str(record.id),
             "fields": record.fields,
+            "count_submitted_responses": record.count_submitted_responses,
             "inserted_at": record.inserted_at,
             "updated_at": record.updated_at,
         }
@@ -712,6 +713,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "count_submitted_responses": {"type": "integer"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},

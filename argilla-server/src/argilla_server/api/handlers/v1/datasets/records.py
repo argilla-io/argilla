@@ -387,6 +387,7 @@ async def list_current_user_dataset_records(
     for record in records:
         record.dataset = dataset
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
+        await db.refresh(record, attribute_names=["count_submitted_responses"])
 
     return Records(items=records, total=total)
 
@@ -577,6 +578,8 @@ async def search_current_user_dataset_records(
     for record in records:
         record.dataset = dataset
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
+
+        await db.refresh(record, attribute_names=["count_submitted_responses"])
 
         record_id_score_map[record.id]["search_record"] = SearchRecord(
             record=RecordSchema.from_orm(record),

@@ -40,6 +40,7 @@ from argilla_server.enums import (
     RecordInclude,
     ResponseStatusFilter,
     SimilarityOrder,
+    RecordStatus,
 )
 from argilla_server.models import (
     Dataset,
@@ -3598,7 +3599,9 @@ class TestSuiteDatasets:
         uuids_str = ",".join(records_ids_a + records_ids_b)
 
         response = await async_client.delete(
-            f"/api/v1/datasets/{dataset_a.id}/records", headers=owner_auth_header, params={"ids": uuids_str}
+            f"/api/v1/datasets/{dataset_a.id}/records",
+            headers=owner_auth_header,
+            params={"ids": uuids_str},
         )
 
         assert response.status_code == 204
@@ -3662,6 +3665,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
+                        "status": RecordStatus.completed,
                         "fields": {"input": "input_a", "output": "output_a"},
                         "metadata": None,
                         "external_id": records[0].external_id,
@@ -3674,6 +3678,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
+                        "status": RecordStatus.completed,
                         "fields": {"input": "input_b", "output": "output_b"},
                         "metadata": {"unit": "test"},
                         "external_id": records[1].external_id,
@@ -4015,6 +4020,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
+                        "status": RecordStatus.completed,
                         "fields": {
                             "input": "input_a",
                             "output": "output_a",
@@ -4030,6 +4036,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
+                        "status": RecordStatus.completed,
                         "fields": {
                             "input": "input_b",
                             "output": "output_b",
@@ -4169,6 +4176,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_a.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_a.external_id,
@@ -4185,6 +4193,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_b.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_b.external_id,
@@ -4200,6 +4209,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_c.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_c.external_id,
@@ -4263,6 +4273,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_a.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_a.external_id,
@@ -4279,6 +4290,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_b.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_b.external_id,
@@ -4294,6 +4306,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_c.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_c.external_id,

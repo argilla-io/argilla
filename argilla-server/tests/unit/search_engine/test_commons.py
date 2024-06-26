@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder, RecordStatus
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
     FloatMetadataFilter,
@@ -92,7 +92,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
 
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
-async def test_banking_sentiment_dataset_non_indexed():
+async def test_banking_sentiment_dataset_non_indexed(db: AsyncSession):
     text_question = await TextQuestionFactory(name="text")
     rating_question = await RatingQuestionFactory(name="rating")
 
@@ -201,7 +201,7 @@ async def test_banking_sentiment_dataset_non_indexed():
     ]
 
     await refresh_dataset(dataset)
-    await refresh_records(records)
+    await refresh_records(db, records)
     await dataset.awaitable_attrs.records
 
     return dataset
@@ -259,11 +259,12 @@ async def refresh_dataset(dataset: Dataset):
     await dataset.awaitable_attrs.vectors_settings
 
 
-async def refresh_records(records: List[Record]):
+async def refresh_records(db: AsyncSession, records: List[Record]):
     for record in records:
         await record.awaitable_attrs.suggestions
         await record.awaitable_attrs.responses
         await record.awaitable_attrs.vectors
+        await db.refresh(record, attribute_names=["count_submitted_responses"])
 
 
 def _expected_value_for_question(question: Question) -> Dict[str, Any]:
@@ -314,6 +315,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "count_submitted_responses": {"type": "integer"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -356,6 +358,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "count_submitted_responses": {"type": "integer"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -428,6 +431,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "count_submitted_responses": {"type": "integer"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -475,6 +479,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "count_submitted_responses": {"type": "integer"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -756,6 +761,7 @@ class TestBaseElasticAndOpenSearchEngine:
     )
     async def test_search_with_suggestion_filter(
         self,
+        db: AsyncSession,
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         property: str,
@@ -782,7 +788,7 @@ class TestBaseElasticAndOpenSearchEngine:
         await SuggestionFactory.create(record=records[1], question=label_question, value="B")
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -857,7 +863,9 @@ class TestBaseElasticAndOpenSearchEngine:
 
         assert [item.record_id for item in results.items] == [record.id for record in records]
 
-    async def test_index_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
+    async def test_index_records(
+        self, db: AsyncSession, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+    ):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
@@ -868,7 +876,7 @@ class TestBaseElasticAndOpenSearchEngine:
         )
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -880,6 +888,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
+                "count_submitted_responses": 0,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
             }
@@ -905,7 +914,7 @@ class TestBaseElasticAndOpenSearchEngine:
         }
 
     async def test_index_records_with_suggestions(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+        self, db: AsyncSession, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):
         text_field = await TextFieldFactory.create()
         label_question = await QuestionFactory.create(
@@ -926,7 +935,7 @@ class TestBaseElasticAndOpenSearchEngine:
         await SuggestionFactory.create(record=records[1], question=label_question, value="B")
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -938,6 +947,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(records[0].id),
                 "fields": records[0].fields,
+                "count_submitted_responses": 0,
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "A"}},
@@ -945,6 +955,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(records[1].id),
                 "fields": records[1].fields,
+                "count_submitted_responses": 0,
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "B"}},
@@ -952,7 +963,7 @@ class TestBaseElasticAndOpenSearchEngine:
         ]
 
     async def test_index_records_with_metadata(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+        self, db: AsyncSession, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):
         text_fields = await TextFieldFactory.create_batch(5)
         metadata_properties = await TermsMetadataPropertyFactory.create_batch(3)
@@ -967,7 +978,7 @@ class TestBaseElasticAndOpenSearchEngine:
         )
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -979,6 +990,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
+                "count_submitted_responses": 0,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "metadata": {
@@ -990,7 +1002,7 @@ class TestBaseElasticAndOpenSearchEngine:
         ]
 
     async def test_index_records_with_vectors(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+        self, db: AsyncSession, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):
         dataset = await DatasetFactory.create()
         text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
@@ -1006,7 +1018,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 )
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -1018,6 +1030,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
+                "count_submitted_responses": 0,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
@@ -1025,7 +1038,9 @@ class TestBaseElasticAndOpenSearchEngine:
             for record in records
         ]
 
-    async def test_delete_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
+    async def test_delete_records(
+        self, db: AsyncSession, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+    ):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
@@ -1036,7 +1051,7 @@ class TestBaseElasticAndOpenSearchEngine:
         )
 
         await refresh_dataset(dataset)
-        await refresh_records(records)
+        await refresh_records(db, records)
 
         await search_engine.create_index(dataset)
         await search_engine.index_records(dataset, records)
@@ -1103,6 +1118,7 @@ class TestBaseElasticAndOpenSearchEngine:
     @pytest.mark.parametrize("annotators_size", [20, 200, 400])
     async def test_annotators_limits(
         self,
+        db: AsyncSession,
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_non_indexed: Dataset,
@@ -1125,6 +1141,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         await record.awaitable_attrs.dataset
         await record.awaitable_attrs.responses
+        await db.refresh(record, attribute_names=["count_submitted_responses"])
         await search_engine.index_records(dataset, [record])
 
         properties = opensearch.indices.get_mapping(index=index_name)[index_name]["mappings"]["properties"]
@@ -1135,6 +1152,7 @@ class TestBaseElasticAndOpenSearchEngine:
     @pytest.mark.parametrize("annotators_size", [1000, 2000, 4000])
     async def test_annotator_limits_increasing_default_fields_limit(
         self,
+        db: AsyncSession,
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_non_indexed: Dataset,
@@ -1158,6 +1176,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         await record.awaitable_attrs.dataset
         await record.awaitable_attrs.responses
+        await db.refresh(record, attribute_names=["count_submitted_responses"])
         await search_engine.index_records(dataset, [record])
 
         properties = opensearch.indices.get_mapping(index=index_name)[index_name]["mappings"]["properties"]
