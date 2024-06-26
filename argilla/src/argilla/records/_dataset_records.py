@@ -372,10 +372,10 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
 
         ingested_records = []
+        rendered_mapping = self._render_record_mapping(records=records, mapping=mapping)
         for record in tqdm(records, desc="1/2: Ingesting records", unit="record"):
             try:
                 if not isinstance(record, Record):
-                    rendered_mapping = self._render_record_mapping(records=records, mapping=mapping)
                     record = self._infer_record_from_mapping(data=record, mapping=rendered_mapping, user_id=user_id)
                 elif isinstance(record, Record):
                     record.dataset = self.__dataset
