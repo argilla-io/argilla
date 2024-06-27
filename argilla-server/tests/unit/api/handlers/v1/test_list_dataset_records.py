@@ -18,7 +18,7 @@ from uuid import uuid4
 import pytest
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import RecordInclude, RecordSortField, ResponseStatus, UserRole
+from argilla_server.enums import RecordInclude, RecordSortField, ResponseStatus, UserRole, RecordStatus
 from argilla_server.models import Dataset, Question, Record, Response, Suggestion, User, Workspace
 from argilla_server.search_engine import (
     FloatMetadataFilter,
@@ -821,6 +821,7 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record_a.id),
+                    "status": RecordStatus.completed,
                     "fields": {"input": "input_a", "output": "output_a"},
                     "metadata": None,
                     "dataset_id": str(dataset.id),
@@ -830,6 +831,7 @@ class TestSuiteListDatasetRecords:
                 },
                 {
                     "id": str(record_b.id),
+                    "status": RecordStatus.completed,
                     "fields": {"input": "input_b", "output": "output_b"},
                     "metadata": {"unit": "test"},
                     "dataset_id": str(dataset.id),
@@ -839,6 +841,7 @@ class TestSuiteListDatasetRecords:
                 },
                 {
                     "id": str(record_c.id),
+                    "status": RecordStatus.pending,
                     "fields": {"input": "input_c", "output": "output_c"},
                     "metadata": None,
                     "dataset_id": str(dataset.id),
@@ -898,6 +901,7 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record.id),
+                    "status": RecordStatus.pending,
                     "fields": {"input": "input_b", "output": "output_b"},
                     "metadata": {"key1": "value1"},
                     "dataset_id": str(dataset.id),

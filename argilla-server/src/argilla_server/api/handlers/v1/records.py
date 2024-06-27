@@ -51,7 +51,6 @@ async def get_record(
         options=[
             selectinload(Record.dataset).selectinload(Dataset.questions),
             selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
-            selectinload(Record.responses),
             selectinload(Record.suggestions),
         ],
     )
@@ -79,7 +78,6 @@ async def update_record(
             selectinload(Record.responses),
             selectinload(Record.suggestions),
             selectinload(Record.vectors),
-            selectinload(Record.responses),
         ],
     )
 
@@ -231,7 +229,6 @@ async def delete_record(
         options=[
             selectinload(Record.dataset).selectinload(Dataset.questions),
             selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
-            selectinload(Record.responses),
         ],
     )
 
