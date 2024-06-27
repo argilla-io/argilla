@@ -209,7 +209,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def log(
         self,
         records: Union[List[dict], List[Record], HFDataset],
-        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> "DatasetRecords":
@@ -364,7 +364,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def _ingest_records(
         self,
         records: Union[List[Dict[str, Any]], Dict[str, Any], List[Record], Record, HFDataset],
-        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
         """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
@@ -418,7 +418,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def _render_record_mapping(
         self,
         records: List[Dict[str, Any]],
-        mapping: Optional[Dict[str, Union[str, List[str], Tuple[str]]]] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
     ) -> Dict[str, Tuple[Optional[str]]]:
         """Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
         schema = self.__dataset.schema
