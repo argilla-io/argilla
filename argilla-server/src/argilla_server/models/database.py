@@ -32,6 +32,8 @@ from argilla_server.enums import (
     ResponseStatus,
     SuggestionType,
     UserRole,
+    DatasetDistributionStrategy,
+    RecordStatus,
 )
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
@@ -210,16 +212,31 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
-    def __repr__(self):
-        return (
-            f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
-            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
-        )
+    @property
+    def status(self):
+        # TODO: Move this to distribution context
+        if self.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
+            if self.count_submitted_responses >= self.dataset.distribution["min_submitted"]:
+                return RecordStatus.completed
+            else:
+                return RecordStatus.pending
+
+        raise NotImplementedError(f"unsupported distribution strategy `{self.dataset.distribution_strategy}`")
+
+    @property
+    def count_submitted_responses(self):
+        return len([response for response in self.responses if response.is_submitted])
 
     def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
                 return vector.value
+
+    def __repr__(self):
+        return (
+            f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Question(DatabaseModel):
@@ -353,6 +370,10 @@ class Dataset(DatabaseModel):
     @property
     def is_ready(self):
         return self.status == DatasetStatus.ready
+
+    @property
+    def distribution_strategy(self) -> DatasetDistributionStrategy:
+        return DatasetDistributionStrategy(self.distribution["strategy"])
 
     def metadata_property_by_name(self, name: str) -> Union["MetadataProperty", None]:
         for metadata_property in self.metadata_properties:

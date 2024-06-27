@@ -325,7 +325,7 @@ async def get_records_by_ids(
     if dataset_id:
         query.filter(Record.dataset_id == dataset_id)
 
-    query = query.filter(Record.id.in_(records_ids))
+    query = query.filter(Record.id.in_(records_ids)).options(joinedload(Record.responses))
 
     if include and include.with_responses:
         if not user_id:
