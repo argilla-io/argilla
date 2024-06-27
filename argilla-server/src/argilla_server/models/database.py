@@ -210,6 +210,8 @@ class Record(DatabaseModel):
         order_by=Vector.inserted_at.asc(),
     )
 
+    _responses_for_count: Mapped[List["Response"]] = relationship(back_populates="record", lazy="selectin")
+
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
     @property
@@ -225,7 +227,7 @@ class Record(DatabaseModel):
 
     @property
     def count_submitted_responses(self):
-        return len([response for response in self.responses if response.is_submitted])
+        return len([response for response in self._responses_for_count if response.is_submitted])
 
     def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
         for vector in self.vectors:
