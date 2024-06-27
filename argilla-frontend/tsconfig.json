@@ -15,16 +15,11 @@
       "~/*": ["./*"],
       "@/*": ["./*"]
     },
-    "types": [
-      "@types/node",
-      "@nuxt/typescript-build",
-      "@nuxt/types",
-      "@types/jest",
-      "@nuxtjs/i18n"
-    ]
+    "types": ["@types/node", "@nuxt/types", "@types/jest", "@nuxtjs/i18n"]
   },
   "vueCompilerOptions": {
     "target": 2.7
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "extends": "./.nuxt/tsconfig.json"
 }

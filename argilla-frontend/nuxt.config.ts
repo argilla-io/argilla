@@ -23,8 +23,12 @@ const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
 export default defineNuxtConfig({
-  bridge: false,
-
+  // https://nuxt.com/docs/bridge/overview
+  bridge: {
+    capi: true,
+    typescript: true,
+    nitro: false, // If migration to Nitro is complete, set to true
+  },
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
   telemetry: false,
@@ -88,12 +92,7 @@ export default defineNuxtConfig({
   ],
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
-  buildModules: [
-    // https://go.nuxtjs.dev/typescript
-    "@nuxt/typescript-build",
-    "@nuxtjs/composition-api/module",
-    ["@pinia/nuxt", { disableVuex: false }],
-  ],
+  buildModules: [["@pinia/nuxt", { disableVuex: false }]],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
