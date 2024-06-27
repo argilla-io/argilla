@@ -416,7 +416,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
     def _render_record_mapping(
         self,
-        records: List[Dict[str, Any]],
+        data: Dict[str, Any],
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
     ) -> Dict[str, Tuple[Optional[str]]]:
         """Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
@@ -425,7 +425,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         singular_mapping = defaultdict(dict)
 
         # update the mapping with unmapped columns
-        for key, value in records[0].items():
+        for key, value in data.items():
             if key not in schema and key not in mapping:
                 warnings.warn(
                     message=f"Record attribute {key} is not in the schema so skipping.",
@@ -491,7 +491,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         """
 
-        mapping = self._render_record_mapping(records=records, mapping=mapping)
+        mapping = self._render_record_mapping(data=data, mapping=mapping)
         id_mapping = mapping.get("id", {})
         suggestion_mapping = mapping.get("suggestion", {})
         response_mapping = mapping.get("response", {})
