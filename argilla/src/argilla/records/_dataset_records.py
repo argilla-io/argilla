@@ -240,8 +240,12 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         created_or_updated = []
         records_updated = 0
+
         for batch in tqdm(
-            iterable=range(0, len(records), batch_size), desc="2/2: Adding and updating records", unit="batch"
+            iterable=range(0, len(records), batch_size),
+            desc="Sending records...",
+            total=len(records) // batch_size,
+            unit="batch",
         ):
             self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
             batch_records = record_models[batch : batch + batch_size]
@@ -373,7 +377,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         ingested_records = []
         rendered_mapping = self._render_record_mapping(records=records, mapping=mapping)
-        for record in tqdm(records, desc="1/2: Ingesting records", unit="record"):
+
+        for record in records:
             try:
                 if not isinstance(record, Record):
                     record = self._infer_record_from_mapping(data=record, mapping=rendered_mapping, user_id=user_id)
