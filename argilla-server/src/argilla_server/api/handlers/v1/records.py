@@ -76,6 +76,7 @@ async def update_record(
         options=[
             selectinload(Record.dataset).selectinload(Dataset.questions),
             selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.responses),
             selectinload(Record.suggestions),
             selectinload(Record.vectors),
             selectinload(Record.responses),
@@ -102,6 +103,7 @@ async def create_record_response(
         options=[
             selectinload(Record.dataset).selectinload(Dataset.questions),
             selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.responses),
         ],
     )
 

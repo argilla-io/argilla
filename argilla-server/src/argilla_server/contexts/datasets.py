@@ -325,7 +325,7 @@ async def get_records_by_ids(
     if dataset_id:
         query.filter(Record.dataset_id == dataset_id)
 
-    query = query.filter(Record.id.in_(records_ids)).options(joinedload(Record.responses))
+    query = query.filter(Record.id.in_(records_ids))
 
     if include and include.with_responses:
         if not user_id:
@@ -334,6 +334,8 @@ async def get_records_by_ids(
             query = query.outerjoin(
                 Response, and_(Response.record_id == Record.id, Response.user_id == user_id)
             ).options(contains_eager(Record.responses))
+    else:
+        query.options(joinedload(Record.responses))
 
     query = await _configure_query_relationships(query=query, dataset_id=dataset_id, include_params=include)
 
@@ -939,6 +941,18 @@ async def create_response(
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
 
+        record = await Record.get_or_raise(
+            db,
+            response.record_id,
+            options=[
+                selectinload(Record.responses),
+            ],
+        )
+        await search_engine.partial_record_update(
+            record,
+            count_submitted_responses=record.count_submitted_responses,
+        )
+
     await db.commit()
 
     return response
@@ -961,6 +975,19 @@ async def update_response(
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
+
+        record = await Record.get_or_raise(
+            db,
+            response.record_id,
+            options=[
+                selectinload(Record.responses),
+            ],
+        )
+
+        await search_engine.partial_record_update(
+            record=record,
+            count_submitted_responses=record.count_submitted_responses,
+        )
 
     await db.commit()
 
@@ -991,6 +1018,18 @@ async def upsert_response(
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
 
+        record = await Record.get_or_raise(
+            db,
+            response.record_id,
+            options=[
+                selectinload(Record.responses),
+            ],
+        )
+        await search_engine.partial_record_update(
+            record=record,
+            count_submitted_responses=record.count_submitted_responses,
+        )
+
     await db.commit()
 
     return response
@@ -1002,6 +1041,18 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
+
+        record = await Record.get_or_raise(
+            db,
+            response.record_id,
+            options=[
+                selectinload(Record.responses),
+            ],
+        )
+        await search_engine.partial_record_update(
+            record=record,
+            count_submitted_responses=record.count_submitted_responses,
+        )
 
     await db.commit()
 
