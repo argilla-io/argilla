@@ -490,7 +490,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             A Record object.
 
         """
-        
+
         mapping = self._render_record_mapping(records=records, mapping=mapping)
         id_mapping = mapping.get("id", {})
         suggestion_mapping = mapping.get("suggestion", {})
