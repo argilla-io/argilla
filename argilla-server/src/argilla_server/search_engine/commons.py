@@ -346,6 +346,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._bulk_op_request(bulk_actions)
 
+    async def partial_record_update(self, record: Record, **update):
+        index_name = await self._get_dataset_index(record.dataset)
+        await self._update_document_request(index_name=index_name, id=str(record.id), body={"doc": update})
+
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_dataset_index(dataset)
 
