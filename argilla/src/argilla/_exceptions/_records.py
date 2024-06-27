@@ -14,5 +14,6 @@
 
 from argilla._exceptions._base import ArgillaErrorBase
 
+
 class RecordsIngestionError(ArgillaErrorBase):
     pass
