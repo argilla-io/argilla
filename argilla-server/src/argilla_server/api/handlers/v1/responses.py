@@ -64,7 +64,10 @@ async def update_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Response.record).selectinload(Record._responses_for_count),
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.update(response))
@@ -83,7 +86,10 @@ async def delete_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Response.record).selectinload(Record._responses_for_count),
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.delete(response))

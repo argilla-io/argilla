@@ -967,7 +967,7 @@ async def update_response(
         await search_engine.update_record_response(response)
         await search_engine.partial_record_update(
             record=response.record,
-            count_submitted_responses=await response.record.awaitable_attrs.count_submitted_responses,
+            count_submitted_responses=response.record.count_submitted_responses,
         )
 
     await db.commit()
@@ -1017,7 +1017,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
         await search_engine.delete_record_response(response)
         await search_engine.partial_record_update(
             record=response.record,
-            count_submitted_responses=await response.record.awaitable_attrs.count_submitted_responses,
+            count_submitted_responses=response.record.count_submitted_responses,
         )
 
     await db.commit()
