@@ -13,4 +13,4 @@
 #  limitations under the License.
 
 # coding: utf-8
-version = "1.29.0-alpha.1"
+version = "1.29.0"

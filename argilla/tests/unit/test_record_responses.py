@@ -49,12 +49,12 @@ class TestRecordResponses:
 
         record_responses = RecordResponses(responses, record)
 
-        assert record_responses.question_a[0].value == "answer_a"
-        assert record_responses.question_a[0].user_id == user.id
-        assert record_responses.question_b[0].value == "answer_b"
-        assert record_responses.question_b[0].user_id == user.id
-        assert record_responses.question_c[0].value == "answer_c"
-        assert record_responses.question_c[0].user_id == user.id
+        assert record_responses["question_a"][0].value == "answer_a"
+        assert record_responses["question_a"][0].user_id == user.id
+        assert record_responses["question_b"][0].value == "answer_b"
+        assert record_responses["question_b"][0].user_id == user.id
+        assert record_responses["question_c"][0].value == "answer_c"
+        assert record_responses["question_c"][0].user_id == user.id
 
     def test_create_record_responses_for_multiple_users(self, record: Record):
         user_a = User(username="johndoe", id=uuid.uuid4())
@@ -69,12 +69,12 @@ class TestRecordResponses:
 
         record_responses = RecordResponses(responses, record)
 
-        assert record_responses.question_a[0].value == "answer_a"
-        assert record_responses.question_a[0].user_id == user_a.id
-        assert record_responses.question_a[1].value == "answer_a"
-        assert record_responses.question_a[1].user_id == user_b.id
-        assert record_responses.question_b[0].value == "answer_b"
-        assert record_responses.question_b[0].user_id == user_a.id
+        assert record_responses["question_a"][0].value == "answer_a"
+        assert record_responses["question_a"][0].user_id == user_a.id
+        assert record_responses["question_a"][1].value == "answer_a"
+        assert record_responses["question_a"][1].user_id == user_b.id
+        assert record_responses["question_b"][0].value == "answer_b"
+        assert record_responses["question_b"][0].user_id == user_a.id
 
     def test_generate_responses_models_for_record_responses(self, record: Record):
         user = User(username="johndoe", id=uuid.uuid4())

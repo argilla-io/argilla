@@ -1,11 +1,11 @@
 ---
-description: These are the how-to guides for the Argilla Python SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+description: These are the how-to guides for the Argilla SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
 hide: toc
 ---
 
 # How-to guides
 
-These are the how-to guides for *the Argilla Python SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+These are the how-to guides for *the Argilla SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
 
 <div class="grid cards" markdown>
 
