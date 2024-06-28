@@ -438,7 +438,12 @@ class User(DatabaseModel):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
-    responses: Mapped[List["Response"]] = relationship(back_populates="user")
+    responses: Mapped[List["Response"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin="User.id == WorkspaceUser.user_id",
