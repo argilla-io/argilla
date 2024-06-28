@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder, RecordStatus
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
     FloatMetadataFilter,
@@ -884,8 +884,8 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
-                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
             }
@@ -943,16 +943,16 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(records[0].id),
+                "status": RecordStatus.pending,
                 "fields": records[0].fields,
-                "status": "pending",
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "A"}},
             },
             {
                 "id": str(records[1].id),
+                "status": RecordStatus.pending,
                 "fields": records[1].fields,
-                "status": "pending",
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "B"}},
@@ -986,8 +986,8 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
-                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "metadata": {
@@ -1026,8 +1026,8 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
-                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
