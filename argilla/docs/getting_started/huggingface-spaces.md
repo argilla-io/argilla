@@ -38,15 +38,11 @@ This guide explains how to deploy your Argilla app in a Hugging Face Space and c
 
 To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section.
 
-> For more information about the persistent storage plans, check the [documentation](https://huggingface.co/docs/hub/spaces-storage#persistent-storage).
-
 If you haven’t enabled persistent storage, Argilla will display a warning message by default. To prevent this warning from appearing if you don’t need persistent storage, set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` to `false` in "Settings" > "New variable". This will suppress the warning message.
 
 ## Configure the Space secrets
 
-Secrets can be configured as optional settings to secure your Argilla Space.
-
-> For more information about the difference between environment variables and secrets, check the [documentation](https://huggingface.co/docs/hub/spaces-storage#persistent-storage).
+[Secrets](https://huggingface.co/docs/hub/spaces-overview#managing-secrets) can be configured as optional settings to secure your Argilla Space.
 
 The Argilla template allows you to configure the credentials for the default users: `owner`, `admin` and `annotator`. It will also allow you to configure the name of the default workspace.
 
@@ -82,10 +78,10 @@ The Hugging Face authentication allows you to give access to your Argilla Space 
 
     To have more control over who can log in to the Space, you can set this up in a private Space so that only members of your organization can sign in.
 
-    Alternatively, you can [create users](./how_to_guides/user.md) and access with their credentials.
+    Alternatively, you can [create users](../how_to_guides/user.md) and access with their credentials.
 
 !!! note
-    If you duplicated an Argilla Space with OAuth instead of creating one from the template, make sure to follow the next steps to ensure it works properly.
+    If you duplicated an Argilla Space with OAuth instead of creating one from the template, make sure to also follow the next steps.
 
 !!! warning
     Make sure to enable the Hugging Face authentication before adding any data, as the Space will need to be restarted with a "Factory build", removing all the previous data.
