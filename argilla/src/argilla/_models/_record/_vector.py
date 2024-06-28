@@ -11,19 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from typing import List
+
+from pydantic import field_validator
 
 from argilla._models import ResourceModel
 
-import re
-from pydantic import field_validator
+__all__ = ["VectorModel", "VectorValue"]
 
-__all__ = ["VectorModel"]
+VectorValue = List[float]
 
 
 class VectorModel(ResourceModel):
     name: str
-    vector_values: List[float]
+    vector_values: VectorValue
 
     @field_validator("name")
     @classmethod

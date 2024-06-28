@@ -1,29 +1,28 @@
 ---
-description: Installation of the Argilla Python SDK.
+description: Installation of the Argilla SDK.
 ---
 
 # Installation
 
 ## Install the SDK with pip
 
-Since this package is not yet published on PyPi, you can install it directly from the repository:
-
 ```console
-pip install git+https://github.com/argilla-io/argilla-python.git
+pip install argilla --pre
 ```
 
 ## Run the Argilla server
 
 If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:
 
-!!! note
-    You can use this SDK with any stable release of argilla server >= 1.27.
-
 * Using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
+
+!!! note
+    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
+
 * Locally with Docker.
 
 ```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:latest
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1
 ```
 
 ## Connect to the Argilla server
@@ -44,7 +43,7 @@ import argilla as rg
 client = rg.Argilla(
     api_url="<api_url>",
     api_key="<api_key>",
-    # extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
+    # headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
