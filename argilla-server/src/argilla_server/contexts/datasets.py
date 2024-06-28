@@ -938,7 +938,7 @@ async def create_response(
         await db.flush([response])
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
-        await db.refresh(record, attribute_names=[Record._responses_for_count.key])
+        await db.refresh(record, attribute_names=[Record.submitted_responses.key])
         await distribution.update_record_status(db, record, autocommit=False)
         await search_engine.partial_record_update(record, status=record.status)
 
@@ -964,7 +964,7 @@ async def update_response(
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
-        await db.refresh(response.record, attribute_names=[Record._responses_for_count.key])
+        await db.refresh(response.record, attribute_names=[Record.submitted_responses.key])
         await distribution.update_record_status(db, response.record, autocommit=False)
         await search_engine.partial_record_update(response.record, status=response.record.status)
 
@@ -996,7 +996,7 @@ async def upsert_response(
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
-        await db.refresh(record, attribute_names=[Record._responses_for_count.key])
+        await db.refresh(record, attribute_names=[Record.submitted_responses.key])
         await distribution.update_record_status(db, record, autocommit=False)
         await search_engine.partial_record_update(record, status=record.status)
 
@@ -1012,7 +1012,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
-        await db.refresh(response.record, attribute_names=[Record._responses_for_count.key])
+        await db.refresh(response.record, attribute_names=[Record.submitted_responses.key])
         await distribution.update_record_status(db, response.record, autocommit=False)
         await search_engine.partial_record_update(record=response.record, status=response.record.status)
 

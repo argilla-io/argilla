@@ -66,7 +66,6 @@ async def update_response(
         response_id,
         options=[
             selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
-            selectinload(Response.record).selectinload(Record._responses_for_count),
         ],
     )
 
@@ -88,7 +87,6 @@ async def delete_response(
         response_id,
         options=[
             selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
-            selectinload(Response.record).selectinload(Record._responses_for_count),
         ],
     )
 
