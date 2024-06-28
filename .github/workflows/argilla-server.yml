@@ -115,7 +115,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main'
       || github.ref == 'refs/heads/develop'
-      || contains(github.ref, "releases/")
+      || contains(github.ref, 'releases/')
       || github.event_name == 'workflow_dispatch'
       || github.event_name == 'pull_request'
     needs:
