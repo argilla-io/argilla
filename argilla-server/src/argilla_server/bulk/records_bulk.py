@@ -29,6 +29,7 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.contexts import distribution
 from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
 from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
@@ -67,6 +68,7 @@ class CreateRecordsBulk:
 
             await self._upsert_records_relationships(records, bulk_create.items)
             await _preload_records_relationships_before_index(self._db, records)
+            await distribution.update_records_status(self._db, records, autocommit=False)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
@@ -207,6 +209,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
 
             await self._upsert_records_relationships(records, bulk_upsert.items)
             await _preload_records_relationships_before_index(self._db, records)
+            await distribution.update_records_status(self._db, records, autocommit=False)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
@@ -239,6 +242,7 @@ async def _preload_records_relationships_before_index(db: "AsyncSession", record
             selectinload(Record.responses).selectinload(Response.user),
             selectinload(Record.suggestions).selectinload(Suggestion.question),
             selectinload(Record.vectors),
+            selectinload(Record._responses_for_count),
         )
     )
 

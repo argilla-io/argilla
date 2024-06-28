@@ -191,7 +191,9 @@ class Record(DatabaseModel):
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
     metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
-    status: Mapped[RecordStatus] = mapped_column(RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True)
+    status: Mapped[RecordStatus] = mapped_column(
+        RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True
+    )
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
@@ -218,17 +220,6 @@ class Record(DatabaseModel):
     _responses_for_count: Mapped[List["Response"]] = relationship(back_populates="record", lazy="selectin")
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
-
-    @property
-    def status(self):
-        # TODO: Move this to distribution context
-        if self.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
-            if self.count_submitted_responses >= self.dataset.distribution["min_submitted"]:
-                return RecordStatus.completed
-            else:
-                return RecordStatus.pending
-
-        raise NotImplementedError(f"unsupported distribution strategy `{self.dataset.distribution_strategy}`")
 
     @property
     def count_submitted_responses(self):
