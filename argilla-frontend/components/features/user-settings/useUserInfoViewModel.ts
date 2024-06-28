@@ -2,10 +2,12 @@ import { useFetch } from "@nuxtjs/composition-api";
 import { useResolve } from "ts-injecty";
 import { ref } from "vue-demi";
 import { GetWorkspacesUseCase } from "~/v1/domain/usecases/get-workspaces-use-case";
+import { useUser } from "~/v1/infrastructure/services/useUser";
 
 export const useUserInfoViewModel = () => {
   const isLoadingWorkspaces = ref(false);
   const workspaces = ref<any[]>([]);
+  const { user } = useUser();
   const getWorkspacesUseCase = useResolve(GetWorkspacesUseCase);
 
   useFetch(async () => {
@@ -17,5 +19,6 @@ export const useUserInfoViewModel = () => {
   return {
     isLoadingWorkspaces,
     workspaces,
+    user,
   };
 };
