@@ -30,7 +30,7 @@ class QuestionBaseModel(BaseModel, validate_assignment=True):
     settings: QuestionSettings
 
     title: str = Field(None, validate_default=True)
-    description: Optional[str] = Field(None, validate_default=True)
+    description: Optional[str] = None
     required: bool = True
     inserted_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -46,12 +46,6 @@ class QuestionBaseModel(BaseModel, validate_assignment=True):
     def __title_default(cls, title, info: ValidationInfo):
         validated_title = title or info.data["name"]
         return validated_title
-
-    @field_validator("description")
-    @classmethod
-    def __description_default(cls, description, info: ValidationInfo) -> Optional[str]:
-        data = info.data
-        return description or data["title"]
 
     @field_serializer("inserted_at", "updated_at", when_used="unless-none")
     def serialize_datetime(self, value: datetime) -> str:

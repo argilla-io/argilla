@@ -3,6 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
+        exclude: argilla/mkdocs.yml
       - id: end-of-file-fixer
         exclude_types: [text, jupyter]
       - id: trailing-whitespace
