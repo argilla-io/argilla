@@ -82,7 +82,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
 
-    We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
+    We illustrate this python dictionaries that represent your data, but we would not advise you to define dictionaries. Instead use the `Record` object for instantiating records.
 
     ```python
     import argilla as rg
@@ -119,16 +119,14 @@ You can add records to a dataset in two different ways: either by using a dictio
     ```
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
-    2. The data structure has keys `query` and `response` and the Argilla dataset has `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
+    2. The data structure has keys `query` and `response` and the Argilla dataset has fields `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
 
 
 === "From a Hugging Face dataset"
 
     You can also add records to a dataset using a Hugging Face dataset. This is useful when you want to use a dataset from the Hugging Face Hub and add it to your Argilla dataset.
 
-    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset.
-
-    If the dataset's schema does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which columns in the dataset correspond to the Argilla dataset fields.
+    You can add the dataset where the column names correspond to the names of fields, metadata or vectors in the Argilla dataset.
 
     ```python
     from uuid import uuid4
@@ -148,13 +146,13 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     2. In this example, the Hugging Face dataset matches the Argilla dataset schema. If that is not the case, you could use the `.map` of the `datasets` library to prepare the data before adding it to the Argilla dataset.
 
-    Here we use the `mapping` parameter to specify the relationship between the Hugging Face dataset and the Argilla dataset.
+    If the Hugging Face dataset's schema does not correspond to your Argilla dataset field names, you can use a `mapping` to specify the relationship. You should indicate as key the column name of the Hugging Face dataset and, as value, the field name of the Argilla dataset.
 
     ```python
-    dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"}) # (1)
+    dataset.records.log(records=hf_dataset, mapping={"text": "review", "label": "sentiment"}) # (1)
     ```
 
-    1. In this case, the `txt` key in the Hugging Face dataset corresponds to the `text` field in the Argilla dataset, and the `y` key in the Hugging Face dataset corresponds to the `label` field in the Argilla dataset.
+    1. In this case, the `text` key in the Hugging Face dataset would correspond to the `review` field in the Argilla dataset, and the `label` key in the Hugging Face dataset would correspond to the `sentiment` field in the Argilla dataset.
 
 
 ### Metadata
