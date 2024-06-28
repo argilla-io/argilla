@@ -34,7 +34,7 @@ async def update_record_status(db: AsyncSession, record: Record, autocommit: boo
 
 
 async def _update_record_status_with_overlap_strategy(db: AsyncSession, record: Record, autocommit: bool) -> Record:
-    if len(record.submitted_responses) >= record.dataset.distribution["min_submitted"]:
+    if len(record.responses_submitted) >= record.dataset.distribution["min_submitted"]:
         record.status = RecordStatus.completed
     else:
         record.status = RecordStatus.pending

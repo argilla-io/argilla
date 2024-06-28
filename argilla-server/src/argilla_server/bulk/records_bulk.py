@@ -240,7 +240,7 @@ async def _preload_records_relationships_before_index(db: "AsyncSession", record
         .filter(Record.id.in_([record.id for record in records]))
         .options(
             selectinload(Record.responses).selectinload(Response.user),
-            selectinload(Record.submitted_responses),
+            selectinload(Record.responses_submitted),
             selectinload(Record.suggestions).selectinload(Suggestion.question),
             selectinload(Record.vectors),
         )

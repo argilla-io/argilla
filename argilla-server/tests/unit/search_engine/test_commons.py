@@ -263,7 +263,7 @@ async def refresh_records(records: List[Record]):
     for record in records:
         await record.awaitable_attrs.suggestions
         await record.awaitable_attrs.responses
-        await record.awaitable_attrs.submitted_responses
+        await record.awaitable_attrs.responses_submitted
         await record.awaitable_attrs.vectors
 
 

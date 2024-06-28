@@ -204,7 +204,7 @@ class Record(DatabaseModel):
         passive_deletes=True,
         order_by=Response.inserted_at.asc(),
     )
-    submitted_responses: Mapped[List["Response"]] = relationship(
+    responses_submitted: Mapped[List["Response"]] = relationship(
         back_populates="record",
         cascade="all, delete-orphan",
         passive_deletes=True,
