@@ -71,6 +71,6 @@ dataset.records.log(
 
 ### `rg.Vector`
 
-::: argilla.vectors.Vector
+::: src.argilla.vectors.Vector
     options:
         heading_level: 3

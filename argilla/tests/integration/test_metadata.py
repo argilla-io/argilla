@@ -117,10 +117,9 @@ def test_add_record_with_metadata(dataset_with_metadata: Dataset):
     dataset_with_metadata.records.log(records)
 
     for idx, record in enumerate(dataset_with_metadata.records):
-        assert record.metadata.category == records[idx]["category"]
         assert record.metadata["category"] == records[idx]["category"]
         assert len(record.metadata) == 1
-        models = record.metadata.models
+        models = record.metadata.api_models()
         assert models[0].value == records[idx]["category"]
         assert models[0].name == "category"
 
@@ -134,9 +133,8 @@ def test_add_record_with_mapped_metadata(dataset_with_metadata: Dataset):
     dataset_with_metadata.records.log(records, mapping={"my_category": "category"})
 
     for idx, record in enumerate(dataset_with_metadata.records):
-        assert record.metadata.category == records[idx]["my_category"]
         assert record.metadata["category"] == records[idx]["my_category"]
         assert len(record.metadata) == 1
-        models = record.metadata.models
+        models = record.metadata.api_models()
         assert models[0].value == records[idx]["my_category"]
         assert models[0].name == "category"
