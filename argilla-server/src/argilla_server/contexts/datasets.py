@@ -938,6 +938,7 @@ async def create_response(
         await db.flush([response])
         # await distribution.refresh_record_status(db, record, autocommit=False)
         await _touch_dataset_last_activity_at(db, record.dataset)
+        await search_engine.index_records(record.dataset, [record])
         await search_engine.update_record_response(response)
 
     await db.commit()
@@ -962,6 +963,7 @@ async def update_response(
         await _load_users_from_responses(response)
         # await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
+        await search_engine.index_records(response.record.dataset, [response.record])
         await search_engine.update_record_response(response)
 
     await db.commit()
@@ -992,6 +994,7 @@ async def upsert_response(
         await _load_users_from_responses(response)
         # await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
+        await search_engine.index_records(response.record.dataset, [response.record])
         await search_engine.update_record_response(response)
 
     await db.commit()
@@ -1005,6 +1008,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
         await _load_users_from_responses(response)
         # await distribution.refresh_record_status(db, response.record, autocommit=False)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
+        await search_engine.index_records(response.record.dataset, [response.record])
         await search_engine.delete_record_response(response)
 
     await db.commit()

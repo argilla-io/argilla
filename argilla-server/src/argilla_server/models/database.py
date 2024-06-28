@@ -89,7 +89,7 @@ class Response(DatabaseModel):
     values: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSON))
     status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -218,16 +218,16 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
+
     def __repr__(self):
         return (
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
-
-    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
-        for vector in self.vectors:
-            if vector.vector_settings_id == vector_settings.id:
-                return vector.value
 
 
 class Question(DatabaseModel):
@@ -451,7 +451,12 @@ class User(DatabaseModel):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
-    responses: Mapped[List["Response"]] = relationship(back_populates="user")
+    responses: Mapped[List["Response"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin="User.id == WorkspaceUser.user_id",

@@ -64,8 +64,21 @@ Just like responses, suggestions can be accessed from a `Record` via their quest
 
 ```python
 for record in dataset.records(with_suggestions=True):
-    print(record.suggestions.label)
+    print(record.suggestions["label"].value)
 ```
+
+We can also add suggestions to records as we iterate over them using the `add` method:
+
+```python
+for record in dataset.records(with_suggestions=True):
+    if not record.suggestions["label"]: # (1)
+        record.suggestions.add(
+            rg.Suggestion("positive", "label", score=0.9, agent="model_name")
+        ) # (2)
+```
+
+1. Validate that the record has a suggestion
+2. Add a suggestion to the record if it does not already have one
 
 ---
 
@@ -73,6 +86,6 @@ for record in dataset.records(with_suggestions=True):
 
 ### `rg.Suggestion`
 
-::: argilla.suggestions.Suggestion
+::: src.argilla.suggestions.Suggestion
     options:
         heading_level: 3

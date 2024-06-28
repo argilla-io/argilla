@@ -2,11 +2,11 @@
   <div class="user-token">
     <h2
       class="user-token-title --heading5 --medium description__title"
-      v-text="title"
+      v-text="$t('userSettings.apiKey')"
     />
     <p
       class="user-token-description --body1 description__text"
-      v-text="description"
+      v-text="$t('userSettings.apiKeyDescription')"
     />
 
     <span class="user-token-value --body1" v-text="'**** **** **** ****'" />
@@ -33,10 +33,6 @@ export default {
       type: String,
       required: true,
     },
-  },
-  created() {
-    this.title = this.$t("userSettings.apiKey");
-    this.description = this.$t("userSettings.apiKeyDescription");
   },
 };
 </script>
