@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to manage users and their credentials.
 ---
 
-# User Management
+# User management
 
 This guide provides an overview of user roles and credentials, explaining how to set up and manage users in Argilla.
 
@@ -69,7 +69,7 @@ Argilla provides a default user with the `owner` role to help you get started in
         client=client
     )
     ```
-    > Check the [User - Python Reference](../../reference/argilla/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
+    > Check the [User - Python Reference](../reference/argilla/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
 
 ## Get current user
 

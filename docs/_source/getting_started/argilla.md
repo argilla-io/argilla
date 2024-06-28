@@ -5,7 +5,7 @@
 ```{admonition} Argilla 2.x
 :class: danger
 We are announcing that Argilla 1.29 is the final minor release for Argilla 1.x. Although we will continue to release bug fixes for this version, we will neither be adding nor removing any functionalities. Instead, we will focus our efforts on Argilla 2.x. Argilla 1.29 will reach its end-of-life on June 20, 2025.
-Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/dev/)!
+Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/)!
 ```
 
 <div class="social social--sidebar" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
@@ -100,7 +100,7 @@ No, Argilla is a versatile tool suitable for a wide range of NLP tasks. However,
 <summary>Does Argilla provide annotation workforces?</summary>
 <p>
 
-Currently, we already have partnerships with annotation providers that ensure ethical practices and secure work environments. Feel free to schedule a meeting <a href="https://calendly.com/argilla-office-hours/30min">here</a> or contact us via <a href="mailto:david@argilla.io">email</a>.
+Currently, we already have partnerships with annotation providers that ensure ethical practices and secure work environments. Feel free to schedule a meeting <a href="https://calendly.com/david-berenstein-huggingface/30min">here</a> or contact us via <a href="mailto:david@argilla.io">email</a>.
 
 </p>
 </details>
@@ -149,7 +149,7 @@ We are continuously working on improving Argilla's features and usability, focus
 
 ## 🤝 Contribute
 
-We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 ## 🥇 Contributors
 

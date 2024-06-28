@@ -64,12 +64,12 @@ def test_query_records_by_text(client: Argilla, dataset: Dataset):
 
     assert len(records) == 1
     assert records[0].id == "1"
-    assert records[0].fields.text == "First record"
+    assert records[0].fields["text"] == "First record"
 
     records = list(dataset.records(query="second"))
     assert len(records) == 1
     assert records[0].id == "2"
-    assert records[0].fields.text == "Second record"
+    assert records[0].fields["text"] == "Second record"
 
     records = list(dataset.records(query="record"))
     assert len(records) == 2

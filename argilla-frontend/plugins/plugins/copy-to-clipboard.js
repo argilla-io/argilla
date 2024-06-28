@@ -15,17 +15,9 @@
  * limitations under the License.
  */
 
-export default (context, inject) => {
+export default (_, inject) => {
   const copyToClipboard = function (text) {
-    if (document.querySelector(".hidden-input")) {
-      document.querySelector(".hidden-input").remove();
-    }
-    const myTemporaryInputElement = document.createElement("textarea");
-    myTemporaryInputElement.className = "hidden-input";
-    myTemporaryInputElement.value = text;
-    document.body.appendChild(myTemporaryInputElement);
-    myTemporaryInputElement.select();
-    document.execCommand("Copy");
+    navigator.clipboard.writeText(text);
   };
 
   inject("copyToClipboard", copyToClipboard);

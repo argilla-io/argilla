@@ -43,8 +43,8 @@ def test_ingest_record_from_dict(dataset):
         },
     )
 
-    assert record.fields.prompt == "What is the capital of France?"
-    assert record.suggestions.label.value == "positive"
+    assert record.fields["prompt"] == "What is the capital of France?"
+    assert record.suggestions["label"].value == "positive"
 
 
 def test_ingest_record_from_dict_with_mapping(dataset):
@@ -58,8 +58,8 @@ def test_ingest_record_from_dict_with_mapping(dataset):
         },
     )
 
-    assert record.fields.prompt == "What is the capital of France?"
-    assert record.suggestions.label.value == "positive"
+    assert record.fields["prompt"] == "What is the capital of France?"
+    assert record.suggestions["label"].value == "positive"
 
 
 def test_ingest_record_from_dict_with_suggestions(dataset):
@@ -70,8 +70,8 @@ def test_ingest_record_from_dict_with_suggestions(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
 
 
 def test_ingest_record_from_dict_with_suggestions_scores(dataset):
@@ -88,10 +88,10 @@ def test_ingest_record_from_dict_with_suggestions_scores(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
-    assert record.suggestions.label.score == 0.9
-    assert record.suggestions.label.agent == "model_name"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
+    assert record.suggestions["label"].score == 0.9
+    assert record.suggestions["label"].agent == "model_name"
 
 
 def test_ingest_record_from_dict_with_suggestions_scores_and_agent(dataset):
@@ -108,10 +108,10 @@ def test_ingest_record_from_dict_with_suggestions_scores_and_agent(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
-    assert record.suggestions.label.score == 0.9
-    assert record.suggestions.label.agent == "model_name"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
+    assert record.suggestions["label"].score == 0.9
+    assert record.suggestions["label"].agent == "model_name"
 
 
 def test_ingest_record_from_dict_with_responses(dataset):
@@ -127,9 +127,9 @@ def test_ingest_record_from_dict_with_responses(dataset):
         user_id=user_id,
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.responses.label[0].value == "negative"
-    assert record.responses.label[0].user_id == user_id
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.responses["label"][0].value == "negative"
+    assert record.responses["label"][0].user_id == user_id
 
 
 def test_ingest_record_from_dict_with_id_as_id(dataset):
@@ -142,7 +142,7 @@ def test_ingest_record_from_dict_with_id_as_id(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
+    assert record.fields["prompt"] == "Hello World, how are you?"
     assert record.id == record_id
 
 
@@ -159,7 +159,8 @@ def test_ingest_record_from_dict_with_id_and_mapping(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.fields["prompt"] == "Hello World, how are you?"
     assert record.id == record_id
 
 
@@ -172,8 +173,8 @@ def test_ingest_record_from_dict_with_metadata(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
     assert record.metadata["score"] == 0.9
 
 
@@ -189,8 +190,8 @@ def test_ingest_record_from_dict_with_metadata_and_mapping(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
     assert record.metadata["score"] == 0.9
 
 
@@ -203,9 +204,9 @@ def test_ingest_record_from_dict_with_vectors(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
-    assert record.vectors.vector == [1, 2, 3]
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
+    assert record.vectors["vector"] == [1, 2, 3]
 
 
 def test_ingest_record_from_dict_with_vectors_and_mapping(dataset):
@@ -220,6 +221,6 @@ def test_ingest_record_from_dict_with_vectors_and_mapping(dataset):
         },
     )
 
-    assert record.fields.prompt == "Hello World, how are you?"
-    assert record.suggestions.label.value == "negative"
-    assert record.vectors.vector == [1, 2, 3]
+    assert record.fields["prompt"] == "Hello World, how are you?"
+    assert record.suggestions["label"].value == "negative"
+    assert record.vectors["vector"] == [1, 2, 3]

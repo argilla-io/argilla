@@ -74,9 +74,9 @@ def test_vectors(client: rg.Argilla, dataset: rg.Dataset):
     assert dataset_records[0].id == str(mock_data[0]["id"])
     assert dataset_records[1].id == str(mock_data[1]["id"])
     assert dataset_records[2].id == str(mock_data[2]["id"])
-    assert dataset_records[0].vectors.vector == mock_data[0]["vector"]
-    assert dataset_records[1].vectors.vector == mock_data[1]["vector"]
-    assert dataset_records[2].vectors.vector == mock_data[2]["vector"]
+    assert dataset_records[0].vectors["vector"] == mock_data[0]["vector"]
+    assert dataset_records[1].vectors["vector"] == mock_data[1]["vector"]
+    assert dataset_records[2].vectors["vector"] == mock_data[2]["vector"]
 
 
 def test_vectors_return_with_bool(client: rg.Argilla, dataset: rg.Dataset):
@@ -106,9 +106,9 @@ def test_vectors_return_with_bool(client: rg.Argilla, dataset: rg.Dataset):
     assert dataset_records[0].id == str(mock_data[0]["id"])
     assert dataset_records[1].id == str(mock_data[1]["id"])
     assert dataset_records[2].id == str(mock_data[2]["id"])
-    assert dataset_records[0].vectors.vector == mock_data[0]["vector"]
-    assert dataset_records[1].vectors.vector == mock_data[1]["vector"]
-    assert dataset_records[2].vectors.vector == mock_data[2]["vector"]
+    assert dataset_records[0].vectors["vector"] == mock_data[0]["vector"]
+    assert dataset_records[1].vectors["vector"] == mock_data[1]["vector"]
+    assert dataset_records[2].vectors["vector"] == mock_data[2]["vector"]
 
 
 def test_vectors_return_with_name(client: rg.Argilla, dataset: rg.Dataset):
@@ -138,6 +138,6 @@ def test_vectors_return_with_name(client: rg.Argilla, dataset: rg.Dataset):
     assert dataset_records[0].id == str(mock_data[0]["id"])
     assert dataset_records[1].id == str(mock_data[1]["id"])
     assert dataset_records[2].id == str(mock_data[2]["id"])
-    assert dataset_records[0].vectors.vector == mock_data[0]["vector"]
-    assert dataset_records[1].vectors.vector == mock_data[1]["vector"]
-    assert dataset_records[2].vectors.vector == mock_data[2]["vector"]
+    assert dataset_records[0].vectors["vector"] == mock_data[0]["vector"]
+    assert dataset_records[1].vectors["vector"] == mock_data[1]["vector"]
+    assert dataset_records[2].vectors["vector"] == mock_data[2]["vector"]
