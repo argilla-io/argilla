@@ -5076,36 +5076,3 @@ class TestSuiteDatasets:
         ]
 
         return dataset, questions, records, responses, suggestions
-
-    async def test_get_record_with_response_for_deleted_user(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        mock_search_engine: "SearchEngine",
-        owner: User,
-        owner_auth_header: dict,
-    ):
-        record = await RecordFactory.create()
-        user = await OwnerFactory.create()
-        response = await ResponseFactory.create(record=record, user=user)
-
-        mock_search_engine.search.return_value = SearchResponses(
-            items=[SearchResponseItem(record_id=record.id)], total=1
-        )
-
-        await db.delete(user)
-
-        http_response = await async_client.get(
-            f"/api/v1/datasets/{record.dataset.id}/records",
-            params={"include": ["responses"]},
-            headers=owner_auth_header,
-        )
-
-        response_json = http_response.json()
-        assert http_response.status_code == 200
-
-        response_items = response_json["items"]
-        assert len(response_items) == 1
-        assert response_items[0]["id"] == str(record.id)
-        assert response_items[0]["responses"][0]["id"] == str(response.id)
-        assert response_items[0]["responses"][0]["user_id"] is None

@@ -6,20 +6,16 @@ concurrency:
 
 on:
   workflow_dispatch:
-  workflow_call:
 
   push:
-    paths:
-      - argilla-v1/**
     branches:
       - main
       - develop
-      - feat/**
       - releases/**
 
   pull_request:
     paths:
-      - argilla-v1/**
+      - "argilla-v1/**"
 
 jobs:
   build:
@@ -102,37 +98,48 @@ jobs:
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+
+    permissions:
+      # This permission is needed for private repositories.
+      # contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
+      id-token: write
+      # This permission is needed for creating tags
+      contents: write
 
     needs:
       - build
 
-    defaults:
-      run:
-        shell: bash -l {0}
-        working-directory: argilla-v1
-
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
+
       - name: Download python package
         uses: actions/download-artifact@v4
         with:
           name: argilla-v1
           path: dist
+
+      - name: Read package info
+        run: |
+          pip install --no-deps dist/*.whl
+          PACKAGE_VERSION=$(python -c 'from importlib.metadata import version; print(version("argilla-v1"))')
+          PACKAGE_NAME=argilla-v1
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
       - name: Publish Package to TestPyPI 🥪
         uses: pypa/gh-action-pypi-publish@release/v1
         continue-on-error: true
         with:
-          user: __token__
-          password: ${{ secrets.AR_TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Test Installing 🍿
         continue-on-error: true
-        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
+        run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
+        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.AR_PYPI_API_TOKEN }}

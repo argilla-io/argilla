@@ -89,7 +89,7 @@ class Response(DatabaseModel):
     values: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSON))
     status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -472,7 +472,12 @@ class User(DatabaseModel):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
-    responses: Mapped[List["Response"]] = relationship(back_populates="user")
+    responses: Mapped[List["Response"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin="User.id == WorkspaceUser.user_id",
