@@ -197,7 +197,7 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
 
 
 class Records(BaseModel):
