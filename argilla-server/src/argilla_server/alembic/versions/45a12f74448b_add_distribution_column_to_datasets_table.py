@@ -15,7 +15,7 @@
 """add distribution column to datasets table
 
 Revision ID: 45a12f74448b
-Revises: ca7293c38970
+Revises: d00f819ccc67
 Create Date: 2024-06-13 11:23:43.395093
 
 """
@@ -27,7 +27,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "45a12f74448b"
-down_revision = "ca7293c38970"
+down_revision = "d00f819ccc67"
 branch_labels = None
 depends_on = None
 
