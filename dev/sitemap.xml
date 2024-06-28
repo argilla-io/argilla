@@ -2,177 +2,177 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/community/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/community/changelog/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/community/contributor/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/community/popular_issues/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/getting_started/faq/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/getting_started/installation/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/getting_started/quickstart/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/annotate/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/dataset/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/migrate_from_legacy_datasets/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/query_export/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/record/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/user/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/workspace/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/SUMMARY/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/client/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/search/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/users/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/workspaces/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/datasets/dataset_records/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/datasets/datasets/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/records/metadata/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/records/records/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/records/responses/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/records/suggestions/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/records/vectors/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/settings/fields/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/settings/metadata_property/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/settings/questions/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/settings/settings/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/reference/argilla/settings/vectors/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/tutorials/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/dev/tutorials/text_classification/</loc>
-         <lastmod>2024-06-25</lastmod>
+         <lastmod>2024-06-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
