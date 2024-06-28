@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 from argilla._api import RecordsAPI
 from argilla._helpers import LoggingMixin
-from argilla._models import RecordModel, MetadataValue
+from argilla._models import RecordModel, MetadataValue, VectorValue, FieldValue
 from argilla.client import Argilla
 from argilla.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
 from argilla.records._resource import Record
@@ -31,7 +31,6 @@ from argilla.settings import TextField, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionPropertyBase
 from argilla.suggestions import Suggestion
-from argilla.vectors import Vector
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -212,7 +211,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, str]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
-    ) -> List[Record]:
+    ) -> "DatasetRecords":
         """Add or update records in a dataset on the server using the provided records.
         If the record includes a known `id` field, the record will be updated.
         If the record does not include a known `id` field, the record will be added as a new record.
@@ -254,7 +253,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             level="info",
         )
 
-        return created_or_updated
+        return self
 
     def delete(
         self,
@@ -414,12 +413,14 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Returns:
             A Record object.
         """
-        fields: Dict[str, str] = {}
-        responses: List[Response] = []
         record_id: Optional[str] = None
-        suggestion_values = defaultdict(dict)
-        vectors: List[Vector] = []
+
+        fields: Dict[str, FieldValue] = {}
+        vectors: Dict[str, VectorValue] = {}
         metadata: Dict[str, MetadataValue] = {}
+
+        responses: List[Response] = []
+        suggestion_values: Dict[str, dict] = defaultdict(dict)
 
         schema = self.__dataset.schema
 
@@ -475,7 +476,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                     {"value": value, "question_name": attribute, "question_id": schema_item.id}
                 )
             elif isinstance(schema_item, VectorField):
-                vectors.append(Vector(name=attribute, values=value))
+                vectors[attribute] = value
             elif isinstance(schema_item, MetadataPropertyBase):
                 metadata[attribute] = value
             else:
@@ -487,9 +488,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         return Record(
             id=record_id,
             fields=fields,
-            suggestions=suggestions,
-            responses=responses,
             vectors=vectors,
             metadata=metadata,
+            suggestions=suggestions,
+            responses=responses,
             _dataset=self.__dataset,
         )

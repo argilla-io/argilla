@@ -34,7 +34,7 @@ class TestRecordSuggestions:
         )
 
         assert suggestions.record == record
-        assert suggestions.name.value == "John Doe"
-        assert suggestions.name.score == 0.9
-        assert suggestions.label.value == ["A", "B"]
-        assert suggestions.label.score == [0.8, 0.9]
+        assert suggestions["name"].value == "John Doe"
+        assert suggestions["name"].score == 0.9
+        assert suggestions["label"].value == ["A", "B"]
+        assert suggestions["label"].score == [0.8, 0.9]

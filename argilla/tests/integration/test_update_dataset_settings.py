@@ -41,12 +41,12 @@ class TestUpdateDatasetSettings:
 
         dataset = client.datasets(dataset.name)
         settings = dataset.settings
-        assert settings.fields.text.use_markdown is True
-        assert settings.vectors.vector.dimensions == 10
+        assert settings.fields["text"].use_markdown is True
+        assert settings.vectors["vector"].dimensions == 10
         assert isinstance(settings.metadata.metadata, FloatMetadataProperty)
 
-        settings.vectors.vector.title = "A new title for vector"
+        settings.vectors["vector"].title = "A new title for vector"
 
         settings.update()
         dataset = client.datasets(dataset.name)
-        assert dataset.settings.vectors.vector.title == "A new title for vector"
+        assert dataset.settings.vectors["vector"].title == "A new title for vector"

@@ -12,8 +12,12 @@
         />
       </template>
       <template v-slot:center>
-        <PersistentStorageBanner />
-        <RecordFeedbackTaskAndQuestionnaire :recordCriteria="recordCriteria" />
+        <div class="center">
+          <PersistentStorageBanner />
+          <RecordFeedbackTaskAndQuestionnaire
+            :recordCriteria="recordCriteria"
+          />
+        </div>
       </template>
     </AnnotationPage>
   </div>
@@ -38,3 +42,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.center {
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>
