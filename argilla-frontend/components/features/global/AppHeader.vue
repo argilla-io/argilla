@@ -42,15 +42,6 @@ export default {
       type: Array,
     },
   },
-  computed: {
-    /**
-     * @deprecated Replace with useRole
-     */
-    isAdminOrOwnerRole() {
-      const role = this.$auth.user.role;
-      return role === "admin" || role === "owner";
-    },
-  },
   methods: {
     onBreadcrumbAction(action) {
       this.$emit("breadcrumb-action", action);
