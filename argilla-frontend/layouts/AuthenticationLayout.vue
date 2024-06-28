@@ -35,24 +35,24 @@ export default {
     display: none;
     overflow: hidden;
     @include media(">desktop") {
-      background: $brand-secondary-color;
+      background: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
       padding: $base-space * 2;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: left;
       width: 60vw;
     }
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      max-width: min(80%, 580px);
-      color: palette(white);
+      color: $black-87;
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
-        @include font-size(40px);
-        padding-right: $base-space * 8;
-        padding-top: $base-space * 4;
+        font-size: clamp(40px, 3vw, 60px);
+        padding-left: 12%;
+        padding-top: $base-space * 12;
+        text-wrap: balance;
       }
       &--mobile {
         position: relative;
