@@ -6,7 +6,7 @@ description: Quickstart of Argilla on how to create your first dataset.
 
 This guide provides a quick overview of the Argilla SDK and how to create your first dataset.
 
-## Setting up your Argilla project
+## Set up your Argilla project
 
 ### Install the SDK with pip
 
