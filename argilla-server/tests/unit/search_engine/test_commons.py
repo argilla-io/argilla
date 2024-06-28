@@ -315,7 +315,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
-                "count_submitted_responses": {"type": "integer"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -358,7 +358,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
-                "count_submitted_responses": {"type": "integer"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -431,7 +431,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
-                "count_submitted_responses": {"type": "integer"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -479,7 +479,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
-                "count_submitted_responses": {"type": "integer"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -885,7 +885,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
-                "count_submitted_responses": 0,
+                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
             }
@@ -944,7 +944,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(records[0].id),
                 "fields": records[0].fields,
-                "count_submitted_responses": 0,
+                "status": "pending",
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "A"}},
@@ -952,7 +952,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(records[1].id),
                 "fields": records[1].fields,
-                "count_submitted_responses": 0,
+                "status": "pending",
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
                 "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "B"}},
@@ -987,7 +987,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
-                "count_submitted_responses": 0,
+                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "metadata": {
@@ -1027,7 +1027,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "fields": record.fields,
-                "count_submitted_responses": 0,
+                "status": "pending",
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
                 "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
