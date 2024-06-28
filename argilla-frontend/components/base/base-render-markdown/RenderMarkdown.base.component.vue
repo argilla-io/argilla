@@ -10,7 +10,7 @@
 import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 
 const preprocess = (html) => {
   return html.replace(/[^\S\r\n]+$/gm, "");

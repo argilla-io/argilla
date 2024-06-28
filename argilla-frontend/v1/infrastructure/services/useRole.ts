@@ -1,11 +1,10 @@
-import { useContext } from "@nuxtjs/composition-api";
-import { ComputedRef, computed } from "vue-demi";
+import type { ComputedRef } from "vue";
 import { RoleService } from "~/v1/domain/services/RoleService";
 
 export const useRole = (): RoleService & {
   isAdminOrOwnerRole: ComputedRef<boolean>;
 } => {
-  const { $auth } = useContext();
+  const { $auth } = useNuxtApp();
 
   const isAdminOrOwner = () => {
     const role = $auth.user.role;

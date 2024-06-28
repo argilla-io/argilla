@@ -1,5 +1,4 @@
 import { useResolve } from "ts-injecty";
-import { ref, useFetch } from "@nuxtjs/composition-api";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { useDatasets } from "~/v1/infrastructure/storage/DatasetsStorage";
 import { useFocusTab } from "~/v1/infrastructure/services";
@@ -13,7 +12,7 @@ export const useDatasetsViewModel = () => {
     await onLoadDatasets();
   });
 
-  useFetch(() => {
+  onBeforeMount(() => {
     loadDatasets();
   });
 

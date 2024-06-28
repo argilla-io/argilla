@@ -1,7 +1,8 @@
 <template>
   <div>
     <p class="shortcuts__title">Shortcuts</p>
-    <base-spinner v-if="$fetchState.pending" />
+    <!-- TODO: Remove false -->
+    <base-spinner v-if="false" />
     <documentation-viewer
       v-else
       class="shortcuts__content"
