@@ -28,11 +28,15 @@ async def update_records_status(db: AsyncSession, records: List[Record], autocom
 
 async def update_record_status(db: AsyncSession, record: Record, autocommit: bool) -> Record:
     if record.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
-        if len(record.submitted_responses) >= record.dataset.distribution["min_submitted"]:
-            record.status = RecordStatus.completed
-        else:
-            record.status = RecordStatus.pending
-
-        return await record.save(db, autocommit)
+        return await _update_record_status_with_overlap_strategy(db, record, autocommit)
 
     raise NotImplementedError(f"unsupported distribution strategy `{record.dataset.distribution_strategy}`")
+
+
+async def _update_record_status_with_overlap_strategy(db: AsyncSession, record: Record, autocommit: bool) -> Record:
+    if len(record.submitted_responses) >= record.dataset.distribution["min_submitted"]:
+        record.status = RecordStatus.completed
+    else:
+        record.status = RecordStatus.pending
+
+    return await record.save(db, autocommit)
