@@ -37,7 +37,6 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla_server.api.schemas.v1.datasets import DatasetProgress
 from argilla_server.api.schemas.v1.fields import FieldCreate
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
 from argilla_server.api.schemas.v1.records import (
@@ -370,11 +369,48 @@ async def _configure_query_relationships(
     return query
 
 
-async def count_records_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
-    return (await db.execute(select(func.count(Record.id)).filter_by(dataset_id=dataset_id))).scalar_one()
+async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: UUID) -> dict:
+    records, responses_submitted, responses_discarded, responses_draft = await asyncio.gather(
+        db.execute(
+            select(func.count(Record.id).filter(Record.dataset_id == dataset_id)),
+        ),
+        db.execute(
+            select(func.count(Response.id))
+            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+            .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted),
+        ),
+        db.execute(
+            select(func.count(Response.id))
+            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+            .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded),
+        ),
+        db.execute(
+            select(func.count(Response.id))
+            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+            .filter(Response.user_id == user_id, Response.status == ResponseStatus.draft),
+        ),
+    )
+
+    records = records.scalar_one()
+    responses_submitted = responses_submitted.scalar_one()
+    responses_discarded = responses_discarded.scalar_one()
+    responses_draft = responses_draft.scalar_one()
+    responses = responses_submitted + responses_discarded + responses_draft
+
+    return {
+        "records": {
+            "count": records,
+        },
+        "responses": {
+            "count": responses,
+            "submitted": responses_submitted,
+            "discarded": responses_discarded,
+            "draft": responses_draft,
+        },
+    }
 
 
-async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> DatasetProgress:
+async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
     completed, pending = await asyncio.gather(
         db.execute(
             select(func.count(Record.id)).filter(
@@ -394,7 +430,7 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> DatasetPro
     pending = pending.scalar_one()
     total = completed + pending
 
-    return DatasetProgress(completed=completed, pending=pending, total=total)
+    return {"total": total, "completed": completed, "pending": pending}
 
 
 _EXTRA_METADATA_FLAG = "extra"
@@ -889,22 +925,6 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
     await db.commit()
 
     return record
-
-
-async def count_responses_by_dataset_id_and_user_id(
-    db: AsyncSession, dataset_id: UUID, user_id: UUID, response_status: Optional[ResponseStatus] = None
-) -> int:
-    expressions = [Response.user_id == user_id]
-    if response_status:
-        expressions.append(Response.status == response_status)
-
-    return (
-        await db.execute(
-            select(func.count(Response.id))
-            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(*expressions)
-        )
-    ).scalar_one()
 
 
 async def create_response(

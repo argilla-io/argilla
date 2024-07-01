@@ -87,9 +87,9 @@ class DatasetMetrics(BaseModel):
 
 
 class DatasetProgress(BaseModel):
+    total: int
     completed: int
     pending: int
-    total: int
 
 
 class Dataset(BaseModel):
