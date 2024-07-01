@@ -87,11 +87,9 @@ class DatasetMetrics(BaseModel):
 
 
 class DatasetProgress(BaseModel):
-    total: int
-    submitted: int
-    discarded: int
-    conflicting: int
+    completed: int
     pending: int
+    total: int
 
 
 class Dataset(BaseModel):

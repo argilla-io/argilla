@@ -61,7 +61,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import accounts, distribution
-from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
+from argilla_server.enums import DatasetStatus, RecordInclude, UserRole, RecordStatus
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
     Dataset,
@@ -375,34 +375,26 @@ async def count_records_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int
 
 
 async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> DatasetProgress:
-    submitted_case = case((Response.status == ResponseStatus.submitted, 1), else_=0)
-    discarded_case = case((Response.status == ResponseStatus.discarded, 1), else_=0)
-
-    submitted_clause = func.sum(submitted_case) > 0, func.sum(discarded_case) == 0
-    discarded_clause = func.sum(discarded_case) > 0, func.sum(submitted_case) == 0
-    conflicting_clause = func.sum(submitted_case) > 0, func.sum(discarded_case) > 0
-
-    query = select(Record.id).join(Response).filter(Record.dataset_id == dataset_id).group_by(Record.id)
-
-    total, submitted, discarded, conflicting = await asyncio.gather(
-        count_records_by_dataset_id(db, dataset_id),
-        db.execute(select(func.count("*")).select_from(query.having(*submitted_clause))),
-        db.execute(select(func.count("*")).select_from(query.having(*discarded_clause))),
-        db.execute(select(func.count("*")).select_from(query.having(*conflicting_clause))),
+    completed, pending = await asyncio.gather(
+        db.execute(
+            select(func.count(Record.id)).filter(
+                Record.dataset_id == dataset_id,
+                Record.status == RecordStatus.completed,
+            ),
+        ),
+        db.execute(
+            select(func.count(Record.id)).filter(
+                Record.dataset_id == dataset_id,
+                Record.status == RecordStatus.pending,
+            ),
+        ),
     )
 
-    submitted = submitted.scalar_one()
-    discarded = discarded.scalar_one()
-    conflicting = conflicting.scalar_one()
-    pending = total - submitted - discarded - conflicting
+    completed = completed.scalar_one()
+    pending = pending.scalar_one()
+    total = completed + pending
 
-    return DatasetProgress(
-        total=total,
-        submitted=submitted,
-        discarded=discarded,
-        conflicting=conflicting,
-        pending=pending,
-    )
+    return DatasetProgress(completed=completed, pending=pending, total=total)
 
 
 _EXTRA_METADATA_FLAG = "extra"
