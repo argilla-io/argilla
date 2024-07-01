@@ -263,8 +263,8 @@ async def refresh_records(records: List[Record]):
     for record in records:
         await record.awaitable_attrs.suggestions
         await record.awaitable_attrs.responses
+        await record.awaitable_attrs.responses_submitted
         await record.awaitable_attrs.vectors
-        await record.awaitable_attrs._responses_for_count
 
 
 def _expected_value_for_question(question: Question) -> Dict[str, Any]:
