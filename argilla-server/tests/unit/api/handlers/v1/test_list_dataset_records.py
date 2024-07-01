@@ -821,7 +821,7 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record_a.id),
-                    "status": RecordStatus.completed,
+                    "status": RecordStatus.pending,
                     "fields": {"input": "input_a", "output": "output_a"},
                     "metadata": None,
                     "dataset_id": str(dataset.id),
@@ -831,7 +831,7 @@ class TestSuiteListDatasetRecords:
                 },
                 {
                     "id": str(record_b.id),
-                    "status": RecordStatus.completed,
+                    "status": RecordStatus.pending,
                     "fields": {"input": "input_b", "output": "output_b"},
                     "metadata": {"unit": "test"},
                     "dataset_id": str(dataset.id),

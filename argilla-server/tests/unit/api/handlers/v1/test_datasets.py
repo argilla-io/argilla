@@ -3663,7 +3663,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {"input": "input_a", "output": "output_a"},
                         "metadata": None,
                         "external_id": records[0].external_id,
@@ -3676,7 +3676,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {"input": "input_b", "output": "output_b"},
                         "metadata": {"unit": "test"},
                         "external_id": records[1].external_id,
@@ -4018,7 +4018,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {
                             "input": "input_a",
                             "output": "output_a",
@@ -4034,7 +4034,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {
                             "input": "input_b",
                             "output": "output_b",

@@ -118,7 +118,7 @@ class TestSearchDatasetRecords:
                 {
                     "record": {
                         "id": str(record_a.id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {
                             "sentiment": "neutral",
                             "text": "This is a text",
@@ -154,7 +154,7 @@ class TestSearchDatasetRecords:
                 {
                     "record": {
                         "id": str(record_b.id),
-                        "status": RecordStatus.completed,
+                        "status": RecordStatus.pending,
                         "fields": {
                             "sentiment": "neutral",
                             "text": "This is a text",
