@@ -79,7 +79,7 @@ from argilla_server.models import (
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
-from argilla_server.validators.datasets import DatasetCreateValidator
+from argilla_server.validators.datasets import DatasetCreateValidator, DatasetUpdateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -171,6 +171,8 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
 
 
 async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> Dataset:
+    await DatasetUpdateValidator.validate(db, dataset, dataset_attrs)
+
     return await dataset.update(db, **dataset_attrs)
 
 

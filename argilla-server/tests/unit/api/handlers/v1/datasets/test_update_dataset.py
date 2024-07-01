@@ -15,7 +15,7 @@
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import DatasetDistributionStrategy
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
 from httpx import AsyncClient
 
 from tests.factories import DatasetFactory
@@ -67,6 +67,53 @@ class TestUpdateDataset:
         }
 
         assert dataset.name == "Dataset updated name"
+        assert dataset.distribution == {
+            "strategy": DatasetDistributionStrategy.overlap,
+            "min_submitted": 1,
+        }
+
+    async def test_update_dataset_without_distribution_for_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"name": "Dataset updated name"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["distribution"] == {
+            "strategy": DatasetDistributionStrategy.overlap,
+            "min_submitted": 1,
+        }
+
+        assert dataset.name == "Dataset updated name"
+        assert dataset.distribution == {
+            "strategy": DatasetDistributionStrategy.overlap,
+            "min_submitted": 1,
+        }
+
+    async def test_update_dataset_distribution_for_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "distribution": {
+                    "strategy": DatasetDistributionStrategy.overlap,
+                    "min_submitted": 4,
+                },
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Distribution settings cannot be modified for a published dataset"}
+
         assert dataset.distribution == {
             "strategy": DatasetDistributionStrategy.overlap,
             "min_submitted": 1,
