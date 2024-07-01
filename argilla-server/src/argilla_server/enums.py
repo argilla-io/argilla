@@ -43,10 +43,19 @@ class DatasetStatus(str, Enum):
     ready = "ready"
 
 
+class DatasetDistributionStrategy(str, Enum):
+    overlap = "overlap"
+
+
 class UserRole(str, Enum):
     owner = "owner"
     admin = "admin"
     annotator = "annotator"
+
+
+class RecordStatus(str, Enum):
+    pending = "pending"
+    completed = "completed"
 
 
 class RecordInclude(str, Enum):

@@ -37,10 +37,7 @@ from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
-from argilla_server.api.schemas.v1.datasets import (
-    DatasetCreate,
-    DatasetProgress,
-)
+from argilla_server.api.schemas.v1.datasets import DatasetProgress
 from argilla_server.api.schemas.v1.fields import FieldCreate
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
 from argilla_server.api.schemas.v1.records import (
@@ -63,7 +60,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
-from argilla_server.contexts import accounts
+from argilla_server.contexts import accounts, distribution
 from argilla_server.enums import DatasetStatus, RecordInclude, UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
@@ -82,6 +79,7 @@ from argilla_server.models import (
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
+from argilla_server.validators.datasets import DatasetCreateValidator, DatasetUpdateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -122,22 +120,18 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
     return result.scalars().all()
 
 
-async def create_dataset(db: AsyncSession, dataset_create: DatasetCreate):
-    if await Workspace.get(db, dataset_create.workspace_id) is None:
-        raise UnprocessableEntityError(f"Workspace with id `{dataset_create.workspace_id}` not found")
-
-    if await Dataset.get_by(db, name=dataset_create.name, workspace_id=dataset_create.workspace_id):
-        raise NotUniqueError(
-            f"Dataset with name `{dataset_create.name}` already exists for workspace with id `{dataset_create.workspace_id}`"
-        )
-
-    return await Dataset.create(
-        db,
-        name=dataset_create.name,
-        guidelines=dataset_create.guidelines,
-        allow_extra_metadata=dataset_create.allow_extra_metadata,
-        workspace_id=dataset_create.workspace_id,
+async def create_dataset(db: AsyncSession, dataset_attrs: dict):
+    dataset = Dataset(
+        name=dataset_attrs["name"],
+        guidelines=dataset_attrs["guidelines"],
+        allow_extra_metadata=dataset_attrs["allow_extra_metadata"],
+        distribution=dataset_attrs["distribution"],
+        workspace_id=dataset_attrs["workspace_id"],
     )
+
+    await DatasetCreateValidator.validate(db, dataset)
+
+    return await dataset.save(db)
 
 
 async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
@@ -176,6 +170,12 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
     return dataset
 
 
+async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> Dataset:
+    await DatasetUpdateValidator.validate(db, dataset, dataset_attrs)
+
+    return await dataset.update(db, **dataset_attrs)
+
+
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     async with db.begin_nested():
         dataset = await dataset.delete(db, autocommit=False)
@@ -184,11 +184,6 @@ async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset:
     await db.commit()
 
     return dataset
-
-
-async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_update: "DatasetUpdate") -> Dataset:
-    params = dataset_update.dict(exclude_unset=True)
-    return await dataset.update(db, **params)
 
 
 async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCreate) -> Field:
@@ -945,6 +940,9 @@ async def create_response(
         await db.flush([response])
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
+        await db.refresh(record, attribute_names=[Record.responses_submitted.key])
+        await distribution.update_record_status(db, record)
+        await search_engine.partial_record_update(record, status=record.status)
 
     await db.commit()
 
@@ -968,6 +966,9 @@ async def update_response(
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
+        await db.refresh(response.record, attribute_names=[Record.responses_submitted.key])
+        await distribution.update_record_status(db, response.record)
+        await search_engine.partial_record_update(response.record, status=response.record.status)
 
     await db.commit()
 
@@ -997,6 +998,9 @@ async def upsert_response(
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.update_record_response(response)
+        await db.refresh(record, attribute_names=[Record.responses_submitted.key])
+        await distribution.update_record_status(db, record)
+        await search_engine.partial_record_update(record, status=record.status)
 
     await db.commit()
 
@@ -1006,9 +1010,13 @@ async def upsert_response(
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
+
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
         await search_engine.delete_record_response(response)
+        await db.refresh(response.record, attribute_names=[Record.responses_submitted.key])
+        await distribution.update_record_status(db, response.record)
+        await search_engine.partial_record_update(record=response.record, status=response.record.status)
 
     await db.commit()
 

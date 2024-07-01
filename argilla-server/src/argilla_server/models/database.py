@@ -29,9 +29,12 @@ from argilla_server.enums import (
     DatasetStatus,
     MetadataPropertyType,
     QuestionType,
+    RecordStatus,
     ResponseStatus,
     SuggestionType,
     UserRole,
+    DatasetDistributionStrategy,
+    RecordStatus,
 )
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
@@ -180,11 +183,17 @@ class VectorSettings(DatabaseModel):
         )
 
 
+RecordStatusEnum = SAEnum(RecordStatus, name="record_status_enum")
+
+
 class Record(DatabaseModel):
     __tablename__ = "records"
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
     metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
+    status: Mapped[RecordStatus] = mapped_column(
+        RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True
+    )
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
 
@@ -193,6 +202,13 @@ class Record(DatabaseModel):
         back_populates="record",
         cascade="all, delete-orphan",
         passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
+    responses_submitted: Mapped[List["Response"]] = relationship(
+        back_populates="record",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        primaryjoin=f"and_(Record.id==Response.record_id, Response.status=='{ResponseStatus.submitted}')",
         order_by=Response.inserted_at.asc(),
     )
     suggestions: Mapped[List["Suggestion"]] = relationship(
@@ -210,16 +226,16 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
+    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+        for vector in self.vectors:
+            if vector.vector_settings_id == vector_settings.id:
+                return vector.value
+
     def __repr__(self):
         return (
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
-
-    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
-        for vector in self.vectors:
-            if vector.vector_settings_id == vector_settings.id:
-                return vector.value
 
 
 class Question(DatabaseModel):
@@ -304,6 +320,7 @@ class Dataset(DatabaseModel):
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
     allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
+    distribution: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON))
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)
@@ -352,6 +369,10 @@ class Dataset(DatabaseModel):
     @property
     def is_ready(self):
         return self.status == DatasetStatus.ready
+
+    @property
+    def distribution_strategy(self) -> DatasetDistributionStrategy:
+        return DatasetDistributionStrategy(self.distribution["strategy"])
 
     def metadata_property_by_name(self, name: str) -> Union["MetadataProperty", None]:
         for metadata_property in self.metadata_properties:
