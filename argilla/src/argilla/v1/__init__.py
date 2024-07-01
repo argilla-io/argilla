@@ -14,7 +14,12 @@
 
 import warnings
 
-from argilla_v1 import *  # noqa
+try:
+    from argilla_v1 import *  # noqa
+except ModuleNotFoundError as ex:
+    raise Exception(
+        'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[v1]"',
+    ) from ex
 
 
 def deprecation(message: str):
@@ -23,5 +28,5 @@ def deprecation(message: str):
 
 deprecation(
     "The module `argilla_sdk.v1` has been include for migration purposes. "
-    "It's deprecated and will be removed in the future"
+    "It's deprecated and will be removed in the future."
 )
