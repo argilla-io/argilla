@@ -21,22 +21,22 @@ from argilla_server.models import Record
 
 
 # TODO: Do this with one single update statement for all records if possible to avoid too many queries.
-async def update_records_status(db: AsyncSession, records: List[Record], autocommit: bool):
+async def update_records_status(db: AsyncSession, records: List[Record]):
     for record in records:
-        await update_record_status(db, record, autocommit)
+        await update_record_status(db, record)
 
 
-async def update_record_status(db: AsyncSession, record: Record, autocommit: bool) -> Record:
+async def update_record_status(db: AsyncSession, record: Record) -> Record:
     if record.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
-        return await _update_record_status_with_overlap_strategy(db, record, autocommit)
+        return await _update_record_status_with_overlap_strategy(db, record)
 
     raise NotImplementedError(f"unsupported distribution strategy `{record.dataset.distribution_strategy}`")
 
 
-async def _update_record_status_with_overlap_strategy(db: AsyncSession, record: Record, autocommit: bool) -> Record:
+async def _update_record_status_with_overlap_strategy(db: AsyncSession, record: Record) -> Record:
     if len(record.responses_submitted) >= record.dataset.distribution["min_submitted"]:
         record.status = RecordStatus.completed
     else:
         record.status = RecordStatus.pending
 
-    return await record.save(db, autocommit)
+    return await record.save(db, autocommit=False)
