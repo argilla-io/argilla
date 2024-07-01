@@ -26,6 +26,7 @@ from argilla._models._search import (
     FilterModel,
     AndFilterModel,
     QueryModel,
+    RecordFilterScopeModel,
 )
 
 
@@ -54,8 +55,9 @@ class Condition(Tuple[str, str, Any]):
     @staticmethod
     def _extract_filter_scope(field: str) -> ScopeModel:
         field = field.strip()
-
         if field == "status":
+            return RecordFilterScopeModel(property="status")
+        elif field == "responses.status":
             return ResponseFilterScopeModel(property="status")
         elif "metadata" in field:
             _, md_property = field.split(".")
