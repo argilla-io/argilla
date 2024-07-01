@@ -101,8 +101,6 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @property
     def settings(self) -> Settings:
-        if self._is_published() and self._settings.is_outdated:
-            self._settings.get()
         return self._settings
 
     @settings.setter
@@ -141,6 +139,11 @@ class Dataset(Resource, DiskImportExportMixin):
     #####################
     #  Core methods     #
     #####################
+
+    def get(self) -> "Dataset":
+        super().get()
+        self.settings.get()
+        return self
 
     def exists(self) -> bool:
         """Checks if the dataset exists on the server
@@ -185,7 +188,7 @@ class Dataset(Resource, DiskImportExportMixin):
         self._settings.create()
         self._api.publish(dataset_id=self._model.id)
 
-        return self.get()  # type: ignore
+        return self.get()
 
     def _workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
         if workspace is None:
