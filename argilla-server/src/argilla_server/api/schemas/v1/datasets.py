@@ -63,6 +63,13 @@ class DatasetOverlapDistributionCreate(BaseModel):
 DatasetDistributionCreate = DatasetOverlapDistributionCreate
 
 
+class DatasetOverlapDistributionUpdate(DatasetDistributionCreate):
+    pass
+
+
+DatasetDistributionUpdate = DatasetOverlapDistributionUpdate
+
+
 class RecordMetrics(BaseModel):
     count: int
 
@@ -122,5 +129,6 @@ class DatasetUpdate(UpdateSchema):
     name: Optional[DatasetName]
     guidelines: Optional[DatasetGuidelines]
     allow_extra_metadata: Optional[bool]
+    distribution: Optional[DatasetDistributionUpdate]
 
-    __non_nullable_fields__ = {"name", "allow_extra_metadata"}
+    __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}

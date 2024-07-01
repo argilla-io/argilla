@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Added support to specify `distribution` attribute when creating a dataset. ([#5013](https://github.com/argilla-io/argilla/pull/5013))
+- Added support to change `distribution` attribute when updating a dataset. ([#5028](https://github.com/argilla-io/argilla/pull/5028))
 
 ### Changed
 

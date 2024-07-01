@@ -53,6 +53,11 @@ class UserRole(str, Enum):
     annotator = "annotator"
 
 
+class RecordStatus(str, Enum):
+    pending = "pending"
+    completed = "completed"
+
+
 class RecordInclude(str, Enum):
     responses = "responses"
     suggestions = "suggestions"

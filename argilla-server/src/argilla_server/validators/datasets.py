@@ -22,16 +22,27 @@ from argilla_server.models import Dataset, Workspace
 
 class DatasetCreateValidator:
     @classmethod
-    async def validate(cls, db, dataset: Dataset) -> None:
+    async def validate(cls, db: AsyncSession, dataset: Dataset) -> None:
         await cls._validate_workspace_is_present(db, dataset.workspace_id)
         await cls._validate_name_is_not_duplicated(db, dataset.name, dataset.workspace_id)
 
     @classmethod
-    async def _validate_workspace_is_present(cls, db, workspace_id: UUID) -> None:
+    async def _validate_workspace_is_present(cls, db: AsyncSession, workspace_id: UUID) -> None:
         if await Workspace.get(db, workspace_id) is None:
             raise UnprocessableEntityError(f"Workspace with id `{workspace_id}` not found")
 
     @classmethod
-    async def _validate_name_is_not_duplicated(cls, db, name: str, workspace_id: UUID) -> None:
+    async def _validate_name_is_not_duplicated(cls, db: AsyncSession, name: str, workspace_id: UUID) -> None:
         if await Dataset.get_by(db, name=name, workspace_id=workspace_id):
             raise NotUniqueError(f"Dataset with name `{name}` already exists for workspace with id `{workspace_id}`")
+
+
+class DatasetUpdateValidator:
+    @classmethod
+    async def validate(cls, db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> None:
+        cls._validate_distribution(dataset, dataset_attrs)
+
+    @classmethod
+    def _validate_distribution(cls, dataset: Dataset, dataset_attrs: dict) -> None:
+        if dataset.is_ready and dataset_attrs.get("distribution") is not None:
+            raise UnprocessableEntityError(f"Distribution settings cannot be modified for a published dataset")

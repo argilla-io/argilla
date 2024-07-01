@@ -17,6 +17,11 @@ from typing import List, Any, Union, Literal, Annotated
 from pydantic import BaseModel, Field
 
 
+class RecordFilterScopeModel(BaseModel):
+    entity: Literal["record"] = "record"
+    property: Literal["status"] = "status"
+
+
 class ResponseFilterScopeModel(BaseModel):
     """Filter scope for filtering on a response entity."""
 
@@ -42,6 +47,7 @@ class MetadataFilterScopeModel(BaseModel):
 
 ScopeModel = Annotated[
     Union[
+        RecordFilterScopeModel,
         ResponseFilterScopeModel,
         SuggestionFilterScopeModel,
         MetadataFilterScopeModel,
