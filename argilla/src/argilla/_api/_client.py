@@ -31,7 +31,6 @@ from argilla._constants import _DEFAULT_API_KEY, _DEFAULT_API_URL
 
 __all__ = ["APIClient"]
 
-
 ARGILLA_API_URL = os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL)
 ARGILLA_API_KEY = os.getenv(key="ARGILLA_API_KEY", default=_DEFAULT_API_KEY)
 DEFAULT_HTTP_CONFIG = HTTPClientConfig(api_url=ARGILLA_API_URL, api_key=ARGILLA_API_KEY)
@@ -106,24 +105,19 @@ class APIClient:
         timeout: int = DEFAULT_HTTP_CONFIG.timeout,
         **http_client_args,
     ):
+        self.api_url = api_url
+        self.api_key = api_key
+
         http_client_args = http_client_args or {}
         http_client_args["timeout"] = timeout
 
-        self.api_url = api_url
-        self.api_key = api_key
-        self._http_client_args = http_client_args
-
-    @property
-    def http_client(self) -> httpx.Client:
-        return create_http_client(
+        self.http_client = create_http_client(
             api_url=self.api_url,  # type: ignore
             api_key=self.api_key,  # type: ignore
-            **self._http_client_args,
+            **http_client_args,
         )
 
-    @property
-    def api(self) -> "ArgillaAPI":
-        return ArgillaAPI(http_client=self.http_client)
+        self.api = ArgillaAPI(self.http_client)
 
     ##############################
     # Utility methods

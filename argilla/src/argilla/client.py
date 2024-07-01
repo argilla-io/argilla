@@ -15,6 +15,7 @@
 import warnings
 from abc import abstractmethod
 from collections.abc import Sequence
+from functools import cached_property
 from typing import TYPE_CHECKING, overload, List, Optional, Union
 
 from argilla import _api
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
     from argilla import Workspace
     from argilla import Dataset
     from argilla import User
-
 
 __all__ = ["Argilla"]
 
@@ -42,6 +42,11 @@ class Argilla(_api.APIClient):
         me: The current user.
 
     """
+
+    workspaces: "Workspaces"
+    datasets: "Datasets"
+    users: "Users"
+    me: "User"
 
     # Default instance of Argilla
     _default_client: Optional["Argilla"] = None
@@ -72,10 +77,9 @@ class Argilla(_api.APIClient):
         """A collection of users on the server."""
         return Users(client=self)
 
-    @property
+    @cached_property
     def me(self) -> "User":
-        """The current user."""
-        from argilla import User
+        from argilla.users import User
 
         return User(client=self, _model=self.api.users.get_me())
 
