@@ -14,7 +14,7 @@
 
 import warnings
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -155,7 +155,6 @@ class IngestedRecordMapper:
         for source_key, value in mapping.items():
             mapped_attributes = [value] if isinstance(value, str) else list(value)
             for attribute_mapping in mapped_attributes:
-                
                 # Split the attribute mapping into its parts based on the '.' delimiter and create an AttributeRoute object.
                 attribute_mapping = attribute_mapping.split(".")
                 attribute_name = attribute_mapping[0]
@@ -169,7 +168,7 @@ class IngestedRecordMapper:
                     parameters=[AttributeParameter(parameter=parameter, source=source_key)],
                 )
                 attribute_route = self._select_attribute_type(attribute=attribute_route, schema_item=schema_item)
-                
+
                 # Add the attribute route to the schematized map based on the attribute type.
                 if attribute_route.name in schematized_map[attribute_route.type]:
                     # Some attributes may be mapped to multiple source values, so we need to append the parameters.
@@ -182,9 +181,9 @@ class IngestedRecordMapper:
         return RecordAttributesMap(**schematized_map)
 
     def _select_attribute_type(self, attribute, schema_item: Optional[object] = None):
-        """Selects the attribute type based on the schema item and the attribute type. 
-           This method implements the logic to infer the attribute type based on the schema item if the attribute type is not provided.
-           If the attribute type is not provided, it will be inferred based on the schema item.
+        """Selects the attribute type based on the schema item and the attribute type.
+        This method implements the logic to infer the attribute type based on the schema item if the attribute type is not provided.
+        If the attribute type is not provided, it will be inferred based on the schema item.
         """
         if isinstance(schema_item, QuestionPropertyBase) and (
             attribute.type is None or attribute.type == AttributeType.SUGGESTION
@@ -206,20 +205,20 @@ class IngestedRecordMapper:
         return attribute
 
     def _schematize_default_attributes(self, mapping: RecordAttributesMap) -> RecordAttributesMap:
-        """ Updates the mapping with default attributes that are not provided in the mapping.
-            Uses the schema of the dataset to infer the default attributes and add them to the mapping.
-            
-            Parameters:
-                mapping: The mapping object to update with default attributes.
-            
-            Returns:
-                RecordAttributesMap: The updated mapping object.
+        """Updates the mapping with default attributes that are not provided in the mapping.
+        Uses the schema of the dataset to infer the default attributes and add them to the mapping.
+
+        Parameters:
+            mapping: The mapping object to update with default attributes.
+
+        Returns:
+            RecordAttributesMap: The updated mapping object.
         """
 
         if len(mapping.id) == 0:
             # If the id is not provided in the mapping, we will map the 'id' key to the 'id' attribute.
             mapping.id["id"] = AttributeRoute(source="id", name="id", type=AttributeType.ID)
-            
+
         # Map keys that match question names to the suggestion attribute type.
         for question in self._dataset.settings.questions:
             if question.name not in mapping.suggestion:
