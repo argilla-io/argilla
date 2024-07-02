@@ -53,6 +53,7 @@ def test_ingest_record_from_dict(dataset):
 def test_ingest_record_from_dict_with_mapped_suggestions(dataset):
     mock_mapping = {
         "my_prompt": "prompt",
+        "my_label": "label.suggestion.value",
         "score": "label.suggestion.score",
         "model": "label.suggestion.agent",
     }
@@ -60,7 +61,7 @@ def test_ingest_record_from_dict_with_mapped_suggestions(dataset):
         records=[
             {
                 "my_prompt": "What is the capital of France?",
-                "label": "positive",
+                "my_label": "positive",
                 "score": 0.9,
                 "model": "model_name",
             }
