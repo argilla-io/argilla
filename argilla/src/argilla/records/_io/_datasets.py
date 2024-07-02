@@ -64,13 +64,13 @@ class HFDatasetsIO:
         dataset_class = _resolve_hf_datasets_type()
         if dataset_class is None:
             raise ImportError("Hugging Face datasets is not installed. Please install it using `pip install datasets`.")
-        record_dicts = GenericIO.to_list(records, flatten=True)
-        dataset = dataset_class.from_list(record_dicts)
+        record_dicts = GenericIO.to_dict(records, flatten=True)
+        dataset = dataset_class.from_dict(record_dicts)
         return dataset
 
     @staticmethod
     def _record_dicts_from_datasets(dataset: "HFDataset") -> List[Dict[str, Union[str, float, int, list]]]:
-        """Creates a dictionaries from a HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
+        """Creates a dictionaries from an HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:
             dataset (Dataset): The dataset containing the records.
