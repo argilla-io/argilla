@@ -500,6 +500,9 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    @include media("<desktop") {
+      height: 80vh;
+    }
   }
 }
 .bulk {
