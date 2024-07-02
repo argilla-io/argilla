@@ -346,6 +346,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._bulk_op_request(bulk_actions)
 
+    async def partial_record_update(self, record: Record, **update):
+        index_name = await self._get_dataset_index(record.dataset)
+        await self._update_document_request(index_name=index_name, id=str(record.id), body={"doc": update})
+
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_dataset_index(dataset)
 
@@ -552,6 +556,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         document = {
             "id": str(record.id),
             "fields": record.fields,
+            "status": record.status,
             "inserted_at": record.inserted_at,
             "updated_at": record.updated_at,
         }
@@ -712,6 +717,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},

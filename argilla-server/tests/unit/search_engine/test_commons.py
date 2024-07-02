@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder, RecordStatus
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
     FloatMetadataFilter,
@@ -263,6 +263,7 @@ async def refresh_records(records: List[Record]):
     for record in records:
         await record.awaitable_attrs.suggestions
         await record.awaitable_attrs.responses
+        await record.awaitable_attrs.responses_submitted
         await record.awaitable_attrs.vectors
 
 
@@ -314,6 +315,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -356,6 +358,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -428,6 +431,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -475,6 +479,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -879,6 +884,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
@@ -937,6 +943,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(records[0].id),
+                "status": RecordStatus.pending,
                 "fields": records[0].fields,
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
@@ -944,6 +951,7 @@ class TestBaseElasticAndOpenSearchEngine:
             },
             {
                 "id": str(records[1].id),
+                "status": RecordStatus.pending,
                 "fields": records[1].fields,
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
@@ -978,6 +986,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
@@ -1017,6 +1026,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),

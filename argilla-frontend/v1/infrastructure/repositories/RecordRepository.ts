@@ -42,10 +42,8 @@ export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
   getRecords(criteria: RecordCriteria): Promise<BackendRecords> {
-    if (criteria.isFilteringByAdvanceSearch)
-      return this.getRecordsByAdvanceSearch(criteria);
-
-    return this.getRecordsByDatasetId(criteria);
+    return this.getRecordsByAdvanceSearch(criteria);
+    // return this.getRecordsByDatasetId(criteria);
   }
 
   async getRecord(recordId: string): Promise<BackendRecord> {
@@ -262,6 +260,30 @@ export class RecordRepository {
             ? searchText.value.field
             : undefined,
         };
+      }
+
+      body.filters = {
+        and: [
+          {
+            type: "terms",
+            scope: {
+              entity: "response",
+              property: "status",
+            },
+            values: [status],
+          },
+        ],
+      };
+
+      if (status === "pending") {
+        body.filters.and.push({
+          type: "terms",
+          scope: {
+            entity: "record",
+            property: "status",
+          },
+          values: ["pending"],
+        });
       }
 
       if (

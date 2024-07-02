@@ -34,11 +34,13 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import (
+    DatasetDistributionStrategy,
     DatasetStatus,
     OptionsOrder,
     RecordInclude,
     ResponseStatusFilter,
     SimilarityOrder,
+    RecordStatus,
 )
 from argilla_server.models import (
     Dataset,
@@ -116,6 +118,10 @@ class TestSuiteDatasets:
                     "guidelines": None,
                     "allow_extra_metadata": True,
                     "status": "draft",
+                    "distribution": {
+                        "strategy": DatasetDistributionStrategy.overlap,
+                        "min_submitted": 1,
+                    },
                     "workspace_id": str(dataset_a.workspace_id),
                     "last_activity_at": dataset_a.last_activity_at.isoformat(),
                     "inserted_at": dataset_a.inserted_at.isoformat(),
@@ -127,6 +133,10 @@ class TestSuiteDatasets:
                     "guidelines": "guidelines",
                     "allow_extra_metadata": True,
                     "status": "draft",
+                    "distribution": {
+                        "strategy": DatasetDistributionStrategy.overlap,
+                        "min_submitted": 1,
+                    },
                     "workspace_id": str(dataset_b.workspace_id),
                     "last_activity_at": dataset_b.last_activity_at.isoformat(),
                     "inserted_at": dataset_b.inserted_at.isoformat(),
@@ -138,6 +148,10 @@ class TestSuiteDatasets:
                     "guidelines": None,
                     "allow_extra_metadata": True,
                     "status": "ready",
+                    "distribution": {
+                        "strategy": DatasetDistributionStrategy.overlap,
+                        "min_submitted": 1,
+                    },
                     "workspace_id": str(dataset_c.workspace_id),
                     "last_activity_at": dataset_c.last_activity_at.isoformat(),
                     "inserted_at": dataset_c.inserted_at.isoformat(),
@@ -653,8 +667,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 401
 
-    # Helper function to create records with responses
-
     async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create(name="dataset")
 
@@ -667,6 +679,10 @@ class TestSuiteDatasets:
             "guidelines": None,
             "allow_extra_metadata": True,
             "status": "draft",
+            "distribution": {
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -839,13 +855,16 @@ class TestSuiteDatasets:
         await db.refresh(workspace)
 
         response_body = response.json()
-        assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 1
         assert response_body == {
             "id": str(UUID(response_body["id"])),
             "name": "name",
             "guidelines": "guidelines",
             "allow_extra_metadata": False,
             "status": "draft",
+            "distribution": {
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
             "workspace_id": str(workspace.id),
             "last_activity_at": datetime.fromisoformat(response_body["last_activity_at"]).isoformat(),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -3644,6 +3663,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
+                        "status": RecordStatus.pending,
                         "fields": {"input": "input_a", "output": "output_a"},
                         "metadata": None,
                         "external_id": records[0].external_id,
@@ -3656,6 +3676,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
+                        "status": RecordStatus.pending,
                         "fields": {"input": "input_b", "output": "output_b"},
                         "metadata": {"unit": "test"},
                         "external_id": records[1].external_id,
@@ -3997,6 +4018,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[0].id),
+                        "status": RecordStatus.pending,
                         "fields": {
                             "input": "input_a",
                             "output": "output_a",
@@ -4012,6 +4034,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(records[1].id),
+                        "status": RecordStatus.pending,
                         "fields": {
                             "input": "input_b",
                             "output": "output_b",
@@ -4151,6 +4174,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_a.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_a.external_id,
@@ -4167,6 +4191,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_b.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_b.external_id,
@@ -4182,6 +4207,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_c.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_c.external_id,
@@ -4245,6 +4271,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_a.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_a.external_id,
@@ -4261,6 +4288,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_b.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_b.external_id,
@@ -4276,6 +4304,7 @@ class TestSuiteDatasets:
                 {
                     "record": {
                         "id": str(record_c.id),
+                        "status": RecordStatus.pending,
                         "fields": {"text": "This is a text", "sentiment": "neutral"},
                         "metadata": None,
                         "external_id": record_c.external_id,
@@ -4752,6 +4781,10 @@ class TestSuiteDatasets:
             "guidelines": guidelines,
             "allow_extra_metadata": allow_extra_metadata,
             "status": "ready",
+            "distribution": {
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),

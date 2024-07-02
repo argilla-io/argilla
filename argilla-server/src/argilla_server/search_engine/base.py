@@ -318,6 +318,10 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    async def partial_record_update(self, record: Record, **update):
+        pass
+
+    @abstractmethod
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         pass
 
