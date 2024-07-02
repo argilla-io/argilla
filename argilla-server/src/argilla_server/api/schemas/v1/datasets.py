@@ -70,27 +70,21 @@ class DatasetOverlapDistributionUpdate(DatasetDistributionCreate):
 DatasetDistributionUpdate = DatasetOverlapDistributionUpdate
 
 
-class RecordMetrics(BaseModel):
-    count: int
-
-
 class ResponseMetrics(BaseModel):
-    count: int
+    total: int
     submitted: int
     discarded: int
     draft: int
+    pending: int
 
 
 class DatasetMetrics(BaseModel):
-    records: RecordMetrics
     responses: ResponseMetrics
 
 
 class DatasetProgress(BaseModel):
     total: int
-    submitted: int
-    discarded: int
-    conflicting: int
+    completed: int
     pending: int
 
 

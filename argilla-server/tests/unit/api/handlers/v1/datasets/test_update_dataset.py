@@ -15,8 +15,9 @@
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
 from httpx import AsyncClient
+
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
 
 from tests.factories import DatasetFactory
 

@@ -147,23 +147,7 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return {
-        "records": {
-            "count": await datasets.count_records_by_dataset_id(db, dataset_id),
-        },
-        "responses": {
-            "count": await datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
-            "submitted": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.submitted
-            ),
-            "discarded": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.discarded
-            ),
-            "draft": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.draft
-            ),
-        },
-    }
+    return await datasets.get_user_dataset_metrics(db, current_user.id, dataset.id)
 
 
 @router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
