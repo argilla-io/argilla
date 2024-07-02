@@ -112,6 +112,7 @@ $resizable-bar-width: $base-space;
   display: flex;
   justify-content: space-between;
   height: 100%;
+  min-height: 0;
   width: 100%;
   &.--v-resizing {
     user-select: none;
