@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import warnings
-from collections import defaultdict
+
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
 
 from tqdm import tqdm
@@ -25,13 +24,9 @@ from argilla._models import RecordModel
 from argilla._exceptions import RecordsIngestionError
 from argilla.client import Argilla
 from argilla.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
+from argilla.records._mapping import IngestedRecordMapper
 from argilla.records._resource import Record
 from argilla.records._search import Query
-from argilla.responses import Response
-from argilla.settings import TextField, VectorField
-from argilla.settings._metadata import MetadataPropertyBase
-from argilla.settings._question import QuestionPropertyBase
-from argilla.suggestions import Suggestion
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -189,8 +184,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             self._validate_vector_names(vector_names=with_vectors)
 
         return DatasetRecordsIterator(
-            self.__dataset,
-            self.__client,
+            dataset=self.__dataset,
+            client=self.__client,
             query=query,
             batch_size=batch_size,
             start_offset=start_offset,
@@ -229,7 +224,6 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         Returns:
             A list of Record objects representing the updated records.
-
         """
         record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
         batch_size = self._normalize_batch_size(
@@ -363,7 +357,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
     def _ingest_records(
         self,
-        records: Union[List[Dict[str, Any]], Dict[str, Any], List[Record], Record, HFDataset],
+        records: Union[List[Dict[str, Any]], List[Record], HFDataset],
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
@@ -376,11 +370,11 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
 
         ingested_records = []
-
+        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
                 if not isinstance(record, Record):
-                    record = self._infer_record_from_mapping(data=record, mapping=mapping, user_id=user_id)
+                    record = record_mapper(data=record)
                 elif isinstance(record, Record):
                     record.dataset = self.__dataset
                 else:
@@ -413,161 +407,3 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 continue
             if vector_name not in self.__dataset.schema:
                 raise ValueError(f"Vector field {vector_name} not found in dataset schema.")
-
-    def _render_record_mapping(
-        self,
-        data: Dict[str, Any],
-        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
-    ) -> Dict[str, Tuple[Optional[str]]]:
-        """Renders a mapping from a list of records and a mapping dictionary, to a singular mapping dictionary."""
-        schema = self.__dataset.schema
-        mapping = mapping or {}
-        singular_mapping = defaultdict(dict)
-
-        # update the mapping with unmapped columns
-        for key, value in data.items():
-            if key not in schema and key not in mapping:
-                warnings.warn(
-                    message=f"Record attribute {key} is not in the schema so skipping.",
-                )
-            if key not in mapping:
-                mapping[key] = key
-
-        # create a singular mapping with destinations from the schema
-        for source_key, value in mapping.items():
-            destinations = [value] if isinstance(value, str) else list(value)
-
-            for attribute_mapping in destinations:
-                attribute_mapping = attribute_mapping.split(".")
-
-                attribute_name = attribute_mapping[0]
-                schema_item = schema.get(attribute_name)
-                attribute_type = attribute_mapping[1] if len(attribute_mapping) > 1 else None
-                sub_attribute = attribute_mapping[2] if len(attribute_mapping) > 2 else None
-
-                # Assign the value to question, field, or response based on schema item
-                if attribute_name == "id":
-                    attribute_type = "id"
-                elif isinstance(schema_item, TextField):
-                    attribute_type = "field"
-                elif isinstance(schema_item, QuestionPropertyBase) and attribute_type == "response":
-                    attribute_type = "response"
-                elif (
-                    isinstance(schema_item, QuestionPropertyBase)
-                    and attribute_type is None
-                    or attribute_type == "suggestion"
-                ):
-                    attribute_type = "suggestion"
-                    sub_attribute = sub_attribute or "value"
-                    attribute_name = (attribute_name, sub_attribute)
-                elif isinstance(schema_item, VectorField):
-                    attribute_type = "vector"
-                elif isinstance(schema_item, MetadataPropertyBase):
-                    attribute_type = "metadata"
-                else:
-                    warnings.warn(
-                        message=f"Record attribute {attribute_name} is not in the schema or mapping so skipping."
-                    )
-                    continue
-
-                singular_mapping[attribute_type][attribute_name] = source_key
-
-        return singular_mapping
-
-    def _infer_record_from_mapping(
-        self,
-        data: Dict[str, Any],
-        mapping: Dict[str, Tuple[Optional[str]]],
-        user_id: Optional[UUID] = None,
-    ) -> "Record":
-        """Converts a mapped record dictionary to a Record object for use by the add or update methods.
-        Args:
-            dataset: The dataset object to which the record belongs.
-            data: A dictionary representing the record.
-            mapping: A dictionary mapping from source data keys/ columns to Argilla fields, questions, ids, etc.
-            user_id: The user id to associate with the record responses.
-        Returns:
-            A Record object.
-
-        """
-
-        mapping = self._render_record_mapping(data=data, mapping=mapping)
-        id_mapping = mapping.get("id", {})
-        suggestion_mapping = mapping.get("suggestion", {})
-        response_mapping = mapping.get("response", {})
-        field_mapping = mapping.get("field", {})
-        metadata_mapping = mapping.get("metadata", {})
-        vector_mapping = mapping.get("vector", {})
-
-        if "id" in id_mapping:
-            record_id = data.get(id_mapping["id"])
-        else:
-            record_id = None
-
-        # Parse suggestions and responses into objects aligned with questions
-        suggestions = self._parse_suggestion_from_mapping(data=data, mapping=suggestion_mapping)
-        responses = self._parse_response_from_mapping(data=data, mapping=response_mapping, user_id=user_id)
-
-        # Parse fields, metadata, and vectors into
-        fields = {attribute_name: data.get(source_key) for attribute_name, source_key in field_mapping.items()}
-        metadata = {attribute_name: data.get(source_key) for attribute_name, source_key in metadata_mapping.items()}
-        vectors = {attribute_name: data.get(source_key) for attribute_name, source_key in vector_mapping.items()}
-
-        return Record(
-            id=record_id,
-            fields=fields,
-            vectors=vectors,
-            metadata=metadata,
-            suggestions=suggestions,
-            responses=responses,
-            _dataset=self.__dataset,
-        )
-
-    def _parse_suggestion_from_mapping(
-        self, data: Dict[str, Any], mapping: Dict[str, Tuple[Optional[str]]]
-    ) -> List[Suggestion]:
-        """Converts a mapped suggestion dictionary to a Suggestion object for use by the add or update methods.
-        Suggestions can be defined across multiple source values and mapped to single questions.
-        Args:
-            data: A dictionary representing the suggestion.
-            mapping: A dictionary mapping from source data keys/ columns to Argilla fields, questions, ids, etc.
-        Returns:
-            A Suggestion object.
-
-        """
-        suggestion_values = defaultdict(dict)
-
-        for (attribute_name, sub_attribute), source_key in mapping.items():
-            value = data.get(source_key)
-            schema_item = self.__dataset.schema.get(attribute_name)
-            suggestion_values[attribute_name].update(
-                {sub_attribute: value, "question_name": attribute_name, "question_id": schema_item.id}
-            )
-
-        suggestions = [Suggestion(**suggestion_dict) for suggestion_dict in suggestion_values.values()]
-
-        return suggestions
-
-    def _parse_response_from_mapping(
-        self, data: Dict[str, Any], mapping: Dict[str, Tuple[Optional[str]]], user_id: UUID
-    ) -> List[Response]:
-        """Converts a mapped response dictionary to a Response object for use by the add or update methods.
-        Args:
-            data: A dictionary representing the response.
-            mapping: A dictionary mapping from source data keys/ columns to Argilla fields, questions, ids, etc.
-            user_id: The user id to associate with the record responses.
-        Returns:
-            A Response object.
-
-        """
-        responses = []
-
-        for attribute_name, source_key in mapping.items():
-            response = Response(
-                value=data.get(source_key),
-                question_name=attribute_name,
-                user_id=user_id,
-            )
-            responses.append(response)
-
-        return responses
