@@ -37,7 +37,11 @@ class TestGetDatasetProgress:
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
         assert response.status_code == 200
-        assert response.json() == {"completed": 3, "pending": 2, "total": 5}
+        assert response.json() == {
+            "completed": 3,
+            "pending": 2,
+            "total": 5,
+        }
 
     async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
