@@ -370,48 +370,61 @@ async def _configure_query_relationships(
 
 
 async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: UUID) -> dict:
-    records, responses_submitted, responses_discarded, responses_draft = await asyncio.gather(
+    responses_submitted, responses_discarded, responses_draft, responses_pending = await asyncio.gather(
         db.execute(
-            select(func.count(Record.id).filter(Record.dataset_id == dataset_id)),
+            select(func.count(Response.id))
+            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
+            .filter(
+                Response.user_id == user_id,
+                Response.status == ResponseStatus.submitted,
+            ),
         ),
         db.execute(
             select(func.count(Response.id))
             .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(Response.user_id == user_id, Response.status == ResponseStatus.submitted),
+            .filter(
+                Response.user_id == user_id,
+                Response.status == ResponseStatus.discarded,
+            ),
         ),
         db.execute(
             select(func.count(Response.id))
             .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(Response.user_id == user_id, Response.status == ResponseStatus.discarded),
+            .filter(
+                Response.user_id == user_id,
+                Response.status == ResponseStatus.draft,
+            ),
         ),
         db.execute(
-            select(func.count(Response.id))
-            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(Response.user_id == user_id, Response.status == ResponseStatus.draft),
+            select(func.count(Record.id))
+            .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
+            .filter(
+                Record.dataset_id == dataset_id,
+                Record.status == RecordStatus.pending,
+                Response.id == None,
+            ),
         ),
     )
 
-    records = records.scalar_one()
     responses_submitted = responses_submitted.scalar_one()
     responses_discarded = responses_discarded.scalar_one()
     responses_draft = responses_draft.scalar_one()
-    responses = responses_submitted + responses_discarded + responses_draft
+    responses_pending = responses_pending.scalar_one()
+    responses_total = responses_submitted + responses_discarded + responses_draft + responses_pending
 
     return {
-        "records": {
-            "count": records,
-        },
         "responses": {
-            "count": responses,
+            "total": responses_total,
             "submitted": responses_submitted,
             "discarded": responses_discarded,
             "draft": responses_draft,
+            "pending": responses_pending,
         },
     }
 
 
 async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
-    completed, pending = await asyncio.gather(
+    records_completed, records_pending = await asyncio.gather(
         db.execute(
             select(func.count(Record.id)).filter(
                 Record.dataset_id == dataset_id,
@@ -426,11 +439,15 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
         ),
     )
 
-    completed = completed.scalar_one()
-    pending = pending.scalar_one()
-    total = completed + pending
+    records_completed = records_completed.scalar_one()
+    records_pending = records_pending.scalar_one()
+    records_total = records_completed + records_pending
 
-    return {"total": total, "completed": completed, "pending": pending}
+    return {
+        "total": records_total,
+        "completed": records_completed,
+        "pending": records_pending,
+    }
 
 
 _EXTRA_METADATA_FLAG = "extra"
