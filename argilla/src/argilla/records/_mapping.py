@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import warnings
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -155,19 +156,17 @@ class IngestedRecordMapper:
         for source_key, value in mapping.items():
             mapped_attributes = [value] if isinstance(value, str) else list(value)
             for attribute_mapping in mapped_attributes:
-                # Split the attribute mapping into its parts based on the '.' delimiter and create an AttributeRoute object.
-                attribute_mapping = attribute_mapping.split(".")
-                attribute_name = attribute_mapping[0]
-                schema_item = self._schema.get(attribute_name)
-                type_ = AttributeType(attribute_mapping[1]) if len(attribute_mapping) > 1 else None
-                parameter = ParameterType(attribute_mapping[2]) if len(attribute_mapping) > 2 else ParameterType.VALUE
+                attribute_name, type_, parameter = self._parse_dot_notation(attribute_mapping)
+                
+                type_ = AttributeType(type_) if type_ else None
+                parameter = ParameterType(parameter) if parameter else ParameterType.VALUE
                 attribute_route = AttributeRoute(
                     source=source_key,
                     name=attribute_name,
                     type=type_,
                     parameters=[AttributeParameter(parameter=parameter, source=source_key)],
                 )
-                attribute_route = self._select_attribute_type(attribute=attribute_route, schema_item=schema_item)
+                attribute_route = self._select_attribute_type(attribute=attribute_route)
 
                 # Add the attribute route to the schematized map based on the attribute type.
                 if attribute_route.name in schematized_map[attribute_route.type]:
@@ -180,11 +179,37 @@ class IngestedRecordMapper:
 
         return RecordAttributesMap(**schematized_map)
 
-    def _select_attribute_type(self, attribute, schema_item: Optional[object] = None):
+    def _parse_dot_notation(self, attribute_mapping: str) -> Tuple[str, Optional[str], Optional[str]]:
+        """Parses a string in the format of 'attribute.type.parameter' into its parts using regex."""
+        
+        # Get the available attributes, types, and parameters from the schema.
+        available_attributes = list(self._schema.keys()) + ["id"]
+        available_types = [type_.value for type_ in AttributeType]
+        available_parameters = [param.value for param in ParameterType]
+
+        # The pattern is in the format of 'attribute[.type[.parameter]]' where type and parameter are optional.
+        pattern = re.compile(
+            rf"^({'|'.join(available_attributes)})"
+            rf"(?:\.({'|'.join(available_types)}))?"
+            rf"(?:\.({'|'.join(available_parameters)}))?$"
+        )
+
+        match = pattern.match(attribute_mapping)
+        if not match:
+            raise ValueError(
+                f"Invalid attribute mapping format: {attribute_mapping}. "
+                "Attribute mapping must be in the format of 'attribute[.type[.parameter]]'."
+                f"Available attributes: {available_attributes}, types: {available_types}, parameters: {available_parameters}."
+            )
+        attribute_name, type_, parameter = match.groups()
+        return attribute_name, type_, parameter
+
+    def _select_attribute_type(self, attribute: AttributeRoute) -> AttributeRoute:
         """Selects the attribute type based on the schema item and the attribute type.
         This method implements the logic to infer the attribute type based on the schema item if the attribute type is not provided.
         If the attribute type is not provided, it will be inferred based on the schema item.
         """
+        schema_item = self._schema.get(attribute.name)
         if isinstance(schema_item, QuestionPropertyBase) and (
             attribute.type is None or attribute.type == AttributeType.SUGGESTION
         ):
