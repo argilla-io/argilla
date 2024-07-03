@@ -191,7 +191,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
 
         for model in workspace_models:
             if model.name == name:
-                return Workspace(_model=model, client=self._client)
+                return self._from_model(model)
         warnings.warn(
             f"Workspace {name} not found. Creating a new workspace. Do `workspace.create()` to create the workspace."
         )
@@ -248,7 +248,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     def _from_model(self, model: WorkspaceModel) -> "Workspace":
         from argilla.workspaces import Workspace
 
-        return Workspace(client=self._client, _model=model)
+        return Workspace.from_model(client=self._client, model=model)
 
 
 class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
@@ -321,4 +321,4 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
     def _from_model(self, model: DatasetModel) -> "Dataset":
         from argilla.datasets import Dataset
 
-        return Dataset(client=self._client, _model=model)
+        return Dataset.from_model(model=model, client=self._client)
