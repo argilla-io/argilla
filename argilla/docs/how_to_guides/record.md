@@ -484,7 +484,7 @@ dataset.records.delete(records=records_to_delete)
 
     ```python
     status_filter = rg.Query(
-        filter = rg.Filter(("status", "==", "pending"))
+        filter = rg.Filter(("response.status", "==", "pending"))
     )
     records_to_delete = list(dataset.records(status_filter))
 

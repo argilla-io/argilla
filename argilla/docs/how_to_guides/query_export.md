@@ -134,7 +134,7 @@ workspace = client.workspaces("my_workspace")
 dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 status_filter = rg.Query(
-    filter=rg.Filter(("status", "==", "submitted"))
+    filter=rg.Filter(("response.status", "==", "submitted"))
 )
 
 filtered_records = list(dataset.records(status_filter))
