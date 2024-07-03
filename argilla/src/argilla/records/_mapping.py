@@ -98,40 +98,28 @@ class RecordAttributesMap(BaseModel):
 
     id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
 
+    def _get_routes_group_by_type(self, type: AttributeType):
+        return {
+            AttributeType.SUGGESTION: self.suggestion,
+            AttributeType.RESPONSE: self.response,
+            AttributeType.FIELD: self.field,
+            AttributeType.METADATA: self.metadata,
+            AttributeType.VECTOR: self.vector,
+            AttributeType.ID: self.id,
+        }[type]
+
     def get_by_name_and_type(self, name: str, type: AttributeType) -> Optional[AttributeRoute]:
         """Get a route by name and type"""
         if name == "id" and AttributeType.ID:
             return self.id
-
-        if type == AttributeType.SUGGESTION:
-            return self.suggestion.get(name)
-
-        if type == AttributeType.RESPONSE:
-            return self.response.get(name)
-
-        if type == AttributeType.FIELD:
-            return self.field.get(name)
-
-        if type == AttributeType.METADATA:
-            return self.metadata.get(name)
-
-        if type == AttributeType.VECTOR:
-            return self.vector.get(name)
+        return self._get_routes_group_by_type(type).get(name)
 
     def add_route(self, attribute_route: AttributeRoute) -> None:
         """Ad a new mapping route"""
         if attribute_route.type == AttributeType.ID:
             self.id = attribute_route
-        elif attribute_route.type == AttributeType.SUGGESTION:
-            self.suggestion[attribute_route.name] = attribute_route
-        elif attribute_route.type == AttributeType.RESPONSE:
-            self.response[attribute_route.name] = attribute_route
-        elif attribute_route.type == AttributeType.FIELD:
-            self.field[attribute_route.name] = attribute_route
-        elif attribute_route.type == AttributeType.VECTOR:
-            self.vector[attribute_route.name] = attribute_route
-        elif attribute_route.type == AttributeType.METADATA:
-            self.metadata[attribute_route.name] = attribute_route
+        else:
+            self._get_routes_group_by_type(attribute_route.type)[attribute_route.name] = attribute_route
 
 
 class IngestedRecordMapper:
