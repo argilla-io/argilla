@@ -318,7 +318,7 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
     You can add suggestions as a dictionary, where the keys correspond to the `name`s of the labels that were configured for your dataset. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
-        # Add records to the dataset with the label 'my_label'
+        # Add records to the dataset with the label question 'my_label'
     data = [
         {
             "question": "Do you need oxygen to breathe?",
