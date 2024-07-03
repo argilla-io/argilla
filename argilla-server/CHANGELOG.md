@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
+### Added
+
+- Added some new performance tuning settings for SQLite database. ([#5150](https://github.com/argilla-io/argilla/pull/5150))
+
 ### Changed
 
 - Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
