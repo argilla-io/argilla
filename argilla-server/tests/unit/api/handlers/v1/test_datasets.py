@@ -768,6 +768,24 @@ class TestSuiteDatasets:
             },
         }
 
+    async def test_get_current_user_dataset_metrics_with_empty_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "responses": {
+                "total": 0,
+                "submitted": 0,
+                "discarded": 0,
+                "draft": 0,
+                "pending": 0,
+            },
+        }
+
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_get_current_user_dataset_metrics_as_annotator(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
