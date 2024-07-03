@@ -39,6 +39,10 @@ class ParameterType(str, Enum):
     SCORE = "score"
     AGENT = "agent"
 
+    @classmethod
+    def values(cls) -> List[str]:
+        return [param.value for param in cls]
+
 
 class AttributeType(str, Enum):
     """Attribute types are the different types of attributes a record can have."""
@@ -49,6 +53,10 @@ class AttributeType(str, Enum):
     METADATA = "metadata"
     VECTOR = "vector"
     ID = "id"
+
+    @classmethod
+    def values(cls) -> List[str]:
+        return [attr.value for attr in cls]
 
 
 class AttributeParameter(BaseModel):
@@ -84,6 +92,7 @@ class RecordAttributesMap(BaseModel):
     vector: Dict[str, AttributeRoute]
 
     id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
+
 
 class IngestedRecordMapper:
     """IngestedRecordMapper is a class that is used to map data into a record object.
@@ -183,10 +192,9 @@ class IngestedRecordMapper:
     def _parse_dot_notation(self, attribute_mapping: str) -> Tuple[str, Optional[str], Optional[str]]:
         """Parses a string in the format of 'attribute.type.parameter' into its parts using regex."""
 
-        # Get the available attributes, types, and parameters from the schema.
         available_attributes = list(self._schema.keys()) + ["id"]
-        available_types = [type_.value for type_ in AttributeType]
-        available_parameters = [param.value for param in ParameterType]
+        available_parameters = ParameterType.values()
+        available_types = AttributeType.values()
 
         # The pattern is in the format of 'attribute[.type[.parameter]]' where type and parameter are optional.
         pattern = re.compile(
