@@ -373,7 +373,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
-                if not isinstance(record, Record):
+                if isinstance(record, dict):
                     record = record_mapper(data=record)
                 elif isinstance(record, Record):
                     record.dataset = self.__dataset
