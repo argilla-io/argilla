@@ -174,6 +174,7 @@ $resizable-bar-width: $base-space;
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   width: 100%;
   &.--h-resizing {
     user-select: none;
