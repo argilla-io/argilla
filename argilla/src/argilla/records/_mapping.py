@@ -18,7 +18,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from argilla.records._resource import Record
 from argilla.responses import Response
@@ -64,7 +64,7 @@ class AttributeParameter(BaseModel):
     And the source in the data that the parameter is coming from.
     """
 
-    parameter: ParameterType = ParameterType.VALUE
+    parameter_type: ParameterType = ParameterType.VALUE
     source: str
 
 
@@ -76,22 +76,62 @@ class AttributeRoute(BaseModel):
     type: Optional[AttributeType] = None
     parameters: List[AttributeParameter] = []
 
-    @property
-    def has_value(self) -> bool:
-        """All attributes must have a value parameter to be valid."""
-        return any(param.parameter == ParameterType.VALUE for param in self.parameters)
+    def set_parameter(self, parameter: AttributeParameter):
+        """Set a parameter for the route.
+        An existing parameter with same parameter type will be replaced by this new one.
+        """
+        for p in self.parameters:
+            if p.parameter_type == parameter.parameter_type:
+                self.parameters.remove(p)
+                break
+        self.parameters.append(parameter)
 
 
 class RecordAttributesMap(BaseModel):
     """RecordAttributesMap is a representation of a record attribute mapping that is used to parse data into a record."""
 
-    suggestion: Dict[str, AttributeRoute]
-    response: Dict[str, AttributeRoute]
-    field: Dict[str, AttributeRoute]
-    metadata: Dict[str, AttributeRoute]
-    vector: Dict[str, AttributeRoute]
+    suggestion: Dict[str, AttributeRoute] = Field(default_factory=dict)
+    response: Dict[str, AttributeRoute] = Field(default_factory=dict)
+    field: Dict[str, AttributeRoute] = Field(default_factory=dict)
+    metadata: Dict[str, AttributeRoute] = Field(default_factory=dict)
+    vector: Dict[str, AttributeRoute] = Field(default_factory=dict)
 
     id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
+
+    def get_by_name_and_type(self, name: str, type: AttributeType) -> Optional[AttributeRoute]:
+        """Get a route by name and type"""
+        if name == "id" and AttributeType.ID:
+            return self.id
+
+        if type == AttributeType.SUGGESTION:
+            return self.suggestion.get(name)
+
+        if type == AttributeType.RESPONSE:
+            return self.response.get(name)
+
+        if type == AttributeType.FIELD:
+            return self.field.get(name)
+
+        if type == AttributeType.METADATA:
+            return self.metadata.get(name)
+
+        if type == AttributeType.VECTOR:
+            return self.vector.get(name)
+
+    def add_route(self, attribute_route: AttributeRoute) -> None:
+        """Ad a new mapping route"""
+        if attribute_route.type == AttributeType.ID:
+            self.id = attribute_route
+        elif attribute_route.type == AttributeType.SUGGESTION:
+            self.suggestion[attribute_route.name] = attribute_route
+        elif attribute_route.type == AttributeType.RESPONSE:
+            self.response[attribute_route.name] = attribute_route
+        elif attribute_route.type == AttributeType.FIELD:
+            self.field[attribute_route.name] = attribute_route
+        elif attribute_route.type == AttributeType.VECTOR:
+            self.vector[attribute_route.name] = attribute_route
+        elif attribute_route.type == AttributeType.METADATA:
+            self.metadata[attribute_route.name] = attribute_route
 
 
 class IngestedRecordMapper:
@@ -114,10 +154,8 @@ class IngestedRecordMapper:
         self._schema = dataset.schema
         self.user_id = user_id
 
-        mapping = mapping or {}
-        _mapping = self._schematize_mapped_attributes(mapping=mapping)
-        _mapping = self._schematize_default_attributes(mapping=_mapping)
-        self.mapping: RecordAttributesMap = _mapping
+        default_mapping = self._schematize_default_attributes()
+        self.mapping = self._schematize_mapped_attributes(mapping=mapping or {}, default_mapping=default_mapping)
 
     def __call__(self, data: Dict[str, Any], user_id: Optional[UUID] = None) -> Record:
         """Maps a dictionary of data to a record object.
@@ -152,42 +190,36 @@ class IngestedRecordMapper:
     # Private helper functions - Build Mapping
     ##########################################
 
-    def _schematize_mapped_attributes(self, mapping: Dict[str, Union[str, Sequence[str]]]) -> RecordAttributesMap:
-        """Converts a mapping dictionary to a schematized mapping object."""
-        schematized_map = {
-            "suggestion": {},
-            "response": {},
-            "field": {},
-            "metadata": {},
-            "vector": {},
-        }
+    def _schematize_mapped_attributes(
+        self,
+        mapping: Dict[str, Union[str, Sequence[str]]],
+        default_mapping: RecordAttributesMap,
+    ) -> RecordAttributesMap:
+        """Extends the default mapping with a schematized mapping object provided from a dict"""
+
         for source_key, value in mapping.items():
             mapped_attributes = [value] if isinstance(value, str) else list(value)
             for attribute_mapping in mapped_attributes:
-                attribute_name, type_, parameter = self._parse_dot_notation(attribute_mapping)
+                attribute_name, attr_type, parameter = self._parse_dot_notation(attribute_mapping)
 
-                type_ = AttributeType(type_) if type_ else None
-                parameter = ParameterType(parameter) if parameter else ParameterType.VALUE
-                attribute_route = AttributeRoute(
-                    source=source_key,
-                    name=attribute_name,
-                    type=type_,
-                    parameters=[AttributeParameter(parameter=parameter, source=source_key)],
-                )
-                attribute_route = self._select_attribute_type(attribute=attribute_route)
+                attr_type = AttributeType(attr_type or AttributeType.SUGGESTION)
+                parameter = AttributeParameter(parameter_type=parameter or ParameterType.VALUE, source=source_key)
 
-                # Add the attribute route to the schematized map based on the attribute type.
-                if attribute_route.type is AttributeType.ID:
-                    schematized_map["id"] = attribute_route
-                elif attribute_route.name in schematized_map[attribute_route.type]:
-                    # Some attributes may be mapped to multiple source values, so we need to append the parameters.
-                    schematized_map[attribute_route.type][attribute_route.name].parameters.extend(
-                        attribute_route.parameters
-                    )
+                attribute_route = default_mapping.get_by_name_and_type(name=attribute_name, type=attr_type)
+                if attribute_route:
+                    attribute_route.source = source_key
+                    attribute_route.set_parameter(parameter)
                 else:
-                    schematized_map[attribute_route.type][attribute_route.name] = attribute_route
+                    attribute_route = AttributeRoute(
+                        name=attribute_name,
+                        source=source_key,
+                        type=attr_type,
+                        parameters=[parameter],
+                    )
+                    attribute_route = self._select_attribute_type(attribute=attribute_route)
+                    default_mapping.add_route(attribute_route)
 
-        return RecordAttributesMap(**schematized_map)
+        return default_mapping
 
     def _parse_dot_notation(self, attribute_mapping: str) -> Tuple[str, Optional[str], Optional[str]]:
         """Parses a string in the format of 'attribute.type.parameter' into its parts using regex."""
@@ -238,53 +270,44 @@ class IngestedRecordMapper:
             warnings.warn(message=f"Record attribute {attribute.name} is not in the schema or mapping so skipping.")
         return attribute
 
-    def _schematize_default_attributes(self, mapping: RecordAttributesMap) -> RecordAttributesMap:
-        """Updates the mapping with default attributes that are not provided in the mapping.
-        Uses the schema of the dataset to infer the default attributes and add them to the mapping.
-
-        Parameters:
-            mapping: The mapping object to update with default attributes.
+    def _schematize_default_attributes(self) -> RecordAttributesMap:
+        """Creates the mapping with default attributes. Uses the schema of the dataset to infer
+         the default attributes and add them to the mapping.
 
         Returns:
-            RecordAttributesMap: The updated mapping object.
+            RecordAttributesMap: The mapping object.
         """
+        mapping = RecordAttributesMap()
 
         # Map keys that match question names to the suggestion attribute type.
         for question in self._dataset.settings.questions:
-            if question.name not in mapping.suggestion:
-                mapping.suggestion[question.name] = AttributeRoute(
-                    source=question.name,
-                    name=question.name,
-                    type=AttributeType.SUGGESTION,
-                    parameters=[AttributeParameter(source=question.name)],
-                )
-
-            elif not mapping.suggestion[question.name].has_value:
-                mapping.suggestion[question.name].parameters.append(AttributeParameter(source=question.name))
+            mapping.suggestion[question.name] = AttributeRoute(
+                source=question.name,
+                name=question.name,
+                type=AttributeType.SUGGESTION,
+                parameters=[AttributeParameter(source=question.name)],
+            )
 
         for field in self._dataset.settings.fields:
-            if field.name not in mapping.field:
-                mapping.field[field.name] = AttributeRoute(
-                    source=field.name,
-                    name=field.name,
-                    type=AttributeType.FIELD,
-                )
+            mapping.field[field.name] = AttributeRoute(
+                source=field.name,
+                name=field.name,
+                type=AttributeType.FIELD,
+            )
 
         for metadata in self._dataset.settings.metadata:
-            if metadata.name not in mapping.metadata:
-                mapping.metadata[metadata.name] = AttributeRoute(
-                    source=metadata.name,
-                    name=metadata.name,
-                    type=AttributeType.METADATA,
-                )
+            mapping.metadata[metadata.name] = AttributeRoute(
+                source=metadata.name,
+                name=metadata.name,
+                type=AttributeType.METADATA,
+            )
 
         for vector in self._dataset.settings.vectors:
-            if vector.name not in mapping.vector:
-                mapping.vector[vector.name] = AttributeRoute(
-                    source=vector.name,
-                    name=vector.name,
-                    type=AttributeType.VECTOR,
-                )
+            mapping.vector[vector.name] = AttributeRoute(
+                source=vector.name,
+                name=vector.name,
+                type=AttributeType.VECTOR,
+            )
 
         return mapping
 
@@ -309,7 +332,7 @@ class IngestedRecordMapper:
         for name, route in mapping.items():
             if route.source not in data:
                 continue
-            parameters = {param.parameter: data.get(param.source) for param in route.parameters}
+            parameters = {param.parameter_type: data.get(param.source) for param in route.parameters}
             schema_item = self._dataset.schema.get(name)
             suggestion = Suggestion(
                 **parameters,
