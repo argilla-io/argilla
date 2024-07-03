@@ -24,7 +24,7 @@ class TestResponses:
     def test_create_user_response(self):
         user_id = uuid.uuid4()
         response = UserResponse(
-            answers=[
+            responses=[
                 Response(question_name="question", value="answer", user_id=user_id),
                 Response(question_name="other-question", value="answer", user_id=user_id),
             ],
@@ -42,7 +42,7 @@ class TestResponses:
     def test_create_submitted_user_responses(self):
         user_id = uuid.uuid4()
         response = UserResponse(
-            answers=[
+            responses=[
                 Response(question_name="question", value="answer", user_id=user_id, status="submitted"),
                 Response(question_name="other-question", value="answer", user_id=user_id, status="submitted"),
             ],
@@ -60,7 +60,7 @@ class TestResponses:
     def test_create_user_response_with_multiple_status(self):
         user_id = uuid.uuid4()
         response = UserResponse(
-            answers=[
+            responses=[
                 Response(question_name="question", value="answer", user_id=user_id, status="draft"),
                 Response(question_name="other-question", value="answer", user_id=user_id, status="submitted"),
             ],
@@ -79,9 +79,9 @@ class TestResponses:
         user_id = uuid.uuid4()
         other_user_id = uuid.uuid4()
 
-        with pytest.raises(ValueError, match="Multiple user_ids found in user answers"):
+        with pytest.raises(ValueError, match="Multiple user_ids found in user responses"):
             UserResponse(
-                answers=[
+                responses=[
                     Response(question_name="question", value="answer", user_id=user_id),
                     Response(question_name="other-question", value="answer", user_id=other_user_id),
                 ],
@@ -92,6 +92,6 @@ class TestResponses:
         response = UserResponse.from_model(
             model=model, dataset=Dataset(name="burr", workspace=Workspace(name="test", id=uuid.uuid4()))
         )
-        assert len(response.answers) == 0
+        assert len(response.responses) == 0
         assert response.user_id is None
         assert response.status == ResponseStatus.draft
