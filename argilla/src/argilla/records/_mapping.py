@@ -157,7 +157,7 @@ class IngestedRecordMapper:
             mapped_attributes = [value] if isinstance(value, str) else list(value)
             for attribute_mapping in mapped_attributes:
                 attribute_name, type_, parameter = self._parse_dot_notation(attribute_mapping)
-                
+
                 type_ = AttributeType(type_) if type_ else None
                 parameter = ParameterType(parameter) if parameter else ParameterType.VALUE
                 attribute_route = AttributeRoute(
@@ -181,7 +181,7 @@ class IngestedRecordMapper:
 
     def _parse_dot_notation(self, attribute_mapping: str) -> Tuple[str, Optional[str], Optional[str]]:
         """Parses a string in the format of 'attribute.type.parameter' into its parts using regex."""
-        
+
         # Get the available attributes, types, and parameters from the schema.
         available_attributes = list(self._schema.keys()) + ["id"]
         available_types = [type_.value for type_ in AttributeType]
