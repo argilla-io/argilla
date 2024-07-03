@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_update-documentation-of-flatten",
+    "title": "docs_update-documentation-of-flatten",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_build-hidden-docs-version",
     "title": "docs_build-hidden-docs-version",
     "aliases": [],
