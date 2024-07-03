@@ -271,7 +271,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
 
         for dataset in workspace.datasets:
             if dataset.name == name:
-                return dataset
+                return dataset.get()
         warnings.warn(f"Dataset {name} not found. Creating a new dataset. Do `dataset.create()` to create the dataset.")
         return Dataset(name=name, workspace=workspace, client=self._client, **kwargs)
 

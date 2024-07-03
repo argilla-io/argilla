@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="bulk__container">
     <LoadLine v-if="isSubmitting || isDraftSaving || isDiscarding" />
     <VerticalResizable
       class="wrapper"
@@ -500,9 +500,18 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    @include media("<desktop") {
+      height: 80vh;
+    }
   }
 }
 .bulk {
+  &__container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
   &__records {
     position: relative;
     display: flex;
