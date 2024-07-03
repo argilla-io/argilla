@@ -85,6 +85,7 @@ class RecordAttributesMap(BaseModel):
 
     id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
 
+
 class IngestedRecordMapper:
     """IngestedRecordMapper is a class that is used to map data into a record object.
     It maps values in ingested data to the appropriate record attributes, based on the user provided mapping and the schema of the dataset.
