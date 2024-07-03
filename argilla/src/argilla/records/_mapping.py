@@ -82,8 +82,8 @@ class RecordAttributesMap(BaseModel):
     field: Dict[str, AttributeRoute]
     metadata: Dict[str, AttributeRoute]
     vector: Dict[str, AttributeRoute]
-    id: Dict[str, AttributeRoute]
 
+    id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
 
 class IngestedRecordMapper:
     """IngestedRecordMapper is a class that is used to map data into a record object.
@@ -122,7 +122,7 @@ class IngestedRecordMapper:
 
         """
 
-        record_id = data.get(self.mapping.id["id"].source)
+        record_id = data.get(self.mapping.id.source)
         suggestions = self._map_suggestions(data=data, mapping=self.mapping.suggestion)
         responses = self._map_responses(data=data, user_id=user_id or self.user_id, mapping=self.mapping.response)
         fields = self._map_attributes(data=data, mapping=self.mapping.field)
@@ -151,7 +151,6 @@ class IngestedRecordMapper:
             "field": {},
             "metadata": {},
             "vector": {},
-            "id": {},
         }
         for source_key, value in mapping.items():
             mapped_attributes = [value] if isinstance(value, str) else list(value)
@@ -169,7 +168,9 @@ class IngestedRecordMapper:
                 attribute_route = self._select_attribute_type(attribute=attribute_route)
 
                 # Add the attribute route to the schematized map based on the attribute type.
-                if attribute_route.name in schematized_map[attribute_route.type]:
+                if attribute_route.type is AttributeType.ID:
+                    schematized_map["id"] = attribute_route
+                elif attribute_route.name in schematized_map[attribute_route.type]:
                     # Some attributes may be mapped to multiple source values, so we need to append the parameters.
                     schematized_map[attribute_route.type][attribute_route.name].parameters.extend(
                         attribute_route.parameters
@@ -239,10 +240,6 @@ class IngestedRecordMapper:
         Returns:
             RecordAttributesMap: The updated mapping object.
         """
-
-        if len(mapping.id) == 0:
-            # If the id is not provided in the mapping, we will map the 'id' key to the 'id' attribute.
-            mapping.id["id"] = AttributeRoute(source="id", name="id", type=AttributeType.ID)
 
         # Map keys that match question names to the suggestion attribute type.
         for question in self._dataset.settings.questions:
