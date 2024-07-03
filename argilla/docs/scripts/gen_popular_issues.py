@@ -95,7 +95,7 @@ with mkdocs_gen_files.open(DATA_PATH, "w") as f:
         .reset_index()
     )
 
-    planned_issues = df[(df["Milestone"].str.startswith("v2")) & (df["State"] == "open")]
+    planned_issues = df[((df["Milestone"].str.startswith("v2")) & (df["State"] == "open")) | ((df["Milestone"].str.startswith("2")) & (df["State"] == "open"))]
     planned_issues_df = (
         planned_issues[["URL", "Issue", "Created at", "Milestone", "State"]]
         .sort_values(by=["Milestone"], ascending=True)
