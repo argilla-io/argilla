@@ -4,11 +4,11 @@ import { Metrics } from "~/v1/domain/entities/dataset/Metrics";
 
 interface BackendMetrics {
   responses: {
-    total: 7;
+    total: number;
     submitted: number;
     discarded: number;
     draft: number;
-    pending: 3;
+    pending: number;
   };
 }
 
