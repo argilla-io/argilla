@@ -4295,7 +4295,7 @@ class TestSuiteDatasets:
                     {
                         "type": "terms",
                         "scope": {"entity": "response", "property": "status"},
-                        "values": [ResponseStatus.submitted.value],
+                        "values": [ResponseStatus.submitted],
                     }
                 ]
             },
