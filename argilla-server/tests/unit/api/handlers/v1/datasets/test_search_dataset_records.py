@@ -316,7 +316,6 @@ class TestSearchDatasetRecords:
                     RangeFilter(scope=SuggestionFilterScope(question=question.name, property="score"), ge=0.5),
                 ]
             ),
-            metadata_filters=[],
             offset=0,
             limit=50,
             query=None,
@@ -367,7 +366,6 @@ class TestSearchDatasetRecords:
                 Order(scope=ResponseFilterScope(question=question.name), order=SortOrder.asc),
                 Order(scope=SuggestionFilterScope(question=question.name, property="score"), order=SortOrder.desc),
             ],
-            metadata_filters=[],
             offset=0,
             limit=50,
             query=None,
