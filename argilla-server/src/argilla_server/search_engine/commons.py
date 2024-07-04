@@ -384,6 +384,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
+      
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 

@@ -310,8 +310,6 @@ class SearchEngine(metaclass=ABCMeta):
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove them and keep filter
-        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
