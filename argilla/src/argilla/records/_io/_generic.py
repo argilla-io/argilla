@@ -33,14 +33,22 @@ class GenericIO:
         Returns:
             dataset_records (List[Dict[str, Union[str, float, int, list]]]): The exported records in a list of dictionaries format.
         """
+        records_schema = set()
         dataset_records: list = []
         for record in records:
-            dataset_records.append(GenericIO._record_to_dict(record=record, flatten=flatten))
+            record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
+            records_schema.update([k for k in record_dict])
+            dataset_records.append(record_dict)
+
+        # normalize records structure
+        for record_dict in dataset_records:
+            record_dict.update({k: None for k in records_schema if k not in record_dict})
+
         return dataset_records
 
-    @staticmethod
+    @classmethod
     def to_dict(
-        records: List["Record"], flatten: bool = False, orient: str = "names"
+        cls, records: List["Record"], flatten: bool = False, orient: str = "names"
     ) -> Dict[str, Union[str, float, int, list]]:
         """Export records to a dictionary with either names or record index as keys.
         Args:
@@ -55,8 +63,8 @@ class GenericIO:
         """
         if orient == "names":
             dataset_records: dict = defaultdict(list)
-            for record in records:
-                for key, value in GenericIO._record_to_dict(record=record, flatten=flatten).items():
+            for record in cls.to_list(records, flatten=flatten):
+                for key, value in record.items():
                     dataset_records[key].append(value)
         elif orient == "index":
             dataset_records: dict = {}
