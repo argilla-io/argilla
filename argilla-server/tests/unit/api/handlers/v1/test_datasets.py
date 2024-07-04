@@ -14,7 +14,7 @@
 import math
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
@@ -43,6 +43,7 @@ from argilla_server.enums import (
     ResponseStatusFilter,
     SimilarityOrder,
     RecordStatus,
+    SortOrder,
 )
 from argilla_server.models import (
     Dataset,
@@ -62,13 +63,14 @@ from argilla_server.search_engine import (
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    SortBy,
     TextQuery,
     AndFilter,
     TermsFilter,
     MetadataFilterScope,
     RangeFilter,
     ResponseFilterScope,
+    Order,
+    RecordFilterScope,
 )
 from tests.factories import (
     AdminFactory,
@@ -3651,7 +3653,6 @@ class TestSuiteDatasets:
             query=TextQuery(q="Hello", field="input"),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
@@ -3811,31 +3812,42 @@ class TestSuiteDatasets:
             filter=AndFilter(filters=[expected_filter]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
             user_id=owner.id,
         )
 
     @pytest.mark.parametrize(
-        "sorts",
+        "sort,expected_sort",
         [
-            [("inserted_at", None)],
-            [("inserted_at", "asc")],
-            [("inserted_at", "desc")],
-            [("updated_at", None)],
-            [("updated_at", "asc")],
-            [("updated_at", "desc")],
-            [("metadata.terms-metadata-property", None)],
-            [("metadata.terms-metadata-property", "asc")],
-            [("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "desc")],
-            [("inserted_at", "desc"), ("updated_at", "asc")],
-            [("inserted_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            (
+                [{"scope": {"entity": "record", "property": "inserted_at"}, "order": "asc"}],
+                [Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.asc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "inserted_at"}, "order": "desc"}],
+                [Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "updated_at"}, "order": "asc"}],
+                [Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.asc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "updated_at"}, "order": "desc"}],
+                [Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc)],
+            ),
+            (
+                [{"scope": {"entity": "metadata", "metadata_property": "terms-metadata-property"}, "order": "asc"}],
+                [Order(scope=MetadataFilterScope(metadata_property="terms-metadata-property"), order=SortOrder.asc)],
+            ),
+            (
+                [
+                    {"scope": {"entity": "record", "property": "updated_at"}, "order": "desc"},
+                    {"scope": {"entity": "metadata", "metadata_property": "terms-metadata-property"}, "order": "desc"},
+                ],
+                [
+                    Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc),
+                    Order(scope=MetadataFilterScope(metadata_property="terms-metadata-property"), order=SortOrder.desc),
+                ],
+            ),
         ],
     )
     async def test_search_current_user_dataset_records_with_sort_by(
@@ -3844,16 +3856,15 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: "User",
         owner_auth_header: dict,
-        sorts: List[Tuple[str, Union[str, None]]],
+        sort: List[dict],
+        expected_sort: List[Order],
     ):
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        expected_sorts_by = []
-        for field, order in sorts:
-            if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
-            expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
+        for order in expected_sort:
+            if isinstance(order.scope, MetadataFilterScope):
+                await TermsMetadataPropertyFactory.create(name=order.scope.metadata_property, dataset=dataset)
 
         mock_search_engine.search.return_value = SearchResponses(
             total=2,
@@ -3863,15 +3874,13 @@ class TestSuiteDatasets:
             ],
         )
 
-        query_params = {
-            "sort_by": [f"{field}:{order}" if order is not None else f"{field}:asc" for field, order in sorts]
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": sort,
         }
-
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=query_params,
             headers=owner_auth_header,
             json=query_json,
         )
@@ -3883,7 +3892,7 @@ class TestSuiteDatasets:
             query=TextQuery(q="Hello", field="input"),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=expected_sorts_by,
+            sort=expected_sort,
             user_id=owner.id,
         )
 
@@ -3893,18 +3902,17 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [{"scope": {"entity": "record", "property": "wrong_property"}, "order": "asc"}],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "inserted_at:wrong"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Provided sort order in 'sort_by' query param 'wrong' for field 'inserted_at' is not valid."
-        }
 
     async def test_search_current_user_dataset_records_with_sort_by_with_non_existent_metadata_property(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
@@ -3912,17 +3920,19 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [{"scope": {"entity": "metadata", "metadata_property": "missing"}, "order": "asc"}],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "metadata.i-do-not-exist:asc"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
+            "detail": f"MetadataProperty not found filtering by name=missing, dataset_id={dataset.id}"
         }
 
     async def test_search_current_user_dataset_records_with_sort_by_with_invalid_field(
@@ -3931,19 +3941,19 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [
+                {"scope": {"entity": "wrong", "property": "wrong"}, "order": "asc"},
+            ],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "not-valid"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. "
-            "It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
-        }
 
     @pytest.mark.parametrize(
         "includes",
@@ -4085,7 +4095,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            sort_by=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -4319,7 +4328,6 @@ class TestSuiteDatasets:
             ),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
@@ -4544,7 +4552,6 @@ class TestSuiteDatasets:
             query=TextQuery(q="Hello", field="input"),
             offset=0,
             limit=5,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
