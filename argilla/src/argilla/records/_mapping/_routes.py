@@ -57,7 +57,7 @@ class AttributeParameter(BaseModel):
 
 class AttributeRoute(BaseModel):
     """AttributeRoute is a reference connection between a record's attribute and a source value in the data.
-    It connects the source key with the attribute name and type. For example, connecting the columns 'score' 
+    It connects the source key with the attribute name and type. For example, connecting the columns 'score'
     and 'y' to the 'score' and 'value' of a suggestion.
     """
 
@@ -89,7 +89,7 @@ class RecordAttributesMap(BaseModel):
     id: AttributeRoute = AttributeRoute(source="id", name="id", type=AttributeType.ID)
 
     def _get_routes_group_by_type(self, type: AttributeType):
-        """ Utility method to facilitate getting the routes by type."""
+        """Utility method to facilitate getting the routes by type."""
         return {
             AttributeType.SUGGESTION: self.suggestion,
             AttributeType.RESPONSE: self.response,
