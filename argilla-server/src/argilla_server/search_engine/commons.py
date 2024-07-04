@@ -38,11 +38,8 @@ from argilla_server.search_engine.base import (
     AndFilter,
     Filter,
     FilterScope,
-    FloatMetadataFilter,
     FloatMetadataMetrics,
-    IntegerMetadataFilter,
     IntegerMetadataMetrics,
-    MetadataFilter,
     MetadataFilterScope,
     MetadataMetrics,
     Order,
@@ -55,7 +52,6 @@ from argilla_server.search_engine.base import (
     SortBy,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataFilter,
     TermsMetadataMetrics,
     TextQuery,
     UserResponseStatusFilter,
@@ -201,25 +197,6 @@ def es_path_for_user(user: User) -> str:
 
 def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
     return str(vector_settings.id)
-
-
-# This function will be moved once the `metadata_filters` argument is removed from search and similarity_search methods
-def _unify_metadata_filters_with_filter(metadata_filters: List[MetadataFilter], filter: Optional[Filter]) -> Filter:
-    filters = []
-    if filter:
-        filters.append(filter)
-
-    for metadata_filter in metadata_filters:
-        metadata_scope = MetadataFilterScope(metadata_property=metadata_filter.metadata_property.name)
-        if isinstance(metadata_filter, TermsMetadataFilter):
-            new_filter = TermsFilter(scope=metadata_scope, values=metadata_filter.values)
-        elif isinstance(metadata_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
-            new_filter = RangeFilter(scope=metadata_scope, ge=metadata_filter.ge, le=metadata_filter.le)
-        else:
-            raise ValueError(f"Cannot process request for metadata filter {metadata_filter}")
-        filters.append(new_filter)
-
-    return AndFilter(filters=filters)
 
 
 # This function will be moved once the response status filter is removed from search and similarity_search methods
@@ -418,15 +395,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         filter: Optional[Filter] = None,
         # TODO: remove them and keep filter
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
         # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
         # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if metadata_filters:
-            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
         if user_response_status_filter and user_response_status_filter.statuses:
             filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
         # END TODO
@@ -625,7 +599,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         sort: Optional[List[Order]] = None,
         # TODO: Remove these arguments
         user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
         sort_by: Optional[List[SortBy]] = None,
         # END TODO
         offset: int = 0,
@@ -635,8 +608,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
         # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if metadata_filters:
-            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
         if user_response_status_filter and user_response_status_filter.statuses:
             filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
 
