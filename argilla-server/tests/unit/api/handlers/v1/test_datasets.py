@@ -19,6 +19,8 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
+from sqlalchemy import func, inspect, select
+
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH
 from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
@@ -62,14 +64,12 @@ from argilla_server.search_engine import (
     SearchResponses,
     SortBy,
     TextQuery,
-    UserResponseStatusFilter,
     AndFilter,
     TermsFilter,
     MetadataFilterScope,
     RangeFilter,
+    ResponseFilterScope,
 )
-from sqlalchemy import func, inspect, select
-
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
@@ -80,7 +80,6 @@ from tests.factories import (
     LabelSelectionQuestionFactory,
     MetadataPropertyFactory,
     MultiLabelSelectionQuestionFactory,
-    OwnerFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -3650,7 +3649,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=None,
@@ -3811,7 +3809,6 @@ class TestSuiteDatasets:
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
             filter=AndFilter(filters=[expected_filter]),
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=None,
@@ -3884,7 +3881,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=expected_sorts_by,
@@ -4090,7 +4086,6 @@ class TestSuiteDatasets:
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
             sort_by=None,
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -4293,18 +4288,35 @@ class TestSuiteDatasets:
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
         mock_search_engine.search.return_value = SearchResponses(items=[])
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "filters": {
+                "and": [
+                    {
+                        "type": "terms",
+                        "scope": {"entity": "response", "property": "status"},
+                        "values": [ResponseStatus.submitted.value],
+                    }
+                ]
+            },
+        }
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
             json=query_json,
-            params={"response_status": ResponseStatus.submitted.value},
         )
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
+            filter=AndFilter(
+                filters=[
+                    TermsFilter(
+                        scope=ResponseFilterScope(property="status", user=owner),
+                        values=[ResponseStatusFilter.submitted],
+                    )
+                ]
+            ),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=None,
@@ -4350,7 +4362,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=5,
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_vector_value(
@@ -4393,7 +4404,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=10,
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_vector_value_and_query(
@@ -4441,7 +4451,6 @@ class TestSuiteDatasets:
             query=TextQuery(q="Test query"),
             order=SimilarityOrder.most_similar,
             max_results=10,
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_wrong_vector(
@@ -4533,7 +4542,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            user_response_status_filter=None,
             offset=0,
             limit=5,
             sort_by=None,

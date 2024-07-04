@@ -516,7 +516,6 @@ class TestSuiteListDatasetRecords:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort_by=expected_sorts_by,
