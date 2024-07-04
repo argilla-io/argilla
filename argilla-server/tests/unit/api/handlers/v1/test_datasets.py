@@ -735,11 +735,12 @@ class TestSuiteDatasets:
         self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        record_a = await RecordFactory.create(dataset=dataset)
-        record_b = await RecordFactory.create(dataset=dataset)
+        record_a = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
+        record_b = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
         record_c = await RecordFactory.create(dataset=dataset)
         record_d = await RecordFactory.create(dataset=dataset)
         await RecordFactory.create_batch(3, dataset=dataset)
+        await RecordFactory.create_batch(2, dataset=dataset, status=RecordStatus.completed)
         await ResponseFactory.create(record=record_a, user=owner)
         await ResponseFactory.create(record=record_b, user=owner, status=ResponseStatus.discarded)
         await ResponseFactory.create(record=record_c, user=owner, status=ResponseStatus.discarded)
@@ -758,33 +759,43 @@ class TestSuiteDatasets:
 
         assert response.status_code == 200
         assert response.json() == {
-            "records": {
-                "count": 7,
-            },
             "responses": {
-                "count": 4,
+                "total": 7,
                 "submitted": 1,
                 "discarded": 2,
                 "draft": 1,
+                "pending": 3,
             },
         }
 
-    async def test_get_current_user_dataset_metrics_without_authentication(self, async_client: "AsyncClient"):
+    async def test_get_current_user_dataset_metrics_with_empty_dataset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
+        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header)
 
-        assert response.status_code == 401
+        assert response.status_code == 200
+        assert response.json() == {
+            "responses": {
+                "total": 0,
+                "submitted": 0,
+                "discarded": 0,
+                "draft": 0,
+                "pending": 0,
+            },
+        }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_get_current_user_dataset_metrics_as_annotator(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
         user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
         record_a = await RecordFactory.create(dataset=dataset)
-        record_b = await RecordFactory.create(dataset=dataset)
+        record_b = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
         record_c = await RecordFactory.create(dataset=dataset)
         record_d = await RecordFactory.create(dataset=dataset)
         await RecordFactory.create_batch(2, dataset=dataset)
+        await RecordFactory.create_batch(3, dataset=dataset, status=RecordStatus.completed)
         await ResponseFactory.create(record=record_a, user=user)
         await ResponseFactory.create(record=record_b, user=user)
         await ResponseFactory.create(record=record_c, user=user, status=ResponseStatus.discarded)
@@ -800,14 +811,27 @@ class TestSuiteDatasets:
         await ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/metrics", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/metrics",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
         assert response.json() == {
-            "records": {"count": 6},
-            "responses": {"count": 4, "submitted": 2, "discarded": 1, "draft": 1},
+            "responses": {
+                "total": 6,
+                "submitted": 2,
+                "discarded": 1,
+                "draft": 1,
+                "pending": 2,
+            },
         }
+
+    async def test_get_current_user_dataset_metrics_without_authentication(self, async_client: "AsyncClient"):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics")
+
+        assert response.status_code == 401
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_get_current_user_dataset_metrics_restricted_user_from_different_workspace(
