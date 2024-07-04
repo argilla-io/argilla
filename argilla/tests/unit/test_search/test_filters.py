@@ -12,21 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import warnings
-
-try:
-    from argilla_v1 import *  # noqa
-except ModuleNotFoundError as ex:
-    raise Exception(
-        'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[v1]"',
-    ) from ex
+from argilla.records import Filter
 
 
-def deprecation(message: str):
-    warnings.warn(message, DeprecationWarning, stacklevel=2)
-
-
-deprecation(
-    "The module `argilla_sdk.v1` has been include for migration purposes. "
-    "It's deprecated and will be removed in the future."
-)
+class TestFilters:
+    def test_filter_by_responses_status(self):
+        test_filter = Filter(("response.status", "in", ["submitted", "discard"]))
+        assert test_filter.api_model().model_dump(by_alias=True) == {
+            "type": "and",
+            "and": [
+                {
+                    "scope": {"entity": "response", "property": "status", "question": None},
+                    "type": "terms",
+                    "values": ["submitted", "discard"],
+                }
+            ],
+        }
