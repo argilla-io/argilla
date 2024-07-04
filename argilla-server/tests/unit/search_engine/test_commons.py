@@ -19,15 +19,15 @@ import pytest_asyncio
 from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder, RecordStatus
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
     ResponseFilterScope,
     SortBy,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataFilter,
     TextQuery,
     UserResponseStatusFilter,
+    Filter,
+    MetadataFilterScope,
+    RangeFilter,
 )
 from argilla_server.search_engine.commons import (
     ALL_RESPONSES_STATUSES_FIELD,
@@ -676,19 +676,19 @@ class TestBaseElasticAndOpenSearchEngine:
         assert result.total == expected_items
 
     @pytest.mark.parametrize(
-        ("metadata_filters_config", "expected_items"),
+        ("filter", "expected_items"),
         [
-            ([{"name": "label", "values": ["neutral"]}], 4),
-            ([{"name": "label", "values": ["positive"]}], 1),
-            ([{"name": "label", "values": ["neutral", "positive"]}], 5),
-            ([{"name": "textId", "ge": 3, "le": 4}], 2),
-            ([{"name": "textId", "ge": 3, "le": 3}], 1),
-            ([{"name": "textId", "ge": 3}], 6),
-            ([{"name": "textId", "le": 4}], 5),
-            ([{"name": "seq_float", "ge": 0.0, "le": 12.03}], 3),
-            ([{"name": "seq_float", "ge": 0.13, "le": 0.13}], 1),
-            ([{"name": "seq_float", "ge": 0.0}], 7),
-            ([{"name": "seq_float", "le": 12.03}], 5),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral"]), 4),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["positive"]), 1),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral", "positive"]), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=4), 2),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=3), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3), 6),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), le=4), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0, le=12.03), 3),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.13, le=0.13), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.0), 7),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), le=12.03), 5),
         ],
     )
     async def test_search_with_metadata_filter(
@@ -696,24 +696,10 @@ class TestBaseElasticAndOpenSearchEngine:
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        metadata_filters_config: List[dict],
+        filter: Filter,
         expected_items: int,
     ):
-        metadata_filters = []
-        for metadata_filter_config in metadata_filters_config:
-            name = metadata_filter_config.pop("name")
-            for metadata_property in test_banking_sentiment_dataset.metadata_properties:
-                if name == metadata_property.name:
-                    if metadata_property.type == MetadataPropertyType.terms:
-                        filter_cls = TermsMetadataFilter
-                    elif metadata_property.type == MetadataPropertyType.integer:
-                        filter_cls = IntegerMetadataFilter
-                    else:
-                        filter_cls = FloatMetadataFilter
-                    metadata_filters.append(filter_cls(metadata_property=metadata_property, **metadata_filter_config))
-                    break
-
-        result = await search_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
+        result = await search_engine.search(test_banking_sentiment_dataset, filter=filter)
         assert len(result.items) == expected_items
         assert result.total == expected_items
 

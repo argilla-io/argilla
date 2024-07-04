@@ -57,16 +57,16 @@ from argilla_server.models import (
     VectorSettings,
 )
 from argilla_server.search_engine import (
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
-    MetadataFilter,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    TermsMetadataFilter,
     TextQuery,
     UserResponseStatusFilter,
+    AndFilter,
+    TermsFilter,
+    MetadataFilterScope,
+    RangeFilter,
 )
 from sqlalchemy import func, inspect, select
 
@@ -3650,7 +3650,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -3691,55 +3690,85 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        ("property_config", "metadata_filter", "expected_filter"),
         [
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value",
-                TermsMetadataFilter,
-                dict(values=["value"]),
+                {
+                    "type": "terms",
+                    "values": ["value"],
+                    "scope": {"entity": "metadata", "metadata_property": "terms_prop"},
+                },
+                TermsFilter(scope=MetadataFilterScope(metadata_property="terms_prop"), values=["value"]),
             ),
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value1,value2",
-                TermsMetadataFilter,
-                dict(values=["value1", "value2"]),
+                {
+                    "type": "terms",
+                    "values": ["value1", "value2"],
+                    "scope": {"entity": "metadata", "metadata_property": "terms_prop"},
+                },
+                TermsFilter(scope=MetadataFilterScope(metadata_property="terms_prop"), values=["value1", "value2"]),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 10, "le": 20}',
-                IntegerMetadataFilter,
-                dict(ge=10, le=20),
+                {
+                    "type": "range",
+                    "ge": 10,
+                    "le": 20,
+                    "scope": {"entity": "metadata", "metadata_property": "integer_prop"},
+                },
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    ge=10,
+                    le=20,
+                ),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 20}',
-                IntegerMetadataFilter,
-                dict(ge=20, high=None),
+                {"type": "range", "ge": 20, "scope": {"entity": "metadata", "metadata_property": "integer_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    ge=20,
+                ),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"le": 20}',
-                IntegerMetadataFilter,
-                dict(low=None, le=20),
+                {"type": "range", "le": 20, "scope": {"entity": "metadata", "metadata_property": "integer_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    le=20,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": -1.30, "le": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=-1.30, le=23.23),
+                {
+                    "type": "range",
+                    "ge": -1.30,
+                    "le": 23.23,
+                    "scope": {"entity": "metadata", "metadata_property": "float_prop"},
+                },
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    ge=-1.30,
+                    le=23.23,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=23.23, high=None),
+                {"type": "range", "ge": 23.23, "scope": {"entity": "metadata", "metadata_property": "float_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    ge=23.23,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"le": 11.32}',
-                FloatMetadataFilter,
-                dict(low=None, le=11.32),
+                {"type": "range", "le": 11.32, "scope": {"entity": "metadata", "metadata_property": "float_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    le=11.32,
+                ),
             ),
         ],
     )
@@ -3749,80 +3778,12 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
-        property_config: dict,
-        param_value: str,
-        expected_filter_class: Type[MetadataFilter],
-        expected_filter_args: dict,
+        property_config,
+        metadata_filter: dict,
+        expected_filter: Any,
     ):
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
-
-        metadata_property = await MetadataPropertyFactory.create(
-            name=property_config["name"],
-            settings=property_config["settings"],
-            dataset=dataset,
-        )
-
-        mock_search_engine.search.return_value = SearchResponses(
-            total=2,
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ],
-        )
-
-        params = {"metadata": [f"{metadata_property.name}:{param_value}"]}
-
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
-        response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=params,
-            headers=owner_auth_header,
-            json=query_json,
-        )
-        assert response.status_code == 200, response.json()
-
-        mock_search_engine.search.assert_called_once_with(
-            dataset=dataset,
-            query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
-            user_response_status_filter=None,
-            offset=0,
-            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
-            user_id=owner.id,
-        )
-
-    @pytest.mark.parametrize(
-        ("property_config", "wrong_value"),
-        [
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, None),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop"),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop:"),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "wrong-value"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, None),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:{}"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "wrong-value"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, None),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:{}"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "wrong-value"),
-        ],
-    )
-    async def test_search_current_user_dataset_records_with_wrong_metadata_filter_values(
-        self,
-        async_client: "AsyncClient",
-        mock_search_engine: SearchEngine,
-        owner: User,
-        owner_auth_header: dict,
-        property_config: dict,
-        wrong_value: str,
-    ):
-        workspace = await WorkspaceFactory.create()
-        dataset, _, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
         await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -3831,23 +3792,31 @@ class TestSuiteDatasets:
         )
 
         mock_search_engine.search.return_value = SearchResponses(
+            total=2,
             items=[
                 SearchResponseItem(record_id=records[0].id, score=14.2),
                 SearchResponseItem(record_id=records[1].id, score=12.2),
             ],
-            total=2,
         )
 
-        params = {"metadata": [wrong_value]}
-
-        query_json = {"query": {"text": {"q": "Hello"}}}
+        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}, "filters": {"and": [metadata_filter]}}
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=params,
             headers=owner_auth_header,
             json=query_json,
         )
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 200, response.json()
+
+        mock_search_engine.search.assert_called_once_with(
+            dataset=dataset,
+            query=TextQuery(q="Hello", field="input"),
+            filter=AndFilter(filters=[expected_filter]),
+            user_response_status_filter=None,
+            offset=0,
+            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort_by=None,
+            user_id=owner.id,
+        )
 
     @pytest.mark.parametrize(
         "sorts",
@@ -3915,7 +3884,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -4121,7 +4089,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
             sort_by=None,
             user_response_status_filter=None,
             offset=0,
@@ -4337,7 +4304,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
             user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -4384,7 +4350,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=5,
-            metadata_filters=[],
             user_response_status_filter=None,
         )
 
@@ -4428,7 +4393,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=10,
-            metadata_filters=[],
             user_response_status_filter=None,
         )
 
@@ -4477,7 +4441,6 @@ class TestSuiteDatasets:
             query=TextQuery(q="Test query"),
             order=SimilarityOrder.most_similar,
             max_results=10,
-            metadata_filters=[],
             user_response_status_filter=None,
         )
 
@@ -4570,7 +4533,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=5,

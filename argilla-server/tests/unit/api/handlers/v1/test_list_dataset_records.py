@@ -12,43 +12,35 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List, Optional, Tuple, Type, Union
-from uuid import uuid4
+from typing import List, Optional, Tuple, Union
 
 import pytest
+from httpx import AsyncClient
+
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import RecordInclude, RecordSortField, ResponseStatus, UserRole, RecordStatus
+from argilla_server.enums import RecordInclude, ResponseStatus
 from argilla_server.models import Dataset, Question, Record, Response, Suggestion, User, Workspace
 from argilla_server.search_engine import (
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
-    MetadataFilter,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
     SortBy,
-    TermsMetadataFilter,
 )
-from httpx import AsyncClient
-
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
     DatasetFactory,
     LabelSelectionQuestionFactory,
-    MetadataPropertyFactory,
     RecordFactory,
     ResponseFactory,
     SuggestionFactory,
     TermsMetadataPropertyFactory,
     TextFieldFactory,
     TextQuestionFactory,
-    UserFactory,
     VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
-    WorkspaceUserFactory,
 )
 
 
@@ -398,108 +390,6 @@ class TestSuiteListDatasetRecords:
         for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
             await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
 
-    @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
-        [
-            (
-                {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value",
-                TermsMetadataFilter,
-                dict(values=["value"]),
-            ),
-            (
-                {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value1,value2",
-                TermsMetadataFilter,
-                dict(values=["value1", "value2"]),
-            ),
-            (
-                {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 10, "le": 20}',
-                IntegerMetadataFilter,
-                dict(ge=10, le=20),
-            ),
-            (
-                {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 20}',
-                IntegerMetadataFilter,
-                dict(ge=20, high=None),
-            ),
-            (
-                {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"le": 20}',
-                IntegerMetadataFilter,
-                dict(ge=None, le=20),
-            ),
-            (
-                {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": -1.30, "le": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=-1.30, le=23.23),
-            ),
-            (
-                {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=23.23, high=None),
-            ),
-            (
-                {"name": "float_prop", "settings": {"type": "float"}},
-                '{"le": 11.32}',
-                FloatMetadataFilter,
-                dict(ge=None, le=11.32),
-            ),
-        ],
-    )
-    async def test_list_dataset_records_with_metadata_filter(
-        self,
-        async_client: "AsyncClient",
-        mock_search_engine: SearchEngine,
-        owner: User,
-        owner_auth_header: dict,
-        property_config: dict,
-        param_value: str,
-        expected_filter_class: Type[MetadataFilter],
-        expected_filter_args: dict,
-    ):
-        workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
-
-        metadata_property = await MetadataPropertyFactory.create(
-            name=property_config["name"],
-            settings=property_config["settings"],
-            dataset=dataset,
-        )
-
-        mock_search_engine.search.return_value = SearchResponses(
-            total=2,
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ],
-        )
-
-        query_params = {"metadata": [f"{metadata_property.name}:{param_value}"]}
-        response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records",
-            params=query_params,
-            headers=owner_auth_header,
-        )
-        assert response.status_code == 200
-
-        response_json = response.json()
-        assert response_json["total"] == 2
-
-        mock_search_engine.search.assert_called_once_with(
-            dataset=dataset,
-            query=None,
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
-            user_response_status_filter=None,
-            offset=0,
-            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=[SortBy(field=RecordSortField.inserted_at)],
-        )
-
     @pytest.mark.skip(reason="Factory integration with search engine")
     @pytest.mark.parametrize(
         "response_status_filter", ["missing", "pending", "discarded", "submitted", "draft", ["submitted", "draft"]]
@@ -626,7 +516,6 @@ class TestSuiteListDatasetRecords:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
