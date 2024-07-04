@@ -345,7 +345,7 @@ class RecordResponses(Iterable[Response]):
             responses_by_user_id[response.user_id].append(response)
 
         return [
-            UserResponse(answers=responses, _record=self.record).api_model()
+            UserResponse(responses=responses, _record=self.record).api_model()
             for responses in responses_by_user_id.values()
         ]
 

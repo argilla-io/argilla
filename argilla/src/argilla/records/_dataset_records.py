@@ -305,8 +305,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Return the records as a list of dictionaries. This is a convenient shortcut for dataset.records(...).to_list().
 
         Parameters:
-            flatten (bool): Whether to flatten the dictionary and use dot notation for nested keys like suggestions and responses.
-
+            flatten (bool): The structure of the exported dictionaries in the list.
+                - True: The record keys are flattened and a dot notation is used to record attributes and their attributes . For example, `label.suggestion` and `label.response`. Records responses are spread across multiple columns for values and users.
+                - False: The record fields, metadata, suggestions and responses will be nested dictionary with keys for record attributes.
         Returns:
             A list of dictionaries of records.
         """
