@@ -21,7 +21,7 @@ from argilla._exceptions import NotFoundError, SettingsError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
-from argilla.datasets._export import DiskImportExportMixin
+from argilla.datasets._export import DiskImportExportMixin, HubImportExportMixin
 from argilla.records import DatasetRecords
 from argilla.settings import Settings
 from argilla.workspaces._resource import Workspace
@@ -29,7 +29,7 @@ from argilla.workspaces._resource import Workspace
 __all__ = ["Dataset"]
 
 
-class Dataset(Resource, DiskImportExportMixin):
+class Dataset(Resource, DiskImportExportMixin, HubImportExportMixin):
     """Class for interacting with Argilla Datasets
 
     Attributes:
