@@ -1,6 +1,8 @@
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
+# TODO: This license is not consistent with the license used in the project.
+#       Delete the inconsistent license and above line and rerun pre-commit to insert a good license.
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #
