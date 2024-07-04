@@ -353,44 +353,6 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
         raise UnprocessableEntityError(str(e))
 
 
-@router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
-async def list_current_user_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
-
-    await authorize(current_user, DatasetPolicy.get(dataset))
-
-    records, total = await _filter_records_using_search_engine(
-        db,
-        search_engine,
-        dataset=dataset,
-        parsed_metadata=metadata.metadata_parsed,
-        limit=limit,
-        offset=offset,
-        user=current_user,
-        response_statuses=response_statuses,
-        include=include,
-        sort_by_query_param=sort_by_query_param,
-    )
-
-    for record in records:
-        record.dataset = dataset
-        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
-
-    return Records(items=records, total=total)
-
-
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
