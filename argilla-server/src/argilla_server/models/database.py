@@ -206,8 +206,7 @@ class Record(DatabaseModel):
     )
     responses_submitted: Mapped[List["Response"]] = relationship(
         back_populates="record",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
+        viewonly=True,
         primaryjoin=f"and_(Record.id==Response.record_id, Response.status=='{ResponseStatus.submitted}')",
         order_by=Response.inserted_at.asc(),
     )
