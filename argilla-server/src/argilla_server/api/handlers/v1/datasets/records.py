@@ -103,7 +103,6 @@ async def _filter_records_using_search_engine(
     limit: int,
     offset: int,
     user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[RecordIncludeParam] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List[Record], int]:
@@ -114,7 +113,6 @@ async def _filter_records_using_search_engine(
         limit=limit,
         offset=offset,
         user=user,
-        response_statuses=response_statuses,
         sort_by_query_param=sort_by_query_param,
     )
 
@@ -178,7 +176,6 @@ async def _get_search_responses(
     offset: int,
     search_records_query: Optional[SearchRecordsQuery] = None,
     user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
     sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
     search_records_query = search_records_query or SearchRecordsQuery()
@@ -219,7 +216,6 @@ async def _get_search_responses(
     if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
         raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
-    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
     sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
 
     if vector_query and vector_settings:
@@ -230,7 +226,6 @@ async def _get_search_responses(
             "record": record,
             "query": text_query,
             "order": vector_query.order,
-            "user_response_status_filter": response_status_filter,
             "max_results": limit,
         }
 
@@ -242,7 +237,6 @@ async def _get_search_responses(
         search_params = {
             "dataset": dataset,
             "query": text_query,
-            "user_response_status_filter": response_status_filter,
             "offset": offset,
             "limit": limit,
             "sort_by": sort_by,
@@ -323,7 +317,6 @@ async def list_dataset_records(
     dataset_id: UUID,
     sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -338,7 +331,6 @@ async def list_dataset_records(
         dataset=dataset,
         limit=limit,
         offset=offset,
-        response_statuses=response_statuses,
         include=include,
         sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
@@ -451,7 +443,6 @@ async def search_current_user_dataset_records(
     body: SearchRecordsQuery,
     sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -477,7 +468,6 @@ async def search_current_user_dataset_records(
         limit=limit,
         offset=offset,
         user=current_user,
-        response_statuses=response_statuses,
         sort_by_query_param=sort_by_query_param,
     )
 
@@ -523,7 +513,6 @@ async def search_dataset_records(
     body: SearchRecordsQuery,
     sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -541,7 +530,6 @@ async def search_dataset_records(
         search_records_query=body,
         limit=limit,
         offset=offset,
-        response_statuses=response_statuses,
         sort_by_query_param=sort_by_query_param,
     )
 
