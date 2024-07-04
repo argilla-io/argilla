@@ -1400,7 +1400,7 @@ class TestBaseElasticAndOpenSearchEngine:
             opensearch,
             test_banking_sentiment_dataset_with_vectors,
             [ResponseStatusFilter.draft],
-            number_of_answered_records=1,
+            number_of_answered_records=len(test_banking_sentiment_dataset_with_vectors.records),
             user=user,
             rating_value=2,
         )
@@ -1416,7 +1416,7 @@ class TestBaseElasticAndOpenSearchEngine:
             filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2"]),
         )
 
-        assert responses.total == 0
+        assert responses.total == 1
 
     async def test_similarity_search_by_record_and_response_value_filter_without_responses(
         self,
