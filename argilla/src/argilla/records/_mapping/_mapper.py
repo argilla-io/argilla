@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import re
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
 
+from argilla._exceptions import RecordsIngestionError
 from argilla.records._resource import Record
 from argilla.responses import Response
 from argilla.settings import TextField, VectorField
@@ -60,8 +60,9 @@ class IngestedRecordMapper:
         self._schema = dataset.schema
         self.user_id = user_id
 
+        mapping = mapping or {}
         default_mapping = self._schematize_default_attributes()
-        self.mapping = self._schematize_mapped_attributes(mapping=mapping or {}, default_mapping=default_mapping)
+        self.mapping = self._schematize_mapped_attributes(mapping=mapping, default_mapping=default_mapping)
 
     def __call__(self, data: Dict[str, Any], user_id: Optional[UUID] = None) -> Record:
         """Maps a dictionary of data to a record object.
@@ -173,12 +174,12 @@ class IngestedRecordMapper:
         elif attribute_route.name == "id":
             attribute_route.type = AttributeType.ID
         else:
-            warnings.warn(message=f"Record attribute {attribute_route.name} is not in the schema or mapping so skipping.")
+            raise RecordsIngestionError(f"Mapped attribute is not a valid dataset attribute: {attribute_route.name}.")
         return attribute_route
 
     def _schematize_default_attributes(self) -> RecordAttributesMap:
         """Creates the mapping with default attribute routes. Uses the schema of the dataset to determine
-         the default attributes and add them to the mapping with their names as keys. This means that 
+         the default attributes and add them to the mapping with their names as keys. This means that
          keys in the data that match the names of dataset attributes will be mapped to them by default.
 
         Returns:
@@ -280,7 +281,7 @@ class IngestedRecordMapper:
     def _map_attributes(self, data: Dict[str, Any], mapping: Dict[str, AttributeRoute]) -> Dict[str, Any]:
         """Converts a dictionary to a dictionary of attributes for use by the add or update methods."""
         attributes = {}
-        
+
         for name, route in mapping.items():
             if route.source not in data:
                 continue
@@ -288,5 +289,5 @@ class IngestedRecordMapper:
             if value is None:
                 continue
             attributes[name] = value
-            
+
         return attributes
