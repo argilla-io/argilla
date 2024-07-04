@@ -283,7 +283,6 @@ class SearchEngine(metaclass=ABCMeta):
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
         # TODO: remove them and keep filter and order
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         sort_by: Optional[List[SortBy]] = None,
         # END TODO
         offset: int = 0,
@@ -312,7 +311,6 @@ class SearchEngine(metaclass=ABCMeta):
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
         # TODO: remove them and keep filter
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
