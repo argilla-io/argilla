@@ -199,19 +199,6 @@ def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
     return str(vector_settings.id)
 
 
-# This function will be moved once the response status filter is removed from search and similarity_search methods
-def _unify_user_response_status_filter_with_filter(
-    user_response_status_filter: UserResponseStatusFilter, filter: Optional[Filter] = None
-) -> Filter:
-    scope = ResponseFilterScope(user=user_response_status_filter.user, property="status")
-    response_filter = TermsFilter(scope=scope, values=[status.value for status in user_response_status_filter.statuses])
-
-    if filter:
-        return AndFilter(filters=[filter, response_filter])
-    else:
-        return response_filter
-
-
 # This function will be moved once the `sort_by` argument is removed from search and similarity_search methods
 def _unify_sort_by_with_order(sort_by: List[SortBy], order: List[Order]) -> List[Order]:
     if order:
@@ -393,18 +380,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove them and keep filter
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
-        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if user_response_status_filter and user_response_status_filter.statuses:
-            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
-        # END TODO
-
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 
@@ -598,7 +577,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
         # TODO: Remove these arguments
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
         sort_by: Optional[List[SortBy]] = None,
         # END TODO
         offset: int = 0,
@@ -608,9 +586,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
 
         # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if user_response_status_filter and user_response_status_filter.statuses:
-            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
-
         if sort_by:
             sort = _unify_sort_by_with_order(sort_by, sort)
         # END TODO

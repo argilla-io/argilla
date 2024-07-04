@@ -320,7 +320,6 @@ class TestSearchDatasetRecords:
             limit=50,
             query=None,
             sort_by=None,
-            user_response_status_filter=None,
         )
 
     async def test_with_sort(
@@ -370,7 +369,6 @@ class TestSearchDatasetRecords:
             limit=50,
             query=None,
             sort_by=None,
-            user_response_status_filter=None,
         )
 
     async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):

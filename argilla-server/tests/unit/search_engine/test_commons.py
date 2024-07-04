@@ -595,7 +595,7 @@ class TestBaseElasticAndOpenSearchEngine:
         result = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status"), values=statuses),
         )
         assert len(result.items) == expected_items
         assert result.total == expected_items
@@ -669,7 +669,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         result = await search_engine.search(
             test_banking_sentiment_dataset,
-            user_response_status_filter=UserResponseStatusFilter(statuses=statuses, user=None),
+            filter=TermsFilter(ResponseFilterScope(property="status"), values=statuses),
         )
 
         assert len(result.items) == expected_items
@@ -734,7 +734,7 @@ class TestBaseElasticAndOpenSearchEngine:
         results = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status", user=user), values=all_statuses),
         )
 
         assert len(no_filter_results.items) == len(results.items)
@@ -1334,32 +1334,34 @@ class TestBaseElasticAndOpenSearchEngine:
         assert responses.items[0].record_id != selected_record.id
 
     @pytest.mark.parametrize(
-        "user_response_status_filter",
+        "statuses",
         [
-            None,
-            UserResponseStatusFilter(statuses=[ResponseStatusFilter.missing, ResponseStatusFilter.draft]),
+            [],
+            [ResponseStatusFilter.missing, ResponseStatusFilter.draft],
         ],
     )
-    async def test_similarity_search_by_record_and_user_response_filter(
+    async def test_similarity_search_by_record_and_response_status_filter(
         self,
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_with_vectors: Dataset,
-        user_response_status_filter: UserResponseStatusFilter,
+        statuses: List[ResponseStatusFilter],
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
         vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
-        if user_response_status_filter:
+        scope = ResponseFilterScope(property="status")
+
+        if statuses:
             test_user = await UserFactory.create()
-            user_response_status_filter.user = test_user
+            scope.user = test_user
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             record=selected_record,
             max_results=1,
-            user_response_status_filter=user_response_status_filter,
+            filter=TermsFilter(scope=scope, values=statuses),
         )
 
         assert responses.total == 1
