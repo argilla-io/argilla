@@ -20,8 +20,8 @@ extra:
       link: https://twitter.com/argilla_io
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
-    - icon: fontawesome/brands/slack
-      link: https://join.slack.com/t/rubrixworkspace/shared_invite/zt-20wllqq29-Z11~kp2SeFYjJ0qevJRiPg
+    - icon: fontawesome/brands/discord
+      link: http://hf.co/join/discord
 
 extra_css:
   - stylesheets/extra.css
