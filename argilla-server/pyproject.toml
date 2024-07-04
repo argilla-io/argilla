@@ -60,9 +60,9 @@ dependencies = [
 
 [project.optional-dependencies]
 postgresql = [
-    "psycopg2 ~= 2.9.9",
+    "psycopg2 == 2.9.9",
     # Async PostgreSQL
-    "asyncpg >= 0.29.0",
+    "asyncpg == 0.29.0",
 ]
 
 [project.urls]
