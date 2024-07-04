@@ -19,7 +19,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from typing_extensions import Annotated
 
 import argilla_server.search_engine as search_engine
 from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
@@ -52,12 +51,11 @@ from argilla_server.database import get_async_db
 from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
+from argilla_server.models import Dataset, Field, Record, User, VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
     SearchEngine,
     SearchResponses,
-    SortBy,
     UserResponseStatusFilter,
     get_search_engine,
 )
@@ -69,25 +67,6 @@ LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
 LIST_DATASET_RECORDS_LIMIT_LE = 1000
 LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
-
-_RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
-_VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
-_METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
-
-SortByQueryParamParsed = Annotated[
-    Dict[str, str],
-    Depends(
-        parse_query_param(
-            name="sort_by",
-            description=(
-                "The field used to sort the records. Expected format is `field` or `field:{asc,desc}`, where `field`"
-                " can be 'inserted_at', 'updated_at' or the name of a metadata property"
-            ),
-            max_values_per_key=1,
-            group_keys_without_values=False,
-        )
-    ),
-]
 
 parse_record_include_param = parse_query_param(
     name="include", help="Relationships to include in the response", model=RecordIncludeParam
@@ -104,7 +83,6 @@ async def _filter_records_using_search_engine(
     offset: int,
     user: Optional[User] = None,
     include: Optional[RecordIncludeParam] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List[Record], int]:
     search_responses = await _get_search_responses(
         db=db,
@@ -113,7 +91,6 @@ async def _filter_records_using_search_engine(
         limit=limit,
         offset=offset,
         user=user,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_ids = [response.record_id for response in search_responses.items]
@@ -176,7 +153,6 @@ async def _get_search_responses(
     offset: int,
     search_records_query: Optional[SearchRecordsQuery] = None,
     user: Optional[User] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
     search_records_query = search_records_query or SearchRecordsQuery()
 
@@ -216,8 +192,6 @@ async def _get_search_responses(
     if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
         raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
-    sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
-
     if vector_query and vector_settings:
         similarity_search_params = {
             "dataset": dataset,
@@ -239,7 +213,6 @@ async def _get_search_responses(
             "query": text_query,
             "offset": offset,
             "limit": limit,
-            "sort_by": sort_by,
         }
 
         if user is not None:
@@ -265,43 +238,6 @@ async def _build_response_status_filter_for_search(
     return user_response_status_filter
 
 
-async def _build_sort_by(
-    db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
-) -> Union[List[SortBy], None]:
-    if sort_by_query_param is None:
-        return None
-
-    sorts_by = []
-    for sort_field, sort_order in sort_by_query_param.items():
-        if sort_field in _RECORD_SORT_FIELD_VALUES:
-            field = sort_field
-        elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
-            metadata_property_name = match.group("name")
-            metadata_property = await MetadataProperty.get_by(db, name=metadata_property_name, dataset_id=dataset.id)
-            if not metadata_property:
-                raise UnprocessableEntityError(
-                    f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in "
-                    f"dataset with '{dataset.id}'."
-                )
-
-            field = metadata_property
-        else:
-            valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
-            raise UnprocessableEntityError(
-                f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
-                f" {valid_sort_fields} or `metadata.metadata-property-name`"
-            )
-
-        if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
-            raise UnprocessableEntityError(
-                f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not valid.",
-            )
-
-        sorts_by.append(SortBy(field=field, order=sort_order or SortOrder.asc.value))
-
-    return sorts_by
-
-
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
@@ -315,7 +251,6 @@ async def list_dataset_records(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
@@ -332,7 +267,6 @@ async def list_dataset_records(
         limit=limit,
         offset=offset,
         include=include,
-        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
 
     return Records(items=records, total=total)
@@ -441,7 +375,6 @@ async def search_current_user_dataset_records(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
@@ -468,7 +401,6 @@ async def search_current_user_dataset_records(
         limit=limit,
         offset=offset,
         user=current_user,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map: Dict[UUID, Dict[str, Union[float, SearchRecord, None]]] = {
@@ -511,7 +443,6 @@ async def search_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     body: SearchRecordsQuery,
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
@@ -530,7 +461,6 @@ async def search_dataset_records(
         search_records_query=body,
         limit=limit,
         offset=offset,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map = {
