@@ -100,7 +100,7 @@ class DatasetRecordsIterator:
     def _fetch_from_server_with_search(self) -> List[RecordModel]:
         search_items, total = self.__client.api.records.search(
             dataset_id=self.__dataset.id,
-            query=self.__query.model,
+            query=self.__query.api_model(),
             limit=self.__batch_size,
             offset=self.__offset,
             with_responses=self.__with_responses,
@@ -305,8 +305,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Return the records as a list of dictionaries. This is a convenient shortcut for dataset.records(...).to_list().
 
         Parameters:
-            flatten (bool): Whether to flatten the dictionary and use dot notation for nested keys like suggestions and responses.
-
+            flatten (bool): The structure of the exported dictionaries in the list.
+                - True: The record keys are flattened and a dot notation is used to record attributes and their attributes . For example, `label.suggestion` and `label.response`. Records responses are spread across multiple columns for values and users.
+                - False: The record fields, metadata, suggestions and responses will be nested dictionary with keys for record attributes.
         Returns:
             A list of dictionaries of records.
         """
@@ -373,7 +374,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
-                if not isinstance(record, Record):
+                if isinstance(record, dict):
                     record = record_mapper(data=record)
                 elif isinstance(record, Record):
                     record.dataset = self.__dataset

@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import { useDatasetEmptyViewModel } from "./useDatasetEmptyViewModel";
+
 export default {
   data() {
     return {
@@ -20,7 +22,7 @@ export default {
   },
   async fetch() {
     const folderContent = require.context(
-      `../../../../../docs/_source/_common/snippets`,
+      `../../../../docs/snippets`,
       false,
       /.start_page.md/,
       "lazy"
@@ -28,11 +30,16 @@ export default {
 
     const startPage = await folderContent("./start_page.md");
 
+    const content = await this.preFillData(startPage);
+
     this.content.tabs.push({
       id: "start-page",
       name: "Start page",
-      markdown: startPage.body,
+      markdown: content,
     });
+  },
+  setup() {
+    return useDatasetEmptyViewModel();
   },
 };
 </script>

@@ -104,17 +104,17 @@ class UserResponse(Resource):
     collected from the server or when creating new records.
 
     Attributes:
-        answers (List[Response]): A list of responses to questions for the user
+        responses (List[Response]): A list of responses to questions for the user
 
     """
 
-    answers: List[Response]
+    responses: List[Response]
 
     _model: UserResponseModel
 
     def __init__(
         self,
-        answers: List[Response],
+        responses: List[Response],
         client: Optional["Argilla"] = None,
         _record: Optional["Record"] = None,
     ) -> None:
@@ -124,13 +124,13 @@ class UserResponse(Resource):
 
         self._record = _record
         self._model = UserResponseModel(
-            values=self.__responses_as_model_values(answers),
-            status=self._compute_status_from_answers(answers),
-            user_id=self._compute_user_id_from_answers(answers),
+            values=self.__responses_as_model_values(responses),
+            status=self._compute_status_from_responses(responses),
+            user_id=self._compute_user_id_from_responses(responses),
         )
 
     def __iter__(self) -> Iterable[Response]:
-        return iter(self.answers)
+        return iter(self.responses)
 
     @property
     def status(self) -> ResponseStatus:
@@ -153,26 +153,26 @@ class UserResponse(Resource):
         self._model.user_id = user_id
 
     @property
-    def answers(self) -> List[Response]:
+    def responses(self) -> List[Response]:
         """Returns the list of responses"""
-        return self.__model_as_response_list(self._model)
+        return self.__model_as_responses_list(self._model)
 
     @classmethod
     def from_model(cls, model: UserResponseModel, dataset: "Dataset") -> "UserResponse":
         """Creates a UserResponse from a ResponseModel"""
-        answers = cls.__model_as_response_list(model)
-        for answer in answers:
-            question = dataset.settings.question_by_name(answer.question_name)
+        responses = cls.__model_as_responses_list(model)
+        for response in responses:
+            question = dataset.settings.question_by_name(response.question_name)
             # We need to adapt the ranking question value to the expected format
             if isinstance(question, RankingQuestion):
-                answer.value = cls.__ranking_from_model_value(answer.value)  # type: ignore
+                response.value = cls.__ranking_from_model_value(response.value)  # type: ignore
 
-        return cls(answers=answers)
+        return cls(responses=responses)
 
     def api_model(self):
         """Returns the model that is used to interact with the API"""
 
-        values = self.__responses_as_model_values(self.answers)
+        values = self.__responses_as_model_values(self.responses)
         for question_name, value in values.items():
             question = self._record.dataset.settings.question_by_name(question_name)
             if isinstance(question, RankingQuestion):
@@ -184,32 +184,42 @@ class UserResponse(Resource):
         """Returns the UserResponse as a dictionary"""
         return self._model.model_dump()
 
-    def _compute_status_from_answers(self, answers: List[Response]) -> ResponseStatus:
+    @staticmethod
+    def _compute_status_from_responses(responses: List[Response]) -> ResponseStatus:
         """Computes the status of the UserResponse from the responses"""
-        statuses = set([answer.status for answer in answers if answer.status is not None])
+        statuses = set([answer.status for answer in responses if answer.status is not None])
         if len(statuses) > 1:
-            warnings.warn(f"Multiple status found in user answers. Using {ResponseStatus.draft.value!r} as default.")
+            warnings.warn(f"Multiple status found in user responses. Using {ResponseStatus.draft.value!r} as default.")
         elif len(statuses) == 1:
             return ResponseStatusModel(next(iter(statuses)))
         return ResponseStatusModel.draft
 
-    def _compute_user_id_from_answers(self, answers: List[Response]) -> UUID:
-        user_ids = set([answer.user_id for answer in answers])
+    @staticmethod
+    def _compute_user_id_from_responses(responses: List[Response]) -> Optional[UUID]:
+        if len(responses) == 0:
+            return None
+
+        user_ids = set([answer.user_id for answer in responses])
         if len(user_ids) > 1:
-            raise ValueError("Multiple user_ids found in user answers.")
+            raise ValueError("Multiple user_ids found in user responses.")
         return next(iter(user_ids))
 
     @staticmethod
-    def __responses_as_model_values(answers: List[Response]) -> Dict[str, Dict[str, Any]]:
+    def __responses_as_model_values(responses: List[Response]) -> Dict[str, Dict[str, Any]]:
         """Creates a dictionary of response values from a list of Responses"""
-        return {answer.question_name: {"value": answer.value} for answer in answers}
+        return {answer.question_name: {"value": answer.value} for answer in responses}
 
     @classmethod
-    def __model_as_response_list(cls, model: UserResponseModel) -> List[Response]:
+    def __model_as_responses_list(cls, model: UserResponseModel) -> List[Response]:
         """Creates a list of Responses from a UserResponseModel without changing the format of the values"""
 
         return [
-            Response(question_name=question_name, value=value["value"], user_id=model.user_id, status=model.status)
+            Response(
+                question_name=question_name,
+                value=value["value"],
+                user_id=model.user_id,
+                status=model.status,
+            )
             for question_name, value in model.values.items()
         ]
 

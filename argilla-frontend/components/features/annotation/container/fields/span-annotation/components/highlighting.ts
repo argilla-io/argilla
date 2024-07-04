@@ -315,9 +315,9 @@ export class Highlighting {
     }
 
     const entityCssKey = this.styles.entityCssKey;
-    CSS.highlights.entries().forEach(([key]) => {
+    for (const [key] of CSS.highlights.entries()) {
       if (key.startsWith(entityCssKey)) CSS.highlights.delete(key);
-    });
+    }
 
     for (const [entity, selections] of Object.entries(highlights)) {
       CSS.highlights.set(entity, new Highlight(...selections.flat()));

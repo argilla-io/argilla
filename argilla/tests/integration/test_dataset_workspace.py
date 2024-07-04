@@ -71,7 +71,7 @@ def test_dataset_with_workspace(client: rg.Argilla):
     assert isinstance(dataset, rg.Dataset)
     assert dataset.id is not None
     assert dataset.exists()
-    assert dataset.workspace_id == ws.id
+    assert dataset.workspace == ws
 
 
 def test_dataset_with_workspace_name(client: rg.Argilla):
@@ -93,7 +93,7 @@ def test_dataset_with_workspace_name(client: rg.Argilla):
     assert isinstance(dataset, rg.Dataset)
     assert dataset.id is not None
     assert dataset.exists()
-    assert dataset.workspace_id == ws.id
+    assert dataset.workspace == ws
 
 
 def test_dataset_with_incorrect_workspace_name(client: rg.Argilla):
@@ -110,7 +110,7 @@ def test_dataset_with_incorrect_workspace_name(client: rg.Argilla):
             ),
             workspace=f"non_existing_workspace_{random.randint(0, 1000)}",
             client=client,
-        )
+        ).create()
 
 
 def test_dataset_with_default_workspace(client: rg.Argilla):
@@ -130,7 +130,7 @@ def test_dataset_with_default_workspace(client: rg.Argilla):
     assert isinstance(dataset, rg.Dataset)
     assert dataset.id is not None
     assert dataset.exists()
-    assert dataset.workspace_id == client.workspaces[0].id
+    assert dataset.workspace == client.workspaces[0]
 
 
 def test_retrieving_dataset(client: rg.Argilla, dataset: rg.Dataset):

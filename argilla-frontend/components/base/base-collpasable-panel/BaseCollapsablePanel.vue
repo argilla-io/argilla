@@ -1,5 +1,11 @@
 <template>
-  <div class="panel" :class="isExpanded ? '--expanded' : '--collapsed'">
+  <div
+    class="panel"
+    :class="[
+      isExpanded ? '--expanded' : '--collapsed',
+      hideOnDesktop ? '--mobile' : undefined,
+    ]"
+  >
     <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
       <slot name="panelHeader" />
       <svgicon
@@ -22,6 +28,10 @@ import "assets/icons/chevron-down";
 export default {
   props: {
     isExpanded: {
+      type: Boolean,
+      default: false,
+    },
+    hideOnDesktop: {
       type: Boolean,
       default: false,
     },
@@ -70,6 +80,12 @@ export default {
     padding: $base-space $base-space * 2;
     overflow-y: auto;
     @include font-size(13px);
+  }
+}
+
+.--mobile {
+  @include media(">=desktop") {
+    display: none !important;
   }
 }
 </style>
