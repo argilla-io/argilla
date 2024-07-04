@@ -318,24 +318,31 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
     You can add suggestions as a dictionary, where the keys correspond to the `name`s of the labels that were configured for your dataset. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
-    # Add records to the dataset with the label 'my_label'
+        # Add records to the dataset with the label question 'my_label'
     data = [
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
-            "my_label.suggestion": "positive",
-            "my_label.suggestion.score": 0.9,
-            "my_label.suggestion.agent": "model_name"
+            "label": "positive",
+            "score": 0.9,
+            "agent": "model_name",
         },
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-            "my_label.suggestion": "negative",
-            "my_label.suggestion.score": 0.9,
-            "my_label.suggestion.agent": "model_name"
+            "label": "negative",
+            "score": 0.9,
+            "agent": "model_name",
         },
     ]
-    dataset.records.log(data)
+    dataset.records.log(
+        data=data,
+        mapping={
+            "label": "my_label",
+            "score": "my_label.suggestion.score",
+            "agent": "my_label.suggestion.agent",
+        },
+    )
     ```
 
 ### Responses
@@ -385,15 +392,15 @@ If your dataset includes some annotations, you can add those to the records as y
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
-            "my_label.response": "positive",
+            "label": "positive",
         },
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-            "my_label.response": "negative",
+            "label": "negative",
         },
     ]
-    dataset.records.log(data, user_id=user.id)
+    dataset.records.log(data, user_id=user.id, mapping={"label": "my_label.response"})
     ```
 
 ## List records
@@ -415,7 +422,7 @@ for record in dataset.records(
 
     # Access the responses of the record
     for response in record.responses:
-        print(record.["<question_name>"].value)
+        print(record["<question_name>"].value)
 ```
 
 ## Update records
@@ -460,8 +467,8 @@ dataset.records.log(records=updated_data)
 
     for record in dataset.records():
 
-        record.vectors["new_vector"] = [...]
-        record.vector["v"] = [...]
+        record.vectors["new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
+        record.vector["v"] = [ 0.1, 0.2, 0.3 ]
 
         updated_records.append(record)
 
