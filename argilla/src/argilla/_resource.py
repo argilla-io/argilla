@@ -78,28 +78,28 @@ class Resource(LoggingMixin):
     ############################
 
     def create(self) -> "Resource":
-        response_model = self._api.create(self._model)
+        response_model = self._api.create(self.api_model())
         self._model = response_model
         self._update_last_api_call()
         self._log_message(f"Resource created: {self}")
         return self
 
     def get(self) -> "Resource":
-        response_model = self._api.get(self._model.id)
+        response_model = self._api.get(self.api_model().id)
         self._model = response_model
         self._update_last_api_call()
         self._log_message(f"Resource fetched: {self}")
         return self
 
     def update(self) -> "Resource":
-        response_model = self._api.update(self._model)
+        response_model = self._api.update(self.api_model())
         self._model = response_model
         self._update_last_api_call()
         self._log_message(f"Resource updated: {self}")
         return self
 
     def delete(self) -> None:
-        self._api.delete(self._model.id)
+        self._api.delete(self.api_model().id)
         self._update_last_api_call()
         self._log_message(f"Resource deleted: {self}")
 
@@ -109,13 +109,13 @@ class Resource(LoggingMixin):
 
     def serialize(self) -> dict[str, Any]:
         try:
-            return self._model.model_dump()
+            return self.api_model().model_dump()
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the resource. {e.__class__.__name__}") from e
 
     def serialize_json(self) -> str:
         try:
-            return self._model.model_dump_json()
+            return self.api_model().model_dump_json()
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the resource. {e.__class__.__name__}") from e
 

@@ -18,7 +18,6 @@ from uuid import UUID, uuid4
 
 from argilla._api import DatasetsAPI
 from argilla._exceptions import NotFoundError, SettingsError
-from argilla._helpers import UUIDUtilities
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
@@ -52,10 +51,9 @@ class Dataset(Resource, DiskImportExportMixin):
     def __init__(
         self,
         name: Optional[str] = None,
-        workspace: Optional[Union["Workspace", str]] = None,
+        workspace: Optional[Union["Workspace", str, UUID]] = None,
         settings: Optional[Settings] = None,
         client: Optional["Argilla"] = None,
-        _model: Optional[DatasetModel] = None,
     ) -> None:
         """Initializes a new Argilla Dataset object with the given parameters.
 
@@ -64,7 +62,6 @@ class Dataset(Resource, DiskImportExportMixin):
             workspace (UUID): Workspace of the dataset. Default is the first workspace found in the server.
             settings (Settings): Settings class to be used to configure the dataset.
             client (Argilla): Instance of Argilla to connect with the server. Default is the default client.
-            _model (DatasetModel): Model of the dataset. Used to create the dataset from an existing model.
         """
         client = client or Argilla._get_default()
         super().__init__(client=client, api=client.api.datasets)
@@ -72,13 +69,8 @@ class Dataset(Resource, DiskImportExportMixin):
             name = f"dataset_{uuid4()}"
             self._log_message(f"Settings dataset name to unique UUID: {name}")
 
-        self.workspace_id = (
-            _model.workspace_id if _model and _model.workspace_id else self._workspace_id_from_name(workspace=workspace)
-        )
-        self._model = _model or DatasetModel(
-            name=name,
-            workspace_id=UUIDUtilities.convert_optional_uuid(uuid=self.workspace_id),
-        )
+        self._workspace = workspace
+        self._model = DatasetModel(name=name)
         self._settings = settings or Settings(_dataset=self)
         self._settings.dataset = self
         self.__records = DatasetRecords(client=self._client, dataset=self)
@@ -136,6 +128,11 @@ class Dataset(Resource, DiskImportExportMixin):
     def schema(self) -> dict:
         return self.settings.schema
 
+    @property
+    def workspace(self) -> Workspace:
+        self._workspace = self._resolve_workspace()
+        return self._workspace
+
     #####################
     #  Core methods     #
     #####################
@@ -178,11 +175,18 @@ class Dataset(Resource, DiskImportExportMixin):
 
     @classmethod
     def from_model(cls, model: DatasetModel, client: "Argilla") -> "Dataset":
-        return cls(client=client, _model=model)
+        instance = cls(client=client, workspace=model.workspace_id, name=model.name)
+        instance._model = model
+
+        return instance
 
     #####################
     #  Utility methods  #
     #####################
+
+    def api_model(self) -> DatasetModel:
+        self._model.workspace_id = self.workspace.id
+        return self._model
 
     def _publish(self) -> "Dataset":
         self._settings.create()
@@ -190,24 +194,26 @@ class Dataset(Resource, DiskImportExportMixin):
 
         return self.get()
 
-    def _workspace_id_from_name(self, workspace: Optional[Union["Workspace", str]]) -> UUID:
+    def _resolve_workspace(self) -> Workspace:
+        workspace = self._workspace
+
         if workspace is None:
-            available_workspaces = self._client.workspaces
-            ws = available_workspaces[0]  # type: ignore
-            warnings.warn(f"Workspace not provided. Using default workspace: {ws.name} id: {ws.id}")
+            workspace = self._client.workspaces.default
+            warnings.warn(f"Workspace not provided. Using default workspace: {workspace.name} id: {workspace.id}")
         elif isinstance(workspace, str):
-            available_workspace_names = [ws.name for ws in self._client.workspaces]
-            ws = self._client.workspaces(workspace)
-            if not ws.exists():
-                self._log_message(
-                    message=f"Workspace with name {workspace} not found. \
-                        Available workspaces: {available_workspace_names}",
-                    level="error",
+            workspace = self._client.workspaces(workspace)
+            if not workspace.exists():
+                available_workspace_names = [ws.name for ws in self._client.workspaces]
+                raise NotFoundError(
+                    f"Workspace with name { workspace} not found. Available workspaces: {available_workspace_names}"
                 )
-                raise NotFoundError()
-        else:
-            ws = workspace
-        return ws.id
+        elif isinstance(workspace, UUID):
+            ws_model = self._client.api.workspaces.get(workspace)
+            workspace = Workspace.from_model(ws_model, client=self._client)
+        elif not isinstance(workspace, Workspace):
+            raise ValueError(f"Wrong workspace value found {workspace}")
+
+        return workspace
 
     def _rollback_dataset_creation(self):
         if self.exists() and not self._is_published():
