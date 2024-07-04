@@ -104,7 +104,7 @@ class DatasetRecordsIterator:
     def _fetch_from_server_with_search(self) -> List[RecordModel]:
         search_items, total = self.__client.api.records.search(
             dataset_id=self.__dataset.id,
-            query=self.__query.model,
+            query=self.__query.api_model(),
             limit=self.__batch_size,
             offset=self.__offset,
             with_responses=self.__with_responses,
