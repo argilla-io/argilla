@@ -20,7 +20,7 @@ Closes #<issue_number>
 <!--  Please go over the list and make sure you've taken everything into account -->
 
 - I added relevant documentation
-- follows the style guidelines of this project
+- I followed the style guidelines of this project
 - I did a self-review of my code
 - I made corresponding changes to the documentation
 - I confirm My changes generate no new warnings

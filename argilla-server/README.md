@@ -26,8 +26,8 @@
 <a href="https://www.linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin"/>
 </a>
-<a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-<img src="https://img.shields.io/badge/slack-purple?logo=slack"/>
+<a href="http://hf.co/join/discord">
+<img src="https://img.shields.io/badge/Discord-7289DA?&logo=discord&logoColor=white"/>
 </a>
 </p>
 

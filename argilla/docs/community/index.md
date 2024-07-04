@@ -9,14 +9,14 @@ We are an open-source community-driven project not only focused on building a gr
 
 <div class="grid cards" markdown>
 
--   __Slack__
+-   __Discord__
 
     ---
 
-    In our Slack you can get direct support from the community.
+    In our Discord channels (#argilla-general and #argilla-help), you can get direct support from the community.
 
 
-    [:octicons-arrow-right-24: Slack ↗](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+    [:octicons-arrow-right-24: Discord ↗](http://hf.co/join/discord)
 
 -   __Community Meetup__
 
