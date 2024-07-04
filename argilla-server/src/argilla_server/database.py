@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Generator
 from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.dialects.sqlite.aiosqlite import AsyncAdapt_aiosqlite_connection
 
 import argilla_server
 from argilla_server.settings import settings
@@ -44,9 +45,9 @@ TAGGED_REVISIONS = OrderedDict(
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
-    if isinstance(dbapi_connection, SQLite3Connection):
+    if isinstance(dbapi_connection, AsyncAdapt_aiosqlite_connection):
         cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA foreign_keys = ON")
         cursor.close()
 
 
