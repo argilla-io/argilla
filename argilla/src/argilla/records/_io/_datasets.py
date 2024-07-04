@@ -64,8 +64,8 @@ class HFDatasetsIO:
         dataset_class = _resolve_hf_datasets_type()
         if dataset_class is None:
             raise ImportError("Hugging Face datasets is not installed. Please install it using `pip install datasets`.")
-        record_dicts = GenericIO.to_list(records, flatten=True)
-        dataset = dataset_class.from_list(record_dicts)
+        record_dicts = GenericIO.to_dict(records, flatten=True)
+        dataset = dataset_class.from_dict(record_dicts)
         return dataset
 
     @staticmethod
