@@ -30,6 +30,7 @@ These are the section headers that we use:
 - Removed `GET /api/v1/me/datasets/:dataset_id/records` endpoint. ([#5153](https://github.com/argilla-io/argilla/pull/5153))
 - [breaking] Removed support for `response_status` query param. ([#5163](https://github.com/argilla-io/argilla/pull/5163))
 - [breaking] Removed support for `metadata` query param. ([#5156](https://github.com/argilla-io/argilla/pull/5156))
+- [breaking] Removed support for `sort_by` query param. ([#5166](https://github.com/argilla-io/argilla/pull/5166))
 
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
