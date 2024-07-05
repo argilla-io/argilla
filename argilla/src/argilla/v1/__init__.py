@@ -18,7 +18,7 @@ try:
     from argilla_v1 import *  # noqa
 except ModuleNotFoundError as ex:
     raise Exception(
-        'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[sdk-v1]"',
+        'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[v1]"',
     ) from ex
 
 
