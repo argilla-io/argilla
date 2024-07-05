@@ -36,9 +36,9 @@ This guide explains how to deploy your Argilla app in a Hugging Face Space and c
 
     Make sure to enable persistent storage before adding any data, as the Space will restart, removing all the previous data.
 
-To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section.
+    If you haven’t enabled persistent storage, Argilla will display a warning message by default. To prevent this warning from appearing if you don’t need persistent storage, set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` to `false` in "Settings" > "New variable". This will suppress the warning message.
 
-If you haven’t enabled persistent storage, Argilla will display a warning message by default. To prevent this warning from appearing if you don’t need persistent storage, set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING` to `false` in "Settings" > "New variable". This will suppress the warning message.
+To enable [persistent storage](https://huggingface.co/docs/hub/spaces-storage#persistent-storage), go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section.
 
 ## Configure the Space secrets
 
