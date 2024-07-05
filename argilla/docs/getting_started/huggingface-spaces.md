@@ -74,17 +74,17 @@ You can add the available secrets in "Settings" > "New secret".
 The Hugging Face authentication allows you to give access to your Argilla Space to users that are logged in to the Hugging Face Hub.
 
 !!! tip
-    This feature is especially helpful for public crowdsourcing projects.
+    This feature is especially helpful for public crowdsourcing projects. The users logging in with OAuth will have the annotator role.
 
     To have more control over who can log in to the Space, you can set this up in a private Space so that only members of your organization can sign in.
 
-    Alternatively, you can [create users](../how_to_guides/user.md) and access with their credentials.
+    To create users with admin or owner roles, you can [create users](../how_to_guides/user.md) and access with their credentials.
 
 !!! note
     If you duplicated an Argilla Space with OAuth instead of creating one from the template, make sure to also follow the next steps.
 
 !!! warning
-    Make sure to enable the Hugging Face authentication before adding any data, as the Space will need to be restarted with a "Factory build", removing all the previous data.
+    If persistent storage is not enabled, make sure to activate the Hugging Face authentication before adding any data, as the Space will need to be restarted with a "Factory build", removing all the previous data.
 
 1. [Create an OAuth App in Hugging Face](https://huggingface.co/settings/applications/new) and fill in the information:
 
