@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_document-how-to-setup-hf-oauth",
+    "title": "docs_document-how-to-setup-hf-oauth",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_build-hidden-docs-version",
     "title": "docs_build-hidden-docs-version",
     "aliases": [],
