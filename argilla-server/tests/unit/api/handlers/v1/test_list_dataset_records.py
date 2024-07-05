@@ -38,7 +38,6 @@ from tests.factories import (
 
 @pytest.mark.asyncio
 class TestSuiteListDatasetRecords:
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -58,25 +57,31 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record_a.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"record_a": "value_a"},
                     "metadata": None,
                     "external_id": record_a.external_id,
+                    "status": "pending",
                     "inserted_at": record_a.inserted_at.isoformat(),
                     "updated_at": record_a.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_b.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"record_b": "value_b"},
                     "metadata": {"unit": "test"},
                     "external_id": record_b.external_id,
+                    "status": "pending",
                     "inserted_at": record_b.inserted_at.isoformat(),
                     "updated_at": record_b.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_c.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"record_c": "value_c"},
                     "metadata": None,
                     "external_id": record_c.external_id,
+                    "status": "pending",
                     "inserted_at": record_c.inserted_at.isoformat(),
                     "updated_at": record_c.updated_at.isoformat(),
                 },
@@ -188,7 +193,6 @@ class TestSuiteListDatasetRecords:
 
         assert response.status_code == 200
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records_with_include_vectors(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
@@ -214,6 +218,7 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record_a.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_a.external_id,
@@ -221,26 +226,31 @@ class TestSuiteListDatasetRecords:
                         "vector-a": [1.0, 2.0, 3.0],
                         "vector-b": [4.0, 5.0],
                     },
+                    "status": "pending",
                     "inserted_at": record_a.inserted_at.isoformat(),
                     "updated_at": record_a.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_b.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_b.external_id,
                     "vectors": {
                         "vector-b": [1.0, 2.0],
                     },
+                    "status": "pending",
                     "inserted_at": record_b.inserted_at.isoformat(),
                     "updated_at": record_b.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_c.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_c.external_id,
                     "vectors": {},
+                    "status": "pending",
                     "inserted_at": record_c.inserted_at.isoformat(),
                     "updated_at": record_c.updated_at.isoformat(),
                 },
@@ -248,7 +258,6 @@ class TestSuiteListDatasetRecords:
             "total": 3,
         }
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records_with_include_specific_vectors(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
@@ -278,6 +287,7 @@ class TestSuiteListDatasetRecords:
             "items": [
                 {
                     "id": str(record_a.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_a.external_id,
@@ -285,26 +295,31 @@ class TestSuiteListDatasetRecords:
                         "vector-a": [1.0, 2.0, 3.0],
                         "vector-b": [4.0, 5.0],
                     },
+                    "status": "pending",
                     "inserted_at": record_a.inserted_at.isoformat(),
                     "updated_at": record_a.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_b.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_b.external_id,
                     "vectors": {
                         "vector-b": [1.0, 2.0],
                     },
+                    "status": "pending",
                     "inserted_at": record_b.inserted_at.isoformat(),
                     "updated_at": record_b.updated_at.isoformat(),
                 },
                 {
                     "id": str(record_c.id),
+                    "dataset_id": str(dataset.id),
                     "fields": {"text": "This is a text", "sentiment": "neutral"},
                     "metadata": None,
                     "external_id": record_c.external_id,
                     "vectors": {},
+                    "status": "pending",
                     "inserted_at": record_c.inserted_at.isoformat(),
                     "updated_at": record_c.updated_at.isoformat(),
                 },
@@ -312,7 +327,6 @@ class TestSuiteListDatasetRecords:
             "total": 3,
         }
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records_with_offset(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -331,7 +345,6 @@ class TestSuiteListDatasetRecords:
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records_with_limit(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
@@ -350,7 +363,6 @@ class TestSuiteListDatasetRecords:
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_a.id)]
 
-    @pytest.mark.skip(reason="Factory integration with search engine")
     async def test_list_dataset_records_with_offset_and_limit(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
@@ -371,80 +383,6 @@ class TestSuiteListDatasetRecords:
         response_body = response.json()
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
-    async def create_records_with_response(
-        self,
-        num_records: int,
-        dataset: Dataset,
-        user: User,
-        response_status: ResponseStatus,
-        response_values: Optional[dict] = None,
-    ):
-        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
-            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
-
-    @pytest.mark.skip(reason="Factory integration with search engine")
-    @pytest.mark.parametrize(
-        "response_status_filter", ["missing", "pending", "discarded", "submitted", "draft", ["submitted", "draft"]]
-    )
-    async def test_list_dataset_records_with_response_status_filter(
-        self,
-        async_client: "AsyncClient",
-        owner: "User",
-        owner_auth_header: dict,
-        response_status_filter: Union[str, List[str]],
-    ):
-        num_records_per_response_status = 10
-        response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
-
-        dataset = await DatasetFactory.create()
-        # missing responses
-        await RecordFactory.create_batch(size=num_records_per_response_status, dataset=dataset)
-        # discarded responses
-        await self.create_records_with_response(
-            num_records_per_response_status, dataset, owner, ResponseStatus.discarded
-        )
-        # submitted responses
-        await self.create_records_with_response(
-            num_records_per_response_status, dataset, owner, ResponseStatus.submitted, response_values
-        )
-        # drafted responses
-        await self.create_records_with_response(
-            num_records_per_response_status, dataset, owner, ResponseStatus.draft, response_values
-        )
-
-        other_dataset = await DatasetFactory.create()
-        await RecordFactory.create_batch(size=2, dataset=other_dataset)
-
-        response_status_filter = (
-            [response_status_filter] if isinstance(response_status_filter, str) else response_status_filter
-        )
-        response_status_filter_url = [
-            f"response_status={response_status}" for response_status in response_status_filter
-        ]
-
-        response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records?{'&'.join(response_status_filter_url)}&include=responses",
-            headers=owner_auth_header,
-        )
-
-        assert response.status_code == 200
-        response_json = response.json()
-
-        assert len(response_json["items"]) == (num_records_per_response_status * len(response_status_filter))
-
-        if "missing" in response_status_filter:
-            assert (
-                len([record for record in response_json["items"] if len(record["responses"]) == 0])
-                >= num_records_per_response_status
-            )
-        assert all(
-            [
-                record["responses"][0]["status"] in response_status_filter
-                for record in response_json["items"]
-                if len(record["responses"]) > 0
-            ]
-        )
-
     async def test_list_dataset_records_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
 
@@ -457,9 +395,9 @@ class TestSuiteListDatasetRecords:
         admin = await AdminFactory.create(workspaces=[workspace])
         dataset = await DatasetFactory.create(workspace=workspace)
 
-        await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-        await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
-        await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+        record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+        record_b = await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+        record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
@@ -468,6 +406,41 @@ class TestSuiteListDatasetRecords:
             f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}
         )
         assert response.status_code == 200
+        assert response.json() == {
+            "total": 3,
+            "items": [
+                {
+                    "id": str(record_a.id),
+                    "dataset_id": str(dataset.id),
+                    "fields": {"record_a": "value_a"},
+                    "metadata": None,
+                    "external_id": record_a.external_id,
+                    "status": "pending",
+                    "inserted_at": record_a.inserted_at.isoformat(),
+                    "updated_at": record_a.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_b.id),
+                    "dataset_id": str(dataset.id),
+                    "fields": {"record_b": "value_b"},
+                    "metadata": None,
+                    "external_id": record_b.external_id,
+                    "status": "pending",
+                    "inserted_at": record_b.inserted_at.isoformat(),
+                    "updated_at": record_b.updated_at.isoformat(),
+                },
+                {
+                    "id": str(record_c.id),
+                    "dataset_id": str(dataset.id),
+                    "fields": {"record_c": "value_c"},
+                    "metadata": None,
+                    "external_id": record_c.external_id,
+                    "status": "pending",
+                    "inserted_at": record_c.inserted_at.isoformat(),
+                    "updated_at": record_c.updated_at.isoformat(),
+                },
+            ],
+        }
 
     async def test_list_dataset_records_as_annotator(self, async_client: "AsyncClient"):
         workspace = await WorkspaceFactory.create()
@@ -560,3 +533,14 @@ class TestSuiteListDatasetRecords:
         ]
 
         return dataset, questions, records, responses, suggestions
+
+    async def create_records_with_response(
+        self,
+        num_records: int,
+        dataset: Dataset,
+        user: User,
+        response_status: ResponseStatus,
+        response_values: Optional[dict] = None,
+    ):
+        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
+            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
