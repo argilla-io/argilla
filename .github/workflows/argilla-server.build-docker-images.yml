@@ -118,6 +118,7 @@ jobs:
           tags: ${{ env.QUICKSTART_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
             ARGILLA_VERSION=${{ env.IMAGE_TAG }}
           push: true
 
