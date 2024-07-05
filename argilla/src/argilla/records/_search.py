@@ -32,8 +32,7 @@ from argilla._models._search import (
 class Condition(Tuple[str, str, Any]):
     """This class is used to map user conditions to the internal filter models"""
 
-    @property
-    def model(self) -> FilterModel:
+    def api_model(self) -> FilterModel:
         field, operator, value = self
 
         field = field.strip()
@@ -55,7 +54,7 @@ class Condition(Tuple[str, str, Any]):
     def _extract_filter_scope(field: str) -> ScopeModel:
         field = field.strip()
 
-        if field == "status":
+        if field == "response.status":
             return ResponseFilterScopeModel(property="status")
         elif "metadata" in field:
             _, md_property = field.split(".")
@@ -70,6 +69,8 @@ class Condition(Tuple[str, str, Any]):
             question, _ = field.split(".")
             return ResponseFilterScopeModel(question=question)
         else:  # Question field -> Suggestion
+            # TODO: The default path would be raise an error instead of consider suggestions by default
+            #  (can be confusing)
             return SuggestionFilterScopeModel(question=field)
 
 
@@ -91,9 +92,8 @@ class Filter:
             conditions = [conditions]
         self.conditions = [Condition(condition) for condition in conditions]
 
-    @property
-    def model(self) -> AndFilterModel:
-        return AndFilterModel.model_validate({"and": [condition.model for condition in self.conditions]})
+    def api_model(self) -> AndFilterModel:
+        return AndFilterModel.model_validate({"and": [condition.api_model() for condition in self.conditions]})
 
 
 class Query:
@@ -112,8 +112,7 @@ class Query:
         self.query = query
         self.filter = filter
 
-    @property
-    def model(self) -> SearchQueryModel:
+    def api_model(self) -> SearchQueryModel:
         model = SearchQueryModel()
 
         if self.query is not None:
@@ -121,7 +120,7 @@ class Query:
             model.query = QueryModel(text=text_query)
 
         if self.filter is not None:
-            model.filters = self.filter.model
+            model.filters = self.filter.api_model()
 
         return model
 

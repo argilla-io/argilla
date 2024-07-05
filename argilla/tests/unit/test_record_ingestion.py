@@ -36,191 +36,158 @@ def dataset():
 
 
 def test_ingest_record_from_dict(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "What is the capital of France?",
-            "label": "positive",
-        },
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "What is the capital of France?",
+                "label": "positive",
+            }
+        ],
     )
 
+    record = record_api_models[0]
     assert record.fields["prompt"] == "What is the capital of France?"
-    assert record.suggestions["label"].value == "positive"
+    assert record.suggestions[0].value == "positive"
 
 
-def test_ingest_record_from_dict_with_mapping(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "my_prompt": "What is the capital of France?",
-            "label": "positive",
-        },
-        mapping={
-            "my_prompt": "prompt",
-        },
+def test_ingest_record_from_dict_with_mapped_suggestions(dataset):
+    mock_mapping = {
+        "my_prompt": "prompt",
+        "my_label": "label.suggestion.value",
+        "score": "label.suggestion.score",
+        "model": "label.suggestion.agent",
+    }
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "my_prompt": "What is the capital of France?",
+                "my_label": "positive",
+                "score": 0.9,
+                "model": "model_name",
+            }
+        ],
+        mapping=mock_mapping,
     )
-
+    record = record_api_models[0]
     assert record.fields["prompt"] == "What is the capital of France?"
-    assert record.suggestions["label"].value == "positive"
+    assert record.suggestions[0].value == "positive"
+    assert record.suggestions[0].question_name == "label"
+    assert record.suggestions[0].score == 0.9
+    assert record.suggestions[0].agent == "model_name"
 
 
-def test_ingest_record_from_dict_with_suggestions(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-        },
-    )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-
-
-def test_ingest_record_from_dict_with_suggestions_scores(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "score": 0.9,
-            "model": "model_name",
-        },
-        mapping={
-            "score": "label.suggestion.score",
-            "model": "label.suggestion.agent",
-        },
-    )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.suggestions["label"].score == 0.9
-    assert record.suggestions["label"].agent == "model_name"
-
-
-def test_ingest_record_from_dict_with_suggestions_scores_and_agent(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "score": 0.9,
-            "model": "model_name",
-        },
-        mapping={
-            "score": "label.suggestion.score",
-            "model": "label.suggestion.agent",
-        },
-    )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.suggestions["label"].score == 0.9
-    assert record.suggestions["label"].agent == "model_name"
-
-
-def test_ingest_record_from_dict_with_responses(dataset):
+def test_ingest_record_from_dict_with_mapped_responses(dataset):
     user_id = uuid4()
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-        },
-        mapping={
-            "label": "label.response",
-        },
+    mocked_mapping = {
+        "label": "label.response",
+    }
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "Hello World, how are you?",
+                "label": "negative",
+            }
+        ],
+        mapping=mocked_mapping,
         user_id=user_id,
     )
+    record = record_api_models[0]
 
     assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.responses["label"][0].value == "negative"
-    assert record.responses["label"][0].user_id == user_id
+    assert record.responses[0].values["label"]["value"] == "negative"
+    assert record.responses[0].user_id == user_id
 
 
 def test_ingest_record_from_dict_with_id_as_id(dataset):
     record_id = uuid4()
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "id": record_id,
-        },
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "Hello World, how are you?",
+                "label": "negative",
+                "id": record_id,
+            }
+        ],
     )
-
+    record = record_api_models[0]
     assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.id == record_id
+    assert record.external_id == record_id
 
 
-def test_ingest_record_from_dict_with_id_and_mapping(dataset):
+def test_ingest_record_from_dict_with_mapped_id(dataset):
     record_id = uuid4()
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "test_id": record_id,
-        },
-        mapping={
-            "test_id": "id",
-        },
+    mock_mapping = {
+        "test_id": "id",
+    }
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "Hello World, how are you?",
+                "label": "negative",
+                "test_id": record_id,
+            }
+        ],
+        mapping=mock_mapping,
+    )
+    record_model = record_api_models[0]
+    assert record_model.fields["prompt"] == "Hello World, how are you?"
+    assert record_model.external_id == record_id
+
+
+def test_ingest_record_from_dict_with_mapped_metadata_vectors(dataset):
+    mock_mapping = {
+        "test_score": "score",
+        "test_vector": "vector",
+    }
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "prompt": "Hello World, how are you?",
+                "label": "negative",
+                "test_score": 0.9,
+                "test_vector": [1, 2, 3],
+            }
+        ],
+        mapping=mock_mapping,
     )
 
+    record = record_api_models[0]
     assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.id == record_id
+    assert record.suggestions[0].value == "negative"
+    assert record.vectors[0].vector_values == [1, 2, 3]
+    assert record.vectors[0].name == "vector"
+    assert record.metadata[0].value == 0.9
+    assert record.metadata[0].name == "score"
 
 
-def test_ingest_record_from_dict_with_metadata(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "score": 0.9,
-        },
+def test_ingest_record_from_dict_with_mapping_multiple():
+    settings = rg.Settings(
+        fields=[rg.TextField(name="prompt_field")],
+        questions=[
+            rg.LabelQuestion(name="label", labels=["negative", "positive"]),
+            rg.TextQuestion(name="prompt_question"),
+        ],
     )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.metadata["score"] == 0.9
-
-
-def test_ingest_record_from_dict_with_metadata_and_mapping(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "test_score": 0.9,
-        },
-        mapping={
-            "test_score": "score",
-        },
+    workspace = rg.Workspace(name="workspace", id=uuid4())
+    dataset = rg.Dataset(
+        name="test_dataset",
+        settings=settings,
+        workspace=workspace,
     )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.metadata["score"] == 0.9
-
-
-def test_ingest_record_from_dict_with_vectors(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "vector": [1, 2, 3],
-        },
+    mapping = {
+        "my_prompt": ("prompt_field", "prompt_question"),
+    }
+    record_api_models = dataset.records._ingest_records(
+        records=[
+            {
+                "my_prompt": "What is the capital of France?",
+                "label": "positive",
+            }
+        ],
+        mapping=mapping,
     )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.vectors["vector"] == [1, 2, 3]
-
-
-def test_ingest_record_from_dict_with_vectors_and_mapping(dataset):
-    record = dataset.records._infer_record_from_mapping(
-        data={
-            "prompt": "Hello World, how are you?",
-            "label": "negative",
-            "test_vector": [1, 2, 3],
-        },
-        mapping={
-            "test_vector": "vector",
-        },
-    )
-
-    assert record.fields["prompt"] == "Hello World, how are you?"
-    assert record.suggestions["label"].value == "negative"
-    assert record.vectors["vector"] == [1, 2, 3]
+    record = record_api_models[0]
+    suggestions = [s.value for s in record.suggestions]
+    assert record.fields["prompt_field"] == "What is the capital of France?"
+    assert "positive" in suggestions
+    assert "What is the capital of France?" in suggestions

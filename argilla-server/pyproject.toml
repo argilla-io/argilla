@@ -30,10 +30,10 @@ dependencies = [
     "backoff>=1.11.1",
     # Database dependencies
     "alembic ~= 1.9.0",
-    "SQLAlchemy ~= 2.0.0",
+    "SQLAlchemy == 2.0.31",
     "greenlet >= 2.0.0",
     # Async SQLite
-    "aiosqlite >=0.19.0",
+    "aiosqlite == 0.20.0",
     # metrics
     "scikit-learn >= 0.24.2",
     # Statics server
@@ -60,9 +60,9 @@ dependencies = [
 
 [project.optional-dependencies]
 postgresql = [
-    "psycopg2 ~= 2.9.5",
+    "psycopg2 == 2.9.9",
     # Async PostgreSQL
-    "asyncpg >=0.27.0",
+    "asyncpg == 0.29.0",
 ]
 
 [project.urls]

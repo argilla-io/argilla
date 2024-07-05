@@ -135,7 +135,7 @@ A **field** is defined in the `TextField` class that has the following arguments
 * `name`: The name of the field.
 * `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value.
 * `required` (optional): Whether the field is required or not. Defaults to `True`. At least one field must be required.
-* `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to True, you will be able to use all the Markdown features for text formatting, as well as embed multimedia content and PDFs.
+* `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to True, you will be able to use all the Markdown features for text formatting, including LaTex formulas and embedding multimedia content and PDFs.
 
 !!! note
     The order of the fields in the UI follows the order in which these are added to the fields attribute in the Python SDK.

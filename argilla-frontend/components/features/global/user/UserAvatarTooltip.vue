@@ -1,16 +1,16 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
     <a class="user__button" @click.prevent="showSelector">
-      {{ firstChar(user.username) }}
+      {{ user.avatar }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">
       <div class="head">
         <div class="left-head">
-          <span v-circle v-text="firstChar(user.username)" />
+          <span v-circle v-text="user.avatar" />
         </div>
         <div class="right-head">
           <div class="item">
-            <span v-text="user.username" />
+            <span v-text="user.userName" />
           </div>
           <div class="item" v-if="user.email">
             <span v-text="user.email" />
@@ -44,7 +44,7 @@
 import "assets/icons/external";
 import "assets/icons/log-out";
 
-import { useRoutes } from "~/v1/infrastructure/services/useRoutes";
+import { useAvatarTooltipViewModel } from "./userAvatarTooltipViewModel";
 
 export default {
   data: () => {
@@ -54,20 +54,11 @@ export default {
     };
   },
   computed: {
-    user() {
-      return this.$auth.user;
-    },
     currentYear() {
-      return this.currentDate.getFullYear();
-    },
-    currentDate() {
-      return new Date();
+      return new Date().getFullYear();
     },
   },
   methods: {
-    firstChar(name) {
-      return name.slice(0, 2);
-    },
     showSelector() {
       this.visibleSelector = !this.visibleSelector;
     },
@@ -81,7 +72,7 @@ export default {
     },
   },
   setup() {
-    return useRoutes();
+    return useAvatarTooltipViewModel();
   },
 };
 </script>

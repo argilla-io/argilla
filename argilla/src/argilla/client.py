@@ -15,6 +15,7 @@
 import warnings
 from abc import abstractmethod
 from collections.abc import Sequence
+from functools import cached_property
 from typing import TYPE_CHECKING, overload, List, Optional, Union
 
 from argilla import _api
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
     from argilla import Workspace
     from argilla import Dataset
     from argilla import User
-
 
 __all__ = ["Argilla"]
 
@@ -42,6 +42,11 @@ class Argilla(_api.APIClient):
         me: The current user.
 
     """
+
+    workspaces: "Workspaces"
+    datasets: "Datasets"
+    users: "Users"
+    me: "User"
 
     # Default instance of Argilla
     _default_client: Optional["Argilla"] = None
@@ -72,10 +77,9 @@ class Argilla(_api.APIClient):
         """A collection of users on the server."""
         return Users(client=self)
 
-    @property
+    @cached_property
     def me(self) -> "User":
-        """The current user."""
-        from argilla import User
+        from argilla.users import User
 
         return User(client=self, _model=self.api.users.get_me())
 
@@ -191,7 +195,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
 
         for model in workspace_models:
             if model.name == name:
-                return Workspace(_model=model, client=self._client)
+                return self._from_model(model)
         warnings.warn(
             f"Workspace {name} not found. Creating a new workspace. Do `workspace.create()` to create the workspace."
         )
@@ -248,7 +252,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     def _from_model(self, model: WorkspaceModel) -> "Workspace":
         from argilla.workspaces import Workspace
 
-        return Workspace(client=self._client, _model=model)
+        return Workspace.from_model(client=self._client, model=model)
 
 
 class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
@@ -271,7 +275,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
 
         for dataset in workspace.datasets:
             if dataset.name == name:
-                return dataset
+                return dataset.get()
         warnings.warn(f"Dataset {name} not found. Creating a new dataset. Do `dataset.create()` to create the dataset.")
         return Dataset(name=name, workspace=workspace, client=self._client, **kwargs)
 
@@ -321,4 +325,4 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
     def _from_model(self, model: DatasetModel) -> "Dataset":
         from argilla.datasets import Dataset
 
-        return Dataset(client=self._client, _model=model)
+        return Dataset.from_model(model=model, client=self._client)

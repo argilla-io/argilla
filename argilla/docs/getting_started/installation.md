@@ -17,12 +17,12 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 * Using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 
 !!! note
-    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
+    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc2`.
 
 * Locally with Docker.
 
 ```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
 ```
 
 ## Connect to the Argilla server
@@ -43,7 +43,7 @@ import argilla as rg
 client = rg.Argilla(
     api_url="<api_url>",
     api_key="<api_key>",
-    # extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
+    # headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 

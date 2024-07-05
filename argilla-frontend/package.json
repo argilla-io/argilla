@@ -1,6 +1,6 @@
 {
   "name": "argilla",
-  "version": "2.0.0rc1",
+  "version": "2.0.0rc2",
   "private": true,
   "scripts": {
     "dev": "nuxt",
@@ -35,6 +35,7 @@
     "frontmatter-markdown-loader": "^3.7.0",
     "marked": "^5.0.3",
     "marked-highlight": "^2.0.1",
+    "marked-katex-extension": "^5.0.2",
     "nuxt": "^2.15.8",
     "nuxt-highlightjs": "^1.0.2",
     "pinia": "^2.1.4",

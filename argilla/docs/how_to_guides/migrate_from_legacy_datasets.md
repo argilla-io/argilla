@@ -26,8 +26,12 @@ The guide will take you through three steps:
 
 ### Step 1: Retrieve the legacy dataset
 
-Connect to the Argilla V1 server via the new `argilla` package. The new sdk contains a `v1` module that allows you to connect to the Argilla V1 server:
+Connect to the Argilla V1 server via the new `argilla` package. First, you should install an extra dependency:
+```bash
+pip install "argilla[legacy]"
+```
 
+Now, you can use the `v1` module to connect to the Argilla V1 server.
 ```python
 import argilla.v1 as rg_v1
 
