@@ -41,7 +41,7 @@ distribution = true
 
 [tool.pdm.version]
 source = "file"
-path = "src/argilla/__init__.py"
+path = "src/argilla/_version.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
