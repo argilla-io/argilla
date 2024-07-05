@@ -131,6 +131,7 @@ nav:
   - Getting started:
       - Quickstart: getting_started/quickstart.md
       - Installation: getting_started/installation.md
+      - Set up in Hugging Face Spaces: getting_started/huggingface-spaces.md
       - FAQ: getting_started/faq.md
   - How-to guides:
       - how_to_guides/index.md

@@ -132,8 +132,5 @@ This will run the latest quickstart docker image with 3 users `owner`, `admin`, 
 - `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
   is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `ARGILLA_WORKSPACE`: The name of a workspace that will be created and used by default for admin and annotator users. The default value will be the one defined by `ADMIN_USERNAME` environment variable.
-- `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
-  supported values for this variable is as follows:
-    1. `single`: Load single datasets for Feedback task.
-    2. `full`: Load all the sample datasets for NLP tasks (Feedback, TokenClassification, TextClassification, Text2Text)
-    3. `none`: No datasets being loaded.
+- `OAUTH2_HUGGINGFACE_CLIENT_ID`: The Client ID of your connected app.
+- `OAUTH2_HUGGINGFACE_CLIENT_SECRET`: The app secret of your connected app.
