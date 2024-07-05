@@ -45,7 +45,6 @@ class Workspace(Resource):
         name: Optional[str] = None,
         id: Optional[UUID] = None,
         client: Optional["Argilla"] = None,
-        _model: Optional[WorkspaceModel] = None,
     ) -> None:
         """Initializes a Workspace object with a client and a name or id
 
@@ -53,15 +52,13 @@ class Workspace(Resource):
             client (Argilla): The client used to interact with Argilla
             name (str): The name of the workspace
             id (UUID): The id of the workspace
-            _model (WorkspaceModel): The internal Pydantic model of the workspace from/to the server
         Returns:
             Workspace: The initialized workspace object
         """
         client = client or Argilla._get_default()
         super().__init__(client=client, api=client.api.workspaces)
-        if _model is None:
-            _model = WorkspaceModel(name=name, id=id)
-        self._model = _model
+
+        self._model = WorkspaceModel(name=name, id=id)
 
     def exists(self) -> bool:
         """
@@ -102,6 +99,13 @@ class Workspace(Resource):
         datasets = self._client.api.datasets.list(self.id)
         self._log_message(f"Got {len(datasets)} datasets for workspace {self.id}")
         return [Dataset.from_model(model=dataset, client=self._client) for dataset in datasets]
+
+    @classmethod
+    def from_model(cls, model: WorkspaceModel, client: Argilla) -> "Workspace":
+        instance = cls(name=model.name, id=model.id, client=client)
+        instance._model = model
+
+        return instance
 
     ############################
     # Properties

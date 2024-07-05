@@ -12,21 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import warnings
-
-try:
-    from argilla_v1 import *  # noqa
-except ModuleNotFoundError as ex:
-    raise Exception(
-        'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[legacy]"',
-    ) from ex
-
-
-def deprecation(message: str):
-    warnings.warn(message, DeprecationWarning, stacklevel=2)
-
-
-deprecation(
-    "The module `argilla_sdk.v1` has been include for migration purposes. "
-    "It's deprecated and will be removed in the future."
-)
+from argilla.records._mapping._mapper import IngestedRecordMapper  # noqa: F401

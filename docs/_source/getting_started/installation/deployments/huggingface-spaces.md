@@ -122,7 +122,7 @@ As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en
 
 ## Feedback and support
 
-If you have improvement suggestions or need specific support, please join [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
+If you have improvement suggestions or need specific support, please join [Argilla Slack community](http://hf.co/join/discord) or reach out on [Argilla's GitHub repository](https://github.com/argilla-io/argilla).
 
 ## Setting up persistent storage
 
