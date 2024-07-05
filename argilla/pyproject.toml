@@ -22,7 +22,7 @@ io = [
     "datasets>=2.0.0",
 ]
 
-sdk-v1 = [
+legacy = [
     "argilla-v1[listeners]",
 ]
 
