@@ -14,6 +14,7 @@
 #  limitations under the License.
 import warnings
 
+# A comment
 from argilla_server.pydantic_v1 import PYDANTIC_MAJOR_VERSION
 
 if PYDANTIC_MAJOR_VERSION >= 2:
