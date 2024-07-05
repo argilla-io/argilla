@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Security, status
@@ -48,15 +47,15 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.enums import RecordSortField
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
+from argilla_server.repositories import DatasetsRepository, RecordsRepository
 from argilla_server.search_engine import (
     AndFilter,
     SearchEngine,
     SearchResponses,
-    UserResponseStatusFilter,
     get_search_engine,
 )
 from argilla_server.security import auth
@@ -73,35 +72,6 @@ parse_record_include_param = parse_query_param(
 )
 
 router = APIRouter()
-
-
-async def _filter_records_using_search_engine(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: Dataset,
-    limit: int,
-    offset: int,
-    user: Optional[User] = None,
-    include: Optional[RecordIncludeParam] = None,
-) -> Tuple[List[Record], int]:
-    search_responses = await _get_search_responses(
-        db=db,
-        search_engine=search_engine,
-        dataset=dataset,
-        limit=limit,
-        offset=offset,
-        user=user,
-    )
-
-    record_ids = [response.record_id for response in search_responses.items]
-    user_id = user.id if user else None
-
-    return (
-        await datasets.get_records_by_ids(
-            db=db, dataset_id=dataset.id, user_id=user_id, records_ids=record_ids, include=include
-        ),
-        search_responses.total,
-    )
 
 
 def _to_search_engine_filter_scope(scope: FilterScope, user: Optional[User]) -> search_engine.FilterScope:
@@ -226,18 +196,6 @@ async def _get_search_responses(
         return await search_engine.search(**search_params)
 
 
-async def _build_response_status_filter_for_search(
-    response_statuses: Optional[List[ResponseStatusFilter]] = None, user: Optional[User] = None
-) -> Optional[UserResponseStatusFilter]:
-    user_response_status_filter = None
-
-    if response_statuses:
-        # TODO(@frascuchon): user response and status responses should be split into different filter types
-        user_response_status_filter = UserResponseStatusFilter(user=user, statuses=response_statuses)
-
-    return user_response_status_filter
-
-
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
@@ -248,25 +206,32 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
+    datasets_repository: DatasetsRepository = Depends(),
+    records_repository: RecordsRepository = Depends(),
     dataset_id: UUID,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id)
-
+    dataset = await datasets_repository.get(dataset_id)
     await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
-    records, total = await _filter_records_using_search_engine(
-        db,
-        search_engine,
-        dataset=dataset,
-        limit=limit,
+    include_args = (
+        dict(
+            with_responses=include.with_responses,
+            with_suggestions=include.with_suggestions,
+            with_vectors=include.with_all_vectors or include.vectors,
+        )
+        if include
+        else {}
+    )
+
+    records, total = await records_repository.list_by_dataset_id(
+        dataset_id=dataset.id,
         offset=offset,
-        include=include,
+        limit=limit,
+        **include_args,
     )
 
     return Records(items=records, total=total)
