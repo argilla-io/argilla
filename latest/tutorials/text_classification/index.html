@@ -1932,10 +1932,10 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>As this is a release candidate version, you'll need to manually change the version in the HF Space Files &gt; Dockerfile to <code>argilla/argilla-quickstart:v2.0.0rc1</code>.</p>
+<p>As this is a release candidate version, you'll need to manually change the version in the HF Space Files &gt; Dockerfile to <code>argilla/argilla-quickstart:v2.0.0rc2</code>.</p>
 </div>
 <ul>
-<li>Locally using Docker: <code>docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1</code></li>
+<li>Locally using Docker: <code>docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2</code></li>
 </ul>
 </div>
 </div>
@@ -2004,7 +2004,7 @@
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;https://[your-owner-name]-[your_space_name].hf.space&quot;</span><span class="p">,</span>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;owner.apikey&quot;</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="c1"># extra_headers={&quot;Authorization&quot;: f&quot;Bearer {HF_TOKEN}&quot;}</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="c1"># headers={&quot;Authorization&quot;: f&quot;Bearer {HF_TOKEN}&quot;}</span>
 </span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
 </span></code></pre></div>
 
