@@ -17,7 +17,7 @@ from uuid import uuid4
 import argilla_server.errors.future as errors
 import pytest
 from argilla_server.api.schemas.v1.records import SearchRecordsQuery
-from argilla_server.contexts.search import SearchRecordsQueryValidator
+from argilla_server.validators.search import SearchRecordsQueryValidator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
@@ -118,7 +118,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
@@ -145,7 +145,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
@@ -174,7 +174,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
@@ -206,7 +206,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
@@ -225,7 +225,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
@@ -244,7 +244,7 @@ class TestSearchRecordsQueryValidator:
             }
         )
 
-        with pytest.raises(errors.NotFoundError) as not_found_error:
+        with pytest.raises(errors.UnprocessableEntityError) as not_found_error:
             await SearchRecordsQueryValidator(db, query, dataset.id).validate()
 
         assert (
