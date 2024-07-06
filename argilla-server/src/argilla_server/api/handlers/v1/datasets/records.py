@@ -12,53 +12,39 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-import argilla_server.search_engine as search_engine
-from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
+from argilla_server.api.policies.v1 import DatasetPolicy, authorize
 from argilla_server.api.schemas.v1.records import (
-    Filters,
-    FilterScope,
-    MetadataFilterScope,
-    Order,
-    RangeFilter,
-    RecordFilterScope,
     RecordIncludeParam,
     Records,
     RecordsCreate,
     RecordsUpdate,
-    SearchRecord,
     SearchRecordsQuery,
     SearchRecordsResult,
-    TermsFilter,
 )
-from argilla_server.api.schemas.v1.records import Record as RecordSchema
-from argilla_server.api.schemas.v1.responses import ResponseFilterScope
 from argilla_server.api.schemas.v1.suggestions import (
     SearchSuggestionOptions,
     SearchSuggestionOptionsQuestion,
     SearchSuggestionsOptions,
-    SuggestionFilterScope,
 )
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import RecordSortField
-from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
-from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset, Field, Record, User, VectorSettings
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models import Dataset, User
 from argilla_server.repositories import DatasetsRepository, RecordsRepository
 from argilla_server.search_engine import (
-    AndFilter,
     SearchEngine,
-    SearchResponses,
     get_search_engine,
 )
 from argilla_server.security import auth
+from argilla_server.services.search import SearchService
 from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 from argilla_server.utils import parse_query_param, parse_uuids
 
@@ -72,135 +58,6 @@ parse_record_include_param = parse_query_param(
 )
 
 router = APIRouter()
-
-
-def _to_search_engine_filter_scope(scope: FilterScope, user: Optional[User]) -> search_engine.FilterScope:
-    if isinstance(scope, RecordFilterScope):
-        return search_engine.RecordFilterScope(property=scope.property)
-    elif isinstance(scope, MetadataFilterScope):
-        return search_engine.MetadataFilterScope(metadata_property=scope.metadata_property)
-    elif isinstance(scope, SuggestionFilterScope):
-        return search_engine.SuggestionFilterScope(question=scope.question, property=scope.property)
-    elif isinstance(scope, ResponseFilterScope):
-        return search_engine.ResponseFilterScope(question=scope.question, property=scope.property, user=user)
-    else:
-        raise Exception(f"Unknown scope type {type(scope)}")
-
-
-def _to_search_engine_filter(filters: Filters, user: Optional[User]) -> search_engine.Filter:
-    engine_filters = []
-
-    for filter in filters.and_:
-        engine_scope = _to_search_engine_filter_scope(filter.scope, user=user)
-
-        if isinstance(filter, TermsFilter):
-            engine_filter = search_engine.TermsFilter(scope=engine_scope, values=filter.values)
-        elif isinstance(filter, RangeFilter):
-            engine_filter = search_engine.RangeFilter(scope=engine_scope, ge=filter.ge, le=filter.le)
-        else:
-            raise Exception(f"Unknown filter type {type(filter)}")
-
-        engine_filters.append(engine_filter)
-
-    return AndFilter(filters=engine_filters)
-
-
-def _to_search_engine_sort(sort: List[Order], user: Optional[User]) -> List[search_engine.Order]:
-    engine_sort = []
-
-    for order in sort:
-        engine_scope = _to_search_engine_filter_scope(order.scope, user=user)
-        engine_sort.append(search_engine.Order(scope=engine_scope, order=order.order))
-
-    return engine_sort
-
-
-async def _get_search_responses(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: Dataset,
-    limit: int,
-    offset: int,
-    search_records_query: Optional[SearchRecordsQuery] = None,
-    user: Optional[User] = None,
-) -> "SearchResponses":
-    search_records_query = search_records_query or SearchRecordsQuery()
-
-    text_query = None
-    vector_query = None
-    if search_records_query.query:
-        text_query = search_records_query.query.text
-        vector_query = search_records_query.query.vector
-
-    filters = search_records_query.filters
-    sort = search_records_query.sort
-
-    vector_settings = None
-    record = None
-
-    if vector_query:
-        vector_settings = await VectorSettings.get_by(db, name=vector_query.name, dataset_id=dataset.id)
-        if vector_settings is None:
-            raise UnprocessableEntityError(f"Vector `{vector_query.name}` not found in dataset `{dataset.id}`.")
-
-        if vector_query.record_id is not None:
-            record = await Record.get_by(db, id=vector_query.record_id, dataset_id=dataset.id)
-            if record is None:
-                raise UnprocessableEntityError(
-                    f"Record with id `{vector_query.record_id}` not found in dataset `{dataset.id}`."
-                )
-
-            await record.awaitable_attrs.vectors
-
-            if not record.vector_value_by_vector_settings(vector_settings):
-                # TODO: Once we move to v2.0 we can use here UnprocessableEntityError instead of MissingVectorError
-                raise MissingVectorError(
-                    message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
-                    code=MISSING_VECTOR_ERROR_CODE,
-                )
-
-    if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
-        raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
-
-    if vector_query and vector_settings:
-        similarity_search_params = {
-            "dataset": dataset,
-            "vector_settings": vector_settings,
-            "value": vector_query.value,
-            "record": record,
-            "query": text_query,
-            "order": vector_query.order,
-            "max_results": limit,
-        }
-
-        if filters:
-            similarity_search_params["filter"] = _to_search_engine_filter(filters, user=user)
-
-        return await search_engine.similarity_search(**similarity_search_params)
-    else:
-        search_params = {
-            "dataset": dataset,
-            "query": text_query,
-            "offset": offset,
-            "limit": limit,
-        }
-
-        if user is not None:
-            search_params["user_id"] = user.id
-
-        if filters:
-            search_params["filter"] = _to_search_engine_filter(filters, user=user)
-        if sort:
-            search_params["sort"] = _to_search_engine_sort(sort, user=user)
-
-        return await search_engine.search(**search_params)
-
-
-async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
-    try:
-        await search.validate_search_records_query(db, query, dataset_id)
-    except (ValueError, NotFoundError) as e:
-        raise UnprocessableEntityError(str(e))
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -335,9 +192,8 @@ async def delete_dataset_records(
 )
 async def search_current_user_dataset_records(
     *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+    datasets: DatasetsRepository = Depends(),
+    search_service: SearchService = Depends(),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -345,54 +201,17 @@ async def search_current_user_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(
-        db,
-        dataset_id,
-        options=[
-            selectinload(Dataset.fields),
-            selectinload(Dataset.metadata_properties),
-        ],
-    )
-
+    dataset = await datasets.get(dataset_id)
     await authorize(current_user, DatasetPolicy.search_records(dataset))
 
-    await _validate_search_records_query(db, body, dataset_id)
-
-    search_responses = await _get_search_responses(
-        db=db,
-        search_engine=search_engine,
-        dataset=dataset,
-        search_records_query=body,
-        limit=limit,
-        offset=offset,
+    return await search_service.search_records(
         user=current_user,
-    )
-
-    record_id_score_map: Dict[UUID, Dict[str, Union[float, SearchRecord, None]]] = {
-        response.record_id: {"query_score": response.score, "search_record": None}
-        for response in search_responses.items
-    }
-
-    records = await datasets.get_records_by_ids(
-        db=db,
-        dataset_id=dataset_id,
-        records_ids=list(record_id_score_map.keys()),
+        dataset=dataset,
+        search_query=body,
+        offset=offset,
+        limit=limit,
         include=include,
-        user_id=current_user.id,
-    )
-
-    for record in records:
-        record.dataset = dataset
-        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
-
-        record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record),
-            query_score=record_id_score_map[record.id]["query_score"],
-        )
-
-    return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()],
-        total=search_responses.total,
+        search_bounded_to_user=True,
     )
 
 
@@ -404,8 +223,8 @@ async def search_current_user_dataset_records(
 )
 async def search_dataset_records(
     *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
+    datasets: DatasetsRepository = Depends(),
+    search_service: SearchService = Depends(),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -413,42 +232,16 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
-
+    dataset = await datasets.get(dataset_id)
     await authorize(current_user, DatasetPolicy.search_records_with_all_responses(dataset))
 
-    await _validate_search_records_query(db, body, dataset_id)
-
-    search_responses = await _get_search_responses(
-        db=db,
-        search_engine=search_engine,
+    return await search_service.search_records(
+        user=current_user,
         dataset=dataset,
-        search_records_query=body,
-        limit=limit,
+        search_query=body,
         offset=offset,
-    )
-
-    record_id_score_map = {
-        response.record_id: {"query_score": response.score, "search_record": None}
-        for response in search_responses.items
-    }
-
-    records = await datasets.get_records_by_ids(
-        db=db,
-        dataset_id=dataset_id,
-        records_ids=list(record_id_score_map.keys()),
+        limit=limit,
         include=include,
-    )
-
-    for record in records:
-        record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record),
-            query_score=record_id_score_map[record.id]["query_score"],
-        )
-
-    return SearchRecordsResult(
-        items=[record["search_record"] for record in record_id_score_map.values()],
-        total=search_responses.total,
     )
 
 
@@ -478,14 +271,3 @@ async def list_dataset_records_search_suggestions_options(
             for sa in suggestion_agents_by_question
         ]
     )
-
-
-async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:
-    if record.metadata_ is None:
-        return None
-
-    metadata = {}
-    for metadata_name in list(record.metadata_.keys()):
-        if await is_authorized(user, RecordPolicy.get_metadata(record, metadata_name)):
-            metadata[metadata_name] = record.metadata_[metadata_name]
-    return metadata
