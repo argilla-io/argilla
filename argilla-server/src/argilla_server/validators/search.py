@@ -39,13 +39,54 @@ class SearchRecordsQueryValidator:
         self._dataset_id = dataset_id
 
     async def validate(self) -> None:
-        if self._query.filters:
-            for filter in self._query.filters.and_:
-                await self._validate_filter_scope(filter.scope)
+        try:
+            if self._query.filters:
+                for filter in self._query.filters.and_:
+                    await self._validate_filter_scope(filter.scope)
 
-        if self._query.sort:
-            for order in self._query.sort:
-                await self._validate_filter_scope(order.scope)
+            if self._query.sort:
+                for order in self._query.sort:
+                    await self._validate_filter_scope(order.scope)
+
+            if self._query.query:
+                await self._validate_search_query(self._query.query)
+        except NotFoundError as ex:
+            raise UnprocessableEntityError(str(ex)) from ex
+
+    async def _validate_search_query(self, query: Query):
+        if query.text:
+            await self._validate_text(query.text)
+        if query.vector:
+            await self._validate_vector(query.vector)
+
+    async def _validate_vector(self, vector_query: VectorQuery):
+        vector_settings = await VectorSettings.get_by(self._db, name=vector_query.name, dataset_id=self._dataset_id)
+        if vector_settings is None:
+            raise UnprocessableEntityError(f"Vector `{vector_query.name}` not found in dataset `{self._dataset_id}`.")
+
+        if vector_query.record_id is not None:
+            record = await Record.get_by(self._db, id=vector_query.record_id, dataset_id=self._dataset_id)
+            if record is None:
+                raise UnprocessableEntityError(
+                    f"Record with id `{vector_query.record_id}` not found in dataset `{self._dataset_id}`."
+                )
+
+            await record.awaitable_attrs.vectors
+
+            if not record.vector_value_by_vector_settings(vector_settings):
+                # TODO: Once we move to v2.0 we can use here UnprocessableEntityError instead of MissingVectorError
+                raise MissingVectorError(
+                    message=f"Record `{record.id}` does not have a vector for vector settings `{vector_settings.name}`",
+                    code=MISSING_VECTOR_ERROR_CODE,
+                )
+
+    async def _validate_text(self, text_query: TextQuery):
+        if (
+            text_query
+            and text_query.field
+            and not await Field.get_by(self._db, name=text_query.field, dataset_id=self._dataset_id)
+        ):
+            raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{self._dataset_id}`.")
 
     async def _validate_filter_scope(self, filter_scope: FilterScope) -> None:
         if isinstance(filter_scope, RecordFilterScope):
