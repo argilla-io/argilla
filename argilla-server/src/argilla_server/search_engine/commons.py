@@ -585,6 +585,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                     "functions": [{"random_score": {"seed": str(user_id), "field": "_seq_no"}}],
                 }
             }
+            sort = None
 
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
