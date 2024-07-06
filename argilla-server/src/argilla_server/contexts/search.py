@@ -19,58 +19,10 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.schemas.v1.records import (
-    FilterScope,
-    MetadataFilterScope,
-    RecordFilterScope,
     SearchRecordsQuery,
 )
-from argilla_server.api.schemas.v1.responses import ResponseFilterScope
-from argilla_server.api.schemas.v1.suggestions import SuggestionFilterScope
-from argilla_server.models import MetadataProperty, Question, Suggestion
-
-
-class SearchRecordsQueryValidator:
-    def __init__(self, db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID):
-        self._db = db
-        self._query = query
-        self._dataset_id = dataset_id
-
-    async def validate(self) -> None:
-        if self._query.filters:
-            for filter in self._query.filters.and_:
-                await self._validate_filter_scope(filter.scope)
-
-        if self._query.sort:
-            for order in self._query.sort:
-                await self._validate_filter_scope(order.scope)
-
-    async def _validate_filter_scope(self, filter_scope: FilterScope) -> None:
-        if isinstance(filter_scope, RecordFilterScope):
-            return
-        elif isinstance(filter_scope, ResponseFilterScope):
-            await self._validate_response_filter_scope(filter_scope)
-        elif isinstance(filter_scope, SuggestionFilterScope):
-            await self._validate_suggestion_filter_scope(filter_scope)
-        elif isinstance(filter_scope, MetadataFilterScope):
-            await self._validate_metadata_filter_scope(filter_scope)
-        else:
-            raise ValueError(f"Unknown filter scope entity `{filter_scope.entity}`")
-
-    async def _validate_response_filter_scope(self, filter_scope: ResponseFilterScope) -> None:
-        if filter_scope.question is None:
-            return
-
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
-
-    async def _validate_suggestion_filter_scope(self, filter_scope: SuggestionFilterScope) -> None:
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
-
-    async def _validate_metadata_filter_scope(self, filter_scope: MetadataFilterScope) -> None:
-        await MetadataProperty.get_by_or_raise(
-            self._db,
-            name=filter_scope.metadata_property,
-            dataset_id=self._dataset_id,
-        )
+from argilla_server.models import Question, Suggestion
+from argilla_server.validators.search import SearchRecordsQueryValidator
 
 
 async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID) -> None:
