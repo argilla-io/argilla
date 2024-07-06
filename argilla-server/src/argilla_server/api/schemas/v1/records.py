@@ -194,7 +194,9 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
+    property: Union[
+        Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal[RecordSortField.status]
+    ]
 
 
 class Records(BaseModel):
@@ -297,6 +299,16 @@ class SearchRecordsQuery(BaseModel):
     sort: Optional[List[Order]] = Field(
         None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
     )
+
+    @property
+    def text_query(self) -> Optional[TextQuery]:
+        if self.query:
+            return self.query.text
+
+    @property
+    def vector_query(self) -> Optional[VectorQuery]:
+        if self.query:
+            return self.query.vector
 
 
 class SearchRecord(BaseModel):
