@@ -361,7 +361,8 @@ class Dataset(DatabaseModel):
 
     responses_count: Mapped[int] = column_property(
         select(func.count(Response.id))
-        .where(Response.record_id.in_(select(Record.id).where(text("datasets.id == records.dataset_id"))))
+        .join(Record)
+        .filter(text("datasets.id == records.dataset_id"))
         .scalar_subquery(),
         deferred=True,
     )
