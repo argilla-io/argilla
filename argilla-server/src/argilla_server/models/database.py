@@ -359,15 +359,14 @@ class Dataset(DatabaseModel):
         order_by=VectorSettings.inserted_at.asc(),
     )
 
-    responses_count: Mapped[int] = column_property(
-        select(func.count(Response.id))
-        .join(Record)
-        .filter(text("datasets.id == records.dataset_id"))
-        .scalar_subquery(),
-        deferred=True,
-    )
-
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
+
+    @property
+    async def responses_count(self) -> int:
+        # TODO: This should be moved to proper repository
+        return await async_object_session(self).scalar(
+            select(func.count(Response.id)).join(Record).where(Record.dataset_id == self.id)
+        )
 
     @property
     def is_draft(self):

@@ -44,7 +44,7 @@ class DatasetUpdateValidator:
 
     @classmethod
     async def _validate_distribution(cls, dataset: Dataset, dataset_attrs: dict) -> None:
-        if dataset_attrs.get("distribution") is not None and (await dataset.awaitable_attrs.responses_count) > 0:
+        if dataset_attrs.get("distribution") is not None and (await dataset.responses_count) > 0:
             raise UnprocessableEntityError(
                 "Distribution settings cannot be modified for a dataset with records including responses"
             )
