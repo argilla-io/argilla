@@ -199,23 +199,6 @@ def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
     return str(vector_settings.id)
 
 
-# This function will be moved once the `sort_by` argument is removed from search and similarity_search methods
-def _unify_sort_by_with_order(sort_by: List[SortBy], order: List[Order]) -> List[Order]:
-    if order:
-        return order
-
-    new_order = []
-    for sort in sort_by:
-        if isinstance(sort.field, MetadataProperty):
-            scope = MetadataFilterScope(metadata_property=sort.field.name)
-        else:
-            scope = RecordFilterScope(property=sort.field)
-
-        new_order.append(Order(scope=scope, order=sort.order))
-
-    return new_order
-
-
 def is_response_status_scope(scope: FilterScope) -> bool:
     return isinstance(scope, ResponseFilterScope) and scope.property == "status" and scope.question is None
 
@@ -327,14 +310,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         es_responses = self._map_record_responses_to_es([response])
 
-        await self._update_document_request(index_name, id=record.id, body={"doc": {"responses": es_responses}})
+        await self._update_document_request(index_name, id=str(record.id), body={"doc": {"responses": es_responses}})
 
     async def delete_record_response(self, response: Response):
         record = response.record
         index_name = await self._get_dataset_index(record.dataset)
 
         await self._update_document_request(
-            index_name, id=record.id, body={"script": es_script_for_delete_user_response(response.user)}
+            index_name, id=str(record.id), body={"script": es_script_for_delete_user_response(response.user)}
         )
 
     async def update_record_suggestion(self, suggestion: Suggestion):
@@ -344,7 +327,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name,
-            id=suggestion.record_id,
+            id=str(suggestion.record_id),
             body={"doc": {"suggestions": es_suggestions}},
         )
 
@@ -353,7 +336,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name,
-            id=suggestion.record_id,
+            id=str(suggestion.record_id),
             body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
         )
 
@@ -576,19 +559,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
-        # TODO: Remove these arguments
-        sort_by: Optional[List[SortBy]] = None,
-        # END TODO
         offset: int = 0,
         limit: int = 100,
         user_id: Optional[str] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
-
-        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if sort_by:
-            sort = _unify_sort_by_with_order(sort_by, sort)
-        # END TODO
         index = await self._get_dataset_index(dataset)
 
         text_query = self._build_text_query(dataset, text=query)

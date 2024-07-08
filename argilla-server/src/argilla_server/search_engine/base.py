@@ -282,9 +282,6 @@ class SearchEngine(metaclass=ABCMeta):
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
-        # TODO: remove them and keep filter and order
-        sort_by: Optional[List[SortBy]] = None,
-        # END TODO
         offset: int = 0,
         limit: int = 100,
     ) -> SearchResponses:

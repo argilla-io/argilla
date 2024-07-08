@@ -16,7 +16,14 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder, RecordStatus
+from argilla_server.enums import (
+    MetadataPropertyType,
+    QuestionType,
+    ResponseStatusFilter,
+    SimilarityOrder,
+    RecordStatus,
+    SortOrder,
+)
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
     ResponseFilterScope,
@@ -28,6 +35,8 @@ from argilla_server.search_engine import (
     Filter,
     MetadataFilterScope,
     RangeFilter,
+    Order,
+    RecordFilterScope,
 )
 from argilla_server.search_engine.commons import (
     ALL_RESPONSES_STATUSES_FIELD,
@@ -820,12 +829,12 @@ class TestBaseElasticAndOpenSearchEngine:
         assert all_results.items[offset : offset + limit] == results.items
 
     @pytest.mark.parametrize(
-        ("sort_by"),
+        ("sort_order"),
         [
-            SortBy(field="inserted_at"),
-            SortBy(field="updated_at"),
-            SortBy(field="inserted_at", order="desc"),
-            SortBy(field="updated_at", order="desc"),
+            Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.asc),
+            Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.asc),
+            Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc),
+            Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc),
         ],
     )
     async def test_search_with_sort_by(
@@ -833,18 +842,15 @@ class TestBaseElasticAndOpenSearchEngine:
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        sort_by: SortBy,
+        sort_order: Order,
     ):
         def _local_sort_by(record: Record) -> Any:
-            if isinstance(sort_by.field, str):
-                return getattr(record, sort_by.field)
-            return record.metadata_[sort_by.field.name]
+            return getattr(record, sort_order.scope.property)
 
-        results = await search_engine.search(test_banking_sentiment_dataset, sort_by=[sort_by])
+        results = await search_engine.search(test_banking_sentiment_dataset, sort=[sort_order])
 
         records = test_banking_sentiment_dataset.records
-        if sort_by:
-            records = sorted(records, key=_local_sort_by, reverse=sort_by.order == "desc")
+        records = sorted(records, key=_local_sort_by, reverse=sort_order.order == "desc")
 
         assert [item.record_id for item in results.items] == [record.id for record in records]
 
