@@ -15,7 +15,6 @@
 import asyncio
 from typing import Any, Dict, Optional, List, Sequence
 
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -38,27 +37,19 @@ from argilla_server.api.schemas.v1.responses import ResponseFilterScope
 from argilla_server.api.schemas.v1.suggestions import (
     SuggestionFilterScope,
 )
-from argilla_server.contexts import datasets
-from argilla_server.validators.search import SearchRecordsQueryValidator
-from argilla_server.database import get_async_db
-from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import Dataset, User, VectorSettings, Record
 from argilla_server.repositories import RecordsRepository, DatasetsRepository
 from argilla_server.search_engine import (
     AndFilter,
     SearchEngine,
-    get_search_engine,
     SearchResponses,
 )
+from argilla_server.validators.search import SearchRecordsQueryValidator
 
 
 class SearchService:
     def __init__(
-        self,
-        datasets: DatasetsRepository = Depends(),
-        records: RecordsRepository = Depends(),
-        db: AsyncSession = Depends(get_async_db),
-        engine: SearchEngine = Depends(get_search_engine),
+        self, db: AsyncSession, engine: SearchEngine, records: RecordsRepository, datasets: DatasetsRepository
     ):
         self.db = db
         self.engine = engine
@@ -84,22 +75,27 @@ class SearchService:
         await SearchRecordsQueryValidator(self.db, search_query, dataset.id).validate()
 
         if search_query.vector_query:
-            results = await self._similarity_search(dataset, search_query, user, max_results=limit)
+            results = await self._similarity_search(
+                dataset=dataset, search_query=search_query, user=user, max_results=limit
+            )
         else:
             results = await self._search(
                 dataset=dataset,
                 search_query=search_query,
+                user=user if search_bounded_to_user else None,
                 offset=offset,
                 limit=limit,
-                user=user if search_bounded_to_user else None,
             )
 
-        records = await datasets.get_records_by_ids(
-            db=self.db,
+        include = include or RecordIncludeParam()
+
+        records = await self.records.list_by_dataset_id_and_ids(
+            ids=[r.record_id for r in results.items],
             dataset_id=dataset.id,
-            records_ids=list([r.record_id for r in results.items]),
-            include=include,
             user_id=user.id if search_bounded_to_user else None,
+            with_responses=include.with_responses,
+            with_suggestions=include.with_suggestions,
+            with_vectors=include.with_all_vectors or include.vectors,
         )
         await self._filter_records_metadata_for_user(records, user)
 
