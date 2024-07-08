@@ -203,8 +203,7 @@ const config: NuxtConfig = {
 
   publicRuntimeConfig: {
     clientVersion: pkg.version,
-    slackCommunity:
-      "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
+    slackCommunity: "http://hf.co/join/discord",
     documentationSite: "https://docs.argilla.io/",
     documentationSiteQuickStart:
       "https://docs.argilla.io/en/latest/getting_started/quickstart.html",
