@@ -193,7 +193,8 @@ async def delete_dataset_records(
 async def search_current_user_dataset_records(
     *,
     datasets: DatasetsRepository = Depends(),
-    search_service: SearchService = Depends(),
+    db: AsyncSession = Depends(get_async_db),
+    engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -203,6 +204,13 @@ async def search_current_user_dataset_records(
 ):
     dataset = await datasets.get(dataset_id)
     await authorize(current_user, DatasetPolicy.search_records(dataset))
+
+    search_service = SearchService(
+        db=db,
+        engine=engine,
+        records=RecordsRepository(db),
+        datasets=DatasetsRepository(db),
+    )
 
     return await search_service.search_records(
         user=current_user,
@@ -223,8 +231,8 @@ async def search_current_user_dataset_records(
 )
 async def search_dataset_records(
     *,
-    datasets: DatasetsRepository = Depends(),
-    search_service: SearchService = Depends(),
+    db: AsyncSession = Depends(get_async_db),
+    engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -232,8 +240,12 @@ async def search_dataset_records(
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await datasets.get(dataset_id)
+    dataset_repository = DatasetsRepository(db)
+
+    dataset = await dataset_repository.get(dataset_id)
     await authorize(current_user, DatasetPolicy.search_records_with_all_responses(dataset))
+
+    search_service = SearchService(db=db, engine=engine, records=RecordsRepository(db), datasets=dataset_repository)
 
     return await search_service.search_records(
         user=current_user,

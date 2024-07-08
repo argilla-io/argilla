@@ -315,6 +315,7 @@ async def create_vector_settings(
     return vector_settings
 
 
+# TODO: Remove this function when using the equivalent repository method
 async def get_records_by_ids(
     db: AsyncSession,
     records_ids: Iterable[UUID],
