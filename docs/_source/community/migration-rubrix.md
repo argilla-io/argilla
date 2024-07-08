@@ -65,7 +65,7 @@ This migration switch can help you with a more gradual transition into Argilla.
 
 >:warning: New datasets created from argilla won't be visible from the old rubrix instance.
 
-> 🚒 **We'd love to support you with this migration process. The easiest way is to contact us through the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) or to open a GitHub issue**
+> 🚒 **We'd love to support you with this migration process. The easiest way is to contact us through the [Slack Community](http://hf.co/join/discord) or to open a GitHub issue**
 
 ## Old versions of Rubrix
 

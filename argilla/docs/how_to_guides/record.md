@@ -82,7 +82,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
 
-    We illustrate this python dictionaries that represent your data, but we would not advise you to to define dictionaries. Instead use the `Record` object for instatiating records.
+    We illustrate this python dictionaries that represent your data, but we would not advise you to define dictionaries. Instead use the `Record` object for instantiating records.
 
     ```python
     import argilla as rg
@@ -119,16 +119,14 @@ You can add records to a dataset in two different ways: either by using a dictio
     ```
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
-    2. The data structure has keys `query` and `response` and the Argilla dataset has `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
+    2. The data structure has keys `query` and `response` and the Argilla dataset has fields `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
 
 
 === "From a Hugging Face dataset"
 
     You can also add records to a dataset using a Hugging Face dataset. This is useful when you want to use a dataset from the Hugging Face Hub and add it to your Argilla dataset.
 
-    You can add the dataset where the column names correspond to the names of fields, questions, metadata or vectors in the Argilla dataset.
-
-    If the dataset's schema does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which columns in the dataset correspond to the Argilla dataset fields.
+    You can add the dataset where the column names correspond to the names of fields, metadata or vectors in the Argilla dataset.
 
     ```python
     from uuid import uuid4
@@ -148,13 +146,13 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     2. In this example, the Hugging Face dataset matches the Argilla dataset schema. If that is not the case, you could use the `.map` of the `datasets` library to prepare the data before adding it to the Argilla dataset.
 
-    Here we use the `mapping` parameter to specify the relationship between the Hugging Face dataset and the Argilla dataset.
+    If the Hugging Face dataset's schema does not correspond to your Argilla dataset field names, you can use a `mapping` to specify the relationship. You should indicate as key the column name of the Hugging Face dataset and, as value, the field name of the Argilla dataset.
 
     ```python
-    dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"}) # (1)
+    dataset.records.log(records=hf_dataset, mapping={"text": "review", "label": "sentiment"}) # (1)
     ```
 
-    1. In this case, the `txt` key in the Hugging Face dataset corresponds to the `text` field in the Argilla dataset, and the `y` key in the Hugging Face dataset corresponds to the `label` field in the Argilla dataset.
+    1. In this case, the `text` key in the Hugging Face dataset would correspond to the `review` field in the Argilla dataset, and the `label` key in the Hugging Face dataset would correspond to the `sentiment` field in the Argilla dataset.
 
 
 ### Metadata
@@ -318,24 +316,31 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
     You can add suggestions as a dictionary, where the keys correspond to the `name`s of the labels that were configured for your dataset. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
-    # Add records to the dataset with the label 'my_label'
+        # Add records to the dataset with the label question 'my_label'
     data = [
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
-            "my_label.suggestion": "positive",
-            "my_label.suggestion.score": 0.9,
-            "my_label.suggestion.agent": "model_name"
+            "label": "positive",
+            "score": 0.9,
+            "agent": "model_name",
         },
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-            "my_label.suggestion": "negative",
-            "my_label.suggestion.score": 0.9,
-            "my_label.suggestion.agent": "model_name"
+            "label": "negative",
+            "score": 0.9,
+            "agent": "model_name",
         },
     ]
-    dataset.records.log(data)
+    dataset.records.log(
+        data=data,
+        mapping={
+            "label": "my_label",
+            "score": "my_label.suggestion.score",
+            "agent": "my_label.suggestion.agent",
+        },
+    )
     ```
 
 ### Responses
@@ -385,15 +390,15 @@ If your dataset includes some annotations, you can add those to the records as y
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
-            "my_label.response": "positive",
+            "label": "positive",
         },
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-            "my_label.response": "negative",
+            "label": "negative",
         },
     ]
-    dataset.records.log(data, user_id=user.id)
+    dataset.records.log(data, user_id=user.id, mapping={"label": "my_label.response"})
     ```
 
 ## List records
@@ -415,7 +420,7 @@ for record in dataset.records(
 
     # Access the responses of the record
     for response in record.responses:
-        print(record.["<question_name>"].value)
+        print(record["<question_name>"].value)
 ```
 
 ## Update records
@@ -460,8 +465,8 @@ dataset.records.log(records=updated_data)
 
     for record in dataset.records():
 
-        record.vectors["new_vector"] = [...]
-        record.vector["v"] = [...]
+        record.vectors["new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
+        record.vector["v"] = [ 0.1, 0.2, 0.3 ]
 
         updated_records.append(record)
 
@@ -484,7 +489,7 @@ dataset.records.delete(records=records_to_delete)
 
     ```python
     status_filter = rg.Query(
-        filter = rg.Filter(("status", "==", "pending"))
+        filter = rg.Filter(("response.status", "==", "pending"))
     )
     records_to_delete = list(dataset.records(status_filter))
 

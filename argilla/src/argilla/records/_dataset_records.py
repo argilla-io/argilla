@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import warnings
-from collections import defaultdict
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
@@ -21,16 +20,13 @@ from tqdm import tqdm
 
 from argilla._api import RecordsAPI
 from argilla._helpers import LoggingMixin
-from argilla._models import RecordModel, MetadataValue, VectorValue, FieldValue
+from argilla._models import RecordModel
+from argilla._exceptions import RecordsIngestionError
 from argilla.client import Argilla
 from argilla.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
+from argilla.records._mapping import IngestedRecordMapper
 from argilla.records._resource import Record
 from argilla.records._search import Query
-from argilla.responses import Response
-from argilla.settings import TextField, VectorField
-from argilla.settings._metadata import MetadataPropertyBase
-from argilla.settings._question import QuestionPropertyBase
-from argilla.suggestions import Suggestion
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -104,7 +100,7 @@ class DatasetRecordsIterator:
     def _fetch_from_server_with_search(self) -> List[RecordModel]:
         search_items, total = self.__client.api.records.search(
             dataset_id=self.__dataset.id,
-            query=self.__query.model,
+            query=self.__query.api_model(),
             limit=self.__batch_size,
             offset=self.__offset,
             with_responses=self.__with_responses,
@@ -188,8 +184,8 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             self._validate_vector_names(vector_names=with_vectors)
 
         return DatasetRecordsIterator(
-            self.__dataset,
-            self.__client,
+            dataset=self.__dataset,
+            client=self.__client,
             query=query,
             batch_size=batch_size,
             start_offset=start_offset,
@@ -208,7 +204,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def log(
         self,
         records: Union[List[dict], List[Record], HFDataset],
-        mapping: Optional[Dict[str, str]] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
     ) -> "DatasetRecords":
@@ -222,12 +218,12 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                      If records are defined as a dictionaries or a dataset, the keys/ column names should correspond to the
                      fields in the Argilla dataset's fields and questions. `id` should be provided to identify the records when updating.
             mapping: A dictionary that maps the keys/ column names in the records to the fields or questions in the Argilla dataset.
+                     To assign an incoming key or column to multiple fields or questions, provide a list or tuple of field or question names.
             user_id: The user id to be associated with the records' response. If not provided, the current user id is used.
             batch_size: The number of records to send in each batch. The default is 256.
 
         Returns:
             A list of Record objects representing the updated records.
-
         """
         record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
         batch_size = self._normalize_batch_size(
@@ -238,8 +234,12 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
         created_or_updated = []
         records_updated = 0
+
         for batch in tqdm(
-            iterable=range(0, len(records), batch_size), desc="Adding and updating records", unit="batch"
+            iterable=range(0, len(records), batch_size),
+            desc="Sending records...",
+            total=len(records) // batch_size,
+            unit="batch",
         ):
             self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
             batch_records = record_models[batch : batch + batch_size]
@@ -358,26 +358,36 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
 
     def _ingest_records(
         self,
-        records: Union[List[Dict[str, Any]], Dict[str, Any], List[Record], Record, HFDataset],
-        mapping: Optional[Dict[str, str]] = None,
+        records: Union[List[Dict[str, Any]], List[Record], HFDataset],
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
     ) -> List[RecordModel]:
+        """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
+
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
+
         if HFDatasetsIO._is_hf_dataset(dataset=records):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
-        if all(map(lambda r: isinstance(r, dict), records)):
-            # Records as flat dicts of values to be matched to questions as suggestion or response
-            records = [self._infer_record_from_mapping(data=r, mapping=mapping, user_id=user_id) for r in records]  # type: ignore
-        elif all(map(lambda r: isinstance(r, Record), records)):
-            for record in records:
-                record.dataset = self.__dataset
-        else:
-            raise ValueError(
-                "Records should be a a list Record instances, "
-                "a Hugging Face Dataset, or a list of dictionaries representing the records."
-            )
-        return [record.api_model() for record in records]
+
+        ingested_records = []
+        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
+        for record in records:
+            try:
+                if isinstance(record, dict):
+                    record = record_mapper(data=record)
+                elif isinstance(record, Record):
+                    record.dataset = self.__dataset
+                else:
+                    raise ValueError(
+                        "Records should be a a list Record instances, "
+                        "a Hugging Face Dataset, or a list of dictionaries representing the records."
+                        f"Found a record of type {type(record)}: {record}."
+                    )
+            except Exception as e:
+                raise RecordsIngestionError(f"Failed to ingest record from dict {record}: {e}")
+            ingested_records.append(record.api_model())
+        return ingested_records
 
     def _normalize_batch_size(self, batch_size: int, records_length, max_value: int):
         norm_batch_size = min(batch_size, records_length, max_value)
@@ -398,100 +408,3 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                 continue
             if vector_name not in self.__dataset.schema:
                 raise ValueError(f"Vector field {vector_name} not found in dataset schema.")
-
-    def _infer_record_from_mapping(
-        self,
-        data: dict,
-        mapping: Optional[Dict[str, str]] = None,
-        user_id: Optional[UUID] = None,
-    ) -> "Record":
-        """Converts a mapped record dictionary to a Record object for use by the add or update methods.
-        Args:
-            dataset: The dataset object to which the record belongs.
-            data: A dictionary representing the record.
-            mapping: A dictionary mapping source data keys to Argilla fields, questions, and ids.
-            user_id: The user id to associate with the record responses.
-        Returns:
-            A Record object.
-        """
-        record_id: Optional[str] = None
-
-        fields: Dict[str, FieldValue] = {}
-        vectors: Dict[str, VectorValue] = {}
-        metadata: Dict[str, MetadataValue] = {}
-
-        responses: List[Response] = []
-        suggestion_values: Dict[str, dict] = defaultdict(dict)
-
-        schema = self.__dataset.schema
-
-        for attribute, value in data.items():
-            schema_item = schema.get(attribute)
-            attribute_type = None
-            sub_attribute = None
-
-            # Map source data keys using the mapping
-            if mapping and attribute in mapping:
-                attribute_mapping = mapping.get(attribute)
-                attribute_mapping = attribute_mapping.split(".")
-                attribute = attribute_mapping[0]
-                schema_item = schema.get(attribute)
-                if len(attribute_mapping) > 1:
-                    attribute_type = attribute_mapping[1]
-                if len(attribute_mapping) > 2:
-                    sub_attribute = attribute_mapping[2]
-            elif schema_item is mapping is None and attribute != "id":
-                warnings.warn(
-                    message=f"""Record attribute {attribute} is not in the schema so skipping.
-                        Define a mapping to map source data fields to Argilla Fields, Questions, and ids
-                        """
-                )
-                continue
-
-            if attribute == "id":
-                record_id = value
-                continue
-
-            # Add suggestion values to the suggestions
-            if attribute_type == "suggestion":
-                if sub_attribute in ["score", "agent"]:
-                    suggestion_values[attribute][sub_attribute] = value
-
-                elif sub_attribute is None:
-                    suggestion_values[attribute].update(
-                        {"value": value, "question_name": attribute, "question_id": schema_item.id}
-                    )
-                else:
-                    warnings.warn(
-                        message=f"Record attribute {sub_attribute} is not a valid suggestion sub_attribute so skipping."
-                    )
-                continue
-
-            # Assign the value to question, field, or response based on schema item
-            if isinstance(schema_item, TextField):
-                fields[attribute] = value
-            elif isinstance(schema_item, QuestionPropertyBase) and attribute_type == "response":
-                responses.append(Response(question_name=attribute, value=value, user_id=user_id))
-            elif isinstance(schema_item, QuestionPropertyBase) and attribute_type is None:
-                suggestion_values[attribute].update(
-                    {"value": value, "question_name": attribute, "question_id": schema_item.id}
-                )
-            elif isinstance(schema_item, VectorField):
-                vectors[attribute] = value
-            elif isinstance(schema_item, MetadataPropertyBase):
-                metadata[attribute] = value
-            else:
-                warnings.warn(message=f"Record attribute {attribute} is not in the schema or mapping so skipping.")
-                continue
-
-        suggestions = [Suggestion(**suggestion_dict) for suggestion_dict in suggestion_values.values()]
-
-        return Record(
-            id=record_id,
-            fields=fields,
-            vectors=vectors,
-            metadata=metadata,
-            suggestions=suggestions,
-            responses=responses,
-            _dataset=self.__dataset,
-        )
