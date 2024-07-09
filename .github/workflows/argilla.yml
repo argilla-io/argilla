@@ -21,7 +21,7 @@ jobs:
   build:
     services:
       argilla-quickstart:
-        image: argilla/argilla-quickstart:main
+        image: argilladev/argilla-quickstart:pr-5136
         ports:
           - 6900:6900
         env:
