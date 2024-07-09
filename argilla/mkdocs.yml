@@ -145,6 +145,7 @@ nav:
   - Tutorials:
       - tutorials/index.md
       - Text classification task: tutorials/text_classification.ipynb
+      - Token classification task: tutorials/token_classification.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
   - Community:
