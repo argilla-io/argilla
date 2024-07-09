@@ -46,3 +46,7 @@ dataset = client.datasets("my_dataset")
 ::: src.argilla.datasets._resource.Dataset
     options:
         heading_level: 3
+
+::: src.argilla.datasets._export
+    options:
+        heading_level: 3
