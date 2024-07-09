@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
 from typing import Any, Type, TYPE_CHECKING, Optional
+from uuid import UUID
 
 from argilla.records import Record
 from argilla.responses import Response
+from argilla._exceptions import NotFoundError
 
 if TYPE_CHECKING:
     from argilla import Dataset
@@ -40,7 +43,7 @@ class HubImportExportMixin:
 
         Args:
             dataset: the `FeedbackDataset` to push to the Hugging Face Hub.
-            repo_id: the ID of the Hugging Face Hub repo to push the `FeedbackDataset` to.
+            repo_id: the ID of the Hugging Face Hub repo to push the `Dataset` to.
             generate_card: whether to generate a dataset card for the `FeedbackDataset` in the Hugging Face Hub. Defaults
                 to `True`.
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
@@ -92,6 +95,8 @@ class HubImportExportMixin:
     def from_hub(
         cls: Type["Dataset"],
         repo_id: str,
+        workspace: Optional[Union["Workspace", str, UUID]] = None,
+        client: Optional["Argilla"] = None,
         *args: Any,
         **kwargs: Any,
     ):
@@ -116,37 +121,51 @@ class HubImportExportMixin:
                     repo_type="dataset",
                     local_dir=tmpdirname,
                 )
-            dataset = cls.from_disk(path=tmpdirname)
-
-        hfds: Dataset = load_dataset(path=repo_id, *args, **kwargs)  # type: ignore
-
-        if isinstance(hfds, DatasetDict) and "split" not in kwargs:
-            if len(hfds.keys()) > 1:
+            dataset = cls.from_disk(path=tmpdirname, target_workspace=workspace, client=client)
+        hf_dataset: Dataset = load_dataset(path=repo_id, *args, **kwargs)  # type: ignore
+        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+            if len(hf_dataset.keys()) > 1:
                 raise ValueError(
                     "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                    f" are: {', '.join(hfds.keys())}."
+                    f" are: {', '.join(hf_dataset.keys())}."
                 )
-            hfds: Dataset = hfds[list(hfds.keys())[0]]
-
-        mapping = {col: col for col in hfds.column_names if ".suggestion" in col}
-        dataset.records.log(records=hfds, mapping=mapping)
-        records_with_responses = cls._extract_responses(hf_dataset=hfds)
-        dataset.records.log(records=records_with_responses)
+            hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+ 
+        dataset.create()
+        cls._extract_suggestions(hf_dataset=hf_dataset, dataset=dataset)
+        cls._extract_responses(hf_dataset=hf_dataset, dataset=dataset)
         return dataset
 
     @staticmethod
-    def _extract_responses(hf_dataset):
+    def _extract_suggestions(hf_dataset, dataset) -> None:
+        """ This method extracts the suggestions from a Hugging Face dataset and logs them as records. """
+        mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
+        dataset.records.log(records=hf_dataset, mapping=mapping)
+
+
+    @staticmethod
+    def _extract_responses(hf_dataset, dataset):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
 
         # Identify columns that colunms that contain responses
         responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
         response_questions = defaultdict(dict)
+        user_ids = {}
         for col in responses_columns:
             question_name = col.split(".")[0]
             if col.endswith("users"):
                 response_questions[question_name]["users"] = hf_dataset[col]
+                user_ids.update({user_id: user_id for user_id in hf_dataset[col]})
             else:
                 response_questions[question_name]["responses"] = hf_dataset[col]
+
+        # check that all response user ids are valid and replace if not
+        for user_id in user_ids:
+            try:
+                dataset.client.users._api.get(user_id)
+            except NotFoundError:
+                warnings.warn(message=f"User {user_id} not found. Assigning responses to current user..")
+                user_ids[user_id] = dataset.client.me.id
 
         # Extract responses and create Record objects
         records_with_responses = []
@@ -156,7 +175,7 @@ class HubImportExportMixin:
             for question_name, values in response_questions.items():
                 for value, user_id in zip(values["responses"][idx], values["users"][idx]):
                     response = Response(
-                        user_id=user_id,
+                        user_id=user_ids[user_id],
                         question_name=question_name,
                         value=value,
                     )
@@ -166,4 +185,4 @@ class HubImportExportMixin:
                 responses=responses,
             )
             records_with_responses.append(record)
-        return records_with_responses
+        dataset.records.log(records=records_with_responses)
