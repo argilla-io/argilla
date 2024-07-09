@@ -2,12 +2,19 @@
 
 This guide provides an overview of how to use Markdown and HTML in `TextFields` to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
 
-The `TextField` and `TextQuestion` provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below, but encourage everyone to gain inspiration to make the most of Markdown.
+The `TextField` and `TextQuestion` provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below.
 
 !!! note
-    We do assume that a `TextField` or `TextQuestion` has been configured with `use_markdown=True`. Take a loot at [`Datasets`](dataset.md) to learn more about this configuration.
+    We do assume that a `TextField` or `TextQuestion` has been configured with `use_markdown=True`. Take a look at [`Datasets`](dataset.md) to learn more about this configuration.
 
-## Multi-modal data: images, audio, video or PDFs
+!!! tip
+    You can get pretty creative with HTML. Think for example about visualizing graphs and tables. Some interesting Python package examples that allow for this are the `pandas.DataFrame.to_html` and the `plotly.io.to_html` methods.
+
+## Multi-modal support: images, audio, video, PDFs and more
+
+Argilla has basic image support in different ways that both have their pros and cons but offer the same UI experience because they both rely on HTML.
+
+![media](../assets/images/how_to_guides/markdown/media.png)
 
 ### Local content through DataURLs
 
@@ -145,9 +152,9 @@ Instead of uploading local files through DataURLs we can also visualize URLs tha
     )
     ```
 
-## Visualize chat conversations
+##  Chat and conversation support
 
-When working with chat data from multi-turn interaction with a Large Language Model, it might be nice to be able to visualize the conversation in a similar way as a common chat interface. To facilitate this, we offer the `chat_to_html` function, which converts messages from OpenAI chat format to a HTML-formatted chat interface.
+When working with chat data from multi-turn interaction with a Large Language Model, it might be nice to be able to visualize the conversation in a similar way as a common chat interface. To facilitate this, we offer the `chat_to_html` function, which converts messages from OpenAI chat format to an HTML-formatted chat interface.
 
 ??? Question "OpenAI chat format"
     The OpenAI chat format is a way to structure a list of messages as input from users and returns a model-generated message as output. These messages can only contain the `roles` "user" for human messages and "assistant", "system" or "model" for model-generated messages.
@@ -166,3 +173,5 @@ rg.Record(
     fields={"markdown_enabled_field": html}
 )
 ```
+
+![media](../assets/images/how_to_guides/markdown/chat.png)
