@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Union, Optional, Type, TYPE_CHECKING, Any
+from typing import Dict, List, Union, TYPE_CHECKING, Any
 
 from argilla.records._io._generic import GenericIO
 from argilla._helpers import resolve_hf_datasets_type
