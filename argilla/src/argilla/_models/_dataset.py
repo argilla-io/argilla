@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 from datetime import datetime
-from uuid import UUID
 from typing import Literal
+from typing import Optional
+from uuid import UUID
 
 from pydantic import field_serializer, ConfigDict
 
 from argilla._models import ResourceModel
 
 __all__ = ["DatasetModel"]
+
+from argilla._models._settings._task_distribution import TaskDistributionModel
 
 
 class DatasetModel(ResourceModel):
@@ -31,9 +33,10 @@ class DatasetModel(ResourceModel):
     guidelines: Optional[str] = None
     allow_extra_metadata: bool = True  # Ideally, the default value should be provided by the server
 
+    distribution: Optional[TaskDistributionModel] = None
+
     workspace_id: Optional[UUID] = None
     last_activity_at: Optional[datetime] = None
-    url: Optional[str] = None
 
     model_config = ConfigDict(
         validate_assignment=True,
