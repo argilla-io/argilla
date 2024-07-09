@@ -15,26 +15,12 @@
 from typing import Dict, List, Union, Optional, Type, TYPE_CHECKING, Any
 
 from argilla.records._io._generic import GenericIO
+from argilla._helpers import resolve_hf_datasets_type
 
 if TYPE_CHECKING:
     from argilla.records import Record
 
-
-def _resolve_hf_datasets_type() -> Optional[Type["HFDataset"]]:
-    """This function resolves the `datasets.Dataset` type safely in case the datasets package is not installed.
-
-    Returns:
-        Optional[Type]: The Dataset class definition in case the datasets package is installed. Otherwise, None.
-    """
-    try:
-        from datasets import Dataset
-
-        return Dataset
-    except ImportError:
-        return None
-
-
-HFDataset = _resolve_hf_datasets_type()
+HFDataset = resolve_hf_datasets_type()
 
 
 class HFDatasetsIO:
@@ -48,7 +34,7 @@ class HFDatasetsIO:
         Returns:
             bool: True if the object is a Hugging Face dataset, False otherwise.
         """
-        datasets_class = _resolve_hf_datasets_type()
+        datasets_class = resolve_hf_datasets_type()
         if datasets_class is None:
             return False
         return isinstance(dataset, datasets_class)
@@ -61,7 +47,7 @@ class HFDatasetsIO:
         Returns:
             The dataset containing the records.
         """
-        dataset_class = _resolve_hf_datasets_type()
+        dataset_class = resolve_hf_datasets_type()
         if dataset_class is None:
             raise ImportError("Hugging Face datasets is not installed. Please install it using `pip install datasets`.")
         record_dicts = GenericIO.to_dict(records, flatten=True)
