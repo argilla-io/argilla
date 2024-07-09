@@ -177,6 +177,5 @@ class HubImportExportMixin:
             records_with_responses.append(record)
         dataset.records.log(records_with_responses)
 
-        dataset.records.log(hfds)
 
         return dataset
