@@ -13,4 +13,4 @@
 # limitations under the License.
 
 from argilla.markdown.media import pdf_to_html, audio_to_html, image_to_html, video_to_html  # noqa
-from argilla.markdown.chat import openai_chat_format_to_html  # noqa
+from argilla.markdown.chat import chat_to_html  # noqa

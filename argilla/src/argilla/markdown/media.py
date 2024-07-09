@@ -24,6 +24,7 @@ SUPPORTED_MEDIA_TYPES = {
     "video": ["mp4", "webm", "ogg"],
     "audio": ["mp3", "wav", "ogg"],
     "image": ["png", "jpg", "jpeg", "ico", "svg", "gif", "apng", "avif", "webp"],
+    "document": ["pdf"],
 }
 
 

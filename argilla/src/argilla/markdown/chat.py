@@ -16,6 +16,34 @@ from typing import Dict, List
 
 import markdown
 
+CHAT_CSS_STYLE = """
+    <style>
+        .user-message, .system-message {
+            display: flex;
+            margin: 10px;
+        }
+        .user-message {
+            justify-content: flex-end;
+        }
+        .system-message {
+            justify-content: flex-start;
+        }
+        .user-message .message-content {
+            background-color: #c2e3f7;
+            color: #000000;
+        }
+        .system-message .message-content {
+            background-color: #f5f5f5;
+            color: #000000;
+        }
+        .message-content {
+            padding: 10px;
+            border-radius: 10px;
+            max-width: fit-content;
+        }
+    </style>
+    """
+
 
 def chat_to_html(messages: List[Dict[str, str]]) -> str:
     """
@@ -56,31 +84,5 @@ def chat_to_html(messages: List[Dict[str, str]]) -> str:
         html += f"{content_html}"
         html += "</div></div>"
         chat_html += html
-    style = """
-    <style>
-        .user-message, .system-message {
-            display: flex;
-            margin: 10px;
-        }
-        .user-message {
-            justify-content: flex-end;
-        }
-        .system-message {
-            justify-content: flex-start;
-        }
-        .user-message .message-content {
-            background-color: #c2e3f7;
-            color: #000000;
-        }
-        .system-message .message-content {
-            background-color: #f5f5f5;
-            color: #000000;
-        }
-        .message-content {
-            padding: 10px;
-            border-radius: 10px;
-            max-width: fit-content;
-        }
-    </style>
-    """
-    return f"<body>{style}{chat_html}</body>"
+
+    return f"<body>{CHAT_CSS_STYLE}{chat_html}</body>"
