@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from collections import defaultdict
 from tempfile import TemporaryDirectory
 from typing import Any, Type, TYPE_CHECKING, Optional
@@ -25,6 +24,9 @@ if TYPE_CHECKING:
 
 
 class HubImportExportMixin:
+    _default_dataset_repo_dir_name = ".argilla"
+    _default_configuration_files = ["settings.json", "dataset.json"]
+
     def to_hub(
         self: "Dataset",
         repo_id: str,
@@ -52,29 +54,19 @@ class HubImportExportMixin:
             size_categories_parser,
         )
 
+        hf_api = HfApi()
+
         hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
-            self.to_disk(tmpdirname, include_records=False)
-
-            _default_settings_path = os.path.join(tmpdirname, self._default_settings_path)
-            _default_dataset_path = os.path.join(tmpdirname, self._default_dataset_path)
-
-            HfApi().upload_file(
-                path_or_fileobj=_default_settings_path,
-                path_in_repo=self._default_settings_path,
+            self.to_disk(path=tmpdirname, include_records=False)
+            hf_api.upload_folder(
+                folder_path=tmpdirname,
                 repo_id=repo_id,
                 repo_type="dataset",
                 token=kwargs.get("token"),
-            )
-
-            HfApi().upload_file(
-                path_or_fileobj=_default_dataset_path,
-                path_in_repo=self._default_dataset_path,
-                repo_id=repo_id,
-                repo_type="dataset",
-                token=kwargs.get("token"),
+                path_in_repo=self._default_dataset_repo_dir_name,
             )
 
         if generate_card:
@@ -100,7 +92,6 @@ class HubImportExportMixin:
     def from_hub(
         cls: Type["Dataset"],
         repo_id: str,
-        show_progress: bool = True,
         *args: Any,
         **kwargs: Any,
     ):
@@ -114,25 +105,20 @@ class HubImportExportMixin:
         Returns:
             A `FeedbackDataset` loaded from the Hugging Face Hub.
         """
-        from datasets import DatasetDict, load_dataset
+        from datasets import DatasetDict, load_dataset, Dataset
         from huggingface_hub import hf_hub_download
 
         with TemporaryDirectory() as tmpdirname:
-            hf_hub_download(
-                repo_id=repo_id,
-                filename="settings.json",
-                repo_type="dataset",
-                local_dir=tmpdirname,
-            )
-            hf_hub_download(
-                repo_id=repo_id,
-                filename="dataset.json",
-                repo_type="dataset",
-                local_dir=tmpdirname,
-            )
-            dataset = cls.from_disk(tmpdirname)
+            for filename in cls._default_configuration_files:
+                hf_hub_download(
+                    repo_id=repo_id,
+                    filename=filename,
+                    repo_type="dataset",
+                    local_dir=tmpdirname,
+                )
+            dataset = cls.from_disk(path=tmpdirname)
 
-        hfds = load_dataset(repo_id)
+        hfds: Dataset = load_dataset(path=repo_id, *args, **kwargs)  # type: ignore
 
         if isinstance(hfds, DatasetDict) and "split" not in kwargs:
             if len(hfds.keys()) > 1:
@@ -140,26 +126,31 @@ class HubImportExportMixin:
                     "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
                     f" are: {', '.join(hfds.keys())}."
                 )
-            hfds = hfds[list(hfds.keys())[0]]
+            hfds: Dataset = hfds[list(hfds.keys())[0]]
 
         mapping = {col: col for col in hfds.column_names if ".suggestion" in col}
-        dataset.records.log(hfds, mapping=mapping)
+        dataset.records.log(records=hfds, mapping=mapping)
+        records_with_responses = cls._extract_responses(hf_dataset=hfds)
+        dataset.records.log(records=records_with_responses)
+        return dataset
 
-        # check if columns contain responses or suggestions
+    @staticmethod
+    def _extract_responses(hf_dataset):
+        """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
 
-        responses_columns = [col for col in hfds.column_names if ".responses" in col]
-
+        # Identify columns that colunms that contain responses
+        responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
         response_questions = defaultdict(dict)
-
         for col in responses_columns:
             question_name = col.split(".")[0]
             if col.endswith("users"):
-                response_questions[question_name]["users"] = hfds[col]
+                response_questions[question_name]["users"] = hf_dataset[col]
             else:
-                response_questions[question_name]["responses"] = hfds[col]
+                response_questions[question_name]["responses"] = hf_dataset[col]
 
+        # Extract responses and create Record objects
         records_with_responses = []
-        for idx, row in enumerate(hfds):
+        for idx, row in enumerate(hf_dataset):
             responses = []
             row_id = row.pop("id")
             for question_name, values in response_questions.items():
@@ -175,6 +166,4 @@ class HubImportExportMixin:
                 responses=responses,
             )
             records_with_responses.append(record)
-        dataset.records.log(records_with_responses)
-
-        return dataset
+        return records_with_responses
