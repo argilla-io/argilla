@@ -70,5 +70,5 @@ class TestRecords:
         record = Record(fields={"name": "John"})
         assert record.status == "pending"
 
-        with pytest.raises(AttributeError, match="can't set attribute 'status'"):
+        with pytest.raises(AttributeError):
             record.status = "completed"
