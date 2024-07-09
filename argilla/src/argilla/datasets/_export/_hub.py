@@ -97,6 +97,7 @@ class HubImportExportMixin:
         repo_id: str,
         workspace: Optional[Union["Workspace", str, UUID]] = None,
         client: Optional["Argilla"] = None,
+        with_records: bool = True,
         *args: Any,
         **kwargs: Any,
     ):
@@ -131,9 +132,10 @@ class HubImportExportMixin:
                 )
             hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
  
-        dataset.create()
-        cls._extract_suggestions(hf_dataset=hf_dataset, dataset=dataset)
-        cls._extract_responses(hf_dataset=hf_dataset, dataset=dataset)
+        if with_records:
+            dataset.create()
+            cls._extract_suggestions(hf_dataset=hf_dataset, dataset=dataset)
+            cls._extract_responses(hf_dataset=hf_dataset, dataset=dataset)
         return dataset
 
     @staticmethod
