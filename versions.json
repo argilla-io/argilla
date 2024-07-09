@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk",
+    "title": "docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_5173-docs-token-classification-tutorial",
     "title": "docs_5173-docs-token-classification-tutorial",
     "aliases": [],
