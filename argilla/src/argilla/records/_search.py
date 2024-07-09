@@ -56,7 +56,7 @@ class Condition(Tuple[str, str, Any]):
         field = field.strip()
         if field == "status":
             return RecordFilterScopeModel(property="status")
-        elif field == "responses.status":
+        elif field == "response.status":
             return ResponseFilterScopeModel(property="status")
         elif "metadata" in field:
             _, md_property = field.split(".")
