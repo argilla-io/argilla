@@ -131,7 +131,7 @@ class HubImportExportMixin:
                     f" are: {', '.join(hf_dataset.keys())}."
                 )
             hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
- 
+
         if with_records:
             dataset.create()
             cls._extract_suggestions(hf_dataset=hf_dataset, dataset=dataset)
@@ -140,10 +140,9 @@ class HubImportExportMixin:
 
     @staticmethod
     def _extract_suggestions(hf_dataset, dataset) -> None:
-        """ This method extracts the suggestions from a Hugging Face dataset and logs them as records. """
+        """This method extracts the suggestions from a Hugging Face dataset and logs them as records."""
         mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
         dataset.records.log(records=hf_dataset, mapping=mapping)
-
 
     @staticmethod
     def _extract_responses(hf_dataset, dataset):
