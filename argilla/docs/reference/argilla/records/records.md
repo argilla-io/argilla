@@ -12,7 +12,7 @@ The `Record` object is used to represent a single record in Argilla. It contains
 To create records, you can use the `Record` class and pass it to the `Dataset.records.log` method. The `Record` class requires a `fields` parameter, which is a dictionary of field names and values. The field names must match the field names in the dataset's `Settings` object to be accepted.
 
 ```python
-dataset.records.add(
+dataset.records.log(
     records=[
         rg.Record(
             fields={"text": "Hello World, how are you?"},
@@ -47,7 +47,7 @@ for record in dataset.records(with_metadata=True):
     record.metadata = {"department": "toys"}
 ```
 
-For changes to take effect, the user must call the `update` method on the `Dataset` object, or pass the updated records to `Dataset.records.log`. All core record atttributes can be updated in this way. Check their respective documentation for more information: [Suggestions](suggestions.md), [Responses](responses.md), [Metadata](metadata.md), [Vectors](vectors/md).
+For changes to take effect, the user must call the `update` method on the `Dataset` object, or pass the updated records to `Dataset.records.log`. All core record atttributes can be updated in this way. Check their respective documentation for more information: [Suggestions](suggestions.md), [Responses](responses.md), [Metadata](metadata.md), [Vectors](vectors.md).
 
 
 ---

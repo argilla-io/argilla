@@ -1,14 +1,16 @@
 import type { ComputedRef } from "vue";
+import { useUser } from "./useUser";
 import { RoleService } from "~/v1/domain/services/RoleService";
 
 export const useRole = (): RoleService & {
   isAdminOrOwnerRole: ComputedRef<boolean>;
 } => {
-  const { $auth } = useNuxtApp();
+  const { getUser } = useUser();
 
   const isAdminOrOwner = () => {
-    const role = $auth.user.role;
-    return role === "admin" || role === "owner";
+    const user = getUser();
+
+    return user.isAdminOrOwner;
   };
 
   const isAdminOrOwnerRole = computed(() => {

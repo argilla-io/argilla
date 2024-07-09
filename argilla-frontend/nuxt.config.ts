@@ -202,8 +202,6 @@ export default defineNuxtConfig({
 
   publicRuntimeConfig: {
     clientVersion: pkg.version,
-    slackCommunity:
-      "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
     documentationSite: "https://docs.argilla.io/",
     documentationSiteQuickStart:
       "https://docs.argilla.io/en/latest/getting_started/quickstart.html",

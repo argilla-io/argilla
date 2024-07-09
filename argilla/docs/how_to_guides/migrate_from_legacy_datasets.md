@@ -10,7 +10,7 @@ This guide will help you migrate task specific datasets to Argilla V2. These do 
 To follow this guide, you will need to have the following prerequisites:
 
 - An argilla 1.* server instance running with legacy datasets.
-- An argilla >=1.29 server instance running. If you don't have one, you can create one by following the [Argilla installation guide](../../getting_started/installation.md).
+- An argilla >=1.29 server instance running. If you don't have one, you can create one by following the [Argilla installation guide](../getting_started/installation.md).
 - The `argilla` sdk package installed in your environment.
 
 If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.
@@ -26,8 +26,12 @@ The guide will take you through three steps:
 
 ### Step 1: Retrieve the legacy dataset
 
-Connect to the Argilla V1 server via the new `argilla` package. The new sdk contains a `v1` module that allows you to connect to the Argilla V1 server:
+Connect to the Argilla V1 server via the new `argilla` package. First, you should install an extra dependency:
+```bash
+pip install "argilla[legacy]"
+```
 
+Now, you can use the `v1` module to connect to the Argilla V1 server.
 ```python
 import argilla.v1 as rg_v1
 

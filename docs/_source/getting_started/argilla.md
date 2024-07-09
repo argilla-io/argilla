@@ -5,12 +5,11 @@
 ```{admonition} Argilla 2.x
 :class: danger
 We are announcing that Argilla 1.29 is the final minor release for Argilla 1.x. Although we will continue to release bug fixes for this version, we will neither be adding nor removing any functionalities. Instead, we will focus our efforts on Argilla 2.x. Argilla 1.29 will reach its end-of-life on June 20, 2025.
-Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/dev/)!
+Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/)!
 ```
 
 <div class="social social--sidebar" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
-    <a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g"
-        class="button--primary" target="_blank">Join <span aria-label="slack" class="slack-icon"></span></a>
+    <a href="http://hf.co/join/discord" class="button--primary" target="_blank">Join<span aria-label="discord" class="discord-icon"></span>Discord</a>
     <a href="https://linkedin.com/company/argilla-io"
         class="button--primary" target="_blank">Follow on LinkedIn</a>
     <a href="https://linkedin.com/company/argilla-io"

@@ -4,7 +4,7 @@
 
 ## Argilla is a platform for building high-quality AI datasets
 
-If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+If you need support join the [Argilla Discord community](http://hf.co/join/discord)
 
 </div>
 
@@ -22,22 +22,16 @@ pip install argilla -U --pre
 
 ### 2. Connect to your Argilla server
 
-Get your `ARGILLA_API_URL`:
-
-- If you are using Docker, it is the URL shown in your browser (by default `http://localhost:6900`)
-- If you are using HF Spaces, it should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`
-
-Get your `ARGILLA_API_KEY` you find in ["My settings"](/user-settings) and copy the API key.
-
-Make sure to replace `ARGILLA_API_URL` and `ARGILLA_API_KEY` in the code below. If you are using a private HF Space, you need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
+[hf_] You need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
 
 ```python
 import argilla as rg
 
 client = rg.Argilla(
-    api_url="<api_url>",
-    api_key="<api_key>"
-    # extra_headers={"Authorization": f"Bearer {HF_TOKEN}"}
+    [local_]api_url="[LOCAL_HOST]",
+    [hf_]api_url="https://[HF_OWNER]-[HF_SPACE_NAME].hf.space",
+    api_key="[USER_API_KEY]",
+    [hf_]headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
