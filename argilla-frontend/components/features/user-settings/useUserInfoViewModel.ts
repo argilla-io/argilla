@@ -10,12 +10,12 @@ export const useUserInfoViewModel = () => {
     getWorkspacesUseCase.execute()
   );
 
-  const isLoadingWorkspaces = computed(() => {
+  const isLoadedWorkspaces = computed(() => {
     return status.value !== "idle" && status.value !== "pending";
   });
 
   return {
-    isLoadingWorkspaces,
+    isLoadedWorkspaces,
     workspaces,
     user,
   };

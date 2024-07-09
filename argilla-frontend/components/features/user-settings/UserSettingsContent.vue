@@ -36,7 +36,7 @@
         class="--heading5 --medium description__title"
         v-text="$t('userSettings.fields.workspaces')"
       />
-      <BaseBadgeSkeleton v-if="isLoadingWorkspaces" :quantity="5" />
+      <BaseBadgeSkeleton v-if="!isLoadedWorkspaces" :quantity="5" />
       <div class="workspaces" v-else-if="workspaces.length">
         <BaseBadge
           v-for="workspace in workspaces"
