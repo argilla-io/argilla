@@ -14,6 +14,8 @@
 
 import uuid
 
+import pytest
+
 from argilla import Record, Suggestion, Response
 from argilla._models import MetadataModel
 
@@ -31,6 +33,7 @@ class TestRecords:
         )
         assert (
             record.__repr__() == f"Record(id={record_id},"
+            "status=pending,"
             "fields={'name': 'John', 'age': '30'},"
             "metadata={'key': 'value'},"
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
@@ -62,3 +65,10 @@ class TestRecords:
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
         assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+
+    def test_prevent_update_record(self):
+        record = Record(fields={"name": "John"})
+        assert record.status == "pending"
+
+        with pytest.raises(AttributeError, match="can't set attribute 'status'"):
+            record.status = "completed"
