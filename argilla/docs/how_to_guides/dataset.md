@@ -491,3 +491,29 @@ dataset_to_delete = client.datasets(name="my_dataset")
 
 dataset_deleted = dataset_to_delete.delete()
 ```
+
+## Save a dataset locally
+
+You can save an existing dataset locally by calling the `to_disk` method on the `Dataset` class.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset_to_save = client.datasets(name="my_dataset")
+
+dataset_saved = dataset_to_save.to_disk(path="/path/empty-directory")
+```
+
+## Load a locally saved dataset
+
+You can load a locally saved dataset by calling the `from_disk` method on the `Dataset` class. If you want to change the name or workspace of the loaded dataset, you can use the `target_name` or `target_workspace` arguments.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+loaded_dataset = rg.Dataset.from_disk(path="/path/dataset-directory", client=client)
+```
