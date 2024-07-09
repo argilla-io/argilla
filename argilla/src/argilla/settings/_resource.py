@@ -25,7 +25,7 @@ from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
-from argilla.settings._task_distribution import OverlapTaskDistribution, DEFAULT_TASK_DISTRIBUTION, TaskDistribution
+from argilla.settings._task_distribution import DEFAULT_TASK_DISTRIBUTION, TaskDistribution
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -271,7 +271,7 @@ class Settings(Resource):
         metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
 
         if distribution:
-            distribution = OverlapTaskDistribution.from_dict(distribution)
+            distribution = TaskDistribution.from_dict(distribution)
 
         return cls(
             questions=questions,
