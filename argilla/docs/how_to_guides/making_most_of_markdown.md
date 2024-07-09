@@ -164,7 +164,7 @@ from argilla.markdown import chat_to_html
 
 messages = [
     {"role": "user", "content": "Hello! How are you?"},
-    {"role": "assistant", "content": "I'm good, thank you! How can I assist you today?"}
+    {"role": "assistant", "content": "I'm good, thank you!"}
 ]
 
 html = chat_to_html(messages)
