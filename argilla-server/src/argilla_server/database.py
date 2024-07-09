@@ -80,7 +80,17 @@ async_engine = create_async_engine(settings.database_url)
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
-async def get_async_db(isolation_level: Optional[IsolationLevel] = None) -> AsyncGenerator[AsyncSession, None]:
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    async for db in _get_async_db():
+        yield db
+
+
+async def get_serializable_async_db() -> AsyncGenerator[AsyncSession, None]:
+    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
+        yield db
+
+
+async def _get_async_db(isolation_level: Optional[IsolationLevel] = None) -> AsyncGenerator[AsyncSession, None]:
     db: AsyncSession = AsyncSessionLocal()
 
     if isolation_level is not None:
@@ -90,11 +100,6 @@ async def get_async_db(isolation_level: Optional[IsolationLevel] = None) -> Asyn
         yield db
     finally:
         await db.close()
-
-
-async def get_serializable_async_db() -> AsyncGenerator[AsyncSession, None]:
-    async for db in get_async_db(isolation_level="SERIALIZABLE"):
-        yield db
 
 
 def database_url_sync() -> str:
