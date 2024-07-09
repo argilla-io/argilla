@@ -21,6 +21,14 @@
     }
   },
   {
+    "version": "docs_5146-docs-update-old-docs-python-reference-paths",
+    "title": "docs_5146-docs-update-old-docs-python-reference-paths",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_update-documentation-of-flatten",
     "title": "docs_update-documentation-of-flatten",
     "aliases": [],
