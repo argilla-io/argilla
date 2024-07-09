@@ -905,13 +905,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#multi-modal-data-images-audio-video-or-pdfs" class="md-nav__link">
+  <a href="#multi-modal-support-images-audio-video-pdfs-and-more" class="md-nav__link">
     <span class="md-ellipsis">
-      Multi-modal data: images, audio, video or PDFs
+      Multi-modal support: images, audio, video, PDFs and more
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Multi-modal data: images, audio, video or PDFs">
+    <nav class="md-nav" aria-label="Multi-modal support: images, audio, video, PDFs and more">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -938,9 +938,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#visualize-chat-conversations" class="md-nav__link">
+  <a href="#chat-and-conversation-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Visualize chat conversations
+      Chat and conversation support
     </span>
   </a>
   
@@ -1837,13 +1837,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#multi-modal-data-images-audio-video-or-pdfs" class="md-nav__link">
+  <a href="#multi-modal-support-images-audio-video-pdfs-and-more" class="md-nav__link">
     <span class="md-ellipsis">
-      Multi-modal data: images, audio, video or PDFs
+      Multi-modal support: images, audio, video, PDFs and more
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Multi-modal data: images, audio, video or PDFs">
+    <nav class="md-nav" aria-label="Multi-modal support: images, audio, video, PDFs and more">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1870,9 +1870,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#visualize-chat-conversations" class="md-nav__link">
+  <a href="#chat-and-conversation-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Visualize chat conversations
+      Chat and conversation support
     </span>
   </a>
   
@@ -1903,12 +1903,18 @@
 
 <h1 id="making-the-most-of-markdown">Making the most of Markdown<a class="headerlink" href="#making-the-most-of-markdown" title="Permanent link">&para;</a></h1>
 <p>This guide provides an overview of how to use Markdown and HTML in <code>TextFields</code> to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.</p>
-<p>The <code>TextField</code> and <code>TextQuestion</code> provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below, but encourage everyone to gain inspiration to make the most of Markdown.</p>
+<p>The <code>TextField</code> and <code>TextQuestion</code> provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>We do assume that a <code>TextField</code> or <code>TextQuestion</code> has been configured with <code>use_markdown=True</code>. Take a loot at <a href="../dataset/"><code>Datasets</code></a> to learn more about this configuration.</p>
+<p>We do assume that a <code>TextField</code> or <code>TextQuestion</code> has been configured with <code>use_markdown=True</code>. Take a look at <a href="../dataset/"><code>Datasets</code></a> to learn more about this configuration.</p>
 </div>
-<h2 id="multi-modal-data-images-audio-video-or-pdfs">Multi-modal data: images, audio, video or PDFs<a class="headerlink" href="#multi-modal-data-images-audio-video-or-pdfs" title="Permanent link">&para;</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can get pretty creative with HTML. Think for example about visualizing graphs and tables. Some interesting Python package examples that allow for this are the <code>pandas.DataFrame.to_html</code> and the <code>plotly.io.to_html</code> methods.</p>
+</div>
+<h2 id="multi-modal-support-images-audio-video-pdfs-and-more">Multi-modal support: images, audio, video, PDFs and more<a class="headerlink" href="#multi-modal-support-images-audio-video-pdfs-and-more" title="Permanent link">&para;</a></h2>
+<p>Argilla has basic image support in different ways that both have their pros and cons but offer the same UI experience because they both rely on HTML.</p>
+<p><img alt="media" src="../../assets/images/how_to_guides/markdown/media.png" /></p>
 <h3 id="local-content-through-dataurls">Local content through DataURLs<a class="headerlink" href="#local-content-through-dataurls" title="Permanent link">&para;</a></h3>
 <p>A DataURL is a scheme that allows data to be encoded into a base64-encoded string, and then embedded directly into HTML. To facilitate this, we offer some functions: <code>image_to_html</code>, <code>audio_to_html</code>, <code>video_to_thml</code> and <code>pdf_to_html</code>. These functions accept either the file path or the file's byte data and return the corresponding HTMurl to render the media file within the Argilla user interface. Additionally, you can also set the <code>width</code> and <code>height</code> in pixel or percentage for video and image (defaults to the original dimensions) and the autoplay and loop attributes to True for audio and video (defaults to False).</p>
 <div class="admonition warning">
@@ -2035,8 +2041,8 @@
 </div>
 </div>
 </div>
-<h2 id="visualize-chat-conversations">Visualize chat conversations<a class="headerlink" href="#visualize-chat-conversations" title="Permanent link">&para;</a></h2>
-<p>When working with chat data from multi-turn interaction with a Large Language Model, it might be nice to be able to visualize the conversation in a similar way as a common chat interface. To facilitate this, we offer the <code>chat_to_html</code> function, which converts messages from OpenAI chat format to a HTML-formatted chat interface.</p>
+<h2 id="chat-and-conversation-support">Chat and conversation support<a class="headerlink" href="#chat-and-conversation-support" title="Permanent link">&para;</a></h2>
+<p>When working with chat data from multi-turn interaction with a Large Language Model, it might be nice to be able to visualize the conversation in a similar way as a common chat interface. To facilitate this, we offer the <code>chat_to_html</code> function, which converts messages from OpenAI chat format to an HTML-formatted chat interface.</p>
 <details class="question">
 <summary>OpenAI chat format</summary>
 <p>The OpenAI chat format is a way to structure a list of messages as input from users and returns a model-generated message as output. These messages can only contain the <code>roles</code> "user" for human messages and "assistant", "system" or "model" for model-generated messages.</p>
@@ -2045,7 +2051,7 @@
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello! How are you?&quot;</span><span class="p">},</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;I&#39;m good, thank you! How can I assist you today?&quot;</span><span class="p">}</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;I&#39;m good, thank you!&quot;</span><span class="p">}</span>
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">]</span>
 </span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">html</span> <span class="o">=</span> <span class="n">chat_to_html</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
@@ -2054,6 +2060,7 @@
 </span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;markdown_enabled_field&quot;</span><span class="p">:</span> <span class="n">html</span><span class="p">}</span>
 </span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="p">)</span>
 </span></code></pre></div>
+<p><img alt="media" src="../../assets/images/how_to_guides/markdown/chat.png" /></p>
 
 
 
