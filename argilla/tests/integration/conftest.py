@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import uuid
 
 import pytest
 
@@ -34,3 +35,9 @@ def cleanup(client: rg.Argilla):
     for user in client.users:
         if user.username.startswith("test_"):
             user.delete()
+
+
+@pytest.fixture()
+def dataset_name() -> str:
+    """use this fixture to autogenerate a safe dataset name for tests"""
+    return f"test_dataset_{uuid.uuid4()}"
