@@ -43,7 +43,7 @@ class HubImportExportMixin:
         **kwargs,
     ) -> None:
         """Pushes the `Dataset` to the Hugging Face Hub. If the dataset has been previously pushed to the
-        Hugging Face Hub, it will be updated instead.
+        Hugging Face Hub, it will be updated instead of creating a new dataset repo.
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to push the `Dataset` to.
