@@ -32,9 +32,7 @@ class DatasetModel(ResourceModel):
 
     guidelines: Optional[str] = None
     allow_extra_metadata: bool = True  # Ideally, the default value should be provided by the server
-
     distribution: Optional[TaskDistributionModel] = None
-
     workspace_id: Optional[UUID] = None
     last_activity_at: Optional[datetime] = None
 
