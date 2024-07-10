@@ -56,11 +56,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk/how_to_guides/making_most_of_markdown/</loc>
-         <lastmod>2024-07-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://argilla-io.github.io/argilla/docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk/how_to_guides/migrate_from_legacy_datasets/</loc>
          <lastmod>2024-07-10</lastmod>
          <changefreq>daily</changefreq>
@@ -72,6 +67,11 @@
     </url>
     <url>
          <loc>https://argilla-io.github.io/argilla/docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk/how_to_guides/record/</loc>
+         <lastmod>2024-07-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla/docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk/how_to_guides/use_markdown_to_format_rich_content/</loc>
          <lastmod>2024-07-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
