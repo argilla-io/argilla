@@ -52,8 +52,8 @@ class DiskImportExportMixin(ABC):
         # Export the dataset model, settings and records
         self._persist_dataset_model(path=dataset_path)
         self.settings.to_json(path=settings_path)
-        if self.exists():
-            self.records.to_json(path=records_path)
+        self.records.to_json(path=records_path)
+
         return path
 
     @classmethod
