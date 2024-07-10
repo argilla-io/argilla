@@ -26,7 +26,7 @@
     
     
       
-        <title>Making the most of Markdown - Argilla Docs</title>
+        <title>Use Markdown to format rich content - Argilla Docs</title>
       
     
     
@@ -71,7 +71,7 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Making the most of Markdown - Argilla Docs" >
+        <meta  property="og:title"  content="Use Markdown to format rich content - Argilla Docs" >
       
         <meta  property="og:description"  content="The Argilla python server SDK" >
       
@@ -87,7 +87,7 @@
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Making the most of Markdown - Argilla Docs" >
+        <meta  name="twitter:title"  content="Use Markdown to format rich content - Argilla Docs" >
       
         <meta  name="twitter:description"  content="The Argilla python server SDK" >
       
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Making the most of Markdown
+              Use Markdown to format rich content
             
           </span>
         </div>
@@ -872,7 +872,7 @@
           
   
   <span class="md-ellipsis">
-    Making the most of Markdown
+    Use Markdown to format rich content
   </span>
   
 
@@ -883,7 +883,7 @@
         
   
   <span class="md-ellipsis">
-    Making the most of Markdown
+    Use Markdown to format rich content
   </span>
   
 
@@ -1903,17 +1903,17 @@
 
 <h1 id="use-markdown-to-format-rich-content">Use Markdown to format rich content<a class="headerlink" href="#use-markdown-to-format-rich-content" title="Permanent link">&para;</a></h1>
 <p>This guide provides an overview of how to use Markdown and HTML in <code>TextFields</code> to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.</p>
-<p>The <code>TextField</code> and <code>TextQuestion</code> provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below.</p>
+<p>The <code>TextField</code> and <code>TextQuestion</code> provide the option to enable Markdown and, therefore, HTML. Given the flexibility of HTML, we can have great control over how data is presented to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates below.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>We do assume that a <code>TextField</code> or <code>TextQuestion</code> has been configured with <code>use_markdown=True</code>. Take a look at <a href="../dataset/"><code>Datasets</code></a> to learn more about this configuration.</p>
+<p>We assume that a <code>TextField</code> or <code>TextQuestion</code> has been configured with <code>use_markdown=True</code>. To learn more about the dataset's settings, take a look at <a href="../dataset/">this guide</a>.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>You can get pretty creative with HTML. Think for example about visualizing graphs and tables. Some interesting Python package examples that allow for this are the <code>pandas.DataFrame.to_html</code> and the <code>plotly.io.to_html</code> methods.</p>
+<p>You can get pretty creative with HTML. For example, think about visualizing graphs and tables. You can use some interesting Python packages methods like <code>pandas.DataFrame.to_html</code> and <code>plotly.io.to_html</code>.</p>
 </div>
 <h2 id="multi-modal-support-images-audio-video-pdfs-and-more">Multi-modal support: images, audio, video, PDFs and more<a class="headerlink" href="#multi-modal-support-images-audio-video-pdfs-and-more" title="Permanent link">&para;</a></h2>
-<p>Argilla has basic image support in different ways that both have their pros and cons but offer the same UI experience because they both rely on HTML.</p>
+<p>Argilla has basic multi-modal support in different ways, each with pros and cons, but they both offer the same UI experience because they both rely on HTML.</p>
 <p><img alt="media" src="../../assets/images/how_to_guides/markdown/media.png" /></p>
 <h3 id="local-content-through-dataurls">Local content through DataURLs<a class="headerlink" href="#local-content-through-dataurls" title="Permanent link">&para;</a></h3>
 <p>A DataURL is a scheme that allows data to be encoded into a base64-encoded string, and then embedded directly into HTML. To facilitate this, we offer some functions: <code>image_to_html</code>, <code>audio_to_html</code>, <code>video_to_thml</code> and <code>pdf_to_html</code>. These functions accept either the file path or the file's byte data and return the corresponding HTMurl to render the media file within the Argilla user interface. Additionally, you can also set the <code>width</code> and <code>height</code> in pixel or percentage for video and image (defaults to the original dimensions) and the autoplay and loop attributes to True for audio and video (defaults to False).</p>
@@ -1986,7 +1986,7 @@
 </div>
 </div>
 <h3 id="hosted-content">Hosted content<a class="headerlink" href="#hosted-content" title="Permanent link">&para;</a></h3>
-<p>Instead of uploading local files through DataURLs we can also visualize URLs that link directly to media files such as images, audio, video, and PDFs hosted on a public or private server. In this case, you can use basic HTML to visualize content that is available on something like Google Photos or decide to configure a private media server.</p>
+<p>Instead of uploading local files through DataURLs, we can also visualize URLs directly linking to media files such as images, audio, video, and PDFs hosted on a public or private server. In this case, you can use basic HTML to visualize content available on platforms like Google Drive or decide to configure a private media server.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>When trying to access content from a private media server you have to ensure that the Argilla server has network access to the private media server, which might be done through something like IP whitelisting.</p>
