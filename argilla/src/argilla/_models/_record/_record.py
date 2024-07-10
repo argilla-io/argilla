@@ -30,14 +30,12 @@ FieldValue = Union[str, None]
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
+    status: Literal["pending", "completed"] = "pending"
     fields: Optional[Dict[str, FieldValue]] = None
     metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
-
-    status: Literal["pending", "completed"] = "pending"
-
     external_id: Optional[Any] = None
 
     @field_serializer("external_id", when_used="unless-none")
