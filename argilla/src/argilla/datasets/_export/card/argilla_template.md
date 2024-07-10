@@ -47,7 +47,7 @@ from datasets import load_dataset
 ds = load_dataset("{{ repo_id }}")
 ```
 
-This will only load the records of the dataset, but not the Argilla settings. 
+This will only load the records of the dataset, but not the Argilla settings.
 
 ## Dataset Structure
 
@@ -81,7 +81,7 @@ The **questions** are the questions that will be asked to the annotators. They c
 {% if argilla_metadata_properties %}
 ### Metadata
 
-The **metadata** is a dictionary that can be used to provide additional information about the dataset record. 
+The **metadata** is a dictionary that can be used to provide additional information about the dataset record.
 | Metadata Name | Title | Type | Values | Visible for Annotators |
 | ------------- | ----- | ---- | ------ | ---------------------- |
 {% for metadata in argilla_metadata_properties %} | {{ metadata.name }} | {{ metadata.title }} | {{ metadata.type }} | {% if metadata.values %}{{ metadata.values }}{% else %}{{ metadata.min }} - {{ metadata.max }}{% endif %} | {{ metadata.visible_for_annotators }} |
