@@ -60,7 +60,7 @@ class HubImportExportMixin:
             size_categories_parser,
         )
 
-        hf_api = HfApi()
+        hf_api = HfApi(token=kwargs.get("token"))
 
         hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
         hfds.push_to_hub(repo_id, *args, **kwargs)
