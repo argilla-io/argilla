@@ -66,7 +66,7 @@ class HubImportExportMixin:
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
-            self.to_disk(path=tmpdirname, include_records=False)
+            self.to_disk(path=tmpdirname, with_records=False)
             hf_api.upload_folder(
                 folder_path=tmpdirname,
                 repo_id=repo_id,
