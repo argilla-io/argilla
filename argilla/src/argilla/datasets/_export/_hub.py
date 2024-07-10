@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
@@ -64,33 +65,35 @@ class HubImportExportMixin:
         hfds.push_to_hub(repo_id, *args, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
-            self.to_disk(path=tmpdirname, with_records=False)
+            config_dir = os.path.join(tmpdirname, self._DEFAULT_DATASET_REPO_DIR)
+            os.makedirs(config_dir)
+            self.to_disk(path=config_dir, with_records=False)
+
+            if generate_card:
+                sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
+                sample_huggingface_record = hfds[0]
+                card = ArgillaDatasetCard.from_template(
+                    card_data=DatasetCardData(
+                        size_categories=size_categories_parser(len(hfds)),
+                        tags=["rlfh", "argilla", "human-feedback"],
+                    ),
+                    repo_id=repo_id,
+                    argilla_fields=self.settings.fields,
+                    argilla_questions=self.settings.questions,
+                    argilla_guidelines=self.settings.guidelines or None,
+                    argilla_vectors_settings=self.settings.vectors or None,
+                    argilla_metadata_properties=self.settings.metadata,
+                    argilla_record=sample_argilla_record.to_dict(),
+                    huggingface_record=sample_huggingface_record,
+                )
+                card.save(filepath=os.path.join(tmpdirname, "README.md"))
+
             hf_api.upload_folder(
                 folder_path=tmpdirname,
                 repo_id=repo_id,
                 repo_type="dataset",
                 token=kwargs.get("token"),
-                path_in_repo=self._DEFAULT_DATASET_REPO_DIR,
             )
-
-        if generate_card:
-            sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
-            sample_huggingface_record = hfds[0]
-            card = ArgillaDatasetCard.from_template(
-                card_data=DatasetCardData(
-                    size_categories=size_categories_parser(len(hfds)),
-                    tags=["rlfh", "argilla", "human-feedback"],
-                ),
-                repo_id=repo_id,
-                argilla_fields=self.settings.fields,
-                argilla_questions=self.settings.questions,
-                argilla_guidelines=self.settings.guidelines or None,
-                argilla_vectors_settings=self.settings.vectors or None,
-                argilla_metadata_properties=self.settings.metadata,
-                argilla_record=sample_argilla_record.to_dict(),
-                huggingface_record=sample_huggingface_record,
-            )
-            card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
 
     @classmethod
     def from_hub(
@@ -119,7 +122,10 @@ class HubImportExportMixin:
         from huggingface_hub import snapshot_download
 
         folder_path = snapshot_download(  # download both files in parallel
-            repo_id=repo_id, repo_type="dataset", allow_patterns=cls._DEFAULT_CONFIGURATION_FILES, token=kwargs.get("token")
+            repo_id=repo_id,
+            repo_type="dataset",
+            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+            token=kwargs.get("token"),
         )
 
         dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
