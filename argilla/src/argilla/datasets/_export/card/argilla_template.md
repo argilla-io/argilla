@@ -6,41 +6,40 @@
 
 # Dataset Card for {{ repo_id.split("/")[-1] }}
 
-This dataset has been created with [Argilla](https://docs.argilla.io).
+{% if homepage_url %}
+- **Homepage:** [{{ homepage_url }}]({{ homepage_url }})
+{% endif %}
+{% if repo_url %}
+- **Repository:** [{{ repo_url }}]({{ repo_url }})
+{% endif %}
+{% if paper_url %}
+- **Paper:** [{{ paper_url }}]({{ paper_url }})
+{% endif %}
+{% if leaderboard_url %}
+- **Leaderboard:** [{{ leaderboard_url }}]({{ leaderboard_url }})
+{% endif %}
+{% if point_of_contact %}
+- **Point of Contact:** {{ point_of_contact }}
+{% endif %}
 
-As shown in the sections below, this dataset can be loaded into Argilla as explained in [Load with Argilla](#load-with-argilla), or used directly with the `datasets` library in [Load with `datasets`](#load-with-datasets).
+This dataset has been created with [Argilla](https://argilla-io.github.io). As shown in the sections below, this dataset can be loaded into Argilla as explained in [Load with Argilla](#load-with-argilla), or used directly with the `datasets` library in [Load with `datasets`](#load-with-datasets).
 
-## Dataset Description
 
-- **Homepage:** {{ homepage_url | default("https://argilla.io", true)}}
-- **Repository:** {{ repo_url | default("https://github.com/argilla-io/argilla", true)}}
-- **Paper:** {{ paper_url | default("", true)}}
-- **Leaderboard:** {{ leaderboard_url | default("", true)}}
-- **Point of Contact:** {{ point_of_contact | default("", true)}}
+## Using this dataset with Argilla
 
-### Dataset Summary
-
-This dataset contains:
-
-* A dataset configuration file conforming to the Argilla dataset format named `argilla.yaml`. This configuration file will be used to configure the dataset when using the `FeedbackDataset.from_huggingface` method in Argilla.
-
-* Dataset records in a format compatible with HuggingFace `datasets`. These records will be loaded automatically when using `FeedbackDataset.from_huggingface` and can be loaded independently using the `datasets` library via `load_dataset`.
-
-* The [annotation guidelines](#annotation-guidelines) that have been used for building and curating the dataset, if they've been defined in Argilla.
-
-### Load with Argilla
-
-To load with Argilla, you'll just need to install Argilla as `pip install argilla --upgrade` and then use the following code:
+To load with Argilla, you'll just need to install Argilla as `pip install argilla --pre --upgrade` and then use the following code:
 
 ```python
-import argilla_v1 as rg
+import argilla as rg
 
-ds = rg.FeedbackDataset.from_huggingface("{{ repo_id }}")
+ds = rg.Dataset.from_hub("{{ repo_id }}")
 ```
 
-### Load with `datasets`
+This will load the settings and records from the dataset repository and push them to the Argilla instance.
 
-To load this dataset with `datasets`, you'll just need to install `datasets` as `pip install datasets --upgrade` and then use the following code:
+## Using this dataset with `datasets`
+
+To load the records of this dataset with `datasets`, you'll just need to install `datasets` as `pip install datasets --upgrade` and then use the following code:
 
 ```python
 from datasets import load_dataset
@@ -48,28 +47,28 @@ from datasets import load_dataset
 ds = load_dataset("{{ repo_id }}")
 ```
 
-### Supported Tasks and Leaderboards
-
-This dataset can contain [multiple fields, questions and responses](https://docs.argilla.io/en/latest/conceptual_guides/data_model.html#feedback-dataset) so it can be used for different NLP tasks, depending on the configuration. The dataset structure is described in the [Dataset Structure section](#dataset-structure).
-
-There are no leaderboards associated with this dataset.
-
-### Languages
-
-{{ languages_section | default("[More Information Needed]", true)}}
+This will only load the records of the dataset, but not the Argilla settings. 
 
 ## Dataset Structure
 
-### Data in Argilla
+This dataset repo contains:
+
+* Dataset records in a format compatible with HuggingFace `datasets`. These records will be loaded automatically when using `rg.Dataset.from_hub` and can be loaded independently using the `datasets` library via `load_dataset`.
+* The [annotation guidelines](#annotation-guidelines) that have been used for building and curating the dataset, if they've been defined in Argilla.
+* A dataset configuration folder conforming to the Argilla dataset format in `.argilla`.
 
 The dataset is created in Argilla with: **fields**, **questions**, **suggestions**, **metadata**, **vectors**, and **guidelines**.
 
-The **fields** are the dataset records themselves, for the moment just text fields are supported. These are the ones that will be used to provide responses to the questions.
+### Fields
+
+The **fields** are the features or text of a dataset's records. For example, the 'text' column of a text classification dataset of the 'prompt' column of an instruction following dataset.
 
 | Field Name | Title | Type | Required | Markdown |
 | ---------- | ----- | ---- | -------- | -------- |
 {% for field in argilla_fields %}| {{ field.name }} | {{ field.title }} | {{ field.type }} | {{ field.required }} | {{ field.use_markdown }} |
 {% endfor %}
+
+### Questions
 
 The **questions** are the questions that will be asked to the annotators. They can be of different types, such as rating, text, label_selection, multi_label_selection, or ranking.
 
@@ -78,12 +77,20 @@ The **questions** are the questions that will be asked to the annotators. They c
 {% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.type }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% else %}N/A{% endif %} |
 {% endfor %}
 
-The **suggestions** are human or machine generated recommendations for each question to assist the annotator during the annotation process, so those are always linked to the existing questions, and named appending "-suggestion" and "-suggestion-metadata" to those, containing the value/s of the suggestion and its metadata, respectively. So on, the possible values are the same as in the table above, but the column name is appended with "-suggestion" and the metadata is appended with "-suggestion-metadata".
+<!-- check length of metadata properties -->
+{% if argilla_metadata_properties %}
+### Metadata
 
-The **metadata** is a dictionary that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
+The **metadata** is a dictionary that can be used to provide additional information about the dataset record. 
+| Metadata Name | Title | Type | Values | Visible for Annotators |
+| ------------- | ----- | ---- | ------ | ---------------------- |
+{% for metadata in argilla_metadata_properties %} | {{ metadata.name }} | {{ metadata.title }} | {{ metadata.type }} | {% if metadata.values %}{{ metadata.values }}{% else %}{{ metadata.min }} - {{ metadata.max }}{% endif %} | {{ metadata.visible_for_annotators }} |
+{% endfor %}
+{% endif %}
 
 {% if argilla_vectors_settings %}
-**✨ NEW** The **vectors** are different columns that contain a vector in floating point, which is constraint to the pre-defined dimensions in the **vectors_settings** when configuring the vectors within the dataset itself, also the dimensions will always be 1-dimensional. The **vectors** are optional and identified by the pre-defined vector name in the dataset configuration file in `argilla.yaml`.
+### Vectors
+The **vectors** contain a vector representation of the record that can be used in  search.
 
 | Vector Name | Title | Dimensions |
 |-------------|-------|------------|
@@ -91,12 +98,6 @@ The **metadata** is a dictionary that can be used to provide additional informat
 {% endfor %}
 {% endif %}
 
-| Metadata Name | Title | Type | Values | Visible for Annotators |
-| ------------- | ----- | ---- | ------ | ---------------------- |
-{% for metadata in argilla_metadata_properties %} | {{ metadata.name }} | {{ metadata.title }} | {{ metadata.type }} | {% if metadata.values %}{{ metadata.values }}{% else %}{{ metadata.min }} - {{ metadata.max }}{% endif %} | {{ metadata.visible_for_annotators }} |
-{% endfor %}
-
-The **guidelines**, are optional as well, and are just a plain string that can be used to provide instructions to the annotators. Find those in the [annotation guidelines](#annotation-guidelines) section.
 
 ### Data Instances
 
@@ -112,32 +113,6 @@ While the same record in HuggingFace `datasets` looks as follows:
 {{ huggingface_record | tojson(indent=4) }}
 ```
 
-### Data Fields
-
-Among the dataset fields, we differentiate between the following:
-
-* **Fields:** These are the dataset records themselves, for the moment just text fields are supported. These are the ones that will be used to provide responses to the questions.
-    {% for field in argilla_fields %}
-    * {% if field.required == false %}(optional) {% endif %}**{{ field.name }}** is of type `{{ field.type }}`.{% endfor %}
-
-* **Questions:** These are the questions that will be asked to the annotators. They can be of different types, such as `RatingQuestion`, `TextQuestion`, `LabelQuestion`, `MultiLabelQuestion`, and `RankingQuestion`.
-    {% for question in argilla_questions %}
-    * {% if question.required == false %}(optional) {% endif %}**{{ question.name }}** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}{% if question.description %}, and description "{{ question.description }}"{% endif %}.{% endfor %}
-
-* **Suggestions:** As of Argilla 1.13.0, the suggestions have been included to provide the annotators with suggestions to ease or assist during the annotation process. Suggestions are linked to the existing questions, are always optional, and contain not just the suggestion itself, but also the metadata linked to it, if applicable.
-    {% for question in argilla_questions %}
-    * (optional) **{{ question.name }}-suggestion** is of type `{{ question.type }}`{% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %} with the following allowed values {% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% endif %}.{% endfor %}
-
-{% if argilla_vectors_settings %}
-* **✨ NEW** **Vectors**: As of Argilla 1.19.0, the vectors have been included in order to add support for similarity search to explore similar records based on vector search powered by the search engine defined. The vectors are optional and cannot be seen within the UI, those are uploaded and internally used. Also the vectors will always be optional, and only the dimensions previously defined in their settings.
-    {% for vector in argilla_vectors_settings %}
-    * (optional) **{{ vector.name }}** is of type `float32` and has a dimension of (1, `{{ vector.dimensions }}`).{% endfor %}
-{% endif %}
-
-Additionally, we also have two more fields that are optional and are the following:
-
-* **metadata:** This is an optional field that can be used to provide additional information about the dataset record. This can be useful to provide additional context to the annotators, or to provide additional information about the dataset record itself. For example, you can use this to provide a link to the original source of the dataset record, or to provide additional information about the dataset record itself, such as the author, the date, or the source. The metadata is always optional, and can be potentially linked to the `metadata_properties` defined in the dataset configuration file in `argilla.yaml`.
-* **external_id:** This is an optional field that can be used to provide an external ID for the dataset record. This can be useful if you want to link the dataset record to an external resource, such as a database or a file.
 
 ### Data Splits
 
