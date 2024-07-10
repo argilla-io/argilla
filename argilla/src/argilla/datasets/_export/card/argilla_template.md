@@ -35,7 +35,7 @@ import argilla as rg
 ds = rg.Dataset.from_hub("{{ repo_id }}")
 ```
 
-This will load the settings and records from the dataset repository and push them to the Argilla instance.
+This will load the settings and records from the dataset repository and push them to you Argilla server for exploration and annotation.
 
 ## Using this dataset with `datasets`
 
