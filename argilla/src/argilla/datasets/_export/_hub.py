@@ -115,7 +115,7 @@ class HubImportExportMixin:
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
-            A `FeedbackDataset` loaded from the Hugging Face Hub.
+            A `Dataset` loaded from the Hugging Face Hub.
         """
         from datasets import DatasetDict, load_dataset, Dataset
         from huggingface_hub import hf_hub_download
