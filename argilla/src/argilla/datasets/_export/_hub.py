@@ -119,7 +119,10 @@ class HubImportExportMixin:
         from huggingface_hub import snapshot_download
 
         folder_path = snapshot_download(  # download both files in parallel
-            repo_id=repo_id, repo_type="dataset", allow_patterns=cls._DEFAULT_CONFIGURATION_FILES, token=kwargs.get("token")
+            repo_id=repo_id,
+            repo_type="dataset",
+            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+            token=kwargs.get("token"),
         )
 
         dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
