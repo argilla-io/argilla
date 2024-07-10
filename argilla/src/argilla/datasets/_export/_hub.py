@@ -21,14 +21,12 @@ from uuid import UUID
 from argilla.records import Record
 from argilla.responses import Response
 from argilla._exceptions import NotFoundError
-from argilla._helpers import resolve_hf_datasets_type
 
 if TYPE_CHECKING:
     from argilla import Dataset
     from argilla import Argilla
     from argilla import Workspace
-
-HFDataset = resolve_hf_datasets_type()
+    from datasets import Dataset as HFDataset
 
 
 class HubImportExportMixin:
