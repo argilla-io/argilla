@@ -2,10 +2,34 @@
 
 This guide provides an overview of how to use Markdown and HTML in `TextFields` to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
 
-The `TextField` and `TextQuestion` provide the option to enable Markdown and, therefore, HTML. Given the flexibility of HTML, we can have great control over how data is presented to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates below.
+The `TextField` and `TextQuestion` provide the option to enable Markdown and therefore HTML by setting `use_markdown=True`. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below.
 
-!!! note
-    We assume that a `TextField` or `TextQuestion` has been configured with `use_markdown=True`. To learn more about the dataset's settings, take a look at [this guide](dataset.md).
+!!! info "Main Methods"
+
+    === "image_to_html"
+        ```python
+        image_to_html("local_image_file.png")
+        ```
+
+    === "audio_to_html"
+        ```python
+        audio_to_html("local_audio_file.mp3")
+        ```
+
+    === "video_to_html"
+        ```python
+        audio_to_html("local_video_file.mp4")
+        ```
+    === "pdf_to_html"
+        ```python
+        pdf_to_html("local_pdf_file.pdf")
+        ```
+
+    === "chat_to_html"
+        ```python
+        chat_to_html([{"role": "user", "content": "hello"}])
+        ```
+    > Check the [Markdown - Python Reference](../reference/argilla/markdown.md) to see the arguments of the `rg.markdown` methods in detail.
 
 !!! tip
     You can get pretty creative with HTML. For example, think about visualizing graphs and tables. You can use some interesting Python packages methods like `pandas.DataFrame.to_html` and `plotly.io.to_html`.
@@ -159,6 +183,7 @@ When working with chat data from multi-turn interaction with a Large Language Mo
 ??? Question "OpenAI chat format"
     The OpenAI chat format is a way to structure a list of messages as input from users and returns a model-generated message as output. These messages can only contain the `roles` "user" for human messages and "assistant", "system" or "model" for model-generated messages.
 
+
 ```python
 from argilla.markdown import chat_to_html
 
@@ -175,3 +200,5 @@ rg.Record(
 ```
 
 ![media](../assets/images/how_to_guides/markdown/chat.png)
+
+Check the [Markdown - Python Reference]() to see these methods in detail.
