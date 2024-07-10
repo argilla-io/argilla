@@ -63,7 +63,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     Learn how to use Markdown and HTML in TextFields to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
 
-    [:octicons-arrow-right-24: How-to guide](making_most_of_markdown.md)
+    [:octicons-arrow-right-24: How-to guide](use_markdown_to_format_rich_content.md)
 
 -   __Migrate to Argilla V2__
 
