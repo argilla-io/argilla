@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
 
 class HubImportExportMixin:
-    _default_dataset_repo_dir_name = ".argilla"
-    _default_configuration_files = ["settings.json", "dataset.json"]
+    _DEFAULT_DATASET_REPO_DIR = ".argilla"
+    _DEFAULT_CONFIGURATION_FILES = ["settings.json", "dataset.json"]
 
     def to_hub(
         self: "Dataset",
@@ -70,7 +70,7 @@ class HubImportExportMixin:
                 repo_id=repo_id,
                 repo_type="dataset",
                 token=kwargs.get("token"),
-                path_in_repo=self._default_dataset_repo_dir_name,
+                path_in_repo=self._DEFAULT_DATASET_REPO_DIR,
             )
 
         if generate_card:
@@ -119,7 +119,7 @@ class HubImportExportMixin:
         from huggingface_hub import hf_hub_download
 
         with TemporaryDirectory() as tmpdirname:
-            for filename in cls._default_configuration_files:
+            for filename in cls._DEFAULT_CONFIGURATION_FILES:
                 hf_hub_download(
                     repo_id=repo_id,
                     filename=filename,
