@@ -16,23 +16,22 @@ import warnings
 from abc import abstractmethod
 from collections.abc import Sequence
 from functools import cached_property
-from typing import TYPE_CHECKING, overload, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union, overload
 
 from argilla import _api
 from argilla._api._client import DEFAULT_HTTP_CONFIG
 from argilla._helpers import GenericIterator
+from argilla._helpers._deploy import DeploymentMixin
 from argilla._helpers._resource_repr import ResourceHTMLReprMixin
-from argilla._models import UserModel, WorkspaceModel, DatasetModel
+from argilla._models import DatasetModel, UserModel, WorkspaceModel
 
 if TYPE_CHECKING:
-    from argilla import Workspace
-    from argilla import Dataset
-    from argilla import User
+    from argilla import Dataset, User, Workspace
 
 __all__ = ["Argilla"]
 
 
-class Argilla(_api.APIClient):
+class Argilla(_api.APIClient, DeploymentMixin):
     """Argilla API client. This is the main entry point to interact with the API.
 
     Attributes:
