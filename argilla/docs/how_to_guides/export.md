@@ -6,7 +6,7 @@ description: In this section, we will provide a step-by-step guide to show how t
 
 This guide provides an overview of how to export your dataset or its records to Python, your local disk, or the Hugging Face Hub.
 
-In Argilla, you can export two main components of a dataset: 
+In Argilla, you can export two main components of a dataset:
 - The dataset's complete configuration defined in `rg.Settings`. This is useful if your want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including `Metadata`, `Vectors`, `Suggestions`, and `Responses`. This is useful if you want to use your dataset's records outside of Argilla.
 
