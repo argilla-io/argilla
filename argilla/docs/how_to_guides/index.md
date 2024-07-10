@@ -5,7 +5,7 @@ hide: toc
 
 # How-to guides
 
-These are the how-to guides for *the Argilla SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples. We have divided the guides into two categories: basic and advanced. The basic guides will help you get started with the core concepts of Argilla, while the advanced guides will help you explore more advanced features.
+These guides provide step-by-step instructions for common scenarios, including detailed explanations and code samples. They are divided into two categories: basic and advanced. The basic guides will help you get started with the core concepts of Argilla, while the advanced guides will help you explore more advanced features.
 
 ## Basic
 
