@@ -103,7 +103,8 @@ class DeploymentMixin:
 
         Example:
             import argilla as rg
-            url = rg.Argilla.deploy_on_spaces(
+
+            client = rg.Argilla.deploy_on_spaces(
                 repo_id="my-org/my-space",
                 token="hf_ABC123",
                 space_storage="10GB",
@@ -160,7 +161,7 @@ class DeploymentMixin:
 
         api_url = repo_url.url
         cls._log_message(message=f"Argilla is being deployed at: {api_url}")
-        while cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id)):
+        while cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=token)):
             time.sleep(SLEEP_TIME)
             cls._log_message(message=f"Waiting {SLEEP_TIME} seconds.")
 
