@@ -2,17 +2,17 @@
 
 This guide provides an overview of how to use Markdown and HTML in `TextFields` to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
 
-The `TextField` and `TextQuestion` provide the option to enable Markdown and therefore HTML. Given the flexibility of HTML, we can get great control over the presentation of data to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates in the examples below.
+The `TextField` and `TextQuestion` provide the option to enable Markdown and, therefore, HTML. Given the flexibility of HTML, we can have great control over how data is presented to our annotators. We provide some out-of-the-box methods for multi-modality and chat templates below.
 
 !!! note
-    We do assume that a `TextField` or `TextQuestion` has been configured with `use_markdown=True`. Take a look at [`Datasets`](dataset.md) to learn more about this configuration.
+    We assume that a `TextField` or `TextQuestion` has been configured with `use_markdown=True`. To learn more about the dataset's settings, take a look at [this guide](dataset.md).
 
 !!! tip
-    You can get pretty creative with HTML. Think for example about visualizing graphs and tables. Some interesting Python package examples that allow for this are the `pandas.DataFrame.to_html` and the `plotly.io.to_html` methods.
+    You can get pretty creative with HTML. For example, think about visualizing graphs and tables. You can use some interesting Python packages methods like `pandas.DataFrame.to_html` and `plotly.io.to_html`.
 
 ## Multi-modal support: images, audio, video, PDFs and more
 
-Argilla has basic image support in different ways that both have their pros and cons but offer the same UI experience because they both rely on HTML.
+Argilla has basic multi-modal support in different ways, each with pros and cons, but they both offer the same UI experience because they both rely on HTML.
 
 ![media](../assets/images/how_to_guides/markdown/media.png)
 
@@ -93,7 +93,7 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
 
 ### Hosted content
 
-Instead of uploading local files through DataURLs we can also visualize URLs that link directly to media files such as images, audio, video, and PDFs hosted on a public or private server. In this case, you can use basic HTML to visualize content that is available on something like Google Photos or decide to configure a private media server.
+Instead of uploading local files through DataURLs, we can also visualize URLs directly linking to media files such as images, audio, video, and PDFs hosted on a public or private server. In this case, you can use basic HTML to visualize content available on platforms like Google Drive or decide to configure a private media server.
 
 !!! warning
     When trying to access content from a private media server you have to ensure that the Argilla server has network access to the private media server, which might be done through something like IP whitelisting.
