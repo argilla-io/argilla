@@ -57,7 +57,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
 <div class="grid cards" markdown>
 
--   __Making most of Markdown__
+-   __Use Markdown to format rich content__
 
     ---
 

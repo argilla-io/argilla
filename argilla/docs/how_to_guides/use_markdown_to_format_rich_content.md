@@ -1,4 +1,4 @@
-# Making the most of Markdown
+# Use Markdown to format rich content
 
 This guide provides an overview of how to use Markdown and HTML in `TextFields` to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
 
