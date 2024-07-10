@@ -1,4 +1,4 @@
-#  Copyright 2021-present, the Recognai S.L. team.
+#  Copyright 2024-present, Argilla, Inc.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 # TODO: This license is not consistent with the license used in the project.
