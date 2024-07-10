@@ -89,7 +89,7 @@ class HubImportExportMixin:
                 argilla_guidelines=self.settings.guidelines or None,
                 argilla_vectors_settings=self.settings.vectors or None,
                 argilla_metadata_properties=self.settings.metadata,
-                argilla_record=sample_argilla_record.api_model().model_dump_json(),
+                argilla_record=sample_argilla_record.to_dict(),
                 huggingface_record=sample_huggingface_record,
             )
             card.push_to_hub(repo_id, repo_type="dataset", token=kwargs.get("token"))
