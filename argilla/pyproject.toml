@@ -23,7 +23,7 @@ io = [
     "datasets>=2.0.0",
 ]
 
-v1 = [
+legacy = [
     "argilla-v1[listeners]",
 ]
 
@@ -42,7 +42,7 @@ distribution = true
 
 [tool.pdm.version]
 source = "file"
-path = "src/argilla/__init__.py"
+path = "src/argilla/_version.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
