@@ -22,4 +22,5 @@ from argilla.responses import *  # noqa
 from argilla.records import *  # noqa
 from argilla.vectors import *  # noqa
 
+
 __version__ = "2.0.0-dev0"
