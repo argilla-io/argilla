@@ -116,17 +116,14 @@ class HubImportExportMixin:
             A `Dataset` loaded from the Hugging Face Hub.
         """
         from datasets import DatasetDict, load_dataset, Dataset
-        from huggingface_hub import hf_hub_download
+        from huggingface_hub import snapshot_download
 
-        with TemporaryDirectory() as tmpdirname:
-            for filename in cls._DEFAULT_CONFIGURATION_FILES:
-                hf_hub_download(
-                    repo_id=repo_id,
-                    filename=filename,
-                    repo_type="dataset",
-                    local_dir=tmpdirname,
-                )
-            dataset = cls.from_disk(path=tmpdirname, target_workspace=workspace, client=client)
+        folder_path = snapshot_download(  # download both files in parallel
+            repo_id=repo_id, repo_type="dataset", allow_patterns=cls._DEFAULT_CONFIGURATION_FILES
+        )
+
+        dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
+
         hf_dataset: Dataset = load_dataset(path=repo_id, *args, **kwargs)  # type: ignore
         if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
             if len(hf_dataset.keys()) > 1:
