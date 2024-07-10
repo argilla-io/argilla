@@ -22,7 +22,7 @@
 - **Point of Contact:** {{ point_of_contact }}
 {% endif %}
 
-This dataset has been created with [Argilla](https://argilla-io.github.io). As shown in the sections below, this dataset can be loaded into Argilla as explained in [Load with Argilla](#load-with-argilla), or used directly with the `datasets` library in [Load with `datasets`](#load-with-datasets).
+This dataset has been created with [Argilla](https://argilla-io.github.io). As shown in the sections below, this dataset can be loaded into Argilla as explained in [Using this dataset with Argilla](#using-this-dataset-with-argilla), or used directly with the `datasets` library in [Using this dataset with datasets](#using-this-dataset-with-datasets).
 
 
 ## Using this dataset with Argilla
