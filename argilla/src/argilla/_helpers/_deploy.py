@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
 SLEEP_TIME = 10
 FROM_REPO_ID = "argilla/argilla-template-space"
-FROM_REPO_ID_OAUTH = "argilla/argilla-template-space-with-oauth"
 
 
 class DeploymentMixin:
@@ -124,9 +123,6 @@ class DeploymentMixin:
         token = cls._acquire_hf_token(token=token)
         api = HfApi(token=token)
 
-        from_id = (
-            FROM_REPO_ID_OAUTH if (oauth_huggingface_client_id and oauth_huggingface_client_secret) else FROM_REPO_ID
-        )
         secrets = [
             {"ADMIN_USERNAME": admin_username},
             {"ADMIN_PASSWORD": admin_password},
@@ -149,7 +145,7 @@ class DeploymentMixin:
                 api.add_space_secret(repo_id=repo_id, key=key, value=value, token=token)
 
         repo_url: RepoUrl = api.duplicate_space(
-            from_id=from_id,
+            from_id=FROM_REPO_ID,
             to_id=repo_id,
             private=private,
             token=token,
