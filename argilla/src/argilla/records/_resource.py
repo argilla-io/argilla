@@ -148,7 +148,7 @@ class Record(Resource):
         return self.__vectors
 
     @property
-    def status(self) -> "str":
+    def status(self) -> str:
         return self._model.status
 
     @property
