@@ -200,5 +200,3 @@ rg.Record(
 ```
 
 ![media](../assets/images/how_to_guides/markdown/chat.png)
-
-Check the [Markdown - Python Reference]() to see these methods in detail.
