@@ -21,6 +21,5 @@ from argilla.suggestions import *  # noqa
 from argilla.responses import *  # noqa
 from argilla.records import *  # noqa
 from argilla.vectors import *  # noqa
-from argilla.utils.huggingface_spaces import deploy_on_spaces  # noqa
 
 __version__ = "2.0.0-dev0"
