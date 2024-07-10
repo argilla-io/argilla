@@ -143,7 +143,6 @@ class HubImportExportMixin:
             cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
         return dataset
 
-
     @staticmethod
     def _log_dataset_records(hf_dataset: "HFDataset", dataset: "Dataset"):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
@@ -171,7 +170,7 @@ class HubImportExportMixin:
         # Create a mapper to map the Hugging Face dataset to a Record object
         mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
         mapper = IngestedRecordMapper(dataset=dataset, mapping=mapping, user_id=dataset._client.me.id)
-        
+
         # Extract responses and create Record objects
         records = []
         for idx, row in enumerate(hf_dataset):
