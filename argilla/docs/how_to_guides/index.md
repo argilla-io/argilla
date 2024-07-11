@@ -55,7 +55,7 @@ These are the how-to guides for *the Argilla SDK*. They provide step-by-step ins
 
     Learn how to export your dataset or its records to Python, your local disk, or the Hugging face Hub.
 
-    [:octicons-arrow-right-24: How-to guide](export.md)
+    [:octicons-arrow-right-24: How-to guide](import_export.md)
 
 -   __Migrate to Argilla V2__
 
