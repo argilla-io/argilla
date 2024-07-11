@@ -266,4 +266,4 @@ def pdf_to_html(
     file_data, _ = _get_file_data(file_source, "pdf")
     pdf_base64 = base64.b64encode(file_data).decode("utf-8")
     data_url = f"data:application/pdf;base64,{pdf_base64}"
-    return f'<object id="pdf" data="{data_url}" type="application/pdf" width="{width}" height="{height}"><p>Unable to display PDF.</p></object>'
+    return f'<object id="pdf" data="{data_url}" type="application/pdf" width="{width}" height="{height}"></object>'
