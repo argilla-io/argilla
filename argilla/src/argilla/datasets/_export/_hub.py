@@ -160,19 +160,20 @@ class HubImportExportMixin:
                 response_questions[question_name]["status"] = hf_dataset[col]
 
         # Check if all user ids are known to this Argilla client
-        known_users_ids = [user.id for user in dataset._client.users._api.list()]
+        known_users_ids = [user.id for user in dataset._client.users]
         unknown_user_ids = set(user_ids.keys()) - set(known_users_ids)
+        my_user = dataset._client.me.id
         if len(unknown_user_ids) > 1:
             warnings.warn(
                 message=f"""Found unknown user ids in dataset repo: {unknown_user_ids}.
-                    Assigning first response for each record to current user ({dataset._client.me.username}) and discarding the rest."""
+                    Assigning first response for each record to current user ({my_user.username}) and discarding the rest."""
             )
         for unknown_user_id in unknown_user_ids:
-            user_ids[unknown_user_id] = dataset._client.me.id
+            user_ids[unknown_user_id] = my_user.id
 
         # Create a mapper to map the Hugging Face dataset to a Record object
         mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
-        mapper = IngestedRecordMapper(dataset=dataset, mapping=mapping, user_id=dataset._client.me.id)
+        mapper = IngestedRecordMapper(dataset=dataset, mapping=mapping, user_id=my_user.id)
 
         # Extract responses and create Record objects
         records = []
@@ -180,14 +181,15 @@ class HubImportExportMixin:
             record = mapper(row)
             record.id = row.pop("id")
             for question_name, values in response_questions.items():
-                _user_ids = user_ids.copy()
+                response_users = {}
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
                 for value, user_id, status in zip(response_values, response_users, response_status):
-                    user_id = _user_ids.pop(UUID(user_id), None)
-                    if user_id is None:
+                    user_id = user_ids[UUID(user_id)]
+                    if user_id in response_users:
                         continue
+                    response_users[user_id] = True
                     response = Response(
                         user_id=user_id,
                         question_name=question_name,
