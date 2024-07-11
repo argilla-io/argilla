@@ -1,12 +1,12 @@
 ---
-description: In this section, we will provide a step-by-step guide to show how to filter and query a dataset.
+description: In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub
 ---
 
 # Importing and exporting datasets and records
 
-This guide provides an overview of how to export your dataset or its records to Python, your local disk, or the Hugging Face Hub.
+This guide provides an overview of how to import and export your dataset or its records to Python, your local disk, or the Hugging Face Hub.
 
-In Argilla, you can export two main components of a dataset:
+In Argilla, you can import/export two main components of a dataset:
 - The dataset's complete configuration defined in `rg.Settings`. This is useful if your want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including `Metadata`, `Vectors`, `Suggestions`, and `Responses`. This is useful if you want to use your dataset's records outside of Argilla.
 
@@ -29,7 +29,7 @@ dataset.to_hub(repo_id="<repo_id>")
 ```
 
 !!! note "With or without records"
-    This will push the dataset's `Settings` and records to the hub. If you only want to push the dataset's configuration, you can set the `with_records` parameter to `False`.
+    The example above will push the dataset's `Settings` and records to the hub. If you only want to push the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.
 
     ```python
     dataset.to_hub(repo_id="<repo_id>", with_records=False)
@@ -43,7 +43,7 @@ dataset.to_hub(repo_id="<repo_id>")
 
 ### Pull an Argilla dataset from the Hugging Face Hub
 
-You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset's configuration. You can pull the dataset from the Hugging Face Hub using the `rg.Dataset.from_hub` method.
+You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset and its configuration. You can pull the dataset from the Hugging Face Hub using the `rg.Dataset.from_hub` method.
 
 ```python
 
@@ -53,9 +53,9 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 dataset = rg.Dataset.from_hub(repo_id="<repo_id>")
 ```
 
-Note that this approach loads the configuration from the repo and downloads the records. If you only want to load records, use the `load_dataset` method of the `datasets` package, and pass the dataset to `rg.Dataset.log` method. See the [guide on records](record.md) for more information.
+Note that this approach loads the configuration from the repo and stores the records. If you only want to load records, use the `load_dataset` method of the `datasets` package, and pass the dataset to `rg.Dataset.log` method. This enables you to configure your own dataset and reuse existing Hub datasets. See the [guide on records](record.md) for more information.
 
-### Saving an Argilla dataset to a local disk
+### Saving an Argilla dataset to local disk
 
 You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the `rg.Dataset.to_disk` method.
 
@@ -74,7 +74,7 @@ This will save the dataset's configuration and records to the specified path. If
 dataset.to_disk(path="path/to/dataset", with_records=False)
 ```
 
-### Loading an Argilla dataset from a local disk
+### Loading an Argilla dataset from local disk
 
 You can load a dataset from your local disk to Argilla. This is useful if you want to restore a dataset's configuration. You can use the `rg.Dataset.from_disk` method.
 
@@ -91,11 +91,11 @@ dataset = rg.Dataset.from_disk(path="path/to/dataset")
     dataset = rg.Dataset.from_disk(path="path/to/dataset", target_workspace=workspace, target_name="my_dataset")
     ```
 
-## Export Records from Argilla Datasets
+## Export only records from Argilla Datasets
 
 The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the `rg.Dataset.records` attribute.
 
-The records can be exported as a dictionary, a list of dictionaries, or to the `datasets` package.
+The records can be exported as a dictionary, a list of dictionaries, or to a `Dataset` of the `datasets` package.
 
 To import records to a dataset, used the `rg.Datasets.records.log` method. Their is a guide on how to do this in the [Record - Python Reference](record.md).
 
@@ -138,8 +138,6 @@ To import records to a dataset, used the `rg.Datasets.records.log` method. Their
     ```
 
 === "To a python list"
-
-    ### Export records to a list
 
     Records can be exported from `Dataset.records` as a list of dictionaries. The `to_list` method can be used to export records as a list of dictionaries. You can decide if to flatten it or not.
 
