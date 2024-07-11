@@ -807,27 +807,27 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pull-a-dataset-from-the-hugging-face-hub" class="md-nav__link">
+  <a href="#pull-an-argilla-dataset-from-the-hugging-face-hub" class="md-nav__link">
     <span class="md-ellipsis">
-      Pull a dataset from the Hugging Face Hub
+      Pull an Argilla dataset from the Hugging Face Hub
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#saving-a-dataset-to-a-local-disk" class="md-nav__link">
+  <a href="#saving-an-argilla-dataset-to-a-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Saving a dataset to a local disk
+      Saving an Argilla dataset to a local disk
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#loading-a-dataset-from-a-local-disk" class="md-nav__link">
+  <a href="#loading-an-argilla-dataset-from-a-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Loading a dataset from a local disk
+      Loading an Argilla dataset from a local disk
     </span>
   </a>
   
@@ -847,24 +847,6 @@
   
     <nav class="md-nav" aria-label="Export Records from Argilla Datasets">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-the-datasets-package" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to the datasets package
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-a-dictionary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to a dictionary
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#export-records-to-a-list" class="md-nav__link">
@@ -1782,27 +1764,27 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pull-a-dataset-from-the-hugging-face-hub" class="md-nav__link">
+  <a href="#pull-an-argilla-dataset-from-the-hugging-face-hub" class="md-nav__link">
     <span class="md-ellipsis">
-      Pull a dataset from the Hugging Face Hub
+      Pull an Argilla dataset from the Hugging Face Hub
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#saving-a-dataset-to-a-local-disk" class="md-nav__link">
+  <a href="#saving-an-argilla-dataset-to-a-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Saving a dataset to a local disk
+      Saving an Argilla dataset to a local disk
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#loading-a-dataset-from-a-local-disk" class="md-nav__link">
+  <a href="#loading-an-argilla-dataset-from-a-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Loading a dataset from a local disk
+      Loading an Argilla dataset from a local disk
     </span>
   </a>
   
@@ -1822,24 +1804,6 @@
   
     <nav class="md-nav" aria-label="Export Records from Argilla Datasets">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-the-datasets-package" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to the datasets package
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-a-dictionary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to a dictionary
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#export-records-to-a-list" class="md-nav__link">
@@ -1900,7 +1864,7 @@
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
-<h3 id="pull-a-dataset-from-the-hugging-face-hub">Pull a dataset from the Hugging Face Hub<a class="headerlink" href="#pull-a-dataset-from-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
+<h3 id="pull-an-argilla-dataset-from-the-hugging-face-hub">Pull an Argilla dataset from the Hugging Face Hub<a class="headerlink" href="#pull-an-argilla-dataset-from-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
 <p>You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset's configuration. You can pull the dataset from the Hugging Face Hub using the <code>rg.Dataset.from_hub</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
@@ -1908,7 +1872,7 @@
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Note that this approach loads the configuration from the repo and downloads the records. If you only want to load records, use the <code>load_dataset</code> method of the <code>datasets</code> package, and pass the dataset to <code>rg.Dataset.log</code> method. See the <a href="../record/">guide on records</a> for more information.</p>
-<h3 id="saving-a-dataset-to-a-local-disk">Saving a dataset to a local disk<a class="headerlink" href="#saving-a-dataset-to-a-local-disk" title="Permanent link">&para;</a></h3>
+<h3 id="saving-an-argilla-dataset-to-a-local-disk">Saving an Argilla dataset to a local disk<a class="headerlink" href="#saving-an-argilla-dataset-to-a-local-disk" title="Permanent link">&para;</a></h3>
 <p>You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the <code>rg.Dataset.to_disk</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
@@ -1920,7 +1884,7 @@
 <p>This will save the dataset's configuration and records to the specified path. If you only want to save the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
-<h3 id="loading-a-dataset-from-a-local-disk">Loading a dataset from a local disk<a class="headerlink" href="#loading-a-dataset-from-a-local-disk" title="Permanent link">&para;</a></h3>
+<h3 id="loading-an-argilla-dataset-from-a-local-disk">Loading an Argilla dataset from a local disk<a class="headerlink" href="#loading-an-argilla-dataset-from-a-local-disk" title="Permanent link">&para;</a></h3>
 <p>You can load a dataset from your local disk to Argilla. This is useful if you want to restore a dataset's configuration. You can use the <code>rg.Dataset.from_disk</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
@@ -1936,10 +1900,9 @@
 <p>The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the <code>rg.Dataset.records</code> attribute.</p>
 <p>The records can be exported as a dictionary, a list of dictionaries, or to the <code>datasets</code> package.</p>
 <p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">To <code>datasets</code></label><label for="__tabbed_1_2">To a dictionary</label><label for="__tabbed_1_3">To a list</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">To the <code>datasets</code> package</label><label for="__tabbed_1_2">To a Python dictionary</label><label for="__tabbed_1_3">To a python list</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<h3 id="export-records-to-the-datasets-package">Export records to the <code>datasets</code> package<a class="headerlink" href="#export-records-to-the-datasets-package" title="Permanent link">&para;</a></h3>
 <p>Records can be exported from <code>Dataset.records</code> to the <code>datasets</code> package. The <code>to_dataset</code> method can be used to export records to the <code>datasets</code> package. You can specify the name of the dataset and the split to export the records.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
@@ -1951,7 +1914,6 @@
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<h3 id="export-records-to-a-dictionary">Export records to a dictionary<a class="headerlink" href="#export-records-to-a-dictionary" title="Permanent link">&para;</a></h3>
 <p>Records can be exported from <code>Dataset.records</code> as a dictionary. The <code>to_dict</code> method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
