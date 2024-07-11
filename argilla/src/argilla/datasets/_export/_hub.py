@@ -91,7 +91,6 @@ class HubImportExportMixin:
                 folder_path=tmpdirname,
                 repo_id=repo_id,
                 repo_type="dataset",
-                token=kwargs.get("token"),
             )
 
     @classmethod
