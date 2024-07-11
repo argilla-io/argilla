@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import uuid
+
 import pytest
 
 import argilla as rg
@@ -100,3 +101,13 @@ def test_delete_single_record(client: rg.Argilla, dataset: rg.Dataset):
     assert dataset_records[0].id == str(mock_data[0]["id"])
     assert dataset_records[1].id == str(mock_data[2]["id"])
     assert mock_data[1]["id"] not in [record.id for record in dataset_records]
+
+
+def test_delete_records_with_batch_support(client: rg.Argilla, dataset: rg.Dataset):
+    records = [rg.Record(id=uuid.uuid4(), fields={"text": f"Field for record {i}"}) for i in range(0, 1000)]
+
+    dataset.records.log(records)
+    all_records = list(dataset.records)
+    dataset.records.delete(all_records)
+
+    assert len(list(dataset.records)) == 0

@@ -14,13 +14,12 @@
 
 from typing import Dict, List, Union, TYPE_CHECKING, Any
 
+from datasets import Dataset as HFDataset
+
 from argilla.records._io._generic import GenericIO
-from argilla._helpers import resolve_hf_datasets_type
 
 if TYPE_CHECKING:
     from argilla.records import Record
-
-HFDataset = resolve_hf_datasets_type()
 
 
 class HFDatasetsIO:
@@ -34,28 +33,22 @@ class HFDatasetsIO:
         Returns:
             bool: True if the object is a Hugging Face dataset, False otherwise.
         """
-        datasets_class = resolve_hf_datasets_type()
-        if datasets_class is None:
-            return False
-        return isinstance(dataset, datasets_class)
+        return isinstance(dataset, HFDataset)
 
     @staticmethod
-    def to_datasets(records: List["Record"]) -> "HFDataset":
+    def to_datasets(records: List["Record"]) -> HFDataset:
         """
         Export the records to a Hugging Face dataset.
 
         Returns:
             The dataset containing the records.
         """
-        dataset_class = resolve_hf_datasets_type()
-        if dataset_class is None:
-            raise ImportError("Hugging Face datasets is not installed. Please install it using `pip install datasets`.")
         record_dicts = GenericIO.to_dict(records, flatten=True)
-        dataset = dataset_class.from_dict(record_dicts)
+        dataset = HFDataset.from_dict(record_dicts)
         return dataset
 
     @staticmethod
-    def _record_dicts_from_datasets(dataset: "HFDataset") -> List[Dict[str, Union[str, float, int, list]]]:
+    def _record_dicts_from_datasets(dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:
         """Creates a dictionaries from a HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:

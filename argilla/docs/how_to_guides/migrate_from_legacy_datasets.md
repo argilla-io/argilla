@@ -28,7 +28,7 @@ The guide will take you through three steps:
 
 Connect to the Argilla V1 server via the new `argilla` package. First, you should install an extra dependency:
 ```bash
-pip install "argilla[v1]"
+pip install "argilla[legacy]"
 ```
 
 Now, you can use the `v1` module to connect to the Argilla V1 server.
