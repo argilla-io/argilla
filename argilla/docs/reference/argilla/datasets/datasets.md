@@ -46,3 +46,11 @@ dataset = client.datasets("my_dataset")
 ::: src.argilla.datasets._resource.Dataset
     options:
         heading_level: 3
+
+::: src.argilla.datasets._export._disk.DiskImportExportMixin.to_disk
+
+::: src.argilla.datasets._export._disk.DiskImportExportMixin.from_disk
+
+::: src.argilla.datasets._export._hub.HubImportExportMixin.to_hub
+
+::: src.argilla.datasets._export._hub.HubImportExportMixin.from_hub
