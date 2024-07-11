@@ -161,9 +161,8 @@ class HubImportExportMixin:
 
         # check that all response user ids are valid and replace if not
         for user_id in user_ids:
-            try:
-                dataset._client.users._api.get(user_id)
-            except NotFoundError:
+            
+            if not dataset._client.users._api.exists(user_id):
                 warnings.warn(message=f"User {user_id} not found. Assigning responses to current user..")
                 user_ids[user_id] = dataset._client.me.id
 
