@@ -16,10 +16,6 @@ dependencies = [
     "huggingface_hub>=0.22.0",
     "tqdm>=4.60.0",
     "rich>=10.0.0",
-]
-
-[project.optional-dependencies]
-io = [
     "datasets>=2.0.0",
 ]
 
