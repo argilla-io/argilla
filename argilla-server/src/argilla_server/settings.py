@@ -30,6 +30,7 @@ from argilla_server.constants import (
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
     DEFAULT_TELEMETRY_KEY,
+    DEFAULT_DATABASE_TIMEOUT,
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
 )
@@ -74,6 +75,10 @@ class Settings(BaseSettings):
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    database_timeout: Optional[int] = Field(
+        default=DEFAULT_DATABASE_TIMEOUT,
+        description="The database connection timeout in seconds",
+    )
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
