@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to filter and query a dataset.
 ---
 
-# Importing and exporting datasets and records  
+# Importing and exporting datasets and records
 
 This guide provides an overview of how to export your dataset or its records to Python, your local disk, or the Hugging Face Hub.
 
