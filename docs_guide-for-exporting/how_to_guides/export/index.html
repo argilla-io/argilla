@@ -1861,9 +1861,9 @@
 <div class="admonition note">
 <p class="admonition-title">With or without records</p>
 <p>This will push the dataset's <code>Settings</code> and records to the hub. If you only want to push the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
-<p>With the dataset's confiugration you could then make changes to the dataset's settings, or add records via the <code>datasets</code> package.</p>
+With the dataset's configuration you could then make changes to the dataset's settings, or add records via the <code>datasets</code> package.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span>
 </span></code></pre></div>
