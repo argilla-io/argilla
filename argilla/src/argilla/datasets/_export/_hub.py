@@ -164,7 +164,7 @@ class HubImportExportMixin:
         unknown_user_ids = set(user_ids.keys()) - set(known_users_ids)
         if len(unknown_user_ids) > 1:
             warnings.warn(
-                message=f"""Found unknown user ids in dataset repo: {unknown_user_ids}. 
+                message=f"""Found unknown user ids in dataset repo: {unknown_user_ids}.
                     Assigning first response for each record to current user ({dataset._client.me.username}) and discarding the rest."""
             )
         for unknown_user_id in unknown_user_ids:
