@@ -53,6 +53,7 @@ class TestHFDatasetsIO:
             "id": Value(dtype="string", id=None),
             "other": Value(dtype="string", id=None),
             "other_question.responses": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
+            "other_question.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
             "other_question.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "question.suggestion": Value(dtype="string", id=None),
             "question.suggestion.agent": Value(dtype="null", id=None),
@@ -60,11 +61,13 @@ class TestHFDatasetsIO:
             "ranking.responses": Sequence(
                 feature=Sequence(feature=Value(dtype="string", id=None), length=-1, id=None), length=-1, id=None
             ),
+            "ranking.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
             "ranking.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "ranking.suggestion": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "ranking.suggestion.agent": Value(dtype="null", id=None),
             "ranking.suggestion.score": Value(dtype="null", id=None),
             "rating.responses": Sequence(feature=Value(dtype="int64", id=None), length=-1, id=None),
+            "rating.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
             "rating.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "rating.suggestion": Value(dtype="int64", id=None),
             "rating.suggestion.agent": Value(dtype="null", id=None),
@@ -78,6 +81,7 @@ class TestHFDatasetsIO:
                     }
                 ]
             ],
+            "spans.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
             "spans.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "spans.suggestion": [
                 {
