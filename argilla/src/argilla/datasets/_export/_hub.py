@@ -21,7 +21,6 @@ from uuid import UUID
 
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
-from argilla._exceptions import NotFoundError
 
 if TYPE_CHECKING:
     from argilla import Dataset
@@ -161,7 +160,6 @@ class HubImportExportMixin:
 
         # check that all response user ids are valid and replace if not
         for user_id in user_ids:
-            
             if not dataset._client.users._api.exists(user_id):
                 warnings.warn(message=f"User {user_id} not found. Assigning responses to current user..")
                 user_ids[user_id] = dataset._client.me.id
