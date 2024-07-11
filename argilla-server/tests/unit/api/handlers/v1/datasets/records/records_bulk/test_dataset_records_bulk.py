@@ -15,6 +15,8 @@ import uuid
 from uuid import UUID
 
 import pytest
+
+from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import DatasetStatus
 from argilla_server.models import Dataset, Record
 from httpx import AsyncClient
@@ -26,6 +28,7 @@ from tests.factories import (
     RecordFactory,
     TermsMetadataPropertyFactory,
     TextFieldFactory,
+    AnnotatorFactory,
 )
 
 
@@ -185,6 +188,19 @@ class TestDatasetRecordsBulk:
         assert response.status_code == 422, response.json()
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(Record))).scalar_one().metadata_ is None
+
+    async def test_create_records_in_bulk_as_annotator(self, async_client: AsyncClient):
+        user = await AnnotatorFactory.create()
+
+        dataset = await self.test_dataset()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json={"items": [{"fields": {"text": "The text field"}}]},
+        )
+
+        assert response.status_code == 403, response.json()
 
     async def _configure_dataset_metadata_properties(self, dataset):
         await TermsMetadataPropertyFactory.create(name="terms_metadata", dataset=dataset)
