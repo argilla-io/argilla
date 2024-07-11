@@ -35,7 +35,7 @@ dataset.to_hub(repo_id="<repo_id>")
     dataset.to_hub(repo_id="<repo_id>", with_records=False)
     ```
 
-### Pull a dataset from the Hugging Face Hub
+### Pull an Argilla dataset from the Hugging Face Hub
 
 You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset's configuration. You can pull the dataset from the Hugging Face Hub using the `rg.Dataset.from_hub` method.
 
@@ -49,7 +49,7 @@ dataset = rg.Dataset.from_hub(repo_id="<repo_id>")
 
 Note that this approach loads the configuration from the repo and downloads the records. If you only want to load records, use the `load_dataset` method of the `datasets` package, and pass the dataset to `rg.Dataset.log` method. See the [guide on records](record.md) for more information.
 
-### Saving a dataset to a local disk
+### Saving an Argilla dataset to a local disk
 
 You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the `rg.Dataset.to_disk` method.
 
@@ -68,7 +68,7 @@ This will save the dataset's configuration and records to the specified path. If
 dataset.to_disk(path="path/to/dataset", with_records=False)
 ```
 
-### Loading a dataset from a local disk
+### Loading an Argilla dataset from a local disk
 
 You can load a dataset from your local disk to Argilla. This is useful if you want to restore a dataset's configuration. You can use the `rg.Dataset.from_disk` method.
 
@@ -93,9 +93,8 @@ The records can be exported as a dictionary, a list of dictionaries, or to the `
 
 To import records to a dataset, used the `rg.Datasets.records.log` method. Their is a guide on how to do this in the [Record - Python Reference](record.md).
 
-=== "To `datasets`"
+=== "To the `datasets` package"
 
-    ### Export records to the `datasets` package
 
     Records can be exported from `Dataset.records` to the `datasets` package. The `to_dataset` method can be used to export records to the `datasets` package. You can specify the name of the dataset and the split to export the records.
 
@@ -109,9 +108,7 @@ To import records to a dataset, used the `rg.Datasets.records.log` method. Their
     exported_ds = dataset.records.to_datasets()
     ```
 
-=== "To a dictionary"
-
-    ### Export records to a dictionary
+=== "To a Python dictionary"
 
     Records can be exported from `Dataset.records` as a dictionary. The `to_dict` method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.
 
@@ -134,7 +131,7 @@ To import records to a dataset, used the `rg.Datasets.records.log` method. Their
     # {"text": ["Hello", "World"], "label.suggestion": ["greeting", "greeting"]}
     ```
 
-=== "To a list"
+=== "To a python list"
 
     ### Export records to a list
 
