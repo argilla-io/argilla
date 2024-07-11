@@ -35,7 +35,7 @@ dataset.to_hub(repo_id="<repo_id>")
     dataset.to_hub(repo_id="<repo_id>", with_records=False)
     ```
 
-    With the dataset's confiugration you could then make changes to the dataset's settings, or add records via the `datasets` package. 
+    With the dataset's confiugration you could then make changes to the dataset's settings, or add records via the `datasets` package.
 
     ```python
     hf_dataset = load_dataset("<repo_id>")
