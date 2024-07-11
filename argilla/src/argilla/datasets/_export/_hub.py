@@ -188,7 +188,7 @@ class HubImportExportMixin:
                     user_id = user_ids[UUID(user_id)]
                     if user_id is in response_users:
                         continue
-                    response_users[user_id] = True   
+                    response_users[user_id] = True
                         continue
                     response = Response(
                         user_id=user_id,
