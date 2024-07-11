@@ -10,7 +10,7 @@ These are the tutorials for *the Argilla SDK*. They provide step-by-step instruc
 
 <div class="grid cards" markdown>
 
--   __Text classification task__
+-   __Text classification__
 
     ---
 
