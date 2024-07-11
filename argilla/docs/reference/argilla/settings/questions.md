@@ -59,7 +59,7 @@ dataset = rg.Dataset(
     options:
         heading_level: 3
         show_root_toc_entry: false
-        
+
 ## `rg.MultiLabelQuestion`
 
 ::: src.argilla.settings._question.MultiLabelQuestion
