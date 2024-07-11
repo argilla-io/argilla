@@ -14,7 +14,7 @@ Check the [Dataset - Python Reference](../reference/argilla/datasets/dataset.md)
 
 ## Export an `rg.Dataset` from Argilla
 
-First, we will go through exporting a complete dataset from Argilla. This includes the dataset's configuration and records. All of these methods use the `rg.Dataset.from_*` and `rg.Dataset.to_*` methods.
+First, we will go through exporting a complete dataset from Argilla. This includes the dataset's setting and records. All of these methods use the `rg.Dataset.from_*` and `rg.Dataset.to_*` methods.
 
 ### Push an Argilla dataset to the Hugging Face Hub
 
@@ -33,6 +33,13 @@ dataset.to_hub(repo_id="<repo_id>")
 
     ```python
     dataset.to_hub(repo_id="<repo_id>", with_records=False)
+    ```
+
+    With the dataset's confiugration you could then make changes to the dataset's settings, or add records via the `datasets` package. 
+
+    ```python
+    hf_dataset = load_dataset("<repo_id>")
+    dataset.log(hf_dataset)
     ```
 
 ### Pull an Argilla dataset from the Hugging Face Hub
