@@ -160,7 +160,7 @@ class HubImportExportMixin:
                 response_questions[question_name]["status"] = hf_dataset[col]
 
         # Check if all user ids are known to this Argilla client
-        known_users_ids = [user.id for user in dataset._client.users._api.list()]
+        known_users_ids = [user.id for user in dataset._client.users]
         unknown_user_ids = set(user_ids.keys()) - set(known_users_ids)
         if len(unknown_user_ids) > 1:
             warnings.warn(
