@@ -35,16 +35,16 @@ class TestApp:
         app = create_server_app()
         client = TestClient(app)
 
-        response = client.get("/api/docs")
+        response = client.get("/api/v1/docs")
         assert response.status_code == 404
 
-        response = client.get(f"{base_url}/api/docs")
+        response = client.get(f"{base_url}/api/v1/docs")
         assert response.status_code == 200
 
-        response = client.get("/api/_info")
+        response = client.get("/api/v1/version")
         assert response.status_code == 404
 
-        response = client.get(f"{base_url}/api/_info")
+        response = client.get(f"{base_url}/api/v1/version")
         assert response.status_code == 200
 
         assert len(app.routes) == 1

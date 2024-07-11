@@ -20,9 +20,11 @@ from uuid import UUID
 from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
+from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
     DatasetStatus,
     MetadataPropertyType,
@@ -35,7 +37,6 @@ from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value
 from argilla_server.pydantic_v1 import parse_obj_as
-from argilla_server.schemas.v1.questions import QuestionSettings
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [
@@ -86,7 +87,7 @@ class Response(DatabaseModel):
     values: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSON))
     status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
     record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
@@ -437,7 +438,12 @@ class User(DatabaseModel):
     workspaces: Mapped[List["Workspace"]] = relationship(
         secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
     )
-    responses: Mapped[List["Response"]] = relationship(back_populates="user")
+    responses: Mapped[List["Response"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by=Response.inserted_at.asc(),
+    )
     datasets: Mapped[List["Dataset"]] = relationship(
         secondary="workspaces_users",
         primaryjoin="User.id == WorkspaceUser.user_id",
@@ -460,6 +466,13 @@ class User(DatabaseModel):
     @property
     def is_annotator(self):
         return self.role == UserRole.annotator
+
+    async def is_member(self, workspace_id: UUID) -> bool:
+        # TODO: Change query to use exists may improve performance
+        return (
+            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            is not None
+        )
 
     def __repr__(self):
         return (

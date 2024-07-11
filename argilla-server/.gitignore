@@ -165,5 +165,5 @@ cython_debug/
 # Misc
 .DS_Store
 
-# Argilla static generated files
+# Generated static files
 src/argilla_server/static/

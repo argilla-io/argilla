@@ -19,11 +19,8 @@ from typing import TYPE_CHECKING, Dict, Generator
 import pytest
 import pytest_asyncio
 from argilla_server import telemetry
-from argilla_server.apis.routes import api_v0, api_v1
+from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla_server.daos.backend import GenericElasticEngineBackend
-from argilla_server.daos.datasets import DatasetsDAO
-from argilla_server.daos.records import DatasetRecordsDAO
 from argilla_server.database import get_async_db
 from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
@@ -53,11 +50,6 @@ def opensearch(elasticsearch_config: dict) -> Generator[OpenSearch, None, None]:
 
     for index_info in client.cat.indices(index="ar.*,rg.*", format="json"):
         client.indices.delete(index=index_info["index"])
-
-
-@pytest.fixture(scope="session")
-def es():
-    return GenericElasticEngineBackend.get_instance()
 
 
 @pytest.fixture(scope="function")
@@ -95,7 +87,7 @@ async def async_client(
 
     mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
 
-    for api in [api_v0, api_v1]:
+    for api in [api_v1]:
         api.dependency_overrides[get_async_db] = override_get_async_db
         api.dependency_overrides[get_search_engine] = override_get_search_engine
 
@@ -112,16 +104,6 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
 
     telemetry._CLIENT = mock_telemetry
     return telemetry._CLIENT
-
-
-@pytest.fixture(scope="session")
-def records_dao(es: GenericElasticEngineBackend):
-    return DatasetRecordsDAO.get_instance(es)
-
-
-@pytest.fixture(scope="session")
-def datasets_dao(records_dao: DatasetRecordsDAO, es: GenericElasticEngineBackend):
-    return DatasetsDAO.get_instance(es=es, records_dao=records_dao)
 
 
 @pytest_asyncio.fixture(scope="function")

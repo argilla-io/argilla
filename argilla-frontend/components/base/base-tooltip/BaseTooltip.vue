@@ -91,7 +91,7 @@ export default {
           break;
         case "bottom":
           this.tooltipPosition = {
-            top: tooltipRect.top - tooltipRect.height + tooltipTextRect.height,
+            top: tooltipRect.top + tooltipRect.height,
             left:
               tooltipRect.left +
               tooltipRect.width / 2 -

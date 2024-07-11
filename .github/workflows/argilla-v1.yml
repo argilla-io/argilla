@@ -1,0 +1,145 @@
+name: Build Argilla (v1) package
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+      - develop
+      - releases/**
+
+  pull_request:
+    paths:
+      - "argilla-v1/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: argilla-v1
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Setup Conda Env 🐍
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          activate-environment: argilla
+
+      - name: Get date for conda cache
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('argilla-v1/environment_dev.yml') }}-${{ env.CACHE_NUMBER }}
+
+      - name: Update environment
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mamba env update -n argilla -f environment_dev.yml
+
+      - name: Cache pip 👜
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Set huggingface hub credentials
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/releases')
+        run: |
+          echo "HF_HUB_ACCESS_TOKEN=${{ secrets.HF_HUB_ACCESS_TOKEN }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
+
+      - name: Run unit tests 📈
+        run: |
+          pip install -e ".[server,listeners]"
+          pytest tests/unit -vs
+
+      - name: Run tests with pandas v2 📈
+        run: |
+          pip install "pandas~=2.0" pytest-custom_exit_code
+          pytest --suppress-no-test-exit-code tests/unit -vs
+
+      - name: Run tests with pydantic v2 📈
+        run: |
+          pip install "pydantic~=2.0" pytest-custom_exit_code
+          pytest --suppress-no-test-exit-code tests/unit -vs
+
+      - name: Build Package 🍟
+        run: |
+          pip install -U build
+          rm -rf dist && python -m build
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argilla-v1
+          path: argilla-v1/dist
+
+  # This job will upload a Python Package using Twine when a release is created
+  # For more information see:
+  # https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+  publish_release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+
+    permissions:
+      # This permission is needed for private repositories.
+      # contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
+      id-token: write
+      # This permission is needed for creating tags
+      contents: write
+
+    needs:
+      - build
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Download python package
+        uses: actions/download-artifact@v4
+        with:
+          name: argilla-v1
+          path: dist
+
+      - name: Read package info
+        run: |
+          pip install --no-deps dist/*.whl
+          PACKAGE_VERSION=$(python -c 'from importlib.metadata import version; print(version("argilla-v1"))')
+          PACKAGE_NAME=argilla-v1
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
+      - name: Publish Package to TestPyPI 🥪
+        uses: pypa/gh-action-pypi-publish@release/v1
+        continue-on-error: true
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      - name: Test Installing 🍿
+        continue-on-error: true
+        run: pip install --upgrade --no-deps --force-reinstall --index-url https://test.pypi.org/simple  $PACKAGE_NAME==$PACKAGE_VERSION
+
+      - name: Publish Package to PyPI 🥩
+        if: github.ref == 'refs/heads/main'
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,6 +1,6 @@
 import { Answer } from "../IAnswer";
 import { Guard } from "../error";
-import { Color } from "./Color";
+import { Color } from "../color/Color";
 import {
   QuestionAnswer,
   TextQuestionAnswer,
@@ -18,6 +18,7 @@ interface OriginalQuestion {
   title: string;
   description: string;
   settings: any;
+  answer: QuestionAnswer;
 }
 
 export class Question {
@@ -40,8 +41,6 @@ export class Question {
     this.settings = new QuestionSetting(settings);
 
     this.initialize();
-    this.initializeAnswers();
-    this.initializeOriginal();
   }
 
   private _description: string;
@@ -102,7 +101,8 @@ export class Question {
     return (
       this.title !== this.original.title ||
       this.description !== this.original.description ||
-      !this.settings.isEqual(this.original.settings)
+      !this.settings.isEqual(this.original.settings) ||
+      !this.answer.isEqual(this.original.answer)
     );
   }
 
@@ -155,8 +155,6 @@ export class Question {
     this.description = this.original.description;
 
     this.restoreOriginal();
-
-    this.reloadAnswerFromOptions();
   }
 
   update() {
@@ -172,6 +170,8 @@ export class Question {
     if (!answer) return;
 
     this.answer.response(answer);
+
+    this.initializeOriginal();
   }
 
   addSuggestion(suggestion: Suggestion) {
@@ -180,7 +180,7 @@ export class Question {
     this.suggestion = suggestion;
   }
 
-  private createEmptyAnswers(): QuestionAnswer {
+  private createInitialAnswers(): QuestionAnswer {
     if (this.isTextType) {
       return new TextQuestionAnswer(this.type, "");
     }
@@ -245,14 +245,25 @@ export class Question {
         };
       });
     }
+
+    this.initializeAnswers();
+    this.initializeOriginal();
   }
 
   private initializeAnswers() {
-    this.answer = this.createEmptyAnswers();
+    this.answer = this.createInitialAnswers();
   }
 
   private initializeOriginal() {
     const { options, ...rest } = this.settings;
+
+    const originalAnswer = this.createInitialAnswers();
+
+    const valuesAnswered = this.answer.valuesAnswered;
+
+    if (valuesAnswered) {
+      originalAnswer.response({ value: valuesAnswered });
+    }
 
     this.original = {
       title: this.title,
@@ -261,6 +272,7 @@ export class Question {
         ...rest,
         options: options?.map((option: string) => option),
       }),
+      answer: originalAnswer,
     };
   }
 
@@ -271,5 +283,13 @@ export class Question {
       ...rest,
       options: options?.map((option: string) => option),
     });
+
+    const valuesAnswered = this.answer.valuesAnswered;
+
+    this.initializeAnswers();
+
+    if (valuesAnswered) {
+      this.answer.response({ value: valuesAnswered });
+    }
   }
 }

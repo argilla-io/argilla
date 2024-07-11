@@ -1,8 +1,8 @@
 import { Question } from "../entities/question/Question";
-import { QuestionRepository } from "~/v1/infrastructure/repositories";
+import { IQuestionRepository } from "../services/IQuestionRepository";
 
 export class GetDatasetQuestionsFilterUseCase {
-  constructor(private readonly questionRepository: QuestionRepository) {}
+  constructor(private readonly questionRepository: IQuestionRepository) {}
 
   async execute(datasetId: string): Promise<Question[]> {
     const backendQuestions = await this.questionRepository.getQuestions(

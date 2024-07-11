@@ -27,14 +27,14 @@
 <a href="https://www.linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/linkedin-blue?logo=linkedin"/>
 </a>
-<a href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-<img src="https://img.shields.io/badge/slack-purple?logo=slack"/>
+<a href="http://hf.co/join/discord">
+<img src="https://img.shields.io/badge/Discord-7289DA?&logo=discord&logoColor=white"/>
 </a>
 </p>
 
 Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://argilla-io.github.io/argilla/latest/).
 
 ## Why use Argilla?
 
@@ -58,7 +58,7 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 - [Community Meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB): listen in or present during one of our bi-weekly events.
 
-- [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g): get direct support from the community.
+- [Discord](http://hf.co/join/discord): get direct support from the community in #argilla-general and #argilla-help.
 
 - [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
 
@@ -81,248 +81,75 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 
 ## 👨‍💻 Getting started
 
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
-<p>
+### Installation
 
-First things first! You can <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
+First things first! You can install the SDK with pip as follows:
 
-```bash
-pip install argilla
+```console
+pip install argilla --pre
 ```
 
-</p>
-</details>
+After that, you will need to deploy Argilla Server. The easiest way to do this is through our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
-<p>
+> As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
 
-```bash
-docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
-```
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
-<p>
-
-HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
-
-After this, we can connect to our server.
-
-<a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
-<p>
-Once you have deployed Argilla, we will connect to the server.
+To use the client, you need to import the `Argilla` class and instantiate it with the API URL and API key.
 
 ```python
 import argilla as rg
 
-rg.init(
-    api_url="argilla-api-url", # e.g. http://localhost:6900 or https://[your-owner-name]-[your_space_name].hf.space
-    api_key="argilla-api-key" # e.g. "owner.apikey"
-    workspace="argilla-workspace" # e.g. "admin"
-)
+client = rg.Argilla(api_url="https://[your-owner-name]-[your_space_name].hf.space", api_key="owner.apikey")
 ```
 
-After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
+### Create your first dataset
 
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
-<p>
-Once you have connected to the server, we will create a workspace for datasets.
+We can now create a dataset with a simple text classification task. First, you need to define the dataset settings.
 
 ```python
-workspace = rg.Workspace.create("new-workspace")
-```
-
-After this, you can assign users to the workspace, this will allow the datasets to appear in the UI for that user.
-
-```python
-users = [u for u in rg.User.list() if u.role == "annotator"]
-for user in users:
-    workspace.add_user(user)
-```
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
-<p>
-
-```python
-import argilla as rg
-
-dataset = rg.FeedbackDataset(
-    guidelines="Please, read the question carefully and try to answer it as accurately as possible.",
+settings = rg.Settings(
+    guidelines="Classify the reviews as positive or negative.",
     fields=[
-        rg.TextField(name="question"),
-        rg.TextField(name="answer"),
+        rg.TextField(
+            name="review",
+            title="Text from the review",
+            use_markdown=False,
+        ),
     ],
     questions=[
-        rg.RatingQuestion(
-            name="answer_quality",
-            description="How would you rate the quality of the answer?",
-            values=[1, 2, 3, 4, 5],
-        ),
-        rg.TextQuestion(
-            name="answer_correction",
-            description="If you think the answer is not accurate, please, correct it.",
-            required=False,
-        ),
-    ]
+        rg.LabelQuestion(
+            name="my_label",
+            title="In which category does this article fit?",
+            labels=["positive", "negative"],
+        )
+    ],
 )
-remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-```
-
-<a href="https://docs.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
-<p>
-
-```python
-import argilla as rg
-
-record = rg.FeedbackRecord(
-    fields={
-        "question": "Why can camels survive long without water?",
-        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
-    },
-    metadata={"source": "encyclopedia"},
-    external_id='rec_1'
+dataset = rg.Dataset(
+    name=f"my_first_dataset",
+    settings=settings,
+    client=client,
 )
-remote_dataset.add_records(record)
+dataset.create()
 ```
 
-And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
+Next, we can add records to the dataset.
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
-
-</p>
-</details>
-
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
-<p>
+```bash
+pip install datasets
+```
 
 ```python
-import argilla as rg
+from datasets import load_dataset
 
-filtered_dataset = dataset.filter_by(response_status="submitted")
+data = load_dataset("imdb", split="train[:100]").to_list()
+dataset.records.log(records=data, mapping={"text": "review"})
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
-<p>
-
-```python
-import argilla as rg
-
-# using text embeddings
-similar_records =  ds.find_similar_records(
-    vector_name="my_vector",
-    value=embedder_model.embeddings("My text is here")
-    # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
-)
-
-# using another record
-similar_records =  ds.find_similar_records(
-    vector_name="my_vector",
-    record=ds.records[0],
-    max_results=5
-)
-```
-
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
-<p>
-
-```python
-from argilla.labeling.text_classification import add_rules, Rule
-
-rule = Rule(query="positive impact", label="optimism")
-add_rules(dataset="go_emotion", rules=[rule])
-```
-
-<a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
-
-<!-- <tr>
-<td>
-<a href="https://argilla.io/blog/introducing-argilla-trainer">Active Learning</a>
-</td>
-<td>
-
-```python
-from argilla_plugins import classy_learner
-
-plugin = classy_learner(name="plugin-test")
-plugin.start()
-```
-
-<video src="https://share.descript.com/view/nvlUjF8tNcZ"/>
-</td>
-</tr> -->
-
-</p>
-</details>
-
-<details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
-<p>
-
-```python
-from argilla.training import ArgillaTrainer
-
-trainer = ArgillaTrainer(
-    name="my_dataset",
-    workspace="my_workspace",
-    framework="my_framework",
-    model="my_framework_model",
-    train_size=0.8,
-    seed=42,
-    limit=10,
-    query="my-query"
-)
-trainer.update_config() # see usage below
-trainer.train()
-records = trainer.predict(["my-text"], as_argilla_records=True)
-```
-
-<a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
-
-</p>
-</details>
+🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
+Need more info, check out [our docs](https://argilla-io.github.io/argilla/latest/).
 
 ## 🥇 Contributors
 
-We love contributors and have launched a [collaboration with JustDiggit](https://argilla.io/blog/introducing-argilla-community-growers) to hand out our very own bunds and help the re-greening of sub-Saharan Africa. To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/argilla-office-hours/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 

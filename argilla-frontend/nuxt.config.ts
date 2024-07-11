@@ -68,14 +68,10 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/axios.ts" },
     { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
-    { src: "~/plugins/plugins/vue-vega.js" },
     { src: "~/plugins/plugins/click-outside.js" },
-    { src: "~/plugins/plugins/virtual-scroller.js" },
-    { src: "~/plugins/plugins/toast.js" },
-    { src: "~/plugins/plugins/highlight-search.js" },
+    { src: "~/plugins/plugins/toast.ts" },
     { src: "~/plugins/plugins/copy-to-clipboard.js" },
     { src: "~/plugins/plugins/filters.js" },
-    { src: "~/plugins/plugins/variables.js" },
     { src: "~/plugins/plugins/vue-draggable.js" },
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
@@ -106,16 +102,6 @@ const config: NuxtConfig = {
     "@nuxtjs/auth-next",
     "nuxt-highlightjs",
     "@nuxtjs/i18n",
-    [
-      "nuxt-mq",
-      {
-        breakpoints: {
-          sm: 450,
-          md: 1901,
-          lg: Infinity,
-        },
-      },
-    ],
   ],
 
   i18n: {
@@ -195,13 +181,13 @@ const config: NuxtConfig = {
         },
         endpoints: {
           login: {
-            url: "/security/token",
+            url: "/v1/token",
             method: "post",
             propertyName: "access_token",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
           },
           logout: false,
-          user: { url: "/me", propertyName: false },
+          user: { url: "/v1/me", propertyName: false },
         },
       },
     },
@@ -217,8 +203,6 @@ const config: NuxtConfig = {
 
   publicRuntimeConfig: {
     clientVersion: pkg.version,
-    slackCommunity:
-      "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
     documentationSite: "https://docs.argilla.io/",
     documentationSiteQuickStart:
       "https://docs.argilla.io/en/latest/getting_started/quickstart.html",

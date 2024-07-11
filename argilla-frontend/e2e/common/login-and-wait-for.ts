@@ -7,7 +7,7 @@ export const loginUserAndWaitFor = async (
   waitForURL: string,
   role: Role = "admin"
 ) => {
-  await page.route("*/**/api/me", async (route) => {
+  await page.route("*/**/api/v1/me", async (route) => {
     const response = await route.fetch();
     const json = await response.json();
     await route.fulfill({

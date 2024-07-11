@@ -29,17 +29,13 @@ from starlette.responses import RedirectResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
-from argilla_server.apis.routes import api_v0, api_v1
+from argilla_server.api.routes import api_v1
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
-from argilla_server.daos.backend import GenericElasticEngineBackend
-from argilla_server.daos.backend.base import GenericSearchError
-from argilla_server.daos.datasets import DatasetsDAO
-from argilla_server.daos.records import DatasetRecordsDAO
 from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
-from argilla_server.pydantic_v1.errors import ConfigError
+from argilla_server.search_engine import get_search_engine
 from argilla_server.security import auth
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
@@ -61,16 +57,16 @@ def create_server_app() -> FastAPI:
 
     @app.get("/docs", include_in_schema=False)
     async def redirect_docs():
-        return RedirectResponse(url=f"{settings.base_url}api/docs")
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
     @app.get("/api", include_in_schema=False)
     async def redirect_api():
-        return RedirectResponse(url=f"{settings.base_url}api/docs")
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
     for app_configure in [
         configure_app_logging,
         configure_database,
-        configure_storage,
+        configure_search_engine,
         configure_telemetry,
         configure_middleware,
         configure_app_security,
@@ -106,7 +102,6 @@ def configure_middleware(app: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.mount("/api/v1", api_v1)
-    app.mount("/api", api_v0)
 
 
 def configure_app_statics(app: FastAPI):
@@ -153,41 +148,33 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_storage(app: FastAPI):
-    def _on_backoff(event):
-        _LOGGER.warning(
-            f"Connection to {settings.obfuscated_elasticsearch()} is not ready. "
-            f"Tried {event['tries']} times. Retrying..."
-        )
+def configure_search_engine(app: FastAPI):
+    @app.on_event("startup")
+    async def configure_elasticsearch():
+        if not settings.search_engine_is_elasticsearch:
+            return
 
-    @backoff.on_exception(
-        lambda: backoff.constant(interval=15),
-        ConfigError,
-        max_time=60,
-        on_backoff=_on_backoff,
-    )
-    def _setup_elasticsearch():
-        try:
-            backend = GenericElasticEngineBackend.get_instance()
-            dataset_records: DatasetRecordsDAO = DatasetRecordsDAO(backend)
-            datasets: DatasetsDAO = DatasetsDAO.get_instance(
-                es=backend,
-                records_dao=dataset_records,
-            )
-            datasets.init()
-            dataset_records.init()
-        except GenericSearchError as error:
-            raise ConfigError(
-                f"Your Elasticsearch endpoint at {settings.obfuscated_elasticsearch()} "
-                "is not available or not responding.\n"
-                "Please make sure your Elasticsearch instance is launched and correctly running and\n"
-                "you have the necessary access permissions. "
-                "Once you have verified this, restart the argilla server.\n"
-            ) from error
+        logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+        logging.getLogger("elastic_transport").setLevel(logging.ERROR)
 
     @app.on_event("startup")
-    async def setup_elasticsearch():
-        _setup_elasticsearch()
+    async def configure_opensearch():
+        if not settings.search_engine_is_opensearch:
+            return
+
+        logging.getLogger("opensearch").setLevel(logging.ERROR)
+        logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
+
+    @app.on_event("startup")
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    async def ping_search_engine():
+        async for search_engine in get_search_engine():
+            if not await search_engine.ping():
+                raise ConnectionError(
+                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
+                    f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
+                    "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
+                )
 
 
 def configure_app_security(app: FastAPI):

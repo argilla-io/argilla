@@ -17,6 +17,9 @@ from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
+from elasticsearch8 import AsyncElasticsearch
+from opensearchpy import AsyncOpenSearch
+
 from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
@@ -80,12 +83,15 @@ def es_range_query(field_name: str, gte: Optional[float] = None, lte: Optional[f
 
 def es_bool_query(
     *,
-    must_not: Optional[List[dict]] = None,
+    must: Optional[dict] = None,
+    must_not: Optional[Any] = None,
     should: Optional[List[dict]] = None,
     minimum_should_match: Optional[Union[int, str]] = None,
 ) -> Dict[str, Any]:
     bool_query = {}
 
+    if must:
+        bool_query["must"] = must
     if should:
         bool_query["should"] = should
     if must_not:
@@ -98,6 +104,10 @@ def es_bool_query(
         bool_query["minimum_should_match"] = minimum_should_match
 
     return {"bool": bool_query}
+
+
+def es_exists_field_query(field: str) -> dict:
+    return {"exists": {"field": field}}
 
 
 def es_ids_query(ids: List[str]) -> dict:
@@ -253,6 +263,34 @@ def is_response_status_scope(scope: FilterScope) -> bool:
     return isinstance(scope, ResponseFilterScope) and scope.property == "status" and scope.question is None
 
 
+def is_response_value_scope_without_user(scope: FilterScope) -> bool:
+    return (
+        isinstance(scope, ResponseFilterScope)
+        and scope.user is None
+        and scope.question is not None
+        and (scope.property is None or scope.property == "value")
+    )
+
+
+def _get_response_value_fields_for_question(index_mapping: dict, question: str) -> List[str]:
+    """This function helper use the index mapping retrieved using client.get_mapping method to get all the defined
+    properties to extract the defined fields for a specific question. The number of fields will depend on the number
+    of users that have answered the question.
+
+    This is a workaround to fix errors when querying response value without user and it will be removed once we review
+    mappings for responses.
+    """
+
+    mapping_def = next(iter(index_mapping.values()))
+    mapping_properties: Dict[str, Any] = mapping_def["mappings"]["properties"]
+
+    response_fields = []
+    for user_id, user_responses in mapping_properties["responses"].get("properties", {}).items():
+        if question in user_responses["properties"]["values"]["properties"]:
+            response_fields.append(es_field_for_response_value(User(id=UUID(user_id)), question=question))
+    return response_fields
+
+
 @dataclasses.dataclass
 class BaseElasticAndOpenSearchEngine(SearchEngine):
     """
@@ -278,6 +316,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     max_result_window: int = 500000
     # See https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-settings-limit.html#mapping-settings-limit
     default_total_fields_limit: int = 2000
+
+    client: Union[AsyncElasticsearch, AsyncOpenSearch] = dataclasses.field(init=False)
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
@@ -397,6 +437,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 
+        index = await self._get_dataset_index(dataset)
         vector_value = value
         record_id = None
 
@@ -412,13 +453,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         query_filters = []
         if filter:
+            index_mapping = await self.client.indices.get_mapping(index=index)
             # Wrapping filter in a list to use easily on each engine implementation
-            query_filters = [self.build_elasticsearch_filter(filter)]
+            query_filters = [self.build_elasticsearch_filter(filter, index_mapping)]
 
         if query:
             query_filters.append(self._build_text_query(dataset, text=query))
 
-        index = await self._get_dataset_index(dataset)
         response = await self._request_similarity_search(
             index=index,
             vector_settings=vector_settings,
@@ -430,9 +471,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return await self._process_search_response(response, threshold)
 
-    def build_elasticsearch_filter(self, filter: Filter) -> Dict[str, Any]:
+    def build_elasticsearch_filter(self, filter: Filter, index_mapping: dict) -> Dict[str, Any]:
         if isinstance(filter, AndFilter):
-            filters = [self.build_elasticsearch_filter(f) for f in filter.filters]
+            filters = [self.build_elasticsearch_filter(f, index_mapping) for f in filter.filters]
             return es_bool_query(should=filters, minimum_should_match=len(filters))
 
         # This is a special case for response status filter, since it's compound by multiple filters
@@ -442,14 +483,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             )
             return self._build_response_status_filter(status_filter)
 
-        es_field = self._scope_to_elasticsearch_field(filter.scope)
+        # This case is a workaround to fix errors when querying response value without user.
+        #  Once we review mappings for responses, we should remove this.
+        if is_response_value_scope_without_user(filter.scope):
+            return self._build_response_value_filter_without_user(filter, index_mapping)
 
-        if isinstance(filter, TermsFilter):
-            return es_terms_query(es_field, values=filter.values)
-        elif isinstance(filter, RangeFilter):
-            return es_range_query(es_field, gte=filter.ge, lte=filter.le)
-        else:
-            raise ValueError(f"Cannot process request for filter {filter}")
+        es_field = self._scope_to_elasticsearch_field(filter.scope)
+        return self._map_filter_to_es_filter(filter, es_field)
 
     def build_elasticsearch_sort(self, sort: List[Order]) -> str:
         sort_config = []
@@ -482,13 +522,34 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         filters = []
         if status_filter.has_pending_status:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
+            filters.append(es_bool_query(must_not=es_exists_field_query(response_field)))
 
         if status_filter.response_statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
             filters.append(es_terms_query(response_field, values=status_filter.response_statuses))
 
-        return {"bool": {"should": filters, "minimum_should_match": 1}}
+        return es_bool_query(should=filters, minimum_should_match=1)
+
+    def _build_response_value_filter_without_user(self, filter: Filter, index_mapping: dict) -> dict:
+        """This is a workaround to fix errors when querying response value without user and consist on
+        combining all the filters for each user in a bool query using an OR operator.
+
+        This should be removed once we review mappings for responses.
+        """
+        question_response_fields = _get_response_value_fields_for_question(index_mapping, filter.scope.question)
+        all_user_filters = [self._map_filter_to_es_filter(filter, field) for field in question_response_fields]
+
+        return es_bool_query(
+            must=es_exists_field_query(ALL_RESPONSES_STATUSES_FIELD), should=all_user_filters, minimum_should_match=1
+        )
+
+    def _map_filter_to_es_filter(self, filter: Filter, es_field: str) -> dict:
+        if isinstance(filter, TermsFilter):
+            return es_terms_query(es_field, values=filter.values)
+        elif isinstance(filter, RangeFilter):
+            return es_range_query(es_field, gte=filter.ge, lte=filter.le)
+        else:
+            raise ValueError(f"Cannot process request for filter {filter}")
 
     def _inverse_vector(self, vector_value: List[float]) -> List[float]:
         return [vector_value[i] * -1 for i in range(0, len(vector_value))]
@@ -583,12 +644,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if sort_by:
             sort = _unify_sort_by_with_order(sort_by, sort)
         # END TODO
+        index = await self._get_dataset_index(dataset)
 
         text_query = self._build_text_query(dataset, text=query)
         bool_query: Dict[str, Any] = {"must": [text_query]}
 
         if filter:
-            bool_query["filter"] = self.build_elasticsearch_filter(filter)
+            index_mapping = await self.client.indices.get_mapping(index=index)
+            bool_query["filter"] = self.build_elasticsearch_filter(filter, index_mapping)
 
         es_query = {"bool": bool_query}
 
@@ -602,8 +665,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                     "functions": [{"random_score": {"seed": str(user_id), "field": "_seq_no"}}],
                 }
             }
-
-        index = await self._get_dataset_index(dataset)
 
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
@@ -777,7 +838,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def __stats_aggregation(self, index_name: str, field_name: str, query: dict) -> dict:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html
-        aggregation_name = f"numeric_stats"
+        aggregation_name = "numeric_stats"
 
         stats_agg = {aggregation_name: {"stats": {"field": field_name}}}
 

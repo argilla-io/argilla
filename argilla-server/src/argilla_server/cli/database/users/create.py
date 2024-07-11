@@ -16,12 +16,12 @@ from typing import List, Optional
 
 import typer
 
+from argilla_server.api.schemas.v1.users import USER_PASSWORD_MIN_LENGTH, UserCreate
+from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
 from argilla_server.contexts import accounts
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
 from argilla_server.pydantic_v1 import constr
-from argilla_server.schemas.v0.users import USER_PASSWORD_MIN_LENGTH, UserCreate
-from argilla_server.schemas.v0.workspaces import WorkspaceCreate
 
 from .utils import get_or_new_workspace
 

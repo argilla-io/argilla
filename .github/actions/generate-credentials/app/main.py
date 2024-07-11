@@ -33,7 +33,9 @@ def generate_credentials() -> Dict[str, Any]:
     credentials = {}
     for user in ["owner", "admin", "annotator"]:
         logging.info(f"Generating random credential for user '{user}'")
-        password = generate_password_from_secret(secret=SECRET, salt=f"{GITHUB_REF}/{user}", length=32)
+        password = generate_password_from_secret(
+            secret=SECRET, salt=f"{GITHUB_REF}/{user}", length=32
+        )
         credentials[user] = password
     return credentials
 
