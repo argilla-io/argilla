@@ -180,13 +180,15 @@ class HubImportExportMixin:
             record = mapper(row)
             record.id = row.pop("id")
             for question_name, values in response_questions.items():
-                _user_ids = user_ids.copy()
+                response_users = {}
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
                 for value, user_id, status in zip(response_values, response_users, response_status):
-                    user_id = _user_ids.pop(UUID(user_id), None)
-                    if user_id is None:
+                    user_id = user_ids[UUID(user_id)]
+                    if user_id is in response_users:
+                        continue
+                    response_users[user_id] = True   
                         continue
                     response = Response(
                         user_id=user_id,
