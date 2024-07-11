@@ -13,106 +13,102 @@
 # limitations under the License.
 
 import base64
-import unittest
 
 import pytest
 from argilla.markdown import audio_to_html, chat_to_html, image_to_html, pdf_to_html, video_to_html
 from argilla.markdown.media import _get_file_data, _is_valid_dimension, _media_to_html, _validate_media_type
 
 
-class TestMarkdown(unittest.TestCase):
-    def test_validate_media_type_valid(self):
-        # Test with valid media type and file type
-        _validate_media_type("video", "mp4")
-        _validate_media_type("audio", "mp3")
-        _validate_media_type("image", "png")
+def test_validate_media_type_valid():
+    _validate_media_type("video", "mp4")
+    _validate_media_type("audio", "mp3")
+    _validate_media_type("image", "png")
 
-    def test_validate_media_type_invalid(self):
-        # Test with invalid media type and file type
-        with pytest.warns(UserWarning):
-            _validate_media_type("video", "pdf")
 
-    def test_get_file_data_from_bytes(self):
-        # Test getting file data from bytes
-        file_data = b"some data"
-        result = _get_file_data(file_data, "mp4", "video")
-        self.assertEqual(result[0], file_data)
-        self.assertEqual(result[1], "mp4")
+def test_validate_media_type_invalid():
+    with pytest.warns(UserWarning):
+        _validate_media_type("video", "pdf")
 
-    def test_media_is_valid_dimension(self):
-        # Test valid dimensions
-        self.assertTrue(_is_valid_dimension("300px"))
-        self.assertTrue(_is_valid_dimension("50%"))
-        self.assertTrue(_is_valid_dimension(None))
-        # Test invalid dimensions
-        self.assertFalse(_is_valid_dimension("300"))
-        self.assertFalse(_is_valid_dimension("px"))
 
-    def test_media_to_html(self):
-        # Test media to HTML for video
-        file_data = b"some video data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = f"<video controls width=300px height=300px><source src='data:video/mp4;base64,{file_data_base64}' type='video/mp4'></video>"
-        result = _media_to_html("video", file_data, "mp4", "300px", "300px")
-        self.assertEqual(result, expected_html)
+def test_get_file_data_from_bytes():
+    file_data = b"some data"
+    result = _get_file_data(file_data, "mp4", "video")
+    assert result[0] == file_data
+    assert result[1] == "mp4"
 
-        # Test media to HTML for audio
-        file_data = b"some audio data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = (
-            f"<audio controls><source src='data:audio/mp3;base64,{file_data_base64}' type='audio/mp3'></audio>"
-        )
-        result = _media_to_html("audio", file_data, "mp3")
-        self.assertEqual(result, expected_html)
 
-        # Test media to HTML for image
-        file_data = b"some image data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
-        result = _media_to_html("image", file_data, "png", "300px", "300px")
-        self.assertEqual(result, expected_html)
+def test_media_is_valid_dimension():
+    # Test valid dimensions
+    assert _is_valid_dimension("300px")
+    assert _is_valid_dimension("50%")
+    assert _is_valid_dimension(None)
+    # Test invalid dimensions
+    assert not _is_valid_dimension("300")
+    assert not _is_valid_dimension("px")
 
-    def test_video_to_html(self):
-        # Test video to HTML
-        file_data = b"some video data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = f"<video controls width=300px height=300px><source src='data:video/mp4;base64,{file_data_base64}' type='video/mp4'></video>"
-        result = video_to_html(file_data, "mp4", "300px", "300px")
-        self.assertEqual(result, expected_html)
 
-    def test_audio_to_html(self):
-        # Test audio to HTML
-        file_data = b"some audio data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = (
-            f"<audio controls><source src='data:audio/mp3;base64,{file_data_base64}' type='audio/mp3'></audio>"
-        )
-        result = audio_to_html(file_data, "mp3")
-        self.assertEqual(result, expected_html)
+def test_media_to_html():
+    # Test media to HTML for video
+    file_data = b"some video data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f"<video controls width=300px height=300px><source src='data:video/mp4;base64,{file_data_base64}' type='video/mp4'></video>"
+    result = _media_to_html("video", file_data, "mp4", "300px", "300px")
+    assert result == expected_html
 
-    def test_image_to_html(self):
-        # Test image to HTML
-        file_data = b"some image data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
-        result = image_to_html(file_data, "png", "300px", "300px")
-        self.assertEqual(result, expected_html)
+    # Test media to HTML for audio
+    file_data = b"some audio data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f"<audio controls><source src='data:audio/mp3;base64,{file_data_base64}' type='audio/mp3'></audio>"
+    result = _media_to_html("audio", file_data, "mp3")
+    assert result == expected_html
 
-    def test_pdf_to_html(self):
-        # Test PDF to HTML
-        file_data = b"%PDF-1.4 some pdf data"
-        file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-        expected_html = f'<object id="pdf" data="data:application/pdf;base64,{file_data_base64}" type="application/pdf" width="300px" height="300px"><p>Unable to display PDF.</p></object>'
-        result = pdf_to_html(file_data, "300px", "300px")
-        self.assertEqual(result, expected_html)
+    # Test media to HTML for image
+    file_data = b"some image data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    result = _media_to_html("image", file_data, "png", "300px", "300px")
+    assert result == expected_html
 
-    def test_chat_to_html_multiple_messages(self):
-        messages = [
-            {"role": "user", "content": "hello"},
-            {"role": "assistant", "content": "hi there"},
-            {"role": "system", "content": "system message"},
-        ]
-        expected_result = """<body>
+
+def test_video_to_html():
+    file_data = b"some video data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f"<video controls width=300px height=300px><source src='data:video/mp4;base64,{file_data_base64}' type='video/mp4'></video>"
+    result = video_to_html(file_data, "mp4", "300px", "300px")
+    assert result == expected_html
+
+
+def test_audio_to_html():
+    file_data = b"some audio data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f"<audio controls><source src='data:audio/mp3;base64,{file_data_base64}' type='audio/mp3'></audio>"
+    result = audio_to_html(file_data, "mp3")
+    assert result == expected_html
+
+
+def test_image_to_html():
+    file_data = b"some image data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    result = image_to_html(file_data, "png", "300px", "300px")
+    assert result == expected_html
+
+
+def test_pdf_to_html():
+    file_data = b"%PDF-1.4 some pdf data"
+    file_data_base64 = base64.b64encode(file_data).decode("utf-8")
+    expected_html = f'<object id="pdf" data="data:application/pdf;base64,{file_data_base64}" type="application/pdf" width="300px" height="300px"><p>Unable to display PDF.</p></object>'
+    result = pdf_to_html(file_data, "300px", "300px")
+    assert result == expected_html
+
+
+def test_chat_to_html_multiple_messages():
+    messages = [
+        {"role": "user", "content": "hello"},
+        {"role": "assistant", "content": "hi there"},
+        {"role": "system", "content": "system message"},
+    ]
+    expected_result = """<body>
     <style>
         .user-message, .system-message {
             display: flex;
@@ -139,10 +135,11 @@ class TestMarkdown(unittest.TestCase):
         }
     </style>
     <div class="user-message"><div class="message-content"><p>hello</p></div></div><div class="system-message"><div class="message-content"><p>hi there</p></div></div><div class="system-message"><div class="message-content"><p>system message</p></div></div></body>"""
-        result = chat_to_html(messages)
-        self.assertEqual(result, expected_result)
+    result = chat_to_html(messages)
+    assert result == expected_result
 
-    def test_chat_to_html_invalid_role(self):
-        messages = [{"role": "unknown", "content": "hello"}]
-        with self.assertRaises(ValueError):
-            chat_to_html(messages)
+
+def test_chat_to_html_invalid_role():
+    messages = [{"role": "unknown", "content": "hello"}]
+    with pytest.raises(ValueError):
+        chat_to_html(messages)
