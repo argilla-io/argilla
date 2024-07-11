@@ -1818,6 +1818,7 @@
 - The dataset's complete configuration defined in <code>rg.Settings</code>. This is useful if your want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including <code>Metadata</code>, <code>Vectors</code>, <code>Suggestions</code>, and <code>Responses</code>. This is useful if you want to use your dataset's records outside of Argilla.</p>
 <p>Check the <a href="../reference/argilla/datasets/dataset.md">Dataset - Python Reference</a> to see the attributes, arguments, and methods of the export <code>Dataset</code> class in detail.</p>
+<p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
 <h2 id="import-and-export-an-rgdataset-from-argilla">Import and Export an <code>rg.Dataset</code> from Argilla<a class="headerlink" href="#import-and-export-an-rgdataset-from-argilla" title="Permanent link">&para;</a></h2>
 <p>First, we will go through exporting a complete dataset from Argilla. This includes the dataset's setting and records. All of these methods use the <code>rg.Dataset.from_*</code> and <code>rg.Dataset.to_*</code> methods.</p>
 <h3 id="push-an-argilla-dataset-to-the-hugging-face-hub">Push an Argilla dataset to the Hugging Face Hub<a class="headerlink" href="#push-an-argilla-dataset-to-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
@@ -1882,7 +1883,6 @@
 <h2 id="export-only-records-from-argilla-datasets">Export only records from Argilla Datasets<a class="headerlink" href="#export-only-records-from-argilla-datasets" title="Permanent link">&para;</a></h2>
 <p>The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the <code>rg.Dataset.records</code> attribute.</p>
 <p>The records can be exported as a dictionary, a list of dictionaries, or to a <code>Dataset</code> of the <code>datasets</code> package.</p>
-<p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">To the <code>datasets</code> package</label><label for="__tabbed_1_2">To a Python dictionary</label><label for="__tabbed_1_3">To a python list</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
