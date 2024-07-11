@@ -324,6 +324,9 @@ class RecordResponses(Iterable[Response]):
     def __getitem__(self, name: str):
         return self.__responses_by_question_name[name]
 
+    def __len__(self):
+        return len(self.__responses)
+
     def __repr__(self) -> str:
         return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
 
@@ -354,9 +357,20 @@ class RecordResponses(Iterable[Response]):
         Args:
             response: The response to add.
         """
+        self._check_response_already_exists(response)
+
         response.record = self.record
         self.__responses.append(response)
         self.__responses_by_question_name[response.question_name].append(response)
+
+    def _check_response_already_exists(self, response: Response) -> None:
+        """Checks if a response for the same question name and user id already exists"""
+        for response in self.__responses_by_question_name[response.question_name]:
+            if response.user_id == response.user_id:
+                raise ValueError(
+                    f"Response for question with name {response.question_name!r} and user id {response.user_id!r} "
+                    f"already found. The responses for the same question name do not support more than one user"
+                )
 
 
 class RecordSuggestions(Iterable[Suggestion]):
