@@ -12,6 +12,8 @@ In Argilla, you can import/export two main components of a dataset:
 
 Check the [Dataset - Python Reference](../reference/argilla/datasets/dataset.md) to see the attributes, arguments, and methods of the export `Dataset` class in detail.
 
+To import records to a dataset, used the `rg.Datasets.records.log` method. Their is a guide on how to do this in the [Record - Python Reference](record.md).
+
 ## Import and Export an `rg.Dataset` from Argilla
 
 First, we will go through exporting a complete dataset from Argilla. This includes the dataset's setting and records. All of these methods use the `rg.Dataset.from_*` and `rg.Dataset.to_*` methods.
@@ -115,7 +117,6 @@ The records alone can be exported from a dataset in Argilla.  This is useful if 
 
 The records can be exported as a dictionary, a list of dictionaries, or to a `Dataset` of the `datasets` package.
 
-To import records to a dataset, used the `rg.Datasets.records.log` method. Their is a guide on how to do this in the [Record - Python Reference](record.md).
 
 === "To the `datasets` package"
 
