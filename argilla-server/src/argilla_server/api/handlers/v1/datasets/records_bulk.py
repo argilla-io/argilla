@@ -56,6 +56,8 @@ async def create_dataset_records_bulk(
         ],
     )
 
+    await authorize(current_user, DatasetPolicy.create_records(dataset))
+
     records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
 
     telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_bulk.items)})
