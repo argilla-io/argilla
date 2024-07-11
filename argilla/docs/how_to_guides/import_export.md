@@ -34,12 +34,20 @@ dataset.to_hub(repo_id="<repo_id>")
     ```python
     dataset.to_hub(repo_id="<repo_id>", with_records=False)
     ```
-    With the dataset's configuration you could then make changes to the dataset's settings, or add records via the `datasets` package.
+
+    With the dataset's configuration you could then make changes to the dataset. For example, you could adapt the dataset's settings for a different task:
+
+    ```python
+    dataset.settings.questions = [rg.TextQuestion(name="answer")]
+    ```
+
+    You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.
 
     ```python
     hf_dataset = load_dataset("<repo_id>")
     dataset.log(hf_dataset)
     ```
+
 
 ### Pull an Argilla dataset from the Hugging Face Hub
 
