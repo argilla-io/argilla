@@ -97,7 +97,7 @@ def test_image_to_html():
 def test_pdf_to_html():
     file_data = b"%PDF-1.4 some pdf data"
     file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-    expected_html = f'<object id="pdf" data="data:application/pdf;base64,{file_data_base64}" type="application/pdf" width="300px" height="300px"><p>Unable to display PDF.</p></object>'
+    expected_html = f'<object id="pdf" data="data:application/pdf;base64,{file_data_base64}" type="application/pdf" width="300px" height="300px"></object>'
     result = pdf_to_html(file_data, "300px", "300px")
     assert result == expected_html
 
