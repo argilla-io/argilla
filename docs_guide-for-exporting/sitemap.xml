@@ -21,11 +21,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_guide-for-exporting/community/popular_issues/</loc>
-         <lastmod>2024-07-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://argilla-io.github.io/argilla/docs_guide-for-exporting/getting_started/faq/</loc>
          <lastmod>2024-07-11</lastmod>
          <changefreq>daily</changefreq>
@@ -56,7 +51,7 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_guide-for-exporting/how_to_guides/export/</loc>
+         <loc>https://argilla-io.github.io/argilla/docs_guide-for-exporting/how_to_guides/import_export/</loc>
          <lastmod>2024-07-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
