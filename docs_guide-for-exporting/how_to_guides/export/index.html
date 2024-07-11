@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to filter and query a dataset.">
+        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub">
       
       
         <meta name="author" content="Argilla, Inc.">
@@ -73,7 +73,7 @@
       
         <meta  property="og:title"  content="Importing and exporting datasets - Argilla Docs" >
       
-        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to filter and query a dataset." >
+        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub" >
       
         <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_guide-for-exporting/assets/images/social/how_to_guides/export.png" >
       
@@ -89,7 +89,7 @@
       
         <meta  name="twitter:title"  content="Importing and exporting datasets - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to filter and query a dataset." >
+        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub" >
       
         <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_guide-for-exporting/assets/images/social/how_to_guides/export.png" >
       
@@ -816,18 +816,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#saving-an-argilla-dataset-to-a-local-disk" class="md-nav__link">
+  <a href="#saving-an-argilla-dataset-to-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Saving an Argilla dataset to a local disk
+      Saving an Argilla dataset to local disk
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#loading-an-argilla-dataset-from-a-local-disk" class="md-nav__link">
+  <a href="#loading-an-argilla-dataset-from-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Loading an Argilla dataset from a local disk
+      Loading an Argilla dataset from local disk
     </span>
   </a>
   
@@ -839,26 +839,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#export-records-from-argilla-datasets" class="md-nav__link">
+  <a href="#export-only-records-from-argilla-datasets" class="md-nav__link">
     <span class="md-ellipsis">
-      Export Records from Argilla Datasets
+      Export only records from Argilla Datasets
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Export Records from Argilla Datasets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-a-list" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to a list
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1773,18 +1758,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#saving-an-argilla-dataset-to-a-local-disk" class="md-nav__link">
+  <a href="#saving-an-argilla-dataset-to-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Saving an Argilla dataset to a local disk
+      Saving an Argilla dataset to local disk
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#loading-an-argilla-dataset-from-a-local-disk" class="md-nav__link">
+  <a href="#loading-an-argilla-dataset-from-local-disk" class="md-nav__link">
     <span class="md-ellipsis">
-      Loading an Argilla dataset from a local disk
+      Loading an Argilla dataset from local disk
     </span>
   </a>
   
@@ -1796,26 +1781,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#export-records-from-argilla-datasets" class="md-nav__link">
+  <a href="#export-only-records-from-argilla-datasets" class="md-nav__link">
     <span class="md-ellipsis">
-      Export Records from Argilla Datasets
+      Export only records from Argilla Datasets
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Export Records from Argilla Datasets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#export-records-to-a-list" class="md-nav__link">
-    <span class="md-ellipsis">
-      Export records to a list
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1843,8 +1813,8 @@
 
 
 <h1 id="importing-and-exporting-datasets-and-records">Importing and exporting datasets and records<a class="headerlink" href="#importing-and-exporting-datasets-and-records" title="Permanent link">&para;</a></h1>
-<p>This guide provides an overview of how to export your dataset or its records to Python, your local disk, or the Hugging Face Hub.</p>
-<p>In Argilla, you can export two main components of a dataset:
+<p>This guide provides an overview of how to import and export your dataset or its records to Python, your local disk, or the Hugging Face Hub.</p>
+<p>In Argilla, you can import/export two main components of a dataset:
 - The dataset's complete configuration defined in <code>rg.Settings</code>. This is useful if your want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including <code>Metadata</code>, <code>Vectors</code>, <code>Suggestions</code>, and <code>Responses</code>. This is useful if you want to use your dataset's records outside of Argilla.</p>
 <p>Check the <a href="../reference/argilla/datasets/dataset.md">Dataset - Python Reference</a> to see the attributes, arguments, and methods of the export <code>Dataset</code> class in detail.</p>
@@ -1860,7 +1830,7 @@
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">With or without records</p>
-<p>This will push the dataset's <code>Settings</code> and records to the hub. If you only want to push the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>.</p>
+<p>The example above will push the dataset's <code>Settings</code> and records to the hub. If you only want to push the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.</p>
 <p><div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
 With the dataset's configuration you could then make changes to the dataset's settings, or add records via the <code>datasets</code> package.</p>
@@ -1869,14 +1839,14 @@ With the dataset's configuration you could then make changes to the dataset's se
 </span></code></pre></div>
 </div>
 <h3 id="pull-an-argilla-dataset-from-the-hugging-face-hub">Pull an Argilla dataset from the Hugging Face Hub<a class="headerlink" href="#pull-an-argilla-dataset-from-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
-<p>You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset's configuration. You can pull the dataset from the Hugging Face Hub using the <code>rg.Dataset.from_hub</code> method.</p>
+<p>You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset and its configuration. You can pull the dataset from the Hugging Face Hub using the <code>rg.Dataset.from_hub</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Note that this approach loads the configuration from the repo and downloads the records. If you only want to load records, use the <code>load_dataset</code> method of the <code>datasets</code> package, and pass the dataset to <code>rg.Dataset.log</code> method. See the <a href="../record/">guide on records</a> for more information.</p>
-<h3 id="saving-an-argilla-dataset-to-a-local-disk">Saving an Argilla dataset to a local disk<a class="headerlink" href="#saving-an-argilla-dataset-to-a-local-disk" title="Permanent link">&para;</a></h3>
+<p>Note that this approach loads the configuration from the repo and stores the records. If you only want to load records, use the <code>load_dataset</code> method of the <code>datasets</code> package, and pass the dataset to <code>rg.Dataset.log</code> method. This enables you to configure your own dataset and reuse existing Hub datasets. See the <a href="../record/">guide on records</a> for more information.</p>
+<h3 id="saving-an-argilla-dataset-to-local-disk">Saving an Argilla dataset to local disk<a class="headerlink" href="#saving-an-argilla-dataset-to-local-disk" title="Permanent link">&para;</a></h3>
 <p>You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the <code>rg.Dataset.to_disk</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
@@ -1888,7 +1858,7 @@ With the dataset's configuration you could then make changes to the dataset's se
 <p>This will save the dataset's configuration and records to the specified path. If you only want to save the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
-<h3 id="loading-an-argilla-dataset-from-a-local-disk">Loading an Argilla dataset from a local disk<a class="headerlink" href="#loading-an-argilla-dataset-from-a-local-disk" title="Permanent link">&para;</a></h3>
+<h3 id="loading-an-argilla-dataset-from-local-disk">Loading an Argilla dataset from local disk<a class="headerlink" href="#loading-an-argilla-dataset-from-local-disk" title="Permanent link">&para;</a></h3>
 <p>You can load a dataset from your local disk to Argilla. This is useful if you want to restore a dataset's configuration. You can use the <code>rg.Dataset.from_disk</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
@@ -1900,9 +1870,9 @@ With the dataset's configuration you could then make changes to the dataset's se
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">,</span> <span class="n">target_workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">target_name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
-<h2 id="export-records-from-argilla-datasets">Export Records from Argilla Datasets<a class="headerlink" href="#export-records-from-argilla-datasets" title="Permanent link">&para;</a></h2>
+<h2 id="export-only-records-from-argilla-datasets">Export only records from Argilla Datasets<a class="headerlink" href="#export-only-records-from-argilla-datasets" title="Permanent link">&para;</a></h2>
 <p>The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the <code>rg.Dataset.records</code> attribute.</p>
-<p>The records can be exported as a dictionary, a list of dictionaries, or to the <code>datasets</code> package.</p>
+<p>The records can be exported as a dictionary, a list of dictionaries, or to a <code>Dataset</code> of the <code>datasets</code> package.</p>
 <p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">To the <code>datasets</code> package</label><label for="__tabbed_1_2">To a Python dictionary</label><label for="__tabbed_1_3">To a python list</label></div>
 <div class="tabbed-content">
@@ -1938,7 +1908,6 @@ With the dataset's configuration you could then make changes to the dataset's se
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<h3 id="export-records-to-a-list">Export records to a list<a class="headerlink" href="#export-records-to-a-list" title="Permanent link">&para;</a></h3>
 <p>Records can be exported from <code>Dataset.records</code> as a list of dictionaries. The <code>to_list</code> method can be used to export records as a list of dictionaries. You can decide if to flatten it or not.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
