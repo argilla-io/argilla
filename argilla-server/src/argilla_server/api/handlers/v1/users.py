@@ -45,8 +45,11 @@ async def get_user(
     current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicy.get)
+
     user = await User.get_or_raise(db, user_id)
+
     await _TELEMETRY_CLIENT.track_crud_user(action="read", user=user)
+
     return user
 
 
@@ -57,9 +60,12 @@ async def list_users(
     current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicy.list)
+
     users = await accounts.list_users(db)
+
     for user in users:
         await _TELEMETRY_CLIENT.track_crud_user(action="read", user=user)
+
     return Users(items=users)
 
 
@@ -71,7 +77,9 @@ async def create_user(
     current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, UserPolicy.create)
+
     user = await accounts.create_user(db, user_create.dict())
+
     await _TELEMETRY_CLIENT.track_crud_user(action="create", user=user, is_oauth=False)
 
     return user
@@ -85,8 +93,11 @@ async def delete_user(
     current_user: User = Security(auth.get_current_user),
 ):
     user = await User.get_or_raise(db, user_id)
+
     await authorize(current_user, UserPolicy.delete)
+
     user = await accounts.delete_user(db, user)
+
     await _TELEMETRY_CLIENT.track_crud_user(action="delete", user=user)
 
     return user
@@ -107,5 +118,8 @@ async def list_user_workspaces(
         workspaces = await accounts.list_workspaces(db)
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
+
+    for workspace in workspaces:
+        await _TELEMETRY_CLIENT.track_crud_workspace(action="read", user=user)
 
     return Workspaces(items=workspaces)
