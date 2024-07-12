@@ -22,15 +22,16 @@ import os
 import re
 import warnings
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 from argilla_server.constants import (
+    DATABASE_SQLITE,
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
     DEFAULT_TELEMETRY_KEY,
-    DEFAULT_DATABASE_TIMEOUT,
+    DEFAULT_DATABASE_SQLITE_TIMEOUT,
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
 )
@@ -75,9 +76,9 @@ class Settings(BaseSettings):
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
-    database_timeout: Optional[int] = Field(
-        default=DEFAULT_DATABASE_TIMEOUT,
-        description="The database connection timeout in seconds",
+    database_sqlite_timeout: Optional[int] = Field(
+        default=DEFAULT_DATABASE_SQLITE_TIMEOUT,
+        description="SQLite database connection timeout in seconds",
     )
 
     elasticsearch: str = "http://localhost:9200"
@@ -224,6 +225,20 @@ class Settings(BaseSettings):
         if ns is None:
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def database_connect_args(self) -> Dict:
+        if self.database_is_sqlite:
+            return {"timeout": self.database_sqlite_timeout}
+
+        return {}
+
+    @property
+    def database_is_sqlite(self) -> bool:
+        if self.database_url is None:
+            return False
+
+        return self.database_url.lower().startswith(DATABASE_SQLITE)
 
     @property
     def search_engine_is_elasticsearch(self) -> bool:

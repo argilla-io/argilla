@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new `ARGILLA_DATABASE_TIMEOUT` environment variable allowing to set transactions timeout for SQLite. ([#5213](https://github.com/argilla-io/argilla/pull/5213))
+- Added new `ARGILLA_DATABASE_SQLITE_TIMEOUT` environment variable allowing to set transactions timeout for SQLite. ([#5213](https://github.com/argilla-io/argilla/pull/5213))
 
 ### Fixed
 
