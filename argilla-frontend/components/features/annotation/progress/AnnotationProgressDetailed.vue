@@ -16,25 +16,34 @@
   -->
 
 <template>
-  <div v-if="datasetMetrics.hasMetrics" class="metrics">
-    <BaseCircleProgress class="metrics__donut" :slices="progressItems" />
-    <ul class="metrics__list">
+  <div v-if="datasetMetrics.hasMetrics">
+    <ul class="my-progress__list">
       <li
         v-for="(status, index) in progressItems"
         :key="index"
-        class="metrics__list__item"
+        class="my-progress__list__item"
       >
+        <span>
+          <span
+            class="color-bullet"
+            :style="{ backgroundColor: status.color }"
+          ></span>
+          <label class="my-progress__list__name" v-text="status.name" />
+        </span>
         <span
-          class="color-bullet"
-          :style="{ backgroundColor: status.color }"
-        ></span>
-        <label class="metrics__list__name" v-text="status.name" />
-        <span
-          class="metrics__list__counter"
-          v-text="`(${getFormattedProgress(status.value)})`"
+          class="my-progress__list__counter"
+          v-text="`${getFormattedProgress(status.value)}`"
         />
       </li>
     </ul>
+    <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
+    <BarProgress
+      class="team-progress"
+      :loading="false"
+      :progress-ranges="progressRanges"
+      :progress-completed="datasetMetrics.submitted + datasetMetrics.discarded"
+      :total="datasetMetrics.total"
+    />
   </div>
 </template>
 
@@ -82,6 +91,22 @@ export default {
         },
       ];
     },
+    progressRanges() {
+      return [
+        {
+          id: "completed",
+          name: "completed",
+          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+          value: this.datasetMetrics.submitted + this.datasetMetrics.discarded,
+        },
+        {
+          id: "pending",
+          name: "progress",
+          color: "linear-gradient(white)",
+          value: this.datasetMetrics.pending + this.datasetMetrics.draft,
+        },
+      ];
+    },
   },
   methods: {
     getFormattedProgress(progress) {
@@ -95,8 +120,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$bullet-size: 10px;
-.metrics {
+$bullet-size: 8px;
+.my-progress {
   display: flex;
   align-items: center;
   gap: $base-space * 4;
@@ -106,28 +131,46 @@ $bullet-size: 10px;
     flex-shrink: 0;
   }
 }
+.team-progress {
+  &__title {
+    text-transform: uppercase;
+    color: $black-54;
+    font-weight: 500;
+  }
+}
 .color-bullet {
+  display: inline-flex;
   height: $bullet-size;
   width: $bullet-size;
+  margin-right: 4px;
   border-radius: $border-radius-rounded;
 }
 
-.metrics__list {
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: $base-space * 2;
-  row-gap: $base-space;
+.my-progress__list {
+  display: flex;
   list-style: none;
+  gap: $base-space;
   padding-left: 0;
+  margin-top: 0;
+  margin-bottom: $base-space * 3;
   &__item {
+    background: palette(grey, 700);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: $base-space;
-    @include font-size(13px);
-    min-width: 140px;
+    padding: $base-space;
+    width: 100%;
+    border-radius: $border-radius;
   }
   &__name {
     text-transform: capitalize;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  &__counter {
+    font-weight: 600;
+    color: $black-87;
+    @include font-size(14px);
   }
 }
 </style>
