@@ -74,7 +74,7 @@ async def get_access_token(
                 role=_USER_ROLE_ON_CREATION,
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
-            _TELEMETRY_CLIENT.track_crud_user(action="create", user=user, is_oauth=True)
+            await _TELEMETRY_CLIENT.track_crud_user(action="create", user=user, is_oauth=True)
         elif not _is_user_created_by_oauth_provider(user):
             # User should sign in using username/password workflow
             raise AuthenticationError("Could not authenticate user")

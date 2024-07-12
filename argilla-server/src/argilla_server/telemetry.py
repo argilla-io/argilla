@@ -17,7 +17,7 @@ import json
 import logging
 import platform
 import uuid
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import Request
 from huggingface_hub.utils import send_telemetry
@@ -62,9 +62,7 @@ class TelemetryClient:
         _LOGGER.info(f"Server id: {self.server_id}")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
 
-    def track_data(
-        self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1, type: str = None
-    ):
+    def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
         library_name = "argilla"
         topic = f"{library_name}/{topic}"
 
@@ -100,7 +98,7 @@ class TelemetryClient:
         user_agent.update(**self._process_request_info(request))
         self.track_data(topic=topic, user_agent=user_agent)
 
-    async def track_crud_user(self, action: str, user: User, is_oauth: bool = None):
+    async def track_crud_user(self, action: str, user: User, is_oauth: Union[bool, None] = None):
         topic = f"user/{action}"
         user_agent = self._process_user_model(user=user)
         if is_oauth is not None:
