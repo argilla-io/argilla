@@ -432,7 +432,7 @@ retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 ## Check dataset existence
 
-You can check if a retrieved dataset exists by calling the `exists` method on the `Dataset` class. This method returns a boolean value.
+You can check if a dataset exists. The `client.datasets` method will return `None` if the dataset was not found.
 
 ```python
 import argilla as rg
@@ -441,7 +441,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 dataset = client.datasets(name="my_dataset")
 
-dataset_existed = dataset.exists()
+dataset_exist = dataset is not None
 ```
 
 ## Update a dataset

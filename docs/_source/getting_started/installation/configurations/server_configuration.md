@@ -73,6 +73,14 @@ The following environment variables are useful only when SQLite is used:
 
 - `ARGILLA_DATABASE_SQLITE_TIMEOUT`: How many seconds the connection should wait before raising an `OperationalError` when a table is locked. If another connection opens a transaction to modify a table, that table will be locked until the transaction is committed. (Defaut: `15` seconds).
 
+#### PostgreSQL
+
+The following environment variables are useful only when PostgreSQL is used:
+
+- `ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE`: The number of connections to keep open inside the database connection pool (Default: `15`).
+
+- `ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW`: The number of connections that can be opened above and beyond `ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE` setting (Default: `10`).
+
 #### Elasticsearch and Opensearch
 
 - `ARGILLA_ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).

@@ -39,10 +39,21 @@ dataset = client.datasets("my_dataset")
 
 ---
 
-## Class Reference
-
-### `rg.Dataset`
+##  `rg.Dataset`
 
 ::: src.argilla.datasets._resource.Dataset
     options:
         heading_level: 3
+        show_root_toc_entry: false
+
+::: src.argilla.datasets._export._disk.DiskImportExportMixin
+    options:
+        heading_level: 3
+        show_root_heading: false
+        show_root_toc_entry: false
+
+::: src.argilla.datasets._export._hub.HubImportExportMixin
+    options:
+        heading_level: 3
+        show_root_heading: false
+        show_root_toc_entry: false

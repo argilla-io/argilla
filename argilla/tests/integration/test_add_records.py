@@ -18,7 +18,7 @@ from datetime import datetime
 
 
 import argilla as rg
-from argilla import Argilla
+from argilla import Argilla, Workspace
 
 
 def test_create_dataset(client):
@@ -90,14 +90,14 @@ def test_add_records(client):
 
 
 def test_add_dict_records(client: Argilla):
-    ws = client.workspaces("new_ws")
-    if not ws.exists():
-        ws.create()
+    ws_name = "new_ws"
+    ws = client.workspaces(ws_name) or Workspace(name=ws_name).create()
 
     ds = client.datasets("new_ds", workspace=ws)
-    if ds.exists():
+    if ds is not None:
         ds.delete()
 
+    ds = rg.Dataset(name="new_ds", workspace=ws)
     ds.settings = rg.Settings(
         fields=[rg.TextField(name="text")],
         questions=[rg.TextQuestion(name="label")],

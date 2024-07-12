@@ -108,9 +108,11 @@ class GenericIO:
             for response in record.responses:
                 responses_key = f"{response.question_name}.responses"
                 responses_users_key = f"{responses_key}.users"
+                responses_status_key = f"{responses_key}.status"
 
                 responses_dict[responses_key].append(response.value)
                 responses_dict[responses_users_key].append(str(response.user_id))
+                responses_dict[responses_status_key].append(response.status.value if response.status else None)
 
             suggestions_dict = {}
             for suggestion in record.suggestions:

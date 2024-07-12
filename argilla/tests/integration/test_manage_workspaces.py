@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla import Argilla, Workspace
+from argilla import Argilla, Workspace, User
 
 
 class TestWorkspacesManagement:
@@ -21,32 +21,37 @@ class TestWorkspacesManagement:
         client.workspaces.add(workspace)
 
         assert workspace in client.workspaces
-        assert workspace.exists()
+        assert client.api.workspaces.exists(workspace.id)
 
     def test_create_and_delete_workspace(self, client: Argilla):
         workspace = client.workspaces(name="test_workspace")
-        if workspace.exists():
+        if workspace:
             for dataset in workspace.datasets:
                 dataset.delete()
             workspace.delete()
 
-        workspace.create()
-        assert workspace.exists()
+        workspace = Workspace(name="test_workspace").create()
+        assert client.api.workspaces.exists(workspace.id)
 
         workspace.delete()
-        assert not workspace.exists()
+        assert not client.api.workspaces.exists(workspace.id)
 
-    def test_add_and_remove_users_to_workspace(self, client: Argilla):
-        workspace = client.workspaces(name="test_workspace")
+    def test_add_and_remove_users_to_workspace(self, client: Argilla, workspace: Workspace):
+        ws_name = "test_workspace"
+        username = "test_user"
 
-        test_user = client.users(username="test_user")
-        if test_user.exists():
+        workspace = client.workspaces(name=ws_name)
+        if workspace:
+            for dataset in workspace.datasets:
+                dataset.delete()
+            workspace.delete()
+
+        test_user = client.users(username=username)
+        if test_user:
             test_user.delete()
 
-        workspace.create()
-
-        test_user.password = "test_password"
-        test_user.create()
+        workspace = Workspace(name=ws_name).create()
+        test_user = User(username=username, password="test_password").create()
 
         user = workspace.add_user(user=test_user.username)
         assert user in workspace.users
