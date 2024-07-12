@@ -67,8 +67,7 @@ def _get_file_data(
     if isinstance(file_source, bytes):
         if not file_type:
             raise ValueError("File type must be provided if file source is a byte string.")
-        else:
-            file_type != "pdf" and _validate_media_type(media_type, file_type)
+        file_type != "pdf" and _validate_media_type(media_type, file_type)
         file_data = file_source
     else:
         file_path = Path(file_source)
@@ -133,7 +132,7 @@ def _media_to_html(
     Raises:
         ValueError: If the width and height are not pixel or percentage.
     """
-    if not _is_valid_dimension(width) or not _is_valid_dimension(height):
+    if not (_is_valid_dimension(width) or _is_valid_dimension(height)):
         raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
 
     file_data, file_type = _get_file_data(file_source, file_type, media_type)
