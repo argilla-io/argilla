@@ -142,14 +142,6 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         self.settings.get()
         return self
 
-    def exists(self) -> bool:
-        """Checks if the dataset exists on the server
-
-        Returns:
-            bool: True if the dataset exists, False otherwise
-        """
-        return self.id and self._api.exists(self.id)
-
     def create(self) -> "Dataset":
         """Creates the dataset on the server with the `Settings` configuration.
 
@@ -202,7 +194,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             warnings.warn(f"Workspace not provided. Using default workspace: {workspace.name} id: {workspace.id}")
         elif isinstance(workspace, str):
             workspace = self._client.workspaces(workspace)
-            if not workspace.exists():
+            if workspace is None:
                 available_workspace_names = [ws.name for ws in self._client.workspaces]
                 raise NotFoundError(
                     f"Workspace with name { workspace} not found. Available workspaces: {available_workspace_names}"
@@ -216,8 +208,8 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         return workspace
 
     def _rollback_dataset_creation(self):
-        if self.exists() and not self._is_published():
+        if not self._is_published():
             self.delete()
 
     def _is_published(self) -> bool:
-        return self.exists() and self._model.status == "ready"
+        return self._model.status == "ready"

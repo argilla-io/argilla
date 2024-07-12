@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
@@ -81,11 +81,10 @@ class DatasetRecordsIterator:
             yield Record.from_model(model=record_model, dataset=self.__dataset)
 
     def _fetch_from_server(self) -> List[RecordModel]:
-        if not self.__dataset.exists():
-            raise ValueError(f"Dataset {self.__dataset.name} does not exist on the server.")
-        if self._is_search_query():
-            return self._fetch_from_server_with_search()
-        return self._fetch_from_server_with_list()
+        if not self.__client.api.datasets.exists(self.__dataset.id):
+            warnings.warn(f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping...")
+            return []
+        return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
 
     def _fetch_from_server_with_list(self) -> List[RecordModel]:
         return self.__client.api.records.list(

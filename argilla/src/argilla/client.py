@@ -110,15 +110,15 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.users
 
-    def __call__(self, username: str, **kwargs) -> "User":
+    def __call__(self, username: str) -> "User":
         from argilla.users import User
 
         user_models = self._api.list()
         for model in user_models:
             if model.username == username:
                 return User(_model=model, client=self._client)
-        warnings.warn(f"User {username} not found. Creating a new user. Do `user.create()` to create the user.")
-        return User(username=username, client=self._client, **kwargs)
+
+        warnings.warn(f"User with username {username!r} not found.")
 
     def __iter__(self):
         return self._Iterator(self.list())
@@ -188,18 +188,13 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.workspaces
 
-    def __call__(self, name: str, **kwargs) -> "Workspace":
-        from argilla.workspaces import Workspace
-
+    def __call__(self, name: str) -> Optional["Workspace"]:
         workspace_models = self._api.list()
 
         for model in workspace_models:
             if model.name == name:
                 return self._from_model(model)
-        warnings.warn(
-            f"Workspace {name} not found. Creating a new workspace. Do `workspace.create()` to create the workspace."
-        )
-        return Workspace(name=name, client=self._client, **kwargs)
+        warnings.warn(f"Workspace with name {name!r} not found.")
 
     def __iter__(self):
         return self._Iterator(self.list())
@@ -265,19 +260,16 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.datasets
 
-    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None, **kwargs) -> "Dataset":
-        from argilla.datasets import Dataset
-
+    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]:
         if isinstance(workspace, str):
             workspace = self._client.workspaces(workspace)
         elif workspace is None:
-            workspace = self._client.workspaces[0]
+            workspace = self._client.workspaces.default
 
         for dataset in workspace.datasets:
             if dataset.name == name:
                 return dataset.get()
-        warnings.warn(f"Dataset {name} not found. Creating a new dataset. Do `dataset.create()` to create the dataset.")
-        return Dataset(name=name, workspace=workspace, client=self._client, **kwargs)
+        warnings.warn(f"Dataset with name {name!r} not found in workspace {workspace.name!r}")
 
     def __iter__(self):
         return self._Iterator(self.list())
