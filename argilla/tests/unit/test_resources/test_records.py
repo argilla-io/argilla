@@ -17,6 +17,7 @@ import uuid
 import pytest
 
 from argilla import Record, Suggestion, Response
+from argilla._exceptions import ArgillaError
 from argilla._models import MetadataModel
 
 
@@ -69,5 +70,5 @@ class TestRecords:
         response = Response(question_name="question", value="value", user_id=uuid.uuid4())
         record = Record(fields={"name": "John"}, responses=[response])
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ArgillaError):
             record.responses.add(response)

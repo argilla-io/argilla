@@ -16,6 +16,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
 from uuid import UUID, uuid4
 
+from argilla._exceptions import ArgillaError
 from argilla._models import (
     MetadataModel,
     RecordModel,
@@ -367,7 +368,7 @@ class RecordResponses(Iterable[Response]):
         """Checks if a response for the same question name and user id already exists"""
         for response in self.__responses_by_question_name[response.question_name]:
             if response.user_id == response.user_id:
-                raise ValueError(
+                raise ArgillaError(
                     f"Response for question with name {response.question_name!r} and user id {response.user_id!r} "
                     f"already found. The responses for the same question name do not support more than one user"
                 )
