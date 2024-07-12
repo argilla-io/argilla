@@ -24,7 +24,7 @@ export const useDatasetProgressViewModel = ({
         {
           id: "completed",
           name: t("datasets.completed"),
-          color: "#0508D9",
+          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
           value: progress.value.completed,
           tooltip: `${progress.value.completed}/${progress.value.total}`,
         },
