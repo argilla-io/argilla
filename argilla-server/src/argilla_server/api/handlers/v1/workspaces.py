@@ -33,6 +33,7 @@ from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security import auth
+from argilla_server.telemetry import _TELEMETRY_CLIENT
 
 router = APIRouter(tags=["workspaces"])
 
@@ -46,7 +47,11 @@ async def get_workspace(
 ):
     await authorize(current_user, WorkspacePolicy.get(workspace_id))
 
-    return await Workspace.get_or_raise(db, workspace_id)
+    workspace = await Workspace.get_or_raise(db, workspace_id)
+
+    _TELEMETRY_CLIENT.track_crud_workspace(action="read", workspace=workspace)
+
+    return workspace
 
 
 @router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema)
@@ -58,7 +63,11 @@ async def create_workspace(
 ):
     await authorize(current_user, WorkspacePolicy.create)
 
-    return await accounts.create_workspace(db, workspace_create.dict())
+    workspace = await accounts.create_workspace(db, workspace_create.dict())
+
+    _TELEMETRY_CLIENT.track_crud_workspace(action="create", workspace=workspace)
+
+    return workspace
 
 
 @router.delete("/workspaces/{workspace_id}", response_model=WorkspaceSchema)
@@ -72,7 +81,11 @@ async def delete_workspace(
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    return await accounts.delete_workspace(db, workspace)
+    workspace = await accounts.delete_workspace(db, workspace)
+
+    _TELEMETRY_CLIENT.track_crud_workspace(action="delete", workspace=workspace)
+
+    return workspace
 
 
 @router.get("/me/workspaces", response_model=Workspaces)
@@ -87,6 +100,9 @@ async def list_workspaces_me(
         workspaces = await accounts.list_workspaces(db)
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, current_user.id)
+
+    for workspace in workspaces.items:
+        _TELEMETRY_CLIENT.track_crud_workspace(action="read", workspace=workspace)
 
     return Workspaces(items=workspaces)
 
