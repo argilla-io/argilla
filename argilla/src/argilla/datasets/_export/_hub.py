@@ -21,6 +21,7 @@ from uuid import UUID
 
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
+from argilla.datasets._export._disk import DiskImportExportMixin
 
 if TYPE_CHECKING:
     from argilla import Dataset
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
 
-class HubImportExportMixin:
+class HubImportExportMixin(DiskImportExportMixin):
     _DEFAULT_DATASET_REPO_DIR = ".argilla"
     _DEFAULT_CONFIGURATION_FILES = ["settings.json", "dataset.json"]
 

@@ -29,7 +29,7 @@ from argilla.workspaces._resource import Workspace
 __all__ = ["Dataset"]
 
 
-class Dataset(Resource, DiskImportExportMixin, HubImportExportMixin):
+class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
     """Class for interacting with Argilla Datasets
 
     Attributes:
