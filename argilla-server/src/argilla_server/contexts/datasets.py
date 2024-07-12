@@ -33,7 +33,7 @@ from uuid import UUID
 
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Select, and_, case, func, select
+from sqlalchemy import Select, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
@@ -42,8 +42,6 @@ from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCr
 from argilla_server.api.schemas.v1.records import (
     RecordCreate,
     RecordIncludeParam,
-    RecordsCreate,
-    RecordsUpdate,
     RecordUpdateWithId,
 )
 from argilla_server.api.schemas.v1.responses import (
@@ -60,7 +58,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import accounts, distribution
-from argilla_server.enums import DatasetStatus, RecordInclude, UserRole, RecordStatus
+from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
     Dataset,
@@ -74,7 +72,6 @@ from argilla_server.models import (
     User,
     Vector,
     VectorSettings,
-    Workspace,
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
@@ -87,9 +84,6 @@ from argilla_server.validators.responses import (
 from argilla_server.validators.suggestions import SuggestionCreateValidator
 
 if TYPE_CHECKING:
-    from argilla_server.api.schemas.v1.datasets import (
-        DatasetUpdate,
-    )
     from argilla_server.api.schemas.v1.fields import FieldUpdate
     from argilla_server.api.schemas.v1.records import RecordUpdate
     from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
@@ -231,7 +225,8 @@ async def create_metadata_property(
 ) -> MetadataProperty:
     if await MetadataProperty.get_by(db, name=metadata_property_create.name, dataset_id=dataset.id):
         raise NotUniqueError(
-            f"Metadata property with name `{metadata_property_create.name}` already exists for dataset with id `{dataset.id}`"
+            f"Metadata property with name `{metadata_property_create.name}` already exists "
+            f"for dataset with id `{dataset.id}`"
         )
 
     async with db.begin_nested():
@@ -292,7 +287,8 @@ async def create_vector_settings(
 
     if await VectorSettings.get_by(db, name=vector_settings_create.name, dataset_id=dataset.id):
         raise NotUniqueError(
-            f"Vector settings with name `{vector_settings_create.name}` already exists for dataset with id `{dataset.id}`"
+            f"Vector settings with name `{vector_settings_create.name}` already exists "
+            f"for dataset with id `{dataset.id}`"
         )
 
     async with db.begin_nested():
@@ -403,7 +399,7 @@ async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: 
             .filter(
                 Record.dataset_id == dataset_id,
                 Record.status == RecordStatus.pending,
-                Response.id == None,
+                Response.id == None,  # noqa
             ),
         ),
     )
@@ -547,57 +543,6 @@ async def _build_record(
         external_id=record_create.external_id,
         dataset=dataset,
     )
-
-
-async def create_records(
-    db: AsyncSession, search_engine: SearchEngine, dataset: Dataset, records_create: RecordsCreate
-):
-    if not dataset.is_ready:
-        raise UnprocessableEntityError("Records cannot be created for a non published dataset")
-
-    records = []
-
-    caches = {
-        "users_ids_cache": set(),
-        "questions_cache": {},
-        "metadata_properties_cache": {},
-        "vectors_settings_cache": {},
-    }
-
-    for record_i, record_create in enumerate(records_create.items):
-        try:
-            record = await _build_record(db, dataset, record_create, caches)
-
-            record.responses = await _build_record_responses(
-                db, record, record_create.responses, caches["users_ids_cache"]
-            )
-
-            record.suggestions = await _build_record_suggestions(
-                db, record, record_create.suggestions, caches["questions_cache"]
-            )
-
-            record.vectors = await _build_record_vectors(
-                db,
-                dataset,
-                record_create.vectors,
-                build_vector_func=lambda value, vector_settings_id: Vector(
-                    value=value, vector_settings_id=vector_settings_id
-                ),
-                cache=caches["vectors_settings_cache"],
-            )
-
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"Record at position {record_i} is not valid because {e}") from e
-
-        records.append(record)
-
-    async with db.begin_nested():
-        db.add_all(records)
-        await db.flush(records)
-        await _preload_records_relationships_before_index(db, records)
-        await search_engine.index_records(dataset, records)
-
-    await db.commit()
 
 
 async def _load_users_from_responses(responses: Union[Response, Iterable[Response]]) -> None:
@@ -806,92 +751,6 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
             selectinload(Record.dataset).selectinload(Dataset.questions),
         )
     )
-
-
-async def update_records(
-    db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_update: "RecordsUpdate"
-) -> None:
-    records_ids = [record_update.id for record_update in records_update.items]
-
-    if len(records_ids) != len(set(records_ids)):
-        raise UnprocessableEntityError("Found duplicate records IDs")
-
-    existing_records_ids = await _exists_records_with_ids(db, dataset_id=dataset.id, records_ids=records_ids)
-    non_existing_records_ids = set(records_ids) - set(existing_records_ids)
-
-    if len(non_existing_records_ids) > 0:
-        sorted_non_existing_records_ids = sorted(non_existing_records_ids, key=lambda x: records_ids.index(x))
-        records_str = ", ".join([str(record_id) for record_id in sorted_non_existing_records_ids])
-        raise UnprocessableEntityError(f"Found records that do not exist: {records_str}")
-
-    # Lists to store the records that will be updated in the database or in the search engine
-    records_update_objects: List[Dict[str, Any]] = []
-    records_search_engine_update: List[UUID] = []
-    records_delete_suggestions: List[UUID] = []
-
-    # Cache dictionaries to avoid querying the database multiple times
-    caches = {
-        "metadata_properties": {},
-        "questions": {},
-        "vector_settings": {},
-    }
-
-    existing_records = await get_records_by_ids(db, records_ids=records_ids, dataset_id=dataset.id)
-
-    suggestions = []
-    upsert_vectors = []
-    for record_i, (record_update, record) in enumerate(zip(records_update.items, existing_records)):
-        try:
-            params, record_suggestions, record_vectors, needs_search_engine_update, caches = await _build_record_update(
-                db, record, record_update, caches
-            )
-
-            if record_suggestions is not None:
-                suggestions.extend(record_suggestions)
-                records_delete_suggestions.append(record_update.id)
-
-            upsert_vectors.extend(record_vectors)
-
-            if needs_search_engine_update:
-                records_search_engine_update.append(record_update.id)
-
-            # Only update the record if there are params to update
-            if len(params) > 1:
-                records_update_objects.append(params)
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"Record at position {record_i} is not valid because {e}") from e
-
-    async with db.begin_nested():
-        if records_delete_suggestions:
-            params = [Suggestion.record_id.in_(records_delete_suggestions)]
-            await Suggestion.delete_many(db, params=params, autocommit=False)
-
-        if suggestions:
-            db.add_all(suggestions)
-
-        if upsert_vectors:
-            await Vector.upsert_many(
-                db,
-                objects=upsert_vectors,
-                constraints=[Vector.record_id, Vector.vector_settings_id],
-                autocommit=False,
-            )
-
-        if records_update_objects:
-            await Record.update_many(db, records_update_objects, autocommit=False)
-
-        if records_search_engine_update:
-            records = await get_records_by_ids(
-                db,
-                dataset_id=dataset.id,
-                records_ids=records_search_engine_update,
-                include=RecordIncludeParam(keys=[RecordInclude.vectors], vectors=None),
-            )
-            await dataset.awaitable_attrs.vectors_settings
-            await _preload_records_relationships_before_index(db, records)
-            await search_engine.index_records(dataset, records)
-
-    await db.commit()
 
 
 async def delete_records(
