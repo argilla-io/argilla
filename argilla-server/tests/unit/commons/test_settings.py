@@ -27,6 +27,7 @@ def test_wrong_settings_namespace(monkeypatch, bad_namespace):
 
 def test_settings_namespace(monkeypatch):
     monkeypatch.setenv("ARGILLA_NAMESPACE", "namespace")
+
     settings = Settings()
 
     assert settings.namespace == "namespace"
@@ -38,12 +39,12 @@ def test_settings_index_replicas_with_shards_defined(monkeypatch):
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_REPLICAS", "2")
 
-    settings = Settings()
-    assert settings.es_records_index_replicas == 2
+    assert Settings().es_records_index_replicas == 2
 
 
 def test_settings_default_index_replicas_with_shards_defined(monkeypatch):
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
+
     settings = Settings()
 
     assert settings.es_records_index_shards == 100
@@ -54,7 +55,18 @@ def test_settings_default_database_url(monkeypatch):
     monkeypatch.setenv("ARGILLA_DATABASE_URL", "")
 
     settings = Settings()
+
     assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
+
+
+def test_settings_database_sqlite_timeout(monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_SQLITE_TIMEOUT", "3")
+
+    assert Settings().database_sqlite_timeout == 3
+
+
+def test_settings_default_database_sqlite_timeout():
+    assert Settings().database_sqlite_timeout == 15
 
 
 @pytest.mark.parametrize(
@@ -68,5 +80,5 @@ def test_settings_default_database_url(monkeypatch):
 )
 def test_settings_database_url(url: str, expected_url: str, monkeypatch):
     monkeypatch.setenv("ARGILLA_DATABASE_URL", url)
-    settings = Settings()
-    assert settings.database_url == expected_url
+
+    assert Settings().database_url == expected_url
