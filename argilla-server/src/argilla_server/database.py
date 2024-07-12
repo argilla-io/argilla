@@ -14,18 +14,16 @@
 import os
 from collections import OrderedDict
 from sqlite3 import Connection as SQLite3Connection
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, AsyncGenerator, Optional
 
 from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.engine.interfaces import IsolationLevel
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from sqlalchemy.dialects.sqlite.aiosqlite import AsyncAdapt_aiosqlite_connection
 
 import argilla_server
 from argilla_server.settings import settings
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla_server.__file__), "alembic.ini"))
@@ -51,13 +49,27 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
-async_engine = create_async_engine(settings.database_url)
+async_engine = create_async_engine(settings.database_url, connect_args=settings.database_connect_args)
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
-async def get_async_db() -> Generator["AsyncSession", None, None]:
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    async for db in _get_async_db():
+        yield db
+
+
+async def get_serializable_async_db() -> AsyncGenerator[AsyncSession, None]:
+    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
+        yield db
+
+
+async def _get_async_db(isolation_level: Optional[IsolationLevel] = None) -> AsyncGenerator[AsyncSession, None]:
+    db: AsyncSession = AsyncSessionLocal()
+
+    if isolation_level is not None:
+        await db.connection(execution_options={"isolation_level": isolation_level})
+
     try:
-        db: "AsyncSession" = AsyncSessionLocal()
         yield db
     finally:
         await db.close()

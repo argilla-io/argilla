@@ -30,6 +30,7 @@ class RecordsAPI(ResourceAPI[RecordModel]):
 
     MAX_RECORDS_PER_CREATE_BULK = 500
     MAX_RECORDS_PER_UPSERT_BULK = 500
+    MAX_RECORDS_PER_DELETE_BULK = 100
 
     http_client: httpx.Client
 

@@ -20,18 +20,28 @@ These are the section headers that we use:
 
 - Added support to specify `distribution` attribute when creating a dataset. ([#5013](https://github.com/argilla-io/argilla/pull/5013))
 - Added support to change `distribution` attribute when updating a dataset. ([#5028](https://github.com/argilla-io/argilla/pull/5028))
+- Added new `ARGILLA_DATABASE_SQLITE_TIMEOUT` environment variable allowing to set transactions timeout for SQLite. ([#5213](https://github.com/argilla-io/argilla/pull/5213))
 
 ### Changed
 
 - Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
-- [breaking] Change `GET /datasets/:dataset_id/progress` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
-- [breaking] Change `GET /me/datasets/:dataset_id/metrics` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
+- [breaking] Change `GET /api/v1/datasets/:dataset_id/progress` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
+- [breaking] Change `GET /api/v1/me/datasets/:dataset_id/metrics` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
 
 ### Fixed
 
 - Fixed SQLite connection settings not working correctly due to a outdated conditional. ([#5149](https://github.com/argilla-io/argilla/pull/5149))
 
+### Removed
+
+- [breaking] Remove deprecated endpoint `POST /api/v1/datasets/:dataset_id/records`. ([#5206](https://github.com/argilla-io/argilla/pull/5206))
+- [breaking] Remove deprecated endpoint `PATCH /api/v1/datasets/:dataset_id/records`. ([#5206](https://github.com/argilla-io/argilla/pull/5206))
+
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
+
+### Changed
+
+- Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
 
 ### Removed
 

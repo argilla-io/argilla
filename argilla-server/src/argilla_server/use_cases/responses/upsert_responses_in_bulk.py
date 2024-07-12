@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from argilla_server.api.policies.v1 import RecordPolicy, authorize
 from argilla_server.api.schemas.v1.responses import Response, ResponseBulk, ResponseBulkError, ResponseUpsert
 from argilla_server.contexts import datasets
-from argilla_server.database import get_async_db
+from argilla_server.database import get_serializable_async_db
 from argilla_server.errors import future as errors
 from argilla_server.models import User
 from argilla_server.search_engine import SearchEngine, get_search_engine
@@ -55,6 +55,8 @@ class UpsertResponsesInBulkUseCase:
 
 class UpsertResponsesInBulkUseCaseFactory:
     def __call__(
-        self, db: AsyncSession = Depends(get_async_db), search_engine: SearchEngine = Depends(get_search_engine)
+        self,
+        db: AsyncSession = Depends(get_serializable_async_db),
+        search_engine: SearchEngine = Depends(get_search_engine),
     ):
         return UpsertResponsesInBulkUseCase(db, search_engine)
