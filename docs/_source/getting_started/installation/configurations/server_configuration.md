@@ -71,7 +71,7 @@ You can set the following environment variables to further configure your server
 
 The following environment variables are useful only when SQLite is used:
 
-- `ARGILLA_DATABASE_TIMEOUT`: How many seconds the connection should wait before raising an `OperationalError` when a table is locked. If another connection opens a transaction to modify a table, that table will be locked until the transaction is committed. (Defaut: `15` seconds).
+- `ARGILLA_DATABASE_SQLITE_TIMEOUT`: How many seconds the connection should wait before raising an `OperationalError` when a table is locked. If another connection opens a transaction to modify a table, that table will be locked until the transaction is committed. (Defaut: `15` seconds).
 
 #### Elasticsearch and Opensearch
 

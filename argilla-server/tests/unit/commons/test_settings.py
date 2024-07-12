@@ -59,14 +59,14 @@ def test_settings_default_database_url(monkeypatch):
     assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
 
 
-def test_settings_database_timeout(monkeypatch):
-    monkeypatch.setenv("ARGILLA_DATABASE_TIMEOUT", "3")
+def test_settings_database_sqlite_timeout(monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_SQLITE_TIMEOUT", "3")
 
-    assert Settings().database_timeout == 3
+    assert Settings().database_sqlite_timeout == 3
 
 
-def test_settings_default_database_timeout():
-    assert Settings().database_timeout == 15
+def test_settings_default_database_sqlite_timeout():
+    assert Settings().database_sqlite_timeout == 15
 
 
 @pytest.mark.parametrize(

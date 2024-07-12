@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Added
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Added support to specify `distribution` attribute when creating a dataset. ([#5013](https://github.com/argilla-io/argilla/pull/5013))
 - Added support to change `distribution` attribute when updating a dataset. ([#5028](https://github.com/argilla-io/argilla/pull/5028))
 
@@ -30,6 +31,9 @@ These are the section headers that we use:
 =======
 - Added new `ARGILLA_DATABASE_TIMEOUT` environment variable allowing to set transactions timeout for SQLite. ([#5213](https://github.com/argilla-io/argilla/pull/5213))
 >>>>>>> improvement/add-database-timeout-setting
+=======
+- Added new `ARGILLA_DATABASE_SQLITE_TIMEOUT` environment variable allowing to set transactions timeout for SQLite. ([#5213](https://github.com/argilla-io/argilla/pull/5213))
+>>>>>>> @{-1}
 
 ### Fixed
 
