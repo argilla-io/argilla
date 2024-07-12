@@ -143,6 +143,9 @@ nav:
       - Importing and exporting datasets: how_to_guides/import_export.md
       - Annotate a dataset: how_to_guides/annotate.md
       - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+      - Advanced:
+        - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
+        - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
       - Text classification task: tutorials/text_classification.ipynb

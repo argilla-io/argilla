@@ -5,7 +5,9 @@ hide: toc
 
 # How-to guides
 
-These are the how-to guides for *the Argilla SDK*. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.
+These guides provide step-by-step instructions for common scenarios, including detailed explanations and code samples. They are divided into two categories: basic and advanced. The basic guides will help you get started with the core concepts of Argilla, while the advanced guides will help you explore more advanced features.
+
+## Basic
 
 <div class="grid cards" markdown>
 
@@ -56,6 +58,20 @@ These are the how-to guides for *the Argilla SDK*. They provide step-by-step ins
     Learn how to export your dataset or its records to Python, your local disk, or the Hugging face Hub.
 
     [:octicons-arrow-right-24: How-to guide](import_export.md)
+
+</div>
+
+## Advanced
+
+<div class="grid cards" markdown>
+
+-   __Use Markdown to format rich content__
+
+    ---
+
+    Learn how to use Markdown and HTML in TextFields to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.
+
+    [:octicons-arrow-right-24: How-to guide](use_markdown_to_format_rich_content.md)
 
 -   __Migrate to Argilla V2__
 

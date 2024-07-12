@@ -12,8 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla._exceptions._base import ArgillaError
-
-
-class MetadataError(ArgillaError):
-    message: str = "Error defining dataset metadata settings"
+from argilla.markdown.media import pdf_to_html, audio_to_html, image_to_html, video_to_html  # noqa
+from argilla.markdown.chat import chat_to_html  # noqa

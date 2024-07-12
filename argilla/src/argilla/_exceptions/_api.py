@@ -11,14 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 from httpx import HTTPStatusError
 
-from argilla._exceptions._base import ArgillaErrorBase
+from argilla._exceptions._base import ArgillaError
 
 
-class ArgillaAPIError(ArgillaErrorBase):
-    pass
+class ArgillaAPIError(ArgillaError):
+    def __init__(self, message: Optional[str] = None, status_code: int = 500):
+        """Base class for all Argilla API exceptions
+        Args:
+            message (str): The message to display when the exception is raised
+            status_code (int): The status code of the response that caused the exception
+        """
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class BadRequestError(ArgillaAPIError):
