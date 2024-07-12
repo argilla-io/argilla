@@ -65,22 +65,23 @@ dataset = rg.Dataset(
 
 ---
 
-## Class References
-
-### `rg.FloatMetadataProperty`
+## `rg.FloatMetadataProperty`
 
 ::: src.argilla.settings._metadata.FloatMetadataProperty
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.IntegerMetadataProperty`
+## `rg.IntegerMetadataProperty`
 
 ::: src.argilla.settings._metadata.IntegerMetadataProperty
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.TermsMetadataProperty`
+## `rg.TermsMetadataProperty`
 
 ::: src.argilla.settings._metadata.TermsMetadataProperty
     options:
         heading_level: 3
+        show_root_toc_entry: false

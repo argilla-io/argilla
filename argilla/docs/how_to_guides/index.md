@@ -41,13 +41,21 @@ These are the how-to guides for *the Argilla SDK*. They provide step-by-step ins
 
     [:octicons-arrow-right-24: How-to guide](record.md)
 
--   __Query, filter and export records__
+-   __Query and filter a dataset__
 
     ---
 
-    Learn how to query and filter a `Dataset` and export their `Records`.
+    Learn how to query and filter a `Dataset`.
 
-    [:octicons-arrow-right-24: How-to guide](query_export.md)
+    [:octicons-arrow-right-24: How-to guide](query.md)
+
+-   __Importing and exporting datasets and records__
+
+    ---
+
+    Learn how to export your dataset or its records to Python, your local disk, or the Hugging face Hub.
+
+    [:octicons-arrow-right-24: How-to guide](import_export.md)
 
 -   __Migrate to Argilla V2__
 
