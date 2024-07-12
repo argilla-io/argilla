@@ -93,9 +93,6 @@ def es_bool_query(
     if must_not:
         bool_query["must_not"] = must_not
 
-    if not bool_query:
-        raise ValueError("Cannot build a boolean query without any clause")
-
     if minimum_should_match:
         bool_query["minimum_should_match"] = minimum_should_match
 
