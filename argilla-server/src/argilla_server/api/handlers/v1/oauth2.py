@@ -16,7 +16,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import telemetry
 from argilla_server.api.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
@@ -27,6 +26,7 @@ from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.security.settings import settings
+from argilla_server.telemetry import _TELEMETRY_CLIENT
 
 router = APIRouter(prefix="/oauth2", tags=["Authentication"])
 
@@ -74,7 +74,7 @@ async def get_access_token(
                 role=_USER_ROLE_ON_CREATION,
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
-            telemetry.track_user_created(user, is_oauth=True)
+            _TELEMETRY_CLIENT.track_crud_user(action="create", user=user, is_oauth=True)
         elif not _is_user_created_by_oauth_provider(user):
             # User should sign in using username/password workflow
             raise AuthenticationError("Could not authenticate user")
