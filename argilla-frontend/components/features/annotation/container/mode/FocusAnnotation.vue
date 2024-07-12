@@ -84,7 +84,10 @@
             />
           </template>
           <template #downHeader>
-            <p v-text="$t('metrics.progress')" />
+            <p
+              class="annotation-progress__title"
+              v-text="$t('metrics.progress.my')"
+            />
             <AnnotationProgress
               class="annotation-progress"
               :datasetId="recordCriteria.datasetId"
@@ -92,7 +95,6 @@
             />
           </template>
           <template #downContent>
-            <AnnotationProgress :datasetId="recordCriteria.datasetId" />
             <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
           </template>
         </HorizontalResizable>
@@ -237,6 +239,12 @@ export default {
 .annotation-progress {
   .--expanded & {
     display: none;
+  }
+}
+.annotation-progress__title {
+  display: none;
+  .--expanded & {
+    display: block;
   }
 }
 </style>
