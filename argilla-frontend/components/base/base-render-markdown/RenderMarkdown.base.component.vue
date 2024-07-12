@@ -11,6 +11,7 @@ import { marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import * as DOMPurify from "dompurify";
+import markedKatex from "marked-katex-extension";
 
 const preprocess = (html) => {
   return html.replace(/[^\S\r\n]+$/gm, "");
@@ -36,6 +37,12 @@ DOMPurify.addHook("beforeSanitizeAttributes", (node) => {
     node.setAttribute("target", "_blank");
   }
 });
+
+marked.use(
+  markedKatex({
+    throwOnError: false,
+  })
+);
 
 marked.use(
   { hooks: { preprocess, postprocess } },

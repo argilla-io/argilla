@@ -86,7 +86,7 @@ retrieved_workspace = client.workspaces("my_workspace")
 
 ## Check workspace existence
 
-You can check if a workspace exists by calling the `exists` method on the `Workspace` class. This method returns a boolean value.
+You can check if a workspace exists. The `client.workspaces` method will return `None` if the workspace was not found.
 
 ```python
 import argilla as rg
@@ -95,7 +95,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 workspace = client.workspaces("my_workspace")
 
-workspace_existed = workspace.exists()
+workspace_exists = workspace is not None
 ```
 
 ## List users in a workspace

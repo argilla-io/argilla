@@ -12,14 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID, uuid4
-
 import pytest
-from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import ResponseStatus, UserRole
+
+from uuid import UUID, uuid4
 from httpx import AsyncClient
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, UserFactory
+from argilla_server.constants import API_KEY_HEADER_NAME
+from argilla_server.enums import UserRole, RecordStatus
+
+from tests.factories import DatasetFactory, RecordFactory, UserFactory
 
 
 @pytest.mark.asyncio
@@ -30,71 +31,16 @@ class TestGetDatasetProgress:
     async def test_get_dataset_progress(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
-        record_with_one_submitted_response = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_one_submitted_response)
-
-        record_with_multiple_submitted_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create_batch(3, record=record_with_multiple_submitted_responses)
-
-        record_with_one_draft_response = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_one_draft_response, status=ResponseStatus.draft)
-
-        record_with_multiple_draft_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create_batch(3, record=record_with_multiple_draft_responses, status=ResponseStatus.draft)
-
-        record_with_one_discarded_response = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_one_discarded_response, status=ResponseStatus.discarded)
-
-        record_with_multiple_discarded_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create_batch(
-            3, record=record_with_multiple_discarded_responses, status=ResponseStatus.discarded
-        )
-
-        record_with_mixed_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_mixed_responses)
-        await ResponseFactory.create(record=record_with_mixed_responses, status=ResponseStatus.draft)
-        await ResponseFactory.create(record=record_with_mixed_responses, status=ResponseStatus.discarded)
-
-        record_without_responses = await RecordFactory.create(dataset=dataset)
-
-        other_dataset = await DatasetFactory.create()
-
-        other_record_with_one_submitted_response = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_one_submitted_response)
-
-        other_record_with_multiple_submitted_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create_batch(3, record=other_record_with_multiple_submitted_responses)
-
-        other_record_with_one_draft_response = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_one_draft_response, status=ResponseStatus.draft)
-
-        other_record_with_multiple_draft_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create_batch(
-            3, record=other_record_with_multiple_draft_responses, status=ResponseStatus.draft
-        )
-
-        other_record_with_one_discarded_response = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_one_discarded_response, status=ResponseStatus.discarded)
-
-        other_record_with_multiple_discarded_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create_batch(
-            3, record=other_record_with_multiple_discarded_responses, status=ResponseStatus.discarded
-        )
-
-        other_record_with_mixed_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_mixed_responses)
-        await ResponseFactory.create(record=other_record_with_mixed_responses, status=ResponseStatus.draft)
-        await ResponseFactory.create(record=other_record_with_mixed_responses, status=ResponseStatus.discarded)
+        records_completed = await RecordFactory.create_batch(3, status=RecordStatus.completed, dataset=dataset)
+        records_pending = await RecordFactory.create_batch(2, status=RecordStatus.pending, dataset=dataset)
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
         assert response.status_code == 200
         assert response.json() == {
-            "total": 8,
-            "submitted": 2,
-            "discarded": 2,
-            "conflicting": 1,
-            "pending": 3,
+            "completed": 3,
+            "pending": 2,
+            "total": 5,
         }
 
     async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
@@ -104,11 +50,9 @@ class TestGetDatasetProgress:
 
         assert response.status_code == 200
         assert response.json() == {
-            "total": 0,
-            "submitted": 0,
-            "discarded": 0,
-            "conflicting": 0,
+            "completed": 0,
             "pending": 0,
+            "total": 0,
         }
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])

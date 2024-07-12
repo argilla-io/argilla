@@ -39,13 +39,12 @@ class TestResourceHTMLReprMixin:
 
         workspace = rg.Workspace(name="workspace1", id=uuid.uuid4())
         datasets = [
-            rg.Dataset.from_model(
-                DatasetModel(id=uuid.uuid4(), name="dataset1", workspace_id=workspace.id), client=client
-            ),
-            rg.Dataset.from_model(
-                DatasetModel(id=uuid.uuid4(), name="dataset2", workspace_id=workspace.id), client=client
-            ),
+            rg.Dataset(name="dataset1", workspace=workspace, client=client),
+            rg.Dataset(name="dataset2", workspace=workspace, client=client),
         ]
+
+        for dataset in datasets:
+            dataset.id = uuid.uuid4()
 
         assert (
             ResourceHTMLReprMixin()._represent_as_html(datasets) == "<h3>Datasets</h3>"

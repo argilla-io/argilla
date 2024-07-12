@@ -1,101 +1,116 @@
 <template>
-  <VerticalResizable class="wrapper" :id="`${recordCriteria.datasetId}-r-v-rz`">
-    <template #left>
-      <HorizontalResizable
-        :id="`${recordCriteria.datasetId}-r-h-rz`"
-        class="wrapper__left"
-      >
-        <template #up>
-          <section class="wrapper__records">
-            <DatasetFilters :recordCriteria="recordCriteria">
-              <ToggleAnnotationType
-                v-if="
-                  records.hasRecordsToAnnotate &&
-                  recordCriteria.committed.isPending
-                "
-                :recordCriteria="recordCriteria"
-            /></DatasetFilters>
-            <SimilarityRecordReference
-              v-show="recordCriteria.isFilteringBySimilarity"
-              v-if="!!records.reference"
-              :fields="records.reference.fields"
-              :recordCriteria="recordCriteria"
-              :availableVectors="datasetVectors"
-            />
-            <div class="wrapper__records__header">
-              <PaginationFeedbackTask :recordCriteria="recordCriteria" />
-            </div>
-            <Record
-              v-if="records.hasRecordsToAnnotate"
-              :datasetVectors="datasetVectors"
-              :recordCriteria="recordCriteria"
-              :record="record"
-            />
-            <div v-else class="wrapper--empty">
-              <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-            </div>
-          </section>
-        </template>
+  <span class="focus__container">
+    <div v-if="!records.hasRecordsToAnnotate">
+      <section class="wrapper__records">
+        <DatasetFilters :recordCriteria="recordCriteria" />
+      </section>
 
-        <template #downHeader>
+      <div class="wrapper--empty">
+        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+      </div>
+    </div>
+    <VerticalResizable
+      v-else
+      :id="`${recordCriteria.datasetId}-r-v-rz`"
+      class="wrapper"
+    >
+      <template #left>
+        <HorizontalResizable
+          :id="`${recordCriteria.datasetId}-r-h-rz`"
+          class="wrapper__left"
+        >
+          <template #up>
+            <section class="wrapper__records">
+              <DatasetFilters :recordCriteria="recordCriteria">
+                <ToggleAnnotationType
+                  v-if="
+                    records.hasRecordsToAnnotate &&
+                    recordCriteria.committed.isPending
+                  "
+                  :recordCriteria="recordCriteria"
+              /></DatasetFilters>
+              <SimilarityRecordReference
+                v-show="recordCriteria.isFilteringBySimilarity"
+                v-if="!!records.reference"
+                :fields="records.reference.fields"
+                :recordCriteria="recordCriteria"
+                :availableVectors="datasetVectors"
+              />
+              <div class="wrapper__records__header">
+                <PaginationFeedbackTask :recordCriteria="recordCriteria" />
+              </div>
+              <Record
+                v-if="records.hasRecordsToAnnotate"
+                :datasetVectors="datasetVectors"
+                :recordCriteria="recordCriteria"
+                :record="record"
+              />
+              <div v-else class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+              </div>
+            </section>
+          </template>
+
+          <template #downHeader>
+            <p v-text="$t('guidelines')" />
+          </template>
+          <template #downContent>
+            <AnnotationGuidelines />
+          </template>
+        </HorizontalResizable>
+      </template>
+
+      <template #right>
+        <HorizontalResizable
+          :id="`${recordCriteria.datasetId}-q-h-rz}`"
+          class="wrapper__right"
+        >
+          <template #up>
+            <QuestionsForm
+              v-if="!!record"
+              :key="`${record.id}_questions`"
+              class="wrapper__form"
+              :class="statusClass"
+              :datasetId="recordCriteria.datasetId"
+              :record="record"
+              :show-discard-button="!record.isDiscarded"
+              :is-draft-saving="isDraftSaving"
+              :is-submitting="isSubmitting"
+              :is-discarding="isDiscarding"
+              :enableAutoSubmitWithKeyboard="true"
+              @on-submit-responses="onSubmit"
+              @on-discard-responses="onDiscard"
+              @on-save-draft="onSaveDraft"
+            />
+          </template>
+          <template #downHeader>
+            <p v-text="$t('metrics.progress')" />
+            <AnnotationProgress
+              class="annotation-progress"
+              :datasetId="recordCriteria.datasetId"
+              enableFetch
+            />
+          </template>
+          <template #downContent>
+            <AnnotationProgress :datasetId="recordCriteria.datasetId" />
+            <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
+          </template>
+        </HorizontalResizable>
+      </template>
+      <BaseCollapsablePanel
+        hideOnDesktop
+        :isExpanded="expandedGuidelines"
+        @toggle-expand="expandedGuidelines = !expandedGuidelines"
+      >
+        <template #panelHeader>
           <p v-text="$t('guidelines')" />
         </template>
-        <template #downContent>
+        <template #panelContent>
           <AnnotationGuidelines />
         </template>
-      </HorizontalResizable>
-    </template>
-
-    <template #right>
-      <HorizontalResizable
-        :id="`${recordCriteria.datasetId}-q-h-rz}`"
-        class="wrapper__right"
-      >
-        <template #up>
-          <QuestionsForm
-            v-if="!!record"
-            :key="`${record.id}_questions`"
-            class="wrapper__form"
-            :class="statusClass"
-            :datasetId="recordCriteria.datasetId"
-            :record="record"
-            :show-discard-button="!record.isDiscarded"
-            :is-draft-saving="isDraftSaving"
-            :is-submitting="isSubmitting"
-            :is-discarding="isDiscarding"
-            :enableAutoSubmitWithKeyboard="true"
-            @on-submit-responses="onSubmit"
-            @on-discard-responses="onDiscard"
-            @on-save-draft="onSaveDraft"
-          />
-        </template>
-        <template #downHeader>
-          <p v-text="$t('metrics.progress')" />
-          <AnnotationProgress
-            class="annotation-progress"
-            :datasetId="recordCriteria.datasetId"
-            enableFetch
-          />
-        </template>
-        <template #downContent>
-          <AnnotationProgress :datasetId="recordCriteria.datasetId" />
-          <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
-        </template>
-      </HorizontalResizable>
-    </template>
-    <BaseCollapsablePanel
-      hideOnDesktop
-      :isExpanded="expandedGuidelines"
-      @toggle-expand="expandedGuidelines = !expandedGuidelines"
-    >
-      <template #panelHeader>
-        <p v-text="$t('guidelines')" />
-      </template>
-      <template #panelContent>
-        <AnnotationGuidelines />
-      </template>
-    </BaseCollapsablePanel>
-  </VerticalResizable>
+      </BaseCollapsablePanel>
+    </VerticalResizable>
+  </span>
 </template>
 <script>
 import { useFocusAnnotationViewModel } from "./useFocusAnnotationViewModel";
@@ -152,6 +167,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.focus {
+  &__container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+}
 .wrapper {
   position: relative;
   display: flex;
@@ -206,6 +229,9 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    @include media("<desktop") {
+      height: 80vh;
+    }
   }
 }
 .annotation-progress {

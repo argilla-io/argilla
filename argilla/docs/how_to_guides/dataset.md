@@ -135,7 +135,7 @@ A **field** is defined in the `TextField` class that has the following arguments
 * `name`: The name of the field.
 * `title` (optional): The name of the field, as it will be displayed in the UI. Defaults to the `name` value.
 * `required` (optional): Whether the field is required or not. Defaults to `True`. At least one field must be required.
-* `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to True, you will be able to use all the Markdown features for text formatting, as well as embed multimedia content and PDFs.
+* `use_markdown` (optional): Specify whether you want markdown rendered in the UI. Defaults to `False`. If you set it to True, you will be able to use all the Markdown features for text formatting, including LaTex formulas and embedding multimedia content and PDFs.
 
 !!! note
     The order of the fields in the UI follows the order in which these are added to the fields attribute in the Python SDK.
@@ -432,7 +432,7 @@ retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 ## Check dataset existence
 
-You can check if a dataset exists by calling the `exists` method on the `Dataset` class. This method returns a boolean value.
+You can check if a dataset exists. The `client.datasets` method will return `None` if the dataset was not found.
 
 ```python
 import argilla as rg
@@ -441,7 +441,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 dataset = client.datasets(name="my_dataset")
 
-dataset_existed = dataset.exists()
+dataset_exist = dataset is not None
 ```
 
 ## Update a dataset
