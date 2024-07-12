@@ -37,8 +37,8 @@ class HubImportExportMixin(DiskImportExportMixin):
     def to_hub(
         self: "Dataset",
         repo_id: str,
+        *,
         generate_card: Optional[bool] = True,
-        *args,
         **kwargs,
     ) -> None:
         """Pushes the `Dataset` to the Hugging Face Hub. If the dataset has been previously pushed to the
