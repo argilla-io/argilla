@@ -15,10 +15,10 @@
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
 from httpx import AsyncClient
 
-from tests.factories import DatasetFactory
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
+from tests.factories import DatasetFactory, RecordFactory, ResponseFactory
 
 
 @pytest.mark.asyncio
@@ -95,7 +95,7 @@ class TestUpdateDataset:
             "min_submitted": 1,
         }
 
-    async def test_update_dataset_distribution_for_published_dataset(
+    async def test_update_dataset_distribution_for_published_dataset_without_responses(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
@@ -111,12 +111,37 @@ class TestUpdateDataset:
             },
         )
 
-        assert response.status_code == 422
-        assert response.json() == {"detail": "Distribution settings cannot be modified for a published dataset"}
+        assert response.status_code == 200
 
         assert dataset.distribution == {
             "strategy": DatasetDistributionStrategy.overlap,
-            "min_submitted": 1,
+            "min_submitted": 4,
+        }
+
+    async def test_update_dataset_distribution_for_dataset_with_responses(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        records = await RecordFactory.create_batch(10, dataset=dataset)
+
+        for record in records:
+            await ResponseFactory.create(record=record)
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "distribution": {
+                    "strategy": DatasetDistributionStrategy.overlap,
+                    "min_submitted": 4,
+                },
+            },
+        )
+
+        assert response.status_code == 422
+
+        assert response.json() == {
+            "detail": "Distribution settings cannot be modified for a dataset with records including responses"
         }
 
     async def test_update_dataset_distribution_with_invalid_strategy(

@@ -14,7 +14,7 @@
 
 import pytest
 
-from argilla import User, Argilla
+from argilla import User, Argilla, Workspace
 from argilla._exceptions import UnprocessableEntityError
 
 
@@ -45,14 +45,11 @@ class TestManageUsers:
         user = User(username="test_delete_user", password="test_password")
         client.users.add(user)
         user.delete()
-        assert not user.exists()
+        assert not client.api.users.exist(user.id)
 
-    def test_add_user_to_workspace(self, client: Argilla):
+    def test_add_user_to_workspace(self, client: Argilla, workspace: Workspace):
         user = User(username="test_user", password="test_password")
         client.users.add(user)
-
-        workspace = client.workspaces(name="test_workspace")
-        workspace.create()
 
         user = client.users(username="test_user")
         assert user.password is None

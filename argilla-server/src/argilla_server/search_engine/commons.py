@@ -79,24 +79,28 @@ def es_range_query(field_name: str, gte: Optional[float] = None, lte: Optional[f
 
 def es_bool_query(
     *,
-    must_not: Optional[List[dict]] = None,
+    must: Optional[dict] = None,
+    must_not: Optional[Any] = None,
     should: Optional[List[dict]] = None,
     minimum_should_match: Optional[Union[int, str]] = None,
 ) -> Dict[str, Any]:
     bool_query = {}
 
+    if must:
+        bool_query["must"] = must
     if should:
         bool_query["should"] = should
     if must_not:
         bool_query["must_not"] = must_not
 
-    if not bool_query:
-        raise ValueError("Cannot build a boolean query without any clause")
-
     if minimum_should_match:
         bool_query["minimum_should_match"] = minimum_should_match
 
     return {"bool": bool_query}
+
+
+def es_exists_field_query(field: str) -> dict:
+    return {"exists": {"field": field}}
 
 
 def es_ids_query(ids: List[str]) -> dict:
@@ -225,7 +229,7 @@ def _get_response_value_fields_for_question(index_mapping: dict, question: str) 
     mapping_properties: Dict[str, Any] = mapping_def["mappings"]["properties"]
 
     response_fields = []
-    for user_id, user_responses in mapping_properties["responses"]["properties"].items():
+    for user_id, user_responses in mapping_properties["responses"].get("properties", {}).items():
         if question in user_responses["properties"]["values"]["properties"]:
             response_fields.append(es_field_for_response_value(User(id=UUID(user_id)), question=question))
     return response_fields
@@ -386,7 +390,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         query_filters = []
         if filter:
-            index_mapping = self.client.indices.get_mapping(index=index)
+            index_mapping = await self.client.indices.get_mapping(index=index)
             # Wrapping filter in a list to use easily on each engine implementation
             query_filters = [self.build_elasticsearch_filter(filter, index_mapping)]
 
@@ -455,13 +459,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         filters = []
         if status_filter.has_pending_status:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-            filters.append({"bool": {"must_not": {"exists": {"field": response_field}}}})
+            filters.append(es_bool_query(must_not=es_exists_field_query(response_field)))
 
         if status_filter.response_statuses:
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
             filters.append(es_terms_query(response_field, values=status_filter.response_statuses))
 
-        return {"bool": {"should": filters, "minimum_should_match": 1}}
+        return es_bool_query(should=filters, minimum_should_match=1)
 
     def _build_response_value_filter_without_user(self, filter: Filter, index_mapping: dict) -> dict:
         """This is a workaround to fix errors when querying response value without user and consist on
@@ -470,12 +474,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         This should be removed once we review mappings for responses.
         """
         question_response_fields = _get_response_value_fields_for_question(index_mapping, filter.scope.question)
-
         all_user_filters = [self._map_filter_to_es_filter(filter, field) for field in question_response_fields]
 
-        if all_user_filters:
-            return es_bool_query(should=all_user_filters, minimum_should_match=1)
-        return {}
+        return es_bool_query(
+            must=es_exists_field_query(ALL_RESPONSES_STATUSES_FIELD), should=all_user_filters, minimum_should_match=1
+        )
 
     def _map_filter_to_es_filter(self, filter: Filter, es_field: str) -> dict:
         if isinstance(filter, TermsFilter):
