@@ -967,6 +967,7 @@ async def create_response(
         )
 
         await db.flush([response])
+        await _load_users_from_responses([response])
         await _touch_dataset_last_activity_at(db, record.dataset)
         await search_engine.update_record_response(response)
         await db.refresh(record, attribute_names=[Record.responses_submitted.key])
