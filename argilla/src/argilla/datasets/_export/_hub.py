@@ -62,7 +62,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         hf_api = HfApi(token=kwargs.get("token"))
 
         hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
-        hfds.push_to_hub(repo_id, *args, **kwargs)
+        hfds.push_to_hub(repo_id, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
             config_dir = os.path.join(tmpdirname, self._DEFAULT_DATASET_REPO_DIR)
@@ -101,7 +101,6 @@ class HubImportExportMixin(DiskImportExportMixin):
         workspace: Optional[Union["Workspace", str, UUID]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
-        *args: Any,
         **kwargs: Any,
     ):
         """Loads a `FeedbackDataset` from the Hugging Face Hub.
@@ -129,7 +128,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
 
-        hf_dataset: Dataset = load_dataset(path=repo_id, *args, **kwargs)  # type: ignore
+        hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
         if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
             if len(hf_dataset.keys()) > 1:
                 raise ValueError(
