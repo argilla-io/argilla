@@ -6,19 +6,19 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="The Argilla python server SDK">
+        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/community/popular_issues/">
+        <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/how_to_guides/import_export/">
       
       
-        <link rel="prev" href="../contributor/">
+        <link rel="prev" href="../query/">
       
       
-        <link rel="next" href="../changelog/">
+        <link rel="next" href="../annotate/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Issue dashboard - Argilla Docs</title>
+        <title>Importing and exporting datasets - Argilla Docs</title>
       
     
     
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Issue dashboard - Argilla Docs" >
+        <meta  property="og:title"  content="Importing and exporting datasets - Argilla Docs" >
       
-        <meta  property="og:description"  content="The Argilla python server SDK" >
+        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/community/popular_issues.png" >
+        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/import_export.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/dev/community/popular_issues/" >
+        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/dev/how_to_guides/import_export/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Issue dashboard - Argilla Docs" >
+        <meta  name="twitter:title"  content="Importing and exporting datasets - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="The Argilla python server SDK" >
+        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to import and export datasets to Python, local disk, or the Hugging Face Hub" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/community/popular_issues.png" >
+        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/import_export.png" >
       
     
     
@@ -112,6 +112,11 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
+      
+        
+        <a href="#importing-and-exporting-datasets-and-records" class="md-skip">
+          Skip to content
+        </a>
       
     </div>
     <div data-md-component="announce">
@@ -146,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Issue dashboard
+              Importing and exporting datasets
             
           </span>
         </div>
@@ -303,9 +308,11 @@
         
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../../how_to_guides/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="../" class="md-tabs__link">
         
   
     
@@ -364,11 +371,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="../" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../community/" class="md-tabs__link">
         
   
     
@@ -576,27 +581,32 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../how_to_guides/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -607,13 +617,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             How-to guides
@@ -626,48 +636,8 @@
   
   
   
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Basic
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_1">
-            <span class="md-nav__icon md-icon"></span>
-            Basic
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../how_to_guides/user/" class="md-nav__link">
+      <a href="../user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -688,7 +658,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/workspace/" class="md-nav__link">
+      <a href="../workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -709,7 +679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/dataset/" class="md-nav__link">
+      <a href="../dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -730,7 +700,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/record/" class="md-nav__link">
+      <a href="../record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -751,11 +721,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/query_export/" class="md-nav__link">
+      <a href="../query/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Query, filter, and export records
+    Query and filter records
   </span>
   
 
@@ -769,10 +739,131 @@
                 
   
   
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Importing and exporting datasets
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Importing and exporting datasets
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-and-export-an-rgdataset-from-argilla" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import and Export an rg.Dataset from Argilla
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import and Export an rg.Dataset from Argilla">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-an-argilla-dataset-to-the-hugging-face-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Push an Argilla dataset to the Hugging Face Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-an-argilla-dataset-from-the-hugging-face-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull an Argilla dataset from the Hugging Face Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saving-an-argilla-dataset-to-local-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving an Argilla dataset to local disk
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-an-argilla-dataset-from-local-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading an Argilla dataset from local disk
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-only-records-from-argilla-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export only records from Argilla Datasets
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/annotate/" class="md-nav__link">
+      <a href="../annotate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -786,9 +877,22 @@
 
               
             
-          </ul>
-        </nav>
-      
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrate your legacy datasets to Argilla V2
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -806,17 +910,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -827,8 +934,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_9">
             <span class="md-nav__icon md-icon"></span>
             Advanced
           </label>
@@ -841,7 +948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
+      <a href="../use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -862,7 +969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1528,32 +1635,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1564,13 +1666,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Community
@@ -1584,7 +1686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../contributor/" class="md-nav__link">
+      <a href="../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1602,17 +1704,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../community/popular_issues.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1621,7 +1716,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1634,7 +1728,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
+      <a href="../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1740,6 +1834,76 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-and-export-an-rgdataset-from-argilla" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import and Export an rg.Dataset from Argilla
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import and Export an rg.Dataset from Argilla">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#push-an-argilla-dataset-to-the-hugging-face-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Push an Argilla dataset to the Hugging Face Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-an-argilla-dataset-from-the-hugging-face-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull an Argilla dataset from the Hugging Face Hub
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saving-an-argilla-dataset-to-local-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving an Argilla dataset to local disk
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-an-argilla-dataset-from-local-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading an Argilla dataset from local disk
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-only-records-from-argilla-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export only records from Argilla Datasets
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1753,214 +1917,140 @@
                 
                   
 
+  
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/import_export.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
+    </a>
+  
+  
 
-  <h1>Issue dashboard</h1>
 
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Most engaging open issues</label><label for="__tabbed_1_2">Latest issues open by the community</label><label for="__tabbed_1_3">Planned issues for upcoming releases</label></div>
+<h1 id="importing-and-exporting-datasets-and-records">Importing and exporting datasets and records<a class="headerlink" href="#importing-and-exporting-datasets-and-records" title="Permanent link">&para;</a></h1>
+<p>This guide provides an overview of how to import and export your dataset or its records to Python, your local disk, or the Hugging Face Hub.</p>
+<p>In Argilla, you can import/export two main components of a dataset:
+- The dataset's complete configuration defined in <code>rg.Settings</code>. This is useful if your want to share your feedback task or restore it later in Argilla.
+- The records stored in the dataset, including <code>Metadata</code>, <code>Vectors</code>, <code>Suggestions</code>, and <code>Responses</code>. This is useful if you want to use your dataset's records outside of Argilla.</p>
+<p>Check the <a href="../reference/argilla/datasets/dataset.md">Dataset - Python Reference</a> to see the attributes, arguments, and methods of the export <code>Dataset</code> class in detail.</p>
+<p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
+<h2 id="import-and-export-an-rgdataset-from-argilla">Import and Export an <code>rg.Dataset</code> from Argilla<a class="headerlink" href="#import-and-export-an-rgdataset-from-argilla" title="Permanent link">&para;</a></h2>
+<p>First, we will go through exporting a complete dataset from Argilla. This includes the dataset's setting and records. All of these methods use the <code>rg.Dataset.from_*</code> and <code>rg.Dataset.to_*</code> methods.</p>
+<h3 id="push-an-argilla-dataset-to-the-hugging-face-hub">Push an Argilla dataset to the Hugging Face Hub<a class="headerlink" href="#push-an-argilla-dataset-to-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
+<p>You can push a dataset from Argilla to the Hugging Face Hub. This is useful if you want to share your dataset with the community or version control it. You can push the dataset to the Hugging Face Hub using the <code>rg.Dataset.to_hub</code> method.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">With or without records</p>
+<p>The example above will push the dataset's <code>Settings</code> and records to the hub. If you only want to push the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<h3 id="pull-an-argilla-dataset-from-the-hugging-face-hub">Pull an Argilla dataset from the Hugging Face Hub<a class="headerlink" href="#pull-an-argilla-dataset-from-the-hugging-face-hub" title="Permanent link">&para;</a></h3>
+<p>You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset and its configuration. You can pull the dataset from the Hugging Face Hub using the <code>rg.Dataset.from_hub</code> method.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The <code>rg.Dataset.from_hub</code> method loads the configuration and records from the dataset repo. If you only want to load records, you can pass a <code>datasets.Dataset</code> object to the <code>rg.Dataset.log</code> method. This enables you to configure your own dataset and reuse existing Hub datasets. See the <a href="../record/">guide on records</a> for more information.</p>
+<div class="admonition note">
+<p class="admonition-title">With or without records</p>
+<p>The example above will pull the dataset's <code>Settings</code> and records from the hub. If you only want to pull the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></code></pre></div>
+<p>With the dataset's configuration you could then make changes to the dataset. For example, you could adapt the dataset's settings for a different task:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">questions</span> <span class="o">=</span> <span class="p">[</span><span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">)]</span>
+</span></code></pre></div>
+<p>You could then log the dataset's records using the <code>load_dataset</code> method of the <code>datasets</code> package and pass the dataset to the <code>rg.Dataset.log</code> method.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;&lt;repo_id&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<h3 id="saving-an-argilla-dataset-to-local-disk">Saving an Argilla dataset to local disk<a class="headerlink" href="#saving-an-argilla-dataset-to-local-disk" title="Permanent link">&para;</a></h3>
+<p>You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the <code>rg.Dataset.to_disk</code> method.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>This will save the dataset's configuration and records to the specified path. If you only want to save the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="loading-an-argilla-dataset-from-local-disk">Loading an Argilla dataset from local disk<a class="headerlink" href="#loading-an-argilla-dataset-from-local-disk" title="Permanent link">&para;</a></h3>
+<p>You can load a dataset from your local disk to Argilla. This is useful if you want to restore a dataset's configuration. You can use the <code>rg.Dataset.from_disk</code> method.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Directing the dataset to a workspace and name</p>
+<p>You can also specify the workspace and name of the dataset when loading it from the disk.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_disk</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;path/to/dataset&quot;</span><span class="p">,</span> <span class="n">target_workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">target_name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<h2 id="export-only-records-from-argilla-datasets">Export only records from Argilla Datasets<a class="headerlink" href="#export-only-records-from-argilla-datasets" title="Permanent link">&para;</a></h2>
+<p>The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the <code>rg.Dataset.records</code> attribute.</p>
+<p>The records can be exported as a dictionary, a list of dictionaries, or to a <code>Dataset</code> of the <code>datasets</code> package.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">To the <code>datasets</code> package</label><label for="__tabbed_1_2">To a Python dictionary</label><label for="__tabbed_1_3">To a python list</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Reactions</th>
-<th style="text-align: center;">Comments</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1607">1607 - Support for hierarchical multilabel text classification (taxonomy)</a></td>
-<td style="text-align: center;">👍 4</td>
-<td style="text-align: center;">💬 15</td>
-</tr>
-<tr>
-<td>2</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4637">4637 - [FEATURE] Label breakdown in Feedback dataset stats</a></td>
-<td style="text-align: center;">👍 4</td>
-<td style="text-align: center;">💬 3</td>
-</tr>
-<tr>
-<td>3</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4658">4658 - Active listeners for Feedback Dataset</a></td>
-<td style="text-align: center;">👍 4</td>
-<td style="text-align: center;">💬 2</td>
-</tr>
-<tr>
-<td>4</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4867">4867 - [FEATURE] Add dependencies to support dev mode on HF Spaces</a></td>
-<td style="text-align: center;">👍 3</td>
-<td style="text-align: center;">💬 4</td>
-</tr>
-<tr>
-<td>5</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4964">4964 - [DOCS] Improvements to docker-compose getting started installation guide</a></td>
-<td style="text-align: center;">👍 3</td>
-<td style="text-align: center;">💬 3</td>
-</tr>
-<tr>
-<td>6</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/3338">3338 - [FEATURE] Add conversation support to Feedback</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 10</td>
-</tr>
-<tr>
-<td>7</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1800">1800 - Add comments/notes to annotation datasets to share with teammates. </a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 6</td>
-</tr>
-<tr>
-<td>8</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1837">1837 - Custom Record UI Templates</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 4</td>
-</tr>
-<tr>
-<td>9</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/1630">1630 - Accepting several predictions/annotations for the same record</a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 2</td>
-</tr>
-<tr>
-<td>10</td>
-<td><a href="https://github.com/argilla-io/argilla/issues/4823">4823 - [FEATURE] <code>ImageField</code> </a></td>
-<td style="text-align: center;">👍 2</td>
-<td style="text-align: center;">💬 1</td>
-</tr>
-</tbody>
-</table>
+<p>Records can be exported from <code>Dataset.records</code> to the <code>datasets</code> package. The <code>to_dataset</code> method can be used to export records to the <code>datasets</code> package. You can specify the name of the dataset and the split to export the records.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Export records as a dictionary</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">exported_ds</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_datasets</span><span class="p">()</span>
+</span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Author</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5198">5198 - [BUG-UI/UX] Latex is not rendering in markdown TextFields</a></td>
-<td style="text-align: center;">by <strong>Broyojo</strong></td>
-</tr>
-<tr>
-<td>2</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5196">5196 - [BUG-UI/UX] Interface gets stuck when multiple people annotate simultaneously + conflicting copies are created</a></td>
-<td style="text-align: center;">by <strong>MoritzLaurer</strong></td>
-</tr>
-<tr>
-<td>3</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5194">5194 - [FEATURE] Support Python 3.12.x for argilla client 2.0</a></td>
-<td style="text-align: center;">by <strong>dcfidalgo</strong></td>
-</tr>
-<tr>
-<td>4</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5175">5175 - Not possible to set API URL in custom docker compose deployments in version <code>1.29.0</code></a></td>
-<td style="text-align: center;">by <strong>stphnthiel</strong></td>
-</tr>
-<tr>
-<td>5</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5167">5167 - [BUG-python/deployment] Huggingface Space crashed </a></td>
-<td style="text-align: center;">by <strong>fangguo1</strong></td>
-</tr>
-<tr>
-<td>6</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5134">5134 - [DOCS]  I cannot create the space in hugging face in this multiclass doc</a></td>
-<td style="text-align: center;">by <strong>micuentadecasa</strong></td>
-</tr>
-<tr>
-<td>7</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5133">5133 - [BUG-python/deployment] <code>ReadTimeout</code> during record uploads</a></td>
-<td style="text-align: center;">by <strong>HPeterr</strong></td>
-</tr>
-<tr>
-<td>8</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5123">5123 - [BUG-python/deployment] <code>KeyError: 'text'</code> when running <code>metric.compute("alpha")</code> on a <code>FeedbackDataset</code></a></td>
-<td style="text-align: center;">by <strong>mpjuhasz</strong></td>
-</tr>
-<tr>
-<td>9</td>
-<td>🟣 <a href="https://github.com/argilla-io/argilla/issues/5122">5122 - [BUG-python/deployment] Issue adding records</a></td>
-<td style="text-align: center;">by <strong>MoritzLaurer</strong></td>
-</tr>
-<tr>
-<td>10</td>
-<td>🟣 <a href="https://github.com/argilla-io/argilla/issues/5121">5121 - [BUG-python/deployment] Confusion about dataset_argilla.exists() / .delete() / .create()</a></td>
-<td style="text-align: center;">by <strong>MoritzLaurer</strong></td>
-</tr>
-</tbody>
-</table>
+<p>Records can be exported from <code>Dataset.records</code> as a dictionary. The <code>to_dict</code> method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># Export records as a dictionary</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">exported_records</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="c1"># {&#39;fields&#39;: [{&#39;text&#39;: &#39;Hello&#39;},{&#39;text&#39;: &#39;World&#39;}], suggestions&#39;: [{&#39;label&#39;: {&#39;value&#39;: &#39;positive&#39;}}, {&#39;label&#39;: {&#39;value&#39;: &#39;negative&#39;}}]</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="c1"># Export records as a dictionary with orient=index</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="n">exported_records</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="c1"># {&quot;uuid&quot;: {&#39;fields&#39;: {&#39;text&#39;: &#39;Hello&#39;}, &#39;suggestions&#39;: {&#39;label&#39;: {&#39;value&#39;: &#39;positive&#39;}}}, {&quot;uuid&quot;: {&#39;fields&#39;: {&#39;text&#39;: &#39;World&#39;}, &#39;suggestions&#39;: {&#39;label&#39;: {&#39;value&#39;: &#39;negative&#39;}}},</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="c1"># Export records as a dictionary with flatten=false</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="n">exported_records</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="c1"># {&quot;text&quot;: [&quot;Hello&quot;, &quot;World&quot;], &quot;label.suggestion&quot;: [&quot;greeting&quot;, &quot;greeting&quot;]}</span>
+</span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Rank</th>
-<th>Issue</th>
-<th style="text-align: center;">Milestone</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5211">5211 - [FEATURE] change <code>black</code> formatting line-length to the default<code>88</code></a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>2</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5208">5208 - [ENHANCEMENT] Show panels when the record list is empty</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>3</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5207">5207 - [FEATURE] Show record status in the UI</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>4</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5204">5204 - [FEATURE] add <code>huggingface_hub.utils.send_telemetry</code> to the <code>argilla-server</code></a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>5</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5181">5181 - [FEATURE] Hub integration with v2 SDK</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>6</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5144">5144 - [DOCS] fix <code>pip install argilla&lt;2</code> within the old argilla docs.</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>7</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5057">5057 - [ENHANCEMENT] Include how to update suggestions and responses in docs</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>8</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5000">5000 - [FEATURE] Automatic task distribution</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>9</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/5016">5016 - [BUG] Search API for search all responses generating error</a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-<tr>
-<td>10</td>
-<td>🟢 <a href="https://github.com/argilla-io/argilla/issues/4732">4732 - [FEATURE] Support Bulk view for<code>SpanQuestion</code></a></td>
-<td style="text-align: center;"><strong>v2.0.0</strong></td>
-</tr>
-</tbody>
-</table>
+<p>Records can be exported from <code>Dataset.records</code> as a list of dictionaries. The <code>to_list</code> method can be used to export records as a list of dictionaries. You can decide if to flatten it or not.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">)</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="c1"># Export records as a list of dictionaries</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="n">exported_records</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="c1"># [{&#39;fields&#39;: {&#39;text&#39;: &#39;Hello&#39;}, &#39;suggestion&#39;: {&#39;label&#39;: {value: &#39;greeting&#39;}}}, {&#39;fields&#39;: {&#39;text&#39;: &#39;World&#39;}, &#39;suggestion&#39;: {&#39;label&#39;: {value: &#39;greeting&#39;}}}]</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="c1"># Export records as a list of dictionaries with flatten=False</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="n">exported_records</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="c1"># [{&quot;text&quot;: &quot;Hello&quot;, &quot;label&quot;: &quot;greeting&quot;}, {&quot;text&quot;: &quot;World&quot;, &quot;label&quot;: &quot;greeting&quot;}]</span>
+</span></code></pre></div>
 </div>
 </div>
 </div>
-<p>Last update: 2024-07-12</p>
 
 
 
@@ -1999,7 +2089,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../contributor/" class="md-footer__link md-footer__link--prev" aria-label="Previous: How to contribute?">
+          <a href="../query/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Query and filter records">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2009,20 +2099,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                How to contribute?
+                Query and filter records
               </div>
             </div>
           </a>
         
         
           
-          <a href="../changelog/" class="md-footer__link md-footer__link--next" aria-label="Next: Changelog">
+          <a href="../annotate/" class="md-footer__link md-footer__link--next" aria-label="Next: Annotate a dataset">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Changelog
+                Annotate a dataset
               </div>
             </div>
             <div class="md-footer__button md-icon">

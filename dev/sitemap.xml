@@ -21,11 +21,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/dev/community/popular_issues/</loc>
-         <lastmod>2024-07-12</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://argilla-io.github.io/argilla/dev/getting_started/faq/</loc>
          <lastmod>2024-07-12</lastmod>
          <changefreq>daily</changefreq>
@@ -56,12 +51,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/import_export/</loc>
+         <lastmod>2024-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/migrate_from_legacy_datasets/</loc>
          <lastmod>2024-07-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/query_export/</loc>
+         <loc>https://argilla-io.github.io/argilla/dev/how_to_guides/query/</loc>
          <lastmod>2024-07-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
