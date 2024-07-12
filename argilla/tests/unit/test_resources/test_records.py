@@ -14,7 +14,10 @@
 
 import uuid
 
+import pytest
+
 from argilla import Record, Suggestion, Response
+from argilla._exceptions import ArgillaError
 from argilla._models import MetadataModel
 
 
@@ -62,3 +65,10 @@ class TestRecords:
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
         assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+
+    def test_add_record_response_for_the_same_question_and_user_id(self):
+        response = Response(question_name="question", value="value", user_id=uuid.uuid4())
+        record = Record(fields={"name": "John"}, responses=[response])
+
+        with pytest.raises(ArgillaError):
+            record.responses.add(response)
