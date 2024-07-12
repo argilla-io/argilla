@@ -33,7 +33,7 @@ from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security import auth
-from argilla_server.telemetry import _TELEMETRY_CLIENT
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["workspaces"])
 
@@ -44,12 +44,13 @@ async def get_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.get(workspace_id))
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    _TELEMETRY_CLIENT.track_crud_workspace(action="read", workspace=workspace)
+    telemetry_client.track_crud_workspace(action="read", workspace=workspace)
 
     return workspace
 
@@ -60,12 +61,13 @@ async def create_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_create: WorkspaceCreate,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.create)
 
     workspace = await accounts.create_workspace(db, workspace_create.dict())
 
-    _TELEMETRY_CLIENT.track_crud_workspace(action="create", workspace=workspace)
+    telemetry_client.track_crud_workspace(action="create", workspace=workspace)
 
     return workspace
 
@@ -76,6 +78,7 @@ async def delete_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.delete)
 
@@ -83,7 +86,7 @@ async def delete_workspace(
 
     workspace = await accounts.delete_workspace(db, workspace)
 
-    _TELEMETRY_CLIENT.track_crud_workspace(action="delete", workspace=workspace)
+    telemetry_client.track_crud_workspace(action="delete", workspace=workspace)
 
     return workspace
 
@@ -93,6 +96,7 @@ async def list_workspaces_me(
     *,
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ) -> Workspaces:
     await authorize(current_user, WorkspacePolicy.list_workspaces_me)
 
@@ -102,7 +106,7 @@ async def list_workspaces_me(
         workspaces = await accounts.list_workspaces_by_user_id(db, current_user.id)
 
     for workspace in workspaces.items:
-        _TELEMETRY_CLIENT.track_crud_workspace(action="read", workspace=workspace)
+        telemetry_client.track_crud_workspace(action="read", workspace=workspace)
 
     return Workspaces(items=workspaces)
 

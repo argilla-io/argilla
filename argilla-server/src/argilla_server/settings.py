@@ -29,7 +29,6 @@ from argilla_server.constants import (
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
-    DEFAULT_TELEMETRY_KEY,
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
 )
@@ -138,7 +137,6 @@ class Settings(BaseSettings):
 
     # See also the telemetry.py module
     enable_telemetry: bool = True
-    telemetry_key: str = DEFAULT_TELEMETRY_KEY
 
     @validator("home_path", always=True)
     def set_home_path_default(cls, home_path: str):
