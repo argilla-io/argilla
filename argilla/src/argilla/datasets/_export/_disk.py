@@ -39,7 +39,7 @@ class DiskImportExportMixin(ABC):
     _default_records_path = "records.json"
     _default_dataset_path = "dataset.json"
 
-    def to_disk(self: "Dataset", path: str) -> str:
+    def to_disk(self: "Dataset", path: str, with_records: bool = True) -> str:
         """Exports the dataset to disk in the given path. The dataset is exported as a directory containing the dataset model, settings and records as json files.
 
         Args:
