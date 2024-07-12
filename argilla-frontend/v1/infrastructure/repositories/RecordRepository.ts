@@ -43,7 +43,6 @@ export class RecordRepository {
 
   getRecords(criteria: RecordCriteria): Promise<BackendRecords> {
     return this.getRecordsByAdvanceSearch(criteria);
-    // return this.getRecordsByDatasetId(criteria);
   }
 
   async getRecord(recordId: string): Promise<BackendRecord> {
@@ -182,35 +181,6 @@ export class RecordRepository {
     } catch (error) {
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE,
-      };
-    }
-  }
-
-  private async getRecordsByDatasetId(
-    criteria: RecordCriteria
-  ): Promise<BackendRecords> {
-    const { datasetId, status, page } = criteria;
-    const { from, many } = page.server;
-    try {
-      const url = `/v1/me/datasets/${datasetId}/records`;
-
-      const params = this.createParams(from, many, status);
-
-      const { data } = await this.axios.get<ResponseWithTotal<BackendRecord[]>>(
-        url,
-        {
-          params,
-        }
-      );
-      const { items: records, total } = data;
-
-      return {
-        records,
-        total,
-      };
-    } catch (err) {
-      throw {
-        response: RECORD_API_ERRORS.ERROR_FETCHING_RECORDS,
       };
     }
   }

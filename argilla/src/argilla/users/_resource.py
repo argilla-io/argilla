@@ -98,15 +98,6 @@ class User(Resource):
         # exists relies on the id, so we need to set it to None
         self._model = UserModel(username=self.username)
 
-    def exists(self) -> bool:
-        """Checks if the user exists in Argilla
-
-        Returns:
-            bool: True if the user exists, False otherwise.
-        """
-        # TODO - Implement the exist method in the API
-        return self.id is not None
-
     def add_to_workspace(self, workspace: "Workspace") -> "User":
         """Adds the user to a workspace. After adding a user to a workspace, it will have access to the datasets
         in the workspace.

@@ -17,12 +17,12 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql
+from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql, select, func, text
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
@@ -206,8 +206,7 @@ class Record(DatabaseModel):
     )
     responses_submitted: Mapped[List["Response"]] = relationship(
         back_populates="record",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
+        viewonly=True,
         primaryjoin=f"and_(Record.id==Response.record_id, Response.status=='{ResponseStatus.submitted}')",
         order_by=Response.inserted_at.asc(),
     )
@@ -361,6 +360,13 @@ class Dataset(DatabaseModel):
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
+
+    @property
+    async def responses_count(self) -> int:
+        # TODO: This should be moved to proper repository
+        return await async_object_session(self).scalar(
+            select(func.count(Response.id)).join(Record).where(Record.dataset_id == self.id)
+        )
 
     @property
     def is_draft(self):

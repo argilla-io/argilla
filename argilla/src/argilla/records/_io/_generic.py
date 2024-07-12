@@ -33,14 +33,22 @@ class GenericIO:
         Returns:
             dataset_records (List[Dict[str, Union[str, float, int, list]]]): The exported records in a list of dictionaries format.
         """
+        records_schema = set()
         dataset_records: list = []
         for record in records:
-            dataset_records.append(GenericIO._record_to_dict(record=record, flatten=flatten))
+            record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
+            records_schema.update([k for k in record_dict])
+            dataset_records.append(record_dict)
+
+        # normalize records structure
+        for record_dict in dataset_records:
+            record_dict.update({k: None for k in records_schema if k not in record_dict})
+
         return dataset_records
 
-    @staticmethod
+    @classmethod
     def to_dict(
-        records: List["Record"], flatten: bool = False, orient: str = "names"
+        cls, records: List["Record"], flatten: bool = False, orient: str = "names"
     ) -> Dict[str, Union[str, float, int, list]]:
         """Export records to a dictionary with either names or record index as keys.
         Args:
@@ -55,8 +63,8 @@ class GenericIO:
         """
         if orient == "names":
             dataset_records: dict = defaultdict(list)
-            for record in records:
-                for key, value in GenericIO._record_to_dict(record=record, flatten=flatten).items():
+            for record in cls.to_list(records, flatten=flatten):
+                for key, value in record.items():
                     dataset_records[key].append(value)
         elif orient == "index":
             dataset_records: dict = {}
@@ -84,26 +92,41 @@ class GenericIO:
         Returns:
             A dictionary representing the record.
         """
+
         record_dict = record.to_dict()
         if flatten:
-            responses: dict = record_dict.pop("responses")
-            suggestions: dict = record_dict.pop("suggestions")
-            fields: dict = record_dict.pop("fields")
-            metadata: dict = record_dict.pop("metadata")
-            record_dict.update(fields)
-            record_dict.update(metadata)
-            question_names = set(suggestions.keys()).union(responses.keys())
-            for question_name in question_names:
-                _suggestion: Union[Dict, None] = suggestions.get(question_name)
-                if _suggestion:
-                    record_dict[f"{question_name}.suggestion"] = _suggestion.pop("value")
-                    record_dict.update(
-                        {f"{question_name}.suggestion.{key}": value for key, value in _suggestion.items()}
-                    )
-                for _response in responses.get(question_name, []):
-                    user_id = _response.pop("user_id")
-                    record_dict[f"{question_name}.response.{user_id}"] = _response.pop("value")
-                    record_dict.update(
-                        {f"{question_name}.response.{user_id}.{key}": value for key, value in _response.items()}
-                    )
+            record_dict.update(
+                **record_dict.pop("fields", {}),
+                **record_dict.pop("metadata", {}),
+                **record_dict.pop("vectors", {}),
+            )
+
+            record_dict.pop("responses")
+            record_dict.pop("suggestions")
+
+            responses_dict = defaultdict(list)
+            for response in record.responses:
+                responses_key = f"{response.question_name}.responses"
+                responses_users_key = f"{responses_key}.users"
+                responses_status_key = f"{responses_key}.status"
+
+                responses_dict[responses_key].append(response.value)
+                responses_dict[responses_users_key].append(str(response.user_id))
+                responses_dict[responses_status_key].append(response.status.value if response.status else None)
+
+            suggestions_dict = {}
+            for suggestion in record.suggestions:
+                suggestion_key = f"{suggestion.question_name}.suggestion"
+                suggestion_agent_key = f"{suggestion_key}.agent"
+                suggestion_score_key = f"{suggestion_key}.score"
+
+                suggestions_dict.update(
+                    {
+                        suggestion_key: suggestion.value,
+                        suggestion_score_key: suggestion.score,
+                        suggestion_agent_key: suggestion.agent,
+                    }
+                )
+
+            record_dict.update({**responses_dict, **suggestions_dict})
         return record_dict

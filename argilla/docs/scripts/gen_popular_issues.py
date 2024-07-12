@@ -32,15 +32,12 @@ def fetch_data_from_github(repository, auth_token):
                 "Issue": [],
                 "State": [],
                 "Created at": [],
-                "Closed at": [],
-                "Last update": [],
-                "Labels": [],
                 "Milestone": [],
                 "Reactions": [],
                 "Comments": [],
                 "URL": [],
-                "Repository": [],
                 "Author": [],
+                "Author association": [],
             }
         )
     headers = {"Authorization": f"token {auth_token}", "Accept": "application/vnd.github.v3+json"}
@@ -58,20 +55,19 @@ def fetch_data_from_github(repository, auth_token):
             issues = response.json()
 
             for issue in issues:
+                if "pull_request" in issue:
+                    continue
                 issues_data.append(
                     {
                         "Issue": f"{issue['number']} - {issue['title']}",
                         "State": issue["state"],
                         "Created at": issue["created_at"],
-                        "Closed at": issue.get("closed_at", None),
-                        "Last update": issue["updated_at"],
-                        "Labels": [label["name"] for label in issue["labels"]],
                         "Milestone": (issue.get("milestone") or {}).get("title"),
                         "Reactions": issue["reactions"]["total_count"],
                         "Comments": issue["comments"],
                         "URL": issue["html_url"],
-                        "Repository": repo_name,
                         "Author": issue["user"]["login"],
+                        "Author association": issue["author_association"],
                     }
                 )
 
@@ -80,53 +76,37 @@ def fetch_data_from_github(repository, auth_token):
     return pd.DataFrame(issues_data)
 
 
-def get_org_members(auth_token):
-    headers = {"Authorization": f"token {auth_token}", "Accept": "application/vnd.github.v3+json"}
-    members_list = []
-
-    members_url = "https://api.github.com/orgs/argilla-io/members"
-
-    if auth_token is None:
-        return []
-
-    while members_url:
-        response = requests.get(members_url, headers=headers)
-        members = response.json()
-
-        for member in members:
-            members_list.append(member["login"])
-
-        members_list.extend(["pre-commit-ci[bot]"])
-
-        members_url = response.links.get("next", {}).get("url", None)
-
-    return members_list
-
-
 with mkdocs_gen_files.open(DATA_PATH, "w") as f:
     df = fetch_data_from_github(REPOSITORY, GITHUB_ACCESS_TOKEN)
 
+    df["Milestone"] = df["Milestone"].astype(str).fillna("")
+    planned_issues = df[
+        ((df["Milestone"].str.startswith("v2")) & (df["State"] == "open"))
+        | ((df["Milestone"].str.startswith("2")) & (df["State"] == "open"))
+    ]
     open_issues = df.loc[df["State"] == "open"]
     engagement_df = (
-        open_issues[["URL", "Issue", "Repository", "Reactions", "Comments"]]
+        open_issues[["URL", "Issue", "Reactions", "Comments"]]
         .sort_values(by=["Reactions", "Comments"], ascending=False)
         .head(10)
         .reset_index()
     )
 
-    members = get_org_members(GITHUB_ACCESS_TOKEN)
-    community_issues = df.loc[~df["Author"].isin(members)]
+    community_issues = df[df["Author association"] != "MEMBER"]
     community_issues_df = (
-        community_issues[["URL", "Issue", "Repository", "Created at", "Author", "State"]]
+        community_issues[["URL", "Issue", "Created at", "Author", "State"]]
         .sort_values(by=["Created at"], ascending=False)
         .head(10)
         .reset_index()
     )
 
-    planned_issues = df.loc[df["Milestone"].notna()]
+    planned_issues = df[
+        ((df["Milestone"].str.startswith("v2")) & (df["State"] == "open"))
+        | ((df["Milestone"].str.startswith("2")) & (df["State"] == "open"))
+    ]
     planned_issues_df = (
-        planned_issues[["URL", "Issue", "Repository", "Created at", "Milestone", "State"]]
-        .sort_values(by=["Milestone"], ascending=False)
+        planned_issues[["URL", "Issue", "Created at", "Milestone", "State"]]
+        .sort_values(by=["Milestone"], ascending=True)
         .head(10)
         .reset_index()
     )

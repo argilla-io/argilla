@@ -36,6 +36,11 @@ export default {
     datasetSettings: "einstellungen",
     userSettings: "meine einstellungen",
   },
+  datasets: {
+    left: "übrig",
+    completed: "Vollendet",
+    pending: "Ausstehend",
+  },
   recordStatus: {
     pending: "Ausstehend",
     draft: "Entwurf",
