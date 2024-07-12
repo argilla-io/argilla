@@ -138,6 +138,10 @@ class Dataset(Resource, DiskImportExportMixin):
     def distribution(self) -> TaskDistribution:
         return self.settings.distribution
 
+    @distribution.setter
+    def distribution(self, value: TaskDistribution) -> None:
+        self.settings.distribution = value
+
     #####################
     #  Core methods     #
     #####################
