@@ -215,7 +215,10 @@ export default {
   },
   metrics: {
     total: "Total",
-    progress: "Progress",
+    progress: {
+      my: "My Progress",
+      team: "Team progress",
+    },
   },
   persistentStorage: {
     adminOrOwner:

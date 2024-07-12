@@ -214,7 +214,10 @@ export default {
   },
   metrics: {
     total: "Total",
-    progress: "Fortschritt",
+    progress: {
+      my: "mein Fortschritt",
+      team: "Fortschritte im Team",
+    },
   },
 
   validations: {
