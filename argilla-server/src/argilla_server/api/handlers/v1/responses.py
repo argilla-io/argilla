@@ -32,6 +32,7 @@ from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, Record, Response, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 from argilla_server.use_cases.responses.upsert_responses_in_bulk import (
     UpsertResponsesInBulkUseCase,
     UpsertResponsesInBulkUseCaseFactory,
@@ -46,8 +47,14 @@ async def create_current_user_responses_bulk(
     body: ResponsesBulkCreate,
     current_user: User = Security(auth.get_current_user),
     use_case: UpsertResponsesInBulkUseCase = Depends(UpsertResponsesInBulkUseCaseFactory()),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
+
+    for response in responses_bulk_items:
+        telemetry_client.track_crud_records_subtopic(
+            topic="create", sub_topic="responses", record_id=response.record_id
+        )
 
     return ResponsesBulk(items=responses_bulk_items)
 
@@ -57,6 +64,7 @@ async def update_response(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     response_id: UUID,
     response_update: ResponseUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -69,7 +77,11 @@ async def update_response(
 
     await authorize(current_user, ResponsePolicy.update(response))
 
-    return await datasets.update_response(db, search_engine, response, response_update)
+    response = await datasets.update_response(db, search_engine, response, response_update)
+
+    telemetry_client.track_crud_records_subtopic(topic="update", sub_topic="responses", record_id=response.record_id)
+
+    return response
 
 
 @router.delete("/responses/{response_id}", response_model=ResponseSchema)
@@ -77,6 +89,7 @@ async def delete_response(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine=Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     response_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -88,4 +101,8 @@ async def delete_response(
 
     await authorize(current_user, ResponsePolicy.delete(response))
 
-    return await datasets.delete_response(db, search_engine, response)
+    response = await datasets.delete_response(db, search_engine, response)
+
+    telemetry_client.track_crud_records_subtopic(topic="delete", sub_topic="responses", record_id=response.record_id)
+
+    return response
