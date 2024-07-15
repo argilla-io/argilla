@@ -29,6 +29,7 @@ These are the section headers that we use:
 - Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
 - [breaking] Change `GET /api/v1/datasets/:dataset_id/progress` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
 - [breaking] Change `GET /api/v1/me/datasets/:dataset_id/metrics` endpoint to support new dataset distribution task. ([#5140](https://github.com/argilla-io/argilla/pull/5140))
+- Change search index mapping for responses (reindex is required). ([#5228](https://github.com/argilla-io/argilla/pull/5228))
 
 ### Fixed
 
