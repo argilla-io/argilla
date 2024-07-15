@@ -14,11 +14,13 @@
 import math
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type
 from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
+from sqlalchemy import func, inspect, select
+
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH
 from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
@@ -41,6 +43,7 @@ from argilla_server.enums import (
     ResponseStatusFilter,
     SimilarityOrder,
     RecordStatus,
+    SortOrder,
 )
 from argilla_server.models import (
     Dataset,
@@ -57,19 +60,18 @@ from argilla_server.models import (
     VectorSettings,
 )
 from argilla_server.search_engine import (
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
-    MetadataFilter,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    SortBy,
-    TermsMetadataFilter,
     TextQuery,
-    UserResponseStatusFilter,
+    AndFilter,
+    TermsFilter,
+    MetadataFilterScope,
+    RangeFilter,
+    ResponseFilterScope,
+    Order,
+    RecordFilterScope,
 )
-from sqlalchemy import func, inspect, select
-
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
@@ -80,7 +82,6 @@ from tests.factories import (
     LabelSelectionQuestionFactory,
     MetadataPropertyFactory,
     MultiLabelSelectionQuestionFactory,
-    OwnerFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -3592,11 +3593,8 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
@@ -3633,55 +3631,85 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        ("property_config", "metadata_filter", "expected_filter"),
         [
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value",
-                TermsMetadataFilter,
-                dict(values=["value"]),
+                {
+                    "type": "terms",
+                    "values": ["value"],
+                    "scope": {"entity": "metadata", "metadata_property": "terms_prop"},
+                },
+                TermsFilter(scope=MetadataFilterScope(metadata_property="terms_prop"), values=["value"]),
             ),
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
-                "value1,value2",
-                TermsMetadataFilter,
-                dict(values=["value1", "value2"]),
+                {
+                    "type": "terms",
+                    "values": ["value1", "value2"],
+                    "scope": {"entity": "metadata", "metadata_property": "terms_prop"},
+                },
+                TermsFilter(scope=MetadataFilterScope(metadata_property="terms_prop"), values=["value1", "value2"]),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 10, "le": 20}',
-                IntegerMetadataFilter,
-                dict(ge=10, le=20),
+                {
+                    "type": "range",
+                    "ge": 10,
+                    "le": 20,
+                    "scope": {"entity": "metadata", "metadata_property": "integer_prop"},
+                },
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    ge=10,
+                    le=20,
+                ),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"ge": 20}',
-                IntegerMetadataFilter,
-                dict(ge=20, high=None),
+                {"type": "range", "ge": 20, "scope": {"entity": "metadata", "metadata_property": "integer_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    ge=20,
+                ),
             ),
             (
                 {"name": "integer_prop", "settings": {"type": "integer"}},
-                '{"le": 20}',
-                IntegerMetadataFilter,
-                dict(low=None, le=20),
+                {"type": "range", "le": 20, "scope": {"entity": "metadata", "metadata_property": "integer_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="integer_prop"),
+                    le=20,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": -1.30, "le": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=-1.30, le=23.23),
+                {
+                    "type": "range",
+                    "ge": -1.30,
+                    "le": 23.23,
+                    "scope": {"entity": "metadata", "metadata_property": "float_prop"},
+                },
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    ge=-1.30,
+                    le=23.23,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"ge": 23.23}',
-                FloatMetadataFilter,
-                dict(ge=23.23, high=None),
+                {"type": "range", "ge": 23.23, "scope": {"entity": "metadata", "metadata_property": "float_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    ge=23.23,
+                ),
             ),
             (
                 {"name": "float_prop", "settings": {"type": "float"}},
-                '{"le": 11.32}',
-                FloatMetadataFilter,
-                dict(low=None, le=11.32),
+                {"type": "range", "le": 11.32, "scope": {"entity": "metadata", "metadata_property": "float_prop"}},
+                RangeFilter(
+                    scope=MetadataFilterScope(metadata_property="float_prop"),
+                    le=11.32,
+                ),
             ),
         ],
     )
@@ -3691,80 +3719,12 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
-        property_config: dict,
-        param_value: str,
-        expected_filter_class: Type[MetadataFilter],
-        expected_filter_args: dict,
+        property_config,
+        metadata_filter: dict,
+        expected_filter: Any,
     ):
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
-
-        metadata_property = await MetadataPropertyFactory.create(
-            name=property_config["name"],
-            settings=property_config["settings"],
-            dataset=dataset,
-        )
-
-        mock_search_engine.search.return_value = SearchResponses(
-            total=2,
-            items=[
-                SearchResponseItem(record_id=records[0].id, score=14.2),
-                SearchResponseItem(record_id=records[1].id, score=12.2),
-            ],
-        )
-
-        params = {"metadata": [f"{metadata_property.name}:{param_value}"]}
-
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
-        response = await async_client.post(
-            f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=params,
-            headers=owner_auth_header,
-            json=query_json,
-        )
-        assert response.status_code == 200, response.json()
-
-        mock_search_engine.search.assert_called_once_with(
-            dataset=dataset,
-            query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
-            user_response_status_filter=None,
-            offset=0,
-            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
-            user_id=owner.id,
-        )
-
-    @pytest.mark.parametrize(
-        ("property_config", "wrong_value"),
-        [
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, None),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop"),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "terms_prop:"),
-            ({"name": "terms_prop", "settings": {"type": "terms"}}, "wrong-value"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, None),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "integer_prop:{}"),
-            ({"name": "integer_prop", "settings": {"type": "integer"}}, "wrong-value"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, None),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "float_prop:{}"),
-            ({"name": "float_prop", "settings": {"type": "float"}}, "wrong-value"),
-        ],
-    )
-    async def test_search_current_user_dataset_records_with_wrong_metadata_filter_values(
-        self,
-        async_client: "AsyncClient",
-        mock_search_engine: SearchEngine,
-        owner: User,
-        owner_auth_header: dict,
-        property_config: dict,
-        wrong_value: str,
-    ):
-        workspace = await WorkspaceFactory.create()
-        dataset, _, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
         await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -3773,45 +3733,63 @@ class TestSuiteDatasets:
         )
 
         mock_search_engine.search.return_value = SearchResponses(
+            total=2,
             items=[
                 SearchResponseItem(record_id=records[0].id, score=14.2),
                 SearchResponseItem(record_id=records[1].id, score=12.2),
             ],
-            total=2,
         )
 
-        params = {"metadata": [wrong_value]}
-
-        query_json = {"query": {"text": {"q": "Hello"}}}
+        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}, "filters": {"and": [metadata_filter]}}
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=params,
             headers=owner_auth_header,
             json=query_json,
         )
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 200, response.json()
+
+        mock_search_engine.search.assert_called_once_with(
+            dataset=dataset,
+            query=TextQuery(q="Hello", field="input"),
+            filter=AndFilter(filters=[expected_filter]),
+            offset=0,
+            limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            user_id=owner.id,
+        )
 
     @pytest.mark.parametrize(
-        "sorts",
+        "sort,expected_sort",
         [
-            [("inserted_at", None)],
-            [("inserted_at", "asc")],
-            [("inserted_at", "desc")],
-            [("updated_at", None)],
-            [("updated_at", "asc")],
-            [("updated_at", "desc")],
-            [("metadata.terms-metadata-property", None)],
-            [("metadata.terms-metadata-property", "asc")],
-            [("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "desc")],
-            [("inserted_at", "desc"), ("updated_at", "asc")],
-            [("inserted_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            (
+                [{"scope": {"entity": "record", "property": "inserted_at"}, "order": "asc"}],
+                [Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.asc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "inserted_at"}, "order": "desc"}],
+                [Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "updated_at"}, "order": "asc"}],
+                [Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.asc)],
+            ),
+            (
+                [{"scope": {"entity": "record", "property": "updated_at"}, "order": "desc"}],
+                [Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc)],
+            ),
+            (
+                [{"scope": {"entity": "metadata", "metadata_property": "terms-metadata-property"}, "order": "asc"}],
+                [Order(scope=MetadataFilterScope(metadata_property="terms-metadata-property"), order=SortOrder.asc)],
+            ),
+            (
+                [
+                    {"scope": {"entity": "record", "property": "updated_at"}, "order": "desc"},
+                    {"scope": {"entity": "metadata", "metadata_property": "terms-metadata-property"}, "order": "desc"},
+                ],
+                [
+                    Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc),
+                    Order(scope=MetadataFilterScope(metadata_property="terms-metadata-property"), order=SortOrder.desc),
+                ],
+            ),
         ],
     )
     async def test_search_current_user_dataset_records_with_sort_by(
@@ -3820,16 +3798,15 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: "User",
         owner_auth_header: dict,
-        sorts: List[Tuple[str, Union[str, None]]],
+        sort: List[dict],
+        expected_sort: List[Order],
     ):
         workspace = await WorkspaceFactory.create()
         dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        expected_sorts_by = []
-        for field, order in sorts:
-            if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
-            expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
+        for order in expected_sort:
+            if isinstance(order.scope, MetadataFilterScope):
+                await TermsMetadataPropertyFactory.create(name=order.scope.metadata_property, dataset=dataset)
 
         mock_search_engine.search.return_value = SearchResponses(
             total=2,
@@ -3839,15 +3816,13 @@ class TestSuiteDatasets:
             ],
         )
 
-        query_params = {
-            "sort_by": [f"{field}:{order}" if order is not None else f"{field}:asc" for field, order in sorts]
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": sort,
         }
-
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params=query_params,
             headers=owner_auth_header,
             json=query_json,
         )
@@ -3857,11 +3832,9 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=expected_sorts_by,
+            sort=expected_sort,
             user_id=owner.id,
         )
 
@@ -3871,18 +3844,17 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [{"scope": {"entity": "record", "property": "wrong_property"}, "order": "asc"}],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "inserted_at:wrong"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Provided sort order in 'sort_by' query param 'wrong' for field 'inserted_at' is not valid."
-        }
 
     async def test_search_current_user_dataset_records_with_sort_by_with_non_existent_metadata_property(
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
@@ -3890,17 +3862,19 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [{"scope": {"entity": "metadata", "metadata_property": "missing"}, "order": "asc"}],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "metadata.i-do-not-exist:asc"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"Provided metadata property in 'sort_by' query param 'i-do-not-exist' not found in dataset with '{dataset.id}'."
+            "detail": f"MetadataProperty not found filtering by name=missing, dataset_id={dataset.id}"
         }
 
     async def test_search_current_user_dataset_records_with_sort_by_with_invalid_field(
@@ -3909,19 +3883,19 @@ class TestSuiteDatasets:
         workspace = await WorkspaceFactory.create()
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "sort": [
+                {"scope": {"entity": "wrong", "property": "wrong"}, "order": "asc"},
+            ],
+        }
 
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
-            params={"sort_by": "not-valid"},
             headers=owner_auth_header,
             json=query_json,
         )
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. "
-            "It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
-        }
 
     @pytest.mark.parametrize(
         "includes",
@@ -4063,9 +4037,6 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            sort_by=None,
-            user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -4268,22 +4239,37 @@ class TestSuiteDatasets:
         dataset, *_ = await self.create_dataset_with_user_responses(owner, workspace)
         mock_search_engine.search.return_value = SearchResponses(items=[])
 
-        query_json = {"query": {"text": {"q": "Hello", "field": "input"}}}
+        query_json = {
+            "query": {"text": {"q": "Hello", "field": "input"}},
+            "filters": {
+                "and": [
+                    {
+                        "type": "terms",
+                        "scope": {"entity": "response", "property": "status"},
+                        "values": [ResponseStatus.submitted],
+                    }
+                ]
+            },
+        }
         response = await async_client.post(
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
             json=query_json,
-            params={"response_status": ResponseStatus.submitted.value},
         )
 
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            user_response_status_filter=UserResponseStatusFilter(user=owner, statuses=[ResponseStatusFilter.submitted]),
+            filter=AndFilter(
+                filters=[
+                    TermsFilter(
+                        scope=ResponseFilterScope(property="status", user=owner),
+                        values=[ResponseStatusFilter.submitted],
+                    )
+                ]
+            ),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
@@ -4326,8 +4312,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=5,
-            metadata_filters=[],
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_vector_value(
@@ -4370,8 +4354,6 @@ class TestSuiteDatasets:
             query=None,
             order=SimilarityOrder.most_similar,
             max_results=10,
-            metadata_filters=[],
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_vector_value_and_query(
@@ -4419,8 +4401,6 @@ class TestSuiteDatasets:
             query=TextQuery(q="Test query"),
             order=SimilarityOrder.most_similar,
             max_results=10,
-            metadata_filters=[],
-            user_response_status_filter=None,
         )
 
     async def test_search_current_user_dataset_records_with_wrong_vector(
@@ -4512,11 +4492,8 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
-            metadata_filters=[],
-            user_response_status_filter=None,
             offset=0,
             limit=5,
-            sort_by=None,
             user_id=owner.id,
         )
         assert response.status_code == 200
