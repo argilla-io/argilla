@@ -69,8 +69,9 @@ async def list_users(
 
     users = await accounts.list_users(db)
 
+    await telemetry_client.track_crud_user(action="list", user=None, is_oauth=False, count=len(users))
     for user in users:
-        await telemetry_client.track_crud_user(action="read", user=user)
+        await telemetry_client.track_crud_user(action="read", user=user, is_oauth=False)
 
     return Users(items=users)
 
@@ -128,7 +129,8 @@ async def list_user_workspaces(
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
 
+    await telemetry_client.track_crud_workspace(action="list", workspace=None, is_oauth=False, count=len(workspaces))
     for workspace in workspaces:
-        await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
+        await telemetry_client.track_crud_workspace(action="read", workspace=workspace, is_oauth=False)
 
     return Workspaces(items=workspaces)

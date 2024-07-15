@@ -41,6 +41,9 @@ class ErrorDetail(BaseModel):
     params: Dict[str, Any]
 
 
+telemetry_client: TelemetryClient = (Depends(get_telemetry_client),)
+
+
 # TODO(@frascuchon): Review class Naming
 class ServerHTTPException(HTTPException):
     def __init__(self, error: ServerError):
@@ -61,7 +64,7 @@ class APIErrorHandler:
         if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
             data["type"] = error.type
 
-        telemetry.get_telemetry_client().track_data(action="ServerErrorFound", data=data)
+        telemetry.get_telemetry_client().track_data(topic="error/server", user_agent=data)
 
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):

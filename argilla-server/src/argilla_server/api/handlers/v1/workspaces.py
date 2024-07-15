@@ -105,9 +105,6 @@ async def list_workspaces_me(
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, current_user.id)
 
-    for workspace in workspaces.items:
-        telemetry_client.track_crud_workspace(action="read", workspace=workspace)
-
     return Workspaces(items=workspaces)
 
 

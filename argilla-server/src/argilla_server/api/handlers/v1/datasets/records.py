@@ -358,6 +358,7 @@ async def list_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
@@ -388,6 +389,8 @@ async def list_current_user_dataset_records(
         record.dataset = dataset
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
+    telemetry_client.track_crud_records(topic="list", dataset=dataset, count=len(records))
+
     return Records(items=records, total=total)
 
 
@@ -396,6 +399,7 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     metadata: MetadataQueryParams = Depends(),
     sort_by_query_param: SortByQueryParamParsed,
@@ -420,6 +424,8 @@ async def list_dataset_records(
         include=include,
         sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
+
+    telemetry_client.track_crud_records(topic="list", dataset=dataset, count=len(records))
 
     return Records(items=records, total=total)
 
@@ -454,7 +460,7 @@ async def create_dataset_records(
 
     await datasets.create_records(db, search_engine, dataset, records_create)
 
-    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
+    telemetry_client.track_crud_records(topic="create", dataset=dataset, count=len(records_create.items))
 
 
 @router.patch(
@@ -486,7 +492,7 @@ async def update_dataset_records(
 
     await datasets.update_records(db, search_engine, dataset, records_update)
 
-    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
+    telemetry_client.track_crud_records(topic="update", dataset=dataset, count=len(records_update.items))
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
@@ -494,6 +500,7 @@ async def delete_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
@@ -512,6 +519,8 @@ async def delete_dataset_records(
         raise UnprocessableEntityError(f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once")
 
     await datasets.delete_records(db, search_engine, dataset, record_ids)
+
+    telemetry_client.track_crud_dataset(topic="delete", dataset=dataset, count=len(record_ids))
 
 
 @router.post(
@@ -583,6 +592,8 @@ async def search_current_user_dataset_records(
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
+    telemetry_client.track_data(topic="read", dataset=dataset, count=len(search_responses.total))
+
     return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
         total=search_responses.total,
@@ -599,6 +610,7 @@ async def search_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     metadata: MetadataQueryParams = Depends(),
@@ -644,6 +656,8 @@ async def search_dataset_records(
             record=RecordSchema.from_orm(record),
             query_score=record_id_score_map[record.id]["query_score"],
         )
+
+    telemetry_client.track_data(topic="read", dataset=dataset, count=len(search_responses.total))
 
     return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
