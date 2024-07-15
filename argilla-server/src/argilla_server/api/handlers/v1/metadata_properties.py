@@ -31,6 +31,7 @@ from argilla_server.database import get_async_db
 from argilla_server.models import MetadataProperty, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["metadata properties"])
 
@@ -58,6 +59,7 @@ async def get_metadata_property_metrics(
 async def update_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     metadata_property_id: UUID,
     metadata_property_update: MetadataPropertyUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -70,13 +72,20 @@ async def update_metadata_property(
 
     await authorize(current_user, MetadataPropertyPolicy.update(metadata_property))
 
-    return await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
+    metadata_property = await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
+
+    await telemetry_client.track_crud_dataset_setting(
+        action="update", setting_name="metadata_properties", dataset=MetadataProperty.dataset, setting=metadata_property
+    )
+
+    return metadata_property
 
 
 @router.delete("/metadata-properties/{metadata_property_id}", response_model=MetadataPropertySchema)
 async def delete_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     metadata_property_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -88,4 +97,10 @@ async def delete_metadata_property(
 
     await authorize(current_user, MetadataPropertyPolicy.delete(metadata_property))
 
-    return await datasets.delete_metadata_property(db, metadata_property)
+    metadata_property = await datasets.delete_metadata_property(db, metadata_property)
+
+    await telemetry_client.track_crud_dataset_setting(
+        action="delete", setting_name="metadata_properties", dataset=MetadataProperty.dataset, setting=metadata_property
+    )
+
+    return metadata_property
