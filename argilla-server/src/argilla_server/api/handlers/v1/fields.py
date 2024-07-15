@@ -25,6 +25,7 @@ from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import Field, User
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["fields"])
 
@@ -33,6 +34,7 @@ router = APIRouter(tags=["fields"])
 async def update_field(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     field_id: UUID,
     field_update: FieldUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -41,13 +43,20 @@ async def update_field(
 
     await authorize(current_user, FieldPolicy.update(field))
 
-    return await datasets.update_field(db, field, field_update)
+    field = await datasets.update_field(db, field, field_update)
+
+    await telemetry_client.track_crud_dataset_setting(
+        action="update", dataset=field.dataset, setting_name="fields", setting=field
+    )
+
+    return field
 
 
 @router.delete("/fields/{field_id}", response_model=FieldSchema)
 async def delete_field(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     field_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -55,4 +64,10 @@ async def delete_field(
 
     await authorize(current_user, FieldPolicy.delete(field))
 
-    return await datasets.delete_field(db, field)
+    field = await datasets.delete_field(db, field)
+
+    await telemetry_client.track_crud_dataset_setting(
+        action="delete", dataset=field.dataset, setting_name="fields", setting=field
+    )
+
+    return field
