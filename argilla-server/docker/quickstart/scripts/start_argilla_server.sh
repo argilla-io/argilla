@@ -31,10 +31,9 @@ python -m argilla_server database users create \
 	--role annotator \
 	--workspace "$ARGILLA_WORKSPACE"
 
-if [ "$REINDEX_DATASETS" == "true" ] || [ "$REINDEX_DATASETS" == "1" ]; then
-  echo "Reindexing existing datasets"
-  python -m argilla_server search-engine reindex
-fi
+# Forcing reindex on restart since elasticsearch data could be allocated in a non-persistent volume
+echo "Reindexing existing datasets"
+python -m argilla_server search-engine reindex
 
 # Start Argilla
 echo "Starting Argilla"
