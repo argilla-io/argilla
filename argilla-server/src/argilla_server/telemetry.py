@@ -24,7 +24,7 @@ from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.constants import DEFAULT_USERNAME
-from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, Workspace
+from argilla_server.models import Dataset, Record, User, Workspace
 from argilla_server.settings import settings
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
@@ -83,8 +83,8 @@ class TelemetryClient:
     @staticmethod
     def _process_record_model(record: Record):
         return {
-            "dataset_id": str(record.dataset.id),
-            "dataset_hash": str(uuid.uuid5(namespace=_TELEMETRY_CLIENT.server_id, name=record.dataset.name)),
+            "dataset_id": str(record.dataset_id),
+            "record_id": str(record.id),
         }
 
     @staticmethod
@@ -195,12 +195,12 @@ class TelemetryClient:
     async def track_crud_records_subtopic(
         self,
         action: str,
-        sub_topic_name: str,
-        sub_topic: Union[Suggestion, Response, MetadataProperty, Vector],
+        sub_topic: str,
+        record_id: str,
         count: Union[int, None] = None,
     ):
         topic = f"dataset/records/{sub_topic}/{action}"
-        user_agent = {"record_id": sub_topic.record_id}
+        user_agent = {"record_id": record_id}
         self.track_data(topic=topic, user_agent=user_agent, count=count)
 
 

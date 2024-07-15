@@ -31,6 +31,7 @@ from argilla_server.errors.future.base_errors import NotFoundError, Unprocessabl
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 from argilla_server.utils import parse_uuids
 
 DELETE_RECORD_SUGGESTIONS_LIMIT = 100
@@ -42,6 +43,7 @@ router = APIRouter(tags=["records"])
 async def get_record(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -57,6 +59,8 @@ async def get_record(
 
     await authorize(current_user, RecordPolicy.get(record))
 
+    telemetry_client.track_crud_records(action="read", record=record)
+
     return record
 
 
@@ -65,6 +69,7 @@ async def update_record(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     record_update: RecordUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -82,7 +87,11 @@ async def update_record(
 
     await authorize(current_user, RecordPolicy.update(record))
 
-    return await datasets.update_record(db, search_engine, record, record_update)
+    record = await datasets.update_record(db, search_engine, record, record_update)
+
+    telemetry_client.track_crud_records(action="update", record=record)
+
+    return record
 
 
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
@@ -90,6 +99,7 @@ async def create_record_response(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     response_create: ResponseCreate,
     current_user: User = Security(auth.get_current_user),
@@ -105,13 +115,18 @@ async def create_record_response(
 
     await authorize(current_user, RecordPolicy.create_response(record))
 
-    return await datasets.create_response(db, search_engine, record, current_user, response_create)
+    response = await datasets.create_response(db, search_engine, record, current_user, response_create)
+
+    telemetry_client.track_crud_records_subtopic(action="create", sub_topic="responses", record_id=record_id)
+
+    return response
 
 
 @router.get("/records/{record_id}/suggestions", status_code=status.HTTP_200_OK, response_model=Suggestions)
 async def get_record_suggestions(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -126,6 +141,10 @@ async def get_record_suggestions(
     )
 
     await authorize(current_user, RecordPolicy.get_suggestions(record))
+
+    telemetry_client.track_crud_records_subtopic(
+        topic="read", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
+    )
 
     return Suggestions(items=record.suggestions)
 
@@ -144,6 +163,7 @@ async def upsert_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     suggestion_create: SuggestionCreate,
     current_user: User = Security(auth.get_current_user),
@@ -174,7 +194,13 @@ async def upsert_suggestion(
     if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
         response.status_code = status.HTTP_200_OK
 
-    return await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
+    suggestion = await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
+
+    telemetry_client.track_crud_records_subtopic(
+        topic="update", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
+    )
+
+    return suggestion
 
 
 @router.delete(
@@ -186,6 +212,7 @@ async def delete_record_suggestions(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the suggestions to be removed"),
@@ -212,12 +239,17 @@ async def delete_record_suggestions(
 
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
+    telemetry_client.track_crud_records_subtopic(
+        topic="delete", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
+    )
+
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)
 async def delete_record(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     record_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -232,4 +264,8 @@ async def delete_record(
 
     await authorize(current_user, RecordPolicy.delete(record))
 
-    return await datasets.delete_record(db, search_engine, record)
+    record = await datasets.delete_record(db, search_engine, record)
+
+    telemetry_client.track_crud_records(topic="delete", record=record)
+
+    return record
