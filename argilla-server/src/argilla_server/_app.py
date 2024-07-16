@@ -201,7 +201,7 @@ def configure_telemetry(app: FastAPI):
     """
     )
     message += "\n\n    "
-    message += "#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"
+    message += "#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"
     message += "\n"
 
     @app.on_event("startup")

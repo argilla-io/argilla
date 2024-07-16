@@ -12,7 +12,8 @@ services:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
 
-      # ARGILLA_ENABLE_TELEMETRY: 0 # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
+      # HF_HUB_DISABLE_TELEMETRY: 1 # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
+      # HF_HUB_OFFLINE: 1 # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
 
       # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/configurations/user_management.html
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml

@@ -26,16 +26,16 @@ from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 from argilla_server.constants import (
-    DATABASE_SQLITE,
     DATABASE_POSTGRESQL,
+    DATABASE_SQLITE,
+    DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
+    DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
+    DEFAULT_DATABASE_SQLITE_TIMEOUT,
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
-    DEFAULT_DATABASE_SQLITE_TIMEOUT,
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
-    DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
-    DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
 )
 from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
@@ -156,8 +156,23 @@ class Settings(BaseSettings):
         description="If True, show a warning when Hugging Face space persistent storage is disabled",
     )
 
+    # Hugging Face telemetry
+    enable_telemetry: bool = Field(
+        default=True, description="The telemetry configuration for Hugging Face hub telemetry. "
+    )
+
     # See also the telemetry.py module
-    enable_telemetry: bool = True
+    @validator("database_url", pre=True, always=True)
+    def set_enable_telemetry(cls, enable_telemetry: bool) -> bool:
+        if os.getenv("HF_HUB_DISABLE_TELEMETRY") == "1" or os.getenv("HF_HUB_OFFLINE") == "1":
+            enable_telemetry = False
+        elif os.getenv("ARGILLA_ENABLE_TELEMETRY") == "0":
+            warnings.warn(
+                "environment vairbale ARGILLA_ENABLE_TELEMETRY is deprecated, use HF_HUB_DISABLE_TELEMETRY or HF_HUB_OFFLINE instead."
+            )
+            enable_telemetry = False
+
+        return enable_telemetry
 
     @validator("home_path", always=True)
     def set_home_path_default(cls, home_path: str):

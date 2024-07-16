@@ -108,7 +108,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-env = ["ARGILLA_ENABLE_TELEMETRY=0"]
+env = ["HF_HUB_DISABLE_TELEMETRY=1"]
 
 [tool.coverage.run]
 concurrency = ["greenlet", "thread", "multiprocessing"]
