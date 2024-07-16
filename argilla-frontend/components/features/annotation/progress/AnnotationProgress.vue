@@ -17,7 +17,7 @@
 
 <template>
   <div class="my-progress__container">
-    <TeamProgress class="my-progress__bar" :datasetId="datasetId" />
+    <TeamProgress :datasetId="datasetId" />
 
     <li class="my-progress__item">
       <span>
@@ -69,9 +69,6 @@ $bullet-size: 8px;
     width: 100%;
     display: flex;
     align-items: center;
-  }
-  &__bar {
-    width: 280px;
   }
   &__item {
     background: palette(grey, 700);

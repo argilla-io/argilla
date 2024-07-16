@@ -61,7 +61,6 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: $base-space;
     }
 
     width: 100%;

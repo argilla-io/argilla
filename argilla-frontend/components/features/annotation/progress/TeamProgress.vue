@@ -52,6 +52,7 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   width: 100%;
+  max-width: 250px;
   color: $black-54;
   @include font-size(12px);
   &__bar {
