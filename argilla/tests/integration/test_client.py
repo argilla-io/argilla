@@ -31,8 +31,7 @@ class TestClient:
         assert client.datasets(id=str(dataset.id)) == dataset
         assert client.datasets(id=str(dataset.id), name="skip this name") == dataset
 
-        with pytest.raises(ArgillaAPIError):
-            client.datasets(id=uuid.uuid4())
+        assert client.datasets(id=uuid.uuid4()) is None
 
     def test_get_user_by_id(self, client: Argilla):
         user = User(username="test_user", password="test password").create()
@@ -41,9 +40,7 @@ class TestClient:
         assert client.users(id=user.id) == user
         assert client.users(id=str(user.id)) == user
         assert client.users(id=str(user.id), username="skip this username") == user
-
-        with pytest.raises(ArgillaAPIError):
-            client.users(id=uuid.uuid4())
+        assert client.users(id=uuid.uuid4()) is None
 
     def test_get_workspace_by_id(self, client: Argilla):
         workspace = Workspace(name=f"test_workspace{uuid.uuid4()}").create()
@@ -51,9 +48,7 @@ class TestClient:
         assert client.workspaces(id=workspace.id) == workspace
         assert client.workspaces(id=str(workspace.id)) == workspace
         assert client.workspaces(id=str(workspace.id), name="skip this name") == workspace
-
-        with pytest.raises(ArgillaAPIError):
-            client.workspaces(id=uuid.uuid4())
+        assert client.workspaces(id=uuid.uuid4()) is None
 
     def test_get_resource_with_missing_args(self, client: Argilla):
         with pytest.raises(ArgillaError):

@@ -439,7 +439,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 dataset = client.datasets(id="<uuid-or-uuid-string>")
 ```
 
-In that case, if the dataset does not exist for the given id, an `ArgillaError` will be raised.
+If the dataset does not exist for the given id, the call will return `None`.
 
 ## Check dataset existence
 

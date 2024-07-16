@@ -20,11 +20,12 @@ from typing import TYPE_CHECKING, overload, List, Optional, Union
 from uuid import UUID
 
 from argilla import _api
+from argilla._api._base import ResourceAPI
 from argilla._api._client import DEFAULT_HTTP_CONFIG
-from argilla._exceptions import ArgillaError
+from argilla._exceptions import ArgillaError, NotFoundError
 from argilla._helpers import GenericIterator
 from argilla._helpers._resource_repr import ResourceHTMLReprMixin
-from argilla._models import UserModel, WorkspaceModel, DatasetModel
+from argilla._models import UserModel, WorkspaceModel, DatasetModel, ResourceModel
 
 if TYPE_CHECKING:
     from argilla import Workspace
@@ -113,30 +114,32 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         self._api = client.api.users
 
     @overload
-    def __call__(self, username: str) -> Optional["User"]: ...
+    def __call__(self, username: str) -> Optional["User"]:
+        """Get a user by username if exists. Otherwise, returns `None`"""
+        ...
 
     @overload
-    def __call__(self, id: Union[UUID, str]) -> "User": ...
+    def __call__(self, id: Union[UUID, str]) -> Optional["User"]:
+        """Get a user by id if exists. Otherwise, returns `None`"""
+        ...
 
     def __call__(self, username: str = None, id: Union[str, UUID] = None) -> Optional["User"]:
         if not (username or id):
             raise ArgillaError("One of 'username' or 'id' must be provided")
-
         if username and id:
             warnings.warn("Only one of 'username' or 'id' must be provided. Using 'id'")
             username = None
 
         if id is not None:
-            if not isinstance(id, UUID):
-                id = UUID(id)
-            return self._from_model(self._api.get(id))
-
-        user_models = self._api.list()
-        for model in user_models:
-            if model.username == username:
-                return self._from_model(model)
-
-        warnings.warn(f"User with username {username!r} not found.")
+            model = _get_model_by_id(self._api, id)
+            if model:
+                return self._from_model(model)  # noqa
+            warnings.warn(f"User with id {id!r} not found.")
+        else:
+            for model in self._api.list():
+                if model.username == username:
+                    return self._from_model(model)
+            warnings.warn(f"User with username {username!r} not found.")
 
     def __iter__(self):
         return self._Iterator(self.list())
@@ -207,10 +210,14 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
         self._api = client.api.workspaces
 
     @overload
-    def __call__(self, name: str) -> Optional["Workspace"]: ...
+    def __call__(self, name: str) -> Optional["Workspace"]:
+        """Get a workspace by name if exists. Otherwise, returns `None`"""
+        ...
 
     @overload
-    def __call__(self, id: Union[UUID, str]) -> "Workspace": ...
+    def __call__(self, id: Union[UUID, str]) -> Optional["Workspace"]:
+        """Get a workspace by id if exists. Otherwise, returns `None`"""
+        ...
 
     def __call__(self, name: str = None, id: Union[UUID, str] = None) -> Optional["Workspace"]:
         if not (name or id):
@@ -221,15 +228,15 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
             name = None
 
         if id is not None:
-            if not isinstance(id, UUID):
-                id = UUID(id)
-            return self._from_model(self._api.get(id))
-
-        workspace_models = self._api.list()
-        for model in workspace_models:
-            if model.name == name:
-                return self._from_model(model)
-        warnings.warn(f"Workspace with name {name!r} not found.")
+            model = _get_model_by_id(self._api, id)
+            if model:
+                return self._from_model(model)  # noqa
+            warnings.warn(f"Workspace with id {id!r} not found")
+        else:
+            for model in self._api.list():
+                if model.name == name:
+                    return self._from_model(model)  # noqa
+            warnings.warn(f"Workspace with name {name!r} not found.")
 
     def __iter__(self):
         return self._Iterator(self.list())
@@ -296,10 +303,14 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         self._api = client.api.datasets
 
     @overload
-    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]: ...
+    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]:
+        """Get a dataset by name and workspace if exists. Otherwise, returns `None`"""
+        ...
 
     @overload
-    def __call__(self, id: Union[UUID, str]) -> "Dataset": ...
+    def __call__(self, id: Union[UUID, str]) -> Optional["Dataset"]:
+        """Get a dataset by id if exists. Otherwise, returns `None`"""
+        ...
 
     def __call__(
         self, name: str = None, workspace: Optional[Union["Workspace", str]] = None, id: Union[UUID, str] = None
@@ -312,18 +323,19 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
             name = None
 
         if id is not None:
-            if not isinstance(id, UUID):
-                id = UUID(id)
-            return self._from_model(self._api.get(id))
+            model = _get_model_by_id(self._api, id)
+            if model:
+                return self._from_model(model)  # noqa
+            warnings.warn(f"Dataset with id {id!r} not found")
+        else:
+            workspace = workspace or self._client.workspaces.default
+            if isinstance(workspace, str):
+                workspace = self._client.workspaces(workspace)
 
-        workspace = workspace or self._client.workspaces.default
-        if isinstance(workspace, str):
-            workspace = self._client.workspaces(workspace)
-
-        for dataset in workspace.datasets:
-            if dataset.name == name:
-                return dataset.get()
-        warnings.warn(f"Dataset with name {name!r} not found in workspace {workspace.name!r}")
+            for dataset in workspace.datasets:
+                if dataset.name == name:
+                    return dataset.get()
+            warnings.warn(f"Dataset with name {name!r} not found in workspace {workspace.name!r}")
 
     def __iter__(self):
         return self._Iterator(self.list())
@@ -372,3 +384,13 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         from argilla.datasets import Dataset
 
         return Dataset.from_model(model=model, client=self._client)
+
+
+def _get_model_by_id(api: ResourceAPI, resource_id: Union[UUID, str]) -> Optional[ResourceModel]:
+    """Get a resource model by id if found. Otherwise, `None`."""
+    try:
+        if not isinstance(resource_id, UUID):
+            resource_id = UUID(resource_id)
+        return api.get(resource_id)
+    except NotFoundError:
+        pass
