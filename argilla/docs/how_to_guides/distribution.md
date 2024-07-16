@@ -4,7 +4,7 @@ description: In this section, we will provide a step-by-step guide to show how t
 
 # Distribute the task among the team
 
-This guide explains how you can use Argilla’s **automatic task distribution** to divide the task of annotating a dataset among multiple team members efficiently. 
+This guide explains how you can use Argilla’s **automatic task distribution** to divide the task of annotating a dataset among multiple team members efficiently.
 
 Users can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of the annotation team. When a record has met the minimum number of submissions, the status of the record will change to `completed` and the record will be removed from the `Pending` queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the `completed` status.
 
