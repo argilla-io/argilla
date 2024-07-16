@@ -84,6 +84,17 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 retrieved_workspace = client.workspaces("my_workspace")
 ```
 
+You can also use the user `id` to fetch the workspace:
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+workspace = client.workspaces("<uuid-or-uuid-string>")
+```
+
+In that case, if the workspace does not exist for the given id, an `ArgillaError` will be raised.
+
 ## Check workspace existence
 
 You can check if a workspace exists. The `client.workspaces` method will return `None` if the workspace was not found.
