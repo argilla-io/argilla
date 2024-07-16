@@ -28,10 +28,9 @@ client.me
 
 ---
 
-## Class Reference
-
-### `rg.User`
+##  `rg.User`
 
 ::: src.argilla.users._resource.User
     options:
         heading_level: 3
+        show_root_toc_entry: false

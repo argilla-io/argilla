@@ -22,15 +22,20 @@ import os
 import re
 import warnings
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 from argilla_server.constants import (
+    DATABASE_SQLITE,
+    DATABASE_POSTGRESQL,
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
     DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
+    DEFAULT_DATABASE_SQLITE_TIMEOUT,
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
+    DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
+    DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
 )
 from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
@@ -72,7 +77,23 @@ class Settings(BaseSettings):
 
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
+
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.pool_size
+    database_postgresql_pool_size: Optional[int] = Field(
+        default=DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
+        description="The number of connections to keep open inside the database connection pool",
+    )
+    # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.max_overflow
+    database_postgresql_max_overflow: Optional[int] = Field(
+        default=DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
+        description="The number of connections that can be opened above and beyond the pool_size setting",
+    )
+    # https://docs.python.org/3/library/sqlite3.html#sqlite3.connect
+    database_sqlite_timeout: Optional[int] = Field(
+        default=DEFAULT_DATABASE_SQLITE_TIMEOUT,
+        description="SQLite database connection timeout in seconds",
+    )
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
@@ -217,6 +238,37 @@ class Settings(BaseSettings):
         if ns is None:
             return index_name.replace("<NAMESPACE>", "")
         return index_name.replace("<NAMESPACE>", f".{ns}")
+
+    @property
+    def database_engine_args(self) -> Dict:
+        if self.database_is_sqlite:
+            return {
+                "connect_args": {
+                    "timeout": self.database_sqlite_timeout,
+                },
+            }
+
+        if self.database_is_postgresql:
+            return {
+                "pool_size": self.database_postgresql_pool_size,
+                "max_overflow": self.database_postgresql_max_overflow,
+            }
+
+        return {}
+
+    @property
+    def database_is_sqlite(self) -> bool:
+        if self.database_url is None:
+            return False
+
+        return self.database_url.lower().startswith(DATABASE_SQLITE)
+
+    @property
+    def database_is_postgresql(self) -> bool:
+        if self.database_url is None:
+            return False
+
+        return self.database_url.lower().startswith(DATABASE_POSTGRESQL)
 
     @property
     def search_engine_is_elasticsearch(self) -> bool:

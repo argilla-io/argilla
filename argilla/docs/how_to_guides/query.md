@@ -2,9 +2,9 @@
 description: In this section, we will provide a step-by-step guide to show how to filter and query a dataset.
 ---
 
-# Query, filter, and export records
+# Query and filter records
 
-This guide provides an overview of how to query and filter a dataset in Argilla and export records.
+This guide provides an overview of how to query and filter a dataset in Argilla.
 
 You can search for records in your dataset by **querying** or **filtering**. The query focuses on the content of the text field, while the filter is used to filter the records based on conditions. You can use them independently or combine multiple filters to create complex search queries. You can also export records from a dataset either as a single dictionary or a list of dictionaries.
 
@@ -169,54 +169,4 @@ queried_filtered_records = list(dataset.records(
     with_suggestions=True
 )
 )
-```
-
-## Export records to a dictionary
-
-Records can be exported from `Dataset.records` as a dictionary. The `to_dict` method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.
-
-=== "
-
-```python
-import argilla as rg
-
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
-
-workspace = client.workspaces("my_workspace")
-
-dataset = client.datasets(name="my_dataset", workspace=workspace)
-
-# Export records as a dictionary
-exported_records = dataset.records.to_dict()
-# {'fields': [{'text': 'Hello'},{'text': 'World'}], suggestions': [{'label': {'value': 'positive'}}, {'label': {'value': 'negative'}}]
-
-# Export records as a dictionary with orient=index
-exported_records = dataset.records.to_dict(orient="index")
-# {"uuid": {'fields': {'text': 'Hello'}, 'suggestions': {'label': {'value': 'positive'}}}, {"uuid": {'fields': {'text': 'World'}, 'suggestions': {'label': {'value': 'negative'}}},
-
-# Export records as a dictionary with flatten=false
-exported_records = dataset.records.to_dict(flatten=True)
-# {"text": ["Hello", "World"], "label.suggestion": ["greeting", "greeting"]}
-```
-
-## Export records to a list
-
-Records can be exported from `Dataset.records` as a list of dictionaries. The `to_list` method can be used to export records as a list of dictionaries. You can decide if to flatten it or not.
-
-```python
-import argilla as rg
-
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
-
-workspace = client.workspaces("my_workspace")
-
-dataset = client.datasets(name="my_dataset", workspace=workspace)
-
-# Export records as a list of dictionaries
-exported_records = dataset.records.to_list()
-# [{'fields': {'text': 'Hello'}, 'suggestion': {'label': {value: 'greeting'}}}, {'fields': {'text': 'World'}, 'suggestion': {'label': {value: 'greeting'}}}]
-
-# Export records as a list of dictionaries with flatten=False
-exported_records = dataset.records.to_list(flatten=True)
-# [{"text": "Hello", "label": "greeting"}, {"text": "World", "label": "greeting"}]
 ```
