@@ -90,7 +90,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces("<uuid-or-uuid-string>")
+workspace = client.workspaces(id="<uuid-or-uuid-string>")
 ```
 
 In that case, if the workspace does not exist for the given id, an `ArgillaError` will be raised.

@@ -436,7 +436,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-dataset = client.datasets("<uuid-or-uuid-string>")
+dataset = client.datasets(id="<uuid-or-uuid-string>")
 ```
 
 In that case, if the dataset does not exist for the given id, an `ArgillaError` will be raised.

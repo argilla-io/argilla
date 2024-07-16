@@ -138,7 +138,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-user = client.users("<uuid-or-uuid-string>")
+user = client.users(id="<uuid-or-uuid-string>")
 ```
 
 In that case, if the user does not exist for the given id, an `ArgillaError` will be raised.
