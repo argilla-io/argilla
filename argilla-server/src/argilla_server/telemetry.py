@@ -17,14 +17,23 @@ import json
 import logging
 import platform
 import uuid
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from fastapi import Request
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.constants import DEFAULT_USERNAME
-from argilla_server.models import Dataset, Record, User, Workspace
+from argilla_server.models import (
+    Dataset,
+    Field,
+    MetadataPropertySettings,
+    Question,
+    Record,
+    User,
+    VectorSettings,
+    Workspace,
+)
 from argilla_server.settings import settings
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
@@ -99,8 +108,17 @@ class TelemetryClient:
         }
 
     @staticmethod
-    def _process_dataset_setting_settings(setting: Any):
-        return {}
+    def _process_dataset_setting_settings(setting: Union[Field, VectorSettings, Question, MetadataPropertySettings]):
+        user_data = {"dataset_id": str(setting.dataset_id)}
+        if isinstance(setting, (Field, Question)):
+            user_data["required"] = setting.required
+            user_data.update(setting.settings)
+        elif isinstance(setting, MetadataPropertySettings):
+            user_data["type"] = setting.type
+        elif isinstance(setting, VectorSettings):
+            user_data["dimensions"] = setting.dimensions
+
+        return user_data
 
     @staticmethod
     def _process_user_model(user: User):
@@ -159,17 +177,16 @@ class TelemetryClient:
             user_agent.update(self._process_dataset_settings(dataset=dataset))
         self.track_data(topic=topic, user_agent=user_agent, count=count)
 
-        return None
         for field in dataset.fields:
-            self.track_crud_dataset_settings(action=action, setting_name="fields", dataset=dataset, setting=field)
+            self.track_crud_dataset_setting(action=action, setting_name="fields", dataset=dataset, setting=field)
         for question in dataset.questions:
-            self.track_crud_dataset_settings(action=action, setting_name="questions", dataset=dataset, setting=question)
+            self.track_crud_dataset_setting(action=action, setting_name="questions", dataset=dataset, setting=question)
         for vector in dataset.vectors_settings:
-            self.track_crud_dataset_settings(
+            self.track_crud_dataset_setting(
                 action=action, setting_name="vectors_settings", dataset=dataset, setting=vector
             )
         for meta_data in dataset.metadata_properties:
-            self.track_crud_dataset_settings(
+            self.track_crud_dataset_setting(
                 action=action, setting_name="metadata_properties", dataset=dataset, setting=meta_data
             )
 
@@ -178,13 +195,12 @@ class TelemetryClient:
         action: str,
         setting_name: str,
         dataset: Dataset,
-        setting: Union[Any, None] = None,
+        setting: Union[Field, VectorSettings, Question, MetadataPropertySettings],
         count: Union[int, None] = None,
     ):
         topic = f"dataset/{setting_name}/{setting.settings.type}/{action}"
         user_agent = self._process_dataset_model(dataset=dataset)
-        if setting:
-            user_agent.update(self._process_dataset_setting_settings(setting=setting))
+        user_agent.update(self._process_dataset_setting_settings(setting=setting))
         self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_records(self, action: str, record: Union[Record, None] = None, count: Union[int, None] = None):
