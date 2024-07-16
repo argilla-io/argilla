@@ -28,7 +28,7 @@ mock_request = Request(scope={"type": "http", "headers": {}})
 def test_disable_telemetry():
     telemetry_client = TelemetryClient(enable_telemetry=False)
 
-    assert telemetry_client.client is None
+    assert telemetry_client.enable_telemetry == False
 
 
 @pytest.mark.asyncio
