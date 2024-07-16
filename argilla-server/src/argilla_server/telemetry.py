@@ -54,7 +54,7 @@ class TelemetryClient:
         return self._server_id
 
     def __post_init__(self, enable_telemetry: bool):
-        self._server_id = uuid.UUID(int=uuid.getnode())
+        self._server_id = str(uuid.UUID(int=uuid.getnode()))
         self._system_info = {
             "server_id": self._server_id,
             "system": platform.system(),
