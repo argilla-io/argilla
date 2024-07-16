@@ -19,11 +19,12 @@ import logging
 import os
 import shutil
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 import backoff
 from brotli_asgi import BrotliMiddleware
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
@@ -87,6 +88,16 @@ def create_server_app() -> FastAPI:
 
 def configure_middleware(app: FastAPI):
     """Configures fastapi middleware"""
+
+    @app.middleware("http")
+    async def add_server_timing_header(request: Request, call_next):
+        start_time = datetime.utcnow()
+        response = await call_next(request)
+        response_time_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+
+        response.headers["Server-Timing"] = f"total;dur={response_time_ms}"
+
+        return response
 
     app.add_middleware(
         CORSMiddleware,
