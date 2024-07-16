@@ -30,7 +30,6 @@ from argilla.settings._vector import VectorField
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-
 __all__ = ["Settings"]
 
 
@@ -356,7 +355,6 @@ class SettingsProperties(Sequence[Property]):
 
     def __init__(self, settings: "Settings", properties: List[Property]):
         self._properties_by_name = {}
-        self._properties_by_id = {}
         self._settings = settings
 
         for property in properties or []:
@@ -366,7 +364,9 @@ class SettingsProperties(Sequence[Property]):
         if isinstance(key, int):
             return list(self._properties_by_name.values())[key]
         if isinstance(key, UUID):
-            return self._properties_by_id.get(key)
+            for prop in self._properties_by_name.values():
+                if prop.id and prop.id == key:
+                    return prop
         else:
             return self._properties_by_name.get(key)
 
@@ -385,7 +385,6 @@ class SettingsProperties(Sequence[Property]):
     def add(self, property: Property) -> Property:
         self._validate_new_property(property)
         self._properties_by_name[property.name] = property
-        self._properties_by_id[property.id] = property
         setattr(self, property.name, property)
         return property
 
