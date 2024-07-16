@@ -52,7 +52,7 @@ jobs:
           - 5432:5432
 
     env:
-      HF_HUB_DISABLE_TELEMETRY: 1
+      HF_HUB_DISABLE_TELEMETRY: 0
 
     steps:
       - name: Checkout Code 🛎
