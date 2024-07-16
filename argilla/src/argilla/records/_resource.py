@@ -85,19 +85,11 @@ class Record(Resource):
             raise ValueError("If fields are not provided, an id must be provided.")
         if fields == {} and id is None:
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
-        self._dataset = _dataset
 
-        self._model = RecordModel(
-            fields=fields,
-            external_id=id or uuid4(),
-            id=_server_id,
-        )
-        # TODO: All this code blocks could be define as property setters
-        # Initialize the fields
-        self.__fields = RecordFields(fields=self._model.fields)
-        # Initialize the vectors
+        self._dataset = _dataset
+        self._model = RecordModel(external_id=id or uuid4(), id=_server_id)
+        self.__fields = RecordFields(fields=fields)
         self.__vectors = RecordVectors(vectors=vectors)
-        # Initialize the metadata
         self.__metadata = RecordMetadata(metadata=metadata)
         self.__responses = RecordResponses(responses=responses, record=self)
         self.__suggestions = RecordSuggestions(suggestions=suggestions, record=self)
