@@ -26,21 +26,24 @@ from argilla import (
     TermsMetadataProperty,
     IntegerMetadataProperty,
     FloatMetadataProperty,
+    Workspace,
+    Dataset,
 )
 
 
 def test_publish_dataset(client: "Argilla"):
-    new_ws = client.workspaces("new_ws")
-    if not new_ws.exists():
-        new_ws.create()
+    ws_name = "new_ws"
+    ds_name = "new_ds"
 
-    assert new_ws.exists(), "The workspace was not created"
+    new_ws = client.workspaces(ws_name) or Workspace(name=ws_name).create()
+    assert client.api.workspaces.exists(new_ws.id), "The workspace was not created"
 
-    ds = client.datasets("new_ds", workspace=new_ws)
-    if ds.exists():
+    ds = client.datasets(ds_name, workspace=new_ws)
+    if ds:
         ds.delete()
+        assert not client.api.datasets.exists(ds.id), "The dataset was not deleted"
 
-    assert not ds.exists(), "The dataset was not deleted"
+    ds = Dataset(name=ds_name, workspace=new_ws)
 
     ds.settings = Settings(
         guidelines="This is a test dataset",
@@ -65,7 +68,7 @@ def test_publish_dataset(client: "Argilla"):
     ds.create()
 
     created_dataset = client.datasets(name=ds.name, workspace=new_ws)
-    assert created_dataset.exists(), "The dataset was not found"
+    assert client.api.datasets.exists(created_dataset.id), "The dataset was not found"
     assert created_dataset == ds
     assert created_dataset.settings == ds.settings, "The settings were not saved"
 
