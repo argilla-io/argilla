@@ -47,7 +47,7 @@ export default {
   },
   computed: {
     spanQuestionsAnswers() {
-      return this.record.questions
+      return this.record?.questions
         .filter((q) => q.isSpanType)
         .map((q) => ({
           id: q.id,
@@ -60,7 +60,7 @@ export default {
       deep: true,
       handler() {
         if (
-          this.record.questions
+          this.record?.questions
             .filter((q) => q.isSpanType)
             .some((q) => q.isModified)
         ) {
