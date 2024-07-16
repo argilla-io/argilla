@@ -215,7 +215,6 @@ export default {
   metrics: {
     total: "Total",
     progress: {
-      my: "mein Fortschritt",
       team: "Fortschritte im Team",
     },
   },
