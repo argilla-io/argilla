@@ -46,7 +46,6 @@ _LOGGER = logging.getLogger(__name__)
 @dataclasses.dataclass
 class TelemetryClient:
     enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
-    disable_send: dataclasses.InitVar[bool] = False
 
     _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
 
