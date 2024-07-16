@@ -11,10 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import uuid
+
 import pytest
 
 import argilla as rg
 from argilla._exceptions import SettingsError
+from argilla.settings._resource import SettingsProperties
 
 
 class TestSettings:
@@ -91,6 +94,34 @@ class TestSettings:
 
         with pytest.raises(SettingsError, match="names of dataset settings must be unique"):
             settings.validate()
+
+
+class TestSettingsProperties:
+    def test_access_by_id(self):
+        settings = rg.Settings()
+
+        field = rg.TextField(name="text", title="title")
+        field._model.id = uuid.uuid4()
+
+        properties = SettingsProperties(settings, [field])
+        assert properties[field.id] == field
+
+    def test_access_by_none_id(self):
+        settings = rg.Settings()
+
+        field = rg.TextField(name="text", title="title")
+
+        properties = SettingsProperties(settings, [field])
+        assert properties[field.id] is None
+
+    def test_access_by_wrong_id(self):
+        settings = rg.Settings()
+
+        field = rg.TextField(name="text", title="title")
+        field._model.id = uuid.uuid4()
+
+        properties = SettingsProperties(settings, [field])
+        assert properties[uuid.uuid4()] is None
 
 
 class TestSettingsSerialization:
