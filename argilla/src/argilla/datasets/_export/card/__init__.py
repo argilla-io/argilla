@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla._exceptions._base import ArgillaError
+from argilla.datasets._export.card._dataset_card import ArgillaDatasetCard
+from argilla.datasets._export.card._parser import size_categories_parser
 
-
-class MetadataError(ArgillaError):
-    message: str = "Error defining dataset metadata settings"
+__all__ = ["ArgillaDatasetCard", "size_categories_parser"]

@@ -106,7 +106,7 @@ dataset.create()
     ```python
     dataset = client.datasets(name=dataset_name)
 
-    if dataset.exists():
+    if dataset is not None:
         dataset.delete()
     ```
 

@@ -1,64 +1,50 @@
 <template>
-  <span class="focus__container">
-    <div v-if="!records.hasRecordsToAnnotate">
-      <section class="wrapper__records">
-        <DatasetFilters :recordCriteria="recordCriteria" />
-      </section>
-
-      <div class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </div>
-    <VerticalResizable
-      v-else
-      :id="`${recordCriteria.datasetId}-r-v-rz`"
-      class="wrapper"
-    >
-      <template #left>
-        <HorizontalResizable
-          :id="`${recordCriteria.datasetId}-r-h-rz`"
-          class="wrapper__left"
-        >
-          <template #up>
-            <section class="wrapper__records">
-              <DatasetFilters :recordCriteria="recordCriteria">
-                <ToggleAnnotationType
-                  v-if="
-                    records.hasRecordsToAnnotate &&
-                    recordCriteria.committed.isPending
-                  "
-                  :recordCriteria="recordCriteria"
-              /></DatasetFilters>
-              <SimilarityRecordReference
-                v-show="recordCriteria.isFilteringBySimilarity"
-                v-if="!!records.reference"
-                :fields="records.reference.fields"
+  <VerticalResizable class="wrapper" :id="`${recordCriteria.datasetId}-r-v-rz`">
+    <template #left>
+      <HorizontalResizable
+        :id="`${recordCriteria.datasetId}-r-h-rz`"
+        class="wrapper__left"
+      >
+        <template #up>
+          <section class="wrapper__records">
+            <DatasetFilters :recordCriteria="recordCriteria">
+              <ToggleAnnotationType
+                v-if="
+                  records.hasRecordsToAnnotate &&
+                  recordCriteria.committed.isPending
+                "
                 :recordCriteria="recordCriteria"
-                :availableVectors="datasetVectors"
-              />
-              <div class="wrapper__records__header">
-                <PaginationFeedbackTask :recordCriteria="recordCriteria" />
-              </div>
-              <Record
-                v-if="records.hasRecordsToAnnotate"
-                :datasetVectors="datasetVectors"
-                :recordCriteria="recordCriteria"
-                :record="record"
-              />
-              <div v-else class="wrapper--empty">
-                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-              </div>
-            </section>
-          </template>
+            /></DatasetFilters>
+            <SimilarityRecordReference
+              v-show="recordCriteria.isFilteringBySimilarity"
+              v-if="!!records.reference"
+              :fields="records.reference.fields"
+              :recordCriteria="recordCriteria"
+              :availableVectors="datasetVectors"
+            />
+            <div class="wrapper__records__header">
+              <PaginationFeedbackTask :recordCriteria="recordCriteria" />
+            </div>
+            <Record
+              v-if="records.hasRecordsToAnnotate"
+              :datasetVectors="datasetVectors"
+              :recordCriteria="recordCriteria"
+              :record="record"
+            />
+            <div v-else class="wrapper--empty">
+              <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
+            </div>
+          </section>
+        </template>
 
-          <template #downHeader>
-            <p v-text="$t('guidelines')" />
-          </template>
-          <template #downContent>
-            <AnnotationGuidelines />
-          </template>
-        </HorizontalResizable>
-      </template>
+        <template #downHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #downContent>
+          <AnnotationGuidelines />
+        </template>
+      </HorizontalResizable>
+    </template>
 
       <template #right>
         <HorizontalResizable
@@ -109,6 +95,7 @@
     </VerticalResizable>
   </span>
 </template>
+
 <script>
 import { useFocusAnnotationViewModel } from "./useFocusAnnotationViewModel";
 export default {
@@ -164,14 +151,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.focus {
-  &__container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-  }
-}
 .wrapper {
   position: relative;
   display: flex;
