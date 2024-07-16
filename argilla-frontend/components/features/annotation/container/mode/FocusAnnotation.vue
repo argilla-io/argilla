@@ -46,54 +46,53 @@
       </HorizontalResizable>
     </template>
 
-      <template #right>
-        <HorizontalResizable
-          :id="`${recordCriteria.datasetId}-q-h-rz}`"
-          class="wrapper__right"
-        >
-          <template #up>
-            <QuestionsForm
-              v-if="!!record"
-              :key="`${record.id}_questions`"
-              class="wrapper__form"
-              :class="statusClass"
-              :datasetId="recordCriteria.datasetId"
-              :record="record"
-              :show-discard-button="!record.isDiscarded"
-              :is-draft-saving="isDraftSaving"
-              :is-submitting="isSubmitting"
-              :is-discarding="isDiscarding"
-              :enableAutoSubmitWithKeyboard="true"
-              @on-submit-responses="onSubmit"
-              @on-discard-responses="onDiscard"
-              @on-save-draft="onSaveDraft"
-            />
-          </template>
-          <template #downHeader>
-            <AnnotationProgress
-              class="annotation-progress"
-              :datasetId="recordCriteria.datasetId"
-            />
-          </template>
-          <template #downContent>
-            <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
-          </template>
-        </HorizontalResizable>
-      </template>
-      <BaseCollapsablePanel
-        hideOnDesktop
-        :isExpanded="expandedGuidelines"
-        @toggle-expand="expandedGuidelines = !expandedGuidelines"
+    <template #right>
+      <HorizontalResizable
+        :id="`${recordCriteria.datasetId}-q-h-rz}`"
+        class="wrapper__right"
       >
-        <template #panelHeader>
-          <p v-text="$t('guidelines')" />
+        <template #up>
+          <QuestionsForm
+            v-if="!!record"
+            :key="`${record.id}_questions`"
+            class="wrapper__form"
+            :class="statusClass"
+            :datasetId="recordCriteria.datasetId"
+            :record="record"
+            :show-discard-button="!record.isDiscarded"
+            :is-draft-saving="isDraftSaving"
+            :is-submitting="isSubmitting"
+            :is-discarding="isDiscarding"
+            :enableAutoSubmitWithKeyboard="true"
+            @on-submit-responses="onSubmit"
+            @on-discard-responses="onDiscard"
+            @on-save-draft="onSaveDraft"
+          />
         </template>
-        <template #panelContent>
-          <AnnotationGuidelines />
+        <template #downHeader>
+          <AnnotationProgress
+            class="annotation-progress"
+            :datasetId="recordCriteria.datasetId"
+          />
         </template>
-      </BaseCollapsablePanel>
-    </VerticalResizable>
-  </span>
+        <template #downContent>
+          <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
+        </template>
+      </HorizontalResizable>
+    </template>
+    <BaseCollapsablePanel
+      hideOnDesktop
+      :isExpanded="expandedGuidelines"
+      @toggle-expand="expandedGuidelines = !expandedGuidelines"
+    >
+      <template #panelHeader>
+        <p v-text="$t('guidelines')" />
+      </template>
+      <template #panelContent>
+        <AnnotationGuidelines />
+      </template>
+    </BaseCollapsablePanel>
+  </VerticalResizable>
 </template>
 
 <script>
