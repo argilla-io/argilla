@@ -15,7 +15,7 @@ import uuid
 
 import pytest
 
-from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion
+from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion, Workspace
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -92,3 +92,59 @@ class TestCreateDatasets:
         assert isinstance(schema["question"], RatingQuestion)
         assert schema["question"].name == "question"
         assert schema["question"].values == [1, 2, 3, 4, 5]
+
+    def test_copy_datasets_from_different_clients(self, client: Argilla):
+        dataset_name = f"test_dataset_{uuid.uuid4()}"
+        Dataset(
+            name=dataset_name,
+            settings=Settings(
+                fields=[TextField(name="text")],
+                questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
+            ),
+        ).create()
+
+        dataset = client.datasets(dataset_name)
+        assert dataset is not None
+
+        new_client = Argilla()
+        new_ws = Workspace("test_copy_workspace")
+        new_client.workspaces.add(new_ws)
+
+        new_dataset = Dataset(
+            name=dataset.name,
+            workspace=new_ws,
+            settings=dataset.settings,
+            client=new_client,
+        ).create()
+
+        assert new_dataset._client == new_client
+        assert dataset._client != new_dataset._client
+
+        assert dataset.settings != new_dataset.settings
+
+        assert isinstance(new_dataset.settings.fields["text"], TextField)
+        assert len(new_dataset.settings.questions) == 1
+        for question in new_dataset.settings.questions:
+            assert question.name == "question"
+
+    def test_create_a_dataset_copy(self, client: Argilla):
+        dataset_name = f"test_dataset{uuid.uuid4()}"
+        dataset = Dataset(
+            name=dataset_name,
+            settings=Settings(
+                fields=[TextField(name="text")],
+                questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
+            ),
+        ).create()
+
+        dataset.records.log([{"text": "This is a text"}])
+
+        new_dataset = Dataset(
+            name=f"{dataset_name}_copy",
+            settings=dataset.settings,
+        ).create()
+
+        records = list(dataset.records)
+        new_dataset.records.log(records)
+
+        assert len(list(dataset.records)) == len(list(new_dataset.records))
