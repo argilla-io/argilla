@@ -45,7 +45,34 @@ TAGGED_REVISIONS = OrderedDict(
 def set_sqlite_pragma(dbapi_connection, connection_record):
     if isinstance(dbapi_connection, AsyncAdapt_aiosqlite_connection):
         cursor = dbapi_connection.cursor()
+
+        # Enforce foreign key constraints
+        # https://www.sqlite.org/pragma.html#pragma_foreign_keys
+        # https://www.sqlite.org/foreignkeys.html
         cursor.execute("PRAGMA foreign_keys = ON")
+
+        # Journal mode WAL allows for greater concurrency (many readers + one writer)
+        # https://www.sqlite.org/pragma.html#pragma_journal_mode
+        cursor.execute("PRAGMA journal_mode = WAL")
+
+        # Set more relaxed level of database durability
+        # 2 = "FULL" (sync on every write), 1 = "NORMAL" (sync every 1000 written pages) and 0 = "NONE"
+        # https://www.sqlite.org/pragma.html#pragma_synchronous
+        cursor.execute("PRAGMA synchronous = NORMAL")
+
+        # Set the global memory map so all processes can share some data
+        # https://www.sqlite.org/pragma.html#pragma_mmap_size
+        # https://www.sqlite.org/mmap.html
+        cursor.execute("PRAGMA mmap_size = 134217728")  # 128 megabytes
+
+        # Impose a limit on the WAL file to prevent unlimited growth
+        # https://www.sqlite.org/pragma.html#pragma_journal_size_limit
+        cursor.execute("PRAGMA journal_size_limit = 67108864")  # 64 megabytes
+
+        # Set the local connection cache to 2000 pages
+        # https://www.sqlite.org/pragma.html#pragma_cache_size
+        cursor.execute("PRAGMA cache_size = 2000")
+
         cursor.close()
 
 
