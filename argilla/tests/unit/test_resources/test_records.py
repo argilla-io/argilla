@@ -34,6 +34,7 @@ class TestRecords:
         )
         assert (
             record.__repr__() == f"Record(id={record_id},"
+            "status=pending,"
             "fields={'name': 'John', 'age': '30'},"
             "metadata={'key': 'value'},"
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
@@ -65,6 +66,13 @@ class TestRecords:
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
         assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+
+    def test_prevent_update_record(self):
+        record = Record(fields={"name": "John"})
+        assert record.status == "pending"
+
+        with pytest.raises(AttributeError):
+            record.status = "completed"
 
     def test_add_record_response_for_the_same_question_and_user_id(self):
         response = Response(question_name="question", value="value", user_id=uuid.uuid4())

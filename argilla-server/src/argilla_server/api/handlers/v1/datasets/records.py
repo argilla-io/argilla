@@ -19,7 +19,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from typing_extensions import Annotated
 
 import argilla_server.search_engine as search_engine
 from argilla_server.api.policies.v1 import DatasetPolicy, RecordPolicy, authorize, is_authorized
@@ -27,8 +26,6 @@ from argilla_server.api.schemas.v1.records import (
     Filters,
     FilterScope,
     MetadataFilterScope,
-    MetadataParsedQueryParam,
-    MetadataQueryParams,
     Order,
     RangeFilter,
     RecordFilterScope,
@@ -49,19 +46,14 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
-from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
-from argilla_server.models import Dataset, Field, MetadataProperty, Record, User, VectorSettings
+from argilla_server.models import Dataset, Field, Record, User, VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
-    MetadataFilter,
     SearchEngine,
     SearchResponses,
-    SortBy,
-    TermsMetadataFilter,
     UserResponseStatusFilter,
     get_search_engine,
 )
@@ -74,25 +66,6 @@ LIST_DATASET_RECORDS_LIMIT_LE = 1000
 LIST_DATASET_RECORDS_DEFAULT_SORT_BY = {RecordSortField.inserted_at.value: "asc"}
 DELETE_DATASET_RECORDS_LIMIT = 100
 
-_RECORD_SORT_FIELD_VALUES = tuple(field.value for field in RecordSortField)
-_VALID_SORT_VALUES = tuple(sort.value for sort in SortOrder)
-_METADATA_PROPERTY_SORT_BY_REGEX = re.compile(r"^metadata\.(?P<name>(?=.*[a-z0-9])[a-z0-9_-]+)$")
-
-SortByQueryParamParsed = Annotated[
-    Dict[str, str],
-    Depends(
-        parse_query_param(
-            name="sort_by",
-            description=(
-                "The field used to sort the records. Expected format is `field` or `field:{asc,desc}`, where `field`"
-                " can be 'inserted_at', 'updated_at' or the name of a metadata property"
-            ),
-            max_values_per_key=1,
-            group_keys_without_values=False,
-        )
-    ),
-]
-
 parse_record_include_param = parse_query_param(
     name="include", help="Relationships to include in the response", model=RecordIncludeParam
 )
@@ -104,13 +77,10 @@ async def _filter_records_using_search_engine(
     db: "AsyncSession",
     search_engine: "SearchEngine",
     dataset: Dataset,
-    parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
     user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
     include: Optional[RecordIncludeParam] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> Tuple[List[Record], int]:
     search_responses = await _get_search_responses(
         db=db,
@@ -119,9 +89,6 @@ async def _filter_records_using_search_engine(
         limit=limit,
         offset=offset,
         user=user,
-        parsed_metadata=parsed_metadata,
-        response_statuses=response_statuses,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_ids = [response.record_id for response in search_responses.items]
@@ -180,13 +147,10 @@ async def _get_search_responses(
     db: "AsyncSession",
     search_engine: "SearchEngine",
     dataset: Dataset,
-    parsed_metadata: List[MetadataParsedQueryParam],
     limit: int,
     offset: int,
     search_records_query: Optional[SearchRecordsQuery] = None,
     user: Optional[User] = None,
-    response_statuses: Optional[List[ResponseStatusFilter]] = None,
-    sort_by_query_param: Optional[Dict[str, str]] = None,
 ) -> "SearchResponses":
     search_records_query = search_records_query or SearchRecordsQuery()
 
@@ -226,10 +190,6 @@ async def _get_search_responses(
     if text_query and text_query.field and not await Field.get_by(db, name=text_query.field, dataset_id=dataset.id):
         raise UnprocessableEntityError(f"Field `{text_query.field}` not found in dataset `{dataset.id}`.")
 
-    metadata_filters = await _build_metadata_filters(db, dataset, parsed_metadata)
-    response_status_filter = await _build_response_status_filter_for_search(response_statuses, user=user)
-    sort_by = await _build_sort_by(db, dataset, sort_by_query_param)
-
     if vector_query and vector_settings:
         similarity_search_params = {
             "dataset": dataset,
@@ -238,8 +198,6 @@ async def _get_search_responses(
             "record": record,
             "query": text_query,
             "order": vector_query.order,
-            "metadata_filters": metadata_filters,
-            "user_response_status_filter": response_status_filter,
             "max_results": limit,
         }
 
@@ -251,11 +209,8 @@ async def _get_search_responses(
         search_params = {
             "dataset": dataset,
             "query": text_query,
-            "metadata_filters": metadata_filters,
-            "user_response_status_filter": response_status_filter,
             "offset": offset,
             "limit": limit,
-            "sort_by": sort_by,
         }
 
         if user is not None:
@@ -267,32 +222,6 @@ async def _get_search_responses(
             search_params["sort"] = _to_search_engine_sort(sort, user=user)
 
         return await search_engine.search(**search_params)
-
-
-async def _build_metadata_filters(
-    db: "AsyncSession", dataset: Dataset, parsed_metadata: List[MetadataParsedQueryParam]
-) -> List["MetadataFilter"]:
-    try:
-        metadata_filters = []
-        for metadata_param in parsed_metadata:
-            metadata_property = await MetadataProperty.get_by(db, name=metadata_param.name, dataset_id=dataset.id)
-            if metadata_property is None:
-                continue  # won't fail on unknown metadata filter name
-
-            if metadata_property.type == MetadataPropertyType.terms:
-                metadata_filter_class = TermsMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.integer:
-                metadata_filter_class = IntegerMetadataFilter
-            elif metadata_property.type == MetadataPropertyType.float:
-                metadata_filter_class = FloatMetadataFilter
-            else:
-                raise ValueError(f"Not found filter for type {metadata_property.type}")
-
-            metadata_filters.append(metadata_filter_class.from_string(metadata_property, metadata_param.value))
-    except (UnprocessableEntityError, ValueError) as ex:
-        raise UnprocessableEntityError(f"Cannot parse provided metadata filters: {ex}")
-
-    return metadata_filters
 
 
 async def _build_response_status_filter_for_search(
@@ -307,86 +236,11 @@ async def _build_response_status_filter_for_search(
     return user_response_status_filter
 
 
-async def _build_sort_by(
-    db: "AsyncSession", dataset: Dataset, sort_by_query_param: Optional[Dict[str, str]] = None
-) -> Union[List[SortBy], None]:
-    if sort_by_query_param is None:
-        return None
-
-    sorts_by = []
-    for sort_field, sort_order in sort_by_query_param.items():
-        if sort_field in _RECORD_SORT_FIELD_VALUES:
-            field = sort_field
-        elif (match := _METADATA_PROPERTY_SORT_BY_REGEX.match(sort_field)) is not None:
-            metadata_property_name = match.group("name")
-            metadata_property = await MetadataProperty.get_by(db, name=metadata_property_name, dataset_id=dataset.id)
-            if not metadata_property:
-                raise UnprocessableEntityError(
-                    f"Provided metadata property in 'sort_by' query param '{metadata_property_name}' not found in "
-                    f"dataset with '{dataset.id}'."
-                )
-
-            field = metadata_property
-        else:
-            valid_sort_fields = ", ".join(f"'{sort_field}'" for sort_field in _RECORD_SORT_FIELD_VALUES)
-            raise UnprocessableEntityError(
-                f"Provided sort field in 'sort_by' query param '{sort_field}' is not valid. It must be either"
-                f" {valid_sort_fields} or `metadata.metadata-property-name`"
-            )
-
-        if sort_order is not None and sort_order not in _VALID_SORT_VALUES:
-            raise UnprocessableEntityError(
-                f"Provided sort order in 'sort_by' query param '{sort_order}' for field '{sort_field}' is not valid.",
-            )
-
-        sorts_by.append(SortBy(field=field, order=sort_order or SortOrder.asc.value))
-
-    return sorts_by
-
-
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset_id)
     except (ValueError, NotFoundError) as e:
         raise UnprocessableEntityError(str(e))
-
-
-@router.get("/me/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
-async def list_current_user_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
-    include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
-    offset: int = 0,
-    limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
-
-    await authorize(current_user, DatasetPolicy.get(dataset))
-
-    records, total = await _filter_records_using_search_engine(
-        db,
-        search_engine,
-        dataset=dataset,
-        parsed_metadata=metadata.metadata_parsed,
-        limit=limit,
-        offset=offset,
-        user=current_user,
-        response_statuses=response_statuses,
-        include=include,
-        sort_by_query_param=sort_by_query_param,
-    )
-
-    for record in records:
-        record.dataset = dataset
-        record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
-
-    return Records(items=records, total=total)
 
 
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
@@ -395,10 +249,7 @@ async def list_dataset_records(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -411,12 +262,9 @@ async def list_dataset_records(
         db,
         search_engine,
         dataset=dataset,
-        parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,
-        response_statuses=response_statuses,
         include=include,
-        sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
 
     return Records(items=records, total=total)
@@ -460,10 +308,7 @@ async def search_current_user_dataset_records(
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -486,12 +331,9 @@ async def search_current_user_dataset_records(
         search_engine=search_engine,
         dataset=dataset,
         search_records_query=body,
-        parsed_metadata=metadata.metadata_parsed,
         limit=limit,
         offset=offset,
         user=current_user,
-        response_statuses=response_statuses,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map: Dict[UUID, Dict[str, Union[float, SearchRecord, None]]] = {
@@ -534,10 +376,7 @@ async def search_dataset_records(
     search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     body: SearchRecordsQuery,
-    metadata: MetadataQueryParams = Depends(),
-    sort_by_query_param: SortByQueryParamParsed,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
-    response_statuses: List[ResponseStatusFilter] = Query([], alias="response_status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
@@ -555,9 +394,6 @@ async def search_dataset_records(
         search_records_query=body,
         limit=limit,
         offset=offset,
-        parsed_metadata=metadata.metadata_parsed,
-        response_statuses=response_statuses,
-        sort_by_query_param=sort_by_query_param,
     )
 
     record_id_score_map = {
