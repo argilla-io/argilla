@@ -102,8 +102,8 @@ def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
     mock_telemetry = mocker.Mock(TelemetryClient)
     mock_telemetry.server_id = uuid.uuid4()
 
-    telemetry._CLIENT = mock_telemetry
-    return telemetry._CLIENT
+    telemetry._TELEMETRY_CLIENT = mock_telemetry
+    return mock_telemetry
 
 
 @pytest_asyncio.fixture(scope="function")
