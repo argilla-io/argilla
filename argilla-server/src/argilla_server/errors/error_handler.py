@@ -41,9 +41,6 @@ class ErrorDetail(BaseModel):
     params: Dict[str, Any]
 
 
-telemetry_client: TelemetryClient = (Depends(get_telemetry_client),)
-
-
 # TODO(@frascuchon): Review class Naming
 class ServerHTTPException(HTTPException):
     def __init__(self, error: ServerError):
