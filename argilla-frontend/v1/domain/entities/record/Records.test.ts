@@ -1,8 +1,9 @@
+import { createBasicRecordCriteria } from "../__mocks__/criteria/mock";
 import { PageCriteria } from "../page/PageCriteria";
 import { SimilarityCriteria } from "../similarity/SimilarityCriteria";
 import { Record } from "./Record";
 import { RecordCriteria } from "./RecordCriteria";
-import { Records } from "./Records";
+import { EmptyQueueRecords, Records } from "./Records";
 
 describe("Records", () => {
   describe("records order", () => {
@@ -1111,6 +1112,33 @@ describe("Records", () => {
         ),
       ]);
       expect(records.total).toBe(200);
+    });
+  });
+});
+
+describe("EmptyQueueRecords", () => {
+  describe("hasRecordsToAnnotate", () => {
+    test("should be false always", () => {
+      const records = new EmptyQueueRecords(
+        createBasicRecordCriteria(),
+        20,
+        []
+      );
+
+      const hasRecordsToAnnotate = records.hasRecordsToAnnotate;
+
+      expect(hasRecordsToAnnotate).toBeFalsy();
+    });
+  });
+
+  describe("getRecordOn", () => {
+    test("always should return the record configured by record criteria", () => {
+      const recordCriteria = createBasicRecordCriteria();
+      const records = new EmptyQueueRecords(recordCriteria, 20, []);
+
+      const hasRecordsToAnnotate = records.getRecordOn(recordCriteria.page);
+
+      expect(hasRecordsToAnnotate).toBeTruthy();
     });
   });
 });

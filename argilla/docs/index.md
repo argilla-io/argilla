@@ -26,11 +26,11 @@ Argilla is a **collaboration platform for AI engineers and domain experts** that
 
     [:octicons-arrow-right-24: Quickstart](getting_started/quickstart.md)
 
--  __Educational guides__
+-  __How-to guides__
 
     ---
 
-    Get familiar with basic and complex workflows for Argilla. From managing `Users`, `Workspaces`. `Datasets` and `Records` to fine-tuning a model.
+    Get familiar with basic and complex workflows for Argilla. Learn how to managing `Users`, `Workspaces`, `Datasets`, and `Records` to set up your data annotation projects.
 
     [:octicons-arrow-right-24: Learn more](how_to_guides/index.md)
 
