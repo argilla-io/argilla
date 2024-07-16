@@ -1119,11 +1119,7 @@ describe("Records", () => {
 describe("EmptyQueueRecords", () => {
   describe("hasRecordsToAnnotate", () => {
     test("should be false always", () => {
-      const records = new EmptyQueueRecords(
-        createBasicRecordCriteria(),
-        20,
-        []
-      );
+      const records = new EmptyQueueRecords(createBasicRecordCriteria(), []);
 
       const hasRecordsToAnnotate = records.hasRecordsToAnnotate;
 
@@ -1134,7 +1130,7 @@ describe("EmptyQueueRecords", () => {
   describe("getRecordOn", () => {
     test("always should return the record configured by record criteria", () => {
       const recordCriteria = createBasicRecordCriteria();
-      const records = new EmptyQueueRecords(recordCriteria, 20, []);
+      const records = new EmptyQueueRecords(recordCriteria, []);
 
       const hasRecordsToAnnotate = records.getRecordOn(recordCriteria.page);
 
