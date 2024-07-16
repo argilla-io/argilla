@@ -20,7 +20,7 @@ pip install argilla --pre
 
 If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:
 
-* Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
+* Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space). Check out the [full guide](huggingface-spaces.md) for a more detailed configuration.
 
 !!! note
     As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc2`.
@@ -30,6 +30,8 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 ```console
 docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
 ```
+
+!!! tip "Default user credentials to log into the UI" This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
 
 ### Connect to the Argilla server
 
