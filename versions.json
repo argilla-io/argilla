@@ -45,6 +45,14 @@
     }
   },
   {
+    "version": "docs_improve_quickstart",
+    "title": "docs_improve_quickstart",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_improve_index",
     "title": "docs_improve_index",
     "aliases": [],
