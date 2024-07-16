@@ -53,7 +53,7 @@ class TelemetryClient:
     def server_id(self) -> uuid.UUID:
         return self._server_id
 
-    def __post_init__(self):
+    def __post_init__(self, enable_telemetry: bool):
         self._server_id = uuid.UUID(int=uuid.getnode())
         self._system_info = {
             "server_id": self._server_id,
@@ -69,6 +69,7 @@ class TelemetryClient:
         _LOGGER.info("System Info:")
         _LOGGER.info(f"Server id: {self.server_id}")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
+        self.enable_telemetry = enable_telemetry
 
     @staticmethod
     def _process_request_info(request: Request):
