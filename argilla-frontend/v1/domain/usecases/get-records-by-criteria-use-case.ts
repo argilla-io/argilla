@@ -39,7 +39,6 @@ export class GetRecordsByCriteriaUseCase {
     if (recordsFromBackend.records.length === 0) {
       return new EmptyQueueRecords(
         criteria,
-        recordsFromBackend.total,
         questionsFromBackend.map((question) => {
           return new Question(
             question.id,

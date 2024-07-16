@@ -132,11 +132,7 @@ export class RecordsWithReference extends Records {
 }
 
 export class EmptyQueueRecords extends Records {
-  constructor(
-    criteria: RecordCriteria,
-    total: number,
-    questions: Question[] = []
-  ) {
+  constructor(criteria: RecordCriteria, questions: Question[] = []) {
     const nullRecord = new Record(
       undefined,
       criteria.datasetId,
@@ -151,6 +147,6 @@ export class EmptyQueueRecords extends Records {
       null
     );
 
-    super([nullRecord], total, false);
+    super([nullRecord], -1, false);
   }
 }
