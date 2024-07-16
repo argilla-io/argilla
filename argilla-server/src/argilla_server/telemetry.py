@@ -130,6 +130,9 @@ class TelemetryClient:
         }
 
     def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
+        if not self.enable_telemetry:
+            return
+
         library_name = "argilla"
         topic = f"{library_name}/{topic}"
 
