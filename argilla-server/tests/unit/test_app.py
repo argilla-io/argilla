@@ -49,3 +49,10 @@ class TestApp:
 
         assert len(app.routes) == 1
         assert cast(Mount, app.routes[0]).path == base_url
+
+    def test_server_timing_header(self):
+        client = TestClient(create_server_app())
+
+        response = client.get("/api/v1/version")
+
+        assert response.headers["Server-Timing"]
