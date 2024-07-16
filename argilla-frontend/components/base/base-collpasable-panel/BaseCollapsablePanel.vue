@@ -7,13 +7,16 @@
     ]"
   >
     <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
-      <slot name="panelHeader" />
-      <svgicon
-        class="panel__header__icon"
-        :name="isExpanded ? 'chevron-down' : 'chevron-right'"
-        width="12"
-        height="12"
-      />
+      <div class="panel__header__container">
+        <slot v-if="!isExpanded" name="panelHeader" />
+        <div style="width: 100%" v-else />
+        <svgicon
+          class="panel__header__icon"
+          :name="isExpanded ? 'chevron-down' : 'chevron-right'"
+          width="12"
+          height="12"
+        />
+      </div>
     </BaseButton>
 
     <div class="panel__content" v-if="isExpanded">
@@ -53,6 +56,14 @@ export default {
   border-top: 1px solid $black-10;
 
   &__header {
+    &__container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: $base-space;
+    }
+
     width: 100%;
     display: flex;
     justify-content: space-between;

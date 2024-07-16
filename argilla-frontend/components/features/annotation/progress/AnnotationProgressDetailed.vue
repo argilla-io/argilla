@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div v-if="datasetMetrics.hasMetrics">
+  <div v-if="metrics.hasMetrics">
     <ul class="my-progress__list">
       <li
         v-for="(status, index) in progressItems"
@@ -30,26 +30,17 @@
           ></span>
           <label class="my-progress__list__name" v-text="status.name" />
         </span>
-        <span
-          class="my-progress__list__counter"
-          v-text="`${getFormattedProgress(status.value)}`"
-        />
+        <span class="my-progress__list__counter" v-text="status.value" />
       </li>
     </ul>
     <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
-    <BarProgress
-      class="team-progress"
-      :loading="false"
-      :progress-ranges="progressRanges"
-      :progress-completed="datasetMetrics.submitted + datasetMetrics.discarded"
-      :total="datasetMetrics.total"
-    />
+    <TeamProgress :datasetId="datasetId" />
   </div>
 </template>
 
 <script>
 import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
-import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
+import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
 
 export default {
   props: {
@@ -68,53 +59,32 @@ export default {
         {
           name: RecordStatus.submitted.name,
           color: RecordStatus.submitted.color,
-          value: this.datasetMetrics.submitted,
-          percent: this.datasetMetrics.percentage.submitted,
+          value: this.metrics.submitted,
+          percent: this.metrics.percentage.submitted,
         },
         {
           name: RecordStatus.draft.name,
           color: RecordStatus.draft.color,
-          value: this.datasetMetrics.draft,
-          percent: this.datasetMetrics.percentage.draft,
+          value: this.metrics.draft,
+          percent: this.metrics.percentage.draft,
         },
         {
           name: RecordStatus.discarded.name,
           color: RecordStatus.discarded.color,
-          value: this.datasetMetrics.discarded,
-          percent: this.datasetMetrics.percentage.discarded,
+          value: this.metrics.discarded,
+          percent: this.metrics.percentage.discarded,
         },
         {
           name: RecordStatus.pending.name,
           color: RecordStatus.pending.color,
-          value: this.datasetMetrics.pending,
-          percent: this.datasetMetrics.percentage.pending,
+          value: this.metrics.pending,
+          percent: this.metrics.percentage.pending,
         },
       ];
-    },
-    progressRanges() {
-      return [
-        {
-          id: "completed",
-          name: "completed",
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.datasetMetrics.submitted + this.datasetMetrics.discarded,
-        },
-        {
-          id: "pending",
-          name: "progress",
-          color: "linear-gradient(white)",
-          value: this.datasetMetrics.pending + this.datasetMetrics.draft,
-        },
-      ];
-    },
-  },
-  methods: {
-    getFormattedProgress(progress) {
-      return progress && this.$options.filters.formatNumber(progress);
     },
   },
   setup(props) {
-    return useFeedbackTaskProgressViewModel(props);
+    return useAnnotationProgressViewModel(props);
   },
 };
 </script>

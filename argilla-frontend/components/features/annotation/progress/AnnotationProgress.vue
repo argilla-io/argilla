@@ -16,17 +16,25 @@
   -->
 
 <template>
-  <BarProgress
-    v-if="datasetMetrics.hasMetrics"
-    :loading="false"
-    :progress-ranges="progressRanges"
-    :progress-completed="datasetMetrics.submitted + datasetMetrics.discarded"
-    :total="datasetMetrics.total"
-  />
+  <div class="my-progress__container">
+    <TeamProgress class="my-progress__bar" :datasetId="datasetId" />
+
+    <li class="my-progress__item">
+      <span>
+        <span
+          class="color-bullet"
+          :style="{ backgroundColor: RecordStatus.submitted.color }"
+        ></span>
+        <label class="my-progress__name" v-text="RecordStatus.submitted.name" />
+      </span>
+      <span class="my-progress__counter" v-text="metrics.submitted" />
+    </li>
+  </div>
 </template>
 
 <script>
-import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
+import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
+import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
 
 export default {
   props: {
@@ -34,31 +42,55 @@ export default {
       type: String,
       required: true,
     },
-    enableFetch: {
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
-    progressRanges() {
-      return [
-        {
-          id: "completed",
-          name: "completed",
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.datasetMetrics.submitted + this.datasetMetrics.discarded,
-        },
-        {
-          id: "pending",
-          name: "progress",
-          color: "linear-gradient(white)",
-          value: this.datasetMetrics.pending + this.datasetMetrics.draft,
-        },
-      ];
+    RecordStatus() {
+      return RecordStatus;
     },
   },
   setup(props) {
-    return useFeedbackTaskProgressViewModel(props);
+    return useAnnotationProgressViewModel(props);
   },
 };
 </script>
+
+<style lang="scss" scoped>
+$bullet-size: 8px;
+.color-bullet {
+  display: inline-flex;
+  height: $bullet-size;
+  width: $bullet-size;
+  margin-right: 4px;
+  border-radius: $border-radius-rounded;
+}
+
+.my-progress {
+  &__container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  &__bar {
+    width: 280px;
+  }
+  &__item {
+    background: palette(grey, 700);
+    display: flex;
+    flex-direction: row;
+    gap: $base-space;
+    padding: $base-space;
+    width: auto;
+    border-radius: $border-radius;
+  }
+  &__name {
+    text-transform: capitalize;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  &__counter {
+    font-weight: 600;
+    color: $black-87;
+    @include font-size(14px);
+  }
+}
+</style>
