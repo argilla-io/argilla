@@ -30,7 +30,6 @@ from argilla.settings._vector import VectorField
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-
 __all__ = ["Settings"]
 
 
@@ -241,7 +240,27 @@ class Settings(Resource):
 
         with open(path, "r") as file:
             settings_dict = json.load(file)
+            return cls._from_dict(settings_dict)
 
+    def __eq__(self, other: "Settings") -> bool:
+        return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
+
+    #####################
+    #  Repr Methods     #
+    #####################
+
+    def __repr__(self) -> str:
+        return (
+            f"Settings(guidelines={self.guidelines}, allow_extra_metadata={self.allow_extra_metadata}, "
+            f"fields={self.fields}, questions={self.questions}, vectors={self.vectors}, metadata={self.metadata})"
+        )
+
+    #####################
+    #  Private methods  #
+    #####################
+
+    @classmethod
+    def _from_dict(cls, settings_dict: dict) -> "Settings":
         fields = settings_dict.get("fields", [])
         vectors = settings_dict.get("vectors", [])
         metadata = settings_dict.get("metadata", [])
@@ -262,22 +281,9 @@ class Settings(Resource):
             allow_extra_metadata=allow_extra_metadata,
         )
 
-    def __eq__(self, other: "Settings") -> bool:
-        return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
-
-    #####################
-    #  Repr Methods     #
-    #####################
-
-    def __repr__(self) -> str:
-        return (
-            f"Settings(guidelines={self.guidelines}, allow_extra_metadata={self.allow_extra_metadata}, "
-            f"fields={self.fields}, questions={self.questions}, vectors={self.vectors}, metadata={self.metadata})"
-        )
-
-    #####################
-    #  Private methods  #
-    #####################
+    def _copy(self) -> "Settings":
+        instance = self.__class__._from_dict(self.serialize())
+        return instance
 
     def _fetch_fields(self) -> List[TextField]:
         models = self._client.api.fields.list(dataset_id=self._dataset.id)
