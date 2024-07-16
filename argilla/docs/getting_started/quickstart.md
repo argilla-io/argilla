@@ -31,7 +31,9 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
 ```
 
-!!! tip "Default user credentials to log into the UI" This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
+!!! tip "Default user credentials to log into the UI" 
+
+    This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
 
 ### Connect to the Argilla server
 
