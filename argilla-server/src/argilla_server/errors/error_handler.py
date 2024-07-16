@@ -18,7 +18,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 
-from argilla_server import telemetry
 from argilla_server.errors.base_errors import (
     BadRequestError,
     ClosedDatasetError,
@@ -34,6 +33,7 @@ from argilla_server.errors.base_errors import (
     WrongTaskError,
 )
 from argilla_server.pydantic_v1 import BaseModel
+from argilla_server.telemetry import get_telemetry_client
 
 
 class ErrorDetail(BaseModel):
@@ -53,15 +53,15 @@ class ServerHTTPException(HTTPException):
 class APIErrorHandler:
     @classmethod
     async def track_error(cls, error: ServerError, request: Request):
-        data = {
+        user_agent = {
             "code": error.code,
             "user-agent": request.headers.get("user-agent"),
             "accept-language": request.headers.get("accept-language"),
         }
         if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
-            data["type"] = error.type
+            user_agent["type"] = error.type
 
-        telemetry.get_telemetry_client().track_data(topic="error/server", user_agent=data)
+        await get_telemetry_client().track_data(topic="error/server", user_agent=user_agent)
 
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):

@@ -51,10 +51,9 @@ async def create_current_user_responses_bulk(
 ):
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
 
-    for response in responses_bulk_items:
-        telemetry_client.track_crud_records_subtopic(
-            topic="create", sub_topic="responses", record_id=response.record_id
-        )
+    await telemetry_client.track_crud_records_subtopic(
+        action="create", sub_topic="responses", record_id=None, count=len(responses_bulk_items)
+    )
 
     return ResponsesBulk(items=responses_bulk_items)
 
@@ -79,7 +78,9 @@ async def update_response(
 
     response = await datasets.update_response(db, search_engine, response, response_update)
 
-    telemetry_client.track_crud_records_subtopic(topic="update", sub_topic="responses", record_id=response.record_id)
+    await telemetry_client.track_crud_records_subtopic(
+        action="update", sub_topic="responses", record_id=response.record_id
+    )
 
     return response
 
@@ -103,6 +104,8 @@ async def delete_response(
 
     response = await datasets.delete_response(db, search_engine, response)
 
-    telemetry_client.track_crud_records_subtopic(topic="delete", sub_topic="responses", record_id=response.record_id)
+    await telemetry_client.track_crud_records_subtopic(
+        action="delete", sub_topic="responses", record_id=response.record_id
+    )
 
     return response

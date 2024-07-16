@@ -50,7 +50,7 @@ async def update_vector_settings(
     vectors_setting = await datasets.update_vector_settings(db, vector_settings, vector_settings_update)
 
     await telemetry_client.track_crud_dataset_setting(
-        action="update", setting_name="vectors_settings", dataset=VectorSettings.dataset, setting=vectors_setting
+        action="update", setting_name="vectors_settings", dataset=vectors_setting.dataset, setting=vectors_setting
     )
 
     return vector_settings
@@ -75,7 +75,7 @@ async def delete_vector_settings(
     vectors_setting = await datasets.delete_vector_settings(db, vector_settings)
 
     await telemetry_client.track_crud_dataset_setting(
-        action="delete", setting_name="vectors_settings", dataset=VectorSettings.dataset, setting=vectors_setting
+        action="delete", setting_name="vectors_settings", dataset=vectors_setting.dataset, setting=vectors_setting
     )
 
     return vectors_setting

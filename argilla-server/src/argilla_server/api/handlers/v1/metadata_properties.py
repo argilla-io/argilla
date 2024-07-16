@@ -75,7 +75,10 @@ async def update_metadata_property(
     metadata_property = await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
 
     await telemetry_client.track_crud_dataset_setting(
-        action="update", setting_name="metadata_properties", dataset=MetadataProperty.dataset, setting=metadata_property
+        action="update",
+        setting_name="metadata_properties",
+        dataset=metadata_property.dataset,
+        setting=metadata_property,
     )
 
     return metadata_property
@@ -100,7 +103,10 @@ async def delete_metadata_property(
     metadata_property = await datasets.delete_metadata_property(db, metadata_property)
 
     await telemetry_client.track_crud_dataset_setting(
-        action="delete", setting_name="metadata_properties", dataset=MetadataProperty.dataset, setting=metadata_property
+        action="delete",
+        setting_name="metadata_properties",
+        dataset=metadata_property.dataset,
+        setting=metadata_property,
     )
 
     return metadata_property

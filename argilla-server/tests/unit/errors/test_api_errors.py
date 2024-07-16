@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from unittest.mock import MagicMock
+
 import pytest
 from argilla_server.api.schemas.v1.datasets import Dataset
 from argilla_server.errors.base_errors import (
@@ -69,7 +71,15 @@ class TestAPIErrorHandler:
             ),
         ],
     )
-    async def test_track_error(self, test_telemetry, error, expected_event):
+    async def test_track_error(self, test_telemetry: MagicMock, error, expected_event):
         await APIErrorHandler.track_error(error, request=mock_request)
 
-        test_telemetry.track_data.assert_called_once_with(action="ServerErrorFound", data=expected_event)
+        user_agent = {
+            "code": error.code,
+            "user-agent": mock_request.headers.get("user-agent"),
+            "accept-language": mock_request.headers.get("accept-language"),
+        }
+        if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
+            user_agent["type"] = error.type
+
+        test_telemetry.track_data.assert_called_once_with(topic="error/server", user_agent=user_agent)

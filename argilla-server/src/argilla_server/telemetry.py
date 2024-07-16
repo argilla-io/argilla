@@ -27,9 +27,12 @@ from argilla_server.constants import DEFAULT_USERNAME
 from argilla_server.models import (
     Dataset,
     Field,
+    FloatMetadataPropertySettings,
+    IntegerMetadataPropertySettings,
     MetadataPropertySettings,
     Question,
     Record,
+    TermsMetadataPropertySettings,
     User,
     VectorSettings,
     Workspace,
@@ -54,9 +57,9 @@ class TelemetryClient:
         return self._server_id
 
     def __post_init__(self, enable_telemetry: bool):
-        self._server_id = str(uuid.UUID(int=uuid.getnode()))
+        self._server_id = uuid.UUID(int=uuid.getnode())
         self._system_info = {
-            "server_id": self._server_id,
+            "server_id": str(self._server_id),
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
@@ -108,12 +111,23 @@ class TelemetryClient:
         }
 
     @staticmethod
-    def _process_dataset_setting_settings(setting: Union[Field, VectorSettings, Question, MetadataPropertySettings]):
+    def _process_dataset_setting_settings(
+        setting: Union[
+            Field,
+            VectorSettings,
+            Question,
+            FloatMetadataPropertySettings,
+            TermsMetadataPropertySettings,
+            IntegerMetadataPropertySettings,
+        ],
+    ):
         user_data = {"dataset_id": str(setting.dataset_id)}
         if isinstance(setting, (Field, Question)):
             user_data["required"] = setting.required
             user_data.update(setting.settings)
-        elif isinstance(setting, MetadataPropertySettings):
+        elif isinstance(
+            setting, (FloatMetadataPropertySettings, TermsMetadataPropertySettings, IntegerMetadataPropertySettings)
+        ):
             user_data["type"] = setting.type
         elif isinstance(setting, VectorSettings):
             user_data["dimensions"] = setting.dimensions
@@ -129,7 +143,7 @@ class TelemetryClient:
             "user_hash": str(uuid.uuid5(namespace=_TELEMETRY_CLIENT.server_id, name=user.username)),
         }
 
-    def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
+    async def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
         if not self.enable_telemetry:
             return
 
@@ -147,7 +161,7 @@ class TelemetryClient:
         topic = "user/login"
         user_agent = self._process_user_model(user=user)
         user_agent.update(**self._process_request_info(request))
-        self.track_data(topic=topic, user_agent=user_agent)
+        await self.track_data(topic=topic, user_agent=user_agent)
 
     async def track_crud_user(
         self,
@@ -157,59 +171,75 @@ class TelemetryClient:
         count: Union[int, None] = None,
     ):
         topic = f"user/{action}"
+        user_agent = {}
         if user:
-            user_agent = self._process_user_model(user=user)
+            user_agent.update(self._process_user_model(user=user))
         if is_oauth is not None:
             user_agent["is_oauth"] = is_oauth
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_workspace(
         self, action: str, workspace: Union[Workspace, None] = None, count: Union[int, None] = None
     ):
         topic: str = f"workspace/{action}"
+        user_agent = {}
         if workspace:
-            user_agent = self._process_workspace_model(workspace=workspace)
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+            user_agent.update(self._process_workspace_model(workspace=workspace))
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_dataset(
         self, action: str, dataset: Union[Dataset, None] = None, count: Union[int, None] = None
     ):
         topic = f"dataset/{action}"
+        user_agent = {}
         if dataset:
-            user_agent = self._process_dataset_model(dataset=dataset)
+            user_agent.update(self._process_dataset_model(dataset=dataset))
             user_agent.update(self._process_dataset_settings(dataset=dataset))
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
-        for field in dataset.fields:
-            self.track_crud_dataset_setting(action=action, setting_name="fields", dataset=dataset, setting=field)
-        for question in dataset.questions:
-            self.track_crud_dataset_setting(action=action, setting_name="questions", dataset=dataset, setting=question)
-        for vector in dataset.vectors_settings:
-            self.track_crud_dataset_setting(
-                action=action, setting_name="vectors_settings", dataset=dataset, setting=vector
-            )
-        for meta_data in dataset.metadata_properties:
-            self.track_crud_dataset_setting(
-                action=action, setting_name="metadata_properties", dataset=dataset, setting=meta_data
-            )
+        if dataset:
+            for field in dataset.fields:
+                self.track_crud_dataset_setting(action=action, setting_name="fields", dataset=dataset, setting=field)
+            for question in dataset.questions:
+                self.track_crud_dataset_setting(
+                    action=action, setting_name="questions", dataset=dataset, setting=question
+                )
+            for vector in dataset.vectors_settings:
+                self.track_crud_dataset_setting(
+                    action=action, setting_name="vectors_settings", dataset=dataset, setting=vector
+                )
+            for meta_data in dataset.metadata_properties:
+                self.track_crud_dataset_setting(
+                    action=action, setting_name="metadata_properties", dataset=dataset, setting=meta_data
+                )
 
     async def track_crud_dataset_setting(
         self,
         action: str,
         setting_name: str,
         dataset: Dataset,
-        setting: Union[Field, VectorSettings, Question, MetadataPropertySettings],
+        setting: Union[Field, VectorSettings, Question, MetadataPropertySettings, None] = None,
         count: Union[int, None] = None,
     ):
-        topic = f"dataset/{setting_name}/{setting.settings.type}/{action}"
+        topic = f"dataset/{setting_name}"
+        if setting:
+            if hasattr(setting, "settings"):
+                topic = f"{topic}/{setting.settings['type']}"
+        topic = f"{topic}/{action}"
         user_agent = self._process_dataset_model(dataset=dataset)
-        user_agent.update(self._process_dataset_setting_settings(setting=setting))
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+        if setting:
+            user_agent.update(self._process_dataset_setting_settings(setting=setting))
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
-    async def track_crud_records(self, action: str, record: Union[Record, None] = None, count: Union[int, None] = None):
+    async def track_crud_records(
+        self, action: str, record_or_dataset: Union[Record, None] = None, count: Union[int, None] = None
+    ):
         topic = f"dataset/records/{action}"
-        user_agent = self._process_record_model(record=record)
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+        if isinstance(record_or_dataset, Record):
+            user_agent = self._process_record_model(record=record_or_dataset)
+        else:
+            user_agent = self._process_dataset_model(dataset=record_or_dataset)
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_records_subtopic(
         self,
@@ -220,11 +250,11 @@ class TelemetryClient:
     ):
         topic = f"dataset/records/{sub_topic}/{action}"
         user_agent = {"record_id": record_id}
-        self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+
+
+_TELEMETRY_CLIENT = TelemetryClient()
 
 
 def get_telemetry_client() -> TelemetryClient:
     return _TELEMETRY_CLIENT
-
-
-_TELEMETRY_CLIENT = TelemetryClient()

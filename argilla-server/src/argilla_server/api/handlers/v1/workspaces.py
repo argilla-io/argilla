@@ -50,7 +50,7 @@ async def get_workspace(
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    telemetry_client.track_crud_workspace(action="read", workspace=workspace)
+    await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
 
     return workspace
 
@@ -67,7 +67,7 @@ async def create_workspace(
 
     workspace = await accounts.create_workspace(db, workspace_create.dict())
 
-    telemetry_client.track_crud_workspace(action="create", workspace=workspace)
+    await telemetry_client.track_crud_workspace(action="create", workspace=workspace)
 
     return workspace
 
@@ -86,7 +86,7 @@ async def delete_workspace(
 
     workspace = await accounts.delete_workspace(db, workspace)
 
-    telemetry_client.track_crud_workspace(action="delete", workspace=workspace)
+    await telemetry_client.track_crud_workspace(action="delete", workspace=workspace)
 
     return workspace
 
