@@ -17,9 +17,11 @@ from abc import abstractmethod
 from collections.abc import Sequence
 from functools import cached_property
 from typing import TYPE_CHECKING, overload, List, Optional, Union
+from uuid import UUID
 
 from argilla import _api
 from argilla._api._client import DEFAULT_HTTP_CONFIG
+from argilla._exceptions import ArgillaError
 from argilla._helpers import GenericIterator
 from argilla._helpers._resource_repr import ResourceHTMLReprMixin
 from argilla._models import UserModel, WorkspaceModel, DatasetModel
@@ -110,13 +112,29 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.users
 
-    def __call__(self, username: str) -> "User":
-        from argilla.users import User
+    @overload
+    def __call__(self, username: str) -> Optional["User"]: ...
+
+    @overload
+    def __call__(self, id: Union[UUID, str]) -> "User": ...
+
+    def __call__(self, username: str = None, id: Union[str, UUID] = None) -> Optional["User"]:
+        if not (username or id):
+            raise ArgillaError("One of 'username' or 'id' must be provided")
+
+        if username and id:
+            warnings.warn("Only one of 'username' or 'id' must be provided. Using 'id'")
+            username = None
+
+        if id is not None:
+            if not isinstance(id, UUID):
+                id = UUID(id)
+            return self._from_model(self._api.get(id))
 
         user_models = self._api.list()
         for model in user_models:
             if model.username == username:
-                return User(_model=model, client=self._client)
+                return self._from_model(model)
 
         warnings.warn(f"User with username {username!r} not found.")
 
@@ -188,9 +206,26 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.workspaces
 
-    def __call__(self, name: str) -> Optional["Workspace"]:
-        workspace_models = self._api.list()
+    @overload
+    def __call__(self, name: str) -> Optional["Workspace"]: ...
 
+    @overload
+    def __call__(self, id: Union[UUID, str]) -> "Workspace": ...
+
+    def __call__(self, name: str = None, id: Union[UUID, str] = None) -> Optional["Workspace"]:
+        if not (name or id):
+            raise ArgillaError("One of 'name' or 'id' must be provided")
+
+        if name and id:
+            warnings.warn("Only one of 'name' or 'id' must be provided. Using 'id'")
+            name = None
+
+        if id is not None:
+            if not isinstance(id, UUID):
+                id = UUID(id)
+            return self._from_model(self._api.get(id))
+
+        workspace_models = self._api.list()
         for model in workspace_models:
             if model.name == name:
                 return self._from_model(model)
@@ -260,11 +295,30 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.datasets
 
-    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]:
+    @overload
+    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]: ...
+
+    @overload
+    def __call__(self, id: Union[UUID, str]) -> "Dataset": ...
+
+    def __call__(
+        self, name: str = None, workspace: Optional[Union["Workspace", str]] = None, id: Union[UUID, str] = None
+    ) -> Optional["Dataset"]:
+        if not (name or id):
+            raise ArgillaError("One of 'name' or 'id' must be provided")
+
+        if name and id:
+            warnings.warn("Only one of 'name' or 'id' must be provided. Using 'id'")
+            name = None
+
+        if id is not None:
+            if not isinstance(id, UUID):
+                id = UUID(id)
+            return self._from_model(self._api.get(id))
+
+        workspace = workspace or self._client.workspaces.default
         if isinstance(workspace, str):
             workspace = self._client.workspaces(workspace)
-        elif workspace is None:
-            workspace = self._client.workspaces.default
 
         for dataset in workspace.datasets:
             if dataset.name == name:
