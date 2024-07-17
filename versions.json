@@ -117,6 +117,14 @@
     }
   },
   {
+    "version": "docs_add-telemetry-info-to-reference",
+    "title": "docs_add-telemetry-info-to-reference",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
