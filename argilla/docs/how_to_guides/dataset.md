@@ -495,7 +495,7 @@ Once a dataset is published, there are limited things you can update. Here is a 
     | From SDK | From UI |
     | ----- | -------------- |
     |✅|✅|
-    
+
 === "Distribution"
     | Attributes | From SDK | From UI |
     | ---- | ----- | -------------- |
@@ -503,7 +503,7 @@ Once a dataset is published, there are limited things you can update. Here is a 
 
     > \* Can be changed as long as the dataset doesn't have any responses.
 
-To modify these attributes, you can simply modify the values of the attributes you wish to change and call the `update` method on the `Dataset` object. 
+To modify these attributes, you can simply modify the values of the attributes you wish to change and call the `update` method on the `Dataset` object.
 
 ```python
 dataset = client.datasets("my_dataset")
