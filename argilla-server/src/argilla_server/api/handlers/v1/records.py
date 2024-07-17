@@ -196,7 +196,7 @@ async def upsert_suggestion(
 
     suggestion = await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
-    await telemetry_client.track_crud_records_subtopic(action="update", sub_topic="suggestions", record_id=record_id)
+    await telemetry_client.track_crud_records_subtopic(action="create", sub_topic="suggestions", record_id=record_id)
 
     return suggestion
 

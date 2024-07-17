@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import List, Optional, Tuple, Type, Union
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -55,7 +56,9 @@ from tests.factories import (
 @pytest.mark.asyncio
 class TestSuiteListDatasetRecords:
     @pytest.mark.skip(reason="Factory integration with search engine")
-    async def test_list_dataset_records(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_records(
+        self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
         record_b = await RecordFactory.create(
@@ -98,6 +101,9 @@ class TestSuiteListDatasetRecords:
                 },
             ],
         }
+        test_telemetry.track_crud_records.assert_called_with(
+            action="list", record_or_dataset=field.dataset, count=response.json()["total"]
+        )
 
     @pytest.mark.parametrize(
         "includes",

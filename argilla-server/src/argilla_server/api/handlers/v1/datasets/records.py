@@ -524,7 +524,7 @@ async def delete_dataset_records(
 
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
-    await telemetry_client.track_crud_dataset(action="delete", dataset=dataset, count=len(record_ids))
+    await telemetry_client.track_crud_records(action="delete", record_or_dataset=dataset, count=num_records)
 
 
 @router.post(

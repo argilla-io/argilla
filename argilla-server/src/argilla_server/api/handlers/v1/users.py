@@ -129,8 +129,8 @@ async def list_user_workspaces(
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
 
-    await telemetry_client.track_crud_workspace(action="list", workspace=None, count=len(workspaces))
     for workspace in workspaces:
         await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
+    await telemetry_client.track_crud_workspace(action="list", workspace=None, count=len(workspaces))
 
     return Workspaces(items=workspaces)

@@ -14,6 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Type
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -71,6 +72,7 @@ class TestSuiteResponses:
         mock_search_engine: SearchEngine,
         owner_auth_header: dict,
         response_json: dict,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
@@ -106,6 +108,9 @@ class TestSuiteResponses:
         assert dataset.updated_at == dataset_previous_updated_at
 
         mock_search_engine.update_record_response.assert_called_once_with(response)
+        test_telemetry.track_crud_records_subtopic.assert_called_with(
+            action="update", sub_topic="responses", record_id=record.id
+        )
 
     async def test_update_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         response = await ResponseFactory.create(
@@ -408,7 +413,12 @@ class TestSuiteResponses:
         }
 
     async def test_delete_response(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        test_telemetry: MagicMock,
     ):
         response = await ResponseFactory.create()
         dataset = response.record.dataset
@@ -425,6 +435,9 @@ class TestSuiteResponses:
         assert dataset.updated_at == dataset_previous_updated_at
 
         mock_search_engine.delete_record_response.assert_called_once_with(response)
+        test_telemetry.track_crud_records_subtopic.assert_called_with(
+            action="delete", sub_topic="responses", record_id=response.record.id
+        )
 
     async def test_delete_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         response = await ResponseFactory.create()

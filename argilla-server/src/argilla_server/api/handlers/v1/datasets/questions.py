@@ -42,13 +42,13 @@ async def list_dataset_questions(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    await telemetry_client.track_crud_dataset_setting(
-        action="list", setting_name="questions", dataset=dataset, count=len(dataset.questions)
-    )
     for question in dataset.questions:
         await telemetry_client.track_crud_dataset_setting(
             action="read", dataset=dataset, setting_name="questions", setting=question
         )
+    await telemetry_client.track_crud_dataset_setting(
+        action="list", setting_name="questions", dataset=dataset, count=len(dataset.questions)
+    )
 
     return Questions(items=dataset.questions)
 

@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 @pytest.mark.asyncio
 class TestSuiteVectorsSettings:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_update_vector_settings(self, async_client: "AsyncClient", role: UserRole):
+    async def test_update_vector_settings(self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock):
         vector_settings = await VectorSettingsFactory.create()
         user = await UserFactory.create(role=role, workspaces=[vector_settings.dataset.workspace])
 
@@ -51,6 +52,9 @@ class TestSuiteVectorsSettings:
         }
 
         assert vector_settings.title == "New Title"
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
+            action="update", setting_name="vectors_settings", dataset=vector_settings.dataset, setting=vector_settings
+        )
 
     @pytest.mark.parametrize("title", [None, "", "t" * (VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH + 1)])
     async def test_update_vector_settings_with_invalid_title(
@@ -118,7 +122,7 @@ class TestSuiteVectorsSettings:
         assert response.status_code == 403
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_delete_vector_settings(self, async_client: "AsyncClient", role: UserRole):
+    async def test_delete_vector_settings(self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock):
         vector_settings = await VectorSettingsFactory.create()
         user = await UserFactory.create(role=role, workspaces=[vector_settings.dataset.workspace])
 
@@ -136,6 +140,9 @@ class TestSuiteVectorsSettings:
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
+            action="delete", setting_name="vectors_settings", dataset=vector_settings.dataset, setting=vector_settings
+        )
 
     async def test_delete_vector_settings_non_existing(self, async_client: "AsyncClient", owner_auth_header: dict):
         vector_settings_id = uuid4()
