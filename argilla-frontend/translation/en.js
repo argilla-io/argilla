@@ -42,9 +42,7 @@ export default {
   },
   datasets: {
     left: "left",
-    submitted: "Submitted",
-    conflicting: "Conflicting",
-    discarded: "Discarded",
+    completed: "Completed",
     pending: "Pending",
   },
   recordStatus: {

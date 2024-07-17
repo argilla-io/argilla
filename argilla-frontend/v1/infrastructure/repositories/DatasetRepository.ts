@@ -107,13 +107,7 @@ export class DatasetRepository implements IDatasetRepository {
         largeCache()
       );
 
-      return new Progress(
-        data.total,
-        data.submitted,
-        data.discarded,
-        data.conflicting,
-        data.pending
-      );
+      return new Progress(data.total, data.completed, data.pending);
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,

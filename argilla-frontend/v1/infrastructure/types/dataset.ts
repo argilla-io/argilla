@@ -16,8 +16,6 @@ export interface BackendDatasetFeedbackTaskResponse {
 
 export interface BackendProgress {
   total: number;
-  submitted: number;
-  discarded: number;
-  conflicting: number;
+  completed: number;
   pending: number;
 }

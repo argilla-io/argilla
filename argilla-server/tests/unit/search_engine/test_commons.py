@@ -16,18 +16,27 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 import pytest_asyncio
-from argilla_server.enums import MetadataPropertyType, QuestionType, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import (
+    MetadataPropertyType,
+    QuestionType,
+    ResponseStatusFilter,
+    SimilarityOrder,
+    RecordStatus,
+    SortOrder,
+)
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings
 from argilla_server.search_engine import (
-    FloatMetadataFilter,
-    IntegerMetadataFilter,
     ResponseFilterScope,
     SortBy,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataFilter,
     TextQuery,
     UserResponseStatusFilter,
+    Filter,
+    MetadataFilterScope,
+    RangeFilter,
+    Order,
+    RecordFilterScope,
 )
 from argilla_server.search_engine.commons import (
     ALL_RESPONSES_STATUSES_FIELD,
@@ -263,6 +272,7 @@ async def refresh_records(records: List[Record]):
     for record in records:
         await record.awaitable_attrs.suggestions
         await record.awaitable_attrs.responses
+        await record.awaitable_attrs.responses_submitted
         await record.awaitable_attrs.vectors
 
 
@@ -314,6 +324,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -356,6 +367,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -428,6 +440,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ],
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -475,6 +488,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
@@ -590,7 +604,7 @@ class TestBaseElasticAndOpenSearchEngine:
         result = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=statuses),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status"), values=statuses),
         )
         assert len(result.items) == expected_items
         assert result.total == expected_items
@@ -664,26 +678,26 @@ class TestBaseElasticAndOpenSearchEngine:
 
         result = await search_engine.search(
             test_banking_sentiment_dataset,
-            user_response_status_filter=UserResponseStatusFilter(statuses=statuses, user=None),
+            filter=TermsFilter(ResponseFilterScope(property="status"), values=statuses),
         )
 
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
     @pytest.mark.parametrize(
-        ("metadata_filters_config", "expected_items"),
+        ("filter", "expected_items"),
         [
-            ([{"name": "label", "values": ["neutral"]}], 4),
-            ([{"name": "label", "values": ["positive"]}], 1),
-            ([{"name": "label", "values": ["neutral", "positive"]}], 5),
-            ([{"name": "textId", "ge": 3, "le": 4}], 2),
-            ([{"name": "textId", "ge": 3, "le": 3}], 1),
-            ([{"name": "textId", "ge": 3}], 6),
-            ([{"name": "textId", "le": 4}], 5),
-            ([{"name": "seq_float", "ge": 0.0, "le": 12.03}], 3),
-            ([{"name": "seq_float", "ge": 0.13, "le": 0.13}], 1),
-            ([{"name": "seq_float", "ge": 0.0}], 7),
-            ([{"name": "seq_float", "le": 12.03}], 5),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral"]), 4),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["positive"]), 1),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral", "positive"]), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=4), 2),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=3), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3), 6),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), le=4), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0, le=12.03), 3),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.13, le=0.13), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.0), 7),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), le=12.03), 5),
         ],
     )
     async def test_search_with_metadata_filter(
@@ -691,24 +705,10 @@ class TestBaseElasticAndOpenSearchEngine:
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        metadata_filters_config: List[dict],
+        filter: Filter,
         expected_items: int,
     ):
-        metadata_filters = []
-        for metadata_filter_config in metadata_filters_config:
-            name = metadata_filter_config.pop("name")
-            for metadata_property in test_banking_sentiment_dataset.metadata_properties:
-                if name == metadata_property.name:
-                    if metadata_property.type == MetadataPropertyType.terms:
-                        filter_cls = TermsMetadataFilter
-                    elif metadata_property.type == MetadataPropertyType.integer:
-                        filter_cls = IntegerMetadataFilter
-                    else:
-                        filter_cls = FloatMetadataFilter
-                    metadata_filters.append(filter_cls(metadata_property=metadata_property, **metadata_filter_config))
-                    break
-
-        result = await search_engine.search(test_banking_sentiment_dataset, metadata_filters=metadata_filters)
+        result = await search_engine.search(test_banking_sentiment_dataset, filter=filter)
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
@@ -743,7 +743,7 @@ class TestBaseElasticAndOpenSearchEngine:
         results = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            user_response_status_filter=UserResponseStatusFilter(user=user, statuses=all_statuses),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status", user=user), values=all_statuses),
         )
 
         assert len(no_filter_results.items) == len(results.items)
@@ -829,12 +829,12 @@ class TestBaseElasticAndOpenSearchEngine:
         assert all_results.items[offset : offset + limit] == results.items
 
     @pytest.mark.parametrize(
-        ("sort_by"),
+        ("sort_order"),
         [
-            SortBy(field="inserted_at"),
-            SortBy(field="updated_at"),
-            SortBy(field="inserted_at", order="desc"),
-            SortBy(field="updated_at", order="desc"),
+            Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.asc),
+            Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.asc),
+            Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc),
+            Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc),
         ],
     )
     async def test_search_with_sort_by(
@@ -842,18 +842,15 @@ class TestBaseElasticAndOpenSearchEngine:
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset: Dataset,
-        sort_by: SortBy,
+        sort_order: Order,
     ):
         def _local_sort_by(record: Record) -> Any:
-            if isinstance(sort_by.field, str):
-                return getattr(record, sort_by.field)
-            return record.metadata_[sort_by.field.name]
+            return getattr(record, sort_order.scope.property)
 
-        results = await search_engine.search(test_banking_sentiment_dataset, sort_by=[sort_by])
+        results = await search_engine.search(test_banking_sentiment_dataset, sort=[sort_order])
 
         records = test_banking_sentiment_dataset.records
-        if sort_by:
-            records = sorted(records, key=_local_sort_by, reverse=sort_by.order == "desc")
+        records = sorted(records, key=_local_sort_by, reverse=sort_order.order == "desc")
 
         assert [item.record_id for item in results.items] == [record.id for record in records]
 
@@ -879,6 +876,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
@@ -937,6 +935,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(records[0].id),
+                "status": RecordStatus.pending,
                 "fields": records[0].fields,
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
@@ -944,6 +943,7 @@ class TestBaseElasticAndOpenSearchEngine:
             },
             {
                 "id": str(records[1].id),
+                "status": RecordStatus.pending,
                 "fields": records[1].fields,
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
@@ -978,6 +978,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
@@ -1017,6 +1018,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
@@ -1338,32 +1340,34 @@ class TestBaseElasticAndOpenSearchEngine:
         assert responses.items[0].record_id != selected_record.id
 
     @pytest.mark.parametrize(
-        "user_response_status_filter",
+        "statuses",
         [
-            None,
-            UserResponseStatusFilter(statuses=[ResponseStatusFilter.missing, ResponseStatusFilter.draft]),
+            [],
+            [ResponseStatusFilter.missing, ResponseStatusFilter.draft],
         ],
     )
-    async def test_similarity_search_by_record_and_user_response_filter(
+    async def test_similarity_search_by_record_and_response_status_filter(
         self,
         search_engine: BaseElasticAndOpenSearchEngine,
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_with_vectors: Dataset,
-        user_response_status_filter: UserResponseStatusFilter,
+        statuses: List[ResponseStatusFilter],
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
         vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
-        if user_response_status_filter:
+        scope = ResponseFilterScope(property="status")
+
+        if statuses:
             test_user = await UserFactory.create()
-            user_response_status_filter.user = test_user
+            scope.user = test_user
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             record=selected_record,
             max_results=1,
-            user_response_status_filter=user_response_status_filter,
+            filter=TermsFilter(scope=scope, values=statuses),
         )
 
         assert responses.total == 1

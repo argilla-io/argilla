@@ -11,14 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from argilla._version import __version__  # noqa
 
-from argilla.client import *  # noqa
-from argilla.datasets import *  # noqa
-from argilla.workspaces import *  # noqa
-from argilla.users import *  # noqa
-from argilla.settings import *  # noqa
-from argilla.suggestions import *  # noqa
-from argilla.responses import *  # noqa
-from argilla.records import *  # noqa
-from argilla.vectors import *  # noqa
+__all__ = ["TaskDistributionModel", "OverlapTaskDistributionModel"]
+
+from typing import Literal
+
+from pydantic import BaseModel, PositiveInt, ConfigDict
+
+
+class OverlapTaskDistributionModel(BaseModel):
+    strategy: Literal["overlap"]
+    min_submitted: PositiveInt
+
+    model_config = ConfigDict(validate_assignment=True)
+
+
+TaskDistributionModel = OverlapTaskDistributionModel

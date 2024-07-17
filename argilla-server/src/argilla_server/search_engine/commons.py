@@ -38,11 +38,8 @@ from argilla_server.search_engine.base import (
     AndFilter,
     Filter,
     FilterScope,
-    FloatMetadataFilter,
     FloatMetadataMetrics,
-    IntegerMetadataFilter,
     IntegerMetadataMetrics,
-    MetadataFilter,
     MetadataFilterScope,
     MetadataMetrics,
     Order,
@@ -55,7 +52,6 @@ from argilla_server.search_engine.base import (
     SortBy,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataFilter,
     TermsMetadataMetrics,
     TextQuery,
     UserResponseStatusFilter,
@@ -96,9 +92,6 @@ def es_bool_query(
         bool_query["should"] = should
     if must_not:
         bool_query["must_not"] = must_not
-
-    if not bool_query:
-        raise ValueError("Cannot build a boolean query without any clause")
 
     if minimum_should_match:
         bool_query["minimum_should_match"] = minimum_should_match
@@ -210,55 +203,6 @@ def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
     return str(vector_settings.id)
 
 
-# This function will be moved once the `metadata_filters` argument is removed from search and similarity_search methods
-def _unify_metadata_filters_with_filter(metadata_filters: List[MetadataFilter], filter: Optional[Filter]) -> Filter:
-    filters = []
-    if filter:
-        filters.append(filter)
-
-    for metadata_filter in metadata_filters:
-        metadata_scope = MetadataFilterScope(metadata_property=metadata_filter.metadata_property.name)
-        if isinstance(metadata_filter, TermsMetadataFilter):
-            new_filter = TermsFilter(scope=metadata_scope, values=metadata_filter.values)
-        elif isinstance(metadata_filter, (IntegerMetadataFilter, FloatMetadataFilter)):
-            new_filter = RangeFilter(scope=metadata_scope, ge=metadata_filter.ge, le=metadata_filter.le)
-        else:
-            raise ValueError(f"Cannot process request for metadata filter {metadata_filter}")
-        filters.append(new_filter)
-
-    return AndFilter(filters=filters)
-
-
-# This function will be moved once the response status filter is removed from search and similarity_search methods
-def _unify_user_response_status_filter_with_filter(
-    user_response_status_filter: UserResponseStatusFilter, filter: Optional[Filter] = None
-) -> Filter:
-    scope = ResponseFilterScope(user=user_response_status_filter.user, property="status")
-    response_filter = TermsFilter(scope=scope, values=[status.value for status in user_response_status_filter.statuses])
-
-    if filter:
-        return AndFilter(filters=[filter, response_filter])
-    else:
-        return response_filter
-
-
-# This function will be moved once the `sort_by` argument is removed from search and similarity_search methods
-def _unify_sort_by_with_order(sort_by: List[SortBy], order: List[Order]) -> List[Order]:
-    if order:
-        return order
-
-    new_order = []
-    for sort in sort_by:
-        if isinstance(sort.field, MetadataProperty):
-            scope = MetadataFilterScope(metadata_property=sort.field.name)
-        else:
-            scope = RecordFilterScope(property=sort.field)
-
-        new_order.append(Order(scope=scope, order=sort.order))
-
-    return new_order
-
-
 def is_response_status_scope(scope: FilterScope) -> bool:
     return isinstance(scope, ResponseFilterScope) and scope.property == "status" and scope.question is None
 
@@ -353,6 +297,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._bulk_op_request(bulk_actions)
 
+    async def partial_record_update(self, record: Record, **update):
+        index_name = await self._get_dataset_index(record.dataset)
+        await self._update_document_request(index_name=index_name, id=str(record.id), body={"doc": update})
+
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         index_name = await self._get_dataset_index(dataset)
 
@@ -366,14 +314,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         es_responses = self._map_record_responses_to_es([response])
 
-        await self._update_document_request(index_name, id=record.id, body={"doc": {"responses": es_responses}})
+        await self._update_document_request(index_name, id=str(record.id), body={"doc": {"responses": es_responses}})
 
     async def delete_record_response(self, response: Response):
         record = response.record
         index_name = await self._get_dataset_index(record.dataset)
 
         await self._update_document_request(
-            index_name, id=record.id, body={"script": es_script_for_delete_user_response(response.user)}
+            index_name, id=str(record.id), body={"script": es_script_for_delete_user_response(response.user)}
         )
 
     async def update_record_suggestion(self, suggestion: Suggestion):
@@ -383,7 +331,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name,
-            id=suggestion.record_id,
+            id=str(suggestion.record_id),
             body={"doc": {"suggestions": es_suggestions}},
         )
 
@@ -392,7 +340,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         await self._update_document_request(
             index_name,
-            id=suggestion.record_id,
+            id=str(suggestion.record_id),
             body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
         )
 
@@ -419,21 +367,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove them and keep filter
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
-        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
     ) -> SearchResponses:
-        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if metadata_filters:
-            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
-        if user_response_status_filter and user_response_status_filter.statuses:
-            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
-        # END TODO
-
         if bool(value) == bool(record):
             raise ValueError("Must provide either vector value or record to compute the similarity search")
 
@@ -558,6 +495,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         document = {
             "id": str(record.id),
             "fields": record.fields,
+            "status": record.status,
             "inserted_at": record.inserted_at,
             "updated_at": record.updated_at,
         }
@@ -624,26 +562,11 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
-        # TODO: Remove these arguments
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
-        sort_by: Optional[List[SortBy]] = None,
-        # END TODO
         offset: int = 0,
         limit: int = 100,
         user_id: Optional[str] = None,
     ) -> SearchResponses:
         # See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
-
-        # TODO: This block will be moved (maybe to contexts/search.py), and only filter and order arguments will be kept
-        if metadata_filters:
-            filter = _unify_metadata_filters_with_filter(metadata_filters, filter)
-        if user_response_status_filter and user_response_status_filter.statuses:
-            filter = _unify_user_response_status_filter_with_filter(user_response_status_filter, filter)
-
-        if sort_by:
-            sort = _unify_sort_by_with_order(sort_by, sort)
-        # END TODO
         index = await self._get_dataset_index(dataset)
 
         text_query = self._build_text_query(dataset, text=query)
@@ -718,6 +641,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "status": {"type": "keyword"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
                 "responses": {"dynamic": True, "type": "object"},
