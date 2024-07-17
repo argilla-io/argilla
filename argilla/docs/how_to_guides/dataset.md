@@ -446,36 +446,85 @@ dataset_exist = dataset is not None
 
 ## Update a dataset
 
-You can update a dataset by calling the `update` method on the `Dataset` class and passing the new settings as an argument.
+Once a dataset is published, there are limited things you can update. Here is a summary of the attributes you can change:
 
-!!! note
-    Keep in mind that once your dataset is published, only the guidelines can be updated.
+=== "Fields"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Required|❌|❌|
+    |Use markdown|✅|✅|
+
+=== "Questions"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|❌|✅|
+    |Description|❌|✅|
+    |Required|❌|❌|
+    |Labels|❌|❌|
+    |Values|❌|❌|
+    |Label order|❌|✅|
+    |Suggestions first|❌|✅|
+    |Visible labels|❌|✅|
+    |Field|❌|❌|
+    |Allow overlapping|❌|❌|
+    |Use markdown|❌|✅|
+
+=== "Metadata"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Options|✅|❌|
+    |Minimum value|✅|❌|
+    |Maximum value|✅|❌|
+    |Visible for annotators|✅|✅|
+    |Allow extra metadata|✅|✅|
+
+
+=== "Vectors"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Dimensions|❌|✅|
+
+=== "Guidelines"
+    | From SDK | From UI |
+    | ----- | -------------- |
+    |✅|✅|
+    
+=== "Distribution"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Minimum submitted|✅*|✅*|
+
+    > \* Can be changed as long as the dataset doesn't have any responses.
+
+To modify these attributes, you can simply modify the values of the attributes you wish to change and call the `update` method on the `Dataset` object. 
 
 ```python
-import argilla as rg
+dataset = client.datasets("my_dataset")
 
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+dataset.settings.fields["text"].use_markdown = True
+dataset.settings.metadata["my_metadata"].visible_for_annotators = False
 
-dataset_to_update = client.datasets(name="my_dataset")
+dataset.update()
+```
 
-settings_to_update = rg.Settings(
-    guidelines="These are some updated guidelines.",
-    fields=[
-        rg.TextField(
-            name="text",
-        ),
-    ],
-    questions=[
-        rg.LabelQuestion(
-            name="label",
-            labels=["label_4", "label_5", "label_6"]
-        ),
-    ],
-)
+You can also add and delete metadata properties and vector fields using the `add` and `delete` methods:
 
-dataset_to_update.settings = settings_to_update
+```python
+dataset = client.datasets("my_dataset")
 
-dataset_updated = dataset_to_update.update()
+# add
+dataset.vectors.add(rg.VectorField(name="my_vector", dimensions=123))
+dataset.update()
+
+#delete
+dataset.metadata["my_metadata"].delete()
 ```
 
 ## Delete a dataset
