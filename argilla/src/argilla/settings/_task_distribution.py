@@ -21,9 +21,8 @@ from argilla._models._settings._task_distribution import OverlapTaskDistribution
 class OverlapTaskDistribution:
     """The task distribution settings class.
 
-    This task distribution defines a number of submitted record required to complete a record.
-    We could support multiple task distribution strategies in the future
-
+    This task distribution defines a number of submitted responses required to complete a record.
+    
     Args:
          min_submitted (int): The number of min. submitted responses to complete the record
     """
