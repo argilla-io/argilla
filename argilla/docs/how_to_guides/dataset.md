@@ -397,6 +397,19 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 !!! tip
     If you want further guidance on good practices for guidelines during the project development, check our [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
 
+### Distribution
+
+When you are working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You ca use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in the pending queues of your team members.
+
+```python
+rg.TaskDistribution(
+    min_submitted = 2
+)
+```
+
+> To learn more about how to distribute the task among team members in the [Distribute the annotation guide](../how_to_guides/distribution.md).
+
+
 ## List datasets
 
 You can list all the datasets available in a workspace using the `datasets` attribute of the `Workspace` class. You can also use `len(workspace.datasets)` to get the number of datasets in a workspace.
