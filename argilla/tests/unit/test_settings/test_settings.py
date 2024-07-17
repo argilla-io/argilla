@@ -95,33 +95,34 @@ class TestSettings:
         with pytest.raises(SettingsError, match="names of dataset settings must be unique"):
             settings.validate()
 
+    def test_settings_access(self):
+        fields = [rg.TextField(name="text"), rg.TextField(name="other-text")]
+        for field in fields:
+            field._model.id = uuid.uuid4()
 
-class TestSettingsProperties:
-    def test_access_by_id(self):
-        settings = rg.Settings()
+        settings = rg.Settings(fields=fields)
 
+        assert settings.fields[0] == settings.fields["text"]
+        assert settings.fields[1] == settings.fields["other-text"]
+        assert settings.fields[fields[0].id] == fields[0]
+        assert settings.fields[fields[1].id] == fields[1]
+
+    def test_settings_access_by_none_id(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert settings.fields[None] is None
+
+    def test_settings_access_by_missing(self):
         field = rg.TextField(name="text", title="title")
         field._model.id = uuid.uuid4()
 
-        properties = SettingsProperties(settings, [field])
-        assert properties[field.id] == field
+        settings = rg.Settings(fields=[field])
+        assert settings.fields[uuid.uuid4()] is None
+        assert settings.fields["missing"] is None
 
-    def test_access_by_none_id(self):
-        settings = rg.Settings()
-
-        field = rg.TextField(name="text", title="title")
-
-        properties = SettingsProperties(settings, [field])
-        assert properties[field.id] is None
-
-    def test_access_by_wrong_id(self):
-        settings = rg.Settings()
-
-        field = rg.TextField(name="text", title="title")
-        field._model.id = uuid.uuid4()
-
-        properties = SettingsProperties(settings, [field])
-        assert properties[uuid.uuid4()] is None
+    def test_settings_access_by_out_of_range(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        with pytest.raises(IndexError):
+            _ = settings.fields[10]
 
 
 class TestSettingsSerialization:
