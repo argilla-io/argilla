@@ -74,6 +74,9 @@ If you are starting an annotation effort, all the records are initially kept in 
 - **Discarded**: The records may or may not have responses. They can be edited but you can’t move them back to the pending queue.
 - **Submitted**: The records have been fully annotated and have already been submitted.
 
+!!! note
+    If you are working as part of a team, the number of records in your Pending queue may change as other members of the team submit responses and those records get completed.
+
 ### Suggestions
 
 If your dataset includes model predictions, you will see them represented by a sparkle icon `✨` in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If confidence scores have been included by the dataset admin, they will be shown alongside with the label. Additionally, admins can choose to always show suggested labels at the beginning of the list. This can be configured from the dataset settings.
@@ -115,9 +118,9 @@ The bulk view displays the records in a vertical list. Once this view is active,
 
 ### Annotation progress
 
-The global progress of the annotation task from all users is displayed in the dataset list. This is indicated in the `Global progress` column, which shows the number of records still to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with both submitted and discarded responses), discarded and pending by hovering your mouse over it.
+You can track the progress of an annotation task in the progress bar shown in the dataset list and in the progress panel inside the dataset. This bar shows the number of records that have been completed (i.e., those that have the minimum number of submitted responses) and those left to be completed.
 
-You can track your annotation progress in real time from the righ-bottom panel inside the dataset page. This means that, while you are annotating, the progress bar updates as you submit or discard a record. Expanding the panel, the distribution of `Pending`, `Draft`, `Submitted` and `Discarded` responses is displayed in a donut chart.
+You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have `Pending`, `Draft`, `Submitted` and `Discarded` responses.
 
 ## Use search, filters, and sort
 
@@ -174,15 +177,3 @@ You can sort your records according to one or several attributes.
 The insertion time and last update are general to all records.
 
 The suggestion scores, response, and suggestion values for rating questions and metadata properties are available only when they were provided.
-
-## Annotate in teams
-
-!!! note
-    Argilla 2.1 will come with automatic task distribution, which will allow you to distribute the work across several users more efficiently.
-
-### Edit guidelines in the settings
-
-As an `owner` or `admin`, you can edit the guidelines as much as you need from the icon settings on the header. Markdown format is enabled.
-
-!!! tip
-    If you want further guidance on good practices for guidelines during the project development, check this [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
