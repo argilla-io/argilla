@@ -61,6 +61,14 @@
     }
   },
   {
+    "version": "docs_switch_quickstart_steps",
+    "title": "docs_switch_quickstart_steps",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_improve_quickstart",
     "title": "docs_improve_quickstart",
     "aliases": [],
