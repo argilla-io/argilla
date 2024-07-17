@@ -162,7 +162,7 @@ class Settings(BaseSettings):
     )
 
     # See also the telemetry.py module
-    @validator("database_url", pre=True, always=True)
+    @validator("enable_telemetry", pre=True, always=True)
     def set_enable_telemetry(cls, enable_telemetry: bool) -> bool:
         if os.getenv("HF_HUB_DISABLE_TELEMETRY") == "1" or os.getenv("HF_HUB_OFFLINE") == "1":
             enable_telemetry = False
