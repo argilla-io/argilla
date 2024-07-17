@@ -34,6 +34,10 @@ export default {
   visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
   guidelines: "Guidelines",
+  taskDistribution: "Task distribution",
+  minimumSubmittedResponses: "Minimum submitted responses",
+  taskDistributionTooltip:
+    "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
     home: "Home",
@@ -51,6 +55,8 @@ export default {
     discarded: "Discarded",
     submitted: "Submitted",
     validated: "Validated",
+    completedTooltip:
+      "The record is complete, it has the \nminimum number of responses",
   },
   userSettings: {
     title: "My settings",
@@ -216,6 +222,7 @@ export default {
   metrics: {
     total: "Total",
     progress: {
+      my: "My Progress",
       team: "Team progress",
     },
   },

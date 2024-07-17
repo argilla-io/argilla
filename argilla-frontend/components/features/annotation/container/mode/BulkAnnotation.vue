@@ -155,6 +155,9 @@
               :datasetId="recordCriteria.datasetId"
             />
           </template>
+          <template #downHeaderExpanded>
+            <p v-text="$t('metrics.progress.my')" />
+          </template>
           <template #downContent>
             <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
           </template>

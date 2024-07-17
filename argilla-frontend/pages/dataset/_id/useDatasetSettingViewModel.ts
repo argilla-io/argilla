@@ -13,7 +13,13 @@ import { DatasetSetting } from "~/v1/domain/entities/dataset/DatasetSetting";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 interface Tab {
-  id: "info" | "fields" | "questions" | "metadata" | "vector" | "danger-zone";
+  id:
+    | "general"
+    | "fields"
+    | "questions"
+    | "metadata"
+    | "vector"
+    | "danger-zone";
   name: string;
   component: string;
 }
@@ -34,7 +40,11 @@ export const useDatasetSettingViewModel = () => {
   const tabs = ref<Tab[]>([]);
 
   const configureTabs = (datasetSettings: DatasetSetting) => {
-    tabs.value.push({ id: "info", name: "Info", component: "SettingsInfo" });
+    tabs.value.push({
+      id: "general",
+      name: "General",
+      component: "SettingsInfo",
+    });
     tabs.value.push({
       id: "fields",
       name: t("fields"),
@@ -105,7 +115,7 @@ export const useDatasetSettingViewModel = () => {
       document.getElementById(id).click();
     };
 
-    if (datasetSetting.isDatasetModified) return goToTab("info");
+    if (datasetSetting.isDatasetModified) return goToTab("general");
     if (datasetSetting.isFieldsModified) return goToTab("fields");
     if (datasetSetting.isQuestionsModified) return goToTab("questions");
     if (datasetSetting.isMetadataPropertiesModified) return goToTab("metadata");

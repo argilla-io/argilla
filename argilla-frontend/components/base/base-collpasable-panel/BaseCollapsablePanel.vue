@@ -9,7 +9,9 @@
     <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
       <div class="panel__header__container">
         <slot v-if="!isExpanded" name="panelHeader" />
-        <div style="width: 100%" v-else />
+        <div v-else style="width: 100%; text-align: left">
+          <slot name="panelHeaderExpanded" />
+        </div>
         <svgicon
           class="panel__header__icon"
           :name="isExpanded ? 'chevron-down' : 'chevron-right'"

@@ -47,6 +47,8 @@ export default {
     discarded: "Verworfen",
     submitted: "Gesichert",
     validated: "Validiert",
+    completedTooltip:
+      "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
   userSettings: {
     title: "Meine Einstellungen",
@@ -215,6 +217,7 @@ export default {
   metrics: {
     total: "Total",
     progress: {
+      my: "mein Fortschritt",
       team: "Fortschritte im Team",
     },
   },

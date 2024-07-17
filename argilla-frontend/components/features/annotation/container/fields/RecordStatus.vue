@@ -4,7 +4,11 @@
     :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"
     ><span class="bullet"></span>
+
     <span>{{ getStatusInfo.name }}</span>
+    <span class="circle" :data-title="$t('recordStatus.completedTooltip')">
+      <svgicon class="check" name="check" width="14" height="14"></svgicon>
+    </span>
   </span>
 </template>
 
@@ -21,27 +25,23 @@ export default {
         case "pending":
           return {
             name: this.$t("recordStatus.pending"),
-            icon: null,
             class: "--pending",
           };
         case "draft":
           return {
             name: this.$t("recordStatus.draft"),
-            icon: null,
             class: "--draft",
           };
 
         case "discarded":
           return {
             name: this.$t("recordStatus.discarded"),
-            icon: "discard",
             class: "--discarded",
           };
 
         case "submitted":
           return {
             name: this.$t("recordStatus.submitted"),
-            icon: "validate",
             class: "--submitted",
           };
       }
@@ -93,5 +93,21 @@ export default {
       background: $draft-color;
     }
   }
+}
+.check {
+  color: $black-87;
+  flex-shrink: 0;
+}
+.circle {
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  border: 2px solid $black-87;
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top", 8px);
 }
 </style>
