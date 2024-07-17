@@ -78,7 +78,6 @@ from tests.factories import (
     LabelSelectionQuestionFactory,
     MetadataPropertyFactory,
     MultiLabelSelectionQuestionFactory,
-    OwnerFactory,
     QuestionFactory,
     RatingQuestionFactory,
     RecordFactory,
@@ -1775,8 +1774,8 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
+        test_telemetry.track_crud_records.assert_called_once_with(
+            action="create", record_or_dataset=dataset, count=len(records)
         )
 
     async def test_create_dataset_records_with_response_for_multiple_users(
@@ -2556,8 +2555,8 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
+        test_telemetry.track_crud_records.assert_called_once_with(
+            action="create", record_or_dataset=dataset, count=len(records)
         )
 
     async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
@@ -4618,7 +4617,7 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="create", dataset=dataset)
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):

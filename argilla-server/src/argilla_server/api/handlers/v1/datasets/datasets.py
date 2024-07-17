@@ -232,7 +232,6 @@ async def create_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
     dataset_create: DatasetCreate,
     current_user: User = Security(auth.get_current_user),
 ):
