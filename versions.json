@@ -37,6 +37,14 @@
     }
   },
   {
+    "version": "docs_update-settings",
+    "title": "docs_update-settings",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_update-documentation-of-flatten",
     "title": "docs_update-documentation-of-flatten",
     "aliases": [],
