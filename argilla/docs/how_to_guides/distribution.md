@@ -4,7 +4,7 @@ description: In this section, we will provide a step-by-step guide to show how t
 
 # Distribute the annotation among the team
 
-This guide explains how you can use Argilla’s **automatic task distribution** to divide the task of annotating a dataset among multiple team members efficiently.
+This guide explains how you can use Argilla’s **automatic task distribution** to efficiently divide the task of annotating a dataset among multiple team members.
 
 Users can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.
 
