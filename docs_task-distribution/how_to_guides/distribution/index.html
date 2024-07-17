@@ -1395,7 +1395,7 @@
         
   
   <span class="md-ellipsis">
-    Task Distribution
+    Distribution
   </span>
   
 
@@ -1873,12 +1873,9 @@ Each record can have multiple responses and each of those can have the status <c
 </div>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">workspace</span><span class="o">=</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">client</span><span class="o">=</span><span class="n">client</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">TaskDistribution</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">min_submitted</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
 </span></code></pre></div>
 <blockquote>
 <p>Check the <a href="../../reference/argilla/settings/task_distribution/">Task Distribution - Python Reference</a> to see the attributes, arguments, and methods of the <code>TaskDistribution</code> class in detail.</p>
@@ -1886,12 +1883,30 @@ Each record can have multiple responses and each of those can have the status <c
 </div>
 <h2 id="configure-task-distribution-settings">Configure task distribution settings<a class="headerlink" href="#configure-task-distribution-settings" title="Permanent link">&para;</a></h2>
 <p>By default, Argilla will set the required minimum submitted responses to 1. This means that whenever a record has at least 1 response with the status <code>submitted</code> the status of the record will be <code>completed</code> and removed from the <code>Pending</code> queue of other team members.</p>
-<p>If you wish to set a different number, you can do so through the <code>task_distribution</code> setting in your dataset settings:</p>
-<p>[CODE SNIPPET and link to “Define dataset settings” guide]</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Leave the default value of minimum submissions (1) if you are working on your own or when you don't require more than one submitted response per record.</p>
 </div>
+<p>If you wish to set a different number, you can do so through the <code>distribution</code> setting in your dataset settings:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;These are some guidelines.&quot;</span><span class="p">,</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="p">),</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="p">],</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">LabelQuestion</span><span class="p">(</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;label_1&quot;</span><span class="p">,</span> <span class="s2">&quot;label_2&quot;</span><span class="p">,</span> <span class="s2">&quot;label_3&quot;</span><span class="p">]</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="p">),</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="p">],</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">distribution</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">TaskDistribution</span><span class="p">(</span><span class="n">min_submitted</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">)</span>
+</span></code></pre></div>
+<blockquote>
+<p>Learn more about configuring dataset settings in the <a href="../dataset/">Dataset management guide</a>.</p>
+</blockquote>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Increase the number of minimum subsmissions if you’d like to ensure you get more than one submitted response per record. Make sure that this number is never higher than the number of members in your team. Note that the lower this number is, the faster the task will be completed.</p>
@@ -1903,7 +1918,12 @@ Each record can have multiple responses and each of those can have the status <c
 <h2 id="change-task-distribution-settings">Change task distribution settings<a class="headerlink" href="#change-task-distribution-settings" title="Permanent link">&para;</a></h2>
 <p>If you wish to change the minimum submitted responses required in a dataset you can do so as long as the annotation hasn’t started, i.e. the dataset has no responses for any records.</p>
 <p>Admins and owners can change this value from the dataset settings page in the UI or from the SDK:</p>
-<p>[CODE SNIPPET]</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">min_submitted</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span></code></pre></div>
 
 
 

@@ -26,7 +26,7 @@
     
     
       
-        <title>Task Distribution - Argilla Docs</title>
+        <title>Distribution - Argilla Docs</title>
       
     
     
@@ -71,7 +71,7 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Task Distribution - Argilla Docs" >
+        <meta  property="og:title"  content="Distribution - Argilla Docs" >
       
         <meta  property="og:description"  content="The Argilla python server SDK" >
       
@@ -87,7 +87,7 @@
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Task Distribution - Argilla Docs" >
+        <meta  name="twitter:title"  content="Distribution - Argilla Docs" >
       
         <meta  name="twitter:description"  content="The Argilla python server SDK" >
       
@@ -114,7 +114,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#task-distribution" class="md-skip">
+        <a href="#distribution" class="md-skip">
           Skip to content
         </a>
       
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Task Distribution
+              Distribution
             
           </span>
         </div>
@@ -1354,7 +1354,7 @@
           
   
   <span class="md-ellipsis">
-    Task Distribution
+    Distribution
   </span>
   
 
@@ -1365,7 +1365,7 @@
         
   
   <span class="md-ellipsis">
-    Task Distribution
+    Distribution
   </span>
   
 
@@ -1396,13 +1396,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rgvectorfield" class="md-nav__link">
+  <a href="#rgtaskdistribution" class="md-nav__link">
     <span class="md-ellipsis">
-      rg.VectorField
+      rg.TaskDistribution
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="rg.VectorField">
+    <nav class="md-nav" aria-label="rg.TaskDistribution">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1857,13 +1857,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rgvectorfield" class="md-nav__link">
+  <a href="#rgtaskdistribution" class="md-nav__link">
     <span class="md-ellipsis">
-      rg.VectorField
+      rg.TaskDistribution
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="rg.VectorField">
+    <nav class="md-nav" aria-label="rg.TaskDistribution">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1903,13 +1903,33 @@
   
 
 
-<h1 id="task-distribution">Task Distribution<a class="headerlink" href="#task-distribution" title="Permanent link">&para;</a></h1>
-<p>Task Distribution settings are used to define the criteria used by the tool to automatically manage records in the dataset depending on the expected number of submitted responses per record.</p>
+<h1 id="distribution">Distribution<a class="headerlink" href="#distribution" title="Permanent link">&para;</a></h1>
+<p>Distribution settings are used to define the criteria used by the tool to automatically manage records in the dataset depending on the expected number of submitted responses per record.</p>
 <h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
 <p>The default minimum submitted responses per record is 1. If you wish to increase this value, you can define it through the <code>TaskDistribution</code> class and pass it to the <code>Settings</code> class.</p>
-<p>[CODE SNIPPET]</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;These are some guidelines.&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="p">),</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="p">],</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">LabelQuestion</span><span class="p">(</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>            <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;label_1&quot;</span><span class="p">,</span> <span class="s2">&quot;label_2&quot;</span><span class="p">,</span> <span class="s2">&quot;label_3&quot;</span><span class="p">]</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="p">),</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">],</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">distribution</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">TaskDistribution</span><span class="p">(</span><span class="n">min_submitted</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">)</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">,</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">)</span>
+</span></code></pre></div>
 <hr />
-<h2 id="rgvectorfield"><code>rg.VectorField</code><a class="headerlink" href="#rgvectorfield" title="Permanent link">&para;</a></h2>
+<h2 id="rgtaskdistribution"><code>rg.TaskDistribution</code><a class="headerlink" href="#rgtaskdistribution" title="Permanent link">&para;</a></h2>
 
 
 <div class="doc doc-object doc-class">
