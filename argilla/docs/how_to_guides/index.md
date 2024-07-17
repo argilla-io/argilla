@@ -67,7 +67,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](annotate.md)
 
--   __Distribute the task__
+-   __Distribute the annotation__
 
     ---
 
