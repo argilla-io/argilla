@@ -654,7 +654,7 @@ class TestSuiteDatasets:
 
     # Helper function to create records with responses
 
-    async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock):
         dataset = await DatasetFactory.create(name="dataset")
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
@@ -671,6 +671,8 @@ class TestSuiteDatasets:
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
+
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="read", dataset=dataset)
 
     async def test_get_dataset_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -4724,7 +4726,9 @@ class TestSuiteDatasets:
         ],
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-    async def test_update_dataset(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict):
+    async def test_update_dataset(
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create(
             name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
         )
@@ -4761,6 +4765,7 @@ class TestSuiteDatasets:
         assert dataset.name == name
         assert dataset.guidelines == guidelines
         assert dataset.allow_extra_metadata is allow_extra_metadata
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="update", dataset=dataset)
 
     @pytest.mark.parametrize(
         "dataset_json",
@@ -4860,6 +4865,7 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset)
@@ -4886,6 +4892,7 @@ class TestSuiteDatasets:
         # ]
 
         mock_search_engine.delete_index.assert_called_once_with(dataset)
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="delete", dataset=dataset)
 
     async def test_delete_published_dataset(
         self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
