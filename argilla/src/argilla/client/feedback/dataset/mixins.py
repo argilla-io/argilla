@@ -46,6 +46,7 @@ class MetricsMixin:
         question_name: Union[
             str, LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion, RankingQuestion
         ] = None,
+        field_name: Union[str, List[str]] = None,
         strategy: Optional[
             Union[str, LabelQuestionStrategy, MultiLabelQuestion, RatingQuestionStrategy, RankingQuestion]
         ] = None,
@@ -85,6 +86,7 @@ class MetricsMixin:
         self,
         metric_names: Union[str, List[str]] = None,
         question_name: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion, RankingQuestion] = None,
+        field_name: Union[str, List[str]] = None,
     ) -> Union["AgreementMetricResult", List["AgreementMetricResult"]]:
         """Compute agreement or reliability of annotation metrics.
 
@@ -104,7 +106,7 @@ class MetricsMixin:
         """
         from argilla.client.feedback.metrics.agreement_metrics import AgreementMetric
 
-        return AgreementMetric(self, question_name).compute(metric_names)
+        return AgreementMetric(self, question_name, field_name).compute(metric_names)
 
 
 class UnificationMixin:
