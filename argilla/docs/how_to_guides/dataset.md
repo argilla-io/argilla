@@ -495,7 +495,7 @@ Once a dataset is published, there are limited things you can update. Here is a 
     | From SDK | From UI |
     | ----- | -------------- |
     |✅|✅|
-    
+
 === "Distribution"
     | Attributes | From SDK | From UI |
     | ---- | ----- | -------------- |
