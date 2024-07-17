@@ -152,7 +152,7 @@ nav:
   - API Reference:
       - Python SDK: reference/argilla/
       - FastAPI Server:
-        - reference/telemetry.md
+        - Telemetry: reference/telemetry.md
   - Community:
       - community/index.md
       - How to contribute?: community/contributor.md
