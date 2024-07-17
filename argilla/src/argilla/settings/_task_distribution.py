@@ -22,7 +22,7 @@ class OverlapTaskDistribution:
     """The task distribution settings class.
 
     This task distribution defines a number of submitted responses required to complete a record.
-    
+
     Args:
          min_submitted (int): The number of min. submitted responses to complete the record
     """
