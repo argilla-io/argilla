@@ -489,7 +489,7 @@ Once a dataset is published, there are limited things you can update. Here is a 
     | ---- | ----- | -------------- |
     |Name|❌|❌|
     |Title|✅|✅|
-    |Dimensions|❌|✅|
+    |Dimensions|❌|❌|
 
 === "Guidelines"
     | From SDK | From UI |
