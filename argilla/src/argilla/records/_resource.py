@@ -79,12 +79,22 @@ class Record(Resource):
             _server_id: An id for the record. (Read-only and set by the server)
             _dataset: The dataset object to which the record belongs.
         """
-        if fields is None and metadata is None and vectors is None and responses is None and suggestions is None:
-            raise ValueError("At least one of fields, metadata, vectors, responses, or suggestions must be provided.")
+        if (
+            fields is None
+            and metadata is None
+            and vectors is None
+            and responses is None
+            and suggestions is None
+        ):
+            raise ValueError(
+                "At least one of fields, metadata, vectors, responses, or suggestions must be provided."
+            )
         if fields is None and id is None:
             raise ValueError("If fields are not provided, an id must be provided.")
         if fields == {} and id is None:
-            raise ValueError("If fields are an empty dictionary, an id must be provided.")
+            raise ValueError(
+                "If fields are an empty dictionary, an id must be provided."
+            )
         self._dataset = _dataset
 
         self._model = RecordModel(
@@ -170,7 +180,9 @@ class Record(Resource):
     def serialize(self) -> Dict[str, Any]:
         """Serializes the Record to a dictionary for interaction with the API"""
         serialized_model = self._model.model_dump()
-        serialized_suggestions = [suggestion.serialize() for suggestion in self.__suggestions]
+        serialized_suggestions = [
+            suggestion.serialize() for suggestion in self.__suggestions
+        ]
         serialized_responses = [response.serialize() for response in self.__responses]
         serialized_model["responses"] = serialized_responses
         serialized_model["suggestions"] = serialized_suggestions
@@ -203,7 +215,9 @@ class Record(Resource):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Dict], dataset: Optional["Dataset"] = None) -> "Record":
+    def from_dict(
+        cls, data: Dict[str, Dict], dataset: Optional["Dataset"] = None
+    ) -> "Record":
         """Converts a dictionary to a Record object.
         Args:
             data: A dictionary representing the record.
@@ -219,7 +233,10 @@ class Record(Resource):
         record_id = data.get("id", None)
         _server_id = data.get("_server_id", None)
 
-        suggestions = [Suggestion(question_name=question_name, **value) for question_name, value in suggestions.items()]
+        suggestions = [
+            Suggestion(question_name=question_name, **value)
+            for question_name, value in suggestions.items()
+        ]
         responses = [
             Response(question_name=question_name, **value)
             for question_name, _responses in responses.items()
@@ -257,7 +274,10 @@ class Record(Resource):
                 for response_model in model.responses
                 for response in UserResponse.from_model(response_model, dataset=dataset)
             ],
-            suggestions=[Suggestion.from_model(model=suggestion, dataset=dataset) for suggestion in model.suggestions],
+            suggestions=[
+                Suggestion.from_model(model=suggestion, dataset=dataset)
+                for suggestion in model.suggestions
+            ],
             _dataset=dataset,
             _server_id=model.id,
         )
@@ -300,7 +320,9 @@ class RecordVectors(dict):
         return dict(self.items())
 
     def api_models(self) -> List[VectorModel]:
-        return [Vector(name=name, values=value).api_model() for name, value in self.items()]
+        return [
+            Vector(name=name, values=value).api_model() for name, value in self.items()
+        ]
 
 
 class RecordResponses(Iterable[Response]):
@@ -329,7 +351,10 @@ class RecordResponses(Iterable[Response]):
         return len(self.__responses)
 
     def __repr__(self) -> str:
-        return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
+        return {
+            k: [{"value": v["value"]} for v in values]
+            for k, values in self.to_dict().items()
+        }.__repr__()
 
     def to_dict(self) -> Dict[str, List[Dict]]:
         """Converts the responses to a dictionary.
@@ -338,7 +363,9 @@ class RecordResponses(Iterable[Response]):
         """
         response_dict = defaultdict(list)
         for response in self.__responses:
-            response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
+            response_dict[response.question_name].append(
+                {"value": response.value, "user_id": str(response.user_id)}
+            )
         return response_dict
 
     def api_models(self) -> List[UserResponseModel]:

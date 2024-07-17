@@ -61,7 +61,9 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
         response.raise_for_status()
         response_json = response.json()
         question_model = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Created question {question_model.name} in dataset {dataset_id}")
+        self._log_message(
+            message=f"Created question {question_model.name} in dataset {dataset_id}"
+        )
         return question_model
 
     @api_error_handler
@@ -81,7 +83,9 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
     # Utility methods #
     ####################
 
-    def create_many(self, dataset_id: UUID, questions: List[QuestionModel]) -> List[QuestionModel]:
+    def create_many(
+        self, dataset_id: UUID, questions: List[QuestionModel]
+    ) -> List[QuestionModel]:
         response_models = []
         for question in questions:
             response_model = self.create(dataset_id=dataset_id, question=question)
@@ -101,8 +105,12 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
     ####################
 
     def _model_from_json(self, response_json: Dict) -> QuestionModel:
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
+        response_json["inserted_at"] = self._date_from_iso_format(
+            date=response_json["inserted_at"]
+        )
+        response_json["updated_at"] = self._date_from_iso_format(
+            date=response_json["updated_at"]
+        )
         return self._get_model_from_response(response_json=response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[QuestionModel]:
@@ -113,7 +121,9 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
         try:
             question_type = response_json.get("settings", {}).get("type")
         except Exception as e:
-            raise ValueError("Invalid field type: missing 'settings.type' in response") from e
+            raise ValueError(
+                "Invalid field type: missing 'settings.type' in response"
+            ) from e
 
         question_class = self._TYPE_TO_MODEL_CLASS.get(question_type)
         if question_class is None:

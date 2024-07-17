@@ -40,7 +40,9 @@ class VectorsAPI(ResourceAPI[VectorFieldModel]):
         response.raise_for_status()
         response_json = response.json()
         created_vector = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Created vector {created_vector.name} in dataset {created_vector.dataset_id}")
+        self._log_message(
+            message=f"Created vector {created_vector.name} in dataset {created_vector.dataset_id}"
+        )
         return created_vector
 
     @api_error_handler
@@ -50,7 +52,9 @@ class VectorsAPI(ResourceAPI[VectorFieldModel]):
         response.raise_for_status()
         response_json = response.json()
         updated_vector = self._model_from_json(response_json)
-        self._log_message(message=f"Updated vector {updated_vector.name} with id {updated_vector.id}")
+        self._log_message(
+            message=f"Updated vector {updated_vector.name} with id {updated_vector.id}"
+        )
         return updated_vector
 
     @api_error_handler
@@ -66,7 +70,9 @@ class VectorsAPI(ResourceAPI[VectorFieldModel]):
 
     @api_error_handler
     def list(self, dataset_id: UUID) -> List[VectorFieldModel]:
-        response = self.http_client.get(f"/api/v1/datasets/{dataset_id}/vectors-settings")
+        response = self.http_client.get(
+            f"/api/v1/datasets/{dataset_id}/vectors-settings"
+        )
         response.raise_for_status()
         response_json = response.json()
         vector_models = self._model_from_jsons(response_jsons=response_json["items"])
@@ -77,8 +83,12 @@ class VectorsAPI(ResourceAPI[VectorFieldModel]):
     ####################
 
     def _model_from_json(self, response_json: Dict) -> VectorFieldModel:
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
+        response_json["inserted_at"] = self._date_from_iso_format(
+            date=response_json["inserted_at"]
+        )
+        response_json["updated_at"] = self._date_from_iso_format(
+            date=response_json["updated_at"]
+        )
         return VectorFieldModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[VectorFieldModel]:

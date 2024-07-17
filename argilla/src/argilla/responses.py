@@ -178,7 +178,9 @@ class UserResponse(Resource):
             if isinstance(question, RankingQuestion):
                 value["value"] = self.__ranking_to_model_value(value["value"])
 
-        return UserResponseModel(values=values, status=self._model.status, user_id=self._model.user_id)
+        return UserResponseModel(
+            values=values, status=self._model.status, user_id=self._model.user_id
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns the UserResponse as a dictionary"""
@@ -187,9 +189,13 @@ class UserResponse(Resource):
     @staticmethod
     def _compute_status_from_responses(responses: List[Response]) -> ResponseStatus:
         """Computes the status of the UserResponse from the responses"""
-        statuses = set([answer.status for answer in responses if answer.status is not None])
+        statuses = set(
+            [answer.status for answer in responses if answer.status is not None]
+        )
         if len(statuses) > 1:
-            warnings.warn(f"Multiple status found in user responses. Using {ResponseStatus.draft.value!r} as default.")
+            warnings.warn(
+                f"Multiple status found in user responses. Using {ResponseStatus.draft.value!r} as default."
+            )
         elif len(statuses) == 1:
             return ResponseStatusModel(next(iter(statuses)))
         return ResponseStatusModel.draft
@@ -205,7 +211,9 @@ class UserResponse(Resource):
         return next(iter(user_ids))
 
     @staticmethod
-    def __responses_as_model_values(responses: List[Response]) -> Dict[str, Dict[str, Any]]:
+    def __responses_as_model_values(
+        responses: List[Response],
+    ) -> Dict[str, Dict[str, Any]]:
         """Creates a dictionary of response values from a list of Responses"""
         return {answer.question_name: {"value": answer.value} for answer in responses}
 

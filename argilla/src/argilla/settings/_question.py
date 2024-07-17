@@ -44,16 +44,24 @@ __all__ = [
 
 class QuestionPropertyBase(SettingsPropertyBase):
     @staticmethod
-    def _render_values_as_options(values: Union[List[str], List[int], Dict[str, str]]) -> List[Dict[str, str]]:
+    def _render_values_as_options(
+        values: Union[List[str], List[int], Dict[str, str]],
+    ) -> List[Dict[str, str]]:
         """Render values as options for the question so that the model conforms to the API schema"""
         if isinstance(values, dict):
             return [{"text": value, "value": key} for key, value in values.items()]
-        elif isinstance(values, list) and all(isinstance(value, str) for value in values):
+        elif isinstance(values, list) and all(
+            isinstance(value, str) for value in values
+        ):
             return [{"text": label, "value": label} for label in values]
-        elif isinstance(values, list) and all(isinstance(value, int) for value in values):
+        elif isinstance(values, list) and all(
+            isinstance(value, int) for value in values
+        ):
             return [{"value": value} for value in values]
         else:
-            raise ValueError("Invalid labels format. Please provide a list of strings or a list of dictionaries.")
+            raise ValueError(
+                "Invalid labels format. Please provide a list of strings or a list of dictionaries."
+            )
 
     @staticmethod
     def _render_options_as_values(options: List[dict]) -> Dict[str, str]:
@@ -103,13 +111,17 @@ class LabelQuestion(QuestionPropertyBase):
             description=description,
             required=required,
             settings=LabelQuestionSettings(
-                options=self._render_values_as_options(labels), visible_options=visible_labels
+                options=self._render_values_as_options(labels),
+                visible_options=visible_labels,
             ),
         )
 
     @classmethod
     def from_model(cls, model: LabelQuestionModel) -> "LabelQuestion":
-        instance = cls(name=model.name, labels=cls._render_options_as_values(model.settings.options))
+        instance = cls(
+            name=model.name,
+            labels=cls._render_options_as_values(model.settings.options),
+        )
         instance._model = model
         return instance
 
@@ -277,12 +289,17 @@ class RatingQuestion(QuestionPropertyBase):
             description=description,
             required=required,
             values=values,
-            settings=RatingQuestionSettings(options=self._render_values_as_options(values)),
+            settings=RatingQuestionSettings(
+                options=self._render_values_as_options(values)
+            ),
         )
 
     @classmethod
     def from_model(cls, model: RatingQuestionModel) -> "RatingQuestion":
-        instance = cls(name=model.name, values=cls._render_options_as_values(model.settings.options))
+        instance = cls(
+            name=model.name,
+            values=cls._render_options_as_values(model.settings.options),
+        )
         instance._model = model
 
         return instance
@@ -327,12 +344,17 @@ class RankingQuestion(QuestionPropertyBase):
             title=title,
             description=description,
             required=required,
-            settings=RankingQuestionSettings(options=self._render_values_as_options(values)),
+            settings=RankingQuestionSettings(
+                options=self._render_values_as_options(values)
+            ),
         )
 
     @classmethod
     def from_model(cls, model: RankingQuestionModel) -> "RankingQuestion":
-        instance = cls(name=model.name, values=cls._render_options_as_values(model.settings.options))
+        instance = cls(
+            name=model.name,
+            values=cls._render_options_as_values(model.settings.options),
+        )
         instance._model = model
 
         return instance

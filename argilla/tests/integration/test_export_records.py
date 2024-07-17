@@ -124,7 +124,9 @@ def test_export_record_list_with_filtered_records(client: Argilla, dataset: rg.D
         },
     ]
     dataset.records.log(records=mock_data)
-    exported_records = dataset.records(query=rg.Query(query="hello")).to_list(flatten=True)
+    exported_records = dataset.records(query=rg.Query(query="hello")).to_list(
+        flatten=True
+    )
     assert len(exported_records) == len(mock_data)
     assert isinstance(exported_records, list)
     assert isinstance(exported_records[0], dict)

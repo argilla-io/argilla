@@ -29,4 +29,6 @@ def raise_for_status(response: httpx.Response) -> None:
         else:
             message = f"{e!r}. Response: {e.response.content!r}"
 
-        raise HTTPStatusError(message=message, request=e.request, response=e.response) from e
+        raise HTTPStatusError(
+            message=message, request=e.request, response=e.response
+        ) from e

@@ -43,11 +43,15 @@ def _validate_media_type(media_type: str, file_type: str) -> None:
         )
 
     if file_type == "ogg":
-        warnings.warn("'ogg' files might not be supported in Safari.", category=UserWarning)
+        warnings.warn(
+            "'ogg' files might not be supported in Safari.", category=UserWarning
+        )
 
 
 def _get_file_data(
-    file_source: Union[str, bytes], file_type: Optional[str] = None, media_type: Optional[str] = None
+    file_source: Union[str, bytes],
+    file_type: Optional[str] = None,
+    media_type: Optional[str] = None,
 ) -> bytes:
     """
     Utility function to check the input file and get the file data as bytes.
@@ -66,7 +70,9 @@ def _get_file_data(
     """
     if isinstance(file_source, bytes):
         if not file_type:
-            raise ValueError("File type must be provided if file source is a byte string.")
+            raise ValueError(
+                "File type must be provided if file source is a byte string."
+            )
         file_type != "pdf" and _validate_media_type(media_type, file_type)
         file_data = file_source
     else:
@@ -133,13 +139,17 @@ def _media_to_html(
         ValueError: If the width and height are not pixel or percentage.
     """
     if not (_is_valid_dimension(width) or _is_valid_dimension(height)):
-        raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
+        raise ValueError(
+            "Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values."
+        )
 
     file_data, file_type = _get_file_data(file_source, file_type, media_type)
     media_base64 = base64.b64encode(file_data).decode("utf-8")
     data_url = f"data:{media_type}/{file_type};base64,{media_base64}"
 
-    common_attrs = f"{f' width={width}' if width else ''}{f' height={height}' if height else ''}"
+    common_attrs = (
+        f"{f' width={width}' if width else ''}{f' height={height}' if height else ''}"
+    )
     media_attrs = f"{' autoplay' if autoplay else ''}{' loop' if loop else ''}"
 
     if media_type == "video":
@@ -178,7 +188,9 @@ def video_to_html(
         >>> from argilla.markdown import video_to_html
         >>> html = video_to_html("my_video.mp4", width="300px", height="300px", autoplay=True, loop=True)
     """
-    return _media_to_html("video", file_source, file_type, width, height, autoplay, loop)
+    return _media_to_html(
+        "video", file_source, file_type, width, height, autoplay, loop
+    )
 
 
 def audio_to_html(
@@ -207,7 +219,9 @@ def audio_to_html(
         >>> from argilla.markdown import audio_to_html
         >>> html = audio_to_html("my_audio.mp3", width="300px", height="300px", autoplay=True, loop=True)
     """
-    return _media_to_html("audio", file_source, file_type, width, height, autoplay, loop)
+    return _media_to_html(
+        "audio", file_source, file_type, width, height, autoplay, loop
+    )
 
 
 def image_to_html(
@@ -236,7 +250,9 @@ def image_to_html(
 
 
 def pdf_to_html(
-    file_source: Union[str, bytes], width: Optional[str] = "1000px", height: Optional[str] = "1000px"
+    file_source: Union[str, bytes],
+    width: Optional[str] = "1000px",
+    height: Optional[str] = "1000px",
 ) -> str:
     """
     Convert a pdf file to an HTML tag with embedded data.
@@ -257,9 +273,14 @@ def pdf_to_html(
         >>> html = pdf_to_html("my_pdf.pdf", width="300px", height="300px")
     """
     if not _is_valid_dimension(width) or not _is_valid_dimension(height):
-        raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
+        raise ValueError(
+            "Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values."
+        )
 
-    if isinstance(file_source, str) and urlparse(file_source).scheme in ["http", "https"]:
+    if isinstance(file_source, str) and urlparse(file_source).scheme in [
+        "http",
+        "https",
+    ]:
         return f'<embed src="{file_source}" type="application/pdf" width="{width}" height="{height}"></embed>'
 
     file_data, _ = _get_file_data(file_source, "pdf")

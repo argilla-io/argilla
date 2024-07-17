@@ -34,7 +34,9 @@ class Resource(LoggingMixin):
 
     _MAX_OUTDATED_RETENTION = 30
 
-    def __init__(self, api: Optional["ResourceAPI"] = None, client: Optional["Argilla"] = None) -> None:
+    def __init__(
+        self, api: Optional["ResourceAPI"] = None, client: Optional["Argilla"] = None
+    ) -> None:
         self._client = client
         self._api = api
 
@@ -111,13 +113,17 @@ class Resource(LoggingMixin):
         try:
             return self.api_model().model_dump()
         except Exception as e:
-            raise ArgillaSerializeError(f"Failed to serialize the resource. {e.__class__.__name__}") from e
+            raise ArgillaSerializeError(
+                f"Failed to serialize the resource. {e.__class__.__name__}"
+            ) from e
 
     def serialize_json(self) -> str:
         try:
             return self.api_model().model_dump_json()
         except Exception as e:
-            raise ArgillaSerializeError(f"Failed to serialize the resource. {e.__class__.__name__}") from e
+            raise ArgillaSerializeError(
+                f"Failed to serialize the resource. {e.__class__.__name__}"
+            ) from e
 
     def _update_last_api_call(self):
         self._last_api_call = datetime.utcnow()

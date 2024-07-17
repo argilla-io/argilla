@@ -58,7 +58,9 @@ class Argilla(_api.APIClient):
         timeout: int = DEFAULT_HTTP_CONFIG.timeout,
         **http_client_args,
     ) -> None:
-        super().__init__(api_url=api_url, api_key=api_key, timeout=timeout, **http_client_args)
+        super().__init__(
+            api_url=api_url, api_key=api_key, timeout=timeout, **http_client_args
+        )
 
         self._set_default(self)
 
@@ -260,7 +262,9 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         self._client = client
         self._api = client.api.datasets
 
-    def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]:
+    def __call__(
+        self, name: str, workspace: Optional[Union["Workspace", str]] = None
+    ) -> Optional["Dataset"]:
         if isinstance(workspace, str):
             workspace = self._client.workspaces(workspace)
         elif workspace is None:
@@ -269,7 +273,9 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         for dataset in workspace.datasets:
             if dataset.name == name:
                 return dataset.get()
-        warnings.warn(f"Dataset with name {name!r} not found in workspace {workspace.name!r}")
+        warnings.warn(
+            f"Dataset with name {name!r} not found in workspace {workspace.name!r}"
+        )
 
     def __iter__(self):
         return self._Iterator(self.list())

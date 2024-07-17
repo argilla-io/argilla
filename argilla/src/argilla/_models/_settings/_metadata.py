@@ -16,7 +16,13 @@ from enum import Enum
 from typing import List, Literal, Optional, Union, Annotated
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 from argilla._exceptions import MetadataError
 from argilla._models import ResourceModel
@@ -74,7 +80,9 @@ class IntegerMetadataPropertySettings(NumericMetadataPropertySettings):
         min_value = values.get("min")
         max_value = values.get("max")
 
-        if not all(isinstance(value, int) or value is None for value in [min_value, max_value]):
+        if not all(
+            isinstance(value, int) or value is None for value in [min_value, max_value]
+        ):
             raise MetadataError("min and max must be integers.")
         return values
 

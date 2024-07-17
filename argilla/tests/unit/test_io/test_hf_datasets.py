@@ -24,22 +24,36 @@ class TestHFDatasetsIO:
     def test_to_datasets_with_partial_values_in_records(self):
         records = [
             rg.Record(fields={"field": "The field"}, metadata={"a": "a"}),
-            rg.Record(fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}),
-            rg.Record(fields={"field": "Again"}, suggestions=[rg.Suggestion("question", value="value")]),
             rg.Record(
-                fields={"field": "Field"}, responses=[rg.Response("other_question", value="value", user_id=uuid4())]
+                fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}
+            ),
+            rg.Record(
+                fields={"field": "Again"},
+                suggestions=[rg.Suggestion("question", value="value")],
+            ),
+            rg.Record(
+                fields={"field": "Field"},
+                responses=[
+                    rg.Response("other_question", value="value", user_id=uuid4())
+                ],
             ),
             rg.Record(
                 fields={"field": "The record field including more type of responses"},
                 suggestions=[
                     rg.Suggestion("rating", value=1),
                     rg.Suggestion("ranking", value=["value1", "value2"]),
-                    rg.Suggestion("spans", value=[{"start": 0, "end": 10, "label": "test"}]),
+                    rg.Suggestion(
+                        "spans", value=[{"start": 0, "end": 10, "label": "test"}]
+                    ),
                 ],
                 responses=[
                     rg.Response("rating", value=1, user_id=uuid4()),
                     rg.Response("ranking", value=["value1", "value2"], user_id=uuid4()),
-                    rg.Response("spans", value=[{"start": 0, "end": 10, "label": "test"}], user_id=uuid4()),
+                    rg.Response(
+                        "spans",
+                        value=[{"start": 0, "end": 10, "label": "test"}],
+                        user_id=uuid4(),
+                    ),
                 ],
             ),
         ]
@@ -52,23 +66,45 @@ class TestHFDatasetsIO:
             "field": Value(dtype="string", id=None),
             "id": Value(dtype="string", id=None),
             "other": Value(dtype="string", id=None),
-            "other_question.responses": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
-            "other_question.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
-            "other_question.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
+            "other_question.responses": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
+            "other_question.responses.status": Sequence(
+                feature=Value(dtype="null", id=None), length=-1, id=None
+            ),
+            "other_question.responses.users": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
             "question.suggestion": Value(dtype="string", id=None),
             "question.suggestion.agent": Value(dtype="null", id=None),
             "question.suggestion.score": Value(dtype="null", id=None),
             "ranking.responses": Sequence(
-                feature=Sequence(feature=Value(dtype="string", id=None), length=-1, id=None), length=-1, id=None
+                feature=Sequence(
+                    feature=Value(dtype="string", id=None), length=-1, id=None
+                ),
+                length=-1,
+                id=None,
             ),
-            "ranking.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
-            "ranking.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
-            "ranking.suggestion": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
+            "ranking.responses.status": Sequence(
+                feature=Value(dtype="null", id=None), length=-1, id=None
+            ),
+            "ranking.responses.users": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
+            "ranking.suggestion": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
             "ranking.suggestion.agent": Value(dtype="null", id=None),
             "ranking.suggestion.score": Value(dtype="null", id=None),
-            "rating.responses": Sequence(feature=Value(dtype="int64", id=None), length=-1, id=None),
-            "rating.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
-            "rating.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
+            "rating.responses": Sequence(
+                feature=Value(dtype="int64", id=None), length=-1, id=None
+            ),
+            "rating.responses.status": Sequence(
+                feature=Value(dtype="null", id=None), length=-1, id=None
+            ),
+            "rating.responses.users": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
             "rating.suggestion": Value(dtype="int64", id=None),
             "rating.suggestion.agent": Value(dtype="null", id=None),
             "rating.suggestion.score": Value(dtype="null", id=None),
@@ -81,8 +117,12 @@ class TestHFDatasetsIO:
                     }
                 ]
             ],
-            "spans.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
-            "spans.responses.users": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
+            "spans.responses.status": Sequence(
+                feature=Value(dtype="null", id=None), length=-1, id=None
+            ),
+            "spans.responses.users": Sequence(
+                feature=Value(dtype="string", id=None), length=-1, id=None
+            ),
             "spans.suggestion": [
                 {
                     "end": Value(dtype="int64", id=None),

@@ -24,7 +24,9 @@ class GenericIO:
     It handles methods for exporting records to generic python formats."""
 
     @staticmethod
-    def to_list(records: List["Record"], flatten: bool = False) -> List[Dict[str, Union[str, float, int, list]]]:
+    def to_list(
+        records: List["Record"], flatten: bool = False
+    ) -> List[Dict[str, Union[str, float, int, list]]]:
         """Export records to a list of dictionaries with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.
@@ -42,7 +44,9 @@ class GenericIO:
 
         # normalize records structure
         for record_dict in dataset_records:
-            record_dict.update({k: None for k in records_schema if k not in record_dict})
+            record_dict.update(
+                {k: None for k in records_schema if k not in record_dict}
+            )
 
         return dataset_records
 
@@ -69,7 +73,9 @@ class GenericIO:
         elif orient == "index":
             dataset_records: dict = {}
             for record in records:
-                dataset_records[record.id] = GenericIO._record_to_dict(record=record, flatten=flatten)
+                dataset_records[record.id] = GenericIO._record_to_dict(
+                    record=record, flatten=flatten
+                )
         else:
             raise ValueError(f"Invalid value for orient parameter: {orient}")
         return dict(dataset_records)
@@ -112,7 +118,9 @@ class GenericIO:
 
                 responses_dict[responses_key].append(response.value)
                 responses_dict[responses_users_key].append(str(response.user_id))
-                responses_dict[responses_status_key].append(response.status.value if response.status else None)
+                responses_dict[responses_status_key].append(
+                    response.status.value if response.status else None
+                )
 
             suggestions_dict = {}
             for suggestion in record.suggestions:

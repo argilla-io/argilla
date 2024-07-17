@@ -26,7 +26,9 @@ def dataset(client: rg.Argilla):
         guidelines=f"my_dataset_{random.randint(1, 100)}",
         fields=[rg.TextField(name="text", required=True, title="Text")],
         questions=[
-            rg.LabelQuestion(name="label", title="Label", labels=["positive", "negative"]),
+            rg.LabelQuestion(
+                name="label", title="Label", labels=["positive", "negative"]
+            ),
             rg.RankingQuestion(name="ranking", title="Ranking", values=["1", "2", "3"]),
         ],
     )
@@ -45,10 +47,16 @@ def dataset(client: rg.Argilla):
 def test_ranking_question_with_suggestions(dataset: rg.Dataset):
     dataset.records.log(
         [
-            {"text": "This is a test text", "label": "positive", "ranking": ["2", "1", "3"]},
+            {
+                "text": "This is a test text",
+                "label": "positive",
+                "ranking": ["2", "1", "3"],
+            },
         ],
     )
-    assert next(iter(dataset.records(with_suggestions=True))).suggestions["ranking"].value == ["2", "1", "3"]
+    assert next(iter(dataset.records(with_suggestions=True))).suggestions[
+        "ranking"
+    ].value == ["2", "1", "3"]
 
 
 def test_ranking_question_with_responses(dataset: rg.Dataset):
@@ -58,4 +66,6 @@ def test_ranking_question_with_responses(dataset: rg.Dataset):
         ],
         mapping={"ranking_": "ranking.response"},
     )
-    assert next(iter(dataset.records(with_responses=True))).responses["ranking"][0].value == ["2"]
+    assert next(iter(dataset.records(with_responses=True))).responses["ranking"][
+        0
+    ].value == ["2"]

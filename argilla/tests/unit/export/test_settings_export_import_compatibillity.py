@@ -33,7 +33,9 @@ def settings():
             rg.FloatMetadataProperty("source"),
         ],
         questions=[
-            rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"]),
+            rg.LabelQuestion(
+                name="label", title="text", labels=["positive", "negative"]
+            ),
         ],
         vectors=[rg.VectorField(name="text_vector", dimensions=3)],
     )

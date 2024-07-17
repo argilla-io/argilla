@@ -90,7 +90,14 @@ class TestDatasets:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_create_dataset(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message, dataset):
+    def test_create_dataset(
+        self,
+        httpx_mock: HTTPXMock,
+        status_code,
+        expected_exception,
+        expected_message,
+        dataset,
+    ):
         mock_dataset_id = uuid.uuid4()
         mock_return_value = {
             "id": str(mock_dataset_id),
@@ -143,7 +150,14 @@ class TestDatasets:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_update_dataset(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message, dataset):
+    def test_update_dataset(
+        self,
+        httpx_mock: HTTPXMock,
+        status_code,
+        expected_exception,
+        expected_message,
+        dataset,
+    ):
         mock_dataset_id = uuid.uuid4()
         mock_workspace_id = uuid.uuid4()
         mock_patch_return_value = {
@@ -207,7 +221,14 @@ class TestDatasets:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_delete_dataset(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message, dataset):
+    def test_delete_dataset(
+        self,
+        httpx_mock: HTTPXMock,
+        status_code,
+        expected_exception,
+        expected_message,
+        dataset,
+    ):
         mock_dataset_id = dataset.id
         mock_return_value = dataset.serialize()
         api_url = "http://test_url"
@@ -226,7 +247,9 @@ class TestDatasets:
                 dataset.delete()
                 assert dataset.name == mock_return_value["name"]
 
-    def _mock_dataset_settings(self, httpx_mock: HTTPXMock, dataset_id: uuid.UUID, dataset_dict: dict):
+    def _mock_dataset_settings(
+        self, httpx_mock: HTTPXMock, dataset_id: uuid.UUID, dataset_dict: dict
+    ):
         mock_field = {
             "id": str(uuid.uuid4()),
             "name": "text",
@@ -248,10 +271,16 @@ class TestDatasets:
             status_code=200,
         )
         httpx_mock.add_response(
-            json=mock_field, url=self.url(f"/api/v1/datasets/{dataset_id}/fields"), method="POST", status_code=200
+            json=mock_field,
+            url=self.url(f"/api/v1/datasets/{dataset_id}/fields"),
+            method="POST",
+            status_code=200,
         )
         httpx_mock.add_response(
-            json=mock_question, url=self.url(f"/api/v1/datasets/{dataset_id}/questions"), method="POST", status_code=200
+            json=mock_question,
+            url=self.url(f"/api/v1/datasets/{dataset_id}/questions"),
+            method="POST",
+            status_code=200,
         )
 
 
@@ -326,14 +355,28 @@ class TestDatasetsAPI:
         }
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/v1/me/datasets", method="GET", status_code=200
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/me/datasets",
+            method="GET",
+            status_code=200,
         )
         with httpx.Client():
             client = rg.Argilla(api_url)
-            dataset = client.api.datasets.get_by_name_and_workspace_id("dataset-01", mock_workspace_id)
+            dataset = client.api.datasets.get_by_name_and_workspace_id(
+                "dataset-01", mock_workspace_id
+            )
             assert mock_dataset_id.hex == mock_return_value["items"][0]["id"]
             assert dataset.name == mock_return_value["items"][0]["name"]
             assert dataset.status == mock_return_value["items"][0]["status"]
-            assert dataset.workspace_id.hex == mock_return_value["items"][0]["workspace_id"]
-            assert dataset.inserted_at.isoformat() == mock_return_value["items"][0]["inserted_at"]
-            assert dataset.updated_at.isoformat() == mock_return_value["items"][0]["updated_at"]
+            assert (
+                dataset.workspace_id.hex
+                == mock_return_value["items"][0]["workspace_id"]
+            )
+            assert (
+                dataset.inserted_at.isoformat()
+                == mock_return_value["items"][0]["inserted_at"]
+            )
+            assert (
+                dataset.updated_at.isoformat()
+                == mock_return_value["items"][0]["updated_at"]
+            )

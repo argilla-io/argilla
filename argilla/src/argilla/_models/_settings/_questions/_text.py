@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla._models._settings._questions._base import QuestionSettings, QuestionBaseModel
+from argilla._models._settings._questions._base import (
+    QuestionSettings,
+    QuestionBaseModel,
+)
 
 
 class TextQuestionSettings(QuestionSettings):

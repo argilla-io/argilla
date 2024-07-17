@@ -37,7 +37,9 @@ class UsersAPI(ResourceAPI[UserModel]):
     @api_error_handler
     def create(self, user: UserModel) -> UserModel:
         json_body = user.model_dump()
-        response = self.http_client.post("/api/v1/users", json=json_body).raise_for_status()
+        response = self.http_client.post(
+            "/api/v1/users", json=json_body
+        ).raise_for_status()
         user_created = self._model_from_json(response_json=response.json())
         self._log_message(message=f"Created user {user_created.username}")
 
@@ -96,15 +98,22 @@ class UsersAPI(ResourceAPI[UserModel]):
 
     @api_error_handler
     def add_to_workspace(self, workspace_id: UUID, user_id: UUID) -> "UserModel":
-        response = self.http_client.post(url=f"/api/v1/workspaces/{workspace_id}/users", json={"user_id": str(user_id)})
+        response = self.http_client.post(
+            url=f"/api/v1/workspaces/{workspace_id}/users",
+            json={"user_id": str(user_id)},
+        )
         response.raise_for_status()
         self._log_message(message=f"Added user {user_id} to workspace {workspace_id}")
         return self._model_from_json(response_json=response.json())
 
     @api_error_handler
     def delete_from_workspace(self, workspace_id: UUID, user_id: UUID) -> "UserModel":
-        response = self.http_client.delete(url=f"/api/v1/workspaces/{workspace_id}/users/{user_id}").raise_for_status()
-        self._log_message(message=f"Deleted user {user_id} from workspace {workspace_id}")
+        response = self.http_client.delete(
+            url=f"/api/v1/workspaces/{workspace_id}/users/{user_id}"
+        ).raise_for_status()
+        self._log_message(
+            message=f"Deleted user {user_id} from workspace {workspace_id}"
+        )
         return self._model_from_json(response_json=response.json())
 
     ####################
@@ -112,8 +121,12 @@ class UsersAPI(ResourceAPI[UserModel]):
     ####################
 
     def _model_from_json(self, response_json) -> UserModel:
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
+        response_json["inserted_at"] = self._date_from_iso_format(
+            date=response_json["inserted_at"]
+        )
+        response_json["updated_at"] = self._date_from_iso_format(
+            date=response_json["updated_at"]
+        )
         return UserModel(**response_json)
 
     def _model_from_jsons(self, response_jsons) -> List[UserModel]:

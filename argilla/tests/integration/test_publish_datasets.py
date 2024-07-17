@@ -52,10 +52,14 @@ def test_publish_dataset(client: "Argilla"):
         questions=[
             TextQuestion(name="text-question"),
             RatingQuestion(name="rating-question", values=[1, 2, 3, 4, 5]),
-            RankingQuestion(name="ranking-question", values=["rank1", "rank2", "rank3"]),
+            RankingQuestion(
+                name="ranking-question", values=["rank1", "rank2", "rank3"]
+            ),
             LabelQuestion(name="label-question", labels=["A", "B", "C"]),
             MultiLabelQuestion(name="multi-label-question", labels=["A", "B", "C"]),
-            SpanQuestion(name="span-question", field="text-field", labels=["label1", "label2"]),
+            SpanQuestion(
+                name="span-question", field="text-field", labels=["label1", "label2"]
+            ),
         ],
         metadata=[
             TermsMetadataProperty(name="metadata-property", options=["term1", "term2"]),

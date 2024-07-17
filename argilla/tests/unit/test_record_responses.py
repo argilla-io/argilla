@@ -15,7 +15,15 @@ import uuid
 
 import pytest
 
-from argilla import Response, User, Dataset, Settings, TextQuestion, TextField, Workspace
+from argilla import (
+    Response,
+    User,
+    Dataset,
+    Settings,
+    TextQuestion,
+    TextField,
+    Workspace,
+)
 from argilla.records._resource import RecordResponses, Record
 
 
@@ -98,16 +106,26 @@ class TestRecordResponses:
             "status": "draft",
         }
 
-    def test_generate_response_models_for_record_responses_with_multiple_users(self, record: Record):
+    def test_generate_response_models_for_record_responses_with_multiple_users(
+        self, record: Record
+    ):
         user_a = User(username="johndoe", id=uuid.uuid4())
         user_b = User(username="janedoe", id=uuid.uuid4())
 
         record_responses = RecordResponses(
             responses=[
-                Response(question_name="question_a", value="answer_a", user_id=user_a.id),
-                Response(question_name="question_a", value="answer_a", user_id=user_b.id),
-                Response(question_name="question_b", value="answer_b", user_id=user_a.id),
-                Response(question_name="question_b", value="answer_b", user_id=user_b.id),
+                Response(
+                    question_name="question_a", value="answer_a", user_id=user_a.id
+                ),
+                Response(
+                    question_name="question_a", value="answer_a", user_id=user_b.id
+                ),
+                Response(
+                    question_name="question_b", value="answer_b", user_id=user_a.id
+                ),
+                Response(
+                    question_name="question_b", value="answer_b", user_id=user_b.id
+                ),
             ],
             record=record,
         )

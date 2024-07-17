@@ -72,7 +72,9 @@ def test_create_dataset_with_metadata(client: Argilla, workspace: Workspace) -> 
         (None, None, rg.IntegerMetadataProperty),
     ],
 )
-def test_create_dataset_with_numerical_metadata(client: Argilla, workspace: Workspace, min, max, type) -> Dataset:
+def test_create_dataset_with_numerical_metadata(
+    client: Argilla, workspace: Workspace, min, max, type
+) -> Dataset:
     name = "".join(random.choices(ascii_lowercase, k=16))
     settings = Settings(
         fields=[TextField(name="text")],

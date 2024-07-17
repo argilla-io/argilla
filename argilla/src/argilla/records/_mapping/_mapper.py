@@ -62,7 +62,9 @@ class IngestedRecordMapper:
 
         mapping = mapping or {}
         default_mapping = self._schematize_default_attributes()
-        self.mapping = self._schematize_mapped_attributes(mapping=mapping, default_mapping=default_mapping)
+        self.mapping = self._schematize_mapped_attributes(
+            mapping=mapping, default_mapping=default_mapping
+        )
 
     def __call__(self, data: Dict[str, Any], user_id: Optional[UUID] = None) -> Record:
         """Maps a dictionary of data to a record object.
@@ -78,7 +80,9 @@ class IngestedRecordMapper:
 
         record_id = data.get(self.mapping.id.source)
         suggestions = self._map_suggestions(data=data, mapping=self.mapping.suggestion)
-        responses = self._map_responses(data=data, user_id=user_id or self.user_id, mapping=self.mapping.response)
+        responses = self._map_responses(
+            data=data, user_id=user_id or self.user_id, mapping=self.mapping.response
+        )
         fields = self._map_attributes(data=data, mapping=self.mapping.field)
         metadata = self._map_attributes(data=data, mapping=self.mapping.metadata)
         vectors = self._map_attributes(data=data, mapping=self.mapping.vector)
@@ -110,9 +114,13 @@ class IngestedRecordMapper:
                 attr_name, attr_type, parameter = self._parse_dot_notation(attr_mapping)
 
                 attr_type = AttributeType(attr_type or AttributeType.SUGGESTION)
-                parameter = AttributeParameter(parameter_type=parameter or ParameterType.VALUE, source=source_key)
+                parameter = AttributeParameter(
+                    parameter_type=parameter or ParameterType.VALUE, source=source_key
+                )
 
-                attr_route = default_mapping.get_by_name_and_type(name=attr_name, type=attr_type)
+                attr_route = default_mapping.get_by_name_and_type(
+                    name=attr_name, type=attr_type
+                )
                 if attr_route:
                     attr_route.source = source_key
                     attr_route.set_parameter(parameter)
@@ -128,7 +136,9 @@ class IngestedRecordMapper:
 
         return default_mapping
 
-    def _parse_dot_notation(self, attribute_mapping: str) -> Tuple[str, Optional[str], Optional[str]]:
+    def _parse_dot_notation(
+        self, attribute_mapping: str
+    ) -> Tuple[str, Optional[str], Optional[str]]:
         """Parses a string in the format of 'attribute.type.parameter' into its attribute parts parts using regex."""
 
         available_attributes = list(self._schema.keys()) + ["id"]
@@ -159,11 +169,15 @@ class IngestedRecordMapper:
         """
         schema_item = self._schema.get(attribute_route.name)
         if isinstance(schema_item, QuestionPropertyBase) and (
-            attribute_route.type is None or attribute_route.type == AttributeType.SUGGESTION
+            attribute_route.type is None
+            or attribute_route.type == AttributeType.SUGGESTION
         ):
             # Suggestions are the default destination for questions.
             attribute_route.type = AttributeType.SUGGESTION
-        elif isinstance(schema_item, QuestionPropertyBase) and attribute_route.type == AttributeType.RESPONSE:
+        elif (
+            isinstance(schema_item, QuestionPropertyBase)
+            and attribute_route.type == AttributeType.RESPONSE
+        ):
             attribute_route.type = AttributeType.RESPONSE
         elif isinstance(schema_item, TextField):
             attribute_route.type = AttributeType.FIELD
@@ -174,7 +188,9 @@ class IngestedRecordMapper:
         elif attribute_route.name == "id":
             attribute_route.type = AttributeType.ID
         else:
-            raise RecordsIngestionError(f"Mapped attribute is not a valid dataset attribute: {attribute_route.name}.")
+            raise RecordsIngestionError(
+                f"Mapped attribute is not a valid dataset attribute: {attribute_route.name}."
+            )
         return attribute_route
 
     def _schematize_default_attributes(self) -> RecordAttributesMap:
@@ -239,7 +255,10 @@ class IngestedRecordMapper:
         for name, route in mapping.items():
             if route.source not in data:
                 continue
-            parameters = {param.parameter_type: data.get(param.source) for param in route.parameters}
+            parameters = {
+                param.parameter_type: data.get(param.source)
+                for param in route.parameters
+            }
             if parameters.get(ParameterType.VALUE) is None:
                 continue
             schema_item = self._dataset.schema.get(name)
@@ -252,7 +271,9 @@ class IngestedRecordMapper:
 
         return suggestions
 
-    def _map_responses(self, data: Dict[str, Any], user_id: UUID, mapping) -> List[Response]:
+    def _map_responses(
+        self, data: Dict[str, Any], user_id: UUID, mapping
+    ) -> List[Response]:
         """Converts an arbitrary dictionary to a list of Response objects for use by the add or update methods.
 
         Parameters:
@@ -278,7 +299,9 @@ class IngestedRecordMapper:
 
         return responses
 
-    def _map_attributes(self, data: Dict[str, Any], mapping: Dict[str, AttributeRoute]) -> Dict[str, Any]:
+    def _map_attributes(
+        self, data: Dict[str, Any], mapping: Dict[str, AttributeRoute]
+    ) -> Dict[str, Any]:
         """Converts a dictionary to a dictionary of attributes for use by the add or update methods."""
         attributes = {}
 

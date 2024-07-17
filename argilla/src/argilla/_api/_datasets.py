@@ -50,7 +50,9 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
     def update(self, dataset: "DatasetModel") -> "DatasetModel":
         json_body = dataset.model_dump()
         dataset_id = json_body["id"]  # type: ignore
-        response = self.http_client.patch(f"{self.url_stub}/{dataset_id}", json=json_body)
+        response = self.http_client.patch(
+            f"{self.url_stub}/{dataset_id}", json=json_body
+        )
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
@@ -95,11 +97,15 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response_json = response.json()
         datasets = self._model_from_jsons(response_jsons=response_json["items"])
         if workspace_id:
-            datasets = [dataset for dataset in datasets if dataset.workspace_id == workspace_id]
+            datasets = [
+                dataset for dataset in datasets if dataset.workspace_id == workspace_id
+            ]
         self._log_message(message=f"Listed {len(datasets)} datasets")
         return datasets
 
-    def get_by_name_and_workspace_id(self, name: str, workspace_id: UUID) -> Optional["DatasetModel"]:
+    def get_by_name_and_workspace_id(
+        self, name: str, workspace_id: UUID
+    ) -> Optional["DatasetModel"]:
         datasets = self.list(workspace_id=workspace_id)
         for dataset in datasets:
             if dataset.name == name:
@@ -107,15 +113,21 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
                 return dataset
 
     def name_exists(self, name: str, workspace_id: UUID) -> bool:
-        return bool(self.get_by_name_and_workspace_id(name=name, workspace_id=workspace_id))
+        return bool(
+            self.get_by_name_and_workspace_id(name=name, workspace_id=workspace_id)
+        )
 
     ####################
     # Private methods #
     ####################
 
     def _model_from_json(self, response_json: Dict) -> "DatasetModel":
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
+        response_json["inserted_at"] = self._date_from_iso_format(
+            date=response_json["inserted_at"]
+        )
+        response_json["updated_at"] = self._date_from_iso_format(
+            date=response_json["updated_at"]
+        )
         return DatasetModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List["DatasetModel"]:

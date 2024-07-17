@@ -31,10 +31,14 @@ class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
     fields: Optional[Dict[str, FieldValue]] = None
-    metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
+    metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(
+        default_factory=dict
+    )
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
-    suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
+    suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(
+        default_factory=tuple
+    )
 
     external_id: Optional[Any] = None
 
@@ -53,7 +57,9 @@ class RecordModel(ResourceModel):
         return {metadata.name: metadata.value for metadata in value}
 
     @field_serializer("fields", when_used="always")
-    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Optional[Dict[str, Union[str, None]]]:
+    def serialize_empty_fields(
+        self, value: Dict[str, Union[str, None]]
+    ) -> Optional[Dict[str, Union[str, None]]]:
         """Serialize empty fields to None."""
         if isinstance(value, dict) and len(value) == 0:
             return None
@@ -61,10 +67,14 @@ class RecordModel(ResourceModel):
 
     @field_validator("metadata", mode="before")
     @classmethod
-    def validate_metadata(cls, metadata: Union[List[MetadataModel], dict]) -> List[MetadataModel]:
+    def validate_metadata(
+        cls, metadata: Union[List[MetadataModel], dict]
+    ) -> List[MetadataModel]:
         """Ensure metadata is a list of MetadataModel instances when provided as a dict."""
         if not metadata:
             return []
         if isinstance(metadata, dict):
-            return [MetadataModel(name=key, value=value) for key, value in metadata.items()]
+            return [
+                MetadataModel(name=key, value=value) for key, value in metadata.items()
+            ]
         return metadata
