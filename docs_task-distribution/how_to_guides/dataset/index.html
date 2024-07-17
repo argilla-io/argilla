@@ -2493,7 +2493,7 @@ to the new dataset.</p>
 <p>If you want further guidance on good practices for guidelines during the project development, check our <a href="https://argilla.io/blog/annotation-guidelines-practices/">blog post</a>.</p>
 </div>
 <h3 id="distribution">Distribution<a class="headerlink" href="#distribution" title="Permanent link">&para;</a></h3>
-<p>When you are working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You ca use the <code>TaskDistribution</code> settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in the pending queues of your team members.</p>
+<p>When working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You can use the <code>TaskDistribution</code> settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in your team members' pending queues.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">TaskDistribution</span><span class="p">(</span>
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="n">min_submitted</span> <span class="o">=</span> <span class="mi">2</span>
 </span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">)</span>
