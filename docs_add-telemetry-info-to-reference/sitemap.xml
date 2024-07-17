@@ -86,6 +86,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla/docs_add-telemetry-info-to-reference/reference/telemetry/</loc>
+         <lastmod>2024-07-17</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla/docs_add-telemetry-info-to-reference/reference/argilla/SUMMARY/</loc>
          <lastmod>2024-07-17</lastmod>
          <changefreq>daily</changefreq>
