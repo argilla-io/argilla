@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
@@ -81,11 +81,10 @@ class DatasetRecordsIterator:
             yield Record.from_model(model=record_model, dataset=self.__dataset)
 
     def _fetch_from_server(self) -> List[RecordModel]:
-        if not self.__dataset.exists():
-            raise ValueError(f"Dataset {self.__dataset.name} does not exist on the server.")
-        if self._is_search_query():
-            return self._fetch_from_server_with_search()
-        return self._fetch_from_server_with_list()
+        if not self.__client.api.datasets.exists(self.__dataset.id):
+            warnings.warn(f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping...")
+            return []
+        return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
 
     def _fetch_from_server_with_list(self) -> List[RecordModel]:
         return self.__client.api.records.list(
@@ -138,6 +137,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     _api: RecordsAPI
 
     DEFAULT_BATCH_SIZE = 256
+    DEFAULT_DELETE_BATCH_SIZE = 64
 
     def __init__(self, client: "Argilla", dataset: "Dataset"):
         """Initializes a DatasetRecords object with a client and a dataset.
@@ -258,12 +258,14 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     def delete(
         self,
         records: List[Record],
+        batch_size: int = DEFAULT_DELETE_BATCH_SIZE,
     ) -> List[Record]:
         """Delete records in a dataset on the server using the provided records
             and matching based on the id.
 
         Parameters:
             records: A list of `Record` objects representing the records to be deleted.
+            batch_size: The number of records to send in each batch. The default is 64.
 
         Returns:
             A list of Record objects representing the deleted records.
@@ -271,17 +273,31 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         """
         mapping = None
         user_id = self.__client.me.id
-
         record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id)
+        batch_size = self._normalize_batch_size(
+            batch_size=batch_size,
+            records_length=len(record_models),
+            max_value=self._api.MAX_RECORDS_PER_DELETE_BULK,
+        )
 
-        self._api.delete_many(dataset_id=self.__dataset.id, records=record_models)
+        records_deleted = 0
+        for batch in tqdm(
+            iterable=range(0, len(records), batch_size),
+            desc="Sending records...",
+            total=len(records) // batch_size,
+            unit="batch",
+        ):
+            self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
+            batch_records = record_models[batch : batch + batch_size]
+            self._api.delete_many(dataset_id=self.__dataset.id, records=batch_records)
+            records_deleted += len(batch_records)
 
         self._log_message(
             message=f"Deleted {len(record_models)} records from dataset {self.__dataset.name}",
             level="info",
         )
 
-        return record_models
+        return records
 
     def to_dict(self, flatten: bool = False, orient: str = "names") -> Dict[str, Any]:
         """

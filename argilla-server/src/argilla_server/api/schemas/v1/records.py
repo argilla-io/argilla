@@ -13,11 +13,8 @@
 #  limitations under the License.
 
 from datetime import datetime
-
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
-
-import fastapi
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
@@ -221,15 +218,6 @@ class MetadataParsedQueryParam:
 
         self.name: str = k
         self.value: str = "".join(v).strip()
-
-
-class MetadataQueryParams(BaseModel):
-    metadata: List[str] = Field(fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
-
-    @property
-    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
-        # TODO: Validate metadata fields names from query params
-        return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
 class VectorQuery(BaseModel):

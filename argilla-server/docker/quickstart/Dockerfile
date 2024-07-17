@@ -1,8 +1,15 @@
 # TODO(gabrielmbmb): update this `Dockerfile` to multi-staged build to reduce the image size
 ARG ARGILLA_VERSION=latest
-FROM argilla/argilla-server:${ARGILLA_VERSION}
+ARG ARGILLA_SERVER_IMAGE=argilla/argilla-server
+FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 
 USER root
+
+# Copy Argilla distribution files
+COPY scripts/start_quickstart_argilla.sh /home/argilla
+COPY scripts/start_argilla_server.sh /home/argilla
+COPY Procfile /home/argilla
+COPY requirements.txt /packages/requirements.txt
 
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
@@ -14,12 +21,6 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmo
 
 # Add Elasticsearch repository
 RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
-
-# Copy Argilla distribution files
-COPY scripts/start_quickstart_argilla.sh /home/argilla
-COPY scripts/start_argilla_server.sh /home/argilla
-COPY Procfile /home/argilla
-COPY requirements.txt /packages/requirements.txt
 
 RUN \
     # Indicate that this is a quickstart deployment
@@ -68,7 +69,5 @@ ENV ARGILLA_HOME_PATH=/data/argilla
 ENV ARGILLA_WORKSPACE=$ADMIN_USERNAME
 
 ENV UVICORN_PORT=6900
-
-ENV REINDEX_DATASETS=0
 
 CMD ["/bin/bash", "start_quickstart_argilla.sh"]

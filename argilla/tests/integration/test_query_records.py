@@ -22,19 +22,6 @@ from argilla import Argilla, Dataset, Settings, TextField, Workspace, LabelQuest
 
 
 @pytest.fixture
-def workspace(client: Argilla) -> Workspace:
-    workspace = client.workspaces("test-workspace")
-    if not workspace.exists():
-        workspace.create()
-    yield workspace
-
-    for dataset in workspace.list_datasets():
-        client.api.datasets.delete(dataset.id)
-
-    workspace.delete()
-
-
-@pytest.fixture
 def dataset(client: Argilla, workspace: Workspace) -> Dataset:
     name = "".join(random.choices(ascii_lowercase, k=16))
     settings = Settings(

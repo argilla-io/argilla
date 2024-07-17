@@ -23,7 +23,8 @@ from argilla._resource import Resource
 from argilla.client import Argilla
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User
+    from argilla.datasets._resource import Dataset
+    from argilla.users._resource import User
 
 
 class Workspace(Resource):
@@ -59,15 +60,6 @@ class Workspace(Resource):
         super().__init__(client=client, api=client.api.workspaces)
 
         self._model = WorkspaceModel(name=name, id=id)
-
-    def exists(self) -> bool:
-        """
-        Checks if the workspace exists in the server
-
-        Returns:
-            bool: True if the workspace exists, False otherwise
-        """
-        return self._api.exists(self.id)
 
     def add_user(self, user: Union["User", str]) -> "User":
         """Adds a user to the workspace. After adding a user to the workspace, it will have access to the datasets
@@ -192,12 +184,12 @@ class WorkspaceUsers(Sequence["User"], LoggingMixin):
 
     def _delete_user_by_username(self, username: str) -> "User":
         user = self._workspace._client.users(username=username)
-        if not user.exists():
+        if user is None:
             raise ValueError(f"User {username} does not exist")
         return user.remove_from_workspace(workspace=self._workspace)
 
     def _add_user_by_username(self, username: str) -> "User":
         user = self._workspace._client.users(username=username)
-        if not user.exists():
+        if user is None:
             raise ValueError(f"User {username} does not exist")
         return user.add_to_workspace(workspace=self._workspace)

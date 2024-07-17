@@ -16,6 +16,7 @@ import uuid
 import pytest
 
 import argilla as rg
+from argilla import Argilla, Workspace
 
 
 @pytest.fixture(scope="session")
@@ -41,3 +42,18 @@ def cleanup(client: rg.Argilla):
 def dataset_name() -> str:
     """use this fixture to autogenerate a safe dataset name for tests"""
     return f"test_dataset_{uuid.uuid4()}"
+
+
+@pytest.fixture
+def workspace(client: Argilla) -> Workspace:
+    ws_name = "test-workspace"
+
+    workspace = client.workspaces(ws_name)
+    if workspace is None:
+        workspace = Workspace(name=ws_name).create()
+    yield workspace
+
+    for dataset in workspace.list_datasets():
+        dataset.delete()
+
+    workspace.delete()

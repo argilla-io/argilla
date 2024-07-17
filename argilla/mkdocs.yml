@@ -103,7 +103,7 @@ plugins:
   - gen-files:
       scripts:
         - docs/scripts/gen_changelog.py
-        - docs/scripts/gen_popular_issues.py
+        # - docs/scripts/gen_popular_issues.py
         # - docs/scripts/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
@@ -114,6 +114,7 @@ plugins:
           selection:
             inherited_members: true # Allow looking up inherited methods
           rendering:
+            show_root_toc_entry: true
             show_root_heading: true # actually display anything at all...
             # show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
             show_if_no_docstring: true
@@ -138,9 +139,13 @@ nav:
       - Manage workspaces: how_to_guides/workspace.md
       - Manage and create datasets: how_to_guides/dataset.md
       - Add, update, and delete records: how_to_guides/record.md
-      - Query, filter, and export records: how_to_guides/query_export.md
+      - Query and filter records: how_to_guides/query.md
+      - Importing and exporting datasets: how_to_guides/import_export.md
       - Annotate a dataset: how_to_guides/annotate.md
       - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+      - Advanced:
+        - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
+        - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
       - Text classification task: tutorials/text_classification.ipynb

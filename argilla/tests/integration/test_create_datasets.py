@@ -39,7 +39,7 @@ class TestCreateDatasets:
         client.datasets.add(dataset)
 
         assert dataset in client.datasets
-        assert dataset.exists()
+        assert dataset is not None
 
         created_dataset = client.datasets(name=dataset_name)
         assert created_dataset.settings == dataset.settings
@@ -56,8 +56,8 @@ class TestCreateDatasets:
         assert dataset in client.datasets
         assert dataset2 in client.datasets
 
-        assert dataset.exists()
-        assert dataset2.exists()
+        assert client.api.datasets.exists(dataset.id)
+        assert client.api.datasets.exists(dataset2.id)
 
         for ds in [dataset, dataset2]:
             schema = client.datasets(name=ds.name).schema
