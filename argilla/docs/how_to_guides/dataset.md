@@ -477,9 +477,9 @@ Once a dataset is published, there are limited things you can update. Here is a 
     | ---- | ----- | -------------- |
     |Name|❌|❌|
     |Title|✅|✅|
-    |Options|✅|❌|
-    |Minimum value|✅|❌|
-    |Maximum value|✅|❌|
+    |Options|❌|❌|
+    |Minimum value|❌|❌|
+    |Maximum value|❌|❌|
     |Visible for annotators|✅|✅|
     |Allow extra metadata|✅|✅|
 
