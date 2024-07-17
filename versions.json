@@ -45,6 +45,14 @@
     }
   },
   {
+    "version": "docs_update-admonitions-token-tutorial",
+    "title": "docs_update-admonitions-token-tutorial",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_task-distribution",
     "title": "docs_task-distribution",
     "aliases": [],
