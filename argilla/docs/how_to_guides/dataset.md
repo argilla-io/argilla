@@ -42,6 +42,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
             allow_extra_metadata=True,
+            distribution=2
         )
         ```
 
@@ -96,6 +97,7 @@ settings = rg.Settings(
     guidelines="Select the sentiment of the prompt.",
     fields=[rg.TextField(name="prompt", use_markdown=True)],
     questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+    distribution=rg.TaskDistribution(min_submitted=3)
 )
 
 dataset1 = rg.Dataset(name="sentiment_analysis_1", settings=settings)
