@@ -1865,7 +1865,7 @@
 
 <h1 id="distribute-the-task-among-the-team">Distribute the task among the team<a class="headerlink" href="#distribute-the-task-among-the-team" title="Permanent link">&para;</a></h1>
 <p>This guide explains how you can use Argilla’s <strong>automatic task distribution</strong> to divide the task of annotating a dataset among multiple team members efficiently.</p>
-<p>Users can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of the annotation team. When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code> and the record will be removed from the <code>Pending</code> queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
+<p>Users can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of each annotator. When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code> and the record will be removed from the <code>Pending</code> queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The status of a record can be either <code>completed</code>, when it has the required number of responses with <code>submitted</code> status, or <code>left</code>, when it doesn’t meet this requirement.
@@ -1890,7 +1890,11 @@ Each record can have multiple responses and each of those can have the status <c
 <p>[CODE SNIPPET and link to “Define dataset settings” guide]</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Set the minimum submissions to 1 if you are working on your own or when annotation overlap is not required. Increase this number if you’d like some overlap, but make sure this number is always lower than the number of people annotating in your team. If you want submitted responses from all team members, set this value to the number of members in your team. Note that the lower this number is, the faster the task will be completed.</p>
+<p>Leave the default value of minimum submissions (1) if you are working on your own or when you don't require more than one submitted response per record.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Increase the number of minimum subsmissions if you’d like to ensure you get more than one submitted response per record. Make sure that this number is never higher than the number of members in your team. Note that the lower this number is, the faster the task will be completed.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1898,7 +1902,7 @@ Each record can have multiple responses and each of those can have the status <c
 </div>
 <h2 id="change-task-distribution-settings">Change task distribution settings<a class="headerlink" href="#change-task-distribution-settings" title="Permanent link">&para;</a></h2>
 <p>If you wish to change the minimum submitted responses required in a dataset you can do so as long as the annotation hasn’t started, i.e. the dataset has no responses for any records.</p>
-<p>Admins and owners can change this value from the dataset settings page or from the SDK:</p>
+<p>Admins and owners can change this value from the dataset settings page in the UI or from the SDK:</p>
 <p>[CODE SNIPPET]</p>
 
 
