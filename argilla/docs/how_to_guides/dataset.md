@@ -399,7 +399,7 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 
 ### Distribution
 
-When you are working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You ca use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in the pending queues of your team members.
+When working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You can use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in your team members' pending queues.
 
 ```python
 rg.TaskDistribution(
