@@ -363,7 +363,7 @@ class SettingsProperties(Sequence[Property]):
     def __getitem__(self, key: Union[UUID, str, int]) -> Optional[Property]:
         if isinstance(key, int):
             return list(self._properties_by_name.values())[key]
-        if isinstance(key, UUID):
+        elif isinstance(key, UUID):
             for prop in self._properties_by_name.values():
                 if prop.id and prop.id == key:
                     return prop
