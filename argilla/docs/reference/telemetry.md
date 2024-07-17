@@ -1,6 +1,6 @@
 # Telemetry
 
-Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.
+Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used. This is done through the [Hugging Face Hub library](https://github.com/huggingface/huggingface_hub) telemetry implementations.
 
 ## How to opt-out
 
