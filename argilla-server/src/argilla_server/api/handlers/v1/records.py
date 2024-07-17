@@ -196,9 +196,7 @@ async def upsert_suggestion(
 
     suggestion = await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
-    await telemetry_client.track_crud_records_subtopic(
-        action="update", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
-    )
+    await telemetry_client.track_crud_records_subtopic(action="update", sub_topic="suggestions", record_id=record_id)
 
     return suggestion
 
@@ -240,7 +238,7 @@ async def delete_record_suggestions(
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
     await telemetry_client.track_crud_records_subtopic(
-        action="delete", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
+        action="delete", sub_topic="suggestions", record_id=record_id, count=num_suggestions
     )
 
 
