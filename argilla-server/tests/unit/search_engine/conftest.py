@@ -33,16 +33,24 @@ def search_engine(request):
 
 
 @pytest_asyncio.fixture()
-async def elasticsearch_engine(elasticsearch_config: dict) -> AsyncGenerator[ElasticSearchEngine, None]:
-    engine = ElasticSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
+async def elasticsearch_engine(
+    elasticsearch_config: dict,
+) -> AsyncGenerator[ElasticSearchEngine, None]:
+    engine = ElasticSearchEngine(
+        config=elasticsearch_config, number_of_replicas=0, number_of_shards=1
+    )
     yield engine
 
     await engine.client.close()
 
 
 @pytest_asyncio.fixture()
-async def opensearch_engine(elasticsearch_config: dict) -> AsyncGenerator[OpenSearchEngine, None]:
-    engine = OpenSearchEngine(config=elasticsearch_config, number_of_replicas=0, number_of_shards=1)
+async def opensearch_engine(
+    elasticsearch_config: dict,
+) -> AsyncGenerator[OpenSearchEngine, None]:
+    engine = OpenSearchEngine(
+        config=elasticsearch_config, number_of_replicas=0, number_of_shards=1
+    )
     yield engine
 
     await engine.client.close()

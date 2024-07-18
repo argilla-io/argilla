@@ -19,9 +19,18 @@ import pytest
 from httpx import AsyncClient
 
 from argilla_server.models import User
-from argilla_server.enums import DatasetDistributionStrategy, RecordStatus, ResponseStatus
+from argilla_server.enums import (
+    DatasetDistributionStrategy,
+    RecordStatus,
+    ResponseStatus,
+)
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, TextQuestionFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    TextQuestionFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -39,10 +48,14 @@ class TestDeleteResponse:
             }
         )
 
-        record = await RecordFactory.create(status=RecordStatus.completed, dataset=dataset)
+        record = await RecordFactory.create(
+            status=RecordStatus.completed, dataset=dataset
+        )
         response = await ResponseFactory.create(record=record)
 
-        resp = await async_client.delete(self.url(response.id), headers=owner_auth_header)
+        resp = await async_client.delete(
+            self.url(response.id), headers=owner_auth_header
+        )
 
         assert resp.status_code == 200
         assert record.status == RecordStatus.pending
@@ -57,10 +70,14 @@ class TestDeleteResponse:
             }
         )
 
-        record = await RecordFactory.create(status=RecordStatus.completed, dataset=dataset)
+        record = await RecordFactory.create(
+            status=RecordStatus.completed, dataset=dataset
+        )
         responses = await ResponseFactory.create_batch(3, record=record)
 
-        resp = await async_client.delete(self.url(responses[0].id), headers=owner_auth_header)
+        resp = await async_client.delete(
+            self.url(responses[0].id), headers=owner_auth_header
+        )
 
         assert resp.status_code == 200
         assert record.status == RecordStatus.completed

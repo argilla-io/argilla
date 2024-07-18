@@ -38,7 +38,9 @@ def test_configure_algorithm():
 
 def test_configure_token_expiration():
     token_expiration = 3600
-    with mock.patch.dict(os.environ, {"ARGILLA_AUTH_TOKEN_EXPIRATION": str(token_expiration)}):
+    with mock.patch.dict(
+        os.environ, {"ARGILLA_AUTH_TOKEN_EXPIRATION": str(token_expiration)}
+    ):
         settings = Settings()
 
         assert settings.token_expiration == token_expiration

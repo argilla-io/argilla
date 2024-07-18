@@ -43,10 +43,19 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name", "dataset_id", name="vector_settings_name_dataset_id_uq"),
+        sa.UniqueConstraint(
+            "name", "dataset_id", name="vector_settings_name_dataset_id_uq"
+        ),
     )
-    op.create_index(op.f("ix_vectors_settings_dataset_id"), "vectors_settings", ["dataset_id"], unique=False)
-    op.create_index(op.f("ix_vectors_settings_name"), "vectors_settings", ["name"], unique=False)
+    op.create_index(
+        op.f("ix_vectors_settings_dataset_id"),
+        "vectors_settings",
+        ["dataset_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_vectors_settings_name"), "vectors_settings", ["name"], unique=False
+    )
     # ### end Alembic commands ###
 
 

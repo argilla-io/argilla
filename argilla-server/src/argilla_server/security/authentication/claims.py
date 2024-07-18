@@ -25,7 +25,9 @@ class Claims(dict):
 
     def __init__(self, seq=None, **kwargs) -> None:
         super().__init__(seq or {}, **kwargs)
-        self["display_name"] = kwargs.get("display_name", self.get("display_name", "name"))
+        self["display_name"] = kwargs.get(
+            "display_name", self.get("display_name", "name")
+        )
         self["identity"] = kwargs.get("identity", self.get("identity", "sub"))
         self["picture"] = kwargs.get("picture", self.get("picture", "picture"))
         self["email"] = kwargs.get("email", self.get("email", "email"))

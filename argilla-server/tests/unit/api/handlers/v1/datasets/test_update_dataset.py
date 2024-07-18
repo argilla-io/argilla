@@ -26,7 +26,9 @@ class TestUpdateDataset:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}"
 
-    async def test_update_dataset_distribution(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_dataset_distribution(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(
@@ -51,7 +53,9 @@ class TestUpdateDataset:
             "min_submitted": 4,
         }
 
-    async def test_update_dataset_without_distribution(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_dataset_without_distribution(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(
@@ -187,7 +191,9 @@ class TestUpdateDataset:
             "min_submitted": 1,
         }
 
-    async def test_update_dataset_distribution_as_none(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_dataset_distribution_as_none(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.patch(

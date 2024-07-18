@@ -32,7 +32,13 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column(
-        "datasets", sa.Column("allow_extra_metadata", sa.Boolean(), server_default=sa.text("true"), nullable=False)
+        "datasets",
+        sa.Column(
+            "allow_extra_metadata",
+            sa.Boolean(),
+            server_default=sa.text("true"),
+            nullable=False,
+        ),
     )
 
 

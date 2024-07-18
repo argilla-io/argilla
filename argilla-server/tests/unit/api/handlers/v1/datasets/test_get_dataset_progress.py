@@ -28,13 +28,21 @@ class TestGetDatasetProgress:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/progress"
 
-    async def test_get_dataset_progress(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        records_completed = await RecordFactory.create_batch(3, status=RecordStatus.completed, dataset=dataset)
-        records_pending = await RecordFactory.create_batch(2, status=RecordStatus.pending, dataset=dataset)
+        records_completed = await RecordFactory.create_batch(
+            3, status=RecordStatus.completed, dataset=dataset
+        )
+        records_pending = await RecordFactory.create_batch(
+            2, status=RecordStatus.pending, dataset=dataset
+        )
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -43,10 +51,14 @@ class TestGetDatasetProgress:
             "total": 5,
         }
 
-    async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress_with_empty_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -56,11 +68,15 @@ class TestGetDatasetProgress:
         }
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_dataset_progress_as_restricted_user(self, async_client: AsyncClient, user_role: UserRole):
+    async def test_get_dataset_progress_as_restricted_user(
+        self, async_client: AsyncClient, user_role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=user_role)
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 200
 
@@ -71,9 +87,13 @@ class TestGetDatasetProgress:
         dataset = await DatasetFactory.create()
 
         other_dataset = await DatasetFactory.create()
-        user = await UserFactory.create(workspaces=[other_dataset.workspace], role=user_role)
+        user = await UserFactory.create(
+            workspaces=[other_dataset.workspace], role=user_role
+        )
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 403
         assert response.json() == {
@@ -83,7 +103,9 @@ class TestGetDatasetProgress:
             },
         }
 
-    async def test_get_dataset_progress_without_authentication(self, async_client: AsyncClient):
+    async def test_get_dataset_progress_without_authentication(
+        self, async_client: AsyncClient
+    ):
         response = await async_client.get(self.url(uuid4()))
 
         assert response.status_code == 401
@@ -99,7 +121,11 @@ class TestGetDatasetProgress:
     ):
         dataset_id = uuid4()
 
-        response = await async_client.get(self.url(dataset_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }

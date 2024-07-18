@@ -19,7 +19,13 @@ from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import UserRole
 from httpx import AsyncClient
 
-from tests.factories import AdminFactory, AnnotatorFactory, UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -27,19 +33,33 @@ class TestListWorkspaceUsers:
     def url(self, workspace_id: UUID) -> str:
         return f"/api/v1/workspaces/{workspace_id}/users"
 
-    async def test_list_workspace_users(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_list_workspace_users(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         workspace = await WorkspaceFactory.create()
         users = await UserFactory.create_batch(3)
-        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=users[0].id)
-        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=users[1].id)
-        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=users[2].id)
+        await WorkspaceUserFactory.create(
+            workspace_id=workspace.id, user_id=users[0].id
+        )
+        await WorkspaceUserFactory.create(
+            workspace_id=workspace.id, user_id=users[1].id
+        )
+        await WorkspaceUserFactory.create(
+            workspace_id=workspace.id, user_id=users[2].id
+        )
 
         other_workspace = await WorkspaceFactory.create()
         other_users = await UserFactory.create_batch(2)
-        await WorkspaceUserFactory.create(workspace_id=other_workspace.id, user_id=other_users[0].id)
-        await WorkspaceUserFactory.create(workspace_id=other_workspace.id, user_id=other_users[1].id)
+        await WorkspaceUserFactory.create(
+            workspace_id=other_workspace.id, user_id=other_users[0].id
+        )
+        await WorkspaceUserFactory.create(
+            workspace_id=other_workspace.id, user_id=other_users[1].id
+        )
 
-        response = await async_client.get(self.url(workspace.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(workspace.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -77,7 +97,9 @@ class TestListWorkspaceUsers:
             ],
         }
 
-    async def test_list_workspace_users_without_authentication(self, async_client: AsyncClient):
+    async def test_list_workspace_users_without_authentication(
+        self, async_client: AsyncClient
+    ):
         workspace = await WorkspaceFactory.create()
 
         response = await async_client.get(self.url(workspace.id))
@@ -96,7 +118,9 @@ class TestListWorkspaceUsers:
 
         assert response.status_code == 200
 
-    async def test_list_workspace_users_as_admin_from_different_workspace(self, async_client: AsyncClient):
+    async def test_list_workspace_users_as_admin_from_different_workspace(
+        self, async_client: AsyncClient
+    ):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create()
 
@@ -110,7 +134,9 @@ class TestListWorkspaceUsers:
     async def test_list_workspace_users_as_annotator(self, async_client: AsyncClient):
         workspace = await WorkspaceFactory.create()
         annotator = await AnnotatorFactory.create()
-        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+        await WorkspaceUserFactory.create(
+            workspace_id=workspace.id, user_id=annotator.id
+        )
 
         response = await async_client.get(
             self.url(workspace.id),
@@ -124,7 +150,11 @@ class TestListWorkspaceUsers:
     ):
         workspace_id = uuid4()
 
-        response = await async_client.get(self.url(workspace_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(workspace_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
+        assert response.json() == {
+            "detail": f"Workspace with id `{workspace_id}` not found"
+        }

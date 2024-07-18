@@ -17,7 +17,18 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql, select, func, text
+from sqlalchemy import (
+    JSON,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    and_,
+    sql,
+    select,
+    func,
+    text,
+)
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.asyncio import async_object_session
@@ -67,11 +78,15 @@ class Field(DatabaseModel):
     title: Mapped[str] = mapped_column(Text)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[UUID] = mapped_column(
+        ForeignKey("datasets.id", ondelete="CASCADE"), index=True
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
 
-    __table_args__ = (UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),
+    )
 
     def __repr__(self):
         return (
@@ -88,14 +103,22 @@ class Response(DatabaseModel):
     __tablename__ = "responses"
 
     values: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSON))
-    status: Mapped[ResponseStatus] = mapped_column(ResponseStatusEnum, default=ResponseStatus.submitted, index=True)
-    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    status: Mapped[ResponseStatus] = mapped_column(
+        ResponseStatusEnum, default=ResponseStatus.submitted, index=True
+    )
+    record_id: Mapped[UUID] = mapped_column(
+        ForeignKey("records.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
 
     record: Mapped["Record"] = relationship(back_populates="responses")
     user: Mapped["User"] = relationship(back_populates="responses")
 
-    __table_args__ = (UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint("record_id", "user_id", name="response_record_id_user_id_uq"),
+    )
     __upsertable_columns__ = {"values", "status"}
 
     @property
@@ -116,16 +139,28 @@ class Suggestion(DatabaseModel):
     __tablename__ = "suggestions"
 
     value: Mapped[Any] = mapped_column(JSON)
-    score: Mapped[Optional[Union[float, List[float]]]] = mapped_column(JSON, nullable=True)
+    score: Mapped[Optional[Union[float, List[float]]]] = mapped_column(
+        JSON, nullable=True
+    )
     agent: Mapped[Optional[str]] = mapped_column(nullable=True)
-    type: Mapped[Optional[SuggestionType]] = mapped_column(SuggestionTypeEnum, nullable=True, index=True)
-    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    question_id: Mapped[UUID] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
+    type: Mapped[Optional[SuggestionType]] = mapped_column(
+        SuggestionTypeEnum, nullable=True, index=True
+    )
+    record_id: Mapped[UUID] = mapped_column(
+        ForeignKey("records.id", ondelete="CASCADE"), index=True
+    )
+    question_id: Mapped[UUID] = mapped_column(
+        ForeignKey("questions.id", ondelete="CASCADE"), index=True
+    )
 
     record: Mapped["Record"] = relationship(back_populates="suggestions")
     question: Mapped["Question"] = relationship(back_populates="suggestions")
 
-    __table_args__ = (UniqueConstraint("record_id", "question_id", name="suggestion_record_id_question_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "record_id", "question_id", name="suggestion_record_id_question_id_uq"
+        ),
+    )
     __upsertable_columns__ = {"value", "score", "agent", "type"}
 
     def __repr__(self) -> str:
@@ -140,14 +175,22 @@ class Vector(DatabaseModel):
     __tablename__ = "vectors"
 
     value: Mapped[List[Any]] = mapped_column(JSON)
-    record_id: Mapped[UUID] = mapped_column(ForeignKey("records.id", ondelete="CASCADE"), index=True)
-    vector_settings_id: Mapped[UUID] = mapped_column(ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True)
+    record_id: Mapped[UUID] = mapped_column(
+        ForeignKey("records.id", ondelete="CASCADE"), index=True
+    )
+    vector_settings_id: Mapped[UUID] = mapped_column(
+        ForeignKey("vectors_settings.id", ondelete="CASCADE"), index=True
+    )
 
     record: Mapped["Record"] = relationship(back_populates="vectors")
     vector_settings: Mapped["VectorSettings"] = relationship(back_populates="vectors")
 
     __table_args__ = (
-        UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
+        UniqueConstraint(
+            "record_id",
+            "vector_settings_id",
+            name="vector_record_id_vector_settings_id_uq",
+        ),
     )
     __upsertable_columns__ = {"value"}
 
@@ -164,7 +207,9 @@ class VectorSettings(DatabaseModel):
     name: Mapped[str] = mapped_column(index=True)
     title: Mapped[str] = mapped_column(Text)
     dimensions: Mapped[int] = mapped_column()
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[UUID] = mapped_column(
+        ForeignKey("datasets.id", ondelete="CASCADE"), index=True
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="vectors_settings")
     vectors: Mapped[List["Vector"]] = relationship(
@@ -174,7 +219,11 @@ class VectorSettings(DatabaseModel):
         order_by=Vector.inserted_at.asc(),
     )
 
-    __table_args__ = (UniqueConstraint("name", "dataset_id", name="vector_settings_name_dataset_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "name", "dataset_id", name="vector_settings_name_dataset_id_uq"
+        ),
+    )
 
     def __repr__(self) -> str:
         return (
@@ -190,12 +239,19 @@ class Record(DatabaseModel):
     __tablename__ = "records"
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
+    metadata_: Mapped[Optional[dict]] = mapped_column(
+        "metadata", MutableDict.as_mutable(JSON), nullable=True
+    )
     status: Mapped[RecordStatus] = mapped_column(
-        RecordStatusEnum, default=RecordStatus.pending, server_default=RecordStatus.pending, index=True
+        RecordStatusEnum,
+        default=RecordStatus.pending,
+        server_default=RecordStatus.pending,
+        index=True,
     )
     external_id: Mapped[Optional[str]] = mapped_column(index=True)
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[UUID] = mapped_column(
+        ForeignKey("datasets.id", ondelete="CASCADE"), index=True
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="records")
     responses: Mapped[List["Response"]] = relationship(
@@ -223,9 +279,15 @@ class Record(DatabaseModel):
         order_by=Vector.inserted_at.asc(),
     )
 
-    __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "external_id", "dataset_id", name="record_external_id_dataset_id_uq"
+        ),
+    )
 
-    def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
+    def vector_value_by_vector_settings(
+        self, vector_settings: "VectorSettings"
+    ) -> Union[List[float], None]:
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
                 return vector.value
@@ -245,7 +307,9 @@ class Question(DatabaseModel):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     required: Mapped[bool] = mapped_column(default=False)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[UUID] = mapped_column(
+        ForeignKey("datasets.id", ondelete="CASCADE"), index=True
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="questions")
     suggestions: Mapped[List["Suggestion"]] = relationship(
@@ -255,7 +319,9 @@ class Question(DatabaseModel):
         order_by=Suggestion.inserted_at.asc(),
     )
 
-    __table_args__ = (UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),
+    )
 
     @property
     def parsed_settings(self) -> QuestionSettings:
@@ -279,12 +345,20 @@ class MetadataProperty(DatabaseModel):
     name: Mapped[str] = mapped_column(String, index=True)
     title: Mapped[str] = mapped_column(Text)
     settings: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON), default={})
-    allowed_roles: Mapped[List[UserRole]] = mapped_column(MutableList.as_mutable(JSON), default=[], server_default="[]")
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    allowed_roles: Mapped[List[UserRole]] = mapped_column(
+        MutableList.as_mutable(JSON), default=[], server_default="[]"
+    )
+    dataset_id: Mapped[UUID] = mapped_column(
+        ForeignKey("datasets.id", ondelete="CASCADE"), index=True
+    )
 
     dataset: Mapped["Dataset"] = relationship(back_populates="metadata_properties")
 
-    __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "name", "dataset_id", name="metadata_property_name_dataset_id_uq"
+        ),
+    )
 
     @property
     def type(self) -> MetadataPropertyType:
@@ -309,7 +383,9 @@ DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
 
 def _updated_at_current_value(context: DefaultExecutionContext) -> datetime:
-    return context.get_current_parameters(isolate_multiinsert_groups=False)["updated_at"]
+    return context.get_current_parameters(isolate_multiinsert_groups=False)[
+        "updated_at"
+    ]
 
 
 class Dataset(DatabaseModel):
@@ -317,12 +393,20 @@ class Dataset(DatabaseModel):
 
     name: Mapped[str] = mapped_column(index=True)
     guidelines: Mapped[Optional[str]] = mapped_column(Text)
-    allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
-    status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
+    allow_extra_metadata: Mapped[bool] = mapped_column(
+        default=True, server_default=sql.true()
+    )
+    status: Mapped[DatasetStatus] = mapped_column(
+        DatasetStatusEnum, default=DatasetStatus.draft, index=True
+    )
     distribution: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON))
-    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
+    workspace_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), index=True
+    )
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        default=inserted_at_current_value, onupdate=datetime.utcnow
+    )
     last_activity_at: Mapped[datetime] = mapped_column(
         default=inserted_at_current_value, onupdate=_updated_at_current_value
     )
@@ -359,13 +443,17 @@ class Dataset(DatabaseModel):
         order_by=VectorSettings.inserted_at.asc(),
     )
 
-    __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),
+    )
 
     @property
     async def responses_count(self) -> int:
         # TODO: This should be moved to proper repository
         return await async_object_session(self).scalar(
-            select(func.count(Response.id)).join(Record).where(Record.dataset_id == self.id)
+            select(func.count(Response.id))
+            .join(Record)
+            .where(Record.dataset_id == self.id)
         )
 
     @property
@@ -412,13 +500,19 @@ class Dataset(DatabaseModel):
 class WorkspaceUser(DatabaseModel):
     __tablename__ = "workspaces_users"
 
-    workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    workspace_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
 
     workspace: Mapped["Workspace"] = relationship(viewonly=True)
     user: Mapped["User"] = relationship(viewonly=True)
 
-    __table_args__ = (UniqueConstraint("workspace_id", "user_id", name="workspace_id_user_id_uq"),)
+    __table_args__ = (
+        UniqueConstraint("workspace_id", "user_id", name="workspace_id_user_id_uq"),
+    )
 
     def __repr__(self):
         return (
@@ -433,9 +527,13 @@ class Workspace(DatabaseModel):
 
     name: Mapped[str] = mapped_column(unique=True, index=True)
 
-    datasets: Mapped[List["Dataset"]] = relationship(back_populates="workspace", order_by=Dataset.inserted_at.asc())
+    datasets: Mapped[List["Dataset"]] = relationship(
+        back_populates="workspace", order_by=Dataset.inserted_at.asc()
+    )
     users: Mapped[List["User"]] = relationship(
-        secondary="workspaces_users", back_populates="workspaces", order_by=WorkspaceUser.inserted_at.asc()
+        secondary="workspaces_users",
+        back_populates="workspaces",
+        order_by=WorkspaceUser.inserted_at.asc(),
     )
 
     def __repr__(self):
@@ -458,12 +556,18 @@ class User(DatabaseModel):
     first_name: Mapped[str]
     last_name: Mapped[Optional[str]]
     username: Mapped[str] = mapped_column(unique=True, index=True)
-    role: Mapped[UserRole] = mapped_column(UserRoleEnum, default=UserRole.annotator, index=True)
-    api_key: Mapped[str] = mapped_column(Text, unique=True, index=True, default=generate_user_api_key)
+    role: Mapped[UserRole] = mapped_column(
+        UserRoleEnum, default=UserRole.annotator, index=True
+    )
+    api_key: Mapped[str] = mapped_column(
+        Text, unique=True, index=True, default=generate_user_api_key
+    )
     password_hash: Mapped[str] = mapped_column(Text)
 
     workspaces: Mapped[List["Workspace"]] = relationship(
-        secondary="workspaces_users", back_populates="users", order_by=WorkspaceUser.inserted_at.asc()
+        secondary="workspaces_users",
+        back_populates="users",
+        order_by=WorkspaceUser.inserted_at.asc(),
     )
     responses: Mapped[List["Response"]] = relationship(
         back_populates="user",
@@ -497,7 +601,9 @@ class User(DatabaseModel):
     async def is_member(self, workspace_id: UUID) -> bool:
         # TODO: Change query to use exists may improve performance
         return (
-            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            await WorkspaceUser.get_by(
+                async_object_session(self), workspace_id=workspace_id, user_id=self.id
+            )
             is not None
         )
 

@@ -45,7 +45,9 @@ async def create_current_user_responses_bulk(
     *,
     body: ResponsesBulkCreate,
     current_user: User = Security(auth.get_current_user),
-    use_case: UpsertResponsesInBulkUseCase = Depends(UpsertResponsesInBulkUseCaseFactory()),
+    use_case: UpsertResponsesInBulkUseCase = Depends(
+        UpsertResponsesInBulkUseCaseFactory()
+    ),
 ):
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
 
@@ -65,7 +67,9 @@ async def update_response(
         db,
         response_id,
         options=[
-            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Response.record)
+            .selectinload(Record.dataset)
+            .selectinload(Dataset.questions),
         ],
     )
 
@@ -86,7 +90,9 @@ async def delete_response(
         db,
         response_id,
         options=[
-            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+            selectinload(Response.record)
+            .selectinload(Record.dataset)
+            .selectinload(Dataset.questions),
         ],
     )
 

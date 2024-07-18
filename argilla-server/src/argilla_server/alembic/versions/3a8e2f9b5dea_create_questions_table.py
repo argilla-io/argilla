@@ -38,9 +38,17 @@ def upgrade() -> None:
         sa.Column("name", sa.String, nullable=False, index=True),
         sa.Column("title", sa.Text, nullable=False),
         sa.Column("description", sa.Text),
-        sa.Column("required", sa.Boolean, nullable=False, server_default=expression.false()),
+        sa.Column(
+            "required", sa.Boolean, nullable=False, server_default=expression.false()
+        ),
         sa.Column("settings", sa.JSON, nullable=False),
-        sa.Column("dataset_id", sa.Uuid, sa.ForeignKey("datasets.id", ondelete="CASCADE"), nullable=False, index=True),
+        sa.Column(
+            "dataset_id",
+            sa.Uuid,
+            sa.ForeignKey("datasets.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
         sa.UniqueConstraint("name", "dataset_id", name="question_name_dataset_id_uq"),

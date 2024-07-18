@@ -33,7 +33,9 @@ class DatasetPolicy:
     @classmethod
     def list_records_with_all_responses(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
@@ -47,63 +49,81 @@ class DatasetPolicy:
     @classmethod
     def create(cls, workspace_id: UUID) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def create_field(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def create_question(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def create_metadata_property(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def create_vector_settings(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def create_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def update_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def upsert_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def delete_records(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
@@ -117,27 +137,35 @@ class DatasetPolicy:
     @classmethod
     def search_records_with_all_responses(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def publish(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def delete(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed
 
     @classmethod
     def update(cls, dataset: Dataset) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+            return actor.is_owner or (
+                actor.is_admin and await actor.is_member(dataset.workspace_id)
+            )
 
         return is_allowed

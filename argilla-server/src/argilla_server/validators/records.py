@@ -19,8 +19,15 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
-from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.api.schemas.v1.records import (
+    RecordCreate,
+    RecordUpdate,
+    RecordUpsert,
+)
+from argilla_server.api.schemas.v1.records_bulk import (
+    RecordsBulkCreate,
+    RecordsBulkUpsert,
+)
 from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
@@ -59,17 +66,25 @@ class RecordValidatorBase(ABC):
                     "and extra metadata is not allowed for this dataset"
                 )
 
-    def _validate_required_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+    def _validate_required_fields(
+        self, dataset: Dataset, fields: Dict[str, str]
+    ) -> None:
         for field in dataset.fields:
-            if field.required and not (field.name in fields and fields.get(field.name) is not None):
-                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
+            if field.required and not (
+                field.name in fields and fields.get(field.name) is not None
+            ):
+                raise UnprocessableEntityError(
+                    f"missing required value for field: {field.name!r}"
+                )
 
     def _validate_extra_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
         fields_copy = copy.copy(fields)
         for field in dataset.fields:
             fields_copy.pop(field.name, None)
         if fields_copy:
-            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
+            raise UnprocessableEntityError(
+                f"found fields values for non configured fields: {list(fields_copy.keys())}"
+            )
 
 
 class RecordCreateValidator(RecordValidatorBase):
@@ -109,22 +124,40 @@ class RecordsBulkCreateValidator:
 
     def _validate_dataset_is_ready(self, dataset: Dataset) -> None:
         if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created for a non published dataset")
+            raise UnprocessableEntityError(
+                "records cannot be created for a non published dataset"
+            )
 
     async def _validate_external_ids_are_not_present_in_db(self, dataset: Dataset):
-        external_ids = [r.external_id for r in self._records_create.items if r.external_id is not None]
-        records_by_external_id = await records.fetch_records_by_external_ids_as_dict(self._db, dataset, external_ids)
+        external_ids = [
+            r.external_id
+            for r in self._records_create.items
+            if r.external_id is not None
+        ]
+        records_by_external_id = await records.fetch_records_by_external_ids_as_dict(
+            self._db, dataset, external_ids
+        )
 
-        found_records = [str(external_id) for external_id in external_ids if external_id in records_by_external_id]
+        found_records = [
+            str(external_id)
+            for external_id in external_ids
+            if external_id in records_by_external_id
+        ]
         if found_records:
-            raise UnprocessableEntityError(f"found records with same external ids: {', '.join(found_records)}")
+            raise UnprocessableEntityError(
+                f"found records with same external ids: {', '.join(found_records)}"
+            )
 
-    def _validate_all_bulk_records(self, dataset: Dataset, records_create: List[RecordCreate]):
+    def _validate_all_bulk_records(
+        self, dataset: Dataset, records_create: List[RecordCreate]
+    ):
         for idx, record_create in enumerate(records_create):
             try:
                 RecordCreateValidator(record_create).validate_for(dataset)
             except UnprocessableEntityError as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                raise UnprocessableEntityError(
+                    f"record at position {idx} is not valid because {ex}"
+                ) from ex
 
 
 class RecordsBulkUpsertValidator:
@@ -132,11 +165,15 @@ class RecordsBulkUpsertValidator:
         self,
         records_upsert: RecordsBulkUpsert,
         db: AsyncSession,
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
+        existing_records_by_external_id_or_record_id: Union[
+            Dict[Union[str, UUID], Record], None
+        ] = None,
     ):
         self._db = db
         self._records_upsert = records_upsert
-        self._existing_records_by_external_id_or_record_id = existing_records_by_external_id_or_record_id or {}
+        self._existing_records_by_external_id_or_record_id = (
+            existing_records_by_external_id_or_record_id or {}
+        )
 
     def validate_for(self, dataset: Dataset) -> None:
         self.validate_dataset_is_ready(dataset)
@@ -144,18 +181,30 @@ class RecordsBulkUpsertValidator:
 
     def validate_dataset_is_ready(self, dataset: Dataset) -> None:
         if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
+            raise UnprocessableEntityError(
+                "records cannot be created or updated for a non published dataset"
+            )
 
-    def _validate_all_bulk_records(self, dataset: Dataset, records_upsert: List[RecordUpsert]):
+    def _validate_all_bulk_records(
+        self, dataset: Dataset, records_upsert: List[RecordUpsert]
+    ):
         for idx, record_upsert in enumerate(records_upsert):
             try:
                 record = self._existing_records_by_external_id_or_record_id.get(
                     record_upsert.id
-                ) or self._existing_records_by_external_id_or_record_id.get(record_upsert.external_id)
+                ) or self._existing_records_by_external_id_or_record_id.get(
+                    record_upsert.external_id
+                )
 
                 if record:
-                    RecordUpdateValidator(RecordUpdate.parse_obj(record_upsert)).validate_for(dataset)
+                    RecordUpdateValidator(
+                        RecordUpdate.parse_obj(record_upsert)
+                    ).validate_for(dataset)
                 else:
-                    RecordCreateValidator(RecordCreate.parse_obj(record_upsert)).validate_for(dataset)
+                    RecordCreateValidator(
+                        RecordCreate.parse_obj(record_upsert)
+                    ).validate_for(dataset)
             except (UnprocessableEntityError, ValueError) as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                raise UnprocessableEntityError(
+                    f"record at position {idx} is not valid because {ex}"
+                ) from ex

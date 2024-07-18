@@ -23,7 +23,13 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import DatasetFactory, QuestionFactory, RecordFactory, SpanQuestionFactory, TextQuestionFactory
+from tests.factories import (
+    DatasetFactory,
+    QuestionFactory,
+    RecordFactory,
+    SpanQuestionFactory,
+    TextQuestionFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -32,7 +38,16 @@ class TestUpsertSuggestion:
         return f"/api/v1/records/{record_id}/suggestions"
 
     @pytest.mark.parametrize(
-        "agent", ["a", "A", "0", "gpt 3.5", "gpt-3.5-turbo", "argilla/zephyr-7b", "ft:gpt-3.5-turbo"]
+        "agent",
+        [
+            "a",
+            "A",
+            "0",
+            "gpt 3.5",
+            "gpt-3.5-turbo",
+            "argilla/zephyr-7b",
+            "ft:gpt-3.5-turbo",
+        ],
     )
     async def test_upsert_suggestion_with_valid_agent(
         self, async_client: AsyncClient, owner_auth_header: dict, agent: str
@@ -166,7 +181,9 @@ class TestUpsertSuggestion:
 
         assert response.status_code == 422
 
-    async def test_upsert_suggestion_with_invalid_lower_score(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_upsert_suggestion_with_invalid_lower_score(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         response = await async_client.put(
             self.url(uuid4()),
             headers=owner_auth_header,
@@ -181,7 +198,9 @@ class TestUpsertSuggestion:
 
         assert response.status_code == 422
 
-    async def test_upsert_suggestion_with_invalid_upper_score(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_upsert_suggestion_with_invalid_upper_score(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         response = await async_client.put(
             self.url(uuid4()),
             headers=owner_auth_header,
@@ -292,9 +311,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -322,9 +345,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -342,16 +369,22 @@ class TestUpsertSuggestion:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "number of items on value and score attributes doesn't match"}
+        assert response.json() == {
+            "detail": "number of items on value and score attributes doesn't match"
+        }
 
     async def test_upsert_suggestion_for_span_question(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -383,8 +416,12 @@ class TestUpsertSuggestion:
             ],
             "agent": None,
             "score": None,
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_upsert_suggestion_for_span_question_with_additional_value_attributes(
@@ -392,9 +429,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -426,8 +467,12 @@ class TestUpsertSuggestion:
             ],
             "agent": None,
             "score": None,
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_upsert_suggestion_for_span_question_with_empty_value(
@@ -435,9 +480,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -461,8 +510,12 @@ class TestUpsertSuggestion:
             "value": [],
             "agent": None,
             "score": None,
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_upsert_suggestion_for_span_question_with_record_not_providing_required_field(
@@ -470,9 +523,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"other-field": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"other-field": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -487,7 +544,9 @@ class TestUpsertSuggestion:
         )
 
         assert response.status_code == 422, response.json()
-        assert response.json() == {"detail": "span question requires record to have field `field-a`"}
+        assert response.json() == {
+            "detail": "span question requires record to have field `field-a`"
+        }
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
@@ -496,9 +555,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -521,9 +584,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -549,9 +616,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -577,9 +648,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -601,9 +676,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -625,9 +704,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -649,9 +732,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -673,9 +760,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -702,9 +793,13 @@ class TestUpsertSuggestion:
     ):
         dataset = await DatasetFactory.create()
 
-        span_question = await SpanQuestionFactory.create(name="span-question", dataset=dataset)
+        span_question = await SpanQuestionFactory.create(
+            name="span-question", dataset=dataset
+        )
 
-        record = await RecordFactory.create(fields={"field-a": "Hello, this is a text field"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello, this is a text field"}, dataset=dataset
+        )
 
         response = await async_client.put(
             self.url(record.id),
@@ -721,6 +816,8 @@ class TestUpsertSuggestion:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "overlapping values found between spans at index idx=0 and idx=2"}
+        assert response.json() == {
+            "detail": "overlapping values found between spans at index idx=0 and idx=2"
+        }
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0

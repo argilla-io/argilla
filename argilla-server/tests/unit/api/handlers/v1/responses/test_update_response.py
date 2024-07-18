@@ -21,10 +21,20 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from argilla_server.enums import ResponseStatus, DatasetDistributionStrategy, RecordStatus
+from argilla_server.enums import (
+    ResponseStatus,
+    DatasetDistributionStrategy,
+    RecordStatus,
+)
 from argilla_server.models import Response, User
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory, TextQuestionFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    SpanQuestionFactory,
+    TextQuestionFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -33,13 +43,19 @@ class TestUpdateResponse:
         return f"/api/v1/responses/{response_id}"
 
     async def test_update_response_for_span_question(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
         response = await ResponseFactory.create(
             status=ResponseStatus.submitted,
             values={
@@ -66,10 +82,14 @@ class TestUpdateResponse:
             },
         }
 
-        resp = await async_client.put(self.url(response.id), headers=owner_auth_header, json=body_json)
+        resp = await async_client.put(
+            self.url(response.id), headers=owner_auth_header, json=body_json
+        )
 
         assert resp.status_code == 200
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == body_json["values"]
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == body_json["values"]
 
         resp_json = resp.json()
         assert resp_json == {
@@ -91,13 +111,19 @@ class TestUpdateResponse:
         }
 
     async def test_update_response_for_span_question_with_additional_value_attributes(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
         response = await ResponseFactory.create(
             status=ResponseStatus.submitted,
             values={
@@ -119,8 +145,18 @@ class TestUpdateResponse:
                 "values": {
                     "span-question": {
                         "value": [
-                            {"label": "label-a", "start": 0, "end": 1, "ignored": "value"},
-                            {"label": "label-b", "start": 2, "end": 3, "ignored": "value"},
+                            {
+                                "label": "label-a",
+                                "start": 0,
+                                "end": 1,
+                                "ignored": "value",
+                            },
+                            {
+                                "label": "label-b",
+                                "start": 2,
+                                "end": 3,
+                                "ignored": "value",
+                            },
                             {"label": "label-c", "start": 4, "end": 5},
                         ],
                     },
@@ -139,7 +175,9 @@ class TestUpdateResponse:
         }
 
         assert resp.status_code == 200
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == expected_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == expected_values
 
         resp_json = resp.json()
         assert resp_json == {
@@ -153,13 +191,19 @@ class TestUpdateResponse:
         }
 
     async def test_update_response_for_span_question_with_empty_value(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
         response = await ResponseFactory.create(
             status=ResponseStatus.submitted,
             values={
@@ -184,10 +228,14 @@ class TestUpdateResponse:
             },
         }
 
-        resp = await async_client.put(self.url(response.id), headers=owner_auth_header, json=body_json)
+        resp = await async_client.put(
+            self.url(response.id), headers=owner_auth_header, json=body_json
+        )
 
         assert resp.status_code == 200
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == body_json["values"]
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == body_json["values"]
 
         resp_json = resp.json()
         assert resp_json == {
@@ -205,13 +253,19 @@ class TestUpdateResponse:
         }
 
     async def test_update_response_for_span_question_with_record_not_providing_required_field(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"other-field": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"other-field": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -240,18 +294,28 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert resp.json() == {"detail": "span question requires record to have field `field-a`"}
+        assert resp.json() == {
+            "detail": "span question requires record to have field `field-a`"
+        }
 
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_invalid_value(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -283,16 +347,24 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_start_greater_than_expected(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -325,16 +397,24 @@ class TestUpdateResponse:
             "detail": "span question response value `start` must have a value lower than record field `field-a` length that is `5`"
         }
 
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_end_greater_than_expected(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -367,16 +447,24 @@ class TestUpdateResponse:
             "detail": "span question response value `end` must have a value lower or equal than record field `field-a` length that is `5`"
         }
 
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_invalid_start(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -405,16 +493,24 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_invalid_end(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -443,16 +539,24 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_equal_start_and_end(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -481,16 +585,24 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_end_smaller_than_start(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -519,16 +631,24 @@ class TestUpdateResponse:
         )
 
         assert resp.status_code == 422
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_for_span_question_with_non_existent_label(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response_values = {
             "span-question": {
@@ -550,7 +670,9 @@ class TestUpdateResponse:
                 "status": ResponseStatus.submitted,
                 "values": {
                     "span-question": {
-                        "value": [{"label": "label-non-existent", "start": 1, "end": 2}],
+                        "value": [
+                            {"label": "label-non-existent", "start": 1, "end": 2}
+                        ],
                     },
                 },
             },
@@ -561,7 +683,9 @@ class TestUpdateResponse:
             "detail": "undefined label 'label-non-existent' for span question.\nValid labels are: ['label-a', 'label-b', 'label-c']"
         }
 
-        assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+        assert (
+            await db.execute(select(Response).filter_by(id=response.id))
+        ).scalar_one().values == response_values
 
     async def test_update_response_updates_record_status_to_completed(
         self, async_client: AsyncClient, owner_auth_header: dict
@@ -575,8 +699,12 @@ class TestUpdateResponse:
 
         await TextQuestionFactory.create(name="text-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
-        response = await ResponseFactory.create(record=record, status=ResponseStatus.draft)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
+        response = await ResponseFactory.create(
+            record=record, status=ResponseStatus.draft
+        )
 
         resp = await async_client.put(
             self.url(response.id),
@@ -606,7 +734,9 @@ class TestUpdateResponse:
 
         await TextQuestionFactory.create(name="text-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset, status=RecordStatus.completed)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset, status=RecordStatus.completed
+        )
         response = await ResponseFactory.create(
             values={
                 "text-question": {

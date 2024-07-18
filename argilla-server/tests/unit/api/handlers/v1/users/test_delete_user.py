@@ -30,10 +30,14 @@ class TestDeleteUser:
     def url(self, user_id: UUID) -> str:
         return f"/api/v1/users/{user_id}"
 
-    async def test_delete_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_delete_user(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         user = await UserFactory.create()
 
-        response = await async_client.delete(self.url(user.id), headers=owner_auth_header)
+        response = await async_client.delete(
+            self.url(user.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -49,7 +53,9 @@ class TestDeleteUser:
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 1
 
-    async def test_delete_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
+    async def test_delete_user_without_authentication(
+        self, db: AsyncSession, async_client: AsyncClient
+    ):
         user = await UserFactory.create()
 
         response = await async_client.delete(self.url(user.id))
@@ -72,10 +78,14 @@ class TestDeleteUser:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
-    async def test_delete_user_with_nonexistent_user_id(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_delete_user_with_nonexistent_user_id(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         user_id = uuid4()
 
-        response = await async_client.delete(self.url(user_id), headers=owner_auth_header)
+        response = await async_client.delete(
+            self.url(user_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 404
         assert response.json() == {"detail": f"User with id `{user_id}` not found"}

@@ -96,7 +96,9 @@ class TestDatasetRecordsBulkWithResponses:
     ):
         dataset = await self.test_dataset()
         user = await OwnerFactory.create()
-        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        record = await RecordFactory.create(
+            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
+        )
 
         http_response = await async_client.put(
             self.url(dataset.id),
@@ -188,9 +190,14 @@ class TestDatasetRecordsBulkWithResponses:
     ):
         dataset = await self.test_dataset()
         user = await OwnerFactory.create()
-        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        record = await RecordFactory.create(
+            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
+        )
         response = await ResponseFactory.create(
-            record=record, user=user, values={"label": {"value": "label-a"}}, status="submitted"
+            record=record,
+            user=user,
+            values={"label": {"value": "label-a"}},
+            status="submitted",
         )
 
         http_response = await async_client.put(
@@ -238,9 +245,14 @@ class TestDatasetRecordsBulkWithResponses:
         dataset = await self.test_dataset()
         user = await OwnerFactory.create()
         other_user = await OwnerFactory.create()
-        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        record = await RecordFactory.create(
+            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
+        )
         await ResponseFactory.create(
-            record=record, user=user, values={"label": {"value": "label-a"}}, status="submitted"
+            record=record,
+            user=user,
+            values={"label": {"value": "label-a"}},
+            status="submitted",
         )
 
         response = await async_client.put(
@@ -321,7 +333,9 @@ class TestDatasetRecordsBulkWithResponses:
             "found response value for non configured question with name='other-question'"
         }
 
-    async def test_update_record_with_wrong_responses_values(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_record_with_wrong_responses_values(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await self.test_dataset()
         user = await OwnerFactory.create()
         response = await async_client.post(
@@ -366,8 +380,16 @@ class TestDatasetRecordsBulkWithResponses:
             settings={
                 "type": QuestionType.label_selection,
                 "options": [
-                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
-                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {
+                        "value": "label-a",
+                        "text": "Label A",
+                        "description": "Label A description",
+                    },
+                    {
+                        "value": "label-b",
+                        "text": "Label B",
+                        "description": "Label B description",
+                    },
                 ],
             },
         )

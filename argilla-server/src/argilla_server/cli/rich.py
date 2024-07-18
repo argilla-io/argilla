@@ -25,12 +25,18 @@ def get_argilla_themed_table(title: str, **kwargs: Any) -> Table:
     return Table(title=title, border_style=_ARGILLA_BORDER_STYLE, **kwargs)
 
 
-def get_argilla_themed_panel(renderable: RenderableType, title: str, success: bool = True, **kwargs: Any) -> Panel:
+def get_argilla_themed_panel(
+    renderable: RenderableType, title: str, success: bool = True, **kwargs: Any
+) -> Panel:
     if success:
         title = f"[green]{title}"
 
-    return Panel(renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, title=title, **kwargs)
+    return Panel(
+        renderable=renderable, border_style=_ARGILLA_BORDER_STYLE, title=title, **kwargs
+    )
 
 
-def echo_in_panel(renderable: RenderableType, title: str, success: bool = True, **kwargs: Any) -> None:
+def echo_in_panel(
+    renderable: RenderableType, title: str, success: bool = True, **kwargs: Any
+) -> None:
     Console().print(get_argilla_themed_panel(renderable, title, success, **kwargs))
