@@ -197,7 +197,7 @@ async def configure_database():
                 f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
             )
 
-    with contextlib.asynccontextmanager(get_async_db)() as db:
+    async with contextlib.asynccontextmanager(get_async_db)() as db:
         await check_default_user(db)
 
 
