@@ -12,7 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""This module contains metrics to gather information related to inter-Annotator agreement. """
+"""This module contains metrics to gather information related to inter-Annotator agreement."""
+
 import warnings
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
@@ -52,6 +53,7 @@ except (ImportError, ModuleNotFoundError):
 def prepare_dataset_for_annotation_task(
     dataset: Union["FeedbackDataset", "RemoteFeedbackDataset"],
     question_name: str,
+    field_name: Union[str, List[str]],
     filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
     sort_by: Optional[List["SortBy"]] = None,
     max_records: Optional[int] = None,
@@ -74,6 +76,7 @@ def prepare_dataset_for_annotation_task(
     Args:
         dataset: FeedbackDataset to compute the metrics.
         question_name: Name of the question for which we want to analyse the agreement.
+        field_name: Name of the fields related to the question we want to analyse the agreement.
         filter_by: A dict with key the field to filter by, and values the filters to apply.
             Can be one of: draft, pending, submitted, and discarded. If set to None,
             no filter will be applied. Defaults to None (no filter is applied).
@@ -108,7 +111,9 @@ def prepare_dataset_for_annotation_task(
 
     for row in hf_dataset:
         responses_ = row[question_name]
-        question_text = row["text"]
+        question_text = (
+            " ".join([row[field] for field in field_name]) if isinstance(field_name, list) else row[field_name]
+        )
         for response in responses_:
             user_id = response["user_id"]
             if user_id is None:
@@ -181,7 +186,7 @@ class AgreementMetric(MetricBase):
     Example:
         >>> import argilla as rg
         >>> from argilla.client.feedback.metrics import AgreementMetric
-        >>> metric = AgreementMetric(dataset=dataset, question_name=question, filter_by={"response_status": "submitted"})
+        >>> metric = AgreementMetric(dataset=dataset, question_name=question, field_name=field, filter_by={"response_status": "submitted"})
         >>> metrics_report = metric.compute("alpha")
 
     """
@@ -190,6 +195,7 @@ class AgreementMetric(MetricBase):
         self,
         dataset: FeedbackDataset,
         question_name: str,
+        field_name: Union[str, List[str]],
         filter_by: Optional[Dict[str, Union["ResponseStatusFilter", List["ResponseStatusFilter"]]]] = None,
         sort_by: Optional[List["SortBy"]] = None,
         max_records: Optional[int] = None,
@@ -199,6 +205,7 @@ class AgreementMetric(MetricBase):
         Args:
             dataset: FeedbackDataset to compute the metrics.
             question_name: Name of the question for which we want to analyse the agreement.
+            field_name: Name of the fields related to the question we want to analyse the agreement.
             filter_by: A dict with key the field to filter by, and values the filters to apply.
                 Can be one of: draft, pending, submitted, and discarded. If set to None,
                 no filter will be applied. Defaults to None (no filter is applied).
@@ -207,6 +214,7 @@ class AgreementMetric(MetricBase):
             max_records: The maximum number of records to use for training. Defaults to None.
         """
         self._metrics_per_question = METRICS_PER_QUESTION
+        self._field_name = field_name
         super().__init__(dataset, question_name)
         self._filter_by = filter_by
         self._sort_by = sort_by
@@ -231,6 +239,7 @@ class AgreementMetric(MetricBase):
         dataset = prepare_dataset_for_annotation_task(
             self._dataset,
             self._question_name,
+            self._field_name,
             filter_by=self._filter_by,
             sort_by=self._sort_by,
             max_records=self._max_records,
