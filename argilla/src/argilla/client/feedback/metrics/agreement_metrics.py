@@ -186,7 +186,7 @@ class AgreementMetric(MetricBase):
     Example:
         >>> import argilla as rg
         >>> from argilla.client.feedback.metrics import AgreementMetric
-        >>> metric = AgreementMetric(dataset=dataset, question_name=question, filter_by={"response_status": "submitted"})
+        >>> metric = AgreementMetric(dataset=dataset, question_name=question, field_name=field, filter_by={"response_status": "submitted"})
         >>> metrics_report = metric.compute("alpha")
 
     """

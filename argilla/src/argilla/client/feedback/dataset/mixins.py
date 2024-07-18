@@ -95,6 +95,7 @@ class MetricsMixin:
         Args:
             metric_names: Metric name or list of metric names of the metrics, dependent on the question type.
             question_name: Question for which we want to compute the metrics.
+            field_name: Name of the fields related to the question we want to analyse the agreement.
 
         Note:
             Currently, TextQuestion is not supported.
