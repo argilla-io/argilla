@@ -2,7 +2,7 @@
 description: In this section, we will provide a step-by-step guide to show how to distribute the annotation task among team members.
 ---
 
-# Distribute the annotation among the team
+# Distribute the annotation task among the team
 
 This guide explains how you can use Argilla’s **automatic task distribution** to efficiently divide the task of annotating a dataset among multiple team members.
 
