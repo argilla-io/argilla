@@ -1,9 +1,16 @@
 import { Progress } from "./Progress";
 
+interface DatasetDistribution {
+  strategy: string;
+  minSubmitted: number;
+}
+
 interface OriginalDataset {
   guidelines: string;
   allowExtraMetadata: boolean;
+  distribution: DatasetDistribution;
 }
+
 export class Dataset {
   public original: OriginalDataset;
   public progress: Progress;
@@ -15,10 +22,11 @@ export class Dataset {
     public readonly status: string,
     public readonly workspaceId: string,
     public readonly workspaceName: string,
+    public allowExtraMetadata: boolean,
+    public distribution: DatasetDistribution,
     public readonly createdAt: string,
     public updatedAt: string,
-    public readonly lastActivityAt: string,
-    public allowExtraMetadata: boolean
+    public readonly lastActivityAt: string
   ) {
     this.initializeOriginal();
   }
@@ -30,13 +38,18 @@ export class Dataset {
   public get isModified(): boolean {
     return (
       this.guidelines !== this.original.guidelines ||
-      this.allowExtraMetadata !== this.original.allowExtraMetadata
+      this.allowExtraMetadata !== this.original.allowExtraMetadata ||
+      JSON.stringify(this.distribution) !==
+        JSON.stringify(this.original.distribution)
     );
   }
 
   restore() {
     this.guidelines = this.original.guidelines;
     this.allowExtraMetadata = this.original.allowExtraMetadata;
+    this.distribution = {
+      ...this.original.distribution,
+    };
   }
 
   update(when: string) {
@@ -49,6 +62,9 @@ export class Dataset {
     this.original = {
       guidelines: this.guidelines,
       allowExtraMetadata: this.allowExtraMetadata,
+      distribution: {
+        ...this.distribution,
+      },
     };
   }
 }

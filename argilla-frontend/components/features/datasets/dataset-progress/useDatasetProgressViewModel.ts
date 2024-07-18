@@ -1,45 +1,46 @@
 import { useResolve } from "ts-injecty";
-import { ref, useFetch } from "@nuxtjs/composition-api";
+import { onBeforeMount, ref } from "@nuxtjs/composition-api";
 import { GetDatasetProgressUseCase } from "@/v1/domain/usecases/get-dataset-progress-use-case";
-import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
-import { Progress } from "~/v1/domain/entities/dataset/Progress";
+import { useTeamProgress } from "~/v1/infrastructure/storage/TeamProgressStorage";
 
 export const useDatasetProgressViewModel = ({
-  dataset,
+  datasetId,
 }: {
-  dataset: Dataset;
+  datasetId: string;
 }) => {
-  const getProgressUseCase = useResolve(GetDatasetProgressUseCase);
-  const progress = ref<Progress | null>(null);
+  const t = useTranslate();
+  const isLoaded = ref(false);
   const progressRanges = ref([]);
 
-  const t = useTranslate();
+  const { state: progress } = useTeamProgress();
+  const getProgressUseCase = useResolve(GetDatasetProgressUseCase);
 
-  useFetch(async () => {
-    try {
-      progress.value = await getProgressUseCase.execute(dataset.id);
+  onBeforeMount(async () => {
+    await getProgressUseCase.execute(datasetId);
 
-      progressRanges.value = [
-        {
-          id: "completed",
-          name: t("datasets.completed"),
-          color: "#0508D9",
-          value: progress.value.completed,
-          tooltip: `${progress.value.completed}/${progress.value.total}`,
-        },
-        {
-          id: "pending",
-          name: t("datasets.left"),
-          color: "#e6e6e6",
-          value: progress.value.pending,
-          tooltip: `${progress.value.pending}/${progress.value.total}`,
-        },
-      ];
-    } catch {}
+    progressRanges.value = [
+      {
+        id: "completed",
+        name: t("datasets.completed"),
+        color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+        value: progress.completed,
+        tooltip: `${progress.completed}/${progress.total}`,
+      },
+      {
+        id: "pending",
+        name: t("datasets.left"),
+        color: "#e6e6e6",
+        value: progress.pending,
+        tooltip: `${progress.pending}/${progress.total}`,
+      },
+    ];
+
+    isLoaded.value = true;
   });
 
   return {
+    isLoaded,
     progress,
     progressRanges,
   };
