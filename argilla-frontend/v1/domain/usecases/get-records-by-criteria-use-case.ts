@@ -123,6 +123,7 @@ export class GetRecordsByCriteriaUseCase {
           record.query_score,
           recordPage,
           record.metadata,
+          record.status,
           record.inserted_at,
           record.updated_at
         );
@@ -164,6 +165,7 @@ export class GetRecordsByCriteriaUseCase {
           0,
           0,
           referenceRecordFromBackend.metadata,
+          referenceRecordFromBackend.status,
           referenceRecordFromBackend.inserted_at,
           referenceRecordFromBackend.updated_at
         );
