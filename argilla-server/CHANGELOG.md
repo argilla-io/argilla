@@ -16,6 +16,9 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+> [!IMPORTANT]
+> This version includes changes related to the search index. So, a reindex is needed.
+
 ### Added
 
 - Added support to specify `distribution` attribute when creating a dataset. ([#5013](https://github.com/argilla-io/argilla/pull/5013))
