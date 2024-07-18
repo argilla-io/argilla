@@ -106,9 +106,9 @@ dataset1.create()
 dataset2.create()
 ```
 
-### Create a dataset with settings from an existing dataset
+### Create a dataset from an existing dataset
 
-To create a new dataset with settings from an existing dataset, get the settings from the existing dataset and pass it
+To create a new dataset from an existing dataset, get the settings from the existing dataset and pass it
 to the new dataset.
 
 ```python
@@ -122,6 +122,13 @@ dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.s
 
 # Create the dataset on the server
 dataset.create()
+```
+
+You can also copy the records from the original dataset to the new one:
+
+```python
+records = list(existing_dataset.records)
+dataset.records.log(records)
 ```
 
 ## Define dataset settings
