@@ -24,7 +24,7 @@ from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import DEFAULT_TASK_DISTRIBUTION, TaskDistribution
 from argilla.settings._vector import VectorField
 
