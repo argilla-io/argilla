@@ -141,7 +141,8 @@ class TestUpdateDataset:
         assert response.status_code == 422
 
         assert response.json() == {
-            "detail": "Distribution settings cannot be modified for a dataset with records including responses"
+            "code": "update_distribution_with_existing_responses",
+            "message": "Distribution settings cannot be modified for a dataset with records including responses",
         }
 
     async def test_update_dataset_distribution_with_invalid_strategy(
