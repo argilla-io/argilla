@@ -162,7 +162,7 @@ class UserResponse(Resource):
         """Creates a UserResponse from a ResponseModel"""
         responses = cls.__model_as_responses_list(model)
         for response in responses:
-            question = dataset.settings.question_by_name(response.question_name)
+            question = dataset.settings.questions[response.question_name]
             # We need to adapt the ranking question value to the expected format
             if isinstance(question, RankingQuestion):
                 response.value = cls.__ranking_from_model_value(response.value)  # type: ignore
@@ -174,7 +174,7 @@ class UserResponse(Resource):
 
         values = self.__responses_as_model_values(self.responses)
         for question_name, value in values.items():
-            question = self._record.dataset.settings.question_by_name(question_name)
+            question = self._record.dataset.settings.questions[question_name]
             if isinstance(question, RankingQuestion):
                 value["value"] = self.__ranking_to_model_value(value["value"])
 
