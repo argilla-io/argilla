@@ -200,7 +200,6 @@ def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
     return str(vector_settings.id)
 
 
-
 def es_path_for_question_response(question_name: str) -> str:
     return f"{question_name}"
 
@@ -541,7 +540,6 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 search_engine_metadata[str(metadata_property.name)] = value
 
         return search_engine_metadata
-
 
     def _map_record_responses_to_es(self, responses: List[Response]) -> List[dict]:
         return [self._map_record_response_to_es(response) for response in responses]
