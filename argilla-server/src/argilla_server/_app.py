@@ -25,6 +25,7 @@ from pathlib import Path
 import backoff
 from brotli_asgi import BrotliMiddleware
 from fastapi import FastAPI, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
@@ -37,11 +38,18 @@ from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
 from argilla_server.models import User
 from argilla_server.search_engine import get_search_engine
-from argilla_server.security import auth
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
 
 _LOGGER = logging.getLogger("argilla")
+
+
+@contextlib.asynccontextmanager
+async def app_lifespan(app: FastAPI):
+    # See https://fastapi.tiangolo.com/advanced/events/#lifespan
+    await configure_database()
+    await configure_search_engine()
+    yield
 
 
 def create_server_app() -> FastAPI:
@@ -54,29 +62,17 @@ def create_server_app() -> FastAPI:
         redoc_url=None,
         redirect_slashes=False,
         version=str(argilla_version),
+        lifespan=app_lifespan,
     )
 
-    @app.get("/docs", include_in_schema=False)
-    async def redirect_docs():
-        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
+    configure_logging()
+    configure_telemetry()
+    configure_middleware(app)
+    configure_api_router(app)
+    configure_app_statics(app)
+    configure_api_docs(app)
 
-    @app.get("/api", include_in_schema=False)
-    async def redirect_api():
-        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
-
-    for app_configure in [
-        configure_app_logging,
-        configure_database,
-        configure_search_engine,
-        configure_telemetry,
-        configure_middleware,
-        configure_app_security,
-        configure_api_router,
-        configure_app_statics,
-    ]:
-        app_configure(app)
-
-    # This if-else clause is needed to simplify the test dependencies setup. Otherwise we cannot override dependencies
+    # This if-else clause is needed to simplify the test dependency setup. Otherwise, we cannot override dependencies
     # easily. We can review this once we have separate fastapi application for the api and the webapp.
     if settings.base_url and settings.base_url != "/":
         _app = FastAPI(
@@ -86,6 +82,16 @@ def create_server_app() -> FastAPI:
         return _app
     else:
         return app
+
+
+def configure_api_docs(app: FastAPI):
+    @app.get("/docs", include_in_schema=False)
+    async def redirect_docs():
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
+
+    @app.get("/api", include_in_schema=False)
+    async def redirect_api():
+        return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
 
 def configure_middleware(app: FastAPI):
@@ -161,94 +167,67 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_search_engine(app: FastAPI):
-    @app.on_event("startup")
-    async def configure_elasticsearch():
-        if not settings.search_engine_is_elasticsearch:
-            return
-
-        logging.getLogger("elasticsearch").setLevel(logging.ERROR)
-        logging.getLogger("elastic_transport").setLevel(logging.ERROR)
-
-    @app.on_event("startup")
-    async def configure_opensearch():
-        if not settings.search_engine_is_opensearch:
-            return
-
-        logging.getLogger("opensearch").setLevel(logging.ERROR)
-        logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
-
-    @app.on_event("startup")
-    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
-    async def ping_search_engine():
-        async for search_engine in get_search_engine():
-            if not await search_engine.ping():
-                raise ConnectionError(
-                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available or not responding.\n"
-                    f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
-                    "you have the necessary access permissions. Once you have verified this, restart the argilla server.\n"
-                )
-
-
-def configure_app_security(app: FastAPI):
-    auth.configure_app(app)
-
-
-def configure_app_logging(app: FastAPI):
-    """Configure app logging using"""
-    app.on_event("startup")(configure_logging)
-
-
-def configure_telemetry(app: FastAPI):
+def configure_telemetry():
     message = "\n"
     message += inspect.cleandoc(
-        """
-        Argilla uses telemetry to report anonymous usage and error information.
-
-        You can know more about what information is reported at:
-
-            https://docs.argilla.io/en/latest/reference/telemetry.html
-
-        Telemetry is currently enabled. If you want to disable it, you can configure
-        the environment variable before relaunching the server:
-    """
+        "Argilla uses telemetry to report anonymous usage and error information. You\n"
+        "can know more about what information is reported at:\n\n"
+        "    https://docs.argilla.io/en/latest/reference/telemetry.html\n\n"
+        "Telemetry is currently enabled. If you want to disable it, you can configure\n"
+        "the environment variable before relaunching the server:\n\n"
+        f'{"#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"}'
     )
-    message += "\n\n    "
-    message += (
-        "#set ARGILLA_ENABLE_TELEMETRY=0"
-        if os.name == "nt"
-        else "$>export ARGILLA_ENABLE_TELEMETRY=0"
-    )
-    message += "\n"
 
-    @app.on_event("startup")
-    async def check_telemetry():
-        if settings.enable_telemetry:
-            print(message, flush=True)
+    if settings.enable_telemetry:
+        _LOGGER.warning(message)
 
 
 _get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
 
 
-def configure_database(app: FastAPI):
-    def _user_has_default_credentials(user: User):
-        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(
-            DEFAULT_PASSWORD, user.password_hash
-        )
+async def configure_database():
+    async def check_default_user(db: AsyncSession):
+        def _user_has_default_credentials(user: User):
+            return user.api_key == DEFAULT_API_KEY or accounts.verify_password(
+                DEFAULT_PASSWORD, user.password_hash
+            )
 
-    def _log_default_user_warning():
-        _LOGGER.warning(
-            f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
-            "If you are using argilla in a production environment this can be a serious security problem. "
-            f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
-        )
+        default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
+        if default_user and _user_has_default_credentials(default_user):
+            _LOGGER.warning(
+                f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
+                "If you are using argilla in a production environment this can be a serious security problem. "
+                f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
+            )
 
-    @app.on_event("startup")
-    async def log_default_user_warning_if_present():
-        async with _get_db_wrapper() as db:
-            default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
-            if default_user and _user_has_default_credentials(default_user):
-                _log_default_user_warning()
+    async with _get_db_wrapper() as db:
+        await check_default_user(db)
+
+
+async def configure_search_engine():
+    if settings.search_engine_is_elasticsearch:
+        # TODO: Move this to the search engine implementation module
+        logging.getLogger("elasticsearch").setLevel(logging.ERROR)
+        logging.getLogger("elastic_transport").setLevel(logging.ERROR)
+
+    elif settings.search_engine_is_opensearch:
+        # TODO: Move this to the search engine implementation module
+        logging.getLogger("opensearch").setLevel(logging.ERROR)
+        logging.getLogger("opensearch_transport").setLevel(logging.ERROR)
+
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    async def ping_search_engine():
+        async for search_engine in get_search_engine():
+            if not await search_engine.ping():
+                raise ConnectionError(
+                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available "
+                    f"or not responding.\n"
+                    f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
+                    "you have the necessary access permissions. Once you have verified this, restart "
+                    "the argilla server.\n"
+                )
+
+    await ping_search_engine()
 
 
 app = create_server_app()
