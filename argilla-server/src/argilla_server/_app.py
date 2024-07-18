@@ -220,8 +220,7 @@ async def configure_search_engine():
         async for search_engine in get_search_engine():
             if not await search_engine.ping():
                 raise ConnectionError(
-                    f"Your {settings.search_engine} endpoint at {settings.obfuscated_elasticsearch()} is not available "
-                    f"or not responding.\n"
+                    f"Your {settings.search_engine} is not available or not responding.\n"
                     f"Please make sure your {settings.search_engine} instance is launched and correctly running and\n"
                     "you have the necessary access permissions. Once you have verified this, restart "
                     "the argilla server.\n"
