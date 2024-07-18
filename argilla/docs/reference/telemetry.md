@@ -48,7 +48,7 @@ The following usage and error information is reported:
 * The type of deployment: `quickstart` or `server`, and if it is deployed on Hugging Face spaces.
 * The dockerized deployment flag: `True` or `False`
 
-This is performed by registering information from the create, read, update and delete (CRUD) operations for API resources:
+This is performed by registering counters for the create, read, update, delete (CRUD) and list operations  for different API resources:
 
 * Users
 * Workspaces
