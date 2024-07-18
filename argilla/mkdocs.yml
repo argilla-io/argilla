@@ -151,7 +151,7 @@ nav:
       - Text classification task: tutorials/text_classification.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
-      - Telemetry: 
+      - Telemetry:
         - Server Telemetry: reference/telemetry.md
   - Community:
       - community/index.md
