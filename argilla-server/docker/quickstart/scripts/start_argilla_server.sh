@@ -5,7 +5,7 @@ set -e
 echo "Running database migrations"
 python -m argilla_server database migrate
 
-# Set the space author name as username if no provided
+# Set the space author name as username if no provided. See https://huggingface.co/docs/hub/en/spaces-overview#helper-environment-variables for more details
 USERNAME="${USERNAME:-$SPACE_AUTHOR_NAME}"
 
 if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
