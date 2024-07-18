@@ -1,4 +1,4 @@
-import { ComputedRef, computed } from "vue-demi";
+import type { ComputedRef } from "vue";
 import { useUser } from "./useUser";
 import { RoleService } from "~/v1/domain/services/RoleService";
 

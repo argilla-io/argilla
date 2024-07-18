@@ -1,8 +1,5 @@
 <template>
-  <BaseLinearProgressSkeleton
-    v-if="$fetchState.pending"
-    class="dataset-progress__bar"
-  />
+  <BaseLinearProgressSkeleton v-if="!isLoaded" class="dataset-progress__bar" />
   <transition v-else-if="!!progress" name="fade" appear>
     <div class="dataset-progress">
       <p class="dataset-progress__pending-info">
@@ -10,8 +7,8 @@
       </p>
       <BaseLinearProgress
         class="dataset-progress__bar"
-        :progress-ranges="progressRanges"
-        :progress-max="progress.total"
+        :progressRanges="progressRanges"
+        :progressMax="progress.total"
         :show-tooltip="true"
       />
     </div>

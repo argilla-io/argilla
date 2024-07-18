@@ -1,4 +1,3 @@
-import { ref, useRoute } from "@nuxtjs/composition-api";
 import { DATASET_API_ERRORS } from "@/v1/infrastructure/repositories/DatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { useTranslate } from "~/v1/infrastructure/services";
@@ -9,7 +8,7 @@ export const useDatasetViewModel = () => {
   const route = useRoute();
   const notification = useNotifications();
   const t = useTranslate();
-  const datasetId = route.value.params.id;
+  const datasetId = route.params.id;
 
   const handleError = (response: string) => {
     let message = "";
