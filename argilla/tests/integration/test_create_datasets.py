@@ -90,6 +90,8 @@ class TestCreateDatasets:
         assert schema["question"].name == "question"
         assert schema["question"].values == [1, 2, 3, 4, 5]
 
+        assert dataset.distribution == dataset_copy.distribution
+
     def test_create_dataset_with_custom_task_distribution(self, client: Argilla, dataset_name: str):
         task_distribution = TaskDistribution(min_submitted=4)
 
