@@ -1867,6 +1867,7 @@
 <p>This guide explains how you can use Argilla’s <strong>automatic task distribution</strong> to efficiently divide the task of annotating a dataset among multiple team members.</p>
 <p>Users can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.</p>
 <p>When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code> and the record will be removed from the <code>Pending</code> queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
+<p><img alt="Task Distribution diagram" src="../../assets/images/how_to_guides/distribution/taskdistribution.svg" /></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The status of a record can be either <code>completed</code>, when it has the required number of responses with <code>submitted</code> status, or <code>left</code>, when it doesn’t meet this requirement.
