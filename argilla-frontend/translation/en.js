@@ -237,6 +237,10 @@ export default {
       missing_vector: {
         message: "Vector not found for the selected record",
       },
+      update_distribution_with_existing_responses: {
+        message:
+          "Distribution settings cannot be modified for a published dataset",
+      },
     },
     http: {
       401: {
