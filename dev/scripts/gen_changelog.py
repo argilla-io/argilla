@@ -24,18 +24,13 @@ RETRIEVED_BRANCH = "develop"
 
 DATA_PATH = "community/changelog.md"
 
-GITHUB_ACCESS_TOKEN = os.getenv(
-    "GH_ACCESS_TOKEN"
-)  # public_repo and read:org scopes are required
+GITHUB_ACCESS_TOKEN = os.getenv("GH_ACCESS_TOKEN")  # public_repo and read:org scopes are required
 
 
 def fetch_file_from_github(repository, changelog_path, branch, auth_token):
     if auth_token is None:
         return ""
-    headers = {
-        "Authorization": f"Bearer {auth_token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
+    headers = {"Authorization": f"Bearer {auth_token}", "Accept": "application/vnd.github.v3+json"}
 
     owner, repo_name = repository.split("/")
     changelog_url = f"https://api.github.com/repos/{owner}/{repo_name}/contents/{changelog_path}?ref={branch}"
@@ -49,7 +44,5 @@ def fetch_file_from_github(repository, changelog_path, branch, auth_token):
 
 
 with mkdocs_gen_files.open(DATA_PATH, "w") as f:
-    content = fetch_file_from_github(
-        REPOSITORY, CHANGELOG_PATH, RETRIEVED_BRANCH, GITHUB_ACCESS_TOKEN
-    )
+    content = fetch_file_from_github(REPOSITORY, CHANGELOG_PATH, RETRIEVED_BRANCH, GITHUB_ACCESS_TOKEN)
     f.write(content)
