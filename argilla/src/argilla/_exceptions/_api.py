@@ -88,6 +88,8 @@ def api_error_handler(func):
         try:
             return func(*args, **kwargs)
         except HTTPStatusError as e:
-            _error_switch(status_code=e.response.status_code, error_detail=e.response.text)
+            _error_switch(
+                status_code=e.response.status_code, error_detail=e.response.text
+            )
 
     return _handler_wrapper

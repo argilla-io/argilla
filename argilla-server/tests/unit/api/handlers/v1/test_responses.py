@@ -73,7 +73,9 @@ class TestSuiteResponses:
         response_json: dict,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        await TextQuestionFactory.create(name="input_ok", dataset=dataset, required=True)
+        await TextQuestionFactory.create(
+            name="input_ok", dataset=dataset, required=True
+        )
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
@@ -86,7 +88,11 @@ class TestSuiteResponses:
         dataset_previous_last_activity_at = dataset.last_activity_at
         dataset_previous_updated_at = dataset.updated_at
 
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
+        resp = await async_client.put(
+            f"/api/v1/responses/{response.id}",
+            headers=owner_auth_header,
+            json=response_json,
+        )
 
         assert resp.status_code == 200
         assert (await db.get(Response, response.id)).values == response_json["values"]
@@ -107,7 +113,9 @@ class TestSuiteResponses:
 
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
-    async def test_update_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_update_response_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         response = await ResponseFactory.create(
             values={
                 "input_ok": {"value": "no"},
@@ -123,7 +131,9 @@ class TestSuiteResponses:
             "status": "submitted",
         }
 
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", json=response_json)
+        resp = await async_client.put(
+            f"/api/v1/responses/{response.id}", json=response_json
+        )
 
         assert resp.status_code == 401
         assert (await db.get(Response, response.id)).values == {
@@ -158,10 +168,19 @@ class TestSuiteResponses:
     ):
         question = await QuestionFactory.create()
         record = await RecordFactory.create(dataset=question.dataset)
-        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.draft)
+        response = await ResponseFactory.create(
+            record=record, user=owner, status=ResponseStatus.draft
+        )
 
-        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
+        response_json = {
+            "values": {question.name: {"value": response_value}},
+            "status": ResponseStatus.submitted,
+        }
+        resp = await async_client.put(
+            f"/api/v1/responses/{response.id}",
+            headers=owner_auth_header,
+            json=response_json,
+        )
 
         assert resp.status_code == 200
         assert resp.json() == {
@@ -205,7 +224,9 @@ class TestSuiteResponses:
             ),
         ],
     )
-    @pytest.mark.parametrize("response_status", [ResponseStatus.draft, ResponseStatus.discarded])
+    @pytest.mark.parametrize(
+        "response_status", [ResponseStatus.draft, ResponseStatus.discarded]
+    )
     async def test_update_response_to_non_submitted_status(
         self,
         async_client: "AsyncClient",
@@ -217,10 +238,19 @@ class TestSuiteResponses:
     ):
         question = await QuestionFactory.create()
         record = await RecordFactory.create(dataset=question.dataset)
-        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.submitted)
+        response = await ResponseFactory.create(
+            record=record, user=owner, status=ResponseStatus.submitted
+        )
 
-        response_json = {"values": {question.name: {"value": response_value}}, "status": response_status}
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
+        response_json = {
+            "values": {question.name: {"value": response_value}},
+            "status": response_status,
+        }
+        resp = await async_client.put(
+            f"/api/v1/responses/{response.id}",
+            headers=owner_auth_header,
+            json=response_json,
+        )
 
         assert resp.status_code == 200
         assert resp.json() == {
@@ -290,14 +320,25 @@ class TestSuiteResponses:
     ):
         question = await QuestionFactory.create()
         record = await RecordFactory.create(dataset=question.dataset)
-        response = await ResponseFactory.create(record=record, user=owner, status=ResponseStatus.draft)
+        response = await ResponseFactory.create(
+            record=record, user=owner, status=ResponseStatus.draft
+        )
 
-        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
-        resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
+        response_json = {
+            "values": {question.name: {"value": response_value}},
+            "status": ResponseStatus.submitted,
+        }
+        resp = await async_client.put(
+            f"/api/v1/responses/{response.id}",
+            headers=owner_auth_header,
+            json=response_json,
+        )
 
         assert resp.status_code == 422
 
-    async def test_update_response_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_update_response_as_annotator(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -322,7 +363,9 @@ class TestSuiteResponses:
         }
 
         resp = await async_client.put(
-            f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+            f"/api/v1/responses/{response.id}",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json=response_json,
         )
 
         assert resp.status_code == 200
@@ -365,7 +408,9 @@ class TestSuiteResponses:
         }
 
         resp = await async_client.put(
-            f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}, json=response_json
+            f"/api/v1/responses/{response.id}",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json=response_json,
         )
 
         assert resp.status_code == 403
@@ -408,7 +453,11 @@ class TestSuiteResponses:
         }
 
     async def test_delete_response(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        db: "AsyncSession",
+        owner_auth_header: dict,
     ):
         response = await ResponseFactory.create()
         dataset = response.record.dataset
@@ -416,7 +465,9 @@ class TestSuiteResponses:
         dataset_previous_last_activity_at = dataset.last_activity_at
         dataset_previous_updated_at = dataset.updated_at
 
-        resp = await async_client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
+        resp = await async_client.delete(
+            f"/api/v1/responses/{response.id}", headers=owner_auth_header
+        )
 
         assert resp.status_code == 200
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
@@ -426,7 +477,9 @@ class TestSuiteResponses:
 
         mock_search_engine.delete_record_response.assert_called_once_with(response)
 
-    async def test_delete_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_delete_response_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         response = await ResponseFactory.create()
 
         resp = await async_client.delete(f"/api/v1/responses/{response.id}")
@@ -442,7 +495,8 @@ class TestSuiteResponses:
         response = await ResponseFactory.create(user=user)
 
         resp = await async_client.delete(
-            f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/responses/{response.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert resp.status_code == 200
@@ -458,7 +512,8 @@ class TestSuiteResponses:
         response = await ResponseFactory.create(record=record)
 
         resp = await async_client.delete(
-            f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/responses/{response.id}",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
         assert resp.status_code == 200
@@ -471,7 +526,8 @@ class TestSuiteResponses:
         response = await ResponseFactory.create()
 
         resp = await async_client.delete(
-            f"/api/v1/responses/{response.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/responses/{response.id}",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
 
         assert resp.status_code == 403

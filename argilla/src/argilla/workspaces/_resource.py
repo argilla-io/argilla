@@ -90,7 +90,10 @@ class Workspace(Resource):
 
         datasets = self._client.api.datasets.list(self.id)
         self._log_message(f"Got {len(datasets)} datasets for workspace {self.id}")
-        return [Dataset.from_model(model=dataset, client=self._client) for dataset in datasets]
+        return [
+            Dataset.from_model(model=dataset, client=self._client)
+            for dataset in datasets
+        ]
 
     @classmethod
     def from_model(cls, model: WorkspaceModel, client: Argilla) -> "Workspace":

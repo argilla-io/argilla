@@ -81,9 +81,7 @@ class MetadataPropertyBase(Resource):
         self._model.dataset_id = value.id
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
-        )
+        return f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
 
 
 class TermsMetadataProperty(MetadataPropertyBase):
@@ -108,7 +106,9 @@ class TermsMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = TermsMetadataPropertySettings(values=options, type=MetadataPropertyType.terms)
+            settings = TermsMetadataPropertySettings(
+                values=options, type=MetadataPropertyType.terms
+            )
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
@@ -161,7 +161,9 @@ class FloatMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = FloatMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.float)
+            settings = FloatMetadataPropertySettings(
+                min=min, max=max, type=MetadataPropertyType.float
+            )
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
@@ -218,7 +220,9 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = IntegerMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.integer)
+            settings = IntegerMetadataPropertySettings(
+                min=min, max=max, type=MetadataPropertyType.integer
+            )
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
@@ -272,7 +276,9 @@ class MetadataField:
         try:
             return switch[metadata_type].from_model(model)
         except KeyError as e:
-            raise MetadataError(f"Unknown metadata property type: {metadata_type}") from e
+            raise MetadataError(
+                f"Unknown metadata property type: {metadata_type}"
+            ) from e
 
     @classmethod
     def from_dict(cls, data: dict) -> MetadataType:
@@ -286,4 +292,6 @@ class MetadataField:
             metadata_model = MetadataFieldModel(**data)
             return switch[metadata_type].from_model(metadata_model)
         except KeyError as e:
-            raise MetadataError(f"Unknown metadata property type: {metadata_type}") from e
+            raise MetadataError(
+                f"Unknown metadata property type: {metadata_type}"
+            ) from e

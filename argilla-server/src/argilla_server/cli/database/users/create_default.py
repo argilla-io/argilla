@@ -26,7 +26,9 @@ async def _create_default(api_key: str, password: str, quiet: bool):
     async with AsyncSessionLocal() as session:
         if await accounts.get_user_by_username(session, DEFAULT_USERNAME):
             if not quiet:
-                typer.echo("User with default username already found on database, will not do anything.")
+                typer.echo(
+                    "User with default username already found on database, will not do anything."
+                )
 
             return
 
@@ -50,7 +52,9 @@ async def _create_default(api_key: str, password: str, quiet: bool):
 
 def create_default(
     api_key: str = typer.Option(default=DEFAULT_API_KEY, help="API key for the user."),
-    password: str = typer.Option(default=DEFAULT_PASSWORD, help="Password for the user."),
+    password: str = typer.Option(
+        default=DEFAULT_PASSWORD, help="Password for the user."
+    ),
     quiet: bool = typer.Option(is_flag=True, default=False, help="Run without output."),
 ):
     asyncio.run(_create_default(api_key, password, quiet))

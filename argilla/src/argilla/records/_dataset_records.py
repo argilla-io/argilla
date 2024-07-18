@@ -82,9 +82,15 @@ class DatasetRecordsIterator:
 
     def _fetch_from_server(self) -> List[RecordModel]:
         if not self.__client.api.datasets.exists(self.__dataset.id):
-            warnings.warn(f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping...")
+            warnings.warn(
+                f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping..."
+            )
             return []
-        return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
+        return (
+            self._fetch_from_server_with_search()
+            if self._is_search_query()
+            else self._fetch_from_server_with_list()
+        )
 
     def _fetch_from_server_with_list(self) -> List[RecordModel]:
         return self.__client.api.records.list(
@@ -150,7 +156,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         self._api = self.__client.api.records
 
     def __iter__(self):
-        return DatasetRecordsIterator(self.__dataset, self.__client, with_suggestions=True, with_responses=True)
+        return DatasetRecordsIterator(
+            self.__dataset, self.__client, with_suggestions=True, with_responses=True
+        )
 
     def __call__(
         self,
@@ -225,7 +233,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Returns:
             A list of Record objects representing the updated records.
         """
-        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
+        record_models = self._ingest_records(
+            records=records, mapping=mapping, user_id=user_id or self.__client.me.id
+        )
         batch_size = self._normalize_batch_size(
             batch_size=batch_size,
             records_length=len(record_models),
@@ -241,10 +251,19 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             total=len(records) // batch_size,
             unit="batch",
         ):
-            self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
+            self._log_message(
+                message=f"Sending records from {batch} to {batch + batch_size}."
+            )
             batch_records = record_models[batch : batch + batch_size]
-            models, updated = self._api.bulk_upsert(dataset_id=self.__dataset.id, records=batch_records)
-            created_or_updated.extend([Record.from_model(model=model, dataset=self.__dataset) for model in models])
+            models, updated = self._api.bulk_upsert(
+                dataset_id=self.__dataset.id, records=batch_records
+            )
+            created_or_updated.extend(
+                [
+                    Record.from_model(model=model, dataset=self.__dataset)
+                    for model in models
+                ]
+            )
             records_updated += updated
 
         records_created = len(created_or_updated) - records_updated
@@ -273,7 +292,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         """
         mapping = None
         user_id = self.__client.me.id
-        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id)
+        record_models = self._ingest_records(
+            records=records, mapping=mapping, user_id=user_id
+        )
         batch_size = self._normalize_batch_size(
             batch_size=batch_size,
             records_length=len(record_models),
@@ -287,7 +308,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             total=len(records) // batch_size,
             unit="batch",
         ):
-            self._log_message(message=f"Sending records from {batch} to {batch + batch_size}.")
+            self._log_message(
+                message=f"Sending records from {batch} to {batch + batch_size}."
+            )
             batch_records = record_models[batch : batch + batch_size]
             self._api.delete_many(dataset_id=self.__dataset.id, records=batch_records)
             records_deleted += len(batch_records)
@@ -387,7 +410,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
 
         ingested_records = []
-        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
+        record_mapper = IngestedRecordMapper(
+            mapping=mapping, dataset=self.__dataset, user_id=user_id
+        )
         for record in records:
             try:
                 if isinstance(record, dict):
@@ -401,7 +426,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                         f"Found a record of type {type(record)}: {record}."
                     )
             except Exception as e:
-                raise RecordsIngestionError(f"Failed to ingest record from dict {record}: {e}")
+                raise RecordsIngestionError(
+                    f"Failed to ingest record from dict {record}: {e}"
+                )
             ingested_records.append(record.api_model())
         return ingested_records
 
@@ -423,4 +450,6 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             if isinstance(vector_name, bool):
                 continue
             if vector_name not in self.__dataset.schema:
-                raise ValueError(f"Vector field {vector_name} not found in dataset schema.")
+                raise ValueError(
+                    f"Vector field {vector_name} not found in dataset schema."
+                )

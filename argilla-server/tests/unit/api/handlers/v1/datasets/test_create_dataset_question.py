@@ -32,7 +32,8 @@ class TestCreateDatasetQuestion:
         return f"/api/v1/datasets/{dataset_id}/questions"
 
     @pytest.mark.parametrize(
-        "allow_overlapping,expected_allow_overlapping", [(None, False), (False, False), (True, True)]
+        "allow_overlapping,expected_allow_overlapping",
+        [(None, False), (False, False), (True, True)],
     )
     async def test_create_dataset_span_question(
         self,
@@ -50,9 +51,21 @@ class TestCreateDatasetQuestion:
             "field": "field-a",
             "visible_options": 3,
             "options": [
-                {"value": "label-a", "text": "Label A", "description": "Label A description"},
-                {"value": "label-b", "text": "Label B", "description": "Label B description"},
-                {"value": "label-c", "text": "Label C", "description": "Label C description"},
+                {
+                    "value": "label-a",
+                    "text": "Label A",
+                    "description": "Label A description",
+                },
+                {
+                    "value": "label-b",
+                    "text": "Label B",
+                    "description": "Label B description",
+                },
+                {
+                    "value": "label-c",
+                    "text": "Label C",
+                    "description": "Label C description",
+                },
             ],
         }
 
@@ -62,7 +75,12 @@ class TestCreateDatasetQuestion:
         response = await async_client.post(
             self.url(dataset.id),
             headers=owner_auth_header,
-            json={"name": "name", "title": "Title", "description": "Description", "settings": settings},
+            json={
+                "name": "name",
+                "title": "Title",
+                "description": "Description",
+                "settings": settings,
+            },
         )
 
         assert response.status_code == 201
@@ -80,16 +98,32 @@ class TestCreateDatasetQuestion:
                 "field": "field-a",
                 "visible_options": 3,
                 "options": [
-                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
-                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
-                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
+                    {
+                        "value": "label-a",
+                        "text": "Label A",
+                        "description": "Label A description",
+                    },
+                    {
+                        "value": "label-b",
+                        "text": "Label B",
+                        "description": "Label B description",
+                    },
+                    {
+                        "value": "label-c",
+                        "text": "Label C",
+                        "description": "Label C description",
+                    },
                 ],
                 "allow_overlapping": expected_allow_overlapping,
                 "allow_character_annotation": True,
             },
             "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_dataset_span_question_with_non_existent_field(
@@ -109,8 +143,16 @@ class TestCreateDatasetQuestion:
                     "type": QuestionType.span,
                     "field": "field-non-existent",
                     "options": [
-                        {"value": "label-a", "text": "Label A", "description": "Label A description"},
-                        {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                        {
+                            "value": "label-a",
+                            "text": "Label A",
+                            "description": "Label A description",
+                        },
+                        {
+                            "value": "label-b",
+                            "text": "Label B",
+                            "description": "Label B description",
+                        },
                     ],
                 },
             },
@@ -142,21 +184,34 @@ class TestCreateDatasetQuestion:
                     "type": QuestionType.span,
                     "field": question_field,
                     "options": [
-                        {"value": "label-c", "text": "Label C", "description": "Label C description"},
-                        {"value": "label-d", "text": "Label D", "description": "Label D description"},
+                        {
+                            "value": "label-c",
+                            "text": "Label C",
+                            "description": "Label C description",
+                        },
+                        {
+                            "value": "label-d",
+                            "text": "Label D",
+                            "description": "Label D description",
+                        },
                     ],
                 },
             },
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": f"'field-a' is already used by span question with id '{question.id}'"}
+        assert response.json() == {
+            "detail": f"'field-a' is already used by span question with id '{question.id}'"
+        }
 
     @pytest.mark.parametrize(
         "visible_options,error_msg",
         [
             (1, "ensure this value is greater than or equal to 3"),
-            (4, "the value for 'visible_options' must be less or equal to the number of items in 'options' (3)"),
+            (
+                4,
+                "the value for 'visible_options' must be less or equal to the number of items in 'options' (3)",
+            ),
         ],
     )
     async def test_create_question_with_wrong_visible_options(
@@ -181,9 +236,21 @@ class TestCreateDatasetQuestion:
                     "field": "field-a",
                     "visible_options": visible_options,
                     "options": [
-                        {"value": "label-a", "text": "Label A", "description": "Label A description"},
-                        {"value": "label-b", "text": "Label B", "description": "Label B description"},
-                        {"value": "label-c", "text": "Label C", "description": "Label C description"},
+                        {
+                            "value": "label-a",
+                            "text": "Label A",
+                            "description": "Label A description",
+                        },
+                        {
+                            "value": "label-b",
+                            "text": "Label B",
+                            "description": "Label B description",
+                        },
+                        {
+                            "value": "label-c",
+                            "text": "Label C",
+                            "description": "Label C description",
+                        },
                     ],
                 },
             },

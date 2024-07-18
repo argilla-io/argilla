@@ -23,7 +23,10 @@ class ResponsePolicy:
             return (
                 actor.is_owner
                 or actor.id == response.user_id
-                or (actor.is_admin and await actor.is_member(response.record.dataset.workspace_id))
+                or (
+                    actor.is_admin
+                    and await actor.is_member(response.record.dataset.workspace_id)
+                )
             )
 
         return is_allowed
@@ -34,7 +37,10 @@ class ResponsePolicy:
             return (
                 actor.is_owner
                 or actor.id == response.user_id
-                or (actor.is_admin and await actor.is_member(response.record.dataset.workspace_id))
+                or (
+                    actor.is_admin
+                    and await actor.is_member(response.record.dataset.workspace_id)
+                )
             )
 
         return is_allowed

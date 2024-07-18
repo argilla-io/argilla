@@ -34,7 +34,9 @@ class TestCreateDatasets:
             name=dataset_name,
             settings=Settings(
                 fields=[TextField(name="test_field")],
-                questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
+                questions=[
+                    RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])
+                ],
             ),
         )
         client.datasets.add(dataset)
@@ -53,7 +55,9 @@ class TestCreateDatasets:
             questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
         )
         dataset = Dataset(name=dataset_name, settings=settings, client=client).create()
-        dataset2 = Dataset(name=f"{dataset_name}_2", settings=settings, client=client).create()
+        dataset2 = Dataset(
+            name=f"{dataset_name}_2", settings=settings, client=client
+        ).create()
 
         assert dataset in client.datasets
         assert dataset2 in client.datasets
@@ -83,7 +87,11 @@ class TestCreateDatasets:
         assert dataset in client.datasets
         created_dataset = client.datasets(dataset.name)
 
-        dataset_copy = Dataset(name=f"{dataset.name}_copy", settings=created_dataset.settings, client=client).create()
+        dataset_copy = Dataset(
+            name=f"{dataset.name}_copy",
+            settings=created_dataset.settings,
+            client=client,
+        ).create()
         assert dataset_copy in client.datasets
 
         schema = dataset_copy.schema

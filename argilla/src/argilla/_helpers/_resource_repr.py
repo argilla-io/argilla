@@ -25,7 +25,10 @@ RESOURCE_REPR_CONFIG = {
         "table_name": "Workspaces",
         # "len_column": "datasets",
     },
-    "User": {"columns": ["username", "id", "role", "updated_at"], "table_name": "Users"},
+    "User": {
+        "columns": ["username", "id", "role", "updated_at"],
+        "table_name": "Users",
+    },
 }
 
 

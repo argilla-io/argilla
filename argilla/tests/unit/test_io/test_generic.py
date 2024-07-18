@@ -27,13 +27,30 @@ class TestGenericIO:
             fields={"field": "The field"},
             metadata={"key": "value"},
             responses=[
-                rg.Response(question_name="q1", value="value", user_id=user_a, status=ResponseStatus.submitted),
-                rg.Response(question_name="q2", value="value", user_id=user_a, status=ResponseStatus.submitted),
-                rg.Response(question_name="q2", value="value", user_id=user_b, status=ResponseStatus.draft),
+                rg.Response(
+                    question_name="q1",
+                    value="value",
+                    user_id=user_a,
+                    status=ResponseStatus.submitted,
+                ),
+                rg.Response(
+                    question_name="q2",
+                    value="value",
+                    user_id=user_a,
+                    status=ResponseStatus.submitted,
+                ),
+                rg.Response(
+                    question_name="q2",
+                    value="value",
+                    user_id=user_b,
+                    status=ResponseStatus.draft,
+                ),
                 rg.Response(question_name="q1", value="value", user_id=user_c),
             ],
             suggestions=[
-                rg.Suggestion(question_name="q1", value="value", score=0.1, agent="test"),
+                rg.Suggestion(
+                    question_name="q1", value="value", score=0.1, agent="test"
+                ),
                 rg.Suggestion(question_name="q2", value="value", score=0.9),
             ],
         )

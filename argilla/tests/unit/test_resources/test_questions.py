@@ -53,7 +53,9 @@ class TestQuestionsAPI:
         )
         with httpx.Client() as client:
             client = rg.Argilla(api_url="http://test_url")
-            client.api.questions.create_many(dataset_id=mock_dataset_id, questions=[mock_question])
+            client.api.questions.create_many(
+                dataset_id=mock_dataset_id, questions=[mock_question]
+            )
 
     def test_create_many_label_questions(self, httpx_mock: HTTPXMock):
         # TODO: Add a test for the delete method in client
@@ -63,7 +65,10 @@ class TestQuestionsAPI:
             "name": "string",
             "title": "string",
             "required": True,
-            "settings": {"type": "labels", "options": [{"text": "positive", "value": "positive"}]},
+            "settings": {
+                "type": "labels",
+                "options": [{"text": "positive", "value": "positive"}],
+            },
             "dataset_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "inserted_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat(),
@@ -75,7 +80,10 @@ class TestQuestionsAPI:
             "required": True,
             "settings": {
                 "type": "label",
-                "options": [{"text": "negative", "value": "negative"}, {"text": "positive", "value": "positive"}],
+                "options": [
+                    {"text": "negative", "value": "negative"},
+                    {"text": "positive", "value": "positive"},
+                ],
             },
         }
         mock_question = LabelQuestionModel(**mock_question)
@@ -87,7 +95,9 @@ class TestQuestionsAPI:
         )
         with httpx.Client() as client:
             client = rg.Argilla(api_url="http://test_url")
-            client.api.questions.create_many(dataset_id=mock_dataset_id, questions=[mock_question])
+            client.api.questions.create_many(
+                dataset_id=mock_dataset_id, questions=[mock_question]
+            )
 
     def test_create_span_question(self, httpx_mock: HTTPXMock):
         mock_dataset_id = uuid.uuid4()
@@ -138,5 +148,7 @@ class TestQuestionsAPI:
             )
 
             client = rg.Argilla(api_url="http://test_url")
-            created_question = client.api.questions.create(dataset_id=mock_dataset_id, question=question)
+            created_question = client.api.questions.create(
+                dataset_id=mock_dataset_id, question=question
+            )
             assert created_question.model_dump(exclude_unset=True) == mock_return_value

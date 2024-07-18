@@ -94,10 +94,16 @@ class DiskImportExportMixin(ABC):
 
         # Get a relevant and unique name for the incoming dataset.
         if target_name:
-            logging.warning(f"Changing dataset name from {dataset_model.name} to {target_name}")
+            logging.warning(
+                f"Changing dataset name from {dataset_model.name} to {target_name}"
+            )
             dataset_model.name = target_name
-        elif client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
-            logging.warning(f"Loaded dataset name {dataset_model.name} already exists. Changing to unique UUID.")
+        elif client.api.datasets.name_exists(
+            name=dataset_model.name, workspace_id=workspace_id
+        ):
+            logging.warning(
+                f"Loaded dataset name {dataset_model.name} already exists. Changing to unique UUID."
+            )
             dataset_model.name = f"{dataset_model.name}_{uuid4()}"
 
         # Create the dataset and load the settings and records

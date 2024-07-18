@@ -16,17 +16,24 @@ from typing import Dict, List, Optional
 
 from pydantic import field_validator, Field
 
-from argilla._models._settings._questions._base import QuestionSettings, QuestionBaseModel
+from argilla._models._settings._questions._base import (
+    QuestionSettings,
+    QuestionBaseModel,
+)
 
 
 class RankingQuestionSettings(QuestionSettings):
     type: str = "ranking"
 
-    options: List[Dict[str, Optional[str]]] = Field(default_factory=list, validate_default=True)
+    options: List[Dict[str, Optional[str]]] = Field(
+        default_factory=list, validate_default=True
+    )
 
     @field_validator("options", mode="before")
     @classmethod
-    def __values_are_unique(cls, options: List[Dict[str, Optional[str]]]) -> List[Dict[str, Optional[str]]]:
+    def __values_are_unique(
+        cls, options: List[Dict[str, Optional[str]]]
+    ) -> List[Dict[str, Optional[str]]]:
         """Ensure that values are unique"""
 
         unique_values = list(set([option["value"] for option in options]))

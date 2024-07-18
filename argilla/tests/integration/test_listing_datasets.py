@@ -23,7 +23,10 @@ class TestDatasetsList:
         dataset = Dataset(
             name="test_dataset",
             workspace=workspace.name,
-            settings=Settings(fields=[TextField(name="text")], questions=[TextQuestion(name="text_question")]),
+            settings=Settings(
+                fields=[TextField(name="text")],
+                questions=[TextQuestion(name="text_question")],
+            ),
             client=client,
         )
         dataset.create()

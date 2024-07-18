@@ -26,7 +26,9 @@ class TestResponses:
         response = UserResponse(
             responses=[
                 Response(question_name="question", value="answer", user_id=user_id),
-                Response(question_name="other-question", value="answer", user_id=user_id),
+                Response(
+                    question_name="other-question", value="answer", user_id=user_id
+                ),
             ],
         )
 
@@ -43,8 +45,18 @@ class TestResponses:
         user_id = uuid.uuid4()
         response = UserResponse(
             responses=[
-                Response(question_name="question", value="answer", user_id=user_id, status="submitted"),
-                Response(question_name="other-question", value="answer", user_id=user_id, status="submitted"),
+                Response(
+                    question_name="question",
+                    value="answer",
+                    user_id=user_id,
+                    status="submitted",
+                ),
+                Response(
+                    question_name="other-question",
+                    value="answer",
+                    user_id=user_id,
+                    status="submitted",
+                ),
             ],
         )
 
@@ -61,8 +73,18 @@ class TestResponses:
         user_id = uuid.uuid4()
         response = UserResponse(
             responses=[
-                Response(question_name="question", value="answer", user_id=user_id, status="draft"),
-                Response(question_name="other-question", value="answer", user_id=user_id, status="submitted"),
+                Response(
+                    question_name="question",
+                    value="answer",
+                    user_id=user_id,
+                    status="draft",
+                ),
+                Response(
+                    question_name="other-question",
+                    value="answer",
+                    user_id=user_id,
+                    status="submitted",
+                ),
             ],
         )
 
@@ -79,18 +101,29 @@ class TestResponses:
         user_id = uuid.uuid4()
         other_user_id = uuid.uuid4()
 
-        with pytest.raises(ValueError, match="Multiple user_ids found in user responses"):
+        with pytest.raises(
+            ValueError, match="Multiple user_ids found in user responses"
+        ):
             UserResponse(
                 responses=[
                     Response(question_name="question", value="answer", user_id=user_id),
-                    Response(question_name="other-question", value="answer", user_id=other_user_id),
+                    Response(
+                        question_name="other-question",
+                        value="answer",
+                        user_id=other_user_id,
+                    ),
                 ],
             )
 
     def test_create_user_response_from_draft_response_model_without_values(self):
-        model = UserResponseModel(values={}, status=ResponseStatus.draft, user=uuid.uuid4())
+        model = UserResponseModel(
+            values={}, status=ResponseStatus.draft, user=uuid.uuid4()
+        )
         response = UserResponse.from_model(
-            model=model, dataset=Dataset(name="burr", workspace=Workspace(name="test", id=uuid.uuid4()))
+            model=model,
+            dataset=Dataset(
+                name="burr", workspace=Workspace(name="test", id=uuid.uuid4())
+            ),
         )
         assert len(response.responses) == 0
         assert response.user_id is None

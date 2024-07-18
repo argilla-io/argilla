@@ -42,7 +42,9 @@ class TestSettings:
     def test_with_text_field(self):
         mock_name = "prompt"
         mock_use_markdown = True
-        settings = rg.Settings(fields=[rg.TextField(name=mock_name, use_markdown=mock_use_markdown)])
+        settings = rg.Settings(
+            fields=[rg.TextField(name=mock_name, use_markdown=mock_use_markdown)]
+        )
         assert settings.fields[0].name == mock_name
         assert settings.fields[0].use_markdown == mock_use_markdown
 
@@ -55,13 +57,19 @@ class TestSettings:
         assert settings.fields[0].use_markdown == mock_use_markdown
 
     def test_with_label_question(self):
-        settings = rg.Settings(questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])])
+        settings = rg.Settings(
+            questions=[
+                rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])
+            ]
+        )
         assert settings.questions[0].name == "sentiment"
         assert settings.questions[0].labels == ["positive", "negative"]
 
     def test_with_label_question_attribute(self):
         settings = rg.Settings()
-        settings.questions = [rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])]
+        settings.questions = [
+            rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])
+        ]
         assert settings.questions[0].name == "sentiment"
         assert settings.questions[0].labels == ["positive", "negative"]
 
@@ -74,7 +82,9 @@ class TestSettings:
                 rg.FloatMetadataProperty("source"),
             ],
             questions=[
-                rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"]),
+                rg.LabelQuestion(
+                    name="label", title="text", labels=["positive", "negative"]
+                ),
             ],
             vectors=[rg.VectorField(name="text", dimensions=3)],
         )
@@ -88,11 +98,17 @@ class TestSettings:
         settings = rg.Settings(
             fields=[rg.TextField(name="text", title="text")],
             metadata=[rg.FloatMetadataProperty("source")],
-            questions=[rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"])],
+            questions=[
+                rg.LabelQuestion(
+                    name="label", title="text", labels=["positive", "negative"]
+                )
+            ],
             vectors=[rg.VectorField(name="text", dimensions=3)],
         )
 
-        with pytest.raises(SettingsError, match="names of dataset settings must be unique"):
+        with pytest.raises(
+            SettingsError, match="names of dataset settings must be unique"
+        ):
             settings.validate()
 
     def test_settings_access(self):
@@ -130,7 +146,9 @@ class TestSettingsSerialization:
         settings = rg.Settings(
             guidelines="This is a guideline",
             fields=[rg.TextField(name="prompt", use_markdown=True)],
-            questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+            questions=[
+                rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])
+            ],
         )
         settings_serialized = settings.serialize()
         assert settings_serialized["guidelines"] == "This is a guideline"

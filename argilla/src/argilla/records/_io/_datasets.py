@@ -48,7 +48,9 @@ class HFDatasetsIO:
         return dataset
 
     @staticmethod
-    def _record_dicts_from_datasets(dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:
+    def _record_dicts_from_datasets(
+        dataset: HFDataset,
+    ) -> List[Dict[str, Union[str, float, int, list]]]:
         """Creates a dictionaries from a HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:

@@ -15,8 +15,19 @@
 import base64
 
 import pytest
-from argilla.markdown import audio_to_html, chat_to_html, image_to_html, pdf_to_html, video_to_html
-from argilla.markdown.media import _get_file_data, _is_valid_dimension, _media_to_html, _validate_media_type
+from argilla.markdown import (
+    audio_to_html,
+    chat_to_html,
+    image_to_html,
+    pdf_to_html,
+    video_to_html,
+)
+from argilla.markdown.media import (
+    _get_file_data,
+    _is_valid_dimension,
+    _media_to_html,
+    _validate_media_type,
+)
 
 
 def test_validate_media_type_valid():
@@ -65,7 +76,9 @@ def test_media_to_html():
     # Test media to HTML for image
     file_data = b"some image data"
     file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-    expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    expected_html = (
+        f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    )
     result = _media_to_html("image", file_data, "png", "300px", "300px")
     assert result == expected_html
 
@@ -89,7 +102,9 @@ def test_audio_to_html():
 def test_image_to_html():
     file_data = b"some image data"
     file_data_base64 = base64.b64encode(file_data).decode("utf-8")
-    expected_html = f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    expected_html = (
+        f'<img src="data:image/png;base64,{file_data_base64}" width=300px height=300px>'
+    )
     result = image_to_html(file_data, "png", "300px", "300px")
     assert result == expected_html
 

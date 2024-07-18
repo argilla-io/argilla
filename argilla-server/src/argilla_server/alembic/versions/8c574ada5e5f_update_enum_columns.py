@@ -30,7 +30,9 @@ branch_labels = None
 depends_on = None
 
 # Aligned with the values of `ResponseStatus` in `src/argilla/server/models/dataset.py`
-response_status_enum = sa.Enum("draft", "submitted", "discarded", name="response_status_enum")
+response_status_enum = sa.Enum(
+    "draft", "submitted", "discarded", name="response_status_enum"
+)
 
 # Aligned with the values of `DatasetStatus` in `src/argilla/server/models/dataset.py`
 dataset_status_enum = sa.Enum("draft", "ready", name="dataset_status_enum")
@@ -54,7 +56,9 @@ def upgrade() -> None:
         )
 
         user_role_enum.create(bind)
-        op.execute("ALTER TABLE users ALTER COLUMN role TYPE user_role_enum USING role::user_role_enum")
+        op.execute(
+            "ALTER TABLE users ALTER COLUMN role TYPE user_role_enum USING role::user_role_enum"
+        )
 
 
 def downgrade() -> None:
@@ -62,13 +66,25 @@ def downgrade() -> None:
 
     if bind.dialect.name == "postgresql":
         with op.batch_alter_table("users") as batch_op:
-            batch_op.alter_column("role", existing_type=user_role_enum, type_=sa.String(), nullable=False)
+            batch_op.alter_column(
+                "role", existing_type=user_role_enum, type_=sa.String(), nullable=False
+            )
         user_role_enum.drop(bind)
 
         with op.batch_alter_table("datasets") as batch_op:
-            batch_op.alter_column("status", existing_type=dataset_status_enum, type_=sa.String(), nullable=False)
+            batch_op.alter_column(
+                "status",
+                existing_type=dataset_status_enum,
+                type_=sa.String(),
+                nullable=False,
+            )
         dataset_status_enum.drop(bind)
 
         with op.batch_alter_table("responses") as batch_op:
-            batch_op.alter_column("status", existing_type=response_status_enum, type_=sa.String(), nullable=False)
+            batch_op.alter_column(
+                "status",
+                existing_type=response_status_enum,
+                type_=sa.String(),
+                nullable=False,
+            )
         response_status_enum.drop(bind)

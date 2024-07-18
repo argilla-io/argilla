@@ -28,7 +28,8 @@ class TestResourceHTMLReprMixin:
         ]
 
         assert (
-            ResourceHTMLReprMixin()._represent_as_html(workspaces) == "<h3>Workspaces</h3>"
+            ResourceHTMLReprMixin()._represent_as_html(workspaces)
+            == "<h3>Workspaces</h3>"
             "<table>"
             "<tr><th>name</th><th>id</th><th>updated_at</th></tr>"
             f"<tr><td>workspace1</td><td>{str(workspaces[0].id)}</td><td>None</td></tr>"

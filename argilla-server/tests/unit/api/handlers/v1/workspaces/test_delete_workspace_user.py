@@ -22,7 +22,13 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import AdminFactory, AnnotatorFactory, UserFactory, WorkspaceFactory, WorkspaceUserFactory
+from tests.factories import (
+    AdminFactory,
+    AnnotatorFactory,
+    UserFactory,
+    WorkspaceFactory,
+    WorkspaceUserFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -30,7 +36,9 @@ class TestDeleteWorkspaceUser:
     def url(self, workspace_id: UUID, user_id: UUID) -> str:
         return f"/api/v1/workspaces/{workspace_id}/users/{user_id}"
 
-    async def test_delete_workspace_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_delete_workspace_user(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create()
         await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
@@ -54,7 +62,9 @@ class TestDeleteWorkspaceUser:
 
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 
-    async def test_delete_workspace_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
+    async def test_delete_workspace_user_without_authentication(
+        self, db: AsyncSession, async_client: AsyncClient
+    ):
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create()
         await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
@@ -64,7 +74,9 @@ class TestDeleteWorkspaceUser:
         assert response.status_code == 401
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
 
-    async def test_delete_workspace_user_as_admin(self, db: AsyncSession, async_client: AsyncClient):
+    async def test_delete_workspace_user_as_admin(
+        self, db: AsyncSession, async_client: AsyncClient
+    ):
         workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create()
         await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=admin.id)
@@ -86,7 +98,9 @@ class TestDeleteWorkspaceUser:
 
         other_workspace = await WorkspaceFactory.create()
         admin = await AdminFactory.create()
-        await WorkspaceUserFactory.create(workspace_id=other_workspace.id, user_id=admin.id)
+        await WorkspaceUserFactory.create(
+            workspace_id=other_workspace.id, user_id=admin.id
+        )
 
         response = await async_client.delete(
             self.url(workspace.id, user.id),
@@ -96,10 +110,14 @@ class TestDeleteWorkspaceUser:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 2
 
-    async def test_delete_workspace_user_as_annotator(self, db: AsyncSession, async_client: AsyncClient):
+    async def test_delete_workspace_user_as_annotator(
+        self, db: AsyncSession, async_client: AsyncClient
+    ):
         workspace = await WorkspaceFactory.create()
         annotator = await AnnotatorFactory.create()
-        await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=annotator.id)
+        await WorkspaceUserFactory.create(
+            workspace_id=workspace.id, user_id=annotator.id
+        )
 
         response = await async_client.delete(
             self.url(workspace.id, annotator.id),

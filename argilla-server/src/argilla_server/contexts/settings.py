@@ -14,7 +14,11 @@
 
 from typing import Union
 
-from argilla_server.api.schemas.v1.settings import ArgillaSettings, HuggingfaceSettings, Settings
+from argilla_server.api.schemas.v1.settings import (
+    ArgillaSettings,
+    HuggingfaceSettings,
+    Settings,
+)
 from argilla_server.settings import settings
 
 HUGGINGFACE_SETTINGS = HuggingfaceSettings()

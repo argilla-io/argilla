@@ -17,7 +17,11 @@ from uuid import UUID
 import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import UserRole
-from argilla_server.search_engine import SearchEngine, SearchResponseItem, SearchResponses
+from argilla_server.search_engine import (
+    SearchEngine,
+    SearchResponseItem,
+    SearchResponses,
+)
 from httpx import AsyncClient
 
 from tests.factories import (
@@ -39,18 +43,32 @@ class TestSearchCurrentUserDatasetRecords:
         return f"/api/v1/me/datasets/{dataset_id}/records/search"
 
     async def test_search_with_filtered_metadata(
-        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TermsMetadataPropertyFactory.create(
-            name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
+            name="annotator_meta",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin, UserRole.annotator],
         )
-        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
-        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
+        await TermsMetadataPropertyFactory.create(
+            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="owner_meta", dataset=dataset, allowed_roles=[]
+        )
         record = await RecordFactory.create(
-            metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
+            metadata_={
+                "admin_meta": "value",
+                "annotator_meta": "value",
+                "owner_meta": "value",
+                "extra": "value",
+            },
             dataset=dataset,
         )
 
@@ -91,17 +109,30 @@ class TestSearchCurrentUserDatasetRecords:
     ):
         user = await AnnotatorFactory.create()
         dataset = await DatasetFactory.create()
-        await WorkspaceUserFactory.create(user_id=user.id, workspace_id=dataset.workspace_id)
+        await WorkspaceUserFactory.create(
+            user_id=user.id, workspace_id=dataset.workspace_id
+        )
 
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TermsMetadataPropertyFactory.create(
-            name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
+            name="annotator_meta",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin, UserRole.annotator],
         )
-        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
-        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
+        await TermsMetadataPropertyFactory.create(
+            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="owner_meta", dataset=dataset, allowed_roles=[]
+        )
 
         record = await RecordFactory.create(
-            metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
+            metadata_={
+                "admin_meta": "value",
+                "annotator_meta": "value",
+                "owner_meta": "value",
+                "extra": "value",
+            },
             dataset=dataset,
         )
 
@@ -143,16 +174,29 @@ class TestSearchCurrentUserDatasetRecords:
         dataset = await DatasetFactory.create()
 
         user = await AdminFactory.create()
-        await WorkspaceUserFactory.create(user_id=user.id, workspace_id=dataset.workspace_id)
+        await WorkspaceUserFactory.create(
+            user_id=user.id, workspace_id=dataset.workspace_id
+        )
 
         await TextFieldFactory.create(name="input", dataset=dataset)
         await TermsMetadataPropertyFactory.create(
-            name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
+            name="annotator_meta",
+            dataset=dataset,
+            allowed_roles=[UserRole.admin, UserRole.annotator],
         )
-        await TermsMetadataPropertyFactory.create(name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin])
-        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
+        await TermsMetadataPropertyFactory.create(
+            name="admin_meta", dataset=dataset, allowed_roles=[UserRole.admin]
+        )
+        await TermsMetadataPropertyFactory.create(
+            name="owner_meta", dataset=dataset, allowed_roles=[]
+        )
         record = await RecordFactory.create(
-            metadata_={"admin_meta": "value", "annotator_meta": "value", "owner_meta": "value", "extra": "value"},
+            metadata_={
+                "admin_meta": "value",
+                "annotator_meta": "value",
+                "owner_meta": "value",
+                "extra": "value",
+            },
             dataset=dataset,
         )
 
@@ -174,7 +218,11 @@ class TestSearchCurrentUserDatasetRecords:
                     "record": {
                         "id": str(record.id),
                         "fields": record.fields,
-                        "metadata": {"admin_meta": "value", "annotator_meta": "value", "extra": "value"},
+                        "metadata": {
+                            "admin_meta": "value",
+                            "annotator_meta": "value",
+                            "extra": "value",
+                        },
                         "external_id": record.external_id,
                         "dataset_id": str(dataset.id),
                         "inserted_at": record.inserted_at.isoformat(),
@@ -192,12 +240,16 @@ class TestSearchCurrentUserDatasetRecords:
         dataset = await DatasetFactory.create()
 
         await TextFieldFactory.create(name="input", dataset=dataset)
-        vector_settings = await VectorSettingsFactory.create(name="vector", dimensions=3, dataset=dataset)
+        vector_settings = await VectorSettingsFactory.create(
+            name="vector", dimensions=3, dataset=dataset
+        )
 
         record = await RecordFactory.create(dataset=dataset)
         record_without_vector = await RecordFactory.create(dataset=dataset)
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record
+        )
 
         response = await async_client.post(
             self.url(dataset.id),
@@ -218,7 +270,9 @@ class TestSearchCurrentUserDatasetRecords:
             "message": f"Record `{record_without_vector.id}` does not have a vector for vector settings `{vector_settings.name}`",
         }
 
-    async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_invalid_filter(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -245,7 +299,9 @@ class TestSearchCurrentUserDatasetRecords:
             "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}",
         }
 
-    async def test_with_invalid_sort(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_invalid_sort(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -255,7 +311,12 @@ class TestSearchCurrentUserDatasetRecords:
                 "query": {
                     "text": {"q": "text", "field": "non-existent"},
                 },
-                "sort": [{"scope": {"entity": "response", "question": "non-existent"}, "order": "asc"}],
+                "sort": [
+                    {
+                        "scope": {"entity": "response", "question": "non-existent"},
+                        "order": "asc",
+                    }
+                ],
             },
         )
 

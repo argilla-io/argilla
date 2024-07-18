@@ -133,7 +133,9 @@ def test_add_dict_records(client: Argilla):
 
 
 def test_add_records_with_suggestions(client) -> None:
-    mock_dataset_name = f"test_add_record_with_suggestions {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    mock_dataset_name = (
+        f"test_add_record_with_suggestions {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
     mock_data = [
         {
             "text": "Hello World, how are you?",
@@ -166,7 +168,11 @@ def test_add_records_with_suggestions(client) -> None:
         ],
         questions=[
             rg.TextQuestion(name="comment", use_markdown=False),
-            rg.MultiLabelQuestion(name="topics", labels=["topic1", "topic2", "topic3"], labels_order="suggestion"),
+            rg.MultiLabelQuestion(
+                name="topics",
+                labels=["topic1", "topic2", "topic3"],
+                labels_order="suggestion",
+            ),
         ],
     )
     dataset = rg.Dataset(
@@ -188,20 +194,30 @@ def test_add_records_with_suggestions(client) -> None:
     dataset_records = list(dataset.records(with_suggestions=True))
 
     assert dataset_records[0].id == str(mock_data[0]["id"])
-    assert dataset_records[0].suggestions["comment"].value == "I'm doing great, thank you!"
+    assert (
+        dataset_records[0].suggestions["comment"].value == "I'm doing great, thank you!"
+    )
     assert dataset_records[0].suggestions["comment"].score is None
     assert dataset_records[0].suggestions["topics"].value == ["topic1", "topic2"]
     assert dataset_records[0].suggestions["topics"].score == [0.9, 0.8]
 
     assert dataset_records[1].fields["text"] == mock_data[1]["text"]
-    assert dataset_records[1].suggestions["comment"].value == "I'm doing great, thank you!"
+    assert (
+        dataset_records[1].suggestions["comment"].value == "I'm doing great, thank you!"
+    )
     assert dataset_records[1].suggestions["comment"].score is None
     assert dataset_records[1].suggestions["topics"].value == ["topic3"]
     assert dataset_records[1].suggestions["topics"].score == [0.9]
 
-    assert dataset_records[2].suggestions["comment"].value == "I'm doing great, thank you!"
+    assert (
+        dataset_records[2].suggestions["comment"].value == "I'm doing great, thank you!"
+    )
     assert dataset_records[2].suggestions["comment"].score is None
-    assert dataset_records[2].suggestions["topics"].value == ["topic1", "topic2", "topic3"]
+    assert dataset_records[2].suggestions["topics"].value == [
+        "topic1",
+        "topic2",
+        "topic3",
+    ]
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8, 0.7]
 
 
@@ -440,7 +456,12 @@ def test_add_records_with_id_mapped(client) -> None:
     dataset.records.log(
         records=mock_data,
         user_id=user.id,
-        mapping={"my_label": "label.response", "my_guess": "label.suggestion", "x": "text", "uuid": "id"},
+        mapping={
+            "my_label": "label.response",
+            "my_guess": "label.suggestion",
+            "x": "text",
+            "uuid": "id",
+        },
     )
     assert dataset.name == mock_dataset_name
 
@@ -605,17 +626,23 @@ def test_add_records_objects_with_responses(client: Argilla):
     records = [
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("label", "negative", user_id=user.id, status="submitted")],
+            responses=[
+                rg.Response("label", "negative", user_id=user.id, status="submitted")
+            ],
             id=str(uuid.uuid4()),
         ),
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("label", "positive", user_id=user.id, status="discarded")],
+            responses=[
+                rg.Response("label", "positive", user_id=user.id, status="discarded")
+            ],
             id=str(uuid.uuid4()),
         ),
         rg.Record(
             fields={"text": "Hello World, how are you?"},
-            responses=[rg.Response("comment", "The comment", user_id=user.id, status="draft")],
+            responses=[
+                rg.Response("comment", "The comment", user_id=user.id, status="draft")
+            ],
             id=str(uuid.uuid4()),
         ),
         rg.Record(

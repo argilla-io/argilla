@@ -34,7 +34,11 @@ class TestTermsMetadata:
             "id": None,
             "dataset_id": None,
             "name": "metadata",
-            "settings": {"type": "terms", "values": ["option1", "option2"], "visible_for_annotators": True},
+            "settings": {
+                "type": "terms",
+                "values": ["option1", "option2"],
+                "visible_for_annotators": True,
+            },
             "title": "A metadata property",
             "type": "terms",
             "visible_for_annotators": True,
@@ -57,7 +61,11 @@ class TestTermsMetadata:
             "dataset_id": None,
             "name": "metadata",
             "title": "metadata",
-            "settings": {"type": "terms", "values": None, "visible_for_annotators": True},
+            "settings": {
+                "type": "terms",
+                "values": None,
+                "visible_for_annotators": True,
+            },
             "type": "terms",
             "visible_for_annotators": True,
             "inserted_at": None,
@@ -70,7 +78,9 @@ class TestTermsMetadata:
             name="metadata",
             title="A metadata property",
             type="terms",
-            settings=TermsMetadataPropertySettings(values=["option1", "option2"], type="terms"),
+            settings=TermsMetadataPropertySettings(
+                values=["option1", "option2"], type="terms"
+            ),
             visible_for_annotators=True,
         )
 

@@ -16,10 +16,25 @@ from typing import List, Optional, Tuple, Type, Union
 from uuid import uuid4
 
 import pytest
-from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
+from argilla_server.api.handlers.v1.datasets.records import (
+    LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+)
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import RecordInclude, RecordSortField, ResponseStatus, UserRole
-from argilla_server.models import Dataset, Question, Record, Response, Suggestion, User, Workspace
+from argilla_server.enums import (
+    RecordInclude,
+    RecordSortField,
+    ResponseStatus,
+    UserRole,
+)
+from argilla_server.models import (
+    Dataset,
+    Question,
+    Record,
+    Response,
+    Suggestion,
+    User,
+    Workspace,
+)
 from argilla_server.search_engine import (
     FloatMetadataFilter,
     IntegerMetadataFilter,
@@ -55,18 +70,26 @@ from tests.factories import (
 @pytest.mark.asyncio
 class TestSuiteListDatasetRecords:
     @pytest.mark.skip(reason="Factory integration with search engine")
-    async def test_list_dataset_records(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_records(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
-        record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+        record_a = await RecordFactory.create(
+            fields={"record_a": "value_a"}, dataset=dataset
+        )
         record_b = await RecordFactory.create(
             fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset
         )
-        record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_c": "value_c"}, dataset=dataset
+        )
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
-        response = await async_client.get(f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -101,15 +124,27 @@ class TestSuiteListDatasetRecords:
 
     @pytest.mark.parametrize(
         "includes",
-        [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
+        [
+            [RecordInclude.responses],
+            [RecordInclude.suggestions],
+            [RecordInclude.responses, RecordInclude.suggestions],
+        ],
     )
     async def test_list_dataset_records_with_include(
-        self, async_client: "AsyncClient", owner: User, owner_auth_header: dict, includes: List[RecordInclude]
+        self,
+        async_client: "AsyncClient",
+        owner: User,
+        owner_auth_header: dict,
+        includes: List[RecordInclude],
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, questions, records, responses, suggestions = await self.create_dataset_with_user_responses(
-            owner, workspace
-        )
+        (
+            dataset,
+            questions,
+            records,
+            responses,
+            suggestions,
+        ) = await self.create_dataset_with_user_responses(owner, workspace)
         record_a, record_b, record_c = records
         response_a_user, response_b_user = responses[1], responses[3]
         suggestion_a, suggestion_b = suggestions
@@ -212,12 +247,22 @@ class TestSuiteListDatasetRecords:
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
 
         response = await async_client.get(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -272,20 +317,46 @@ class TestSuiteListDatasetRecords:
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
-        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
+        vector_settings_c = await VectorSettingsFactory.create(
+            name="vector-c", dimensions=4, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
-        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
-        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[6.0, 7.0, 8.0, 9.0],
+            vector_settings=vector_settings_c,
+            record=record_a,
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
+        await VectorFactory.create(
+            value=[10.0, 11.0, 12.0, 13.0],
+            vector_settings=vector_settings_c,
+            record=record_b,
+        )
+        await VectorFactory.create(
+            value=[14.0, 15.0, 16.0, 17.0],
+            vector_settings=vector_settings_c,
+            record=record_c,
+        )
 
         response = await async_client.get(
             f"/api/v1/datasets/{dataset.id}/records",
-            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            params={
+                "include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"
+            },
             headers=owner_auth_header,
         )
 
@@ -329,17 +400,23 @@ class TestSuiteListDatasetRecords:
         }
 
     @pytest.mark.skip(reason="Factory integration with search engine")
-    async def test_list_dataset_records_with_offset(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_records_with_offset(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
         await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
-        record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_c": "value_c"}, dataset=dataset
+        )
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, params={"offset": 2}
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"offset": 2},
         )
 
         assert response.status_code == 200
@@ -348,9 +425,13 @@ class TestSuiteListDatasetRecords:
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
     @pytest.mark.skip(reason="Factory integration with search engine")
-    async def test_list_dataset_records_with_limit(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_records_with_limit(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
-        record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+        record_a = await RecordFactory.create(
+            fields={"record_a": "value_a"}, dataset=dataset
+        )
         await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
         await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
@@ -358,7 +439,9 @@ class TestSuiteListDatasetRecords:
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, params={"limit": 1}
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"limit": 1},
         )
 
         assert response.status_code == 200
@@ -372,14 +455,18 @@ class TestSuiteListDatasetRecords:
     ):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-        record_c = await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_b": "value_b"}, dataset=dataset
+        )
         await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", headers=owner_auth_header, params={"offset": 1, "limit": 1}
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"offset": 1, "limit": 1},
         )
 
         assert response.status_code == 200
@@ -395,11 +482,20 @@ class TestSuiteListDatasetRecords:
         response_status: ResponseStatus,
         response_values: Optional[dict] = None,
     ):
-        for record in await RecordFactory.create_batch(size=num_records, dataset=dataset):
-            await ResponseFactory.create(record=record, user=user, values=response_values, status=response_status)
+        for record in await RecordFactory.create_batch(
+            size=num_records, dataset=dataset
+        ):
+            await ResponseFactory.create(
+                record=record, user=user, values=response_values, status=response_status
+            )
 
     @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        (
+            "property_config",
+            "param_value",
+            "expected_filter_class",
+            "expected_filter_args",
+        ),
         [
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
@@ -463,7 +559,9 @@ class TestSuiteListDatasetRecords:
         expected_filter_args: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         metadata_property = await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -493,7 +591,11 @@ class TestSuiteListDatasetRecords:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
+            metadata_filters=[
+                expected_filter_class(
+                    metadata_property=metadata_property, **expected_filter_args
+                )
+            ],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -502,7 +604,15 @@ class TestSuiteListDatasetRecords:
 
     @pytest.mark.skip(reason="Factory integration with search engine")
     @pytest.mark.parametrize(
-        "response_status_filter", ["missing", "pending", "discarded", "submitted", "draft", ["submitted", "draft"]]
+        "response_status_filter",
+        [
+            "missing",
+            "pending",
+            "discarded",
+            "submitted",
+            "draft",
+            ["submitted", "draft"],
+        ],
     )
     async def test_list_dataset_records_with_response_status_filter(
         self,
@@ -516,28 +626,41 @@ class TestSuiteListDatasetRecords:
 
         dataset = await DatasetFactory.create()
         # missing responses
-        await RecordFactory.create_batch(size=num_records_per_response_status, dataset=dataset)
+        await RecordFactory.create_batch(
+            size=num_records_per_response_status, dataset=dataset
+        )
         # discarded responses
         await self.create_records_with_response(
             num_records_per_response_status, dataset, owner, ResponseStatus.discarded
         )
         # submitted responses
         await self.create_records_with_response(
-            num_records_per_response_status, dataset, owner, ResponseStatus.submitted, response_values
+            num_records_per_response_status,
+            dataset,
+            owner,
+            ResponseStatus.submitted,
+            response_values,
         )
         # drafted responses
         await self.create_records_with_response(
-            num_records_per_response_status, dataset, owner, ResponseStatus.draft, response_values
+            num_records_per_response_status,
+            dataset,
+            owner,
+            ResponseStatus.draft,
+            response_values,
         )
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response_status_filter = (
-            [response_status_filter] if isinstance(response_status_filter, str) else response_status_filter
+            [response_status_filter]
+            if isinstance(response_status_filter, str)
+            else response_status_filter
         )
         response_status_filter_url = [
-            f"response_status={response_status}" for response_status in response_status_filter
+            f"response_status={response_status}"
+            for response_status in response_status_filter
         ]
 
         response = await async_client.get(
@@ -548,11 +671,19 @@ class TestSuiteListDatasetRecords:
         assert response.status_code == 200
         response_json = response.json()
 
-        assert len(response_json["items"]) == (num_records_per_response_status * len(response_status_filter))
+        assert len(response_json["items"]) == (
+            num_records_per_response_status * len(response_status_filter)
+        )
 
         if "missing" in response_status_filter:
             assert (
-                len([record for record in response_json["items"] if len(record["responses"]) == 0])
+                len(
+                    [
+                        record
+                        for record in response_json["items"]
+                        if len(record["responses"]) == 0
+                    ]
+                )
                 >= num_records_per_response_status
             )
         assert all(
@@ -581,9 +712,21 @@ class TestSuiteListDatasetRecords:
             [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
             [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
             [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "desc"),
+                ("metadata.terms-metadata-property", "asc"),
+            ],
+            [
+                ("inserted_at", "desc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
         ],
     )
     async def test_list_dataset_records_with_sort_by(
@@ -595,12 +738,16 @@ class TestSuiteListDatasetRecords:
         sorts: List[Tuple[str, Union[str, None]]],
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(
+                    name=field.split(".")[-1], dataset=dataset
+                )
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -612,7 +759,10 @@ class TestSuiteListDatasetRecords:
         )
 
         query_params = {
-            "sort_by": [f"{field}:{order}" if order is not None else f"{field}:asc" for field, order in sorts]
+            "sort_by": [
+                f"{field}:{order}" if order is not None else f"{field}:asc"
+                for field, order in sorts
+            ]
         }
 
         response = await async_client.get(
@@ -639,7 +789,9 @@ class TestSuiteListDatasetRecords:
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", params={"sort_by": "inserted_at:wrong"}, headers=owner_auth_header
+            f"/api/v1/datasets/{dataset.id}/records",
+            params={"sort_by": "inserted_at:wrong"},
+            headers=owner_auth_header,
         )
         assert response.status_code == 422
         assert response.json() == {
@@ -665,7 +817,9 @@ class TestSuiteListDatasetRecords:
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         response = await async_client.get(
             f"/api/v1/datasets/{dataset.id}/records",
@@ -678,7 +832,9 @@ class TestSuiteListDatasetRecords:
             "It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
         }
 
-    async def test_list_dataset_records_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_dataset_records_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}/records")
@@ -698,7 +854,8 @@ class TestSuiteListDatasetRecords:
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
         assert response.status_code == 200
 
@@ -715,7 +872,8 @@ class TestSuiteListDatasetRecords:
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
         assert response.status_code == 403
 
@@ -735,11 +893,17 @@ class TestSuiteListDatasetRecords:
         ]
 
         records = [
-            await RecordFactory.create(fields={"input": "input_a", "output": "output_a"}, dataset=dataset),
             await RecordFactory.create(
-                fields={"input": "input_b", "output": "output_b"}, metadata_={"unit": "test"}, dataset=dataset
+                fields={"input": "input_a", "output": "output_a"}, dataset=dataset
             ),
-            await RecordFactory.create(fields={"input": "input_c", "output": "output_c"}, dataset=dataset),
+            await RecordFactory.create(
+                fields={"input": "input_b", "output": "output_b"},
+                metadata_={"unit": "test"},
+                dataset=dataset,
+            ),
+            await RecordFactory.create(
+                fields={"input": "input_c", "output": "output_c"}, dataset=dataset
+            ),
         ]
 
         responses = [
@@ -751,7 +915,9 @@ class TestSuiteListDatasetRecords:
                 record=records[0],
                 user=annotator,
             ),
-            await ResponseFactory.create(status="discarded", record=records[0], user=user),
+            await ResponseFactory.create(
+                status="discarded", record=records[0], user=user
+            ),
             await ResponseFactory.create(
                 values={
                     "input_ok": {"value": "yes"},
@@ -778,10 +944,14 @@ class TestSuiteListDatasetRecords:
         ]
 
         # Add some responses from other users
-        await ResponseFactory.create_batch(10, record=records[0], status=ResponseStatus.submitted)
+        await ResponseFactory.create_batch(
+            10, record=records[0], status=ResponseStatus.submitted
+        )
 
         suggestions = [
-            await SuggestionFactory.create(record=records[0], question=questions[0], value="option-1"),
+            await SuggestionFactory.create(
+                record=records[0], question=questions[0], value="option-1"
+            ),
             await SuggestionFactory.create(
                 record=records[1],
                 question=questions[0],
@@ -795,10 +965,16 @@ class TestSuiteListDatasetRecords:
         return dataset, questions, records, responses, suggestions
 
     async def test_list_current_user_dataset_records(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
         record_a, record_b, record_c = records
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -813,7 +989,9 @@ class TestSuiteListDatasetRecords:
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -856,7 +1034,9 @@ class TestSuiteListDatasetRecords:
         user = await AnnotatorFactory.create()
         await WorkspaceUserFactory.create(workspace_id=workspace.id, user_id=user.id)
 
-        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         await TermsMetadataPropertyFactory.create(
             name="key1",
@@ -877,7 +1057,12 @@ class TestSuiteListDatasetRecords:
         record = await RecordFactory.create(
             dataset=dataset,
             fields={"input": "input_b", "output": "output_b"},
-            metadata_={"key1": "value1", "key2": "value2", "key3": "value3", "extra": "extra"},
+            metadata_={
+                "key1": "value1",
+                "key2": "value2",
+                "key3": "value3",
+                "extra": "extra",
+            },
         )
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -889,7 +1074,8 @@ class TestSuiteListDatasetRecords:
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -909,19 +1095,29 @@ class TestSuiteListDatasetRecords:
         }
 
     @pytest.mark.skip(reason="Factory integration with search engine")
-    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
+    @pytest.mark.parametrize(
+        "role", [UserRole.annotator, UserRole.admin, UserRole.owner]
+    )
     @pytest.mark.parametrize(
         "includes",
-        [[RecordInclude.responses], [RecordInclude.suggestions], [RecordInclude.responses, RecordInclude.suggestions]],
+        [
+            [RecordInclude.responses],
+            [RecordInclude.suggestions],
+            [RecordInclude.responses, RecordInclude.suggestions],
+        ],
     )
     async def test_list_current_user_dataset_records_with_include(
         self, async_client: "AsyncClient", role: UserRole, includes: List[RecordInclude]
     ):
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(workspaces=[workspace], role=role)
-        dataset, questions, records, responses, suggestions = await self.create_dataset_with_user_responses(
-            user, workspace
-        )
+        (
+            dataset,
+            questions,
+            records,
+            responses,
+            suggestions,
+        ) = await self.create_dataset_with_user_responses(user, workspace)
         record_a, record_b, record_c = records
         response_a_user, response_b_user = responses[1], responses[3]
         suggestion_a, suggestion_b = suggestions
@@ -931,7 +1127,9 @@ class TestSuiteListDatasetRecords:
 
         params = [("include", include.value) for include in includes]
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", params=params, headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            params=params,
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         expected = {
@@ -1024,12 +1222,22 @@ class TestSuiteListDatasetRecords:
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/records",
@@ -1084,20 +1292,46 @@ class TestSuiteListDatasetRecords:
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
         record_c = await RecordFactory.create(dataset=dataset)
-        vector_settings_a = await VectorSettingsFactory.create(name="vector-a", dimensions=3, dataset=dataset)
-        vector_settings_b = await VectorSettingsFactory.create(name="vector-b", dimensions=2, dataset=dataset)
-        vector_settings_c = await VectorSettingsFactory.create(name="vector-c", dimensions=4, dataset=dataset)
+        vector_settings_a = await VectorSettingsFactory.create(
+            name="vector-a", dimensions=3, dataset=dataset
+        )
+        vector_settings_b = await VectorSettingsFactory.create(
+            name="vector-b", dimensions=2, dataset=dataset
+        )
+        vector_settings_c = await VectorSettingsFactory.create(
+            name="vector-c", dimensions=4, dataset=dataset
+        )
 
-        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a)
-        await VectorFactory.create(value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a)
-        await VectorFactory.create(value=[6.0, 7.0, 8.0, 9.0], vector_settings=vector_settings_c, record=record_a)
-        await VectorFactory.create(value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b)
-        await VectorFactory.create(value=[10.0, 11.0, 12.0, 13.0], vector_settings=vector_settings_c, record=record_b)
-        await VectorFactory.create(value=[14.0, 15.0, 16.0, 17.0], vector_settings=vector_settings_c, record=record_c)
+        await VectorFactory.create(
+            value=[1.0, 2.0, 3.0], vector_settings=vector_settings_a, record=record_a
+        )
+        await VectorFactory.create(
+            value=[4.0, 5.0], vector_settings=vector_settings_b, record=record_a
+        )
+        await VectorFactory.create(
+            value=[6.0, 7.0, 8.0, 9.0],
+            vector_settings=vector_settings_c,
+            record=record_a,
+        )
+        await VectorFactory.create(
+            value=[1.0, 2.0], vector_settings=vector_settings_b, record=record_b
+        )
+        await VectorFactory.create(
+            value=[10.0, 11.0, 12.0, 13.0],
+            vector_settings=vector_settings_c,
+            record=record_b,
+        )
+        await VectorFactory.create(
+            value=[14.0, 15.0, 16.0, 17.0],
+            vector_settings=vector_settings_c,
+            record=record_c,
+        )
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/records",
-            params={"include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"},
+            params={
+                "include": f"{RecordInclude.vectors.value}:{vector_settings_a.name},{vector_settings_b.name}"
+            },
             headers=owner_auth_header,
         )
 
@@ -1147,13 +1381,17 @@ class TestSuiteListDatasetRecords:
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
         await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
-        record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_c": "value_c"}, dataset=dataset
+        )
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header, params={"offset": 2}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"offset": 2},
         )
 
         assert response.status_code == 200
@@ -1166,7 +1404,9 @@ class TestSuiteListDatasetRecords:
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+        record_a = await RecordFactory.create(
+            fields={"record_a": "value_a"}, dataset=dataset
+        )
         await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
         await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
@@ -1174,7 +1414,9 @@ class TestSuiteListDatasetRecords:
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header, params={"limit": 1}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"limit": 1},
         )
 
         assert response.status_code == 200
@@ -1188,14 +1430,18 @@ class TestSuiteListDatasetRecords:
     ):
         dataset = await DatasetFactory.create()
         await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
-        record_c = await RecordFactory.create(fields={"record_b": "value_b"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_b": "value_b"}, dataset=dataset
+        )
         await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers=owner_auth_header, params={"offset": 1, "limit": 1}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers=owner_auth_header,
+            params={"offset": 1, "limit": 1},
         )
 
         assert response.status_code == 200
@@ -1204,7 +1450,12 @@ class TestSuiteListDatasetRecords:
         assert [item["id"] for item in response_body["items"]] == [str(record_c.id)]
 
     @pytest.mark.parametrize(
-        ("property_config", "param_value", "expected_filter_class", "expected_filter_args"),
+        (
+            "property_config",
+            "param_value",
+            "expected_filter_class",
+            "expected_filter_args",
+        ),
         [
             (
                 {"name": "terms_prop", "settings": {"type": "terms"}},
@@ -1268,7 +1519,9 @@ class TestSuiteListDatasetRecords:
         expected_filter_args: dict,
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         metadata_property = await MetadataPropertyFactory.create(
             name=property_config["name"],
@@ -1298,7 +1551,11 @@ class TestSuiteListDatasetRecords:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=None,
-            metadata_filters=[expected_filter_class(metadata_property=metadata_property, **expected_filter_args)],
+            metadata_filters=[
+                expected_filter_class(
+                    metadata_property=metadata_property, **expected_filter_args
+                )
+            ],
             user_response_status_filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
@@ -1307,9 +1564,16 @@ class TestSuiteListDatasetRecords:
         )
 
     @pytest.mark.skip(reason="Factory integration with search engine")
-    @pytest.mark.parametrize("response_status_filter", ["missing", "pending", "discarded", "submitted", "draft"])
+    @pytest.mark.parametrize(
+        "response_status_filter",
+        ["missing", "pending", "discarded", "submitted", "draft"],
+    )
     async def test_list_current_user_dataset_records_with_response_status_filter(
-        self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict, response_status_filter: str
+        self,
+        async_client: "AsyncClient",
+        owner: "User",
+        owner_auth_header: dict,
+        response_status_filter: str,
     ):
         num_responses_per_status = 10
         response_values = {"input_ok": {"value": "yes"}, "output_ok": {"value": "yes"}}
@@ -1318,14 +1582,24 @@ class TestSuiteListDatasetRecords:
         # missing responses
         await RecordFactory.create_batch(size=num_responses_per_status, dataset=dataset)
         # discarded responses
-        await self.create_records_with_response(num_responses_per_status, dataset, owner, ResponseStatus.discarded)
+        await self.create_records_with_response(
+            num_responses_per_status, dataset, owner, ResponseStatus.discarded
+        )
         # submitted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.submitted, response_values
+            num_responses_per_status,
+            dataset,
+            owner,
+            ResponseStatus.submitted,
+            response_values,
         )
         # drafted responses
         await self.create_records_with_response(
-            num_responses_per_status, dataset, owner, ResponseStatus.draft, response_values
+            num_responses_per_status,
+            dataset,
+            owner,
+            ResponseStatus.draft,
+            response_values,
         )
 
         other_dataset = await DatasetFactory.create()
@@ -1342,10 +1616,15 @@ class TestSuiteListDatasetRecords:
         assert len(response_json["items"]) == num_responses_per_status
 
         if response_status_filter in ["missing", "pending"]:
-            assert all([len(record["responses"]) == 0 for record in response_json["items"]])
+            assert all(
+                [len(record["responses"]) == 0 for record in response_json["items"]]
+            )
         else:
             assert all(
-                [record["responses"][0]["status"] == response_status_filter for record in response_json["items"]]
+                [
+                    record["responses"][0]["status"] == response_status_filter
+                    for record in response_json["items"]
+                ]
             )
 
     @pytest.mark.parametrize(
@@ -1366,9 +1645,21 @@ class TestSuiteListDatasetRecords:
             [("inserted_at", "desc"), ("metadata.terms-metadata-property", "asc")],
             [("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
             [("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "asc"), ("updated_at", "desc"), ("metadata.terms-metadata-property", "asc")],
-            [("inserted_at", "desc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
-            [("inserted_at", "asc"), ("updated_at", "asc"), ("metadata.terms-metadata-property", "desc")],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "desc"),
+                ("metadata.terms-metadata-property", "asc"),
+            ],
+            [
+                ("inserted_at", "desc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
+            [
+                ("inserted_at", "asc"),
+                ("updated_at", "asc"),
+                ("metadata.terms-metadata-property", "desc"),
+            ],
         ],
     )
     async def test_list_current_user_dataset_records_with_sort_by(
@@ -1380,12 +1671,16 @@ class TestSuiteListDatasetRecords:
         sorts: List[Tuple[str, Union[str, None]]],
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, records, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         expected_sorts_by = []
         for field, order in sorts:
             if field not in ("inserted_at", "updated_at"):
-                field = await TermsMetadataPropertyFactory.create(name=field.split(".")[-1], dataset=dataset)
+                field = await TermsMetadataPropertyFactory.create(
+                    name=field.split(".")[-1], dataset=dataset
+                )
             expected_sorts_by.append(SortBy(field=field, order=order or "asc"))
 
         mock_search_engine.search.return_value = SearchResponses(
@@ -1397,7 +1692,10 @@ class TestSuiteListDatasetRecords:
         )
 
         query_params = {
-            "sort_by": [f"{field}:{order}" if order is not None else f"{field}:asc" for field, order in sorts]
+            "sort_by": [
+                f"{field}:{order}" if order is not None else f"{field}:asc"
+                for field, order in sorts
+            ]
         }
 
         response = await async_client.get(
@@ -1453,7 +1751,9 @@ class TestSuiteListDatasetRecords:
         self, async_client: "AsyncClient", owner: "User", owner_auth_header: dict
     ):
         workspace = await WorkspaceFactory.create()
-        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(owner, workspace)
+        dataset, _, _, _, _ = await self.create_dataset_with_user_responses(
+            owner, workspace
+        )
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/records",
@@ -1465,7 +1765,9 @@ class TestSuiteListDatasetRecords:
             "detail": "Provided sort field in 'sort_by' query param 'not-valid' is not valid. It must be either 'inserted_at', 'updated_at' or `metadata.metadata-property-name`"
         }
 
-    async def test_list_current_user_dataset_records_without_authentication(self, async_client: "AsyncClient"):
+    async def test_list_current_user_dataset_records_without_authentication(
+        self, async_client: "AsyncClient"
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/records")
@@ -1480,18 +1782,23 @@ class TestSuiteListDatasetRecords:
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create(workspaces=[workspace], role=role)
         dataset = await DatasetFactory.create(workspace=workspace)
-        record_a = await RecordFactory.create(fields={"record_a": "value_a"}, dataset=dataset)
+        record_a = await RecordFactory.create(
+            fields={"record_a": "value_a"}, dataset=dataset
+        )
         record_b = await RecordFactory.create(
             fields={"record_b": "value_b"}, metadata_={"unit": "test"}, dataset=dataset
         )
-        record_c = await RecordFactory.create(fields={"record_c": "value_c"}, dataset=dataset)
+        record_c = await RecordFactory.create(
+            fields={"record_c": "value_c"}, dataset=dataset
+        )
         expected_records = [record_a, record_b, record_c]
 
         other_dataset = await DatasetFactory.create()
         await RecordFactory.create_batch(size=2, dataset=other_dataset)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -1499,7 +1806,9 @@ class TestSuiteListDatasetRecords:
         response_items = response.json()["items"]
 
         for expected_record in expected_records:
-            found_items = [item for item in response_items if item["id"] == str(expected_record.id)]
+            found_items = [
+                item for item in response_items if item["id"] == str(expected_record.id)
+            ]
             assert found_items, expected_record
 
             assert found_items[0] == {
@@ -1520,7 +1829,8 @@ class TestSuiteListDatasetRecords:
         user = await UserFactory.create(workspaces=[workspace], role=role)
 
         response = await async_client.get(
-            f"/api/v1/me/datasets/{dataset.id}/records", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/me/datasets/{dataset.id}/records",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 403
@@ -1538,4 +1848,6 @@ class TestSuiteListDatasetRecords:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }

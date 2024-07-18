@@ -375,9 +375,21 @@ class SpanQuestionFactory(QuestionFactory):
         "field": "field-a",
         "visible_options": None,
         "options": [
-            {"value": "label-a", "text": "Label A", "description": "Label A description"},
-            {"value": "label-b", "text": "Label B", "description": "Label B description"},
-            {"value": "label-c", "text": "Label C", "description": "Label C description"},
+            {
+                "value": "label-a",
+                "text": "Label A",
+                "description": "Label A description",
+            },
+            {
+                "value": "label-b",
+                "text": "Label B",
+                "description": "Label B description",
+            },
+            {
+                "value": "label-c",
+                "text": "Label C",
+                "description": "Label C description",
+            },
         ],
         "allow_overlapping": False,
         "allow_character_annotation": True,

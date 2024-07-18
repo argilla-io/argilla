@@ -48,13 +48,19 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         await SuggestionFactory.create(question=question_c, agent="agent-c")
 
         extra_dataset = await DatasetFactory.create()
-        extra_question_a = await QuestionFactory.create(name="extra-question-a", dataset=extra_dataset)
-        extra_question_b = await QuestionFactory.create(name="extra-question-b", dataset=extra_dataset)
+        extra_question_a = await QuestionFactory.create(
+            name="extra-question-a", dataset=extra_dataset
+        )
+        extra_question_b = await QuestionFactory.create(
+            name="extra-question-b", dataset=extra_dataset
+        )
 
         await SuggestionFactory.create(question=extra_question_a, agent="extra-agent-a")
         await SuggestionFactory.create(question=extra_question_b, agent="extra-agent-b")
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -83,28 +89,40 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
             ]
         }
 
-    async def test_with_dataset_without_questions(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_dataset_without_questions(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {"items": []}
 
-    async def test_with_dataset_without_suggestions(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_dataset_without_suggestions(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         question_a = await QuestionFactory.create(name="question-a", dataset=dataset)
         question_b = await QuestionFactory.create(name="question-b", dataset=dataset)
         question_c = await QuestionFactory.create(name="question-c", dataset=dataset)
 
         extra_dataset = await DatasetFactory.create()
-        extra_question_a = await QuestionFactory.create(name="extra-question-a", dataset=extra_dataset)
-        extra_question_b = await QuestionFactory.create(name="extra-question-b", dataset=extra_dataset)
+        extra_question_a = await QuestionFactory.create(
+            name="extra-question-a", dataset=extra_dataset
+        )
+        extra_question_b = await QuestionFactory.create(
+            name="extra-question-b", dataset=extra_dataset
+        )
 
         await SuggestionFactory.create(question=extra_question_a, agent="extra-agent-a")
         await SuggestionFactory.create(question=extra_question_b, agent="extra-agent-b")
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -137,7 +155,9 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         dataset = await DatasetFactory.create()
         owner = await OwnerFactory.create(workspaces=[dataset.workspace])
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: owner.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: owner.api_key}
+        )
 
         assert response.status_code == 200
 
@@ -145,7 +165,9 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         dataset = await DatasetFactory.create()
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: admin.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: admin.api_key}
+        )
 
         assert response.status_code == 200
 
@@ -153,7 +175,9 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         dataset = await DatasetFactory.create()
         annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: annotator.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: annotator.api_key}
+        )
 
         assert response.status_code == 200
 
@@ -161,14 +185,22 @@ class TestListDatasetRecordsSearchSuggestionsOptions:
         dataset = await DatasetFactory.create()
         annotator = await AnnotatorFactory.create()
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: annotator.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: annotator.api_key}
+        )
 
         assert response.status_code == 403
 
-    async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_with_non_existent_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset_id = uuid4()
 
-        response = await async_client.get(self.url(dataset_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }

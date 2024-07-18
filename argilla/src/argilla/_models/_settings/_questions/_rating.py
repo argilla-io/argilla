@@ -16,7 +16,10 @@ from typing import List
 
 from pydantic import field_validator, Field
 
-from argilla._models._settings._questions._base import QuestionSettings, QuestionBaseModel
+from argilla._models._settings._questions._base import (
+    QuestionSettings,
+    QuestionBaseModel,
+)
 
 
 class RatingQuestionSettings(QuestionSettings):

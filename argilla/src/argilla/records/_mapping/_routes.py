@@ -99,7 +99,9 @@ class RecordAttributesMap(BaseModel):
             AttributeType.ID: self.id,
         }[type]
 
-    def get_by_name_and_type(self, name: str, type: AttributeType) -> Optional[AttributeRoute]:
+    def get_by_name_and_type(
+        self, name: str, type: AttributeType
+    ) -> Optional[AttributeRoute]:
         """Utility method to get a route by name and type"""
         if name == "id" and AttributeType.ID:
             return self.id
@@ -110,4 +112,6 @@ class RecordAttributesMap(BaseModel):
         if attribute_route.type == AttributeType.ID:
             self.id = attribute_route
         else:
-            self._get_routes_group_by_type(attribute_route.type)[attribute_route.name] = attribute_route
+            self._get_routes_group_by_type(attribute_route.type)[
+                attribute_route.name
+            ] = attribute_route

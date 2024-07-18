@@ -59,16 +59,22 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
 NT = TypeVar("NT", int, float)
 
 
-class NumericMetadataPropertySettings(BaseMetadataPropertySettings, GenericModel, Generic[NT]):
+class NumericMetadataPropertySettings(
+    BaseMetadataPropertySettings, GenericModel, Generic[NT]
+):
     min: Optional[NT] = None
     max: Optional[NT] = None
 
     def check_metadata(self, value: NT) -> None:
         if self.min is not None and value < self.min:
-            raise UnprocessableEntityError(f"'{value}' is less than the minimum value of '{self.min}'.")
+            raise UnprocessableEntityError(
+                f"'{value}' is less than the minimum value of '{self.min}'."
+            )
 
         if self.max is not None and value > self.max:
-            raise UnprocessableEntityError(f"'{value}' is greater than the maximum value of '{self.max}'.")
+            raise UnprocessableEntityError(
+                f"'{value}' is greater than the maximum value of '{self.max}'."
+            )
 
 
 class IntegerMetadataPropertySettings(NumericMetadataPropertySettings[int]):

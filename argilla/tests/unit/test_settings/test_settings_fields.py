@@ -30,7 +30,9 @@ class TestTextField:
         mock_name = "prompt"
         mock_use_markdown = True
         mock_title = "Prompt"
-        text_field = rg.TextField(name=mock_name, use_markdown=mock_use_markdown, title=mock_title)
+        text_field = rg.TextField(
+            name=mock_name, use_markdown=mock_use_markdown, title=mock_title
+        )
         assert text_field.name == mock_name
         assert text_field.use_markdown == mock_use_markdown
         assert text_field.title == mock_title
@@ -61,5 +63,7 @@ class TestTextField:
     )
     def test_title_validator(self, title, name, expected, mocker):
         mock_use_markdown = True
-        text_field = rg.TextField(name=name, use_markdown=mock_use_markdown, title=title)
+        text_field = rg.TextField(
+            name=name, use_markdown=mock_use_markdown, title=title
+        )
         assert text_field.title == expected

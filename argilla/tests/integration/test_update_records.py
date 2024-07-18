@@ -47,7 +47,9 @@ def dataset(client: rg.Argilla) -> rg.Dataset:
 
 
 class TestUpdateSuggestions:
-    def test_update_records_suggestions_from_data(self, client: rg.Argilla, dataset: rg.Dataset):
+    def test_update_records_suggestions_from_data(
+        self, client: rg.Argilla, dataset: rg.Dataset
+    ):
         mock_data = [
             {
                 "text": "Hello World, how are you?",
@@ -84,8 +86,12 @@ class TestUpdateSuggestions:
         for record in dataset.records(with_suggestions=True):
             assert record.suggestions["label"].value == "positive"
 
-    @pytest.mark.skip(reason="This test is failing because the backend expects the fields to be present in the data.")
-    def test_update_records_without_fields(self, client: rg.Argilla, dataset: rg.Dataset):
+    @pytest.mark.skip(
+        reason="This test is failing because the backend expects the fields to be present in the data."
+    )
+    def test_update_records_without_fields(
+        self, client: rg.Argilla, dataset: rg.Dataset
+    ):
         mock_data = [
             {
                 "text": "Hello World, how are you?",
@@ -114,7 +120,9 @@ class TestUpdateSuggestions:
         for i, record in enumerate(dataset.records(with_suggestions=True)):
             assert record.suggestions["label"].value == updated_mock_data[i]["label"]
 
-    def test_update_records_add_suggestions(self, client: rg.Argilla, dataset: rg.Dataset):
+    def test_update_records_add_suggestions(
+        self, client: rg.Argilla, dataset: rg.Dataset
+    ):
         mock_data = [
             {
                 "text": "Hello World, how are you?",
@@ -152,7 +160,9 @@ class TestUpdateSuggestions:
 
 
 class TestUpdateResponses:
-    def test_update_records_add_responses(self, client: rg.Argilla, dataset: rg.Dataset):
+    def test_update_records_add_responses(
+        self, client: rg.Argilla, dataset: rg.Dataset
+    ):
         mock_data = [
             {
                 "text": "Hello World, how are you?",

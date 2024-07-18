@@ -22,7 +22,11 @@ class TestFilters:
             "type": "and",
             "and": [
                 {
-                    "scope": {"entity": "response", "property": "status", "question": None},
+                    "scope": {
+                        "entity": "response",
+                        "property": "status",
+                        "question": None,
+                    },
                     "type": "terms",
                     "values": ["submitted", "discard"],
                 }

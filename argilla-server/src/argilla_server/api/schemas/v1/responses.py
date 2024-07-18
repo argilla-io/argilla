@@ -20,7 +20,13 @@ from fastapi import Body
 
 from argilla_server.api.schemas.v1.questions import QuestionName
 from argilla_server.enums import ResponseStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
+from argilla_server.pydantic_v1 import (
+    BaseModel,
+    Field,
+    StrictInt,
+    StrictStr,
+    root_validator,
+)
 
 RESPONSES_BULK_CREATE_MIN_ITEMS = 1
 RESPONSES_BULK_CREATE_MAX_ITEMS = 100
@@ -38,22 +44,29 @@ class RankingQuestionResponseValueItem(BaseModel):
 
 class SpanQuestionResponseValueItem(BaseModel):
     label: str
-    start: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL)
-    end: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL)
+    start: int = Field(
+        ..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL
+    )
+    end: int = Field(
+        ..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL
+    )
 
     @root_validator(skip_on_failure=True)
     def check_start_and_end(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         start, end = values.get("start"), values.get("end")
 
         if start is not None and end is not None and end <= start:
-            raise ValueError("span question response value 'end' must have a value greater than 'start'")
+            raise ValueError(
+                "span question response value 'end' must have a value greater than 'start'"
+            )
 
         return values
 
 
 RankingQuestionResponseValue = List[RankingQuestionResponseValueItem]
 SpanQuestionResponseValue = Annotated[
-    List[SpanQuestionResponseValueItem], Field(..., max_items=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
+    List[SpanQuestionResponseValueItem],
+    Field(..., max_items=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS),
 ]
 MultiLabelSelectionQuestionResponseValue = List[str]
 RatingQuestionResponseValue = StrictInt
@@ -198,6 +211,10 @@ class UserSubmittedResponseCreate(BaseModel):
 
 
 UserResponseCreate = Annotated[
-    Union[UserSubmittedResponseCreate, UserDraftResponseCreate, UserDiscardedResponseCreate],
+    Union[
+        UserSubmittedResponseCreate,
+        UserDraftResponseCreate,
+        UserDiscardedResponseCreate,
+    ],
     Field(discriminator="status"),
 ]

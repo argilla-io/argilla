@@ -61,7 +61,9 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         hf_api = HfApi(token=kwargs.get("token"))
 
-        hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
+        hfds = self.records(
+            with_vectors=True, with_responses=True, with_suggestions=True
+        ).to_datasets()
         hfds.push_to_hub(repo_id, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
@@ -70,7 +72,9 @@ class HubImportExportMixin(DiskImportExportMixin):
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
-                sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
+                sample_argilla_record = next(
+                    iter(self.records(with_suggestions=True, with_responses=True))
+                )
                 sample_huggingface_record = hfds[0]
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
@@ -126,7 +130,9 @@ class HubImportExportMixin(DiskImportExportMixin):
             token=kwargs.get("token"),
         )
 
-        dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
+        dataset = cls.from_disk(
+            path=folder_path, target_workspace=workspace, client=client
+        )
 
         hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
         if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
@@ -146,14 +152,21 @@ class HubImportExportMixin(DiskImportExportMixin):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
 
         # Identify columns that colunms that contain responses
-        responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
+        responses_columns = [
+            col for col in hf_dataset.column_names if ".responses" in col
+        ]
         response_questions = defaultdict(dict)
         user_ids = {}
         for col in responses_columns:
             question_name = col.split(".")[0]
             if col.endswith("users"):
                 response_questions[question_name]["users"] = hf_dataset[col]
-                user_ids.update({UUID(user_id): UUID(user_id) for user_id in set(sum(hf_dataset[col], []))})
+                user_ids.update(
+                    {
+                        UUID(user_id): UUID(user_id)
+                        for user_id in set(sum(hf_dataset[col], []))
+                    }
+                )
             elif col.endswith("responses"):
                 response_questions[question_name]["responses"] = hf_dataset[col]
             elif col.endswith("status"):
@@ -173,7 +186,9 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         # Create a mapper to map the Hugging Face dataset to a Record object
         mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
-        mapper = IngestedRecordMapper(dataset=dataset, mapping=mapping, user_id=my_user.id)
+        mapper = IngestedRecordMapper(
+            dataset=dataset, mapping=mapping, user_id=my_user.id
+        )
 
         # Extract responses and create Record objects
         records = []
@@ -185,7 +200,9 @@ class HubImportExportMixin(DiskImportExportMixin):
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
-                for value, user_id, status in zip(response_values, response_users, response_status):
+                for value, user_id, status in zip(
+                    response_values, response_users, response_status
+                ):
                     user_id = user_ids[UUID(user_id)]
                     if user_id in response_users:
                         continue

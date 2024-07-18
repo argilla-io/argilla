@@ -16,7 +16,15 @@ import uuid
 
 import pytest
 
-from argilla import Dataset, Settings, TextField, LabelQuestion, Argilla, VectorField, FloatMetadataProperty
+from argilla import (
+    Dataset,
+    Settings,
+    TextField,
+    LabelQuestion,
+    Argilla,
+    VectorField,
+    FloatMetadataProperty,
+)
 
 
 @pytest.fixture

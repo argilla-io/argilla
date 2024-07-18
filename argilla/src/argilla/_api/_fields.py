@@ -44,7 +44,9 @@ class FieldsAPI(ResourceAPI[FieldModel]):
         response.raise_for_status()
         response_json = response.json()
         created_field = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Created field {created_field.name} in dataset {field.dataset_id}")
+        self._log_message(
+            message=f"Created field {created_field.name} in dataset {field.dataset_id}"
+        )
         return created_field
 
     @api_error_handler
@@ -54,7 +56,9 @@ class FieldsAPI(ResourceAPI[FieldModel]):
         response.raise_for_status()
         response_json = response.json()
         updated_field = self._model_from_json(response_json)
-        self._log_message(message=f"Update field {updated_field.name} with id {field.id}")
+        self._log_message(
+            message=f"Update field {updated_field.name} with id {field.id}"
+        )
         return updated_field
 
     @api_error_handler
@@ -80,8 +84,12 @@ class FieldsAPI(ResourceAPI[FieldModel]):
     ####################
 
     def _model_from_json(self, response_json: Dict) -> FieldModel:
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
+        response_json["inserted_at"] = self._date_from_iso_format(
+            date=response_json["inserted_at"]
+        )
+        response_json["updated_at"] = self._date_from_iso_format(
+            date=response_json["updated_at"]
+        )
         return FieldModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[FieldModel]:

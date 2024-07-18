@@ -62,7 +62,9 @@ class TestWorkspaces:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_create_workspace(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message):
+    def test_create_workspace(
+        self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message
+    ):
         mock_name = "test-workspace"
         mock_return_value = {
             "id": str(uuid.uuid4()),
@@ -71,12 +73,18 @@ class TestWorkspaces:
             "updated_at": datetime.utcnow().isoformat(),
         }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/workspaces", status_code=status_code)
+        httpx_mock.add_response(
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/workspaces",
+            status_code=status_code,
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             if expected_exception:
                 with pytest.raises(expected_exception, match=expected_message):
-                    ws = rg.Workspace(name="test-workspace", id=uuid.uuid4(), client=client)
+                    ws = rg.Workspace(
+                        name="test-workspace", id=uuid.uuid4(), client=client
+                    )
                     ws.create()
             else:
                 ws = rg.Workspace(name="test-workspace", id=uuid.uuid4(), client=client)
@@ -96,7 +104,9 @@ class TestWorkspaces:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_get_workspace(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message):
+    def test_get_workspace(
+        self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message
+    ):
         workspace_id = uuid.uuid4()
         mock_return_value = {
             "id": workspace_id.hex,
@@ -106,17 +116,23 @@ class TestWorkspaces:
         }
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/v1/workspaces/{workspace_id}", status_code=status_code
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/workspaces/{workspace_id}",
+            status_code=status_code,
         )
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
 
             if expected_exception:
                 with pytest.raises(expected_exception, match=expected_message):
-                    workspace = rg.Workspace(name="test-workspace", id=workspace_id, client=client)
+                    workspace = rg.Workspace(
+                        name="test-workspace", id=workspace_id, client=client
+                    )
                     workspace = workspace.get()
             else:
-                workspace = rg.Workspace(name="test-workspace", id=workspace_id, client=client)
+                workspace = rg.Workspace(
+                    name="test-workspace", id=workspace_id, client=client
+                )
                 workspace = workspace.get()
                 assert workspace.name == mock_return_value["name"]
                 assert workspace.id == workspace_id
@@ -139,7 +155,9 @@ class TestWorkspaces:
             ]
         }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/me/workspaces")
+        httpx_mock.add_response(
+            json=mock_return_value, url=f"{api_url}/api/v1/me/workspaces"
+        )
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
             workspaces = client.workspaces
@@ -168,7 +186,9 @@ class TestWorkspacesAPI:
             ]
         }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/me/workspaces")
+        httpx_mock.add_response(
+            json=mock_return_value, url=f"{api_url}/api/v1/me/workspaces"
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             ws = client.api.workspaces.get_by_name("test-workspace")
@@ -194,19 +214,29 @@ class TestWorkspacesAPI:
             json=mock_return,
         )
         with httpx.Client():
-            local_client = rg.Argilla(api_url="http://localhost:6900", api_key="admin.apikey")
-            remote_client = rg.Argilla(api_url="http://argilla.production.net", api_key="admin.apikey")
+            local_client = rg.Argilla(
+                api_url="http://localhost:6900", api_key="admin.apikey"
+            )
+            remote_client = rg.Argilla(
+                api_url="http://argilla.production.net", api_key="admin.apikey"
+            )
             assert local_client.api_url == "http://localhost:6900"
             assert remote_client.api_url == "http://argilla.production.net"
-            local_workspace = rg.Workspace(name="local-test-workspace", client=local_client)
+            local_workspace = rg.Workspace(
+                name="local-test-workspace", client=local_client
+            )
             local_workspace = local_workspace.create()
-            remote_workspace = rg.Workspace(name="remote-test-workspace", client=remote_client)
+            remote_workspace = rg.Workspace(
+                name="remote-test-workspace", client=remote_client
+            )
             remote_workspace = remote_workspace.create()
 
     def test_delete_workspace(self, httpx_mock: HTTPXMock):
         workspace_id = uuid.uuid4()
         api_url = "http://test_url"
-        httpx_mock.add_response(url=f"{api_url}/api/v1/workspaces/{workspace_id}", status_code=204)
+        httpx_mock.add_response(
+            url=f"{api_url}/api/v1/workspaces/{workspace_id}", status_code=204
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             client.api.workspaces.delete(workspace_id)
@@ -238,7 +268,9 @@ class TestWorkspacesAPI:
             ]
         }
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/me/datasets")
+        httpx_mock.add_response(
+            json=mock_return_value, url=f"{api_url}/api/v1/me/datasets"
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             datasets = client.api.datasets.list(workspace_id)

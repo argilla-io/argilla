@@ -24,7 +24,11 @@ from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict
+from argilla.settings._question import (
+    QuestionType,
+    question_from_model,
+    question_from_dict,
+)
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -151,7 +155,9 @@ class Settings(Resource):
         return schema_dict
 
     @cached_property
-    def schema_by_id(self) -> Dict[UUID, Union[TextField, QuestionType, MetadataType, VectorField]]:
+    def schema_by_id(
+        self,
+    ) -> Dict[UUID, Union[TextField, QuestionType, MetadataType, VectorField]]:
         return {v.id: v for v in self.schema.values()}
 
     def validate(self) -> None:
@@ -207,7 +213,9 @@ class Settings(Resource):
                 "allow_extra_metadata": self.allow_extra_metadata,
             }
         except Exception as e:
-            raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
+            raise ArgillaSerializeError(
+                f"Failed to serialize the settings. {e.__class__.__name__}"
+            ) from e
 
     def to_json(self, path: Union[Path, str]) -> None:
         """Save the settings to a file on disk
@@ -235,7 +243,10 @@ class Settings(Resource):
         guidelines = settings_dict.get("guidelines")
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
 
-        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
+        questions = [
+            question_from_dict(question)
+            for question in settings_dict.get("questions", [])
+        ]
         fields = [TextField.from_dict(field) for field in fields]
         vectors = [VectorField.from_dict(vector) for vector in vectors]
         metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
@@ -250,7 +261,9 @@ class Settings(Resource):
         )
 
     def __eq__(self, other: "Settings") -> bool:
-        return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
+        return (
+            self.serialize() == other.serialize()
+        )  # TODO: Create proper __eq__ methods for fields and questions
 
     #####################
     #  Repr Methods     #
@@ -394,7 +407,9 @@ class SettingsProperties(Sequence[Property]):
                 property.dataset = self._settings.dataset
                 property.create()
             except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to create property {property.name!r}: {e.message}") from e
+                raise SettingsError(
+                    f"Failed to create property {property.name!r}: {e.message}"
+                ) from e
 
     def update(self):
         for item in self:
@@ -402,17 +417,23 @@ class SettingsProperties(Sequence[Property]):
                 item.dataset = self._settings.dataset
                 item.update() if item.id else item.create()
             except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to update {item.name!r}: {e.message}") from e
+                raise SettingsError(
+                    f"Failed to update {item.name!r}: {e.message}"
+                ) from e
 
     def serialize(self) -> List[dict]:
         return [property.serialize() for property in self]
 
     def _validate_new_property(self, property: Property) -> None:
         if property.name in self._properties_by_name:
-            raise ValueError(f"Property with name {property.name!r} already exists in the collection")
+            raise ValueError(
+                f"Property with name {property.name!r} already exists in the collection"
+            )
 
         if property.name in dir(self):
-            raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+            raise ValueError(
+                f"Property with name {property.name!r} conflicts with an existing attribute"
+            )
 
 
 class QuestionsProperties(SettingsProperties[QuestionType]):

@@ -16,7 +16,10 @@ from typing import Dict, List, Optional, ClassVar
 
 from pydantic import field_validator, Field, model_validator
 
-from argilla._models._settings._questions._base import QuestionSettings, QuestionBaseModel
+from argilla._models._settings._questions._base import (
+    QuestionSettings,
+    QuestionBaseModel,
+)
 
 try:
     from typing import Self
@@ -29,12 +32,18 @@ class LabelQuestionSettings(QuestionSettings):
 
     _MIN_VISIBLE_OPTIONS: ClassVar[int] = 3
 
-    options: List[Dict[str, Optional[str]]] = Field(default_factory=list, validate_default=True)
-    visible_options: Optional[int] = Field(None, validate_default=True, ge=_MIN_VISIBLE_OPTIONS)
+    options: List[Dict[str, Optional[str]]] = Field(
+        default_factory=list, validate_default=True
+    )
+    visible_options: Optional[int] = Field(
+        None, validate_default=True, ge=_MIN_VISIBLE_OPTIONS
+    )
 
     @field_validator("options", mode="before")
     @classmethod
-    def __labels_are_unique(cls, options: List[Dict[str, Optional[str]]]) -> List[Dict[str, Optional[str]]]:
+    def __labels_are_unique(
+        cls, options: List[Dict[str, Optional[str]]]
+    ) -> List[Dict[str, Optional[str]]]:
         """Ensure that labels are unique"""
 
         unique_labels = list(set([option["value"] for option in options]))
@@ -44,7 +53,11 @@ class LabelQuestionSettings(QuestionSettings):
 
     @model_validator(mode="after")
     def __validate_visible_options(self) -> "Self":
-        if self.visible_options is None and self.options and len(self.options) >= self._MIN_VISIBLE_OPTIONS:
+        if (
+            self.visible_options is None
+            and self.options
+            and len(self.options) >= self._MIN_VISIBLE_OPTIONS
+        ):
             self.visible_options = len(self.options)
         return self
 

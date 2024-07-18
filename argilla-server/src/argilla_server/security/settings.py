@@ -55,7 +55,9 @@ class Settings(BaseSettings):
     @property
     def oauth(self) -> "OAuth2Settings":
         """Return the oauth settings"""
-        from argilla_server.security.authentication.oauth2.settings import OAuth2Settings
+        from argilla_server.security.authentication.oauth2.settings import (
+            OAuth2Settings,
+        )
 
         if self._oauth_settings:
             return self._oauth_settings

@@ -19,7 +19,12 @@ from fastapi import APIRouter, Depends, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
+from argilla_server.api.policies.v1 import (
+    DatasetPolicy,
+    MetadataPropertyPolicy,
+    authorize,
+    is_authorized,
+)
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
 )
@@ -36,7 +41,11 @@ from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataProperty,
     MetadataPropertyCreate,
 )
-from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
+from argilla_server.api.schemas.v1.vector_settings import (
+    VectorSettings,
+    VectorSettingsCreate,
+    VectorsSettings,
+)
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.enums import ResponseStatus
@@ -90,9 +99,14 @@ async def list_current_user_datasets(
 
 @router.get("/datasets/{dataset_id}/fields", response_model=Fields)
 async def list_dataset_fields(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
+    dataset = await Dataset.get_or_raise(
+        db, dataset_id, options=[selectinload(Dataset.fields)]
+    )
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
@@ -101,20 +115,32 @@ async def list_dataset_fields(
 
 @router.get("/datasets/{dataset_id}/vectors-settings", response_model=VectorsSettings)
 async def list_dataset_vector_settings(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.vectors_settings)])
+    dataset = await Dataset.get_or_raise(
+        db, dataset_id, options=[selectinload(Dataset.vectors_settings)]
+    )
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
     return VectorsSettings(items=dataset.vectors_settings)
 
 
-@router.get("/me/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties)
+@router.get(
+    "/me/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties
+)
 async def list_current_user_dataset_metadata_properties(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
+    dataset = await Dataset.get_or_raise(
+        db, dataset_id, options=[selectinload(Dataset.metadata_properties)]
+    )
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
@@ -127,7 +153,10 @@ async def list_current_user_dataset_metadata_properties(
 
 @router.get("/datasets/{dataset_id}", response_model=DatasetSchema)
 async def get_dataset(
-    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
@@ -152,7 +181,9 @@ async def get_current_user_dataset_metrics(
             "count": await datasets.count_records_by_dataset_id(db, dataset_id),
         },
         "responses": {
-            "count": await datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
+            "count": await datasets.count_responses_by_dataset_id_and_user_id(
+                db, dataset_id, current_user.id
+            ),
             "submitted": await datasets.count_responses_by_dataset_id_and_user_id(
                 db, dataset_id, current_user.id, ResponseStatus.submitted
             ),
@@ -180,7 +211,9 @@ async def get_dataset_progress(
     return await datasets.get_dataset_progress(db, dataset_id)
 
 
-@router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=DatasetSchema)
+@router.post(
+    "/datasets", status_code=status.HTTP_201_CREATED, response_model=DatasetSchema
+)
 async def create_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -192,7 +225,11 @@ async def create_dataset(
     return await datasets.create_dataset(db, dataset_create)
 
 
-@router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
+@router.post(
+    "/datasets/{dataset_id}/fields",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Field,
+)
 async def create_dataset_field(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -208,7 +245,9 @@ async def create_dataset_field(
 
 
 @router.post(
-    "/datasets/{dataset_id}/metadata-properties", status_code=status.HTTP_201_CREATED, response_model=MetadataProperty
+    "/datasets/{dataset_id}/metadata-properties",
+    status_code=status.HTTP_201_CREATED,
+    response_model=MetadataProperty,
 )
 async def create_dataset_metadata_property(
     *,
@@ -222,11 +261,15 @@ async def create_dataset_metadata_property(
 
     await authorize(current_user, DatasetPolicy.create_metadata_property(dataset))
 
-    return await datasets.create_metadata_property(db, search_engine, dataset, metadata_property_create)
+    return await datasets.create_metadata_property(
+        db, search_engine, dataset, metadata_property_create
+    )
 
 
 @router.post(
-    "/datasets/{dataset_id}/vectors-settings", status_code=status.HTTP_201_CREATED, response_model=VectorSettings
+    "/datasets/{dataset_id}/vectors-settings",
+    status_code=status.HTTP_201_CREATED,
+    response_model=VectorSettings,
 )
 async def create_dataset_vector_settings(
     *,
@@ -240,7 +283,9 @@ async def create_dataset_vector_settings(
 
     await authorize(current_user, DatasetPolicy.create_vector_settings(dataset))
 
-    return await datasets.create_vector_settings(db, search_engine, dataset, vector_settings_create)
+    return await datasets.create_vector_settings(
+        db, search_engine, dataset, vector_settings_create
+    )
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=DatasetSchema)
@@ -269,7 +314,11 @@ async def publish_dataset(
 
     telemetry_client.track_data(
         action="PublishedDataset",
-        data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
+        data={
+            "questions": list(
+                set([question.settings["type"] for question in dataset.questions])
+            )
+        },
     )
 
     return dataset

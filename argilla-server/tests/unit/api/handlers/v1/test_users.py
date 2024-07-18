@@ -27,11 +27,15 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestsUsersV1Endpoints:
-    async def test_list_user_workspaces(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_user_workspaces(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         workspaces = await WorkspaceFactory.create_batch(3)
         user = await UserFactory.create(workspaces=workspaces)
 
-        response = await async_client.get(f"/api/v1/users/{user.id}/workspaces", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/users/{user.id}/workspaces", headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -51,7 +55,8 @@ class TestsUsersV1Endpoints:
         owner = await UserFactory.create(role=UserRole.owner)
 
         response = await async_client.get(
-            f"/api/v1/users/{owner.id}/workspaces", headers={API_KEY_HEADER_NAME: owner.api_key}
+            f"/api/v1/users/{owner.id}/workspaces",
+            headers={API_KEY_HEADER_NAME: owner.api_key},
         )
         assert response.status_code == 200
         assert response.json() == {
@@ -67,13 +72,16 @@ class TestsUsersV1Endpoints:
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_list_user_workspaces_as_restricted_user(self, async_client: "AsyncClient", role: UserRole):
+    async def test_list_user_workspaces_as_restricted_user(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         workspaces = await WorkspaceFactory.create_batch(3)
         user = await UserFactory.create(workspaces=workspaces)
         requesting_user = await UserFactory.create(role=role)
 
         response = await async_client.get(
-            f"/api/v1/users/{user.id}/workspaces", headers={API_KEY_HEADER_NAME: requesting_user.api_key}
+            f"/api/v1/users/{user.id}/workspaces",
+            headers={API_KEY_HEADER_NAME: requesting_user.api_key},
         )
 
         assert response.status_code == 403

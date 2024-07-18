@@ -30,7 +30,9 @@ class TestRecords:
             fields={"name": "John", "age": "30"},
             metadata={"key": "value"},
             suggestions=[Suggestion(question_name="question", value="answer")],
-            responses=[Response(question_name="question", value="answer", user_id=user_id)],
+            responses=[
+                Response(question_name="question", value="answer", user_id=user_id)
+            ],
         )
         assert (
             record.__repr__() == f"Record(id={record_id},"
@@ -64,10 +66,15 @@ class TestRecords:
         record = Record(fields={"name": "John"}, vectors={"vector": [1.0, 2.0, 3.0]})
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
-        assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+        assert record.vectors == {
+            "vector": [1.0, 2.0, 3.0],
+            "new-vector": [1.0, 2.0, 3.0],
+        }
 
     def test_add_record_response_for_the_same_question_and_user_id(self):
-        response = Response(question_name="question", value="value", user_id=uuid.uuid4())
+        response = Response(
+            question_name="question", value="value", user_id=uuid.uuid4()
+        )
         record = Record(fields={"name": "John"}, responses=[response])
 
         with pytest.raises(ArgillaError):

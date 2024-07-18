@@ -36,7 +36,9 @@ class TestWorkspacesManagement:
         workspace.delete()
         assert not client.api.workspaces.exists(workspace.id)
 
-    def test_add_and_remove_users_to_workspace(self, client: Argilla, workspace: Workspace):
+    def test_add_and_remove_users_to_workspace(
+        self, client: Argilla, workspace: Workspace
+    ):
         ws_name = "test_workspace"
         username = "test_user"
 

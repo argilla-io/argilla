@@ -59,12 +59,16 @@ def mock_search_engine(mocker) -> Generator["SearchEngine", None, None]:
 
 @pytest_asyncio.fixture(scope="function")
 async def owner() -> User:
-    return await OwnerFactory.create(first_name="Owner", username="owner", api_key="owner.apikey")
+    return await OwnerFactory.create(
+        first_name="Owner", username="owner", api_key="owner.apikey"
+    )
 
 
 @pytest_asyncio.fixture(scope="function")
 async def annotator() -> User:
-    return await AnnotatorFactory.create(first_name="Annotator", username="annotator", api_key="annotator.apikey")
+    return await AnnotatorFactory.create(
+        first_name="Annotator", username="annotator", api_key="annotator.apikey"
+    )
 
 
 @pytest.fixture(scope="function")
@@ -85,7 +89,10 @@ async def async_client(
     async def override_get_search_engine():
         yield mock_search_engine
 
-    mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch(
+        "argilla_server._app._get_db_wrapper",
+        wraps=contextlib.asynccontextmanager(override_get_async_db),
+    )
 
     for api in [api_v1]:
         api.dependency_overrides[get_async_db] = override_get_async_db

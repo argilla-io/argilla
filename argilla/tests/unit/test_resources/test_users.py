@@ -83,7 +83,9 @@ class TestUsers:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_create_user(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message):
+    def test_create_user(
+        self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message
+    ):
         user_id = uuid.uuid4().hex
         mock_return_value = {
             "id": str(user_id),
@@ -98,7 +100,10 @@ class TestUsers:
 
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=status_code
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/users",
+            method="POST",
+            status_code=status_code,
         )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
@@ -126,7 +131,9 @@ class TestUsers:
             (500, InternalServerError, "InternalServerError"),
         ],
     )
-    def test_get_user(self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message):
+    def test_get_user(
+        self, httpx_mock: HTTPXMock, status_code, expected_exception, expected_message
+    ):
         user_id = uuid.uuid4()
         mock_return_value = {
             "id": str(user_id),
@@ -141,7 +148,10 @@ class TestUsers:
 
         api_url = "http://test_url"
         httpx_mock.add_response(
-            json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=status_code
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/users",
+            method="POST",
+            status_code=status_code,
         )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
@@ -236,7 +246,9 @@ class TestUsersAPI:
 
     def test_delete_user(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
-        httpx_mock.add_response(url=f"http://test_url/api/v1/users/{user_id}", method="DELETE")
+        httpx_mock.add_response(
+            url=f"http://test_url/api/v1/users/{user_id}", method="DELETE"
+        )
         with httpx.Client():
             client = rg.Argilla(api_url="http://test_url", api_key="admin.apikey")
             client.api.users.delete(user_id)
@@ -267,7 +279,10 @@ class TestUsersAPI:
         }
 
         api_url = "http://test_url"
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/workspaces/{workspace_id}/users")
+        httpx_mock.add_response(
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/workspaces/{workspace_id}/users",
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             users = client.api.users.list_by_workspace_id(workspace_id)
@@ -290,7 +305,12 @@ class TestUsersAPI:
         }
         api_url = "http://test_url"
 
-        httpx_mock.add_response(json=mock_return_value, url=f"{api_url}/api/v1/users", method="POST", status_code=200)
+        httpx_mock.add_response(
+            json=mock_return_value,
+            url=f"{api_url}/api/v1/users",
+            method="POST",
+            status_code=200,
+        )
         with httpx.Client():
             client = rg.Argilla(api_url=api_url, api_key="admin.apikey")
             user_create = UserModel(username="test-user", password="test-password")

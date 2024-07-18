@@ -77,7 +77,12 @@ class Condition(Tuple[str, str, Any]):
 class Filter:
     """This class is used to map user filters to the internal filter models"""
 
-    def __init__(self, conditions: Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None] = None):
+    def __init__(
+        self,
+        conditions: Union[
+            List[Tuple[str, str, Any]], Tuple[str, str, Any], None
+        ] = None,
+    ):
         """ Create a filter object for use in Argilla search requests.
 
         Parameters:
@@ -93,7 +98,9 @@ class Filter:
         self.conditions = [Condition(condition) for condition in conditions]
 
     def api_model(self) -> AndFilterModel:
-        return AndFilterModel.model_validate({"and": [condition.api_model() for condition in self.conditions]})
+        return AndFilterModel.model_validate(
+            {"and": [condition.api_model() for condition in self.conditions]}
+        )
 
 
 class Query:
@@ -101,7 +108,9 @@ class Query:
 
     query: Optional[str] = None
 
-    def __init__(self, *, query: Union[str, None] = None, filter: Union[Filter, None] = None):
+    def __init__(
+        self, *, query: Union[str, None] = None, filter: Union[Filter, None] = None
+    ):
         """Create a query object for use in Argilla search requests.add()
 
         Parameters:

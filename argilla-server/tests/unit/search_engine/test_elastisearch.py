@@ -23,9 +23,14 @@ from tests.unit.search_engine.test_commons import refresh_dataset
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not settings.search_engine == "elasticsearch", reason="Running on elasticsearch engine")
+@pytest.mark.skipif(
+    not settings.search_engine == "elasticsearch",
+    reason="Running on elasticsearch engine",
+)
 class TestElasticSearchEngine:
-    async def test_create_dataset_index_with_vectors(self, search_engine: ElasticSearchEngine, opensearch: OpenSearch):
+    async def test_create_dataset_index_with_vectors(
+        self, search_engine: ElasticSearchEngine, opensearch: OpenSearch
+    ):
         vectors_settings = await VectorSettingsFactory.create_batch(5)
         dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
 
@@ -46,7 +51,9 @@ class TestElasticSearchEngine:
             for settings in vectors_settings
         }
 
-    async def test_create_index_with_existing_index(self, search_engine: ElasticSearchEngine, opensearch: OpenSearch):
+    async def test_create_index_with_existing_index(
+        self, search_engine: ElasticSearchEngine, opensearch: OpenSearch
+    ):
         from elasticsearch8 import RequestError
 
         dataset = await DatasetFactory.create()

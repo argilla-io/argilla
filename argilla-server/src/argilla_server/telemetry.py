@@ -53,7 +53,9 @@ class TelemetryClient:
     def server_id(self) -> uuid.UUID:
         return self._server_id
 
-    def __post_init__(self, enable_telemetry: bool, disable_send: bool, api_key: str, host: str):
+    def __post_init__(
+        self, enable_telemetry: bool, disable_send: bool, api_key: str, host: str
+    ):
         from argilla_server._version import __version__
 
         self._server_id = uuid.UUID(int=uuid.getnode())
@@ -75,14 +77,24 @@ class TelemetryClient:
         self.client: Optional[Client] = None
         if enable_telemetry:
             try:
-                client = Client(write_key=api_key, gzip=True, host=host, send=not disable_send, max_retries=10)
+                client = Client(
+                    write_key=api_key,
+                    gzip=True,
+                    host=host,
+                    send=not disable_send,
+                    max_retries=10,
+                )
                 client.identify(user_id=str(self._server_id), traits=self._system_info)
 
                 self.client = client
             except Exception as err:
-                _LOGGER.warning(f"Cannot initialize telemetry. Error: {err}. Disabling...")
+                _LOGGER.warning(
+                    f"Cannot initialize telemetry. Error: {err}. Disabling..."
+                )
 
-    def track_data(self, action: str, data: Dict[str, Any], include_system_info: bool = True):
+    def track_data(
+        self, action: str, data: Dict[str, Any], include_system_info: bool = True
+    ):
         if not self.client:
             return
 
@@ -92,14 +104,22 @@ class TelemetryClient:
         if include_system_info:
             context = self._system_info.copy()
 
-        self.client.track(user_id=str(self._server_id), event=action, properties=event_data, context=context)
+        self.client.track(
+            user_id=str(self._server_id),
+            event=action,
+            properties=event_data,
+            context=context,
+        )
 
 
 _CLIENT = TelemetryClient()
 
 
 def _process_request_info(request: Request):
-    return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
+    return {
+        header: request.headers.get(header)
+        for header in ["user-agent", "accept-language"]
+    }
 
 
 async def track_login(request: Request, user: User):
@@ -108,7 +128,9 @@ async def track_login(request: Request, user: User):
         data={
             "is_default_user": user.username == DEFAULT_USERNAME,
             "user_id": str(user.id),
-            "user_hash": str(uuid.uuid5(namespace=_CLIENT.server_id, name=user.username)),
+            "user_hash": str(
+                uuid.uuid5(namespace=_CLIENT.server_id, name=user.username)
+            ),
             **_process_request_info(request),
         },
     )

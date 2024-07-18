@@ -30,7 +30,9 @@ class SuggestionFilterScopeModel(BaseModel):
 
     entity: Literal["suggestion"] = "suggestion"
     question: str
-    property: Union[Literal["value"], Literal["agent"], Literal["score"], None] = "value"
+    property: Union[Literal["value"], Literal["agent"], Literal["score"], None] = (
+        "value"
+    )
 
 
 class MetadataFilterScopeModel(BaseModel):

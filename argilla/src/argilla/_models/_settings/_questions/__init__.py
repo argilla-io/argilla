@@ -14,16 +14,34 @@
 # flake8: noqa
 from typing import Union
 
-from argilla._models._settings._questions._label_selection import LabelQuestionModel, LabelQuestionSettings
+from argilla._models._settings._questions._label_selection import (
+    LabelQuestionModel,
+    LabelQuestionSettings,
+)
 from argilla._models._settings._questions._multi_label_selection import (
     MultiLabelQuestionModel,
     MultiLabelQuestionSettings,
 )
-from argilla._models._settings._questions._rating import RatingQuestionModel, RatingQuestionSettings
-from argilla._models._settings._questions._ranking import RankingQuestionModel, RankingQuestionSettings
-from argilla._models._settings._questions._text import TextQuestionModel, TextQuestionSettings
-from argilla._models._settings._questions._base import QuestionBaseModel, QuestionSettings
-from argilla._models._settings._questions._span import SpanQuestionModel, SpanQuestionSettings
+from argilla._models._settings._questions._rating import (
+    RatingQuestionModel,
+    RatingQuestionSettings,
+)
+from argilla._models._settings._questions._ranking import (
+    RankingQuestionModel,
+    RankingQuestionSettings,
+)
+from argilla._models._settings._questions._text import (
+    TextQuestionModel,
+    TextQuestionSettings,
+)
+from argilla._models._settings._questions._base import (
+    QuestionBaseModel,
+    QuestionSettings,
+)
+from argilla._models._settings._questions._span import (
+    SpanQuestionModel,
+    SpanQuestionSettings,
+)
 
 QuestionModel = Union[
     LabelQuestionModel,

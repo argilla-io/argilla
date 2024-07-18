@@ -95,31 +95,47 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         if excluded_id:
             # See https://opensearch.org/docs/latest/search-plugins/knn/filter-search-knn/#efficient-k-nn-filtering
             # Will work from Opensearch >= v2.4.0
-            knn_query["filter"] = es_bool_query(must_not=[es_ids_query([str(excluded_id)])])
+            knn_query["filter"] = es_bool_query(
+                must_not=[es_ids_query([str(excluded_id)])]
+            )
 
-        body = {"query": {"knn": {es_field_for_vector_settings(vector_settings): knn_query}}}
+        body = {
+            "query": {"knn": {es_field_for_vector_settings(vector_settings): knn_query}}
+        }
 
         if query_filters:
             # IMPORTANT: Including boolean filters as part knn filter may return query errors if responses are not
             # created for requested user (with exists query clauses). This is not happening with Elasticsearch.
             # The only way make it work is to use them as a post_filter.
             # See this issue for more details https://github.com/opensearch-project/k-NN/issues/1286
-            body["post_filter"] = es_bool_query(should=query_filters, minimum_should_match=len(query_filters))
+            body["post_filter"] = es_bool_query(
+                should=query_filters, minimum_should_match=len(query_filters)
+            )
 
-        return await self.client.search(index=index, body=body, _source=False, track_total_hits=True, size=k)
+        return await self.client.search(
+            index=index, body=body, _source=False, track_total_hits=True, size=k
+        )
 
-    async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
-        await self.client.indices.create(index=index_name, body=dict(settings=settings, mappings=mappings))
+    async def _create_index_request(
+        self, index_name: str, mappings: dict, settings: dict
+    ) -> None:
+        await self.client.indices.create(
+            index=index_name, body=dict(settings=settings, mappings=mappings)
+        )
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(
+            index_name, ignore=[404], ignore_unavailable=True
+        )
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
         await self.client.update(index=index_name, id=id, body=body, refresh=True)
 
     async def put_index_mapping_request(self, index: str, mappings: dict):
-        await self.client.indices.put_mapping(index=index, body={"properties": mappings})
+        await self.client.indices.put_mapping(
+            index=index, body={"properties": mappings}
+        )
 
     async def _index_search_request(
         self,
@@ -149,7 +165,9 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
-        _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False, refresh=True)
+        _, errors = await helpers.async_bulk(
+            client=self.client, actions=actions, raise_on_error=False, refresh=True
+        )
         if errors:
             raise RuntimeError(errors)
 

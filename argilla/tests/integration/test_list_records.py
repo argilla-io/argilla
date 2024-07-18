@@ -17,7 +17,15 @@ from string import ascii_lowercase
 
 import pytest
 
-from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspace, LabelQuestion
+from argilla import (
+    Argilla,
+    Dataset,
+    Settings,
+    TextField,
+    TextQuestion,
+    Workspace,
+    LabelQuestion,
+)
 
 
 @pytest.fixture
@@ -27,7 +35,9 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
         fields=[TextField(name="text")],
         questions=[
             TextQuestion(name="comment", use_markdown=False),
-            LabelQuestion(name="sentiment", labels=["positive", "negative"], required=False),
+            LabelQuestion(
+                name="sentiment", labels=["positive", "negative"], required=False
+            ),
         ],
     )
     dataset = Dataset(
@@ -56,8 +66,18 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
 def test_list_records_with_responses(client: Argilla, dataset: Dataset):
     dataset.records.log(
         [
-            {"text": "The record text field", "id": 1, "comment": "The comment", "sentiment": "positive"},
-            {"text": "The record text field", "id": 2, "comment": "The comment", "sentiment": "negative"},
+            {
+                "text": "The record text field",
+                "id": 1,
+                "comment": "The comment",
+                "sentiment": "positive",
+            },
+            {
+                "text": "The record text field",
+                "id": 2,
+                "comment": "The comment",
+                "sentiment": "negative",
+            },
         ],
         mapping={
             "comment": "comment.response",

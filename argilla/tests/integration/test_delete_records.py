@@ -104,7 +104,10 @@ def test_delete_single_record(client: rg.Argilla, dataset: rg.Dataset):
 
 
 def test_delete_records_with_batch_support(client: rg.Argilla, dataset: rg.Dataset):
-    records = [rg.Record(id=uuid.uuid4(), fields={"text": f"Field for record {i}"}) for i in range(0, 1000)]
+    records = [
+        rg.Record(id=uuid.uuid4(), fields={"text": f"Field for record {i}"})
+        for i in range(0, 1000)
+    ]
 
     dataset.records.log(records)
     all_records = list(dataset.records)

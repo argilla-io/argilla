@@ -58,36 +58,50 @@ async def create_text_questions(dataset: "Dataset") -> None:
 
 
 async def create_rating_questions(dataset: "Dataset") -> None:
-    await RatingQuestionFactory.create(name="rating_question_1", dataset=dataset, required=True)
+    await RatingQuestionFactory.create(
+        name="rating_question_1", dataset=dataset, required=True
+    )
     await RatingQuestionFactory.create(name="rating_question_2", dataset=dataset)
 
 
 async def create_label_selection_questions(dataset: "Dataset") -> None:
-    await LabelSelectionQuestionFactory.create(name="label_selection_question_1", dataset=dataset, required=True)
-    await LabelSelectionQuestionFactory.create(name="label_selection_question_2", dataset=dataset)
+    await LabelSelectionQuestionFactory.create(
+        name="label_selection_question_1", dataset=dataset, required=True
+    )
+    await LabelSelectionQuestionFactory.create(
+        name="label_selection_question_2", dataset=dataset
+    )
 
 
 async def create_multi_label_selection_questions(dataset: "Dataset") -> None:
     await MultiLabelSelectionQuestionFactory.create(
         name="multi_label_selection_question_1", dataset=dataset, required=True
     )
-    await MultiLabelSelectionQuestionFactory.create(name="multi_label_selection_question_2", dataset=dataset)
+    await MultiLabelSelectionQuestionFactory.create(
+        name="multi_label_selection_question_2", dataset=dataset
+    )
 
 
 async def create_ranking_question(dataset: "Dataset") -> None:
-    await RankingQuestionFactory.create(name="ranking_question_1", dataset=dataset, required=True)
+    await RankingQuestionFactory.create(
+        name="ranking_question_1", dataset=dataset, required=True
+    )
     await RankingQuestionFactory.create(name="ranking_question_2", dataset=dataset)
 
 
 @pytest.mark.asyncio
 class TestSuiteRecords:
-    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
+    @pytest.mark.parametrize(
+        "role", [UserRole.owner, UserRole.admin, UserRole.annotator]
+    )
     async def test_get_record(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
 
-        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -118,11 +132,15 @@ class TestSuiteRecords:
         record = await RecordFactory.create(dataset=dataset)
         user = await UserFactory.create(role=role)
 
-        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 403
 
-    async def test_get_record_with_nonexistent_record_id(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_get_record_with_nonexistent_record_id(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         record_id = uuid4()
 
         await RecordFactory.create()
@@ -136,27 +154,58 @@ class TestSuiteRecords:
         assert response.json() == {"detail": f"Record with id `{record_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
+    async def test_update_record(
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
         question_0 = await TextQuestionFactory.create(dataset=dataset)
         question_1 = await TextQuestionFactory.create(dataset=dataset)
         question_2 = await TextQuestionFactory.create(dataset=dataset)
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
-        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata-property", dataset=dataset
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="integer-metadata-property", dataset=dataset
+        )
+        await FloatMetadataPropertyFactory.create(
+            name="float-metadata-property", dataset=dataset
+        )
         record = await RecordFactory.create(
             dataset=dataset,
-            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+            metadata_={
+                "terms-metadata-property": "a",
+                "integer-metadata-property": 1,
+                "float-metadata-property": 1.0,
+            },
         )
-        await SuggestionFactory.create(question=question_0, record=record, value="suggestion 1")
-        await SuggestionFactory.create(question=question_1, record=record, value="suggestion 2")
-        await SuggestionFactory.create(question=question_2, record=record, value="suggestion 3")
-        vector_settings_0 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_1 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        vector_settings_2 = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
-        await VectorFactory.create(record=record, vector_settings=vector_settings_0, value=[1, 1, 1, 1, 1])
-        await VectorFactory.create(record=record, vector_settings=vector_settings_1, value=[2, 2, 2, 2, 2])
+        await SuggestionFactory.create(
+            question=question_0, record=record, value="suggestion 1"
+        )
+        await SuggestionFactory.create(
+            question=question_1, record=record, value="suggestion 2"
+        )
+        await SuggestionFactory.create(
+            question=question_2, record=record, value="suggestion 3"
+        )
+        vector_settings_0 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        vector_settings_1 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        vector_settings_2 = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
+        await VectorFactory.create(
+            record=record, vector_settings=vector_settings_0, value=[1, 1, 1, 1, 1]
+        )
+        await VectorFactory.create(
+            record=record, vector_settings=vector_settings_1, value=[2, 2, 2, 2, 2]
+        )
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -231,15 +280,28 @@ class TestSuiteRecords:
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_null_metadata(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
-        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata-property", dataset=dataset
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="integer-metadata-property", dataset=dataset
+        )
+        await FloatMetadataPropertyFactory.create(
+            name="float-metadata-property", dataset=dataset
+        )
         record = await RecordFactory.create(
             dataset=dataset,
-            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+            metadata_={
+                "terms-metadata-property": "a",
+                "integer-metadata-property": 1,
+                "float-metadata-property": 1.0,
+            },
         )
 
         response = await async_client.patch(
@@ -264,7 +326,10 @@ class TestSuiteRecords:
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_metadata(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
@@ -291,10 +356,15 @@ class TestSuiteRecords:
         mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_list_terms_metadata(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata-property", dataset=dataset
+        )
         record = await RecordFactory.create(dataset=dataset)
 
         response = await async_client.patch(
@@ -325,7 +395,11 @@ class TestSuiteRecords:
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_suggestions(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         suggestion = await SuggestionFactory.create()
         record = suggestion.record
@@ -349,10 +423,17 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-        assert (await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))).scalar_one_or_none() is None
+        assert (
+            await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))
+        ).scalar_one_or_none() is None
 
     @pytest.mark.parametrize(
-        ["MetadataPropertyFactoryClass", "create_value", "update_value", "expected_error"],
+        [
+            "MetadataPropertyFactoryClass",
+            "create_value",
+            "update_value",
+            "expected_error",
+        ],
         [
             (
                 TermsMetadataPropertyFactory,
@@ -385,7 +466,9 @@ class TestSuiteRecords:
     ):
         dataset = await DatasetFactory.create(allow_extra_metadata=False)
         await MetadataPropertyFactoryClass.create(name="name", dataset=dataset)
-        record = await RecordFactory.create(dataset=dataset, metadata_={"name": create_value})
+        record = await RecordFactory.create(
+            dataset=dataset, metadata_={"name": create_value}
+        )
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -400,12 +483,22 @@ class TestSuiteRecords:
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(allow_extra_metadata=False)
-        await TermsMetadataPropertyFactory.create(name="terms-metadata-property", dataset=dataset)
-        await IntegerMetadataPropertyFactory.create(name="integer-metadata-property", dataset=dataset)
-        await FloatMetadataPropertyFactory.create(name="float-metadata-property", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms-metadata-property", dataset=dataset
+        )
+        await IntegerMetadataPropertyFactory.create(
+            name="integer-metadata-property", dataset=dataset
+        )
+        await FloatMetadataPropertyFactory.create(
+            name="float-metadata-property", dataset=dataset
+        )
         record = await RecordFactory.create(
             dataset=dataset,
-            metadata_={"terms-metadata-property": "a", "integer-metadata-property": 1, "float-metadata-property": 1.0},
+            metadata_={
+                "terms-metadata-property": "a",
+                "integer-metadata-property": 1,
+                "float-metadata-property": 1.0,
+            },
         )
 
         response = await async_client.patch(
@@ -427,7 +520,9 @@ class TestSuiteRecords:
             f"'{dataset.id}' and extra metadata is not allowed for this dataset"
         }
 
-    async def test_update_record_with_invalid_suggestion(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_record_with_invalid_suggestion(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
         question = await LabelSelectionQuestionFactory.create(dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
@@ -447,9 +542,13 @@ class TestSuiteRecords:
             "detail": f"suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid label for label selection question.\nValid labels are: ['option1', 'option2', 'option3']"
         }
 
-    async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_update_record_with_invalid_vector(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
-        vector_settings = await VectorSettingsFactory.create(dataset=dataset, dimensions=5)
+        vector_settings = await VectorSettingsFactory.create(
+            dataset=dataset, dimensions=5
+        )
         record = await RecordFactory.create(dataset=dataset)
 
         response = await async_client.patch(
@@ -524,7 +623,9 @@ class TestSuiteRecords:
         assert response.status_code == 422
         assert response.json() == {"detail": "found duplicate suggestions question IDs"}
 
-    async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
+    async def test_update_record_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ):
         record = await RecordFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
 
@@ -540,7 +641,9 @@ class TestSuiteRecords:
 
     async def test_update_record_as_annotator(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()
-        user = await UserFactory.create(role=UserRole.annotator, workspaces=[record.dataset.workspace])
+        user = await UserFactory.create(
+            role=UserRole.annotator, workspaces=[record.dataset.workspace]
+        )
 
         response = await async_client.patch(
             f"/api/v1/records/{record.id}",
@@ -553,7 +656,8 @@ class TestSuiteRecords:
         assert response.status_code == 403
 
     @pytest.mark.parametrize(
-        "response_status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft]
+        "response_status",
+        [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft],
     )
     async def test_create_record_response_with_required_questions(
         self,
@@ -565,14 +669,18 @@ class TestSuiteRecords:
         response_status: ResponseStatus,
     ):
         dataset = await DatasetFactory.create()
-        await TextQuestionFactory.create(name="corrected-1", dataset=dataset, required=True)
+        await TextQuestionFactory.create(
+            name="corrected-1", dataset=dataset, required=True
+        )
         await TextQuestionFactory.create(name="corrected-2", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
         responses = {"values": {"corrected-1": {"value": "Unit Test 1"}}}
         response_json = {**responses, "status": response_status}
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         response_body = response.json()
@@ -585,11 +693,17 @@ class TestSuiteRecords:
             "status": response_status,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
-        response = (await db.execute(select(Response).where(Response.record_id == record.id))).scalar_one()
+        response = (
+            await db.execute(select(Response).where(Response.record_id == record.id))
+        ).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
     async def test_create_submitted_record_response_with_missing_required_questions(
@@ -605,12 +719,18 @@ class TestSuiteRecords:
         }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
         assert response.status_code == 422
-        assert response.json() == {"detail": "missing response value for required question with name='input_ok'"}
+        assert response.json() == {
+            "detail": "missing response value for required question with name='input_ok'"
+        }
 
-    @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
+    @pytest.mark.parametrize(
+        "response_status", [ResponseStatus.discarded, ResponseStatus.draft]
+    )
     async def test_create_record_response_with_missing_required_questions(
         self,
         async_client: "AsyncClient",
@@ -621,14 +741,18 @@ class TestSuiteRecords:
         response_status: ResponseStatus,
     ):
         dataset = await DatasetFactory.create()
-        await TextQuestionFactory.create(name="corrected-1", dataset=dataset, required=True)
+        await TextQuestionFactory.create(
+            name="corrected-1", dataset=dataset, required=True
+        )
         await TextQuestionFactory.create(name="corrected-2", dataset=dataset)
         record = await RecordFactory.create(dataset=dataset)
 
         responses = {"values": {"corrected-2": {"value": "Unit Test 2"}}}
         response_json = {**responses, "status": response_status}
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         response_body = response.json()
@@ -641,11 +765,17 @@ class TestSuiteRecords:
             "status": response_status,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
-        response = (await db.execute(select(Response).where(Response.record_id == record.id))).scalar_one()
+        response = (
+            await db.execute(select(Response).where(Response.record_id == record.id))
+        ).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
     @pytest.mark.parametrize(
@@ -677,10 +807,15 @@ class TestSuiteRecords:
         question = await QuestionFactory.create()
         record = await RecordFactory.create(dataset=question.dataset)
 
-        response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
+        response_json = {
+            "values": {question.name: {"value": response_value}},
+            "status": ResponseStatus.submitted,
+        }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         response_body = response.json()
@@ -692,11 +827,17 @@ class TestSuiteRecords:
             "status": ResponseStatus.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
-    @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
+    @pytest.mark.parametrize(
+        "response_status", [ResponseStatus.discarded, ResponseStatus.draft]
+    )
     @pytest.mark.parametrize(
         "QuestionFactory, response_value",
         [
@@ -733,10 +874,15 @@ class TestSuiteRecords:
         question = await QuestionFactory.create()
         record = await RecordFactory.create(dataset=question.dataset)
 
-        response_json = {"values": {question.name: {"value": response_value}}, "status": response_status}
+        response_json = {
+            "values": {question.name: {"value": response_value}},
+            "status": response_status,
+        }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 201
@@ -749,8 +895,12 @@ class TestSuiteRecords:
             "status": response_status.value,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_record_response_with_extra_question_responses(
@@ -768,7 +918,9 @@ class TestSuiteRecords:
             "status": "submitted",
         }
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 422
@@ -820,7 +972,9 @@ class TestSuiteRecords:
                 create_multi_label_selection_questions,
                 {
                     "values": {
-                        "multi_label_selection_question_1": {"value": ["option1", "option2", "option1"]},
+                        "multi_label_selection_question_1": {
+                            "value": ["option1", "option2", "option1"]
+                        },
                     },
                 },
                 "multi label selection questions expect a list of unique values, but duplicates were found",
@@ -829,7 +983,9 @@ class TestSuiteRecords:
                 create_multi_label_selection_questions,
                 {
                     "values": {
-                        "multi_label_selection_question_1": {"value": ["option4", "option5"]},
+                        "multi_label_selection_question_1": {
+                            "value": ["option4", "option5"]
+                        },
                     },
                 },
                 "['option4', 'option5'] are not valid labels for multi label selection question.\nValid labels are: ['option1', 'option2', 'option3']",
@@ -954,7 +1110,9 @@ class TestSuiteRecords:
 
         response_json = {**responses, "status": "submitted"}
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 422
@@ -962,7 +1120,9 @@ class TestSuiteRecords:
         if expected_error_msg:
             assert response.json() == {"detail": expected_error_msg}
 
-    async def test_create_record_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_create_record_response_without_authentication(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         record = await RecordFactory.create()
         response_json = {
             "values": {
@@ -972,14 +1132,21 @@ class TestSuiteRecords:
             "status": "submitted",
         }
 
-        response = await async_client.post(f"/api/v1/records/{record.id}/responses", json=response_json)
+        response = await async_client.post(
+            f"/api/v1/records/{record.id}/responses", json=response_json
+        )
 
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
     async def test_create_record_response(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict, status: str
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: User,
+        owner_auth_header: dict,
+        status: str,
     ):
         dataset = await DatasetFactory.create()
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -998,7 +1165,9 @@ class TestSuiteRecords:
         dataset_previous_updated_at = dataset.updated_at
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 201
@@ -1018,8 +1187,12 @@ class TestSuiteRecords:
             "status": status,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
     @pytest.mark.parametrize(
@@ -1040,11 +1213,15 @@ class TestSuiteRecords:
         response_json = {"status": status}
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == expected_status_code
-        assert (await db.execute(select(func.count(Response.id)))).scalar() == expected_response_count
+        assert (
+            await db.execute(select(func.count(Response.id)))
+        ).scalar() == expected_response_count
 
         if expected_status_code == 201:
             response_body = response.json()
@@ -1055,19 +1232,35 @@ class TestSuiteRecords:
                 "status": status,
                 "record_id": str(record.id),
                 "user_id": str(owner.id),
-                "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-                "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+                "inserted_at": datetime.fromisoformat(
+                    response_body["inserted_at"]
+                ).isoformat(),
+                "updated_at": datetime.fromisoformat(
+                    response_body["updated_at"]
+                ).isoformat(),
             }
 
-    @pytest.mark.parametrize("status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft])
+    @pytest.mark.parametrize(
+        "status",
+        [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft],
+    )
     async def test_create_record_response_with_wrong_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, status: ResponseStatus
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        status: ResponseStatus,
     ):
         record = await RecordFactory.create()
-        response_json = {"status": status, "values": {"wrong_question": {"value": "wrong value"}}}
+        response_json = {
+            "status": status,
+            "values": {"wrong_question": {"value": "wrong value"}},
+        }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 422
@@ -1076,14 +1269,20 @@ class TestSuiteRecords:
         }
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_create_record_response_for_user_role(self, async_client: "AsyncClient", db: Session, role: UserRole):
+    @pytest.mark.parametrize(
+        "role", [UserRole.owner, UserRole.admin, UserRole.annotator]
+    )
+    async def test_create_record_response_for_user_role(
+        self, async_client: "AsyncClient", db: Session, role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
         record = await RecordFactory.create(dataset=dataset)
-        user = await UserFactory.create(workspaces=[record.dataset.workspace], role=role)
+        user = await UserFactory.create(
+            workspaces=[record.dataset.workspace], role=role
+        )
         response_json = {
             "values": {
                 "input_ok": {"value": "yes"},
@@ -1093,7 +1292,9 @@ class TestSuiteRecords:
         }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json=response_json,
         )
 
         assert response.status_code == 201
@@ -1109,8 +1310,12 @@ class TestSuiteRecords:
             "status": "submitted",
             "record_id": str(record.id),
             "user_id": str(user.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_body["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_body["updated_at"]
+            ).isoformat(),
         }
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
@@ -1129,14 +1334,20 @@ class TestSuiteRecords:
         }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+            json=response_json,
         )
 
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     async def test_create_record_response_already_created(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner: User,
+        owner_auth_header: dict,
     ):
         record = await RecordFactory.create()
 
@@ -1171,7 +1382,9 @@ class TestSuiteRecords:
         }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 422
@@ -1190,7 +1403,9 @@ class TestSuiteRecords:
         }
 
         response = await async_client.post(
-            f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
+            f"/api/v1/records/{record.id}/responses",
+            headers=owner_auth_header,
+            json=response_json,
         )
 
         assert response.status_code == 422
@@ -1220,8 +1435,12 @@ class TestSuiteRecords:
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
-    async def test_get_record_suggestions(self, async_client: "AsyncClient", role: UserRole):
+    @pytest.mark.parametrize(
+        "role", [UserRole.annotator, UserRole.admin, UserRole.owner]
+    )
+    async def test_get_record_suggestions(
+        self, async_client: "AsyncClient", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
         record = await RecordFactory.create(dataset=dataset)
@@ -1231,11 +1450,14 @@ class TestSuiteRecords:
             question=question_a, record=record, value="This is a unit test suggestion"
         )
         suggestion_b = await SuggestionFactory.create(
-            question=question_b, record=record, value="This is a another unit test suggestion"
+            question=question_b,
+            record=record,
+            value="This is a another unit test suggestion",
         )
 
         response = await async_client.get(
-            f"/api/v1/records/{record.id}/suggestions", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/records/{record.id}/suggestions",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200
@@ -1283,7 +1505,11 @@ class TestSuiteRecords:
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_create_record_suggestion(
-        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        role: UserRole,
+        payload: dict,
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1301,8 +1527,12 @@ class TestSuiteRecords:
         response_json = response.json()
         payload.update(
             {
-                "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-                "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+                "inserted_at": datetime.fromisoformat(
+                    response_json["inserted_at"]
+                ).isoformat(),
+                "updated_at": datetime.fromisoformat(
+                    response_json["updated_at"]
+                ).isoformat(),
             }
         )
         assert response_json == {
@@ -1314,7 +1544,11 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
     async def test_create_record_suggestion_update(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1324,7 +1558,10 @@ class TestSuiteRecords:
         response = await async_client.put(
             f"/api/v1/records/{record.id}/suggestions",
             headers=owner_auth_header,
-            json={"question_id": str(question.id), "value": "Testing updating a suggestion"},
+            json={
+                "question_id": str(question.id),
+                "value": "Testing updating a suggestion",
+            },
         )
 
         assert response.status_code == 200
@@ -1384,23 +1621,34 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": f"Question with id `{question_id}` not found"}
+        assert response.json() == {
+            "detail": f"Question with id `{question_id}` not found"
+        }
 
-    async def test_create_record_suggestion_as_annotator(self, async_client: "AsyncClient"):
+    async def test_create_record_suggestion_as_annotator(
+        self, async_client: "AsyncClient"
+    ):
         annotator = await UserFactory.create(role=UserRole.annotator)
         record = await RecordFactory.create()
 
         response = await async_client.put(
             f"/api/v1/records/{record.id}/suggestions",
             headers={API_KEY_HEADER_NAME: annotator.api_key},
-            json={"question_id": str(uuid4()), "value": "This is a unit test suggestion"},
+            json={
+                "question_id": str(uuid4()),
+                "value": "This is a unit test suggestion",
+            },
         )
 
         assert response.status_code == 403
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_record(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: "SearchEngine",
+        role: UserRole,
     ):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
@@ -1421,9 +1669,13 @@ class TestSuiteRecords:
             "updated_at": record.updated_at.isoformat(),
         }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
-        mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=[record])
+        mock_search_engine.delete_records.assert_called_once_with(
+            dataset=dataset, records=[record]
+        )
 
-    async def test_delete_record_as_admin_from_another_workspace(self, async_client: "AsyncClient", db: "AsyncSession"):
+    async def test_delete_record_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient", db: "AsyncSession"
+    ):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
         user = await UserFactory.create(role=UserRole.admin)
@@ -1440,12 +1692,15 @@ class TestSuiteRecords:
         record = await RecordFactory.create()
 
         response = await async_client.delete(
-            f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
         )
 
         assert response.status_code == 403
 
-    async def test_delete_record_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_delete_record_non_existent(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ):
         record_id = uuid4()
 
         response = await async_client.delete(
@@ -1458,7 +1713,11 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
     ) -> None:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1533,7 +1792,9 @@ class TestSuiteRecords:
         assert response.status_code == 204
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 10
 
-    async def test_delete_record_suggestions_as_admin_from_another_workspace(self, async_client: "AsyncClient") -> None:
+    async def test_delete_record_suggestions_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ) -> None:
         record = await RecordFactory.create()
         suggestions = await SuggestionFactory.create_batch(10, record=record)
         user = await UserFactory.create(role=UserRole.admin)
@@ -1541,7 +1802,9 @@ class TestSuiteRecords:
         response = await async_client.delete(
             f"/api/v1/records/{record.id}/suggestions",
             headers={API_KEY_HEADER_NAME: user.api_key},
-            params={"ids": ",".join([str(suggestion.id) for suggestion in suggestions])},
+            params={
+                "ids": ",".join([str(suggestion.id) for suggestion in suggestions])
+            },
         )
 
         assert response.status_code == 403
@@ -1550,7 +1813,9 @@ class TestSuiteRecords:
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ) -> None:
         record = await RecordFactory.create()
-        user = await UserFactory.create(role=UserRole.annotator, workspaces=[record.dataset.workspace])
+        user = await UserFactory.create(
+            role=UserRole.annotator, workspaces=[record.dataset.workspace]
+        )
 
         response = await async_client.delete(
             f"/api/v1/records/{record.id}/suggestions",

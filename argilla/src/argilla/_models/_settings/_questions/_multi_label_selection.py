@@ -16,7 +16,10 @@ from enum import Enum
 
 from pydantic import Field
 
-from argilla._models._settings._questions._label_selection import LabelQuestionSettings, LabelQuestionModel
+from argilla._models._settings._questions._label_selection import (
+    LabelQuestionSettings,
+    LabelQuestionModel,
+)
 
 
 class OptionsOrder(str, Enum):
@@ -26,7 +29,9 @@ class OptionsOrder(str, Enum):
 
 class MultiLabelQuestionSettings(LabelQuestionSettings):
     type: str = "multi_label_selection"
-    options_order: OptionsOrder = Field(OptionsOrder.natural, description="The order of the labels in the UI.")
+    options_order: OptionsOrder = Field(
+        OptionsOrder.natural, description="The order of the labels in the UI."
+    )
 
 
 class MultiLabelQuestionModel(LabelQuestionModel):
