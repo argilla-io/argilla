@@ -19,10 +19,6 @@ else
   echo "No username and password was provided. Skipping user creation"
 fi
 
-
-
-
-
 # Forcing reindex on restart since elasticsearch data could be allocated in a non-persistent volume
 echo "Reindexing existing datasets"
 python -m argilla_server search-engine reindex
