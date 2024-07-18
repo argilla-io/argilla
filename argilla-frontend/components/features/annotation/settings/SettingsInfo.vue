@@ -43,7 +43,11 @@
               >
                 <svgicon name="info" width="22" height="22"></svgicon>
               </span>
-              <input type="number" id="task-distribution" />
+              <input
+                type="number"
+                id="task-distribution"
+                v-model="settings.dataset.distribution.minSubmitted"
+              />
             </div>
           </div>
 
