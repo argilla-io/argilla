@@ -71,7 +71,7 @@
       <geometric-shape-a />
       <p
         class="login__text"
-        v-html="$t('login.support', { link: $config.slackCommunity })"
+        v-html="$t('login.support', { link: $config.communityLink })"
       />
     </div>
   </div>
