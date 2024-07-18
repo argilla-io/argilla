@@ -100,5 +100,5 @@ class TestCreateDatasets:
         )
         dataset = Dataset(dataset_name, settings=settings).create()
 
-        assert dataset.exists()
+        assert client.api.datasets.exists(dataset.id)
         assert dataset.settings.distribution == task_distribution
