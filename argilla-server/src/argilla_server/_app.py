@@ -182,9 +182,6 @@ def configure_telemetry():
         _LOGGER.warning(message)
 
 
-_get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
-
-
 async def configure_database():
     async def check_default_user(db: AsyncSession):
         def _user_has_default_credentials(user: User):
@@ -200,7 +197,7 @@ async def configure_database():
                 f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
             )
 
-    async with _get_db_wrapper() as db:
+    with contextlib.asynccontextmanager(get_async_db)() as db:
         await check_default_user(db)
 
 
