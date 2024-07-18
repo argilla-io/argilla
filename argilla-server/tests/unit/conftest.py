@@ -12,12 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import contextlib
 import uuid
 from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+
 from argilla_server import telemetry
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
@@ -26,9 +28,6 @@ from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-
 from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
@@ -85,11 +84,17 @@ async def async_client(
     async def override_get_search_engine():
         yield mock_search_engine
 
-    mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    # TODO: Once the db and search engine are wrapped in high-level dependencies, this code should works.
+    #  Commented for now.
+    # mocker.patch("argilla_server.database.get_async_db", wraps=override_get_async_db)
+    # mocker.patch("argilla_server.search_engine.get_search_engine", wraps=override_get_search_engine)
 
-    for api in [api_v1]:
-        api.dependency_overrides[get_async_db] = override_get_async_db
-        api.dependency_overrides[get_search_engine] = override_get_search_engine
+    api_v1.dependency_overrides.update(
+        {
+            get_async_db: override_get_async_db,
+            get_search_engine: override_get_search_engine,
+        }
+    )
 
     async with AsyncClient(app=app, base_url="http://testserver") as async_client:
         yield async_client
