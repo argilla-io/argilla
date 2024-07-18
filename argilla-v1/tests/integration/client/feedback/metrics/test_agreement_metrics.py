@@ -65,20 +65,18 @@ def test_allowed_metrics(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    metric = AgreementMetric(
-        dataset=dataset, question_name=question, field_name=[field.name for field in feedback_dataset_fields]
-    )
+    metric = AgreementMetric(dataset=dataset, question_name=question)
     assert set(metric.allowed_metrics) == metric_names
 
 
 @pytest.mark.parametrize(
-    "field, question, num_items, type_of_data",
+    "question, num_items, type_of_data",
     [
-        (["text"], "question-1", None, None),
-        (["text", "label"], "question-2", 12, int),
-        (["text", "label"], "question-3", 12, str),
-        (["text"], "question-4", 12, FrozenSet),
-        (["label"], "question-5", 12, Tuple),
+        ("question-1", None, None),
+        ("question-2", 12, int),
+        ("question-3", 12, str),
+        ("question-4", 12, frozenset),
+        ("question-5", 12, tuple),
     ],
 )
 @pytest.mark.usefixtures(
@@ -93,7 +91,6 @@ def test_prepare_dataset_for_annotation_task(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
-    field: Union[str, List[str]],
     num_items: int,
     type_of_data: Union[str, int, FrozenSet, Tuple[str]],
 ):
@@ -104,11 +101,11 @@ def test_prepare_dataset_for_annotation_task(
     )
     dataset.add_records(records=feedback_dataset_records_with_paired_suggestions)
 
-    if question == "question-1":
+    if question in ("question-1",):
         with pytest.raises(NotImplementedError, match=r"^Question '"):
-            prepare_dataset_for_annotation_task(dataset, question, field)
+            prepare_dataset_for_annotation_task(dataset, question)
     else:
-        formatted_dataset = prepare_dataset_for_annotation_task(dataset, question, field)
+        formatted_dataset = prepare_dataset_for_annotation_task(dataset, question)
         assert isinstance(formatted_dataset, list)
         assert len(formatted_dataset) == num_items
         item = formatted_dataset[0]
@@ -116,12 +113,7 @@ def test_prepare_dataset_for_annotation_task(
         assert isinstance(item[0], str)
         assert item[0].startswith("00000000-")  # beginning of our uuid for tests
         assert isinstance(item[1], str)
-        expected_field_value = (
-            " ".join([feedback_dataset_records_with_paired_suggestions[0].fields[f] for f in field])
-            if isinstance(field, list)
-            else feedback_dataset_records_with_paired_suggestions[0].fields[field]
-        )
-        assert item[1] == expected_field_value
+        assert item[1] == feedback_dataset_records_with_paired_suggestions[0].fields["text"]
         assert isinstance(item[2], type_of_data)
 
 
@@ -164,17 +156,9 @@ def test_agreement_metrics(
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError, match=r"^No metrics are defined currently for"):
-            AgreementMetric(
-                dataset=dataset,
-                question_name=question,
-                field_name=[field.name for field in feedback_dataset_fields],
-            )
+            AgreementMetric(dataset=dataset, question_name=question)
     else:
-        metric = AgreementMetric(
-            dataset=dataset,
-            question_name=question,
-            field_name=[field.name for field in feedback_dataset_fields],
-        )
+        metric = AgreementMetric(dataset=dataset, question_name=question)
         # Test for repr method
         assert repr(metric) == f"AgreementMetric(question_name={question})"
         metrics_report = metric.compute(metric_names)
@@ -189,19 +173,19 @@ def test_agreement_metrics(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "field, question, metric_names",
+    "question, metric_names",
     [
         # TextQuestion
-        (["text"], "question-1", None),
+        ("question-1", None),
         # RatingQuestion
-        (["text", "label"], "question-2", "alpha"),
-        (["text", "label"], "question-2", ["alpha"]),
+        ("question-2", "alpha"),
+        ("question-2", ["alpha"]),
         # LabelQuestion
-        ("text", "question-3", "alpha"),
+        ("question-3", "alpha"),
         # MultiLabelQuestion
-        ("label", "question-4", "alpha"),
+        ("question-4", "alpha"),
         # RankingQuestion
-        (["text", "label"], "question-5", "alpha"),
+        ("question-5", "alpha"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -216,7 +200,6 @@ async def test_agreement_metrics_remote(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
-    field: Union[str, List[str]],
     metric_names: Union[str, List[str]],
     owner: User,
 ):
@@ -236,17 +219,9 @@ async def test_agreement_metrics_remote(
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError, match=r"^No metrics are defined currently for"):
-            AgreementMetric(
-                dataset=remote,
-                question_name=question,
-                field_name=field,
-            )
+            AgreementMetric(dataset=remote, question_name=question)
     else:
-        metric = AgreementMetric(
-            dataset=remote,
-            question_name=question,
-            field_name=field,
-        )
+        metric = AgreementMetric(dataset=remote, question_name=question)
         # Test for repr method
         assert repr(metric) == f"AgreementMetric(question_name={question})"
         metrics_report = metric.compute(metric_names)
@@ -260,19 +235,19 @@ async def test_agreement_metrics_remote(
 
 
 @pytest.mark.parametrize(
-    "field, question, metric_names",
+    "question, metric_names",
     [
         # TextQuestion
-        (["text"], "question-1", None),
+        ("question-1", None),
         # RatingQuestion
-        (["text", "label"], "question-2", "alpha"),
-        (["text", "label"], "question-2", ["alpha"]),
+        ("question-2", "alpha"),
+        ("question-2", ["alpha"]),
         # LabelQuestion
-        ("text", "question-3", "alpha"),
+        ("question-3", "alpha"),
         # MultiLabelQuestion
-        ("label", "question-4", "alpha"),
+        ("question-4", "alpha"),
         # RankingQuestion
-        (["text", "label"], "question-5", "alpha"),
+        ("question-5", "alpha"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -287,7 +262,6 @@ def test_agreement_metrics_from_feedback_dataset(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
-    field: Union[str, List[str]],
     metric_names: Union[str, List[str]],
 ):
     dataset = FeedbackDataset(
@@ -299,11 +273,9 @@ def test_agreement_metrics_from_feedback_dataset(
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError, match=r"^No metrics are defined currently for"):
-            dataset.compute_agreement_metrics(question_name=question, field_name=field, metric_names=metric_names)
+            dataset.compute_agreement_metrics(question_name=question, metric_names=metric_names)
     else:
-        metrics_report = dataset.compute_agreement_metrics(
-            question_name=question, field_name=field, metric_names=metric_names
-        )
+        metrics_report = dataset.compute_agreement_metrics(question_name=question, metric_names=metric_names)
 
         if isinstance(metric_names, str):
             metrics_report = [metrics_report]
@@ -316,19 +288,19 @@ def test_agreement_metrics_from_feedback_dataset(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "field, question, metric_names",
+    "question, metric_names",
     [
         # TextQuestion
-        (["text"], "question-1", None),
+        ("question-1", None),
         # RatingQuestion
-        (["text", "label"], "question-2", "alpha"),
-        (["text", "label"], "question-2", ["alpha"]),
+        ("question-2", "alpha"),
+        ("question-2", ["alpha"]),
         # LabelQuestion
-        ("text", "question-3", "alpha"),
+        ("question-3", "alpha"),
         # MultiLabelQuestion
-        ("label", "question-4", "alpha"),
+        ("question-4", "alpha"),
         # RankingQuestion
-        (["text", "label"], "question-5", "alpha"),
+        ("question-5", "alpha"),
     ],
 )
 @pytest.mark.usefixtures(
@@ -343,7 +315,6 @@ async def test_agreement_metrics_from_remote_feedback_dataset(
     feedback_dataset_questions: List["AllowedQuestionTypes"],
     feedback_dataset_records_with_paired_suggestions: List[FeedbackRecord],
     question: str,
-    field: Union[str, List[str]],
     metric_names: Union[str, List[str]],
     owner: User,
 ) -> None:
@@ -364,11 +335,9 @@ async def test_agreement_metrics_from_remote_feedback_dataset(
 
     if question in ("question-1",):
         with pytest.raises(NotImplementedError, match=r"^No metrics are defined currently for"):
-            remote.compute_agreement_metrics(question_name=question, field_name=field, metric_names=metric_names)
+            remote.compute_agreement_metrics(question_name=question, metric_names=metric_names)
     else:
-        metrics_report = remote.compute_agreement_metrics(
-            question_name=question, field_name=field, metric_names=metric_names
-        )
+        metrics_report = remote.compute_agreement_metrics(question_name=question, metric_names=metric_names)
 
         if isinstance(metric_names, str):
             metrics_report = [metrics_report]

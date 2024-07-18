@@ -85,7 +85,6 @@ class MetricsMixin:
         self,
         metric_names: Union[str, List[str]] = None,
         question_name: Union[str, LabelQuestion, MultiLabelQuestion, RatingQuestion, RankingQuestion] = None,
-        field_name: Union[str, List[str]] = None,
     ) -> Union["AgreementMetricResult", List["AgreementMetricResult"]]:
         """Compute agreement or reliability of annotation metrics.
 
@@ -95,7 +94,6 @@ class MetricsMixin:
         Args:
             metric_names: Metric name or list of metric names of the metrics, dependent on the question type.
             question_name: Question for which we want to compute the metrics.
-            field_name: Name of the fields related to the question we want to analyse the agreement.
 
         Note:
             Currently, TextQuestion is not supported.
@@ -106,7 +104,7 @@ class MetricsMixin:
         """
         from argilla_v1.client.feedback.metrics.agreement_metrics import AgreementMetric
 
-        return AgreementMetric(self, question_name, field_name).compute(metric_names)
+        return AgreementMetric(self, question_name).compute(metric_names)
 
 
 class UnificationMixin:
