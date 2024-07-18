@@ -2489,45 +2489,257 @@ to the new dataset.</p>
 </span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="n">dataset_exist</span> <span class="o">=</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </span></code></pre></div>
 <h2 id="update-a-dataset">Update a dataset<a class="headerlink" href="#update-a-dataset" title="Permanent link">&para;</a></h2>
-<p>You can update a dataset by calling the <code>update</code> method on the <code>Dataset</code> class and passing the new settings as an argument.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Keep in mind that once your dataset is published, only the guidelines can be updated.</p>
+<p>Once a dataset is published, there are limited things you can update. Here is a summary of the attributes you can change:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:6"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Fields</label><label for="__tabbed_4_2">Questions</label><label for="__tabbed_4_3">Metadata</label><label for="__tabbed_4_4">Vectors</label><label for="__tabbed_4_5">Guidelines</label><label for="__tabbed_4_6">Distribution</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Required</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Use markdown</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Required</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Labels</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Values</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Label order</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Suggestions first</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Visible labels</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Field</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Allow overlapping</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Use markdown</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Options</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Minimum value</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Maximum value</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Visible for annotators</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Allow extra metadata</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Dimensions</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>From SDK</th>
+<th>From UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum submitted</td>
+<td>✅*</td>
+<td>✅*</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>* Can be changed as long as the dataset doesn't have any responses.</p>
+</blockquote>
+</div>
+</div>
+</div>
+<p>To modify these attributes, you can simply set the new value of the attributes you wish to change and call the <code>update</code> method on the <code>Dataset</code> object.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
 </span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="n">dataset_to_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
-</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="n">settings_to_update</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
-</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;These are some updated guidelines.&quot;</span><span class="p">,</span>
-</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
-</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
-</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>        <span class="p">),</span>
-</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>    <span class="p">],</span>
-</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">LabelQuestion</span><span class="p">(</span>
-</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
-</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>            <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;label_4&quot;</span><span class="p">,</span> <span class="s2">&quot;label_5&quot;</span><span class="p">,</span> <span class="s2">&quot;label_6&quot;</span><span class="p">]</span>
-</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>        <span class="p">),</span>
-</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>    <span class="p">],</span>
-</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a><span class="p">)</span>
-</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>
-</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a><span class="n">dataset_to_update</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings_to_update</span>
-</span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>
-</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a><span class="n">dataset_updated</span> <span class="o">=</span> <span class="n">dataset_to_update</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">use_markdown</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;my_metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">visible_for_annotators</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span></code></pre></div>
+<p>You can also add and delete metadata properties and vector fields using the <code>add</code> and <code>delete</code> methods:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="c1"># add</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="n">dataset</span><span class="o">.</span><span class="n">vectors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rg</span><span class="o">.</span><span class="n">VectorField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_vector&quot;</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">123</span><span class="p">))</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="c1">#delete</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="n">dataset</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;my_metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 </span></code></pre></div>
 <h2 id="delete-a-dataset">Delete a dataset<a class="headerlink" href="#delete-a-dataset" title="Permanent link">&para;</a></h2>
 <p>You can delete an existing dataset by calling the <code>delete</code> method on the <code>Dataset</code> class.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
-</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="n">dataset_to_delete</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
-</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>
-</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="n">dataset_deleted</span> <span class="o">=</span> <span class="n">dataset_to_delete</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="n">dataset_to_delete</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="n">dataset_deleted</span> <span class="o">=</span> <span class="n">dataset_to_delete</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 </span></code></pre></div>
 
 
