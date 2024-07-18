@@ -14,7 +14,7 @@ When a record has met the minimum number of submissions, the status of the recor
 
 !!! note
     The status of a record can be either `completed`, when it has the required number of responses with `submitted` status, or `pending`, when it doesn’t meet this requirement.
-    
+
     Each record can have multiple responses and each of those can have the status `submitted`, `discarded` or `draft`.
 
 !!! info "Main Class"
