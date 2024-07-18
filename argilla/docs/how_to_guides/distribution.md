@@ -13,7 +13,7 @@ When a record has met the minimum number of submissions, the status of the recor
 ![Task Distribution diagram](../assets/images/how_to_guides/distribution/taskdistribution.svg)
 
 !!! note
-    The status of a record can be either `completed`, when it has the required number of responses with `submitted` status, or `left`, when it doesn’t meet this requirement.
+    The status of a record can be either `completed`, when it has the required number of responses with `submitted` status, or `pending`, when it doesn’t meet this requirement.
     Each record can have multiple responses and each of those can have the status `submitted`, `discarded` or `draft`.
 
 !!! info "Main Class"
