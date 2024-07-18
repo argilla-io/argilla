@@ -23,7 +23,6 @@ import re
 import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
-from urllib.parse import urlparse
 
 from argilla_server.constants import (
     DATABASE_SQLITE,
@@ -285,14 +284,6 @@ class Settings(BaseSettings):
     @property
     def search_engine_is_opensearch(self) -> bool:
         return self.search_engine == SEARCH_ENGINE_OPENSEARCH
-
-    def obfuscated_elasticsearch(self) -> str:
-        """Returns configured elasticsearch url obfuscating the provided password, if any"""
-        parsed = urlparse(self.elasticsearch)
-        if parsed.password:
-            return self.elasticsearch.replace(parsed.password, "XXXX")
-
-        return self.elasticsearch
 
     class Config:
         env_prefix = "ARGILLA_"
