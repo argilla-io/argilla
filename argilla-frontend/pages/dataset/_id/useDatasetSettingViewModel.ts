@@ -110,11 +110,11 @@ export const useDatasetSettingViewModel = () => {
     routes.goToFeedbackTaskAnnotationPage(datasetId);
   };
 
-  const goToTabWithModification = () => {
-    const goToTab = (id: Tab["id"]) => {
-      document.getElementById(id).click();
-    };
+  const goToTab = (id: Tab["id"]) => {
+    document.getElementById(id)?.click();
+  };
 
+  const goToTabWithModification = () => {
     if (datasetSetting.isDatasetModified) return goToTab("general");
     if (datasetSetting.isFieldsModified) return goToTab("fields");
     if (datasetSetting.isQuestionsModified) return goToTab("questions");
@@ -158,6 +158,21 @@ export const useDatasetSettingViewModel = () => {
     }
   );
 
+  const onTabChanged = async (tabId: Tab["id"]) => {
+    await routes.setQueryParams({
+      key: "tab",
+      value: tabId,
+    });
+  };
+
+  const onTabLoaded = () => {
+    const selectedTab = routes.getQueryParams<string>("tab") as Tab["id"];
+
+    if (tabs.value.some((t) => t.id === selectedTab)) {
+      goToTab(selectedTab);
+    }
+  };
+
   return {
     isLoadingDataset,
     breadcrumbs,
@@ -167,5 +182,7 @@ export const useDatasetSettingViewModel = () => {
     datasetSetting,
     goToOutside,
     goToDataset,
+    onTabChanged,
+    onTabLoaded,
   };
 };
