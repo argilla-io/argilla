@@ -46,7 +46,6 @@ class MetricsMixin:
         question_name: Union[
             str, LabelQuestion, MultiLabelQuestion, RatingQuestion, TextQuestion, RankingQuestion
         ] = None,
-        field_name: Union[str, List[str]] = None,
         strategy: Optional[
             Union[str, LabelQuestionStrategy, MultiLabelQuestion, RatingQuestionStrategy, RankingQuestion]
         ] = None,
