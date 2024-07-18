@@ -3,6 +3,11 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
+import { useTeamProgress } from "../infrastructure/storage/TeamProgressStorage";
+import {
+  UpdateMetricsEventHandler,
+  UpdateTeamProgressEventHandler,
+} from "../infrastructure/events";
 import {
   DatasetRepository,
   RecordRepository,
@@ -56,6 +61,9 @@ export const loadDependencyContainer = (context: Context) => {
   const useAuth = () => context.$auth;
 
   const dependencies = [
+    register(UpdateMetricsEventHandler).build(),
+    register(UpdateTeamProgressEventHandler).build(),
+
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -83,7 +91,7 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(GetDatasetProgressUseCase)
-      .withDependency(DatasetRepository)
+      .withDependencies(DatasetRepository, useTeamProgress)
       .build(),
 
     register(GetRecordsByCriteriaUseCase)

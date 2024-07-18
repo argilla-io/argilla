@@ -6,11 +6,14 @@ const STATUS = {
   submitted: "hsl(227, 56%, 52%)",
   draft: "hsl(188, 92%, 39%)",
 };
+
 type Status = keyof typeof STATUS;
 
-export class RecordStatus {
+export class RecordStatus extends String {
   public readonly color: Color;
   private constructor(public readonly name: Status, color: string) {
+    super(name);
+
     this.color = Color.from(color);
   }
 
