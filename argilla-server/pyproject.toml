@@ -155,14 +155,14 @@ exclude = [
     "node_modules",
     "venv",
 ]
-line-length = 120
+line-length = 88
 
 [tool.ruff.per-file-ignores]
 # Ignore imported but unused;
 "__init__.py" = ["F401"]
 
 [tool.black]
-line-length = 120
+line-length = 88
 
 [tool.pdm.scripts]
 _.env_file = ".env.dev"
