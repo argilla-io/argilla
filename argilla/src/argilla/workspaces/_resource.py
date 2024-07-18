@@ -23,7 +23,8 @@ from argilla._resource import Resource
 from argilla.client import Argilla
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User
+    from argilla.datasets._resource import Dataset
+    from argilla.users._resource import User
 
 
 class Workspace(Resource):
