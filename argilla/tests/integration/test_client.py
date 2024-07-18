@@ -17,38 +17,67 @@ import uuid
 import pytest
 
 from argilla import Argilla, Dataset, TextField, TextQuestion, Settings, User, Workspace
-from argilla._exceptions import ArgillaAPIError, ArgillaError
+from argilla._exceptions import ArgillaError
 
 
+@pytest.fixture
+def dataset(client: Argilla) -> Dataset:
+    return Dataset(
+        name=f"test_dataset{uuid.uuid4()}",
+        settings=Settings(fields=[TextField(name="text")], questions=[TextQuestion(name="question")]),
+        client=client,
+    ).create()
+
+
+@pytest.fixture
+def user(client: Argilla) -> User:
+    user = User(username="test_user", password="test password").create()
+    user.password = None  # to align with GET user result
+
+    return user
+
+
+@pytest.fixture
+def workspace(client: Argilla) -> Workspace:
+    return Workspace(name=f"test_workspace{uuid.uuid4()}").create()
+
+
+# TODO: We can move this test suite to tests/unit once we have a mock client implementation
 class TestClient:
-    def test_get_dataset_by_id(self, client: Argilla):
-        dataset = Dataset(
-            name=f"test_dataset{uuid.uuid4()}",
-            settings=Settings(fields=[TextField(name="text")], questions=[TextQuestion(name="question")]),
-        ).create()
+    def test_get_resources(self, client: Argilla, workspace: Workspace, user: User, dataset: Dataset):
+        assert client.workspaces(name=workspace.name) == workspace
+        assert client.workspaces(id=workspace.id) == workspace
+        assert client.workspaces(id=str(workspace.id)) == workspace
+        assert client.workspaces(id=str(workspace.id), name="skip this name") == workspace
 
+        assert client.users(username=user.username) == user
+        assert client.users(id=user.id) == user
+        assert client.users(id=str(user.id)) == user
+        assert client.users(id=str(user.id), username="skip this username") == user
+
+        assert client.datasets(name=dataset.name) == dataset
         assert client.datasets(id=dataset.id) == dataset
         assert client.datasets(id=str(dataset.id)) == dataset
         assert client.datasets(id=str(dataset.id), name="skip this name") == dataset
 
-        assert client.datasets(id=uuid.uuid4()) is None
+    def test_get_resources_warnings(self, client: Argilla):
+        with pytest.warns(UserWarning, match="Workspace with id"):
+            assert client.workspaces(id=uuid.uuid4()) is None
 
-    def test_get_user_by_id(self, client: Argilla):
-        user = User(username="test_user", password="test password").create()
-        user = client.users(username=user.username)
+        with pytest.warns(UserWarning, match="User with id"):
+            assert client.users(id=uuid.uuid4()) is None
 
-        assert client.users(id=user.id) == user
-        assert client.users(id=str(user.id)) == user
-        assert client.users(id=str(user.id), username="skip this username") == user
-        assert client.users(id=uuid.uuid4()) is None
+        with pytest.warns(UserWarning, match="Dataset with id"):
+            assert client.datasets(id=uuid.uuid4()) is None
 
-    def test_get_workspace_by_id(self, client: Argilla):
-        workspace = Workspace(name=f"test_workspace{uuid.uuid4()}").create()
+        with pytest.warns(UserWarning, match="Workspace with name"):
+            assert client.workspaces(name="missing") is None
 
-        assert client.workspaces(id=workspace.id) == workspace
-        assert client.workspaces(id=str(workspace.id)) == workspace
-        assert client.workspaces(id=str(workspace.id), name="skip this name") == workspace
-        assert client.workspaces(id=uuid.uuid4()) is None
+        with pytest.warns(UserWarning, match="User with username"):
+            assert client.users(username="missing") is None
+
+        with pytest.warns(UserWarning, match="Dataset with name"):
+            assert client.datasets(name="missing") is None
 
     def test_get_resource_with_missing_args(self, client: Argilla):
         with pytest.raises(ArgillaError):
