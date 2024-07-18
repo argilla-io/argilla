@@ -66,9 +66,11 @@ class TestSuiteSuggestions:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
         mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
+
         test_telemetry.track_crud_records_subtopic.assert_called_with(
             action="delete", sub_topic="suggestions", record_id=suggestion.record.id
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_suggestion_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
         suggestion_id = uuid4()

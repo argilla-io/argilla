@@ -36,12 +36,13 @@ async def test_track_user_login(test_telemetry: MagicMock):
     await get_telemetry_client().track_user_login(request=mock_request, user=user)
 
     test_telemetry.track_user_login.assert_called_once_with(request=mock_request, user=user)
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.parametrize("is_oauth", [True, False])
 @pytest.mark.parametrize("username", ["argilla", "john"])
-def test_user_created(test_telemetry, username: str, is_oauth: bool):
+def test_user_created(test_telemetry: MagicMock, username: str, is_oauth: bool):
     user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
 
-    get_telemetry_client().track_crud_user(action="create", user=user, is_oauth=is_oauth)
     test_telemetry.track_crud_user.assert_called_once_with(action="create", user=user, is_oauth=is_oauth)
+    test_telemetry.track_data.assert_called()

@@ -100,14 +100,19 @@ class TelemetryClient:
 
     @staticmethod
     def _process_dataset_settings(dataset: Dataset):
-        return {
-            "count_fields": len(dataset.fields),
-            "count_questions": len(dataset.questions),
-            "count_vector_settings": len(dataset.vectors_settings),
-            "count_metadata_properties": len(dataset.metadata_properties),
-            "allow_extra_metadata": dataset.allow_extra_metadata,
-            "guidelines": True if dataset.guidelines else False,
-        }
+        attributes = [
+            "fields",
+            "questions",
+            "vectors_settings",
+            "metadata_properties",
+            "allow_extra_metadata",
+            "guidelines",
+        ]
+        user_data = {}
+        for attr in attributes:
+            if dataset.is_relationship_loaded(attr):
+                user_data[attr] = getattr(dataset, attr)
+        return user_data
 
     @staticmethod
     def _process_dataset_setting_settings(
@@ -196,21 +201,14 @@ class TelemetryClient:
             user_agent.update(self._process_dataset_settings(dataset=dataset))
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
+        attributes: list[str] = ["fields", "questions", "vectors_settings", "metadata_properties"]
         if dataset:
-            for field in dataset.fields:
-                self.track_crud_dataset_setting(action=action, setting_name="fields", dataset=dataset, setting=field)
-            for question in dataset.questions:
-                self.track_crud_dataset_setting(
-                    action=action, setting_name="questions", dataset=dataset, setting=question
-                )
-            for vector in dataset.vectors_settings:
-                self.track_crud_dataset_setting(
-                    action=action, setting_name="vectors_settings", dataset=dataset, setting=vector
-                )
-            for meta_data in dataset.metadata_properties:
-                self.track_crud_dataset_setting(
-                    action=action, setting_name="metadata_properties", dataset=dataset, setting=meta_data
-                )
+            for attr in attributes:
+                if dataset.is_relationship_loaded(attr):
+                    for obtained_attr in getattr(dataset, attr):
+                        self.track_crud_dataset_setting(
+                            action=action, setting_name=attr, dataset=dataset, setting=obtained_attr
+                        )
 
     async def track_crud_dataset_setting(
         self,

@@ -52,9 +52,11 @@ class TestSuiteVectorsSettings:
         }
 
         assert vector_settings.title == "New Title"
+
         test_telemetry.track_crud_dataset_setting.assert_called_with(
             action="update", setting_name="vectors_settings", dataset=vector_settings.dataset, setting=vector_settings
         )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize("title", [None, "", "t" * (VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH + 1)])
     async def test_update_vector_settings_with_invalid_title(
@@ -140,9 +142,11 @@ class TestSuiteVectorsSettings:
             "inserted_at": vector_settings.inserted_at.isoformat(),
             "updated_at": vector_settings.updated_at.isoformat(),
         }
+
         test_telemetry.track_crud_dataset_setting.assert_called_with(
             action="delete", setting_name="vectors_settings", dataset=vector_settings.dataset, setting=vector_settings
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_vector_settings_non_existing(self, async_client: "AsyncClient", owner_auth_header: dict):
         vector_settings_id = uuid4()

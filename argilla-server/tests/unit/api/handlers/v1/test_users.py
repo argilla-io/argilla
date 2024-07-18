@@ -48,7 +48,9 @@ class TestsUsersV1Endpoints:
                 for workspace in workspaces
             ]
         }
+
         test_telemetry.track_crud_workspace.assert_called_with(action="list", workspace=None, count=len(workspaces))
+        test_telemetry.track_data.assert_called()
 
     async def test_list_user_workspaces_for_owner(self, async_client: "AsyncClient"):
         workspaces = await WorkspaceFactory.create_batch(5)

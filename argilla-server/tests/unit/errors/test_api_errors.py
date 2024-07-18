@@ -83,3 +83,4 @@ class TestAPIErrorHandler:
             user_agent["type"] = error.type
 
         test_telemetry.track_data.assert_called_once_with(topic="error/server", user_agent=user_agent)
+        test_telemetry.track_data.assert_called()

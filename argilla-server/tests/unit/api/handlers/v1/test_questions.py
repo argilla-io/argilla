@@ -283,6 +283,7 @@ async def test_update_question(
     test_telemetry.track_crud_dataset_setting.assert_called_with(
         action="update", dataset=question.dataset, setting_name="questions", setting=ANY
     )
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.parametrize("title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)])
@@ -515,6 +516,7 @@ async def test_delete_question(
     test_telemetry.track_crud_dataset_setting.assert_called_with(
         action="delete", dataset=question.dataset, setting_name="questions", setting=ANY
     )
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio

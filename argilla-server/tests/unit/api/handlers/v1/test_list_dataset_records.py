@@ -101,9 +101,11 @@ class TestSuiteListDatasetRecords:
                 },
             ],
         }
+
         test_telemetry.track_crud_records.assert_called_with(
             action="list", record_or_dataset=field.dataset, count=response.json()["total"]
         )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "includes",

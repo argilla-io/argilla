@@ -11,14 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import contextlib
-import uuid
 from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
-from argilla_server import telemetry
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
@@ -33,8 +30,6 @@ from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
 if TYPE_CHECKING:
-    from unittest.mock import MagicMock
-
     from pytest_mock import MockerFixture
 
 
@@ -98,12 +93,21 @@ async def async_client(
 
 
 @pytest.fixture(autouse=True)
-def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
-    mock_telemetry = mocker.Mock(TelemetryClient)
-    mock_telemetry.server_id = uuid.uuid4()
+def test_telemetry(mocker: "MockerFixture") -> "TelemetryClient":
+    # Create a real instance TelemetryClient
+    real_telemetry = TelemetryClient()
 
-    telemetry._TELEMETRY_CLIENT = mock_telemetry
-    return mock_telemetry
+    # Create a wrapper to track calls to other methods
+    for attr_name in dir(real_telemetry):
+        attr = getattr(real_telemetry, attr_name)
+        if callable(attr) and not attr_name.startswith("__"):
+            wrapped = mocker.Mock(wraps=attr)
+            setattr(real_telemetry, attr_name, wrapped)
+
+    # Patch the _TELEMETRY_CLIENT to use the real_telemetry
+    mocker.patch("argilla_server.telemetry._TELEMETRY_CLIENT", new=real_telemetry)
+
+    return real_telemetry
 
 
 @pytest_asyncio.fixture(scope="function")

@@ -104,6 +104,7 @@ class TestSuiteRecords:
         }
 
         test_telemetry.track_crud_records.assert_called_with(action="read", record_or_dataset=record)
+        test_telemetry.track_data.assert_called()
 
     async def test_get_record_without_authentication(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()
@@ -233,7 +234,9 @@ class TestSuiteRecords:
             "updated_at": record.updated_at.isoformat(),
         }
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
         test_telemetry.track_crud_records.assert_called_with(action="update", record_or_dataset=record)
+        test_telemetry.track_data.assert_called()
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -1036,6 +1039,7 @@ class TestSuiteRecords:
         test_telemetry.track_crud_records_subtopic.assert_called_with(
             action="create", sub_topic="responses", record_id=record.id
         )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "status, expected_status_code, expected_response_count",
@@ -1278,9 +1282,11 @@ class TestSuiteRecords:
                 },
             ]
         }
+
         test_telemetry.track_crud_records_subtopic.assert_called_with(
             action="read", sub_topic="suggestions", record_id=record.id, count=len(response.json()["items"])
         )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "payload",
@@ -1330,9 +1336,11 @@ class TestSuiteRecords:
         }
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
+
         test_telemetry.track_crud_records_subtopic.assert_called_with(
             action="create", sub_topic="suggestions", record_id=record.id
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_create_record_suggestion_update(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -1448,7 +1456,9 @@ class TestSuiteRecords:
         }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=[record])
+
         test_telemetry.track_crud_records.assert_called_with(action="delete", record_or_dataset=record)
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_record_as_admin_from_another_workspace(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()
@@ -1513,12 +1523,14 @@ class TestSuiteRecords:
 
         expected_calls = [call(suggestion) for suggestion in suggestions]
         mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
+
         test_telemetry.track_crud_records_subtopic.assert_called_with(
             action="delete",
             sub_topic="suggestions",
             record_id=record.id,
             count=len(suggestions_ids) + len(random_uuids),
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_record_suggestions_with_no_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict

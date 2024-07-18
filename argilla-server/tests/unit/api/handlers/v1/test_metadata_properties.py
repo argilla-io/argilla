@@ -199,6 +199,7 @@ async def test_update_metadata_property(
         dataset=metadata_property.dataset,
         setting=metadata_property,
     )
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio
@@ -424,12 +425,14 @@ async def test_delete_metadata_property(
     }
 
     assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
+
     test_telemetry.track_crud_dataset_setting.assert_called_with(
         action="delete",
         setting_name="metadata_properties",
         dataset=metadata_property.dataset,
         setting=metadata_property,
     )
+    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio
