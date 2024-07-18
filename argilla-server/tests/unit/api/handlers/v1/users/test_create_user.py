@@ -29,7 +29,9 @@ class TestCreateUser:
     def url(self) -> str:
         return "/api/v1/users"
 
-    async def test_create_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_create_user(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         response = await async_client.post(
             self.url(),
             headers=owner_auth_header,
@@ -44,7 +46,9 @@ class TestCreateUser:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
-        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        user = (
+            await db.execute(select(User).filter_by(username="username"))
+        ).scalar_one()
 
         response_json = response.json()
         assert response_json == {
@@ -75,7 +79,9 @@ class TestCreateUser:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
-        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        user = (
+            await db.execute(select(User).filter_by(username="username"))
+        ).scalar_one()
 
         assert response.json()["first_name"] == "First name"
         assert user.first_name == "First name"
@@ -97,7 +103,9 @@ class TestCreateUser:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
-        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        user = (
+            await db.execute(select(User).filter_by(username="username"))
+        ).scalar_one()
 
         assert response.json()["last_name"] == "Last name"
         assert user.last_name == "Last name"
@@ -118,7 +126,9 @@ class TestCreateUser:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
-        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        user = (
+            await db.execute(select(User).filter_by(username="username"))
+        ).scalar_one()
 
         assert response.json()["last_name"] == None
         assert user.last_name == None
@@ -141,12 +151,16 @@ class TestCreateUser:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
-        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        user = (
+            await db.execute(select(User).filter_by(username="username"))
+        ).scalar_one()
 
         assert response.json()["role"] == UserRole.owner
         assert user.role == UserRole.owner
 
-    async def test_create_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
+    async def test_create_user_without_authentication(
+        self, db: AsyncSession, async_client: AsyncClient
+    ):
         response = await async_client.post(
             self.url(),
             json={

@@ -31,13 +31,19 @@ class TestCreateRecordResponse:
         return f"/api/v1/records/{record_id}/responses"
 
     async def test_create_record_response_for_span_question(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -75,18 +81,28 @@ class TestCreateRecordResponse:
             "status": ResponseStatusFilter.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_record_response_for_span_question_with_additional_value_attributes(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -95,8 +111,18 @@ class TestCreateRecordResponse:
                 "values": {
                     "span-question": {
                         "value": [
-                            {"label": "label-a", "start": 0, "end": 1, "ignored": "value"},
-                            {"label": "label-b", "start": 2, "end": 3, "ignored": "value"},
+                            {
+                                "label": "label-a",
+                                "start": 0,
+                                "end": 1,
+                                "ignored": "value",
+                            },
+                            {
+                                "label": "label-b",
+                                "start": 2,
+                                "end": 3,
+                                "ignored": "value",
+                            },
                             {"label": "label-c", "start": 4, "end": 5},
                         ],
                     },
@@ -124,18 +150,28 @@ class TestCreateRecordResponse:
             "status": ResponseStatusFilter.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_record_response_for_span_question_with_empty_value(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -165,8 +201,12 @@ class TestCreateRecordResponse:
             "status": ResponseStatusFilter.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
     async def test_create_record_response_for_span_question_with_record_not_providing_required_field(
@@ -176,7 +216,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"other-field": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"other-field": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -194,7 +236,9 @@ class TestCreateRecordResponse:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "span question requires record to have field `field-a`"}
+        assert response.json() == {
+            "detail": "span question requires record to have field `field-a`"
+        }
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
@@ -205,7 +249,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -233,7 +279,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -262,7 +310,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -291,7 +341,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -318,7 +370,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -345,7 +399,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -372,7 +428,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -399,7 +457,9 @@ class TestCreateRecordResponse:
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -425,13 +485,19 @@ class TestCreateRecordResponse:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     async def test_create_record_response_for_span_question_with_overlapped_values(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
         await SpanQuestionFactory.create(name="span-question", dataset=dataset)
 
-        record = await RecordFactory.create(fields={"field-a": "Hello, this is a text field"}, dataset=dataset)
+        record = await RecordFactory.create(
+            fields={"field-a": "Hello, this is a text field"}, dataset=dataset
+        )
 
         response = await async_client.post(
             self.url(record.id),
@@ -451,6 +517,8 @@ class TestCreateRecordResponse:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "overlapping values found between spans at index idx=0 and idx=2"}
+        assert response.json() == {
+            "detail": "overlapping values found between spans at index idx=0 and idx=2"
+        }
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0

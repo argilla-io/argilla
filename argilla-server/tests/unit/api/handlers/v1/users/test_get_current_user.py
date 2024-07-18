@@ -22,7 +22,9 @@ class TestGetCurrentUser:
     def url(self) -> str:
         return "/api/v1/me"
 
-    async def test_get_current_user(self, async_client: AsyncClient, owner: User, owner_auth_header: dict):
+    async def test_get_current_user(
+        self, async_client: AsyncClient, owner: User, owner_auth_header: dict
+    ):
         response = await async_client.get(self.url(), headers=owner_auth_header)
 
         assert response.status_code == 200
@@ -37,7 +39,9 @@ class TestGetCurrentUser:
             "updated_at": owner.updated_at.isoformat(),
         }
 
-    async def test_get_current_user_without_authentication(self, async_client: AsyncClient):
+    async def test_get_current_user_without_authentication(
+        self, async_client: AsyncClient
+    ):
         response = await async_client.get(self.url())
 
         assert response.status_code == 401

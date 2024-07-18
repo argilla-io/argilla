@@ -28,7 +28,9 @@ class BearerTokenAuthenticationBackend(AuthenticationBackend):
 
     scheme = HTTPBearer(auto_error=False)
 
-    async def authenticate(self, request: Request) -> typing.Optional[typing.Tuple[AuthCredentials, BaseUser]]:
+    async def authenticate(
+        self, request: Request
+    ) -> typing.Optional[typing.Tuple[AuthCredentials, BaseUser]]:
         """Authenticate the user using the username and password Bearer header"""
         credentials = await self.scheme(request)
         if not credentials:
@@ -43,5 +45,8 @@ class BearerTokenAuthenticationBackend(AuthenticationBackend):
             return None
 
         return AuthCredentials(), UserInfo(
-            username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
+            username=user.username,
+            name=user.first_name,
+            role=user.role,
+            identity=str(user.id),
         )

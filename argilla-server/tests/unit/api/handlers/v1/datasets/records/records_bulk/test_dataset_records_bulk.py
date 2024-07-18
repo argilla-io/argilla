@@ -73,12 +73,18 @@ class TestDatasetRecordsBulk:
         ],
     )
     async def test_create_dataset_records_bulk(
-        self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, record_create: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        record_create: dict,
     ):
         dataset = await self.test_dataset()
 
         response = await async_client.post(
-            self.url(dataset.id), headers=owner_auth_header, json={"items": [record_create]}
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"items": [record_create]},
         )
 
         assert response.status_code == 201, response.json()
@@ -103,9 +109,15 @@ class TestDatasetRecordsBulk:
             ]
         }
 
-    @pytest.mark.parametrize("metadata", [{"terms_metadata": "b"}, {"terms_metadata": ["c", "a"]}, {}, None])
+    @pytest.mark.parametrize(
+        "metadata", [{"terms_metadata": "b"}, {"terms_metadata": ["c", "a"]}, {}, None]
+    )
     async def test_update_record_metadata_by_id(
-        self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        metadata: dict,
     ) -> None:
         dataset = await self.test_dataset()
         records = await RecordFactory.create_batch(dataset=dataset, size=10)
@@ -113,18 +125,30 @@ class TestDatasetRecordsBulk:
         response = await async_client.put(
             self.url(dataset.id),
             headers=owner_auth_header,
-            json={"items": [{"id": str(record.id), "metadata": metadata} for record in records]},
+            json={
+                "items": [
+                    {"id": str(record.id), "metadata": metadata} for record in records
+                ]
+            },
         )
 
         assert response.status_code == 200
-        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(records)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(
+            records
+        )
         updated_records = (await db.execute(select(Record))).scalars().all()
         for record in updated_records:
             assert record.metadata_ == metadata
 
-    @pytest.mark.parametrize("metadata", [{"terms_metadata": "b"}, {"terms_metadata": ["c", "a"]}, {}, None])
+    @pytest.mark.parametrize(
+        "metadata", [{"terms_metadata": "b"}, {"terms_metadata": ["c", "a"]}, {}, None]
+    )
     async def test_update_record_metadata_by_external_id(
-        self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict, metadata: dict
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        metadata: dict,
     ):
         dataset = await self.test_dataset()
         records = await RecordFactory.create_batch(dataset=dataset, size=10)
@@ -133,12 +157,17 @@ class TestDatasetRecordsBulk:
             self.url(dataset.id),
             headers=owner_auth_header,
             json={
-                "items": [{"external_id": record.external_id, "metadata": metadata} for record in records],
+                "items": [
+                    {"external_id": record.external_id, "metadata": metadata}
+                    for record in records
+                ],
             },
         )
 
         assert response.status_code == 200, response.json()
-        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(records)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(
+            records
+        )
         updated_records = (await db.execute(select(Record))).scalars().all()
         for record in updated_records:
             assert record.metadata_ == metadata
@@ -155,14 +184,20 @@ class TestDatasetRecordsBulk:
             headers=owner_auth_header,
             json={
                 "items": [
-                    {"id": str(record.id), "external_id": str(uuid.uuid4()), "metadata": new_metadata}
+                    {
+                        "id": str(record.id),
+                        "external_id": str(uuid.uuid4()),
+                        "metadata": new_metadata,
+                    }
                     for record in records
                 ],
             },
         )
 
         assert response.status_code == 200, response.json()
-        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(records)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == len(
+            records
+        )
         updated_records = (await db.execute(select(Record))).scalars().all()
         for record in updated_records:
             assert record.metadata_ == new_metadata
@@ -203,7 +238,9 @@ class TestDatasetRecordsBulk:
         assert response.status_code == 403, response.json()
 
     async def _configure_dataset_metadata_properties(self, dataset):
-        await TermsMetadataPropertyFactory.create(name="terms_metadata", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="terms_metadata", dataset=dataset
+        )
 
         await dataset.awaitable_attrs.metadata_properties
 

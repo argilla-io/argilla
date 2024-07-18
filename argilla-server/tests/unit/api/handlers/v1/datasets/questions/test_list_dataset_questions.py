@@ -40,10 +40,15 @@ class TestListDatasetQuestions:
             },
         )
 
-        response = await async_client.get(self.url(question.dataset_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(question.dataset_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
-        assert response.json()["items"][0]["settings"]["options_order"] == OptionsOrder.suggestion
+        assert (
+            response.json()["items"][0]["settings"]["options_order"]
+            == OptionsOrder.suggestion
+        )
         assert question.settings["options_order"] == OptionsOrder.suggestion
 
     async def test_list_dataset_multi_label_selection_question_without_options_order(
@@ -59,8 +64,13 @@ class TestListDatasetQuestions:
             },
         )
 
-        response = await async_client.get(self.url(question.dataset_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(question.dataset_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
-        assert response.json()["items"][0]["settings"]["options_order"] == OptionsOrder.natural
+        assert (
+            response.json()["items"][0]["settings"]["options_order"]
+            == OptionsOrder.natural
+        )
         assert "options_order" not in question.settings

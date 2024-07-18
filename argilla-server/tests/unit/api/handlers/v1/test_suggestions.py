@@ -33,10 +33,16 @@ if TYPE_CHECKING:
 class TestSuiteSuggestions:
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_suggestion(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, db: "AsyncSession", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        db: "AsyncSession",
+        role: UserRole,
     ) -> None:
         suggestion = await SuggestionFactory.create()
-        user = await UserFactory.create(role=role, workspaces=[suggestion.record.dataset.workspace])
+        user = await UserFactory.create(
+            role=role, workspaces=[suggestion.record.dataset.workspace]
+        )
 
         response = await async_client.delete(
             f"/api/v1/suggestions/{suggestion.id}",
@@ -53,15 +59,21 @@ class TestSuiteSuggestions:
             "score": None,
             "value": "negative",
             "agent": None,
-            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
+            "inserted_at": datetime.fromisoformat(
+                response_json["inserted_at"]
+            ).isoformat(),
+            "updated_at": datetime.fromisoformat(
+                response_json["updated_at"]
+            ).isoformat(),
         }
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
         mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
 
-    async def test_delete_suggestion_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
+    async def test_delete_suggestion_non_existent(
+        self, async_client: "AsyncClient", owner_auth_header: dict
+    ) -> None:
         suggestion_id = uuid4()
 
         response = await async_client.delete(
@@ -70,9 +82,13 @@ class TestSuiteSuggestions:
         )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Suggestion with id `{suggestion_id}` not found"}
+        assert response.json() == {
+            "detail": f"Suggestion with id `{suggestion_id}` not found"
+        }
 
-    async def test_delete_suggestion_as_admin_from_another_workspace(self, async_client: "AsyncClient") -> None:
+    async def test_delete_suggestion_as_admin_from_another_workspace(
+        self, async_client: "AsyncClient"
+    ) -> None:
         suggestion = await SuggestionFactory.create()
         user = await UserFactory.create(role=UserRole.admin)
 
@@ -83,9 +99,13 @@ class TestSuiteSuggestions:
 
         assert response.status_code == 403
 
-    async def test_delete_suggestion_as_annotator(self, async_client: "AsyncClient") -> None:
+    async def test_delete_suggestion_as_annotator(
+        self, async_client: "AsyncClient"
+    ) -> None:
         suggestion = await SuggestionFactory.create()
-        user = await UserFactory.create(role=UserRole.annotator, workspaces=[suggestion.record.dataset.workspace])
+        user = await UserFactory.create(
+            role=UserRole.annotator, workspaces=[suggestion.record.dataset.workspace]
+        )
 
         response = await async_client.delete(
             f"/api/v1/suggestions/{suggestion.id}",

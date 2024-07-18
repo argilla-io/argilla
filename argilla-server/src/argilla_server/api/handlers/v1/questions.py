@@ -37,7 +37,9 @@ async def update_question(
     question_update: QuestionUpdate,
     current_user: User = Security(auth.get_current_user),
 ):
-    question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
+    question = await Question.get_or_raise(
+        db, question_id, options=[selectinload(Question.dataset)]
+    )
 
     await authorize(current_user, QuestionPolicy.update(question))
 
@@ -51,7 +53,9 @@ async def delete_question(
     question_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    question = await Question.get_or_raise(db, question_id, options=[selectinload(Question.dataset)])
+    question = await Question.get_or_raise(
+        db, question_id, options=[selectinload(Question.dataset)]
+    )
 
     await authorize(current_user, QuestionPolicy.delete(question))
 

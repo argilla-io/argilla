@@ -51,13 +51,19 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
 @pytest.mark.asyncio
 async def test_update_field(
-    async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, expected_settings: dict
+    async_client: "AsyncClient",
+    db: "AsyncSession",
+    role: UserRole,
+    payload: dict,
+    expected_settings: dict,
 ):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
 
     response = await async_client.patch(
-        f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json=payload,
     )
 
     title = payload.get("title") or field.title
@@ -86,7 +92,9 @@ async def test_update_field_with_invalid_title(
 ):
     field = await TextFieldFactory.create(title="title")
 
-    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json={"title": title})
+    response = await async_client.patch(
+        f"/api/v1/fields/{field.id}", headers=owner_auth_header, json={"title": title}
+    )
 
     assert response.status_code == 422
 
@@ -104,29 +112,40 @@ async def test_update_field_with_invalid_title(
     ],
 )
 @pytest.mark.asyncio
-async def test_update_field_with_invalid_settings(async_client: "AsyncClient", owner_auth_header: dict, payload: dict):
-    field = await TextFieldFactory.create()
-
-    response = await async_client.patch(f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=payload)
-
-    assert response.status_code == 422
-
-
-@pytest.mark.asyncio
-async def test_update_field_with_invalid_payload(async_client: "AsyncClient", owner_auth_header: dict):
+async def test_update_field_with_invalid_settings(
+    async_client: "AsyncClient", owner_auth_header: dict, payload: dict
+):
     field = await TextFieldFactory.create()
 
     response = await async_client.patch(
-        f"/api/v1/fields/{field.id}",
-        headers=owner_auth_header,
-        json={"title": {"this": "is", "not": "valid"}, "settings": {"use_markdown": "no"}},
+        f"/api/v1/fields/{field.id}", headers=owner_auth_header, json=payload
     )
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
+async def test_update_field_with_invalid_payload(
+    async_client: "AsyncClient", owner_auth_header: dict
+):
+    field = await TextFieldFactory.create()
+
+    response = await async_client.patch(
+        f"/api/v1/fields/{field.id}",
+        headers=owner_auth_header,
+        json={
+            "title": {"this": "is", "not": "valid"},
+            "settings": {"use_markdown": "no"},
+        },
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_field_non_existent(
+    async_client: "AsyncClient", owner_auth_header: dict
+):
     field_id = uuid4()
 
     response = await async_client.patch(
@@ -140,7 +159,9 @@ async def test_update_field_non_existent(async_client: "AsyncClient", owner_auth
 
 
 @pytest.mark.asyncio
-async def test_update_field_as_admin_from_different_workspace(async_client: "AsyncClient"):
+async def test_update_field_as_admin_from_different_workspace(
+    async_client: "AsyncClient",
+):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=UserRole.admin)
 
@@ -156,7 +177,9 @@ async def test_update_field_as_admin_from_different_workspace(async_client: "Asy
 @pytest.mark.asyncio
 async def test_update_field_as_annotator(async_client: "AsyncClient"):
     field = await TextFieldFactory.create()
-    user = await UserFactory.create(role=UserRole.annotator, workspaces=[field.dataset.workspace])
+    user = await UserFactory.create(
+        role=UserRole.annotator, workspaces=[field.dataset.workspace]
+    )
 
     response = await async_client.patch(
         f"/api/v1/fields/{field.id}",
@@ -180,10 +203,14 @@ async def test_update_field_without_authentication(async_client: "AsyncClient"):
 
 
 @pytest.mark.asyncio
-async def test_delete_field(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
+async def test_delete_field(
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
+):
     field = await TextFieldFactory.create(name="name", title="title")
 
-    response = await async_client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/v1/fields/{field.id}", headers=owner_auth_header
+    )
 
     assert response.status_code == 200
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
@@ -202,7 +229,9 @@ async def test_delete_field(async_client: "AsyncClient", db: "AsyncSession", own
 
 
 @pytest.mark.asyncio
-async def test_delete_field_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_delete_field_without_authentication(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     field = await TextFieldFactory.create()
 
     response = await async_client.delete(f"/api/v1/fields/{field.id}")
@@ -212,11 +241,15 @@ async def test_delete_field_without_authentication(async_client: "AsyncClient", 
 
 
 @pytest.mark.asyncio
-async def test_delete_field_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
+async def test_delete_field_as_annotator(
+    async_client: "AsyncClient", db: "AsyncSession"
+):
     annotator = await AnnotatorFactory.create()
     field = await TextFieldFactory.create()
 
-    response = await async_client.delete(f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: annotator.api_key})
+    response = await async_client.delete(
+        f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
+    )
 
     assert response.status_code == 403
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
@@ -229,10 +262,14 @@ async def test_delete_field_belonging_to_published_dataset(
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     field = await TextFieldFactory.create(dataset=dataset)
 
-    response = await async_client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/v1/fields/{field.id}", headers=owner_auth_header
+    )
 
     assert response.status_code == 422
-    assert response.json() == {"detail": "Fields cannot be deleted for a published dataset"}
+    assert response.json() == {
+        "detail": "Fields cannot be deleted for a published dataset"
+    }
 
     assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
 
@@ -245,7 +282,9 @@ async def test_delete_field_with_nonexistent_field_id(
 
     await TextFieldFactory.create()
 
-    response = await async_client.delete(f"/api/v1/fields/{field_id}", headers=owner_auth_header)
+    response = await async_client.delete(
+        f"/api/v1/fields/{field_id}", headers=owner_auth_header
+    )
 
     assert response.status_code == 404
     assert response.json() == {"detail": f"Field with id `{field_id}` not found"}

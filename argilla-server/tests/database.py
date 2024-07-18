@@ -30,5 +30,9 @@ def get_task() -> asyncio.Task:
     return task
 
 
-TestSession = async_scoped_session(async_sessionmaker(expire_on_commit=False, future=True), get_task)
-SyncTestSession = orm.scoped_session(orm.sessionmaker(class_=orm.Session, expire_on_commit=False))
+TestSession = async_scoped_session(
+    async_sessionmaker(expire_on_commit=False, future=True), get_task
+)
+SyncTestSession = orm.scoped_session(
+    orm.sessionmaker(class_=orm.Session, expire_on_commit=False)
+)

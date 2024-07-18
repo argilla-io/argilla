@@ -35,9 +35,19 @@ def upgrade() -> None:
         "workspaces_users",
         sa.Column("id", sa.Uuid, primary_key=True),
         sa.Column(
-            "workspace_id", sa.Uuid, sa.ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
+            "workspace_id",
+            sa.Uuid,
+            sa.ForeignKey("workspaces.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
         ),
-        sa.Column("user_id", sa.Uuid, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True),
+        sa.Column(
+            "user_id",
+            sa.Uuid,
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column("inserted_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
         sa.UniqueConstraint("workspace_id", "user_id", name="workspace_id_user_id_uq"),

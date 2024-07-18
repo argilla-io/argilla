@@ -41,12 +41,25 @@ def upgrade() -> None:
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["record_id"], ["records.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["vector_settings_id"], ["vectors_settings.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["vector_settings_id"], ["vectors_settings.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("record_id", "vector_settings_id", name="vector_record_id_vector_settings_id_uq"),
+        sa.UniqueConstraint(
+            "record_id",
+            "vector_settings_id",
+            name="vector_record_id_vector_settings_id_uq",
+        ),
     )
-    op.create_index(op.f("ix_vectors_record_id"), "vectors", ["record_id"], unique=False)
-    op.create_index(op.f("ix_vectors_vector_settings_id"), "vectors", ["vector_settings_id"], unique=False)
+    op.create_index(
+        op.f("ix_vectors_record_id"), "vectors", ["record_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_vectors_vector_settings_id"),
+        "vectors",
+        ["vector_settings_id"],
+        unique=False,
+    )
     # ### end Alembic commands ###
 
 

@@ -56,7 +56,9 @@ class TestCreateDatasetQuestion:
         response_json = response.json()
         assert response_json["settings"]["options_order"] == OptionsOrder.suggestion
 
-        question = (await db.execute(select(Question).filter_by(id=UUID(response_json["id"])))).scalar_one()
+        question = (
+            await db.execute(select(Question).filter_by(id=UUID(response_json["id"])))
+        ).scalar_one()
         assert question.settings["options_order"] == OptionsOrder.suggestion
 
     async def test_create_dataset_multi_label_selection_question_without_options_order(
@@ -85,7 +87,9 @@ class TestCreateDatasetQuestion:
         response_json = response.json()
         assert response_json["settings"]["options_order"] == OptionsOrder.natural
 
-        question = (await db.execute(select(Question).filter_by(id=UUID(response_json["id"])))).scalar_one()
+        question = (
+            await db.execute(select(Question).filter_by(id=UUID(response_json["id"])))
+        ).scalar_one()
         assert question.settings["options_order"] == OptionsOrder.natural
 
     async def test_create_dataset_multi_label_selection_question_with_options_order_as_none(

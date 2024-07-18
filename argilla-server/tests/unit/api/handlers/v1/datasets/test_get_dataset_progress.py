@@ -27,66 +27,119 @@ class TestGetDatasetProgress:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/progress"
 
-    async def test_get_dataset_progress(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         record_with_one_submitted_response = await RecordFactory.create(dataset=dataset)
         await ResponseFactory.create(record=record_with_one_submitted_response)
 
-        record_with_multiple_submitted_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create_batch(3, record=record_with_multiple_submitted_responses)
+        record_with_multiple_submitted_responses = await RecordFactory.create(
+            dataset=dataset
+        )
+        await ResponseFactory.create_batch(
+            3, record=record_with_multiple_submitted_responses
+        )
 
         record_with_one_draft_response = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_one_draft_response, status=ResponseStatus.draft)
+        await ResponseFactory.create(
+            record=record_with_one_draft_response, status=ResponseStatus.draft
+        )
 
-        record_with_multiple_draft_responses = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create_batch(3, record=record_with_multiple_draft_responses, status=ResponseStatus.draft)
+        record_with_multiple_draft_responses = await RecordFactory.create(
+            dataset=dataset
+        )
+        await ResponseFactory.create_batch(
+            3, record=record_with_multiple_draft_responses, status=ResponseStatus.draft
+        )
 
         record_with_one_discarded_response = await RecordFactory.create(dataset=dataset)
-        await ResponseFactory.create(record=record_with_one_discarded_response, status=ResponseStatus.discarded)
+        await ResponseFactory.create(
+            record=record_with_one_discarded_response, status=ResponseStatus.discarded
+        )
 
-        record_with_multiple_discarded_responses = await RecordFactory.create(dataset=dataset)
+        record_with_multiple_discarded_responses = await RecordFactory.create(
+            dataset=dataset
+        )
         await ResponseFactory.create_batch(
-            3, record=record_with_multiple_discarded_responses, status=ResponseStatus.discarded
+            3,
+            record=record_with_multiple_discarded_responses,
+            status=ResponseStatus.discarded,
         )
 
         record_with_mixed_responses = await RecordFactory.create(dataset=dataset)
         await ResponseFactory.create(record=record_with_mixed_responses)
-        await ResponseFactory.create(record=record_with_mixed_responses, status=ResponseStatus.draft)
-        await ResponseFactory.create(record=record_with_mixed_responses, status=ResponseStatus.discarded)
+        await ResponseFactory.create(
+            record=record_with_mixed_responses, status=ResponseStatus.draft
+        )
+        await ResponseFactory.create(
+            record=record_with_mixed_responses, status=ResponseStatus.discarded
+        )
 
         record_without_responses = await RecordFactory.create(dataset=dataset)
 
         other_dataset = await DatasetFactory.create()
 
-        other_record_with_one_submitted_response = await RecordFactory.create(dataset=other_dataset)
+        other_record_with_one_submitted_response = await RecordFactory.create(
+            dataset=other_dataset
+        )
         await ResponseFactory.create(record=other_record_with_one_submitted_response)
 
-        other_record_with_multiple_submitted_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create_batch(3, record=other_record_with_multiple_submitted_responses)
-
-        other_record_with_one_draft_response = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_one_draft_response, status=ResponseStatus.draft)
-
-        other_record_with_multiple_draft_responses = await RecordFactory.create(dataset=other_dataset)
+        other_record_with_multiple_submitted_responses = await RecordFactory.create(
+            dataset=other_dataset
+        )
         await ResponseFactory.create_batch(
-            3, record=other_record_with_multiple_draft_responses, status=ResponseStatus.draft
+            3, record=other_record_with_multiple_submitted_responses
         )
 
-        other_record_with_one_discarded_response = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_with_one_discarded_response, status=ResponseStatus.discarded)
-
-        other_record_with_multiple_discarded_responses = await RecordFactory.create(dataset=other_dataset)
-        await ResponseFactory.create_batch(
-            3, record=other_record_with_multiple_discarded_responses, status=ResponseStatus.discarded
+        other_record_with_one_draft_response = await RecordFactory.create(
+            dataset=other_dataset
+        )
+        await ResponseFactory.create(
+            record=other_record_with_one_draft_response, status=ResponseStatus.draft
         )
 
-        other_record_with_mixed_responses = await RecordFactory.create(dataset=other_dataset)
+        other_record_with_multiple_draft_responses = await RecordFactory.create(
+            dataset=other_dataset
+        )
+        await ResponseFactory.create_batch(
+            3,
+            record=other_record_with_multiple_draft_responses,
+            status=ResponseStatus.draft,
+        )
+
+        other_record_with_one_discarded_response = await RecordFactory.create(
+            dataset=other_dataset
+        )
+        await ResponseFactory.create(
+            record=other_record_with_one_discarded_response,
+            status=ResponseStatus.discarded,
+        )
+
+        other_record_with_multiple_discarded_responses = await RecordFactory.create(
+            dataset=other_dataset
+        )
+        await ResponseFactory.create_batch(
+            3,
+            record=other_record_with_multiple_discarded_responses,
+            status=ResponseStatus.discarded,
+        )
+
+        other_record_with_mixed_responses = await RecordFactory.create(
+            dataset=other_dataset
+        )
         await ResponseFactory.create(record=other_record_with_mixed_responses)
-        await ResponseFactory.create(record=other_record_with_mixed_responses, status=ResponseStatus.draft)
-        await ResponseFactory.create(record=other_record_with_mixed_responses, status=ResponseStatus.discarded)
+        await ResponseFactory.create(
+            record=other_record_with_mixed_responses, status=ResponseStatus.draft
+        )
+        await ResponseFactory.create(
+            record=other_record_with_mixed_responses, status=ResponseStatus.discarded
+        )
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -97,10 +150,14 @@ class TestGetDatasetProgress:
             "pending": 3,
         }
 
-    async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress_with_empty_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset.id), headers=owner_auth_header
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -112,11 +169,15 @@ class TestGetDatasetProgress:
         }
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_dataset_progress_as_restricted_user(self, async_client: AsyncClient, user_role: UserRole):
+    async def test_get_dataset_progress_as_restricted_user(
+        self, async_client: AsyncClient, user_role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=user_role)
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 200
 
@@ -127,9 +188,13 @@ class TestGetDatasetProgress:
         dataset = await DatasetFactory.create()
 
         other_dataset = await DatasetFactory.create()
-        user = await UserFactory.create(workspaces=[other_dataset.workspace], role=user_role)
+        user = await UserFactory.create(
+            workspaces=[other_dataset.workspace], role=user_role
+        )
 
-        response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key}
+        )
 
         assert response.status_code == 403
         assert response.json() == {
@@ -139,7 +204,9 @@ class TestGetDatasetProgress:
             },
         }
 
-    async def test_get_dataset_progress_without_authentication(self, async_client: AsyncClient):
+    async def test_get_dataset_progress_without_authentication(
+        self, async_client: AsyncClient
+    ):
         response = await async_client.get(self.url(uuid4()))
 
         assert response.status_code == 401
@@ -155,7 +222,11 @@ class TestGetDatasetProgress:
     ):
         dataset_id = uuid4()
 
-        response = await async_client.get(self.url(dataset_id), headers=owner_auth_header)
+        response = await async_client.get(
+            self.url(dataset_id), headers=owner_auth_header
+        )
 
         assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
+        assert response.json() == {
+            "detail": f"Dataset with id `{dataset_id}` not found"
+        }

@@ -52,7 +52,9 @@ class TestGetUser:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_user_with_unauthorized_role(self, async_client: AsyncClient, user_role: UserRole):
+    async def test_get_user_with_unauthorized_role(
+        self, async_client: AsyncClient, user_role: UserRole
+    ):
         user = await UserFactory.create(role=user_role)
 
         response = await async_client.get(
@@ -62,7 +64,9 @@ class TestGetUser:
 
         assert response.status_code == 403
 
-    async def test_get_user_with_nonexistent_user_id(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_user_with_nonexistent_user_id(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         user_id = uuid4()
 
         response = await async_client.get(self.url(user_id), headers=owner_auth_header)

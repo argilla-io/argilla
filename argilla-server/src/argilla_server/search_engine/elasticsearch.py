@@ -110,17 +110,27 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
                 minimum_should_match = len(query_filters)
 
             bool_filter_query = es_bool_query(
-                should=query_filters, minimum_should_match=minimum_should_match, must_not=must_not_filters
+                should=query_filters,
+                minimum_should_match=minimum_should_match,
+                must_not=must_not_filters,
             )
 
             knn_query["filter"] = bool_filter_query
-        return await self.client.search(index=index, knn=knn_query, _source=False, track_total_hits=True, size=k)
+        return await self.client.search(
+            index=index, knn=knn_query, _source=False, track_total_hits=True, size=k
+        )
 
-    async def _create_index_request(self, index_name: str, mappings: dict, settings: dict) -> None:
-        await self.client.indices.create(index=index_name, settings=settings, mappings=mappings)
+    async def _create_index_request(
+        self, index_name: str, mappings: dict, settings: dict
+    ) -> None:
+        await self.client.indices.create(
+            index=index_name, settings=settings, mappings=mappings
+        )
 
     async def _delete_index_request(self, index_name: str):
-        await self.client.indices.delete(index=index_name, ignore=[404], ignore_unavailable=True)
+        await self.client.indices.delete(
+            index=index_name, ignore=[404], ignore_unavailable=True
+        )
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
@@ -154,7 +164,9 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
-        _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False, refresh=True)
+        _, errors = await helpers.async_bulk(
+            client=self.client, actions=actions, raise_on_error=False, refresh=True
+        )
         if errors:
             raise RuntimeError(errors)
 

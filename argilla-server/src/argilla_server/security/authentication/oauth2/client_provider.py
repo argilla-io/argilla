@@ -62,11 +62,17 @@ class OAuth2ClientProvider:
         scope: Optional[List[str]] = None,
         redirect_uri: str = None,
     ) -> None:
-        self.client_id = client_id or self._environment_variable_for_property("client_id")
-        self.client_secret = client_secret or self._environment_variable_for_property("client_secret")
+        self.client_id = client_id or self._environment_variable_for_property(
+            "client_id"
+        )
+        self.client_secret = client_secret or self._environment_variable_for_property(
+            "client_secret"
+        )
         self.scope = scope or self._environment_variable_for_property("scope", "")
         self.scope = self.scope.split(" ") if self.scope else []
-        self.redirect_uri = redirect_uri or self._environment_variable_for_property("redirect_uri")
+        self.redirect_uri = redirect_uri or self._environment_variable_for_property(
+            "redirect_uri"
+        )
         self.redirect_uri = self.redirect_uri or f"/oauth/{self.name}/callback"
 
         self._backend = self.backend_class(strategy=self.backend_strategy)
@@ -88,11 +94,15 @@ class OAuth2ClientProvider:
         redirect_uri = self.get_redirect_uri(request)
         state = "".join([random.choice(string.ascii_letters) for _ in range(32)])
 
-        oauth2_query_params = dict(state=state, scope=self.scope, redirect_uri=redirect_uri)
+        oauth2_query_params = dict(
+            state=state, scope=self.scope, redirect_uri=redirect_uri
+        )
         oauth2_query_params.update(request.query_params)
 
         authorization_url = str(
-            self.new_oauth_client().prepare_request_uri(self._authorization_endpoint, **oauth2_query_params)
+            self.new_oauth_client().prepare_request_uri(
+                self._authorization_endpoint, **oauth2_query_params
+            )
         )
 
         return authorization_url, state
@@ -116,12 +126,16 @@ class OAuth2ClientProvider:
         self._check_request_params(request)
 
         redirect_uri = self.get_redirect_uri(request)
-        authorization_response = self._align_url_to_allow_http_redirect(str(request.url))
+        authorization_response = self._align_url_to_allow_http_redirect(
+            str(request.url)
+        )
 
         oauth2_query_params = dict(redirect_url=redirect_uri)
         oauth2_query_params.update(request.query_params)
 
-        return await self._fetch_user_data(authorization_response=authorization_response, **oauth2_query_params)
+        return await self._fetch_user_data(
+            authorization_response=authorization_response, **oauth2_query_params
+        )
 
     def _check_request_params(self, request) -> None:
         if "code" not in request.query_params:
@@ -147,7 +161,9 @@ class OAuth2ClientProvider:
 
         return data
 
-    async def _fetch_user_data(self, authorization_response: str, **oauth_query_params) -> dict:
+    async def _fetch_user_data(
+        self, authorization_response: str, **oauth_query_params
+    ) -> dict:
         oauth_client = self.new_oauth_client()
         token_url, headers, content = oauth_client.prepare_token_request(
             self._token_endpoint,
@@ -159,16 +175,22 @@ class OAuth2ClientProvider:
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient(auth=auth) as session:
             try:
-                response = await session.post(token_url, headers=headers, content=content)
+                response = await session.post(
+                    token_url, headers=headers, content=content
+                )
                 oauth_client.parse_request_body_response(json.dumps(response.json()))
 
-                return self.standardize(self._backend.user_data(oauth_client.access_token))
+                return self.standardize(
+                    self._backend.user_data(oauth_client.access_token)
+                )
             except httpx.HTTPError as e:
                 raise ValueError(str(e))
             except AuthException as e:
                 raise future.AuthenticationError(str(e))
 
-    def _environment_variable_for_property(self, property_name: str, default: str = None) -> str:
+    def _environment_variable_for_property(
+        self, property_name: str, default: str = None
+    ) -> str:
         env_var_name = f"OAUTH2_{self.name.upper()}_{property_name.upper()}"
 
         return os.getenv(env_var_name, default)

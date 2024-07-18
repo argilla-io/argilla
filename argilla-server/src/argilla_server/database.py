@@ -28,7 +28,9 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
-ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla_server.__file__), "alembic.ini"))
+ALEMBIC_CONFIG_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(argilla_server.__file__), "alembic.ini")
+)
 TAGGED_REVISIONS = OrderedDict(
     {
         "1.7": "1769ee58fbb4",
@@ -51,9 +53,13 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 
-async_engine = create_async_engine(settings.database_url, **settings.database_engine_args)
+async_engine = create_async_engine(
+    settings.database_url, **settings.database_engine_args
+)
 
-AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
+AsyncSessionLocal = async_sessionmaker(
+    autocommit=False, expire_on_commit=False, bind=async_engine
+)
 
 
 async def get_async_db() -> Generator["AsyncSession", None, None]:
