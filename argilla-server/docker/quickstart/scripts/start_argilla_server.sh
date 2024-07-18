@@ -11,31 +11,20 @@ export OAUTH2_HUGGINGFACE_SCOPE=$OAUTH_SCOPES
 echo "Running database migrations"
 python -m argilla_server database migrate
 
-echo "Creating owner user"
-python -m argilla_server database users create \
-	--first-name "Owner" \
-	--username "$OWNER_USERNAME" \
-	--password "$OWNER_PASSWORD" \
-	--api-key "$OWNER_API_KEY" \
-	--role owner \
-	--workspace "$ARGILLA_WORKSPACE"
+# Set the space author name as username if no provided.
+# See https://huggingface.co/docs/hub/en/spaces-overview#helper-environment-variables for more details
+USERNAME="${USERNAME:-$SPACE_AUTHOR_NAME}"
 
-echo "Creating admin user"
-python -m argilla_server database users create \
-	--first-name "Admin" \
-	--username "$ADMIN_USERNAME" \
-	--password "$ADMIN_PASSWORD" \
-	--api-key "$ADMIN_API_KEY" \
-	--role admin \
-	--workspace "$ARGILLA_WORKSPACE"
-
-echo "Creating annotator user"
-python -m argilla_server database users create \
-	--first-name "Annotator" \
-	--username "$ANNOTATOR_USERNAME" \
-	--password "$ANNOTATOR_PASSWORD" \
-	--role annotator \
-	--workspace "$ARGILLA_WORKSPACE"
+if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
+  echo "Creating owner user with username ${USERNAME}"
+  python -m argilla_server database users create \
+    --first-name "$USERNAME" \
+    --username "$USERNAME" \
+    --password "$PASSWORD" \
+    --role owner
+else
+  echo "No username and password was provided. Skipping user creation"
+fi
 
 # Forcing reindex on restart since elasticsearch data could be allocated in a non-persistent volume
 echo "Reindexing existing datasets"
