@@ -75,7 +75,7 @@ def test_settings_database_url(url: str, expected_url: str, monkeypatch):
 
 
 def test_settings_default_database_sqlite_timeout():
-    assert Settings().database_sqlite_timeout == 15
+    assert Settings().database_sqlite_timeout == 5
 
 
 def test_settings_database_sqlite_timeout(monkeypatch):
