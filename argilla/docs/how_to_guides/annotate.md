@@ -72,10 +72,13 @@ If you are starting an annotation effort, all the records are initially kept in 
 - **Pending**: The records without a response.
 - **Draft**: The records with partial responses. They can be submitted or discarded later. You can’t move them back to the pending queue.
 - **Discarded**: The records may or may not have responses. They can be edited but you can’t move them back to the pending queue.
-- **Submitted**: The records have been fully annotated and have already been submitted.
+- **Submitted**: The records have been fully annotated and have already been submitted. You can remove them from this queue and send them to the draft or discarded queues, but never back to the pending queue.
 
 !!! note
     If you are working as part of a team, the number of records in your Pending queue may change as other members of the team submit responses and those records get completed.
+
+!!! tip
+    If you are working as part of a team, the records in the draft queue that have been completed by other team members will show a check mark to indicate that there is no need to provide a response.
 
 ### Suggestions
 
