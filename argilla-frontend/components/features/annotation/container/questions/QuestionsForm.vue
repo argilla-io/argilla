@@ -23,7 +23,7 @@
           :class="isDiscarding ? '--button--discarding' : null"
           :loading="isDiscarding"
           :loading-progress="progress"
-          :disabled="isDiscardDisabled || isSaving"
+          :disabled="isDiscardDisabled || isSaving || !record.id"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onDiscard"
         >
@@ -39,7 +39,7 @@
           :class="isDraftSaving ? '--button--saving-draft' : null"
           :loading="isDraftSaving"
           :loading-progress="progress"
-          :disabled="isDraftSaveDisabled || isSaving"
+          :disabled="isDraftSaveDisabled || isSaving || !record.id"
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onSaveDraft"
         >
@@ -62,13 +62,18 @@
           :loading-progress="progress"
           :loading="isSubmitting"
           :disabled="
-            !questionAreCompletedCorrectly || isSubmitDisabled || isSaving
+            !questionAreCompletedCorrectly ||
+            isSubmitDisabled ||
+            isSaving ||
+            !record.id
           "
           :data-title="
-            !isSaving
-              ? !questionAreCompletedCorrectly && !isSubmitDisabled
-                ? $t('to_submit_complete_required')
-                : submitTooltip
+            !!record.id
+              ? !isSaving
+                ? !questionAreCompletedCorrectly && !isSubmitDisabled
+                  ? $t('to_submit_complete_required')
+                  : submitTooltip
+                : null
               : null
           "
           @on-click="onSubmit"
@@ -405,9 +410,6 @@ export default {
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
-    &:hover {
-      color: $black-87;
-    }
     &:disabled {
       pointer-events: visible;
       cursor: not-allowed;

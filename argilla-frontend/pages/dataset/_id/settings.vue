@@ -20,6 +20,8 @@
         :tabs="tabs"
         tab-size="large"
         class="settings__tabs-content"
+        @onChanged="onTabChanged"
+        @onLoaded="onTabLoaded"
       >
         <template v-slot="{ currentComponent }">
           <component

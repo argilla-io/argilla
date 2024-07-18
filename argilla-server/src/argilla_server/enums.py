@@ -27,7 +27,6 @@ class ResponseStatus(str, Enum):
 
 class ResponseStatusFilter(str, Enum):
     draft = "draft"
-    missing = "missing"  # Deprecated, use pending instead
     pending = "pending"
     submitted = "submitted"
     discarded = "discarded"
