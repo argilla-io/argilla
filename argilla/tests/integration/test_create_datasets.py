@@ -95,16 +95,14 @@ class TestCreateDatasets:
 
     def test_copy_datasets_from_different_clients(self, client: Argilla):
         dataset_name = f"test_dataset_{uuid.uuid4()}"
-        Dataset(
+        dataset = Dataset(
             name=dataset_name,
             settings=Settings(
                 fields=[TextField(name="text")],
                 questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
             ),
+            client=client,
         ).create()
-
-        dataset = client.datasets(dataset_name)
-        assert dataset is not None
 
         new_client = Argilla()
         new_ws = Workspace("test_copy_workspace")
