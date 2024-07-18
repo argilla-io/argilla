@@ -182,5 +182,8 @@ export default {
   .hljs-tag .hljs-name {
     color: #c0a5a5;
   }
+  .katex-html {
+    display: none;
+  }
 }
 </style>
