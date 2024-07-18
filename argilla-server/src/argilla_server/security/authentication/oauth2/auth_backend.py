@@ -19,9 +19,7 @@ from fastapi.security import HTTPBearer
 from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
 
 from argilla_server.security.authentication.jwt import JWT
-from argilla_server.security.authentication.oauth2.client_provider import (
-    OAuth2ClientProvider,
-)
+from argilla_server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 
 
@@ -33,9 +31,7 @@ class OAuth2AuthenticationBackend(AuthenticationBackend):
     def __init__(self, providers: Dict[str, OAuth2ClientProvider]) -> None:
         self.providers = providers
 
-    async def authenticate(
-        self, request: Request
-    ) -> Optional[Tuple[AuthCredentials, BaseUser]]:
+    async def authenticate(self, request: Request) -> Optional[Tuple[AuthCredentials, BaseUser]]:
         credentials = await self.scheme(request)
         if credentials is None:
             return None

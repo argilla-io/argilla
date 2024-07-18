@@ -30,14 +30,10 @@ async def update_record_status(db: AsyncSession, record: Record) -> Record:
     if record.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
         return await _update_record_status_with_overlap_strategy(db, record)
 
-    raise NotImplementedError(
-        f"unsupported distribution strategy `{record.dataset.distribution_strategy}`"
-    )
+    raise NotImplementedError(f"unsupported distribution strategy `{record.dataset.distribution_strategy}`")
 
 
-async def _update_record_status_with_overlap_strategy(
-    db: AsyncSession, record: Record
-) -> Record:
+async def _update_record_status_with_overlap_strategy(db: AsyncSession, record: Record) -> Record:
     if len(record.responses_submitted) >= record.dataset.distribution["min_submitted"]:
         record.status = RecordStatus.completed
     else:

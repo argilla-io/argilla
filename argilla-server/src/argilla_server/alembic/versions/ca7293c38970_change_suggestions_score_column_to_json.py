@@ -32,9 +32,7 @@ depends_on = None
 
 def upgrade() -> None:
     with op.batch_alter_table("suggestions") as batch_op:
-        batch_op.alter_column(
-            "score", type_=sa.JSON(), postgresql_using="to_json(score)"
-        )
+        batch_op.alter_column("score", type_=sa.JSON(), postgresql_using="to_json(score)")
 
     op.execute(_score_update_statement())
 
@@ -52,9 +50,7 @@ def _score_update_statement() -> str:
     elif op.get_context().dialect.name == "postgresql":
         return "UPDATE suggestions SET score = NULL WHERE json_typeof(value) = 'array'"
     else:
-        raise NotImplementedError(
-            f"Unsupported database: {op.get_context().dialect.name}"
-        )
+        raise NotImplementedError(f"Unsupported database: {op.get_context().dialect.name}")
 
 
 def _score_float_update_statement() -> str:
@@ -77,6 +73,4 @@ def _score_float_update_statement() -> str:
                 END
         """
     else:
-        raise NotImplementedError(
-            f"Unsupported database: {op.get_context().dialect.name}"
-        )
+        raise NotImplementedError(f"Unsupported database: {op.get_context().dialect.name}")

@@ -33,16 +33,7 @@ from argilla_server.enums import (
     SimilarityOrder,
     SortOrder,
 )
-from argilla_server.models import (
-    Dataset,
-    MetadataProperty,
-    Record,
-    Response,
-    Suggestion,
-    User,
-    Vector,
-    VectorSettings,
-)
+from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
 from argilla_server.pydantic_v1 import BaseModel, Field
 from argilla_server.pydantic_v1.generics import GenericModel
 
@@ -93,9 +84,7 @@ class RecordFilterScope:
     property: str
 
 
-FilterScope = Union[
-    SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope, RecordFilterScope
-]
+FilterScope = Union[SuggestionFilterScope, ResponseFilterScope, MetadataFilterScope, RecordFilterScope]
 
 
 @dataclasses.dataclass
@@ -142,16 +131,12 @@ class UserResponseStatusFilter(BaseModel):
         return [
             status.value
             for status in self.statuses
-            if status
-            not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
+            if status not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
         ]
 
     @property
     def has_pending_status(self) -> bool:
-        return (
-            ResponseStatusFilter.pending in self.statuses
-            or ResponseStatusFilter.missing in self.statuses
-        )
+        return ResponseStatusFilter.pending in self.statuses or ResponseStatusFilter.missing in self.statuses
 
 
 class SearchResponseItem(BaseModel):
@@ -198,9 +183,7 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
     type: MetadataPropertyType = Field(MetadataPropertyType.float)
 
 
-MetadataMetrics = Union[
-    TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics
-]
+MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
 
 
 class SearchEngine(metaclass=ABCMeta):
@@ -233,9 +216,7 @@ class SearchEngine(metaclass=ABCMeta):
 
     @classmethod
     @asynccontextmanager
-    async def get_by_name(
-        cls, engine_name: str
-    ) -> AsyncGenerator["SearchEngine", None]:
+    async def get_by_name(cls, engine_name: str) -> AsyncGenerator["SearchEngine", None]:
         engine_name = engine_name.lower().strip()
 
         if engine_name not in cls.registered_classes:
@@ -263,9 +244,7 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def configure_metadata_property(
-        self, dataset: Dataset, metadata_property: MetadataProperty
-    ):
+    async def configure_metadata_property(self, dataset: Dataset, metadata_property: MetadataProperty):
         pass
 
     @abstractmethod
@@ -309,9 +288,7 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def compute_metrics_for(
-        self, metadata_property: MetadataProperty
-    ) -> MetadataMetrics:
+    async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
         pass
 
     async def configure_index_vectors(self, vector_settings: VectorSettings):

@@ -13,9 +13,7 @@
 #  limitations under the License.
 
 from argilla_server.api.policies.v1.commons import PolicyAction, is_authorized
-from argilla_server.api.policies.v1.metadata_property_policy import (
-    MetadataPropertyPolicy,
-)
+from argilla_server.api.policies.v1.metadata_property_policy import MetadataPropertyPolicy
 from argilla_server.models import Record, User
 
 
@@ -30,18 +28,14 @@ class RecordPolicy:
     @classmethod
     def update(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(record.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(record.dataset.workspace_id))
 
         return is_allowed
 
     @classmethod
     def delete(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(record.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(record.dataset.workspace_id))
 
         return is_allowed
 
@@ -62,18 +56,14 @@ class RecordPolicy:
     @classmethod
     def create_suggestion(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(record.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(record.dataset.workspace_id))
 
         return is_allowed
 
     @classmethod
     def delete_suggestions(cls, record: Record) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(record.dataset.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(record.dataset.workspace_id))
 
         return is_allowed
 
@@ -85,9 +75,7 @@ class RecordPolicy:
 
             metadata_property = record.dataset.metadata_property_by_name(metadata_name)
             if metadata_property:
-                return await is_authorized(
-                    actor, MetadataPropertyPolicy.get(metadata_property)
-                )
+                return await is_authorized(actor, MetadataPropertyPolicy.get(metadata_property))
 
             return actor.is_admin and await actor.is_member(record.dataset.workspace_id)
 

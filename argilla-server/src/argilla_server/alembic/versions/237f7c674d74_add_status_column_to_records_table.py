@@ -37,12 +37,7 @@ record_status_enum = sa.Enum("pending", "completed", name="record_status_enum")
 def upgrade() -> None:
     record_status_enum.create(op.get_bind())
 
-    op.add_column(
-        "records",
-        sa.Column(
-            "status", record_status_enum, server_default="pending", nullable=False
-        ),
-    )
+    op.add_column("records", sa.Column("status", record_status_enum, server_default="pending", nullable=False))
     op.create_index(op.f("ix_records_status"), "records", ["status"], unique=False)
 
     # NOTE: Updating existent records to have "completed" status when they have

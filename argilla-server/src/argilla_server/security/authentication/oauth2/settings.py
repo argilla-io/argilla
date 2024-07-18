@@ -16,12 +16,8 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2.client_provider import (
-    OAuth2ClientProvider,
-)
-from argilla_server.security.authentication.oauth2.supported_providers import (
-    ALL_SUPPORTED_OAUTH2_PROVIDERS,
-)
+from argilla_server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
+from argilla_server.security.authentication.oauth2.supported_providers import ALL_SUPPORTED_OAUTH2_PROVIDERS
 
 __all__ = ["OAuth2Settings"]
 
@@ -87,10 +83,7 @@ class OAuth2Settings:
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[AllowedWorkspace]:
-        return [
-            AllowedWorkspace(**workspace)
-            for workspace in settings.pop(cls.ALLOWED_WORKSPACES_KEY, [])
-        ]
+        return [AllowedWorkspace(**workspace) for workspace in settings.pop(cls.ALLOWED_WORKSPACES_KEY, [])]
 
     @classmethod
     def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:

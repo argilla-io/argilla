@@ -20,7 +20,4 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.fixture(autouse=True)
 def mock_session_local(mocker: MockerFixture, async_db_proxy: AsyncSession) -> None:
-    mocker.patch(
-        "argilla_server.cli.search_engine.reindex.AsyncSessionLocal",
-        return_value=async_db_proxy,
-    )
+    mocker.patch("argilla_server.cli.search_engine.reindex.AsyncSessionLocal", return_value=async_db_proxy)

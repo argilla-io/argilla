@@ -28,11 +28,7 @@ class TestCliServerSearchEngineReindex:
 
         assert result.exit_code == 0, result.output
 
-    def test_reindex_with_nonexistent_dataset_id(
-        self, cli_runner: CliRunner, cli: Typer
-    ):
-        result = cli_runner.invoke(
-            cli, f"search-engine reindex --feedback-dataset-id {uuid4()}"
-        )
+    def test_reindex_with_nonexistent_dataset_id(self, cli_runner: CliRunner, cli: Typer):
+        result = cli_runner.invoke(cli, f"search-engine reindex --feedback-dataset-id {uuid4()}")
 
         assert result.exit_code == 1

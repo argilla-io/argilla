@@ -37,14 +37,10 @@ class ArgillaTyper(typer.Typer):
     # https://github.com/tiangolo/typer/issues/88#issuecomment-1613013597
     def command(
         self, *args: Any, **kwargs: Any
-    ) -> Callable[
-        [Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]]
-    ]:
+    ) -> Callable[[Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R]]]:
         super_command = super().command(*args, **kwargs)
 
-        def decorator(
-            func: Callable[P, Coroutine[Any, Any, R]],
-        ) -> Callable[P, Coroutine[Any, Any, R]]:
+        def decorator(func: Callable[P, Coroutine[Any, Any, R]]) -> Callable[P, Coroutine[Any, Any, R]]:
             @wraps(func)
             def sync_func(*_args: P.args, **_kwargs: P.kwargs) -> R:
                 return asyncio.run(func(*_args, **_kwargs))

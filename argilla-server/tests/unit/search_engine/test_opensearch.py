@@ -24,15 +24,10 @@ from tests.unit.search_engine.test_commons import refresh_dataset
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(
-    not settings.search_engine == "opensearch", reason="Running on opensearch engine"
-)
+@pytest.mark.skipif(not settings.search_engine == "opensearch", reason="Running on opensearch engine")
 class TestOpenSearchEngine:
     async def test_create_index_for_dataset(
-        self,
-        opensearch_engine: OpenSearchEngine,
-        db: AsyncSession,
-        opensearch: OpenSearch,
+        self, opensearch_engine: OpenSearchEngine, db: AsyncSession, opensearch: OpenSearch
     ):
         dataset = await DatasetFactory.create()
 
@@ -46,9 +41,7 @@ class TestOpenSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["settings"]["index"]["knn"] == "false"
 
-    async def test_create_dataset_index_with_vectors(
-        self, search_engine: OpenSearchEngine, opensearch: OpenSearch
-    ):
+    async def test_create_dataset_index_with_vectors(self, search_engine: OpenSearchEngine, opensearch: OpenSearch):
         vectors_settings = await VectorSettingsFactory.create_batch(5)
         dataset = await DatasetFactory.create(vectors_settings=vectors_settings)
 
@@ -75,9 +68,7 @@ class TestOpenSearchEngine:
 
         assert index["settings"]["index"]["knn"] == "false"
 
-    async def test_create_index_with_existing_index(
-        self, search_engine: OpenSearchEngine, opensearch: OpenSearch
-    ):
+    async def test_create_index_with_existing_index(self, search_engine: OpenSearchEngine, opensearch: OpenSearch):
         dataset = await DatasetFactory.create()
 
         await refresh_dataset(dataset)

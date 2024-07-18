@@ -19,19 +19,9 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import User, Record
-from argilla_server.enums import (
-    DatasetDistributionStrategy,
-    RecordStatus,
-    ResponseStatus,
-    DatasetStatus,
-)
+from argilla_server.enums import DatasetDistributionStrategy, RecordStatus, ResponseStatus, DatasetStatus
 
-from tests.factories import (
-    AnnotatorFactory,
-    DatasetFactory,
-    TextFieldFactory,
-    TextQuestionFactory,
-)
+from tests.factories import AnnotatorFactory, DatasetFactory, TextFieldFactory, TextQuestionFactory
 
 
 @pytest.mark.asyncio
@@ -40,11 +30,7 @@ class TestCreateDatasetRecordsBulk:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
     async def test_create_dataset_records_bulk_updates_records_status(
-        self,
-        db: AsyncSession,
-        async_client: AsyncClient,
-        owner: User,
-        owner_auth_header: dict,
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(
             status=DatasetStatus.ready,
@@ -153,15 +139,7 @@ class TestCreateDatasetRecordsBulk:
         assert response_items[2]["status"] == RecordStatus.pending
         assert response_items[3]["status"] == RecordStatus.pending
 
-        assert (
-            await Record.get(db, UUID(response_items[0]["id"]))
-        ).status == RecordStatus.completed
-        assert (
-            await Record.get(db, UUID(response_items[1]["id"]))
-        ).status == RecordStatus.pending
-        assert (
-            await Record.get(db, UUID(response_items[2]["id"]))
-        ).status == RecordStatus.pending
-        assert (
-            await Record.get(db, UUID(response_items[3]["id"]))
-        ).status == RecordStatus.pending
+        assert (await Record.get(db, UUID(response_items[0]["id"]))).status == RecordStatus.completed
+        assert (await Record.get(db, UUID(response_items[1]["id"]))).status == RecordStatus.pending
+        assert (await Record.get(db, UUID(response_items[2]["id"]))).status == RecordStatus.pending
+        assert (await Record.get(db, UUID(response_items[3]["id"]))).status == RecordStatus.pending

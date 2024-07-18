@@ -23,9 +23,7 @@ class TestGetStatus:
     def url(self) -> str:
         return "/api/v1/status"
 
-    async def test_get_status(
-        self, async_client: AsyncClient, mock_search_engine: SearchEngine
-    ):
+    async def test_get_status(self, async_client: AsyncClient, mock_search_engine: SearchEngine):
         mock_search_engine.info.return_value = {}
 
         response = await async_client.get(self.url())

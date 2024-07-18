@@ -42,9 +42,7 @@ class TestAPIErrorHandler:
                 },
             ),
             (
-                EntityAlreadyExistsError(
-                    name="mock-name", type=Dataset, workspace="mock-workspace"
-                ),
+                EntityAlreadyExistsError(name="mock-name", type=Dataset, workspace="mock-workspace"),
                 {
                     "accept-language": None,
                     "code": "argilla.api.errors::EntityAlreadyExistsError",
@@ -74,6 +72,4 @@ class TestAPIErrorHandler:
     async def test_track_error(self, test_telemetry, error, expected_event):
         await APIErrorHandler.track_error(error, request=mock_request)
 
-        test_telemetry.track_data.assert_called_once_with(
-            action="ServerErrorFound", data=expected_event
-        )
+        test_telemetry.track_data.assert_called_once_with(action="ServerErrorFound", data=expected_event)

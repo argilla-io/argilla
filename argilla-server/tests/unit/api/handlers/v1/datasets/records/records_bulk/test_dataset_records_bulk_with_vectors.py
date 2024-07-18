@@ -58,9 +58,7 @@ class TestDatasetRecordsBulkWithVectors:
                             "prompt": "Does exercise help reduce stress?",
                             "response": "Exercise can definitely help reduce stress.",
                         },
-                        "vectors": {
-                            vector_settings.name: [1.0] * vector_settings.dimensions
-                        },
+                        "vectors": {vector_settings.name: [1.0] * vector_settings.dimensions},
                     },
                 ]
             },
@@ -80,9 +78,7 @@ class TestDatasetRecordsBulkWithVectors:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await self.test_dataset()
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         vector_settings = dataset.vector_settings_by_name("prompt_embeddings")
 
         response = await async_client.put(
@@ -92,9 +88,7 @@ class TestDatasetRecordsBulkWithVectors:
                 "items": [
                     {
                         "id": str(record.id),
-                        "vectors": {
-                            vector_settings.name: [1.0] * vector_settings.dimensions
-                        },
+                        "vectors": {vector_settings.name: [1.0] * vector_settings.dimensions},
                     },
                 ]
             },
@@ -127,9 +121,7 @@ class TestDatasetRecordsBulkWithVectors:
                             "prompt": "Does exercise help reduce stress?",
                             "response": "Exercise can definitely help reduce stress.",
                         },
-                        "vectors": {
-                            vector_settings.name: [1.0] * vector_settings.dimensions
-                        },
+                        "vectors": {vector_settings.name: [1.0] * vector_settings.dimensions},
                     },
                 ]
             },
@@ -150,13 +142,9 @@ class TestDatasetRecordsBulkWithVectors:
     ):
         dataset = await self.test_dataset()
         vector_settings = dataset.vector_settings_by_name("prompt_embeddings")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         await VectorFactory.create(
-            record=record,
-            vector_settings=vector_settings,
-            value=[0.5] * vector_settings.dimensions,
+            record=record, vector_settings=vector_settings, value=[0.5] * vector_settings.dimensions
         )
 
         response = await async_client.put(
@@ -166,9 +154,7 @@ class TestDatasetRecordsBulkWithVectors:
                 "items": [
                     {
                         "id": str(record.id),
-                        "vectors": {
-                            vector_settings.name: [0.1] * vector_settings.dimensions
-                        },
+                        "vectors": {vector_settings.name: [0.1] * vector_settings.dimensions},
                     },
                 ]
             },
@@ -191,13 +177,9 @@ class TestDatasetRecordsBulkWithVectors:
         dataset = await self.test_dataset()
         vector_settings = dataset.vector_settings_by_name("prompt_embeddings")
         other_vector_settings = dataset.vector_settings_by_name("response_embeddings")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         vector = await VectorFactory.create(
-            record=record,
-            vector_settings=vector_settings,
-            value=[0.5] * vector_settings.dimensions,
+            record=record, vector_settings=vector_settings, value=[0.5] * vector_settings.dimensions
         )
 
         response = await async_client.put(
@@ -207,10 +189,7 @@ class TestDatasetRecordsBulkWithVectors:
                 "items": [
                     {
                         "id": str(record.id),
-                        "vectors": {
-                            other_vector_settings.name: [0.1]
-                            * other_vector_settings.dimensions
-                        },
+                        "vectors": {other_vector_settings.name: [0.1] * other_vector_settings.dimensions},
                     },
                 ]
             },
@@ -219,11 +198,7 @@ class TestDatasetRecordsBulkWithVectors:
         assert response.status_code == 200, response.json()
         assert (await db.execute(select(func.count(Vector.id)))).scalar_one() == 2
         other_vector = (
-            await db.execute(
-                select(Vector).filter(
-                    Vector.vector_settings_id == other_vector_settings.id
-                )
-            )
+            await db.execute(select(Vector).filter(Vector.vector_settings_id == other_vector_settings.id))
         ).scalar_one()
 
         records = response.json()["items"]
@@ -294,17 +269,11 @@ class TestDatasetRecordsBulkWithVectors:
     ):
         dataset = await self.test_dataset()
         vector_settings = dataset.vector_settings_by_name("prompt_embeddings")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         await VectorFactory.create(
-            record=record,
-            vector_settings=vector_settings,
-            value=[1.0] * vector_settings.dimensions,
+            record=record, vector_settings=vector_settings, value=[1.0] * vector_settings.dimensions
         )
-        other_vector_settings = await VectorSettingsFactory.create(
-            name="other_vector_settings"
-        )
+        other_vector_settings = await VectorSettingsFactory.create(name="other_vector_settings")
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -313,10 +282,7 @@ class TestDatasetRecordsBulkWithVectors:
                 "items": [
                     {
                         "id": str(record.id),
-                        "vectors": {
-                            other_vector_settings.name: [1.0]
-                            * other_vector_settings.dimensions
-                        },
+                        "vectors": {other_vector_settings.name: [1.0] * other_vector_settings.dimensions},
                     },
                 ]
             },
@@ -333,13 +299,9 @@ class TestDatasetRecordsBulkWithVectors:
     ):
         dataset = await self.test_dataset()
         vector_settings = dataset.vector_settings_by_name("prompt_embeddings")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         await VectorFactory.create(
-            record=record,
-            vector_settings=vector_settings,
-            value=[1.0] * vector_settings.dimensions,
+            record=record, vector_settings=vector_settings, value=[1.0] * vector_settings.dimensions
         )
 
         response = await async_client.put(
@@ -368,11 +330,7 @@ class TestDatasetRecordsBulkWithVectors:
         await dataset.awaitable_attrs.fields
 
     async def _configure_dataset_vectors(self, dataset: Dataset) -> None:
-        await VectorSettingsFactory.create(
-            dataset=dataset, name="prompt_embeddings", dimensions=10
-        )
-        await VectorSettingsFactory.create(
-            dataset=dataset, name="response_embeddings", dimensions=10
-        )
+        await VectorSettingsFactory.create(dataset=dataset, name="prompt_embeddings", dimensions=10)
+        await VectorSettingsFactory.create(dataset=dataset, name="response_embeddings", dimensions=10)
 
         await dataset.awaitable_attrs.vectors_settings

@@ -18,30 +18,10 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
-from argilla_server.api.schemas.v1.responses import (
-    Response,
-    ResponseFilterScope,
-    UserResponseCreate,
-)
-from argilla_server.api.schemas.v1.suggestions import (
-    Suggestion,
-    SuggestionCreate,
-    SuggestionFilterScope,
-)
-from argilla_server.enums import (
-    RecordInclude,
-    RecordSortField,
-    SimilarityOrder,
-    SortOrder,
-    RecordStatus,
-)
-from argilla_server.pydantic_v1 import (
-    BaseModel,
-    Field,
-    StrictStr,
-    root_validator,
-    validator,
-)
+from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
+from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
+from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
+from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
 from argilla_server.search_engine import TextQuery
 
@@ -74,10 +54,7 @@ class RecordGetterDict(GetterDict):
 
         if key == "vectors":
             if self._obj.is_relationship_loaded("vectors"):
-                return {
-                    vector.vector_settings.name: vector.value
-                    for vector in self._obj.vectors
-                }
+                return {vector.vector_settings.name: vector.value for vector in self._obj.vectors}
             else:
                 return default
 
@@ -123,26 +100,20 @@ class RecordCreate(BaseModel):
         user_ids = {}
         for value in responses:
             if user_ids.get(value.user_id):
-                raise ValueError(
-                    f"'responses' contains several responses for the same user_id={str(value.user_id)!r}"
-                )
+                raise ValueError(f"'responses' contains several responses for the same user_id={str(value.user_id)!r}")
             user_ids.setdefault(value.user_id, True)
 
         return responses
 
     @validator("metadata")
     @classmethod
-    def prevent_nan_values(
-        cls, metadata: Optional[Dict[str, Any]]
-    ) -> Optional[Dict[str, Any]]:
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
 
         for k, v in metadata.items():
             if v != v:
-                raise ValueError(
-                    f"NaN is not allowed as metadata value, found NaN for key {k!r}"
-                )
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
 
         return metadata
 
@@ -160,21 +131,15 @@ class RecordUpdate(UpdateSchema):
 
     @validator("metadata_")
     @classmethod
-    def prevent_nan_values(
-        cls, metadata: Optional[Dict[str, Any]]
-    ) -> Optional[Dict[str, Any]]:
+    def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
             return metadata
 
         for k, v in metadata.items():
             if v != v:
-                raise ValueError(
-                    f"NaN is not allowed as metadata value, found NaN for key {k!r}"
-                )
+                raise ValueError(f"NaN is not allowed as metadata value, found NaN for key {k!r}")
 
-        return {
-            k: v for k, v in metadata.items() if v == v
-        }  # By definition, NaN != NaN
+        return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
 
 class RecordUpdateWithId(RecordUpdate):
@@ -197,11 +162,7 @@ class RecordIncludeParam(BaseModel):
             return values
 
         vectors = values.get("vectors")
-        if (
-            vectors is not None
-            and len(vectors) > 0
-            and RecordInclude.vectors in relationships
-        ):
+        if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
             # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
             # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
             raise ValueError(
@@ -216,17 +177,11 @@ class RecordIncludeParam(BaseModel):
 
     @property
     def with_suggestions(self) -> bool:
-        return (
-            self._has_relationships and RecordInclude.suggestions in self.relationships
-        )
+        return self._has_relationships and RecordInclude.suggestions in self.relationships
 
     @property
     def with_all_vectors(self) -> bool:
-        return (
-            self._has_relationships
-            and not self.vectors
-            and RecordInclude.vectors in self.relationships
-        )
+        return self._has_relationships and not self.vectors and RecordInclude.vectors in self.relationships
 
     @property
     def with_some_vector(self) -> bool:
@@ -239,11 +194,7 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[
-        Literal[RecordSortField.inserted_at],
-        Literal[RecordSortField.updated_at],
-        Literal["status"],
-    ]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
 
 
 class Records(BaseModel):
@@ -253,16 +204,12 @@ class Records(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = Field(
-        ..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS
-    )
+    items: List[RecordCreate] = Field(..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordsUpdate(BaseModel):
     # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(
-        ..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS
-    )
+    items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
 
 
 class MetadataParsedQueryParam:
@@ -302,12 +249,7 @@ class MetadataFilterScope(BaseModel):
 
 
 FilterScope = Annotated[
-    Union[
-        RecordFilterScope,
-        ResponseFilterScope,
-        SuggestionFilterScope,
-        MetadataFilterScope,
-    ],
+    Union[RecordFilterScope, ResponseFilterScope, SuggestionFilterScope, MetadataFilterScope],
     Field(..., discriminator="entity"),
 ]
 
@@ -320,11 +262,7 @@ class Order(BaseModel):
 class TermsFilter(BaseModel):
     type: Literal["terms"]
     scope: FilterScope
-    values: List[str] = Field(
-        ...,
-        min_items=TERMS_FILTER_VALUES_MIN_ITEMS,
-        max_items=TERMS_FILTER_VALUES_MAX_ITEMS,
-    )
+    values: List[str] = Field(..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS)
 
 
 class RangeFilter(BaseModel):
@@ -350,21 +288,14 @@ Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="ty
 
 
 class Filters(BaseModel):
-    and_: List[Filter] = Field(
-        None,
-        alias="and",
-        min_items=FILTERS_AND_MIN_ITEMS,
-        max_items=FILTERS_AND_MAX_ITEMS,
-    )
+    and_: List[Filter] = Field(None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS)
 
 
 class SearchRecordsQuery(BaseModel):
     query: Optional[Query]
     filters: Optional[Filters]
     sort: Optional[List[Order]] = Field(
-        None,
-        min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS,
-        max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS,
+        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
     )
 
 

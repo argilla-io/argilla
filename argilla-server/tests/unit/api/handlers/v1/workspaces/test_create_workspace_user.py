@@ -30,9 +30,7 @@ class TestCreateWorkspaceUser:
     def url(self, workspace_id: UUID) -> str:
         return f"/api/v1/workspaces/{workspace_id}/users"
 
-    async def test_create_workspace_user(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_create_workspace_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create()
 
@@ -56,16 +54,10 @@ class TestCreateWorkspaceUser:
 
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 1
         assert (
-            await db.execute(
-                select(WorkspaceUser).filter_by(
-                    workspace_id=workspace.id, user_id=user.id
-                )
-            )
+            await db.execute(select(WorkspaceUser).filter_by(workspace_id=workspace.id, user_id=user.id))
         ).scalar_one()
 
-    async def test_create_workspace_user_without_authentication(
-        self, db: AsyncSession, async_client: AsyncClient
-    ):
+    async def test_create_workspace_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         workspace = await WorkspaceFactory.create()
         user = await UserFactory.create()
 
@@ -106,9 +98,7 @@ class TestCreateWorkspaceUser:
         )
 
         assert response.status_code == 404
-        assert response.json() == {
-            "detail": f"Workspace with id `{workspace_id}` not found"
-        }
+        assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
 
         assert (await db.execute(select(func.count(WorkspaceUser.id)))).scalar() == 0
 

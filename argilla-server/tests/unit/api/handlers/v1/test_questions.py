@@ -63,21 +63,12 @@ if TYPE_CHECKING:
         ),
         (
             TextQuestionFactory,
-            {
-                "name": "New Name",
-                "required": True,
-                "dataset_id": str(uuid4()),
-                "settings": {"type": "text"},
-            },
+            {"name": "New Name", "required": True, "dataset_id": str(uuid4()), "settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
         ),
         (
             RatingQuestionFactory,
-            {
-                "name": "New Name",
-                "description": "New Description",
-                "settings": {"type": "rating"},
-            },
+            {"name": "New Name", "description": "New Description", "settings": {"type": "rating"}},
             {
                 "type": "rating",
                 "options": [
@@ -189,29 +180,13 @@ if TYPE_CHECKING:
         ),
         (
             RankingQuestionFactory,
-            {
-                "name": "New Name",
-                "description": "New Description",
-                "settings": {"type": "ranking"},
-            },
+            {"name": "New Name", "description": "New Description", "settings": {"type": "ranking"}},
             {
                 "type": "ranking",
                 "options": [
-                    {
-                        "value": "completion-a",
-                        "text": "Completion A",
-                        "description": None,
-                    },
-                    {
-                        "value": "completion-b",
-                        "text": "Completion B",
-                        "description": None,
-                    },
-                    {
-                        "value": "completion-c",
-                        "text": "Completion C",
-                        "description": None,
-                    },
+                    {"value": "completion-a", "text": "Completion A", "description": None},
+                    {"value": "completion-b", "text": "Completion B", "description": None},
+                    {"value": "completion-c", "text": "Completion C", "description": None},
                 ],
             },
         ),
@@ -222,21 +197,9 @@ if TYPE_CHECKING:
                     "type": "span",
                     "field": "field-a",
                     "options": [
-                        {
-                            "value": "label-b",
-                            "text": "Label B",
-                            "description": "Label B description",
-                        },
-                        {
-                            "value": "label-a",
-                            "text": "Label A",
-                            "description": "Label A description",
-                        },
-                        {
-                            "value": "label-c",
-                            "text": "Label C",
-                            "description": "Label C description",
-                        },
+                        {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                        {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                        {"value": "label-c", "text": "Label C", "description": "Label C description"},
                     ],
                 }
             },
@@ -244,21 +207,9 @@ if TYPE_CHECKING:
                 "type": "span",
                 "field": "field-a",
                 "options": [
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-c",
-                        "text": "Label C",
-                        "description": "Label C description",
-                    },
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
                 ],
                 "allow_overlapping": False,
                 "allow_character_annotation": True,
@@ -277,21 +228,9 @@ if TYPE_CHECKING:
                 "type": "span",
                 "field": "field-a",
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
-                    {
-                        "value": "label-c",
-                        "text": "Label C",
-                        "description": "Label C description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
                 ],
                 "allow_overlapping": False,
                 "allow_character_annotation": True,
@@ -314,9 +253,7 @@ async def test_update_question(
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
 
     response = await async_client.patch(
-        f"/api/v1/questions/{question.id}",
-        headers={API_KEY_HEADER_NAME: user.api_key},
-        json=payload,
+        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
     )
 
     title = payload.get("title") or question.title
@@ -342,9 +279,7 @@ async def test_update_question(
     assert question.settings == expected_settings
 
 
-@pytest.mark.parametrize(
-    "title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)]
-)
+@pytest.mark.parametrize("title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)])
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_title(
     async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
@@ -352,9 +287,7 @@ async def test_update_question_with_invalid_title(
     question = await TextQuestionFactory.create(title="title")
 
     response = await async_client.patch(
-        f"/api/v1/questions/{question.id}",
-        headers=owner_auth_header,
-        json={"title": title},
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"title": title}
     )
 
     assert response.status_code == 422
@@ -370,9 +303,7 @@ async def test_update_question_with_description_as_none(
     question = await TextQuestionFactory.create(description="description")
 
     response = await async_client.patch(
-        f"/api/v1/questions/{question.id}",
-        headers=owner_auth_header,
-        json={"description": None},
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"description": None}
     )
 
     assert response.status_code == 200
@@ -382,22 +313,15 @@ async def test_update_question_with_description_as_none(
     assert question.description == None
 
 
-@pytest.mark.parametrize(
-    "description", ["", "d" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1)]
-)
+@pytest.mark.parametrize("description", ["", "d" * (QUESTION_CREATE_DESCRIPTION_MAX_LENGTH + 1)])
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_description(
-    async_client: "AsyncClient",
-    db: "AsyncSession",
-    owner_auth_header: dict,
-    description: str,
+    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, description: str
 ):
     question = await TextQuestionFactory.create(description="description")
 
     response = await async_client.patch(
-        f"/api/v1/questions/{question.id}",
-        headers=owner_auth_header,
-        json={"description": description},
+        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json={"description": description}
     )
 
     assert response.status_code == 422
@@ -412,22 +336,14 @@ async def test_update_question_with_invalid_description(
         (TextQuestionFactory, {"settings": None}),
         (TextQuestionFactory, {"title": None, "description": None, "settings": None}),
         (TextQuestionFactory, {"settings": {"type": "text", "use_markdown": None}}),
-        (
-            TextQuestionFactory,
-            {"title": "New Title", "settings": {"type": "label_selection"}},
-        ),
-        (
-            LabelSelectionQuestionFactory,
-            {"settings": {"type": "label_selection", "visible_options": -5}},
-        ),
+        (TextQuestionFactory, {"title": "New Title", "settings": {"type": "label_selection"}}),
+        (LabelSelectionQuestionFactory, {"settings": {"type": "label_selection", "visible_options": -5}}),
         (
             LabelSelectionQuestionFactory,
             {
                 "settings": {
                     "type": "label_selection",
-                    "options": [
-                        {"value": "undefined-option", "text": "Undefined option"}
-                    ],
+                    "options": [{"value": "undefined-option", "text": "Undefined option"}],
                 }
             },
         ),
@@ -444,18 +360,13 @@ async def test_update_question_with_invalid_description(
                 }
             },
         ),
-        (
-            MultiLabelSelectionQuestionFactory,
-            {"settings": {"type": "multi_label_selection", "visible_options": -5}},
-        ),
+        (MultiLabelSelectionQuestionFactory, {"settings": {"type": "multi_label_selection", "visible_options": -5}}),
         (
             MultiLabelSelectionQuestionFactory,
             {
                 "settings": {
                     "type": "multi_label_selection",
-                    "options": [
-                        {"value": "undefined-option", "text": "Undefined option"}
-                    ],
+                    "options": [{"value": "undefined-option", "text": "Undefined option"}],
                 }
             },
         ),
@@ -479,16 +390,8 @@ async def test_update_question_with_invalid_description(
                     "type": "span",
                     "field": "field-a",
                     "options": [
-                        {
-                            "value": "label-b",
-                            "text": "Label B",
-                            "description": "Label B description",
-                        },
-                        {
-                            "value": "label-c",
-                            "text": "Label C",
-                            "description": "Label C description",
-                        },
+                        {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                        {"value": "label-c", "text": "Label C", "description": "Label C description"},
                     ],
                 }
             },
@@ -500,21 +403,9 @@ async def test_update_question_with_invalid_description(
                     "type": "span",
                     "field": "field-a",
                     "options": [
-                        {
-                            "value": "label-a",
-                            "text": "Label A",
-                            "description": "Label A description",
-                        },
-                        {
-                            "value": "label-b",
-                            "text": "Label B",
-                            "description": "Label B description",
-                        },
-                        {
-                            "value": "label-d",
-                            "text": "Label D",
-                            "description": "Label D description",
-                        },
+                        {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                        {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                        {"value": "label-d", "text": "Label D", "description": "Label D description"},
                     ],
                 }
             },
@@ -523,42 +414,30 @@ async def test_update_question_with_invalid_description(
 )
 @pytest.mark.asyncio
 async def test_update_question_with_invalid_settings(
-    async_client: "AsyncClient",
-    owner_auth_header: dict,
-    QuestionFactory: Type["QuestionFactoryType"],
-    payload: dict,
+    async_client: "AsyncClient", owner_auth_header: dict, QuestionFactory: Type["QuestionFactoryType"], payload: dict
 ):
     question = await QuestionFactory.create()
 
-    response = await async_client.patch(
-        f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload
-    )
+    response = await async_client.patch(f"/api/v1/questions/{question.id}", headers=owner_auth_header, json=payload)
 
     assert response.status_code == 422, payload
 
 
 @pytest.mark.asyncio
-async def test_update_question_with_invalid_payload(
-    async_client: "AsyncClient", owner_auth_header: dict
-):
+async def test_update_question_with_invalid_payload(async_client: "AsyncClient", owner_auth_header: dict):
     question = await TextQuestionFactory.create()
 
     response = await async_client.patch(
         f"/api/v1/questions/{question.id}",
         headers=owner_auth_header,
-        json={
-            "title": {"this": "is", "not": "valid"},
-            "settings": {"use_markdown": "no"},
-        },
+        json={"title": {"this": "is", "not": "valid"}, "settings": {"use_markdown": "no"}},
     )
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_update_question_non_existent(
-    async_client: "AsyncClient", owner_auth_header: dict
-):
+async def test_update_question_non_existent(async_client: "AsyncClient", owner_auth_header: dict):
     question_id = uuid4()
 
     response = await async_client.patch(
@@ -572,9 +451,7 @@ async def test_update_question_non_existent(
 
 
 @pytest.mark.asyncio
-async def test_update_question_as_admin_from_different_workspace(
-    async_client: "AsyncClient",
-):
+async def test_update_question_as_admin_from_different_workspace(async_client: "AsyncClient"):
     question = await TextQuestionFactory.create()
     user = await UserFactory.create(role=UserRole.admin)
 
@@ -603,12 +480,8 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_question(
-    async_client: "AsyncClient", db: "AsyncSession", role: UserRole
-):
-    question = await TextQuestionFactory.create(
-        name="name", title="title", description="description"
-    )
+async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
+    question = await TextQuestionFactory.create(name="name", title="title", description="description")
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
 
     response = await async_client.delete(
@@ -633,9 +506,7 @@ async def test_delete_question(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_as_admin_from_different_workspace(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_as_admin_from_different_workspace(async_client: "AsyncClient", db: "AsyncSession"):
     user = await UserFactory.create(role=UserRole.admin)
     question = await TextQuestionFactory.create()
 
@@ -648,9 +519,7 @@ async def test_delete_question_as_admin_from_different_workspace(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_without_authentication(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_without_authentication(async_client: "AsyncClient", db: "AsyncSession"):
     question = await TextQuestionFactory.create()
 
     response = await async_client.delete(f"/api/v1/questions/{question.id}")
@@ -660,15 +529,12 @@ async def test_delete_question_without_authentication(
 
 
 @pytest.mark.asyncio
-async def test_delete_question_as_annotator(
-    async_client: "AsyncClient", db: "AsyncSession"
-):
+async def test_delete_question_as_annotator(async_client: "AsyncClient", db: "AsyncSession"):
     annotator = await AnnotatorFactory.create()
     question = await TextQuestionFactory.create()
 
     response = await async_client.delete(
-        f"/api/v1/questions/{question.id}",
-        headers={API_KEY_HEADER_NAME: annotator.api_key},
+        f"/api/v1/questions/{question.id}", headers={API_KEY_HEADER_NAME: annotator.api_key}
     )
 
     assert response.status_code == 403
@@ -682,14 +548,10 @@ async def test_delete_question_belonging_to_published_dataset(
     dataset = await DatasetFactory.create(status=DatasetStatus.ready)
     question = await TextQuestionFactory.create(dataset=dataset)
 
-    response = await async_client.delete(
-        f"/api/v1/questions/{question.id}", headers=owner_auth_header
-    )
+    response = await async_client.delete(f"/api/v1/questions/{question.id}", headers=owner_auth_header)
 
     assert response.status_code == 422
-    assert response.json() == {
-        "detail": "questions cannot be deleted for a published dataset"
-    }
+    assert response.json() == {"detail": "questions cannot be deleted for a published dataset"}
     assert (await db.execute(select(func.count(Question.id)))).scalar() == 1
 
 

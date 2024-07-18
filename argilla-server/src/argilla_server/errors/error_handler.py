@@ -58,14 +58,10 @@ class APIErrorHandler:
             "user-agent": request.headers.get("user-agent"),
             "accept-language": request.headers.get("accept-language"),
         }
-        if isinstance(
-            error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)
-        ):
+        if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
             data["type"] = error.type
 
-        telemetry.get_telemetry_client().track_data(
-            action="ServerErrorFound", data=data
-        )
+        telemetry.get_telemetry_client().track_data(action="ServerErrorFound", data=data)
 
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):
@@ -93,9 +89,7 @@ class APIErrorHandler:
             ValidationError,
             WrongTaskError,
         ]:
-            app.add_exception_handler(
-                exception_type, APIErrorHandler.common_exception_handler
-            )
+            app.add_exception_handler(exception_type, APIErrorHandler.common_exception_handler)
 
     @classmethod
     def _exception_to_argilla_error(cls, error: Exception) -> ServerError:

@@ -140,14 +140,11 @@ def parse_query_param(
 
         # Check that the number of keys is within the allowed range
         num_keys_without_values = len(parsed_params.get("keys", []))
-        num_keys_with_values = (
-            len(parsed_params) - 1
-        )  # we don't want to count the "keys" key
+        num_keys_with_values = len(parsed_params) - 1  # we don't want to count the "keys" key
         total_keys = num_keys_with_values + num_keys_without_values
         if max_keys is not None and total_keys > max_keys:
             raise HTTPException(
-                status_code=422,
-                detail=f"'{name}' query parameter must contain at most {max_keys} comma-separated keys",
+                status_code=422, detail=f"'{name}' query parameter must contain at most {max_keys} comma-separated keys"
             )
 
         # Check that the number of values per key is within the allowed range

@@ -77,9 +77,7 @@ async def dataset_for_pagination(opensearch: OpenSearch):
     await dataset.awaitable_attrs.records
     index_name = es_index_name_for_dataset(dataset)
 
-    opensearch.indices.create(
-        index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}}
-    )
+    opensearch.indices.create(index=index_name, body={"mappings": {"properties": {"id": {"type": "keyword"}}}})
 
     bulk_actions = [
         {
@@ -124,11 +122,7 @@ async def test_banking_sentiment_dataset_non_indexed():
     records = [
         await RecordFactory.create(
             dataset=dataset,
-            fields={
-                "textId": "00000",
-                "text": "My card payment had the wrong exchange rate",
-                "label": "negative",
-            },
+            fields={"textId": "00000", "text": "My card payment had the wrong exchange rate", "label": "negative"},
             metadata_={"label": None, "textId": "00000", "seq_float": 0.13},
             responses=[],
         ),
@@ -232,9 +226,7 @@ async def test_banking_sentiment_dataset(
     records = test_banking_sentiment_dataset_non_indexed.records
 
     await search_engine.create_index(test_banking_sentiment_dataset_non_indexed)
-    await search_engine.index_records(
-        test_banking_sentiment_dataset_non_indexed, records=records
-    )
+    await search_engine.index_records(test_banking_sentiment_dataset_non_indexed, records=records)
 
     return test_banking_sentiment_dataset_non_indexed
 
@@ -242,13 +234,9 @@ async def test_banking_sentiment_dataset(
 @pytest_asyncio.fixture(scope="function")
 @pytest.mark.asyncio
 async def test_banking_sentiment_dataset_with_vectors(
-    search_engine: BaseElasticAndOpenSearchEngine,
-    opensearch: OpenSearch,
-    test_banking_sentiment_dataset: Dataset,
+    search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch, test_banking_sentiment_dataset: Dataset
 ) -> Dataset:
-    vectors_settings = await VectorSettingsFactory.create_batch(
-        5, dataset=test_banking_sentiment_dataset
-    )
+    vectors_settings = await VectorSettingsFactory.create_batch(5, dataset=test_banking_sentiment_dataset)
 
     for settings in vectors_settings:
         await search_engine.configure_index_vectors(settings)
@@ -260,16 +248,12 @@ async def test_banking_sentiment_dataset_with_vectors(
                 await VectorFactory.create(
                     vector_settings=settings,
                     record=record,
-                    value=[
-                        random.uniform(-10, 10) for _ in range(0, settings.dimensions)
-                    ],
+                    value=[random.uniform(-10, 10) for _ in range(0, settings.dimensions)],
                 )
             )
         await record.awaitable_attrs.vectors
 
-    await search_engine.set_records_vectors(
-        test_banking_sentiment_dataset, vectors=vectors
-    )
+    await search_engine.set_records_vectors(test_banking_sentiment_dataset, vectors=vectors)
 
     await refresh_dataset(test_banking_sentiment_dataset)
     await test_banking_sentiment_dataset.awaitable_attrs.records
@@ -293,10 +277,7 @@ async def refresh_records(records: List[Record]):
 
 
 def _expected_value_for_question(question: Question) -> Dict[str, Any]:
-    if question.type in [
-        QuestionType.label_selection,
-        QuestionType.multi_label_selection,
-    ]:
+    if question.type in [QuestionType.label_selection, QuestionType.multi_label_selection]:
         return {"type": "keyword"}
     elif question.type == QuestionType.rating:
         return {"type": "integer"}
@@ -319,10 +300,7 @@ class TestBaseElasticAndOpenSearchEngine:
     """
 
     async def test_create_index_for_dataset(
-        self,
-        search_engine: BaseElasticAndOpenSearchEngine,
-        db: "AsyncSession",
-        opensearch: OpenSearch,
+        self, search_engine: BaseElasticAndOpenSearchEngine, db: "AsyncSession", opensearch: OpenSearch
     ):
         dataset = await DatasetFactory.create()
 
@@ -339,10 +317,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {
-                            "type": "keyword",
-                            "copy_to": ALL_RESPONSES_STATUSES_FIELD,
-                        },
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -358,18 +333,10 @@ class TestBaseElasticAndOpenSearchEngine:
             },
         }
 
-        assert index["settings"]["index.max_result_window"] == str(
-            search_engine.max_result_window
-        )
-        assert index["settings"]["index.number_of_shards"] == str(
-            search_engine.number_of_shards
-        )
-        assert index["settings"]["index.number_of_replicas"] == str(
-            search_engine.number_of_replicas
-        )
-        assert index["settings"]["index.mapping.total_fields.limit"] == str(
-            search_engine.default_total_fields_limit
-        )
+        assert index["settings"]["index.max_result_window"] == str(search_engine.max_result_window)
+        assert index["settings"]["index.number_of_shards"] == str(search_engine.number_of_shards)
+        assert index["settings"]["index.number_of_replicas"] == str(search_engine.number_of_replicas)
+        assert index["settings"]["index.mapping.total_fields.limit"] == str(search_engine.default_total_fields_limit)
 
     async def test_create_index_for_dataset_with_fields(
         self,
@@ -393,10 +360,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {
-                            "type": "keyword",
-                            "copy_to": ALL_RESPONSES_STATUSES_FIELD,
-                        },
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -407,11 +371,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
                 ALL_RESPONSES_STATUSES_FIELD: {"type": "keyword"},
-                "fields": {
-                    "properties": {
-                        field.name: {"type": "text"} for field in dataset.fields
-                    }
-                },
+                "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
                 "responses": {"type": "object", "dynamic": "true"},
                 "metadata": {"dynamic": "false", "type": "object"},
             },
@@ -431,9 +391,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         metadata_properties = [terms_property, integer_property]
 
-        dataset = await DatasetFactory.create(
-            fields=[text_field], metadata_properties=metadata_properties
-        )
+        dataset = await DatasetFactory.create(fields=[text_field], metadata_properties=metadata_properties)
 
         await refresh_dataset(dataset)
 
@@ -444,9 +402,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert opensearch.indices.exists(index=index_name)
 
         index = opensearch.indices.get(index=index_name)[index_name]
-        assert index["mappings"]["properties"]["metadata"]["properties"][
-            str(float_property.name)
-        ] == {"type": "float"}
+        assert index["mappings"]["properties"]["metadata"]["properties"][str(float_property.name)] == {"type": "float"}
 
     async def test_create_index_for_dataset_with_metadata_properties(
         self,
@@ -462,9 +418,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         metadata_properties = [terms_property, integer_property, float_property]
 
-        dataset = await DatasetFactory.create(
-            fields=[text_field], metadata_properties=metadata_properties
-        )
+        dataset = await DatasetFactory.create(fields=[text_field], metadata_properties=metadata_properties)
 
         await refresh_dataset(dataset)
 
@@ -479,10 +433,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {
-                            "type": "keyword",
-                            "copy_to": ALL_RESPONSES_STATUSES_FIELD,
-                        },
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 }
@@ -518,19 +469,11 @@ class TestBaseElasticAndOpenSearchEngine:
         rating_ann_size: int,
     ):
         text_questions = await TextQuestionFactory.create_batch(size=text_ann_size)
-        rating_questions = await RatingQuestionFactory.create_batch(
-            size=rating_ann_size
-        )
-        label_questions = await LabelSelectionQuestionFactory.create_batch(
-            size=text_ann_size
-        )
-        multilabel_questions = await MultiLabelSelectionQuestionFactory.create_batch(
-            size=rating_ann_size
-        )
+        rating_questions = await RatingQuestionFactory.create_batch(size=rating_ann_size)
+        label_questions = await LabelSelectionQuestionFactory.create_batch(size=text_ann_size)
+        multilabel_questions = await MultiLabelSelectionQuestionFactory.create_batch(size=rating_ann_size)
 
-        all_questions = (
-            text_questions + rating_questions + label_questions + multilabel_questions
-        )
+        all_questions = text_questions + rating_questions + label_questions + multilabel_questions
         dataset = await DatasetFactory.create(questions=all_questions)
 
         await refresh_dataset(dataset)
@@ -568,10 +511,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic_templates": [
                 {
                     "status_responses": {
-                        "mapping": {
-                            "type": "keyword",
-                            "copy_to": ALL_RESPONSES_STATUSES_FIELD,
-                        },
+                        "mapping": {"type": "keyword", "copy_to": ALL_RESPONSES_STATUSES_FIELD},
                         "path_match": "responses.*.status",
                     }
                 },
@@ -607,10 +547,7 @@ class TestBaseElasticAndOpenSearchEngine:
             (TextQuery(q="cash"), 3),
             (TextQuery(q="card payment"), 5),
             (TextQuery(q="nothing"), 0),
-            (
-                TextQuery(q="rate negative"),
-                1,
-            ),  # Terms are found in two different fields
+            (TextQuery(q="rate negative"), 1),  # Terms are found in two different fields
             (TextQuery(q="negative", field="label"), 4),
             (TextQuery(q="00000", field="textId"), 1),
             (TextQuery(q="card payment", field="text"), 5),
@@ -647,14 +584,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ([ResponseStatusFilter.discarded], 2),
             ([ResponseStatusFilter.missing, ResponseStatusFilter.draft], 6),
             ([ResponseStatusFilter.submitted, ResponseStatusFilter.discarded], 4),
-            (
-                [
-                    ResponseStatusFilter.missing,
-                    ResponseStatusFilter.draft,
-                    ResponseStatusFilter.discarded,
-                ],
-                6,
-            ),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded], 6),
         ],
     )
     async def test_search_with_response_status_filter(
@@ -674,9 +604,7 @@ class TestBaseElasticAndOpenSearchEngine:
         result = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            filter=TermsFilter(
-                scope=ResponseFilterScope(property="status"), values=statuses
-            ),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status"), values=statuses),
         )
         assert len(result.items) == expected_items
         assert result.total == expected_items
@@ -709,25 +637,19 @@ class TestBaseElasticAndOpenSearchEngine:
 
         results_for_user = await search_engine.search(
             test_banking_sentiment_dataset,
-            filter=TermsFilter(
-                ResponseFilterScope(question="rating", user=None), values=["2"]
-            ),
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2"]),
         )
         assert results_for_user.total == 2
 
         results_for_another_user = await search_engine.search(
             test_banking_sentiment_dataset,
-            filter=TermsFilter(
-                ResponseFilterScope(question="rating", user=None), values=["4"]
-            ),
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["4"]),
         )
         assert results_for_another_user.total == 3
 
         combined_results = await search_engine.search(
             test_banking_sentiment_dataset,
-            filter=TermsFilter(
-                ResponseFilterScope(question="rating", user=None), values=["2", "4"]
-            ),
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2", "4"]),
         )
         assert combined_results.total == 3
 
@@ -741,14 +663,7 @@ class TestBaseElasticAndOpenSearchEngine:
             ([ResponseStatusFilter.discarded], 2),
             ([ResponseStatusFilter.missing, ResponseStatusFilter.draft], 5),
             ([ResponseStatusFilter.submitted, ResponseStatusFilter.discarded], 3),
-            (
-                [
-                    ResponseStatusFilter.missing,
-                    ResponseStatusFilter.draft,
-                    ResponseStatusFilter.discarded,
-                ],
-                4,
-            ),
+            ([ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded], 4),
         ],
     )
     async def test_search_with_response_status_filter_with_no_user(
@@ -759,9 +674,7 @@ class TestBaseElasticAndOpenSearchEngine:
         statuses: List[ResponseStatusFilter],
         expected_items: int,
     ):
-        await self._configure_record_responses(
-            opensearch, test_banking_sentiment_dataset, statuses, expected_items
-        )
+        await self._configure_record_responses(opensearch, test_banking_sentiment_dataset, statuses, expected_items)
 
         result = await search_engine.search(
             test_banking_sentiment_dataset,
@@ -774,79 +687,17 @@ class TestBaseElasticAndOpenSearchEngine:
     @pytest.mark.parametrize(
         ("filter", "expected_items"),
         [
-            (
-                TermsFilter(
-                    scope=MetadataFilterScope(metadata_property="label"),
-                    values=["neutral"],
-                ),
-                4,
-            ),
-            (
-                TermsFilter(
-                    scope=MetadataFilterScope(metadata_property="label"),
-                    values=["positive"],
-                ),
-                1,
-            ),
-            (
-                TermsFilter(
-                    scope=MetadataFilterScope(metadata_property="label"),
-                    values=["neutral", "positive"],
-                ),
-                5,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=4
-                ),
-                2,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=3
-                ),
-                1,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="textId"), ge=3
-                ),
-                6,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="textId"), le=4
-                ),
-                5,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="seq_float"),
-                    ge=0,
-                    le=12.03,
-                ),
-                3,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="seq_float"),
-                    ge=0.13,
-                    le=0.13,
-                ),
-                1,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.0
-                ),
-                7,
-            ),
-            (
-                RangeFilter(
-                    scope=MetadataFilterScope(metadata_property="seq_float"), le=12.03
-                ),
-                5,
-            ),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral"]), 4),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["positive"]), 1),
+            (TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["neutral", "positive"]), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=4), 2),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=3), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3), 6),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), le=4), 5),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0, le=12.03), 3),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.13, le=0.13), 1),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.0), 7),
+            (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), le=12.03), 5),
         ],
     )
     async def test_search_with_metadata_filter(
@@ -857,9 +708,7 @@ class TestBaseElasticAndOpenSearchEngine:
         filter: Filter,
         expected_items: int,
     ):
-        result = await search_engine.search(
-            test_banking_sentiment_dataset, filter=filter
-        )
+        result = await search_engine.search(test_banking_sentiment_dataset, filter=filter)
         assert len(result.items) == expected_items
         assert result.total == expected_items
 
@@ -884,46 +733,26 @@ class TestBaseElasticAndOpenSearchEngine:
     ):
         user = await UserFactory.create()
 
-        all_statuses = [
-            ResponseStatusFilter.missing,
-            ResponseStatusFilter.draft,
-            ResponseStatusFilter.discarded,
-        ]
+        all_statuses = [ResponseStatusFilter.missing, ResponseStatusFilter.draft, ResponseStatusFilter.discarded]
         await self._configure_record_responses(
-            opensearch,
-            test_banking_sentiment_dataset,
-            all_statuses,
-            len(test_banking_sentiment_dataset.records),
-            user,
+            opensearch, test_banking_sentiment_dataset, all_statuses, len(test_banking_sentiment_dataset.records), user
         )
 
-        no_filter_results = await search_engine.search(
-            test_banking_sentiment_dataset, query=TextQuery(q="payment")
-        )
+        no_filter_results = await search_engine.search(test_banking_sentiment_dataset, query=TextQuery(q="payment"))
 
         results = await search_engine.search(
             test_banking_sentiment_dataset,
             query=TextQuery(q="payment"),
-            filter=TermsFilter(
-                scope=ResponseFilterScope(property="status", user=user),
-                values=all_statuses,
-            ),
+            filter=TermsFilter(scope=ResponseFilterScope(property="status", user=user), values=all_statuses),
         )
 
         assert len(no_filter_results.items) == len(results.items)
         assert no_filter_results.total == results.total
-        assert [item.score for item in no_filter_results.items] == [
-            item.score for item in results.items
-        ]
+        assert [item.score for item in no_filter_results.items] == [item.score for item in results.items]
 
     @pytest.mark.parametrize(
         "property, filter_match_value, filter_unmatch_value",
-        [
-            ("value", "A", "C"),
-            ("score", "0.5", "0"),
-            ("agent", "peter", "john"),
-            ("type", "human", "model"),
-        ],
+        [("value", "A", "C"), ("score", "0.5", "0"), ("agent", "peter", "john"), ("type", "human", "model")],
     )
     async def test_search_with_suggestion_filter(
         self,
@@ -940,9 +769,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 "options": [{"value": "A"}, {"value": "B"}],
             }
         )
-        dataset = await DatasetFactory.create(
-            fields=[text_field], questions=[label_question]
-        )
+        dataset = await DatasetFactory.create(fields=[text_field], questions=[label_question])
         records = await RecordFactory.create_batch(
             size=2,
             dataset=dataset,
@@ -950,16 +777,9 @@ class TestBaseElasticAndOpenSearchEngine:
         )
 
         await SuggestionFactory.create(
-            record=records[0],
-            question=label_question,
-            value="A",
-            type="human",
-            agent="peter",
-            score=0.5,
+            record=records[0], question=label_question, value="A", type="human", agent="peter", score=0.5
         )
-        await SuggestionFactory.create(
-            record=records[1], question=label_question, value="B"
-        )
+        await SuggestionFactory.create(record=records[1], question=label_question, value="B")
 
         await refresh_dataset(dataset)
         await refresh_records(records)
@@ -970,21 +790,14 @@ class TestBaseElasticAndOpenSearchEngine:
         scope = SuggestionFilterScope(question=label_question.name, property=property)
 
         await self._check_filter_match(
-            dataset,
-            search_engine,
-            filter=TermsFilter(scope=scope, values=[filter_match_value]),
+            dataset, search_engine, filter=TermsFilter(scope=scope, values=[filter_match_value])
         )
         await self._check_filter_unmatch(
-            dataset,
-            search_engine,
-            filter=TermsFilter(scope=scope, values=[filter_unmatch_value]),
+            dataset, search_engine, filter=TermsFilter(scope=scope, values=[filter_unmatch_value])
         )
 
     async def _check_filter_unmatch(
-        self,
-        dataset: Dataset,
-        elasticsearch_engine: BaseElasticAndOpenSearchEngine,
-        filter: TermsFilter,
+        self, dataset: Dataset, elasticsearch_engine: BaseElasticAndOpenSearchEngine, filter: TermsFilter
     ) -> None:
         result = await elasticsearch_engine.search(dataset, filter=filter)
 
@@ -992,10 +805,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert result.total == 0
 
     async def _check_filter_match(
-        self,
-        dataset: Dataset,
-        elasticsearch_engine: BaseElasticAndOpenSearchEngine,
-        filter: TermsFilter,
+        self, dataset: Dataset, elasticsearch_engine: BaseElasticAndOpenSearchEngine, filter: TermsFilter
     ):
         result = await elasticsearch_engine.search(dataset, filter=filter)
 
@@ -1011,16 +821,10 @@ class TestBaseElasticAndOpenSearchEngine:
         offset: int,
         limit: int,
     ):
-        all_results = await search_engine.search(
-            dataset_for_pagination, query="documents", offset=0, limit=100
-        )
-        results = await search_engine.search(
-            dataset_for_pagination, query="documents", offset=offset, limit=limit
-        )
+        all_results = await search_engine.search(dataset_for_pagination, query="documents", offset=0, limit=100)
+        results = await search_engine.search(dataset_for_pagination, query="documents", offset=offset, limit=limit)
 
-        assert len(results.items) == min(
-            len(dataset_for_pagination.records) - offset, limit
-        )
+        assert len(results.items) == min(len(dataset_for_pagination.records) - offset, limit)
         assert results.total == 100
         assert all_results.items[offset : offset + limit] == results.items
 
@@ -1029,9 +833,7 @@ class TestBaseElasticAndOpenSearchEngine:
         [
             Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.asc),
             Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.asc),
-            Order(
-                scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc
-            ),
+            Order(scope=RecordFilterScope(property="inserted_at"), order=SortOrder.desc),
             Order(scope=RecordFilterScope(property="updated_at"), order=SortOrder.desc),
         ],
     )
@@ -1045,31 +847,20 @@ class TestBaseElasticAndOpenSearchEngine:
         def _local_sort_by(record: Record) -> Any:
             return getattr(record, sort_order.scope.property)
 
-        results = await search_engine.search(
-            test_banking_sentiment_dataset, sort=[sort_order]
-        )
+        results = await search_engine.search(test_banking_sentiment_dataset, sort=[sort_order])
 
         records = test_banking_sentiment_dataset.records
-        records = sorted(
-            records, key=_local_sort_by, reverse=sort_order.order == "desc"
-        )
+        records = sorted(records, key=_local_sort_by, reverse=sort_order.order == "desc")
 
-        assert [item.record_id for item in results.items] == [
-            record.id for record in records
-        ]
+        assert [item.record_id for item in results.items] == [record.id for record in records]
 
-    async def test_index_records(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
-    ):
+    async def test_index_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            fields={
-                field.name: f"This is the value for {field.name}"
-                for field in text_fields
-            },
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
             responses=[],
         )
 
@@ -1081,10 +872,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         index_name = es_index_name_for_dataset(dataset)
 
-        es_docs = [
-            hit["_source"]
-            for hit in opensearch.search(index=index_name)["hits"]["hits"]
-        ]
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
             {
                 "id": str(record.id),
@@ -1124,9 +912,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 "options": [{"value": "A"}, {"value": "B"}],
             }
         )
-        dataset = await DatasetFactory.create(
-            fields=[text_field], questions=[label_question]
-        )
+        dataset = await DatasetFactory.create(fields=[text_field], questions=[label_question])
         records = await RecordFactory.create_batch(
             size=2,
             dataset=dataset,
@@ -1134,12 +920,8 @@ class TestBaseElasticAndOpenSearchEngine:
             responses=[],
         )
 
-        await SuggestionFactory.create(
-            record=records[0], question=label_question, value="A"
-        )
-        await SuggestionFactory.create(
-            record=records[1], question=label_question, value="B"
-        )
+        await SuggestionFactory.create(record=records[0], question=label_question, value="A")
+        await SuggestionFactory.create(record=records[1], question=label_question, value="B")
 
         await refresh_dataset(dataset)
         await refresh_records(records)
@@ -1149,10 +931,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         index_name = es_index_name_for_dataset(dataset)
 
-        es_docs = [
-            hit["_source"]
-            for hit in opensearch.search(index=index_name)["hits"]["hits"]
-        ]
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
             {
                 "id": str(records[0].id),
@@ -1160,14 +939,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 "fields": records[0].fields,
                 "inserted_at": records[0].inserted_at.isoformat(),
                 "updated_at": records[0].updated_at.isoformat(),
-                "suggestions": {
-                    label_question.name: {
-                        "agent": None,
-                        "score": None,
-                        "type": None,
-                        "value": "A",
-                    }
-                },
+                "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "A"}},
             },
             {
                 "id": str(records[1].id),
@@ -1175,14 +947,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 "fields": records[1].fields,
                 "inserted_at": records[1].inserted_at.isoformat(),
                 "updated_at": records[1].updated_at.isoformat(),
-                "suggestions": {
-                    label_question.name: {
-                        "agent": None,
-                        "score": None,
-                        "type": None,
-                        "value": "B",
-                    }
-                },
+                "suggestions": {label_question.name: {"agent": None, "score": None, "type": None, "value": "B"}},
             },
         ]
 
@@ -1192,20 +957,12 @@ class TestBaseElasticAndOpenSearchEngine:
         text_fields = await TextFieldFactory.create_batch(5)
         metadata_properties = await TermsMetadataPropertyFactory.create_batch(3)
 
-        dataset = await DatasetFactory.create(
-            fields=text_fields, metadata_properties=metadata_properties, questions=[]
-        )
+        dataset = await DatasetFactory.create(fields=text_fields, metadata_properties=metadata_properties, questions=[])
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            fields={
-                field.name: f"This is the value for {field.name}"
-                for field in text_fields
-            },
-            metadata_={
-                metadata_prop.name: "Value for Metadata Property"
-                for metadata_prop in metadata_properties
-            },
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            metadata_={metadata_prop.name: "Value for Metadata Property" for metadata_prop in metadata_properties},
             responses=[],
         )
 
@@ -1217,10 +974,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         index_name = es_index_name_for_dataset(dataset)
 
-        es_docs = [
-            hit["_source"]
-            for hit in opensearch.search(index=index_name)["hits"]["hits"]
-        ]
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
             {
                 "id": str(record.id),
@@ -1241,24 +995,15 @@ class TestBaseElasticAndOpenSearchEngine:
     ):
         dataset = await DatasetFactory.create()
         text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
-        vectors_settings = await VectorSettingsFactory.create_batch(
-            size=5, dataset=dataset, dimensions=5
-        )
+        vectors_settings = await VectorSettingsFactory.create_batch(size=5, dataset=dataset, dimensions=5)
         records = await RecordFactory.create_batch(
-            size=5,
-            fields={
-                field.name: f"This is the value for {field.name}"
-                for field in text_fields
-            },
-            responses=[],
+            size=5, fields={field.name: f"This is the value for {field.name}" for field in text_fields}, responses=[]
         )
 
         for record in records:
             for vector_settings in vectors_settings:
                 await VectorFactory.create(
-                    record=record,
-                    vector_settings=vector_settings,
-                    value=[1.0, 2.0, 3.0, 4.0, 5.0],
+                    record=record, vector_settings=vector_settings, value=[1.0, 2.0, 3.0, 4.0, 5.0]
                 )
 
         await refresh_dataset(dataset)
@@ -1269,10 +1014,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         index_name = es_index_name_for_dataset(dataset)
 
-        es_docs = [
-            hit["_source"]
-            for hit in opensearch.search(index=index_name)["hits"]["hits"]
-        ]
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
         assert es_docs == [
             {
                 "id": str(record.id),
@@ -1280,26 +1022,18 @@ class TestBaseElasticAndOpenSearchEngine:
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
-                "vectors": {
-                    str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0]
-                    for vector_settings in vectors_settings
-                },
+                "vectors": {str(vector_settings.id): [1.0, 2.0, 3.0, 4.0, 5.0] for vector_settings in vectors_settings},
             }
             for record in records
         ]
 
-    async def test_delete_records(
-        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
-    ):
+    async def test_delete_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
         dataset = await DatasetFactory.create(fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            fields={
-                field.name: f"This is the value for {field.name}"
-                for field in text_fields
-            },
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
             responses=[],
         )
 
@@ -1317,14 +1051,7 @@ class TestBaseElasticAndOpenSearchEngine:
         deleted_docs = [
             hit["_source"]
             for hit in opensearch.search(
-                index=index_name,
-                body={
-                    "query": {
-                        "ids": {
-                            "values": [str(record.id) for record in records_to_delete]
-                        }
-                    }
-                },
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_delete]}}}
             )["hits"]["hits"]
         ]
         assert len(deleted_docs) == 0
@@ -1332,14 +1059,7 @@ class TestBaseElasticAndOpenSearchEngine:
         es_docs = [
             hit["_source"]
             for hit in opensearch.search(
-                index=index_name,
-                body={
-                    "query": {
-                        "ids": {
-                            "values": [str(record.id) for record in records_to_keep]
-                        }
-                    }
-                },
+                index=index_name, body={"query": {"ids": {"values": [str(record.id) for record in records_to_keep]}}}
             )["hits"]["hits"]
         ]
         assert len(records_to_keep) == 5
@@ -1353,9 +1073,7 @@ class TestBaseElasticAndOpenSearchEngine:
         record = test_banking_sentiment_dataset.records[0]
         question = test_banking_sentiment_dataset.questions[0]
 
-        response = await ResponseFactory.create(
-            record=record, values={question.name: {"value": "test"}}
-        )
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
         record = await response.awaitable_attrs.record
         await record.awaitable_attrs.dataset
         await search_engine.update_record_response(response)
@@ -1377,15 +1095,8 @@ class TestBaseElasticAndOpenSearchEngine:
             "properties": {
                 str(response.user.id): {
                     "properties": {
-                        "status": {
-                            "type": "keyword",
-                            "copy_to": [ALL_RESPONSES_STATUSES_FIELD],
-                        },
-                        "values": {
-                            "properties": {
-                                question.name: _expected_value_for_question(question)
-                            }
-                        },
+                        "status": {"type": "keyword", "copy_to": [ALL_RESPONSES_STATUSES_FIELD]},
+                        "values": {"properties": {question.name: _expected_value_for_question(question)}},
                     }
                 }
             },
@@ -1412,17 +1123,13 @@ class TestBaseElasticAndOpenSearchEngine:
         index_name = es_index_name_for_dataset(dataset)
 
         for user in annotators:
-            await ResponseFactory.create(
-                record=record, user=user, values={question.name: {"value": "test"}}
-            )
+            await ResponseFactory.create(record=record, user=user, values={question.name: {"value": "test"}})
 
         await record.awaitable_attrs.dataset
         await record.awaitable_attrs.responses
         await search_engine.index_records(dataset, [record])
 
-        properties = opensearch.indices.get_mapping(index=index_name)[index_name][
-            "mappings"
-        ]["properties"]
+        properties = opensearch.indices.get_mapping(index=index_name)[index_name]["mappings"]["properties"]
 
         for user in annotators:
             assert str(user.id) in properties["responses"]["properties"]
@@ -1449,17 +1156,13 @@ class TestBaseElasticAndOpenSearchEngine:
         index_name = es_index_name_for_dataset(dataset)
 
         for user in annotators:
-            await ResponseFactory.create(
-                record=record, user=user, values={question.name: {"value": "test"}}
-            )
+            await ResponseFactory.create(record=record, user=user, values={question.name: {"value": "test"}})
 
         await record.awaitable_attrs.dataset
         await record.awaitable_attrs.responses
         await search_engine.index_records(dataset, [record])
 
-        properties = opensearch.indices.get_mapping(index=index_name)[index_name][
-            "mappings"
-        ]["properties"]
+        properties = opensearch.indices.get_mapping(index=index_name)[index_name]["mappings"]["properties"]
 
         for user in annotators:
             assert str(user.id) in properties["responses"]["properties"]
@@ -1474,9 +1177,7 @@ class TestBaseElasticAndOpenSearchEngine:
         record = test_banking_sentiment_dataset.records[0]
         question = test_banking_sentiment_dataset.questions[0]
 
-        response = await ResponseFactory.create(
-            record=record, values={question.name: {"value": "test"}}
-        )
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
         record = await response.awaitable_attrs.record
         await record.awaitable_attrs.dataset
         await search_engine.update_record_response(response)
@@ -1512,14 +1213,7 @@ class TestBaseElasticAndOpenSearchEngine:
                 },
             ),
             ("textId", {"max": 8, "min": 0, "type": MetadataPropertyType.integer}),
-            (
-                "seq_float",
-                {
-                    "max": 120020.1328125,
-                    "min": -149.1300048828125,
-                    "type": MetadataPropertyType.float,
-                },
-            ),
+            ("seq_float", {"max": 120020.1328125, "min": -149.1300048828125, "type": MetadataPropertyType.float}),
         ],
     )
     async def test_compute_metrics_for(
@@ -1579,16 +1273,13 @@ class TestBaseElasticAndOpenSearchEngine:
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_with_vectors: Dataset,
     ):
-        settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
         with pytest.raises(
             expected_exception=ValueError,
             match="Must provide either vector value or record to compute the similarity search",
         ):
             await search_engine.similarity_search(
-                dataset=test_banking_sentiment_dataset_with_vectors,
-                vector_settings=settings,
+                dataset=test_banking_sentiment_dataset_with_vectors, vector_settings=settings
             )
 
     async def test_similarity_search_with_too_much_inputs(
@@ -1597,9 +1288,7 @@ class TestBaseElasticAndOpenSearchEngine:
         opensearch: OpenSearch,
         test_banking_sentiment_dataset_with_vectors: Dataset,
     ):
-        settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
         with pytest.raises(
             expected_exception=ValueError,
             match="Must provide either vector value or record to compute the similarity search",
@@ -1637,9 +1326,7 @@ class TestBaseElasticAndOpenSearchEngine:
         test_banking_sentiment_dataset_with_vectors: Dataset,
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
@@ -1667,9 +1354,7 @@ class TestBaseElasticAndOpenSearchEngine:
         statuses: List[ResponseStatusFilter],
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         scope = ResponseFilterScope(property="status")
 
@@ -1695,9 +1380,7 @@ class TestBaseElasticAndOpenSearchEngine:
         test_banking_sentiment_dataset_with_vectors: Dataset,
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
@@ -1721,26 +1404,20 @@ class TestBaseElasticAndOpenSearchEngine:
             opensearch,
             test_banking_sentiment_dataset_with_vectors,
             [ResponseStatusFilter.draft],
-            number_of_answered_records=len(
-                test_banking_sentiment_dataset_with_vectors.records
-            ),
+            number_of_answered_records=len(test_banking_sentiment_dataset_with_vectors.records),
             user=user,
             rating_value=2,
         )
 
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             record=selected_record,
             max_results=1,
-            filter=TermsFilter(
-                ResponseFilterScope(question="rating", user=None), values=["2"]
-            ),
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2"]),
         )
 
         assert responses.total == 1
@@ -1752,25 +1429,19 @@ class TestBaseElasticAndOpenSearchEngine:
         test_banking_sentiment_dataset_with_vectors: Dataset,
     ):
         selected_record: Record = test_banking_sentiment_dataset_with_vectors.records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
             vector_settings=vector_settings,
             record=selected_record,
             max_results=1,
-            filter=TermsFilter(
-                ResponseFilterScope(question="rating", user=None), values=["2"]
-            ),
+            filter=TermsFilter(ResponseFilterScope(question="rating", user=None), values=["2"]),
         )
 
         assert responses.total == 0
 
-    @pytest.mark.parametrize(
-        "query, expected_results", [("payment", 5), ("nothing to find", 0)]
-    )
+    @pytest.mark.parametrize("query, expected_results", [("payment", 5), ("nothing to find", 0)])
     async def test_similarity_search_with_text_search(
         self,
         search_engine: BaseElasticAndOpenSearchEngine,
@@ -1781,9 +1452,7 @@ class TestBaseElasticAndOpenSearchEngine:
     ):
         records = test_banking_sentiment_dataset_with_vectors.records
         selected_record: Record = records[0]
-        vector_settings: VectorSettings = (
-            test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
-        )
+        vector_settings: VectorSettings = test_banking_sentiment_dataset_with_vectors.vectors_settings[0]
 
         responses = await search_engine.similarity_search(
             dataset=test_banking_sentiment_dataset_with_vectors,
@@ -1828,9 +1497,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
         for status in all_statuses:
             if status not in response_status and status != ResponseStatusFilter.missing:
-                await self._update_records_responses(
-                    opensearch, index_name, rest_of_the_records, status, user
-                )
+                await self._update_records_responses(opensearch, index_name, rest_of_the_records, status, user)
 
         opensearch.indices.refresh(index=index_name)
 
@@ -1857,6 +1524,4 @@ class TestBaseElasticAndOpenSearchEngine:
                         f"{user.id}.values.rating": rating_value or -1,
                     }
                 )
-            opensearch.update(
-                index_name, id=record.id, body={"doc": {"responses": users_responses}}
-            )
+            opensearch.update(index_name, id=record.id, body={"doc": {"responses": users_responses}})

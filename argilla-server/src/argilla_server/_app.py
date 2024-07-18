@@ -79,9 +79,7 @@ def create_server_app() -> FastAPI:
     # This if-else clause is needed to simplify the test dependencies setup. Otherwise we cannot override dependencies
     # easily. We can review this once we have separate fastapi application for the api and the webapp.
     if settings.base_url and settings.base_url != "/":
-        _app = FastAPI(
-            docs_url=None, redoc_url=None, openapi_url=None, redirect_slashes=False
-        )
+        _app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, redirect_slashes=False)
         _app.mount(settings.base_url, app)
         return _app
     else:
@@ -214,11 +212,7 @@ def configure_telemetry(app: FastAPI):
     """
     )
     message += "\n\n    "
-    message += (
-        "#set ARGILLA_ENABLE_TELEMETRY=0"
-        if os.name == "nt"
-        else "$>export ARGILLA_ENABLE_TELEMETRY=0"
-    )
+    message += "#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"
     message += "\n"
 
     @app.on_event("startup")
@@ -232,9 +226,7 @@ _get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
 
 def configure_database(app: FastAPI):
     def _user_has_default_credentials(user: User):
-        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(
-            DEFAULT_PASSWORD, user.password_hash
-        )
+        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
 
     def _log_default_user_warning():
         _LOGGER.warning(

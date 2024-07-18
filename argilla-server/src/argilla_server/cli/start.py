@@ -16,15 +16,9 @@ import typer
 
 
 def start(
-    host: str = typer.Option(
-        "0.0.0.0", help="The host where the Argilla server will be binded"
-    ),
-    port: int = typer.Option(
-        6900, help="The port where the Argilla server will be binded"
-    ),
-    access_log: bool = typer.Option(
-        True, help="Whether to enable or disable the Argilla server access log"
-    ),
+    host: str = typer.Option("0.0.0.0", help="The host where the Argilla server will be binded"),
+    port: int = typer.Option(6900, help="The port where the Argilla server will be binded"),
+    access_log: bool = typer.Option(True, help="Whether to enable or disable the Argilla server access log"),
 ) -> None:
     import uvicorn
 

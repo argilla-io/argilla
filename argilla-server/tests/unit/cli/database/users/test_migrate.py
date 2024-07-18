@@ -25,13 +25,9 @@ if TYPE_CHECKING:
 
 
 def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    mock_users_file = os.path.join(
-        os.path.dirname(__file__), "test_user_files", "users.yml"
-    )
+    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users.yml")
 
-    with mock.patch.dict(
-        os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}
-    ):
+    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
         result = cli_runner.invoke(cli, "database users migrate")
 
         assert result.exit_code == 0
@@ -44,10 +40,7 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
         assert user.username == "john"
         assert user.role == UserRole.owner
         assert user.api_key == "a14427ea-9197-11ec-b909-0242ac120002"
-        assert (
-            user.password_hash
-            == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
-        )
+        assert user.password_hash == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
         assert [ws.name for ws in user.workspaces] == ["john"]
 
         user = sync_db.query(User).filter_by(username="tanya").first()
@@ -55,10 +48,7 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
         assert user.username == "tanya"
         assert user.role == UserRole.annotator
         assert user.api_key == "78a10b53-8db7-4ab5-9e9e-fbd4b7e76551"
-        assert (
-            user.password_hash
-            == "$2y$05$aqNyXcXRXddNj5toZwT0HugHqKZypvqlBAkZviAGGbsAC8oTj/P5K"
-        )
+        assert user.password_hash == "$2y$05$aqNyXcXRXddNj5toZwT0HugHqKZypvqlBAkZviAGGbsAC8oTj/P5K"
         assert [ws.name for ws in user.workspaces] == ["tanya", "argilla", "team"]
 
         user = sync_db.query(User).filter_by(username="daisy").first()
@@ -66,26 +56,15 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
         assert user.username == "daisy"
         assert user.role == UserRole.annotator
         assert user.api_key == "a8168929-8668-494c-b7a5-98cd35740d9b"
-        assert (
-            user.password_hash
-            == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
-        )
-        assert set([ws.name for ws in user.workspaces]) == {
-            "daisy",
-            "argilla",
-            "team",
-            "latam",
-        }
+        assert user.password_hash == "$2y$05$l83IhUs4ZDaxsgZ/P12FO.RFTi2wKQ2AxMK2vYtLx//yKramuCcZG"
+        assert set([ws.name for ws in user.workspaces]) == {"daisy", "argilla", "team", "latam"}
 
         user = sync_db.query(User).filter_by(username="macleod").first()
         assert user.first_name == ""
         assert user.username == "macleod"
         assert user.role == UserRole.annotator
         assert user.api_key == "7c3b4d6e-1898-4c42-84c8-e1758cea1ce0"
-        assert (
-            user.password_hash
-            == "$2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium"
-        )
+        assert user.password_hash == "$2y$05$Fb3iv7AGv8k.o5cl9qdCtuwkrLcDcSYKWyJk1QNl6RXKUecvP.Ium"
         assert [ws.name for ws in user.workspaces] == ["macleod", "highlands"]
 
         user = sync_db.query(User).filter_by(username="sanchez").first()
@@ -93,23 +72,14 @@ def test_migrate(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Ty
         assert user.username == "sanchez"
         assert user.role == UserRole.annotator
         assert user.api_key == "ac7b6b86-7d63-45ce-a76a-08f64e0d5fd6"
-        assert (
-            user.password_hash
-            == "$2y$05$wMvfoz2TwrRFRZhNELHjbOcqEucVYImNORuRvh7Vp26.dIqvo9tY2"
-        )
+        assert user.password_hash == "$2y$05$wMvfoz2TwrRFRZhNELHjbOcqEucVYImNORuRvh7Vp26.dIqvo9tY2"
         assert [ws.name for ws in user.workspaces] == ["sanchez"]
 
 
-def test_migrate_with_one_user_file(
-    monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
-    mock_users_file = os.path.join(
-        os.path.dirname(__file__), "test_user_files", "users_one.yml"
-    )
+def test_migrate_with_one_user_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
+    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users_one.yml")
 
-    with mock.patch.dict(
-        os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}
-    ):
+    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
         result = cli_runner.invoke(cli, "database users migrate")
 
         assert result.exit_code == 0
@@ -122,23 +92,14 @@ def test_migrate_with_one_user_file(
         assert user.username == "john"
         assert user.role == UserRole.annotator
         assert user.api_key == "a14427ea-9197-11ec-b909-0242ac120002"
-        assert (
-            user.password_hash
-            == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
-        )
+        assert user.password_hash == "$2y$05$xtl7iy3bpqchUwiQMjEHe.tY7OaIjDrg43W3TB4EHQ7izvdjvGtPS"
         assert [ws.name for ws in user.workspaces] == ["john", "argilla", "team"]
 
 
-def test_migrate_with_invalid_user(
-    monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
-    mock_users_file = os.path.join(
-        os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml"
-    )
+def test_migrate_with_invalid_user(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
+    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
 
-    with mock.patch.dict(
-        os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}
-    ):
+    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
         result = cli_runner.invoke(cli, "database users migrate")
 
         assert result.exit_code == 1
@@ -147,16 +108,10 @@ def test_migrate_with_invalid_user(
         assert sync_db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_invalid_workspace(
-    monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
-    mock_users_file = os.path.join(
-        os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml"
-    )
+def test_migrate_with_invalid_workspace(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
+    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml")
 
-    with mock.patch.dict(
-        os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}
-    ):
+    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
         result = cli_runner.invoke(cli, "database users migrate")
 
         assert result.exit_code == 1
@@ -165,12 +120,8 @@ def test_migrate_with_invalid_workspace(
         assert sync_db.query(WorkspaceUser).count() == 0
 
 
-def test_migrate_with_nonexistent_file(
-    monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
-    with mock.patch.dict(
-        os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": "nonexistent.yml"}
-    ):
+def test_migrate_with_nonexistent_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
+    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": "nonexistent.yml"}):
         result = cli_runner.invoke(cli, "database users migrate")
 
         assert result.exit_code == 1

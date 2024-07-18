@@ -16,9 +16,7 @@ from social_core.backends.github import GithubOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 
 from argilla_server.security.authentication.claims import Claims
-from argilla_server.security.authentication.oauth2.client_provider import (
-    OAuth2ClientProvider,
-)
+from argilla_server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
 
 
 class HuggingfaceOpenId(OpenIdConnectAuth):
@@ -35,11 +33,7 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
 
 
 class GitHubClientProvider(OAuth2ClientProvider):
-    claims = Claims(
-        picture="avatar_url",
-        identity=lambda user: f"{user.provider}:{user.id}",
-        username="login",
-    )
+    claims = Claims(picture="avatar_url", identity=lambda user: f"{user.provider}:{user.id}", username="login")
     backend_class = GithubOAuth2
     name = "github"
 
@@ -54,6 +48,4 @@ class HuggingfaceClientProvider(OAuth2ClientProvider):
 
 _providers = [GitHubClientProvider, HuggingfaceClientProvider]
 
-ALL_SUPPORTED_OAUTH2_PROVIDERS = {
-    provider_class.name: provider_class for provider_class in _providers
-}
+ALL_SUPPORTED_OAUTH2_PROVIDERS = {provider_class.name: provider_class for provider_class in _providers}

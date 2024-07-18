@@ -31,9 +31,7 @@ class TestCreateDatasetVectorSettings:
     ):
         dataset = await DatasetFactory.create()
 
-        await VectorSettingsFactory.create_batch(
-            CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT, dataset=dataset
-        )
+        await VectorSettingsFactory.create_batch(CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT, dataset=dataset)
 
         response = await async_client.post(
             self.url(dataset.id),

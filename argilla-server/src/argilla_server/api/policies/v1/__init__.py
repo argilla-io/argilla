@@ -15,9 +15,7 @@
 from argilla_server.api.policies.v1.commons import authorize, is_authorized
 from argilla_server.api.policies.v1.dataset_policy import DatasetPolicy
 from argilla_server.api.policies.v1.field_policy import FieldPolicy
-from argilla_server.api.policies.v1.metadata_property_policy import (
-    MetadataPropertyPolicy,
-)
+from argilla_server.api.policies.v1.metadata_property_policy import MetadataPropertyPolicy
 from argilla_server.api.policies.v1.question_policy import QuestionPolicy
 from argilla_server.api.policies.v1.record_policy import RecordPolicy
 from argilla_server.api.policies.v1.response_policy import ResponsePolicy

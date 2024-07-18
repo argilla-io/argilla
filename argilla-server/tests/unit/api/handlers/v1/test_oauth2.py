@@ -51,88 +51,52 @@ def default_oauth_settings() -> OAuth2Settings:
 
 @pytest.mark.asyncio
 class TestOauth2:
-    async def tests_list_providers_with_default_config(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        response = await async_client.get(
-            "/api/v1/oauth2/providers", headers=owner_auth_header
-        )
+    async def tests_list_providers_with_default_config(self, async_client: AsyncClient, owner_auth_header: dict):
+        response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
 
         assert response.status_code == 200
         assert response.json() == {"items": []}
 
     async def test_list_providers_with_oauth_disabled(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        disabled_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, disabled_oauth_settings: OAuth2Settings
     ):
         with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: disabled_oauth_settings,
+            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
         ):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers", headers=owner_auth_header
-            )
+            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
             assert response.status_code == 200
             assert response.json() == {"items": []}
 
     async def test_list_provider_with_oauth_disabled_from_settings(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
         default_oauth_settings.enabled = False
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers", headers=owner_auth_header
-            )
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
             assert response.status_code == 200
             assert response.json() == {"items": []}
 
     async def test_list_providers(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers", headers=owner_auth_header
-            )
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
             assert response.status_code == 200
             assert response.json() == {"items": [{"name": "huggingface"}]}
 
     async def test_provider_huggingface_authentication(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
             )
             assert response.status_code == 303
 
             redirect_url = URL(response.headers.get("location"))
             assert redirect_url.scheme == b"https"
             assert redirect_url.host == b"huggingface.co"
-            assert (
-                b"/oauth/authorize?response_type=code&client_id=client_id"
-                in redirect_url.target
-            )
+            assert b"/oauth/authorize?response_type=code&client_id=client_id" in redirect_url.target
 
     async def test_provider_authentication_with_oauth_disabled(
         self,
@@ -141,12 +105,10 @@ class TestOauth2:
         disabled_oauth_settings: OAuth2Settings,
     ):
         with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: disabled_oauth_settings,
+            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
         ):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
             )
             assert response.status_code == 404
 
@@ -157,29 +119,18 @@ class TestOauth2:
         default_oauth_settings: OAuth2Settings,
     ):
         default_oauth_settings.enabled = False
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
             )
             assert response.status_code == 404
 
     async def test_provider_authentication_with_invalid_provider(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/invalid/authentication",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/invalid/authentication", headers=owner_auth_header
             )
             assert response.status_code == 404
 
@@ -190,10 +141,7 @@ class TestOauth2:
         owner_auth_header: dict,
         default_oauth_settings: OAuth2Settings,
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
                 "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
                 return_value={"preferred_username": "username", "name": "name"},
@@ -208,14 +156,10 @@ class TestOauth2:
                 assert response.status_code == 200
 
                 json_response = response.json()
-                assert (
-                    JWT.decode(json_response["access_token"])["username"] == "username"
-                )
+                assert JWT.decode(json_response["access_token"])["username"] == "username"
                 assert json_response["token_type"] == "bearer"
 
-                user = (
-                    await db.execute(select(User).where(User.username == "username"))
-                ).scalar_one_or_none()
+                user = (await db.execute(select(User).where(User.username == "username"))).scalar_one_or_none()
                 assert user is not None
                 assert user.role == UserRole.annotator
 
@@ -226,80 +170,46 @@ class TestOauth2:
         disabled_oauth_settings: OAuth2Settings,
     ):
         with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: disabled_oauth_settings,
+            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
         ):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/access-token",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/access-token", headers=owner_auth_header
             )
             assert response.status_code == 404
 
     async def test_provider_access_token_with_invalid_provider(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/invalid/authentication",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/invalid/authentication", headers=owner_auth_header
             )
             assert response.status_code == 404
 
     async def test_provider_access_token_with_not_found_code(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/access-token",
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/access-token", headers=owner_auth_header
             )
             assert response.status_code == 400
-            assert response.json() == {
-                "detail": "'code' parameter was not found in callback request"
-            }
+            assert response.json() == {"detail": "'code' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_not_found_state(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/access-token",
-                params={"code": "code"},
-                headers=owner_auth_header,
+                "/api/v1/oauth2/providers/huggingface/access-token", params={"code": "code"}, headers=owner_auth_header
             )
             assert response.status_code == 400
-            assert response.json() == {
-                "detail": "'state' parameter was not found in callback request"
-            }
+            assert response.json() == {"detail": "'state' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_invalid_state(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
                 "/api/v1/oauth2/providers/huggingface/access-token",
                 params={"code": "code", "state": "invalid"},
@@ -310,15 +220,9 @@ class TestOauth2:
             assert response.json() == {"detail": "'state' parameter does not match"}
 
     async def test_provider_access_token_with_authentication_error(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
+        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
     ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
                 "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
                 side_effect=AuthenticationError("error"),
@@ -341,16 +245,10 @@ class TestOauth2:
     ):
         admin = await AdminFactory.create()
 
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
                 "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
-                return_value={
-                    "preferred_username": admin.username,
-                    "name": admin.first_name,
-                },
+                return_value={"preferred_username": admin.username, "name": admin.first_name},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",
@@ -370,16 +268,10 @@ class TestOauth2:
     ):
         user = await AnnotatorFactory.create()
 
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: default_oauth_settings,
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
                 "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
-                return_value={
-                    "preferred_username": user.username,
-                    "name": user.first_name,
-                },
+                return_value={"preferred_username": user.username, "name": user.first_name},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",

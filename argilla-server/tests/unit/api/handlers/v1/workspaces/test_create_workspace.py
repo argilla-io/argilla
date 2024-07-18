@@ -28,9 +28,7 @@ class TestCreateWorkspace:
     def url(self) -> str:
         return "/api/v1/workspaces"
 
-    async def test_create_workspace(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_create_workspace(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
         response = await async_client.post(
             self.url(),
             headers=owner_auth_header,
@@ -40,9 +38,7 @@ class TestCreateWorkspace:
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
-        workspace = (
-            await db.execute(select(Workspace).filter_by(name="workspace"))
-        ).scalar_one()
+        workspace = (await db.execute(select(Workspace).filter_by(name="workspace"))).scalar_one()
 
         assert response.json() == {
             "id": str(workspace.id),
@@ -51,9 +47,7 @@ class TestCreateWorkspace:
             "updated_at": workspace.updated_at.isoformat(),
         }
 
-    async def test_create_workspace_without_authentication(
-        self, db: AsyncSession, async_client: AsyncClient
-    ):
+    async def test_create_workspace_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         response = await async_client.post(
             self.url(),
             json={"name": "workspace"},

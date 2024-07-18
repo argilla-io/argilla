@@ -43,9 +43,7 @@ _INSERT_FUNC = {
 }
 
 
-def _schema_or_kwargs(
-    schema: Union[Schema, None], values: Dict[str, Any]
-) -> Dict[str, Any]:
+def _schema_or_kwargs(schema: Union[Schema, None], values: Dict[str, Any]) -> Dict[str, Any]:
     if schema:
         return schema.dict()
     return values
@@ -57,9 +55,7 @@ class CRUDMixin:
     def fill(self, replace_dict: bool = False, **kwargs: Any) -> Self:
         for key, value in kwargs.items():
             if not hasattr(self, key):
-                raise AttributeError(
-                    f"Model `{self.__class__.__name__}` has no attribute `{key}`"
-                )
+                raise AttributeError(f"Model `{self.__class__.__name__}` has no attribute `{key}`")
             # If the value is a dict, set value for each key one by one, as we want to update only the keys that are in
             # `value` and not override the whole dict.
             if isinstance(value, dict) and not replace_dict:
@@ -71,11 +67,7 @@ class CRUDMixin:
 
     @classmethod
     async def create(
-        cls,
-        db: AsyncSession,
-        schema: Union[Schema, None] = None,
-        autocommit: bool = True,
-        **kwargs: Any,
+        cls, db: AsyncSession, schema: Union[Schema, None] = None, autocommit: bool = True, **kwargs: Any
     ) -> Self:
         _values = _schema_or_kwargs(schema, kwargs)
         instance = cls()
@@ -83,17 +75,11 @@ class CRUDMixin:
         return await instance.save(db, autocommit)
 
     @classmethod
-    async def get(
-        cls, db: AsyncSession, id: UUID, options: List[ExecutableOption] = []
-    ) -> Union[Self, None]:
-        return (
-            await db.execute(select(cls).filter_by(id=id).options(*options))
-        ).scalar_one_or_none()
+    async def get(cls, db: AsyncSession, id: UUID, options: List[ExecutableOption] = []) -> Union[Self, None]:
+        return (await db.execute(select(cls).filter_by(id=id).options(*options))).scalar_one_or_none()
 
     @classmethod
-    async def get_or_raise(
-        cls, db: AsyncSession, id: UUID, options: List[ExecutableOption] = []
-    ) -> Self:
+    async def get_or_raise(cls, db: AsyncSession, id: UUID, options: List[ExecutableOption] = []) -> Self:
         instance = await cls.get(db, id, options)
         if instance is not None:
             return instance
@@ -102,9 +88,7 @@ class CRUDMixin:
 
     @classmethod
     async def get_by(cls, db: AsyncSession, **conditions) -> Union[Self, None]:
-        return (
-            await db.execute(select(cls).filter_by(**conditions))
-        ).scalar_one_or_none()
+        return (await db.execute(select(cls).filter_by(**conditions))).scalar_one_or_none()
 
     @classmethod
     async def get_by_or_raise(cls, db: AsyncSession, **conditions) -> Self:
@@ -112,9 +96,7 @@ class CRUDMixin:
         if instance is not None:
             return instance
 
-        conditions_str = ", ".join(
-            [f"{key}={value}" for key, value in conditions.items()]
-        )
+        conditions_str = ", ".join([f"{key}={value}" for key, value in conditions.items()])
 
         raise NotFoundError(f"{cls.__name__} not found filtering by {conditions_str}")
 
@@ -162,18 +144,13 @@ class CRUDMixin:
         insert_stmt = _INSERT_FUNC[db.bind.dialect.name](cls).values(values)
 
         # On conflict, update the columns that are upsertable (defined in `Model.__upsertable_columns__`)
-        columns_to_update = {
-            column: insert_stmt.excluded[column]
-            for column in cls.__upsertable_columns__
-        }
+        columns_to_update = {column: insert_stmt.excluded[column] for column in cls.__upsertable_columns__}
 
         # onupdate for `updated_at` is not working. We need to force a new value on update
         if hasattr(cls, "updated_at"):
             columns_to_update["updated_at"] = datetime.utcnow()
         upsert_stmt = (
-            insert_stmt.on_conflict_do_update(
-                index_elements=constraints, set_=columns_to_update
-            )
+            insert_stmt.on_conflict_do_update(index_elements=constraints, set_=columns_to_update)
             .returning(cls)
             .execution_options(populate_existing=True)
         )
@@ -220,13 +197,9 @@ class CRUDMixin:
 
 
 def inserted_at_current_value(context: DefaultExecutionContext) -> datetime:
-    return context.get_current_parameters(isolate_multiinsert_groups=False)[
-        "inserted_at"
-    ]
+    return context.get_current_parameters(isolate_multiinsert_groups=False)["inserted_at"]
 
 
 class TimestampMixin:
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        default=inserted_at_current_value, onupdate=datetime.utcnow
-    )
+    updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)

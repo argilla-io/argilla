@@ -40,66 +40,38 @@ class TestUpdateDatasetRecordsInBulk:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
     async def test_update_dataset_records(
-        self,
-        async_client: AsyncClient,
-        db: AsyncSession,
-        owner: User,
-        owner_auth_header: dict,
+        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
         await TextFieldFactory.create(name="prompt", dataset=dataset)
         await TextFieldFactory.create(name="response", dataset=dataset)
 
-        text_question = await TextQuestionFactory.create(
-            name="text-question", dataset=dataset
-        )
+        text_question = await TextQuestionFactory.create(name="text-question", dataset=dataset)
 
         label_selection_question = await LabelSelectionQuestionFactory.create(
             name="label-selection-question",
             settings={
                 "type": QuestionType.label_selection,
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
                 ],
             },
             dataset=dataset,
         )
 
-        multi_label_selection_question = (
-            await MultiLabelSelectionQuestionFactory.create(
-                name="multi-label-selection-question",
-                settings={
-                    "type": QuestionType.multi_label_selection,
-                    "options": [
-                        {
-                            "value": "label-a",
-                            "text": "Label A",
-                            "description": "Label A description",
-                        },
-                        {
-                            "value": "label-b",
-                            "text": "Label B",
-                            "description": "Label B description",
-                        },
-                        {
-                            "value": "label-c",
-                            "text": "Label C",
-                            "description": "Label C description",
-                        },
-                    ],
-                },
-                dataset=dataset,
-            )
+        multi_label_selection_question = await MultiLabelSelectionQuestionFactory.create(
+            name="multi-label-selection-question",
+            settings={
+                "type": QuestionType.multi_label_selection,
+                "options": [
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
+                ],
+            },
+            dataset=dataset,
         )
 
         rating_question = await RatingQuestionFactory.create(
@@ -120,16 +92,8 @@ class TestUpdateDatasetRecordsInBulk:
             settings={
                 "type": QuestionType.ranking,
                 "options": [
-                    {
-                        "value": "ranking-a",
-                        "text": "Ranking A",
-                        "description": "Ranking A description",
-                    },
-                    {
-                        "value": "ranking-b",
-                        "text": "Ranking B",
-                        "description": "Ranking B description",
-                    },
+                    {"value": "ranking-a", "text": "Ranking A", "description": "Ranking A description"},
+                    {"value": "ranking-b", "text": "Ranking B", "description": "Ranking B description"},
                 ],
             },
             dataset=dataset,
@@ -141,16 +105,8 @@ class TestUpdateDatasetRecordsInBulk:
                 "type": QuestionType.span,
                 "field": "response",
                 "options": [
-                    {
-                        "value": "thing",
-                        "text": "Thing",
-                        "description": "Thing description",
-                    },
-                    {
-                        "value": "place",
-                        "text": "Place",
-                        "description": "Place description",
-                    },
+                    {"value": "thing", "text": "Thing", "description": "Thing description"},
+                    {"value": "place", "text": "Place", "description": "Place description"},
                 ],
             },
             dataset=dataset,

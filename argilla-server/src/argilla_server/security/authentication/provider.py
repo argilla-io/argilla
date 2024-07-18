@@ -24,10 +24,7 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors import UnauthorizedError
 from argilla_server.models import User
-from argilla_server.security.authentication.db import (
-    APIKeyAuthenticationBackend,
-    BearerTokenAuthenticationBackend,
-)
+from argilla_server.security.authentication.db import APIKeyAuthenticationBackend, BearerTokenAuthenticationBackend
 from argilla_server.security.authentication.userinfo import UserInfo
 
 
@@ -66,9 +63,7 @@ class AuthenticationProvider:
 
         return user
 
-    async def _authenticate_request_user(
-        self, db: AsyncSession, request: Request
-    ) -> Optional[UserInfo]:
+    async def _authenticate_request_user(self, db: AsyncSession, request: Request) -> Optional[UserInfo]:
         # This db will be used by the backends. Ideally this should be done as a global dependency
         # but is not working as expected. Sometimes the db is not available in the request state at the
         # middlewares level.

@@ -69,15 +69,11 @@ async def _create(
 
     async with AsyncSessionLocal() as session:
         if await accounts.get_user_by_username(session, username):
-            typer.echo(
-                f"User with username {username!r} already exists in database. Skipping..."
-            )
+            typer.echo(f"User with username {username!r} already exists in database. Skipping...")
             return
 
         if await accounts.get_user_by_api_key(session, api_key):
-            typer.echo(
-                f"User with api_key {api_key!r} already exists in database. Skipping..."
-            )
+            typer.echo(f"User with api_key {api_key!r} already exists in database. Skipping...")
             return
 
         user_create = UserCreateForTask(
@@ -87,9 +83,7 @@ async def _create(
             role=role,
             password=password,
             api_key=api_key,
-            workspaces=[
-                WorkspaceCreate(name=workspace_name) for workspace_name in workspace
-            ],
+            workspaces=[WorkspaceCreate(name=workspace_name) for workspace_name in workspace],
         )
 
         user = await User.create(
@@ -100,10 +94,7 @@ async def _create(
             role=user_create.role,
             password_hash=accounts.hash_password(user_create.password),
             api_key=user_create.api_key,
-            workspaces=[
-                await get_or_new_workspace(session, workspace.name)
-                for workspace in user_create.workspaces
-            ],
+            workspaces=[await get_or_new_workspace(session, workspace.name) for workspace in user_create.workspaces],
         )
 
         typer.echo("User successfully created:")
@@ -113,9 +104,7 @@ async def _create(
         typer.echo(f"• username: {user.username!r}")
         typer.echo(f"• role: {user.role.value!r}")
         typer.echo(f"• api_key: {user.api_key!r}")
-        typer.echo(
-            f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}"
-        )
+        typer.echo(f"• workspaces: {[workspace.name for workspace in user.workspaces]!r}")
 
 
 def create(
@@ -146,13 +135,10 @@ def create(
         help=f"API key as a string with a minimum length of {USER_API_KEY_MIN_LENGTH} characters. If not specified a secure random API key will be generated",
     ),
     workspace: List[str] = typer.Option(
-        default=[],
-        help="A workspace that the user will be a member of (can be used multiple times).",
+        default=[], help="A workspace that the user will be a member of (can be used multiple times)."
     ),
 ):
-    asyncio.run(
-        _create(first_name, username, role, password, last_name, api_key, workspace)
-    )
+    asyncio.run(_create(first_name, username, role, password, last_name, api_key, workspace))
 
 
 if __name__ == "__main__":

@@ -56,10 +56,7 @@ def test_settings_default_database_url(monkeypatch):
 
     settings = Settings()
 
-    assert (
-        settings.database_url
-        == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
-    )
+    assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
 
 
 @pytest.mark.parametrize(
@@ -67,14 +64,8 @@ def test_settings_default_database_url(monkeypatch):
     [
         ("sqlite:///test.db", "sqlite+aiosqlite:///test.db"),
         ("sqlite:///:memory:", "sqlite+aiosqlite:///:memory:"),
-        (
-            "postgresql://user:pass@localhost:5432/db",
-            "postgresql+asyncpg://user:pass@localhost:5432/db",
-        ),
-        (
-            "postgresql+psycopg2://user:pass@localhost:5432/db",
-            "postgresql+asyncpg://user:pass@localhost:5432/db",
-        ),
+        ("postgresql://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
+        ("postgresql+psycopg2://user:pass@localhost:5432/db", "postgresql+asyncpg://user:pass@localhost:5432/db"),
     ],
 )
 def test_settings_database_url(url: str, expected_url: str, monkeypatch):

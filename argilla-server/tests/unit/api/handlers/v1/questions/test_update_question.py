@@ -19,12 +19,7 @@ from argilla_server.enums import OptionsOrder, QuestionType
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import (
-    LabelSelectionQuestionFactory,
-    QuestionFactory,
-    SpanQuestionFactory,
-    TextQuestionFactory,
-)
+from tests.factories import LabelSelectionQuestionFactory, QuestionFactory, SpanQuestionFactory, TextQuestionFactory
 
 
 @pytest.mark.asyncio
@@ -32,9 +27,7 @@ class TestUpdateQuestion:
     def url(self, question_id: UUID) -> str:
         return f"/api/v1/questions/{question_id}"
 
-    async def test_update_question_with_different_type(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_update_question_with_different_type(self, async_client: AsyncClient, owner_auth_header: dict):
         question = await TextQuestionFactory.create()
 
         response = await async_client.patch(
@@ -74,13 +67,9 @@ class TestUpdateQuestion:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": "the number of options cannot be modified. expected 3 but got 4"
-        }
+        assert response.json() == {"detail": "the number of options cannot be modified. expected 3 but got 4"}
 
-    async def test_update_question_with_different_options(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_update_question_with_different_options(self, async_client: AsyncClient, owner_auth_header: dict):
         question = await LabelSelectionQuestionFactory.create()
 
         response = await async_client.patch(
@@ -213,21 +202,9 @@ class TestUpdateQuestion:
                 "type": QuestionType.span.value,
                 "field": "field-a",
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
-                    {
-                        "value": "label-c",
-                        "text": "Label C",
-                        "description": "Label C description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
                 ],
                 "allow_overlapping": False,
             }
@@ -255,32 +232,16 @@ class TestUpdateQuestion:
                 "type": QuestionType.span.value,
                 "field": "field-a",
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
-                    {
-                        "value": "label-c",
-                        "text": "Label C",
-                        "description": "Label C description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
                 ],
                 "allow_overlapping": True,
                 "allow_character_annotation": True,
                 "visible_options": None,
             },
-            "inserted_at": datetime.fromisoformat(
-                response_json["inserted_at"]
-            ).isoformat(),
-            "updated_at": datetime.fromisoformat(
-                response_json["updated_at"]
-            ).isoformat(),
+            "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
+            "updated_at": datetime.fromisoformat(response_json["updated_at"]).isoformat(),
         }
 
     async def test_update_span_question_disabling_allow_overlapping(
@@ -291,21 +252,9 @@ class TestUpdateQuestion:
                 "type": QuestionType.span.value,
                 "field": "field-a",
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
-                    {
-                        "value": "label-c",
-                        "text": "Label C",
-                        "description": "Label C description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
+                    {"value": "label-c", "text": "Label C", "description": "Label C description"},
                 ],
                 "allow_overlapping": True,
             }

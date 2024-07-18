@@ -30,23 +30,14 @@ from argilla_server.security.authentication.userinfo import UserInfo
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def create_workspace_user(
-    db: AsyncSession, workspace_user_attrs: dict
-) -> WorkspaceUser:
+async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) -> WorkspaceUser:
     workspace_id = workspace_user_attrs["workspace_id"]
     user_id = workspace_user_attrs["user_id"]
 
-    if (
-        await WorkspaceUser.get_by(db, workspace_id=workspace_id, user_id=user_id)
-        is not None
-    ):
-        raise NotUniqueError(
-            f"Workspace user with workspace_id `{workspace_id}` and user_id `{user_id}` is not unique"
-        )
+    if await WorkspaceUser.get_by(db, workspace_id=workspace_id, user_id=user_id) is not None:
+        raise NotUniqueError(f"Workspace user with workspace_id `{workspace_id}` and user_id `{user_id}` is not unique")
 
-    workspace_user = await WorkspaceUser.create(
-        db, workspace_id=workspace_id, user_id=user_id
-    )
+    workspace_user = await WorkspaceUser.create(db, workspace_id=workspace_id, user_id=user_id)
 
     # TODO: Once we delete API v0 endpoint we can reduce this to refresh only the user.
     await db.refresh(workspace_user, attribute_names=["workspace", "user"])
@@ -54,9 +45,7 @@ async def create_workspace_user(
     return workspace_user
 
 
-async def delete_workspace_user(
-    db: AsyncSession, workspace_user: WorkspaceUser
-) -> WorkspaceUser:
+async def delete_workspace_user(db: AsyncSession, workspace_user: WorkspaceUser) -> WorkspaceUser:
     return await workspace_user.delete(db)
 
 
@@ -65,9 +54,7 @@ async def list_workspaces(db: AsyncSession) -> List[Workspace]:
     return result.scalars().all()
 
 
-async def list_workspaces_by_user_id(
-    db: AsyncSession, user_id: UUID
-) -> List[Workspace]:
+async def list_workspaces_by_user_id(db: AsyncSession, user_id: UUID) -> List[Workspace]:
     result = await db.execute(
         select(Workspace)
         .join(WorkspaceUser)
@@ -79,9 +66,7 @@ async def list_workspaces_by_user_id(
 
 async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace:
     if await Workspace.get_by(db, name=workspace_attrs["name"]) is not None:
-        raise NotUniqueError(
-            f"Workspace name `{workspace_attrs['name']}` is not unique"
-        )
+        raise NotUniqueError(f"Workspace name `{workspace_attrs['name']}` is not unique")
 
     return await Workspace.create(db, name=workspace_attrs["name"])
 
@@ -100,29 +85,19 @@ async def user_exists(db: AsyncSession, user_id: UUID) -> bool:
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> Union[User, None]:
-    result = await db.execute(
-        select(User).filter_by(username=username).options(selectinload(User.workspaces))
-    )
+    result = await db.execute(select(User).filter_by(username=username).options(selectinload(User.workspaces)))
     return result.scalar_one_or_none()
 
 
 async def get_user_by_api_key(db: AsyncSession, api_key: str) -> Union[User, None]:
-    result = await db.execute(
-        select(User)
-        .where(User.api_key == api_key)
-        .options(selectinload(User.workspaces))
-    )
+    result = await db.execute(select(User).where(User.api_key == api_key).options(selectinload(User.workspaces)))
     return result.scalar_one_or_none()
 
 
 async def list_users(db: "AsyncSession") -> Sequence[User]:
     # TODO: After removing API v0 implementation we can remove the workspaces eager loading
     # because is not used in the new API v1 endpoints.
-    result = await db.execute(
-        select(User)
-        .order_by(User.inserted_at.asc())
-        .options(selectinload(User.workspaces))
-    )
+    result = await db.execute(select(User).order_by(User.inserted_at.asc()).options(selectinload(User.workspaces)))
     return result.scalars().all()
 
 
@@ -133,9 +108,7 @@ async def list_users_by_ids(db: AsyncSession, ids: Iterable[UUID]) -> Sequence[U
 
 # TODO: After removing API v0 implementation we can remove the workspaces attribute.
 # With API v1 the workspaces will be created doing additional requests to other endpoints for it.
-async def create_user(
-    db: AsyncSession, user_attrs: dict, workspaces: Union[List[str], None] = None
-) -> User:
+async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List[str], None] = None) -> User:
     if await get_user_by_username(db, user_attrs["username"]) is not None:
         raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
@@ -154,9 +127,7 @@ async def create_user(
             for workspace_name in workspaces:
                 workspace = await Workspace.get_by(db, name=workspace_name)
                 if not workspace:
-                    raise UnprocessableEntityError(
-                        f"Workspace '{workspace_name}' does not exist"
-                    )
+                    raise UnprocessableEntityError(f"Workspace '{workspace_name}' does not exist")
 
                 await WorkspaceUser.create(
                     db,
@@ -226,8 +197,6 @@ def generate_user_token(user: User) -> str:
     )
 
 
-async def fetch_users_by_ids_as_dict(
-    db: "AsyncSession", user_ids: List[UUID]
-) -> Dict[UUID, User]:
+async def fetch_users_by_ids_as_dict(db: "AsyncSession", user_ids: List[UUID]) -> Dict[UUID, User]:
     users = await list_users_by_ids(db, set(user_ids))
     return {user.id: user for user in users}

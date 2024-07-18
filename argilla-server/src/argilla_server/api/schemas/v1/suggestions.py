@@ -39,9 +39,7 @@ SCORE_LESS_THAN_OR_EQUAL = 1
 class SuggestionFilterScope(BaseModel):
     entity: Literal["suggestion"]
     question: QuestionName
-    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = (
-        "value"
-    )
+    property: Optional[Union[Literal["value"], Literal["agent"], Literal["score"]]] = "value"
 
 
 class SearchSuggestionOptionsQuestion(BaseModel):

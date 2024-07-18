@@ -26,9 +26,7 @@ class TestListUsers:
     def url(self) -> str:
         return "/api/v1/users"
 
-    async def test_list_users(
-        self, async_client: AsyncClient, owner: User, owner_auth_header: dict
-    ):
+    async def test_list_users(self, async_client: AsyncClient, owner: User, owner_auth_header: dict):
         user_a, user_b = await UserFactory.create_batch(2)
 
         response = await async_client.get(self.url(), headers=owner_auth_header)
@@ -75,13 +73,9 @@ class TestListUsers:
         assert response.status_code == 401
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_list_users_with_unauthorized_role(
-        self, async_client: AsyncClient, user_role: UserRole
-    ):
+    async def test_list_users_with_unauthorized_role(self, async_client: AsyncClient, user_role: UserRole):
         user = await UserFactory.create(role=user_role)
 
-        response = await async_client.get(
-            self.url(), headers={API_KEY_HEADER_NAME: user.api_key}
-        )
+        response = await async_client.get(self.url(), headers={API_KEY_HEADER_NAME: user.api_key})
 
         assert response.status_code == 403

@@ -91,9 +91,7 @@ class TestDatasetRecordsBulkWithSuggestions:
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await self.test_dataset()
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
         question_id = str(dataset.question_by_name("label").id)
 
         response = await async_client.put(
@@ -179,12 +177,8 @@ class TestDatasetRecordsBulkWithSuggestions:
     ):
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
-        await SuggestionFactory.create(
-            record=record, question=question, value="label-a"
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        await SuggestionFactory.create(record=record, question=question, value="label-a")
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -228,12 +222,8 @@ class TestDatasetRecordsBulkWithSuggestions:
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
         other_question = dataset.question_by_name("rating")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
-        suggestion = await SuggestionFactory.create(
-            record=record, question=question, value="label-a"
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        suggestion = await SuggestionFactory.create(record=record, question=question, value="label-a")
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -243,12 +233,7 @@ class TestDatasetRecordsBulkWithSuggestions:
                     {
                         "id": str(record.id),
                         "suggestions": [
-                            {
-                                "question_id": str(other_question.id),
-                                "value": 5,
-                                "agent": "test-agent",
-                                "score": 0.5,
-                            },
+                            {"question_id": str(other_question.id), "value": 5, "agent": "test-agent", "score": 0.5},
                         ],
                     },
                 ]
@@ -258,9 +243,7 @@ class TestDatasetRecordsBulkWithSuggestions:
         assert response.status_code == 200, response.json()
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 2
         other_suggestion = (
-            await db.execute(
-                select(Suggestion).filter(Suggestion.question_id == other_question.id)
-            )
+            await db.execute(select(Suggestion).filter(Suggestion.question_id == other_question.id))
         ).scalar_one()
 
         records = response.json()["items"]
@@ -355,12 +338,8 @@ class TestDatasetRecordsBulkWithSuggestions:
     ):
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
-        suggestion = await SuggestionFactory.create(
-            record=record, question=question, value="label-a"
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        suggestion = await SuggestionFactory.create(record=record, question=question, value="label-a")
         other_question = await TextQuestionFactory.create(name="other-question")
 
         response = await async_client.put(
@@ -389,12 +368,8 @@ class TestDatasetRecordsBulkWithSuggestions:
     ):
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
-        record = await RecordFactory.create(
-            dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"}
-        )
-        suggestion = await SuggestionFactory.create(
-            record=record, question=question, value="label-a"
-        )
+        record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
+        suggestion = await SuggestionFactory.create(record=record, question=question, value="label-a")
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -431,16 +406,8 @@ class TestDatasetRecordsBulkWithSuggestions:
             settings={
                 "type": QuestionType.label_selection,
                 "options": [
-                    {
-                        "value": "label-a",
-                        "text": "Label A",
-                        "description": "Label A description",
-                    },
-                    {
-                        "value": "label-b",
-                        "text": "Label B",
-                        "description": "Label B description",
-                    },
+                    {"value": "label-a", "text": "Label A", "description": "Label A description"},
+                    {"value": "label-b", "text": "Label B", "description": "Label B description"},
                 ],
             },
         )

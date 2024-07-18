@@ -22,9 +22,7 @@ class WorkspaceUserPolicy:
     @classmethod
     def list(cls, workspace_id: UUID) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(workspace_id))
 
         return is_allowed
 
@@ -35,8 +33,6 @@ class WorkspaceUserPolicy:
     @classmethod
     def delete(cls, workspace_user: WorkspaceUser) -> PolicyAction:
         async def is_allowed(actor: User) -> bool:
-            return actor.is_owner or (
-                actor.is_admin and await actor.is_member(workspace_user.workspace_id)
-            )
+            return actor.is_owner or (actor.is_admin and await actor.is_member(workspace_user.workspace_id))
 
         return is_allowed

@@ -38,22 +38,14 @@ NAMING_CONVENTION = {"fk": "%(table_name)s_%(column_0_name)s_fkey"}
 def upgrade() -> None:
     op.execute("DELETE FROM responses WHERE user_id IS NULL")
 
-    with op.batch_alter_table(
-        "responses", naming_convention=NAMING_CONVENTION
-    ) as batch_op:
+    with op.batch_alter_table("responses", naming_convention=NAMING_CONVENTION) as batch_op:
         batch_op.alter_column("user_id", existing_type=sa.Uuid(), nullable=False)
         batch_op.drop_constraint(CONSTRAINT_NAME, type_="foreignkey")
-        batch_op.create_foreign_key(
-            CONSTRAINT_NAME, "users", ["user_id"], ["id"], ondelete="CASCADE"
-        )
+        batch_op.create_foreign_key(CONSTRAINT_NAME, "users", ["user_id"], ["id"], ondelete="CASCADE")
 
 
 def downgrade() -> None:
-    with op.batch_alter_table(
-        "responses", naming_convention=NAMING_CONVENTION
-    ) as batch_op:
+    with op.batch_alter_table("responses", naming_convention=NAMING_CONVENTION) as batch_op:
         batch_op.alter_column("user_id", existing_type=sa.Uuid(), nullable=True)
         batch_op.drop_constraint(CONSTRAINT_NAME, type_="foreignkey")
-        batch_op.create_foreign_key(
-            CONSTRAINT_NAME, "users", ["user_id"], ["id"], ondelete="SET NULL"
-        )
+        batch_op.create_foreign_key(CONSTRAINT_NAME, "users", ["user_id"], ["id"], ondelete="SET NULL")

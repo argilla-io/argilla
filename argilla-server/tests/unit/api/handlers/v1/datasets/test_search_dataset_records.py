@@ -15,9 +15,7 @@
 from uuid import UUID, uuid4
 
 import pytest
-from argilla_server.api.handlers.v1.datasets.records import (
-    LIST_DATASET_RECORDS_LIMIT_LE,
-)
+from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_LE
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import RecordInclude, SortOrder, RecordStatus
 from argilla_server.search_engine import (
@@ -89,24 +87,15 @@ class TestSearchDatasetRecords:
         assert response.status_code == 403
 
     async def test_with_include_responses(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        mock_search_engine: SearchEngine,
+        self, async_client: AsyncClient, owner_auth_header: dict, mock_search_engine: SearchEngine
     ):
         dataset = await DatasetFactory.create()
         record_a = await RecordFactory.create(dataset=dataset)
         record_b = await RecordFactory.create(dataset=dataset)
 
-        response_a = await ResponseFactory.create(
-            values={"input_ok": {"value": "yes"}}, record=record_a
-        )
-        response_b = await ResponseFactory.create(
-            values={"input_ok": {"value": "no"}}, record=record_a
-        )
-        response_c = await ResponseFactory.create(
-            values={"input_ok": {"value": "yes"}}, record=record_b
-        )
+        response_a = await ResponseFactory.create(values={"input_ok": {"value": "yes"}}, record=record_a)
+        response_b = await ResponseFactory.create(values={"input_ok": {"value": "no"}}, record=record_a)
+        response_c = await ResponseFactory.create(values={"input_ok": {"value": "yes"}}, record=record_b)
 
         mock_search_engine.search.return_value = SearchResponses(
             items=[
@@ -193,9 +182,7 @@ class TestSearchDatasetRecords:
             "total": 2,
         }
 
-    async def test_with_invalid_offset(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_invalid_offset(self, async_client: AsyncClient, owner_auth_header: dict):
         response = await async_client.post(
             self.url(uuid4()),
             headers=owner_auth_header,
@@ -205,9 +192,7 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
 
-    async def test_with_invalid_lower_limit(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_invalid_lower_limit(self, async_client: AsyncClient, owner_auth_header: dict):
         response = await async_client.post(
             self.url(uuid4()),
             headers=owner_auth_header,
@@ -217,9 +202,7 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
 
-    async def test_with_invalid_upper_limit(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_invalid_upper_limit(self, async_client: AsyncClient, owner_auth_header: dict):
         response = await async_client.post(
             self.url(uuid4()),
             headers=owner_auth_header,
@@ -229,9 +212,7 @@ class TestSearchDatasetRecords:
 
         assert response.status_code == 422
 
-    async def test_with_non_existent_dataset(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_non_existent_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset_id = uuid4()
 
         response = await async_client.post(
@@ -241,13 +222,9 @@ class TestSearchDatasetRecords:
         )
 
         assert response.status_code == 404
-        assert response.json() == {
-            "detail": f"Dataset with id `{dataset_id}` not found"
-        }
+        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
-    async def test_with_text_query_using_non_existent_field(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_text_query_using_non_existent_field(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -264,16 +241,12 @@ class TestSearchDatasetRecords:
         dataset = await DatasetFactory.create()
 
         await TextFieldFactory.create(name="input", dataset=dataset)
-        vector_settings = await VectorSettingsFactory.create(
-            name="vector", dimensions=3, dataset=dataset
-        )
+        vector_settings = await VectorSettingsFactory.create(name="vector", dimensions=3, dataset=dataset)
 
         record = await RecordFactory.create(dataset=dataset)
         record_without_vector = await RecordFactory.create(dataset=dataset)
 
-        await VectorFactory.create(
-            value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record
-        )
+        await VectorFactory.create(value=[1.0, 2.0, 3.0], vector_settings=vector_settings, record=record)
 
         response = await async_client.post(
             self.url(dataset.id),
@@ -295,10 +268,7 @@ class TestSearchDatasetRecords:
         }
 
     async def test_with_filter(
-        self,
-        async_client: AsyncClient,
-        mock_search_engine: SearchEngine,
-        owner_auth_header: dict,
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
@@ -328,11 +298,7 @@ class TestSearchDatasetRecords:
                         },
                         {
                             "type": "range",
-                            "scope": {
-                                "entity": "suggestion",
-                                "question": question.name,
-                                "property": "score",
-                            },
+                            "scope": {"entity": "suggestion", "question": question.name, "property": "score"},
                             "ge": 0.5,
                         },
                     ],
@@ -346,16 +312,8 @@ class TestSearchDatasetRecords:
             dataset=dataset,
             filter=AndFilter(
                 filters=[
-                    TermsFilter(
-                        scope=ResponseFilterScope(question=question.name),
-                        values=["value-a"],
-                    ),
-                    RangeFilter(
-                        scope=SuggestionFilterScope(
-                            question=question.name, property="score"
-                        ),
-                        ge=0.5,
-                    ),
+                    TermsFilter(scope=ResponseFilterScope(question=question.name), values=["value-a"]),
+                    RangeFilter(scope=SuggestionFilterScope(question=question.name, property="score"), ge=0.5),
                 ]
             ),
             offset=0,
@@ -364,10 +322,7 @@ class TestSearchDatasetRecords:
         )
 
     async def test_with_sort(
-        self,
-        async_client: AsyncClient,
-        mock_search_engine: SearchEngine,
-        owner_auth_header: dict,
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
 
@@ -394,11 +349,7 @@ class TestSearchDatasetRecords:
                         "order": "asc",
                     },
                     {
-                        "scope": {
-                            "entity": "suggestion",
-                            "question": question.name,
-                            "property": "score",
-                        },
+                        "scope": {"entity": "suggestion", "question": question.name, "property": "score"},
                         "order": "desc",
                     },
                 ]
@@ -410,25 +361,15 @@ class TestSearchDatasetRecords:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             sort=[
-                Order(
-                    scope=ResponseFilterScope(question=question.name),
-                    order=SortOrder.asc,
-                ),
-                Order(
-                    scope=SuggestionFilterScope(
-                        question=question.name, property="score"
-                    ),
-                    order=SortOrder.desc,
-                ),
+                Order(scope=ResponseFilterScope(question=question.name), order=SortOrder.asc),
+                Order(scope=SuggestionFilterScope(question=question.name, property="score"), order=SortOrder.desc),
             ],
             offset=0,
             limit=50,
             query=None,
         )
 
-    async def test_with_invalid_filter(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -452,9 +393,7 @@ class TestSearchDatasetRecords:
             "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         }
 
-    async def test_with_invalid_sort(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
+    async def test_with_invalid_sort(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         response = await async_client.post(
@@ -464,12 +403,7 @@ class TestSearchDatasetRecords:
                 "query": {
                     "text": {"q": "text", "field": "non-existent"},
                 },
-                "sort": [
-                    {
-                        "scope": {"entity": "response", "question": "non-existent"},
-                        "order": "asc",
-                    }
-                ],
+                "sort": [{"scope": {"entity": "response", "question": "non-existent"}, "order": "asc"}],
             },
         )
 

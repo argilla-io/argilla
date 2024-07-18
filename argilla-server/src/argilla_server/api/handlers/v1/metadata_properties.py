@@ -35,10 +35,7 @@ from argilla_server.security import auth
 router = APIRouter(tags=["metadata properties"])
 
 
-@router.get(
-    "/metadata-properties/{metadata_property_id}/metrics",
-    response_model=MetadataMetrics,
-)
+@router.get("/metadata-properties/{metadata_property_id}/metrics", response_model=MetadataMetrics)
 async def get_metadata_property_metrics(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -57,9 +54,7 @@ async def get_metadata_property_metrics(
     return await search_engine.compute_metrics_for(metadata_property)
 
 
-@router.patch(
-    "/metadata-properties/{metadata_property_id}", response_model=MetadataPropertySchema
-)
+@router.patch("/metadata-properties/{metadata_property_id}", response_model=MetadataPropertySchema)
 async def update_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),
@@ -75,14 +70,10 @@ async def update_metadata_property(
 
     await authorize(current_user, MetadataPropertyPolicy.update(metadata_property))
 
-    return await datasets.update_metadata_property(
-        db, metadata_property, metadata_property_update
-    )
+    return await datasets.update_metadata_property(db, metadata_property, metadata_property_update)
 
 
-@router.delete(
-    "/metadata-properties/{metadata_property_id}", response_model=MetadataPropertySchema
-)
+@router.delete("/metadata-properties/{metadata_property_id}", response_model=MetadataPropertySchema)
 async def delete_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),

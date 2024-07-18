@@ -18,12 +18,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.policies.v1 import RecordPolicy, authorize
-from argilla_server.api.schemas.v1.responses import (
-    Response,
-    ResponseBulk,
-    ResponseBulkError,
-    ResponseUpsert,
-)
+from argilla_server.api.schemas.v1.responses import Response, ResponseBulk, ResponseBulkError, ResponseUpsert
 from argilla_server.contexts import datasets
 from argilla_server.database import get_serializable_async_db
 from argilla_server.errors import future as errors
@@ -36,39 +31,25 @@ class UpsertResponsesInBulkUseCase:
         self.db = db
         self.search_engine = search_engine
 
-    async def execute(
-        self, responses: List[ResponseUpsert], user: User
-    ) -> List[ResponseBulk]:
+    async def execute(self, responses: List[ResponseUpsert], user: User) -> List[ResponseBulk]:
         responses_bulk_items = []
 
-        all_records = await datasets.get_records_by_ids(
-            self.db, [item.record_id for item in responses]
-        )
+        all_records = await datasets.get_records_by_ids(self.db, [item.record_id for item in responses])
         non_empty_records = [r for r in all_records if r is not None]
 
-        await datasets.preload_records_relationships_before_validate(
-            self.db, non_empty_records
-        )
+        await datasets.preload_records_relationships_before_validate(self.db, non_empty_records)
         for item, record in zip(responses, all_records):
             try:
                 if record is None:
-                    raise errors.NotFoundError(
-                        f"Record with id `{item.record_id}` not found"
-                    )
+                    raise errors.NotFoundError(f"Record with id `{item.record_id}` not found")
 
                 await authorize(user, RecordPolicy.create_response(record))
 
-                response = await datasets.upsert_response(
-                    self.db, self.search_engine, record, user, item
-                )
+                response = await datasets.upsert_response(self.db, self.search_engine, record, user, item)
             except Exception as err:
-                responses_bulk_items.append(
-                    ResponseBulk(item=None, error=ResponseBulkError(detail=str(err)))
-                )
+                responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))
             else:
-                responses_bulk_items.append(
-                    ResponseBulk(item=Response.from_orm(response), error=None)
-                )
+                responses_bulk_items.append(ResponseBulk(item=Response.from_orm(response), error=None))
 
         return responses_bulk_items
 

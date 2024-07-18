@@ -44,9 +44,7 @@ async def test_track_login(test_telemetry: MagicMock):
         "user-agent": None,
         "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
     }
-    test_telemetry.track_data.assert_called_once_with(
-        action="UserInfoRequested", data=expected_event_data
-    )
+    test_telemetry.track_data.assert_called_once_with(action="UserInfoRequested", data=expected_event_data)
 
 
 @pytest.mark.parametrize("is_oauth", [True, False])

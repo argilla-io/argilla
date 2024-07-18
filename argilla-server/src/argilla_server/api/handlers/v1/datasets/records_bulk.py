@@ -20,11 +20,7 @@ from sqlalchemy.orm import selectinload
 from starlette import status
 
 from argilla_server.api.policies.v1 import DatasetPolicy, authorize
-from argilla_server.api.schemas.v1.records_bulk import (
-    RecordsBulk,
-    RecordsBulkCreate,
-    RecordsBulkUpsert,
-)
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulk, RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.bulk.records_bulk import CreateRecordsBulk, UpsertRecordsBulk
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
@@ -62,13 +58,9 @@ async def create_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicy.create_records(dataset))
 
-    records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(
-        dataset, records_bulk_create
-    )
+    records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
 
-    telemetry_client.track_data(
-        action="DatasetRecordsCreated", data={"records": len(records_bulk.items)}
-    )
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_bulk.items)})
 
     return records_bulk
 
@@ -96,18 +88,12 @@ async def upsert_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicy.upsert_records(dataset))
 
-    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(
-        dataset, records_bulk_create
-    )
+    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_create)
 
     updated = len(records_bulk.updated_item_ids)
     created = len(records_bulk.items) - updated
 
-    telemetry_client.track_data(
-        action="DatasetRecordsCreated", data={"records": created}
-    )
-    telemetry_client.track_data(
-        action="DatasetRecordsUpdated", data={"records": updated}
-    )
+    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": created})
+    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": updated})
 
     return records_bulk

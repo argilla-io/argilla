@@ -25,15 +25,11 @@ async def _update(username: str, role: UserRole):
         user = await accounts.get_user_by_username(session, username)
 
         if not user:
-            typer.echo(
-                f"User with username {username!r} does not exists in database. Skipping..."
-            )
+            typer.echo(f"User with username {username!r} does not exists in database. Skipping...")
             return
 
         if user.role == role:
-            typer.echo(
-                f"User {username!r} already has role {role.value!r}. Skipping..."
-            )
+            typer.echo(f"User {username!r} already has role {role.value!r}. Skipping...")
             return
 
         old_role = user.role

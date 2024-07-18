@@ -27,9 +27,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_create(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str
-):
+def test_create(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
         f"database users create --first-name first-name --username username --role {role_string} "
@@ -50,9 +48,7 @@ def test_create(
     assert [ws.name for ws in user.workspaces] == ["workspace"]
 
 
-def test_create_with_default_role(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_default_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --password 12345678",
@@ -69,9 +65,7 @@ def test_create_with_default_role(
 
 
 @pytest.mark.parametrize("role_string", ["owner", "admin", "annotator"])
-def test_create_with_input_role(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str
-):
+def test_create_with_input_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer, role_string: str):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --password 12345678",
@@ -87,9 +81,7 @@ def test_create_with_input_role(
     assert user.role.value == UserRole(role_string).value
 
 
-def test_create_with_invalid_role(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_invalid_role(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --role bad_role "
@@ -101,9 +93,7 @@ def test_create_with_invalid_role(
     assert sync_db.query(Workspace).count() == 0
 
 
-def test_create_with_input_password(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_input_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --role owner",
@@ -119,12 +109,9 @@ def test_create_with_input_password(
     assert accounts.verify_password("12345678", user.password_hash)
 
 
-def test_create_with_invalid_password(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_invalid_password(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli,
-        "database users create --first-name first-name --username username --password 1234 --role owner",
+        cli, "database users create --first-name first-name --username username --password 1234 --role owner"
     )
 
     assert result.exit_code == 1
@@ -132,13 +119,9 @@ def test_create_with_invalid_password(
     assert sync_db.query(Workspace).count() == 0
 
 
-def test_create_with_input_username(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
-        cli,
-        "database users create --first-name first-name --password 12345678",
-        input="username\n",
+        cli, "database users create --first-name first-name --password 12345678", input="username\n"
     )
 
     assert result.exit_code == 0
@@ -148,9 +131,7 @@ def test_create_with_input_username(
     assert sync_db.query(User).filter_by(username="username").first()
 
 
-def test_create_with_invalid_username(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username -Invalid-Username --password 12345678 --role owner",
@@ -161,14 +142,11 @@ def test_create_with_invalid_username(
     assert sync_db.query(Workspace).count() == 0
 
 
-def test_create_with_existing_username(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     UserSyncFactory.create(username="username")
 
     result = cli_runner.invoke(
-        cli,
-        "database users create --first-name first-name --username username --role owner --password 12345678",
+        cli, "database users create --first-name first-name --username username --role owner --password 12345678"
     )
 
     assert result.exit_code == 0
@@ -207,9 +185,7 @@ def test_create_with_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typ
     assert user.api_key == "abcdefgh"
 
 
-def test_create_with_invalid_api_key(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_invalid_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --role owner --password 12345678 --api-key abc",
@@ -220,9 +196,7 @@ def test_create_with_invalid_api_key(
     assert sync_db.query(Workspace).count() == 0
 
 
-def test_create_with_existing_api_key(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_existing_api_key(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     UserSyncFactory.create(api_key="abcdefgh")
 
     result = cli_runner.invoke(
@@ -236,9 +210,7 @@ def test_create_with_existing_api_key(
     assert sync_db.query(Workspace).count() == 0
 
 
-def test_create_with_multiple_workspaces(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_multiple_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --role owner --password 12345678 "
@@ -254,9 +226,7 @@ def test_create_with_multiple_workspaces(
     assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b"]
 
 
-def test_create_with_existent_workspaces(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     WorkspaceSyncFactory.create(name="workspace-a")
     WorkspaceSyncFactory.create(name="workspace-b")
 
@@ -272,16 +242,10 @@ def test_create_with_existent_workspaces(
 
     user = sync_db.query(User).filter_by(username="username").first()
     assert user
-    assert [ws.name for ws in user.workspaces] == [
-        "workspace-a",
-        "workspace-b",
-        "workspace-c",
-    ]
+    assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b", "workspace-c"]
 
 
-def test_create_with_invalid_workspaces(
-    sync_db: "Session", cli_runner: CliRunner, cli: Typer
-):
+def test_create_with_invalid_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     result = cli_runner.invoke(
         cli,
         "database users create --first-name first-name --username username --role owner --password 12345678 "
