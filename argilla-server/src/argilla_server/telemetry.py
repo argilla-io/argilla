@@ -63,7 +63,6 @@ class TelemetryClient:
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
-            "python_version": platform.python_version(),
             "sys_version": platform.version(),
             "deployment": server_deployment_type(),
             "docker": is_running_on_docker_container(),
