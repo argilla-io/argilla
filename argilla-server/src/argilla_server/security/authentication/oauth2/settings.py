@@ -83,7 +83,7 @@ class OAuth2Settings:
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[AllowedWorkspace]:
-        allowed_workspaces = settings.pop(cls.ALLOWED_WORKSPACES_KEY) or []
+        allowed_workspaces = settings.pop(cls.ALLOWED_WORKSPACES_KEY, None) or []
         return [AllowedWorkspace(**workspace) for workspace in allowed_workspaces]
 
     @classmethod
