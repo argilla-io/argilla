@@ -153,7 +153,6 @@ def es_field_for_metadata_property(metadata_property: Union[str, MetadataPropert
 
 
 def es_field_for_record_field(field_name: str) -> str:
-    # TODO: Remove me
     return f"fields.{field_name or '*'}"
 
 
