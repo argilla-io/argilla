@@ -23,7 +23,10 @@ export const useSearchTextHighlight = (fieldId: string) => {
       output = output.replaceAll(char, " ");
     }
 
-    return output.split(" ").filter(Boolean);
+    return output
+      .split(" ")
+      .map((w) => w.trim())
+      .filter(Boolean);
   };
 
   const createRangesToHighlight = (
@@ -102,7 +105,6 @@ export const useSearchTextHighlight = (fieldId: string) => {
 
     const textNodes = getTextNodesUnder(fieldComponent);
     const words = scapeDSLChars(searchText);
-    debugger;
 
     for (const textNode of textNodes) {
       for (const word of words) {
